@@ -1,0 +1,161 @@
+ghostview*showLocator:	false
+ghostview*foreground:	black
+ghostview*background:	gray81
+Ghostview*page.foreground:	black
+Ghostview*page.background:	gray81
+Xgterm.widgets:	toplevel    TopLevelShell  gtermShell			         gtermShell  Gterm          gterm
+Xgterm*geometry:	640x480
+Xgterm*gterm*width:	640
+Xgterm*gterm*height:	480
+Ghostscript*geometry:	612x792-0+0
+Ghostscript*xResolution:	72
+Ghostscript*yResolution:	72
+xrn.geometry:	=750x800+230+20
+xrn.newsrcFile:	~/.newsrc
+xrn.saveDir:	~/news
+xrn.nntpServer:	noao.edu
+xrn.rescanTime:	1800
+xrn.organization:	National Optical Astronomy Observatories
+xrn.replyTo:	tody@noao.edu
+xrn.iconGeometry:	+64+521
+xrn.leaveHeaders:	subject,from
+xrn.includeHeader:	off
+xrn.includePrefix:	> 
+xrn.signatureFile:	~/.signature
+xrn.editorCommand:	xterm -g 80x44 -fn 7x13 -e vi %s
+xrn.deadLetters:	~/dead.letters
+xrn.savePostings:	~/Articles
+xrn.topLines:	15
+xrn.saveMode:	mailbox,headers,onedir
+xrn.minLines:	3
+xrn.maxLines:	6
+xrn.tmpDir:	/tmp
+xrn.mailer:	/usr/lib/sendmail -oi -t
+xrn.Gripe.geometry:	+50+50
+xrn.ngButtonList:	ngQuit,ngRead,ngPost,ngCatchUp,ngRescan,ngAllGroups,ngListOld,ngPrevGroup,ngGoto
+xrn.artButtonList:	artNextUnread,artSubNext,artNextGroup,artLast,artCatchUp,artMarkUnread,artListOld,artPost
+xrn.ngBindings:	<Key>X:          ngExit()  \n\
+<Key>Q:          ngQuit()  \n\
+<Key>g:          ngGoto()  \n\
+<Key>r:          ngRead()  \n\
+<Key>n:          ngNext()  \n\
+<Key>p:          ngPrev()  \n\
+<Key>s:          ngSubscribe()  \n\
+<Key>u:          ngUnsub()  \n\
+<Key>w:          ngCatchUp()
+xrn.artBindings:	<Key>d:          artScroll()  \n\
+<Key>u:          artScrollBack()  \n\
+<Key>p:          artPrev() \n\
+<Key>b:          artPrev() \n\
+<Key>h:          artHeader() \n\
+<Key>l:          artLast() \n\
+<Key>n:          artNext() \n\
+<Key>N:          artNextGroup() \n\
+<Key>f:          artNext() \n\
+<Key>s:          artSave() \n\
+<Key>q:          artQuit()
+xrn*foreground:	red
+xrn*background:	plum
+xrn*border:	LightGray
+xrn*Text*Foreground:	yellow
+xrn*Text*Background:	DarkSlateGray
+xrn*ScrollBarMgr.thickness:	22
+xrn*font:	9x15
+xrn*ScrollBar.foreground:	yellow
+xrn*ScrollBar.background:	DarkSlateGray
+xrn*ScrollBar.border:	White
+xrn*Label.foreground:	blue
+xrn*Label.background:	cyan
+xrn*Box.ngQuit.foreground:	Black
+xrn*Box.ngQuit.background:	red
+xrn*dialog*foreground:	Black
+xrn*dialog*background:	LightSteelBlue
+xrn*dialog*borderWidth:	2
+xrn*dialog*Text.foreground:	Black
+xrn*dialog*Text.background:	Red
+xrn*dialog*font:	9x15
+xrn*dialog*Label.foreground:	NavyBlue
+xrn*dialog*Command.foreground:	Black
+xrn*dialog*Command.background:	yellow
+xrn*Command.foreground:	White
+xrn*Command.background:	coral
+XGterm*gterm*color8:	magenta
+XGterm*gterm*color9:	bisque
+XGterm*gterm*bgdialog:	yellow
+XGterm*gterm*fgdialog:	black
+XGterm*gterm*fgcursor:	red
+XGterm*gterm*fgbusy:	red
+XGterm*gterm*color2:	red
+XGterm*gterm*color3:	green
+XGterm*gterm*color4:	blue
+XGterm*gterm*color5:	cyan
+XGterm*gterm*color6:	yellow
+XGterm*gterm*color7:	purple
+XTerm*ReverseWrap:	TRUE
+XTerm*SaveLines:	500
+XTerm*Tek4014*Width:	320
+XTerm*Tek4014*Height:	240
+XTerm*Tek4014*foreground:	yellow
+XTerm*Tek4014*background:	blue
+XTerm*TiteInhibit:	TRUE
+XLogo*Foreground:	Gray
+XLogo*Background:	Maroon
+XCalendar*markOnStartup:	True
+XCalendar*bcontrols*borderWidth:	1
+XBoard*BigSizeMode:	false
+XBoard*font:	-*-helvetica-medium-o-normal--*-100-*-*-*-*-*-*
+OpenWindows*foreground:	white
+OpenWindows*WindowColor:	black
+OpenWindows*BorderColor:	LightSteelBlue
+OpenWindows*SetInput:	"followmouse"
+olwm*foreground:	white
+olwm*WindowColor:	black
+olwm*BorderColor:	LightSteelBlue
+olwm*SetInput:	"followmouse"
+Olwm*foreground:	white
+Olwm*WindowColor:	black
+Olwm*BorderColor:	LightSteelBlue
+Clock*Background:	black
+Clock*BorderColor:	red
+Clock*hour:	yellow
+Clock*jewel:	green
+Clock*minute:	yellow
+XCalc*button40.foreground:	yellow
+XCalc*button40.background:	black
+XCalc*button22.foreground:	White
+XCalc*button22.background:	MidnightBlue
+XCalc*button23.foreground:	White
+XCalc*button23.background:	MidnightBlue
+XCalc*button24.foreground:	White
+XCalc*button24.background:	MidnightBlue
+XCalc*button27.foreground:	White
+XCalc*button27.background:	MidnightBlue
+XCalc*button28.foreground:	White
+XCalc*button28.background:	MidnightBlue
+XCalc*button29.foreground:	White
+XCalc*button29.background:	MidnightBlue
+XCalc*button32.foreground:	White
+XCalc*button32.background:	MidnightBlue
+XCalc*button33.foreground:	White
+XCalc*button33.background:	MidnightBlue
+XCalc*button34.foreground:	White
+XCalc*button34.background:	MidnightBlue
+XCalc*button37.foreground:	White
+XCalc*button37.background:	MidnightBlue
+XCalc*button38.foreground:	White
+XCalc*button38.background:	MidnightBlue
+XCalc*button39.foreground:	White
+XCalc*button39.background:	MidnightBlue
+XCalc*Foreground:	Black
+XCalc*Background:	LightSteelBlue
+XCalc*Command.foreground:	Green
+XCalc*Command.background:	DarkSlateGray
+XCalc*button20.foreground:	yellow
+XCalc*button20.background:	black
+XCalc*button25.foreground:	yellow
+XCalc*button25.background:	black
+XCalc*button30.foreground:	yellow
+XCalc*button30.background:	black
+XCalc*button35.foreground:	yellow
+XCalc*button35.background:	black
+*gtermShell.geometry:	640x480

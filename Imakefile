@@ -1,0 +1,62 @@
+XCOMM  Imakefile for the X11IRAF Source Tree
+XCOMM
+XCOMM  Mike Fitzpatrick, National Optical Astronomy Observatories, IRAF project.
+XCOMM  Aug 9 1996
+
+#include <X11IRAF.tmpl>
+
+#define IHaveSubdirs
+#define PassCDebugFlags 'CDEBUGFLAGS=$(CDEBUGFLAGS)'
+
+LIBDIRS 	= obm xaw3d xpm
+APPDIRS 	= xgterm ximtool xtapemon obmsh
+SUBDIRS 	= $(LIBDIRS) $(APPDIRS)
+
+World::
+	@echo "Building the X11IRAF software tree"
+	@echo "" ; date ; echo ""
+	MakeDir (include)
+	MakeDir (lib)
+	MakeDir (bin)
+	MakeDir (app-defaults)
+	$(MAKE) $(MFLAGS) Makefiles X11IRAFDIR=$$PWD
+	$(MAKE) $(MFLAGS) clean	    X11IRAFDIR=$$PWD
+	$(MAKE) $(MFLAGS) includes  X11IRAFDIR=$$PWD
+	$(MAKE) $(MFLAGS) depend    X11IRAFDIR=$$PWD
+	$(MAKE) $(MFLAGS) libs      X11IRAFDIR=$$PWD
+	$(MAKE) $(MFLAGS) apps	    X11IRAFDIR=$$PWD
+	$(MAKE) $(MFLAGS) install   X11IRAFDIR=$$PWD
+	@echo "" ; date ; echo ""
+	@echo "Done."
+
+libs::
+	@case '${MFLAGS}' in *[ik]*) set +e;; esac; \
+	for i in $(LIBDIRS) ;\
+	do \
+	(cd $$i ; echo "making" linklibs "in $(CURRENT_DIR)/$$i..."; \
+	$(MAKE) $(MFLAGS) 'CDEBUGFLAGS=$(CDEBUGFLAGS)' linklibs); \
+	done
+
+apps::
+	@case '${MFLAGS}' in *[ik]*) set +e;; esac; \
+	for i in $(APPDIRS) ;\
+	do \
+	(cd $$i ; echo "making" all "in $(CURRENT_DIR)/$$i..."; \
+	$(MAKE) $(MFLAGS) 'CDEBUGFLAGS=$(CDEBUGFLAGS)' all); \
+	done
+
+bindist::
+	@tar -cf bin.tar bin app-defaults man
+
+archive::
+	$(MAKE) $(MFLAGS) pristine
+	@tar -cvf - . | gzip > ../x11iraf.tar.gz
+
+pristine::
+	$(MAKE) $(MFLAGS) clean	    X11IRAFDIR=$$PWD
+	$(RM) -rf bin bin.tar* include lib app-defaults man spool* Makefile\
+	  Makefile.bak */Makefile */Makefile.bak */*/Makefile */*/Makefile.bak
+
+MakeSubdirs($(SUBDIRS))
+DependSubdirs($(SUBDIRS))
+

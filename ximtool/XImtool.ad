@@ -1,0 +1,1863 @@
+    *objects:\
+	toplevel	Layout		display \
+	display		Layout		menubar \
+	menubar		MenuButton	fileButton \
+	menubar		MenuButton	viewButton \
+	menubar		MenuButton	optionsButton \
+	menubar		TextBox		imageTitle \
+	menubar		Toggle		panelButton \
+	menubar		Toggle		xflipButton \
+	menubar		Toggle		yflipButton \
+	menubar		Command		prevButton \
+	menubar		MenuButton	frameButton \
+	menubar		Command		nextButton \
+	menubar		Toggle		helpButton \
+	display		Gterm		imagewin \
+	display		Gterm		colorbar \
+\
+	toplevel	TopLevelShell	info \
+	info		Paned		infoPanel \
+	infoPanel	Box		infoBox \
+	infoBox		Command		infoDone \
+	infoBox		Command		infoDown \
+	infoBox		Command		infoUp \
+	infoBox		Command		infoSave \
+	infoBox		Command		infoUpdate \
+	infoBox		Command		infoClear \
+	infoPanel	AsciiText	infoText \
+\
+	toplevel	TopLevelShell	controlShell \
+	controlShell	Layout		controlPanel \
+	controlPanel	Group		viewBox \
+	controlPanel	Group		enhancementBox \
+	controlPanel	Group		blinkBox \
+	controlPanel	Group		optionsBox \
+	controlPanel	Frame		controlBox \
+\
+	viewBox		Layout		view \
+	view		Group		frameSelect \
+	frameSelect	Layout		frameBox \
+	frameBox	TextToggle	frame1 \
+	frameBox	TextToggle	frame2 \
+	frameBox	TextToggle	frame3 \
+	frameBox	TextToggle	frame4 \
+	frameBox	Command		prevFrame \
+	frameBox	Command		nextFrame \
+	view		Frame		frameDataBox \
+	frameDataBox	TextBox		frameData \
+	view		Group		zoomBox \
+	zoomBox		Layout		zoom \
+	zoom		TextButton	toggleZoom \
+	zoom		TextButton	zoomIn \
+	zoom		Command		x1 \
+	zoom		Command		z2 \
+	zoom		Command		z3 \
+	zoom		Command		z4 \
+	zoom		Command		z5 \
+	zoom		Command		z8 \
+	zoom		TextButton	zoomOut \
+	zoom		TextButton	centerFrame \
+	zoom		Command		d2 \
+	zoom		Command		d3 \
+	zoom		Command		d4 \
+	zoom		Command		d5 \
+	zoom		Command		d8 \
+	view		Layout		viewButtons \
+	viewButtons	Command		aspect \
+	viewButtons	Command		flipX \
+	viewButtons	Command		flipY \
+	viewButtons	Command		flipXY \
+	viewButtons	Command		clearFrame \
+	viewButtons	Command		fitFrame \
+\
+	enhancementBox	Layout		enhance \
+	enhance		Scrollbar2	colorlistScroll \
+	enhance		Frame		colorlistFrame \
+	colorlistFrame	Porthole	colorlistPort \
+	colorlistPort	MultiList	colorlist \
+	enhance		Frame		colordataFrame \
+	colordataFrame	TextBox		colordata \
+	enhance		Label		contrastLabel \
+	enhance		Slider2d	contrastSlider \
+	enhance		Label		brightnessLabel \
+	enhance		Slider2d	brightnessSlider \
+	enhance		Command		invertButton \
+	enhance		Command		optimizeButton \
+\
+	blinkBox	Layout		blink \
+	blink		Label		blinkFramesLabel \
+	blink		Command		blinkFrame1 \
+	blink		Command		blinkFrame2 \
+	blink		Command		blinkFrame3 \
+	blink		Command		blinkFrame4 \
+	blink		Command		blinkReset \
+	blink		Label		blinkRateLabel \
+	blink		Frame		BRframe \
+	BRframe		Layout		BRlayout \
+	BRlayout	Arrow		BRdecrease \
+	BRlayout	TextBox		BRtext \
+	BRlayout	Arrow		BRincrease \
+	blink		Command		registerButton \
+	blink		Command		matchButton \
+	blink		Toggle		blinkButton \
+\
+	optionsBox	TextToggle	pannerButton \
+	optionsBox	TextToggle	coordsBoxButton \
+	optionsBox	TextToggle	autoscaleButton \
+	optionsBox	TextToggle	antialiasButton \
+	optionsBox	TextToggle	tileFramesButton \
+	optionsBox	TextToggle	warningsButton \
+\
+	controlBox	Layout		control \
+	control		Command		initializeButton \
+	control		Command		normalizeButton \
+	control		Command		doneButton \
+\
+        toplevel        TopLevelShell   tclShell\
+        tclShell        Form            tclForm\
+        tclForm         Label           tclLabel\
+        tclForm         Command         tclClear\
+        tclForm         Command         tclExecute\
+        tclForm         AsciiText       tclEntry\
+        tclForm         Command         tclcloseButton\
+\
+	toplevel	TransientShell	warning \
+	warning		Layout		warn \
+	warn		Frame		warnFrame \
+	warnFrame	Layout		WFlayout \
+	WFlayout	Icon		warnIcon \
+	WFlayout	TextBox		warnText \
+	warn		TextButton	warnOk \
+	warn		TextButton	warnCancel \
+	warn		TextButton	warnHelp \
+\
+	toplevel	TopLevelShell	print_panel\
+	print_panel	Layout		printLayout\
+\
+	printLayout	Group		printCmdGroup\
+	printLayout	Group		optGroup\
+	printLayout	Group		cmdGroup\
+\
+	printCmdGroup	Layout		printCmdLayout\
+	printCmdLayout	Layout		labelLayout\
+	labelLayout	Label		toLabel\
+	labelLayout	Label		printerLabel\
+	printCmdLayout	Layout		inputLayout\
+	inputLayout	TextToggle	toPrinter\
+	inputLayout	TextToggle	toFile\
+	inputLayout	Frame		printcmdFrame\
+	printcmdFrame	AsciiText	printcmd\
+\
+	optGroup	Layout		optLayout\
+	optLayout	Group		epsPageGroup\
+	optLayout	Group		optionsGroup\
+	optLayout	Group		printColorGroup\
+	optLayout	Group		printerGroup\
+\
+        epsPageGroup    Layout          epsPage\
+        epsPage         Label           epsOrientLabel\
+	epsPage    	TextToggle	epsPortButton\
+	epsPage    	TextToggle	epsLandButton\
+        epsPage         Label           epsSizeLabel\
+	epsPage    	TextToggle	epsLetterButton\
+	epsPage    	TextToggle	epsLegalButton\
+	epsPage    	TextToggle	epsA4Button\
+        epsPage         Label           epsScaleLabel\
+        epsPage         Frame           ScaleFrame \
+        ScaleFrame      Layout          ScaleLayout \
+        ScaleLayout     Arrow           SCdecrease \
+        ScaleLayout     TextBox         SCtext \
+        ScaleLayout     Arrow           SCincrease \
+\
+        optionsGroup    Layout          options\
+        options         TextToggle      epsscaleButton\
+        options         TextToggle      autorotateButton\
+        options         TextToggle      aspectButton\
+        options         TextToggle      annotateButton\
+        options         TextToggle      compressButton\
+\
+        printColorGroup Layout          printColor\
+        printColor      TextToggle      prGrayButton\
+        printColor      TextToggle      prPseudoButton\
+	printColor	TextToggle	prRGBButton\
+\
+        printerGroup    Layout          printers \
+        printers        Scrollbar2      printlistScroll \
+        printers        Frame           printlistFrame \
+        printlistFrame  Porthole        printlistPort \
+        printlistPort   MultiList       printlist \
+\
+	cmdGroup	Layout		cmdLayout\
+	cmdLayout	TextButton	okayPrint\
+	cmdLayout	Label		printStatus\
+	cmdLayout	TextButton	cancelPrint\
+\
+	toplevel	TopLevelShell	save_panel\
+	save_panel	Layout		saveLayout\
+\
+	saveLayout	Group		saveNameGroup\
+	saveLayout	Group		saveOptGroup\
+	saveLayout	Group		saveCmdGroup\
+\
+	saveNameGroup	Layout		saveNameLayout\
+	saveNameLayout	Label		saveLabel\
+	saveNameLayout	Frame		fnameFrame\
+	fnameFrame	AsciiText	saveFile\
+\
+	saveOptGroup	Layout		saveOptLayout\
+	saveOptLayout	Group		fmtGroup\
+	saveOptLayout	Group		saveColorGroup\
+	saveOptLayout	Frame		saveDataBox \
+	saveDataBox	TextBox		saveData \
+\
+	fmtGroup	Layout		formats\
+        formats        	TextToggle      rasButton\
+        formats        	TextToggle      gifButton\
+        formats        	TextToggle      jpegButton\
+	formats		TextToggle	tiffButton\
+        formats        	TextToggle      fitsButton\
+	formats		TextToggle	x11Button\
+        formats        	TextToggle      pnmButton\
+	formats		TextToggle	rawButton\
+\
+        saveColorGroup  Layout          saveColor\
+        saveColor       TextToggle      svGrayButton\
+        saveColor       TextToggle      svPseudoButton\
+	saveColor	TextToggle	svRGBButton\
+\
+	saveCmdGroup	Layout		saveCmdLayout\
+	saveCmdLayout	TextButton	okaySave\
+	saveCmdLayout	Label		saveStatus\
+	saveCmdLayout	TextButton	cancelSave\
+\
+	toplevel        TopLevelShell   load_panel \
+	load_panel	Layout          filesLayout \
+	filesLayout	Group		imagesGroup \
+	imagesGroup	Layout		imagesLayout \
+	imagesLayout	Label		imtemplateLabel \
+	imagesLayout	Frame		imtemplateFrame \
+	imtemplateFrame	AsciiText	imtemplateText \
+	imagesLayout	Scrollbar2	imlistScrollbar \
+	imagesLayout	Frame		imlistFrame \
+	imlistFrame	Porthole	imlistPorthole \
+	imlistPorthole	MultiList	imageList \
+	imagesLayout	TextButton	rootButton \
+	imagesLayout	TextButton	homeButton \
+	imagesLayout	TextButton	upButton \
+	imagesLayout	TextButton	rescanButton \
+	imagesLayout	TextToggle	grayToggle \
+	imagesLayout	TextToggle	browseToggle \
+	imagesLayout	Label		dirLabel \
+	imagesLayout	Label		fnameLabel \
+	imagesLayout	Frame		filnamFrame \
+	imagesLayout	Label		frameLabel \
+	imagesLayout	Command		frameFrame \
+	filnamFrame	AsciiText	fnameText \
+\
+	filesLayout	Group		fbuttonsGroup \
+	fbuttonsGroup	Layout		fbuttonsLayout \
+	fbuttonsLayout	Command		filesLoadButton \
+	fbuttonsLayout	Label		filesStatus \
+	fbuttonsLayout	Command		filesCloseButton \
+\
+	toplevel	TopLevelShell	help_panel \
+	help_panel	Layout		helpLayout \
+	helpLayout	Layout		helpMenuLayout \
+	helpLayout	Layout		helpInfoLayout \
+\
+	helpMenuLayout	Command		helpBack \
+	helpMenuLayout	Command		helpForward \
+	helpMenuLayout	Command		helpHome \
+	helpMenuLayout	Command		helpClose \
+\
+	helpLayout	Frame		helpTextFrame\
+	helpTextFrame	HTML            helpText \
+\
+	helpInfoLayout	Label		helpIRAFLogo \
+	helpInfoLayout	Label		helpInfo1 \
+	helpInfoLayout	Label		helpInfo2 \
+	helpInfoLayout	Label		helpInfo3 \
+	helpInfoLayout	Label		helpNOAOLogo \
+\
+	toplevel	Parameter	ximtool\
+	ximtool		Parameter	alert\
+	ximtool		Parameter	initialize\
+	ximtool		Parameter	resize\
+	ximtool		Parameter	frame\
+	ximtool		Parameter	nframes\
+	ximtool		Parameter	frameSize\
+	ximtool		Parameter	frameRegion\
+	ximtool		Parameter	frameView\
+	ximtool		Parameter	frameTitle\
+	ximtool		Parameter	frameFit\
+	ximtool		Parameter	enhancement\
+	ximtool		Parameter	colortables\
+	ximtool		Parameter	autoscale\
+	ximtool		Parameter	antialias\
+	ximtool		Parameter	tileFrames\
+	ximtool		Parameter	cursorMode\
+	ximtool		Parameter	xflip\
+	ximtool		Parameter	yflip\
+	ximtool		Parameter	printerList\
+	ximtool		Parameter	printOptions\
+	ximtool		Parameter	loadOptions\
+	ximtool		Parameter	saveOptions\
+	ximtool		Parameter	filelist\
+	ximtool		Parameter	help
+
+
+    ! Main image window resources.
+    ! -------------------------------
+    *allowShellResize:				True
+    *beNiceToColormap:				False
+    *menuLabel.foreground:			Gold
+    *markerMenu.foreground:			Black
+    *markerMenu.background:			SteelBlue
+    *markerMenu*SimpleMenu.foreground:		Black
+    *markerMenu*SimpleMenu.background:		SteelBlue
+    *markerColor.SmeBSB.leftMargin:		64
+    *markerColor.SmeBSB.rightMargin:		0
+    *markerColor.menuLabel.leftMargin:		5
+    *markerColor.menuLabel.rightMargin:		5
+
+    *display.background:			gray
+    *display.borderWidth:			0
+
+    *display.debug:				False
+    *display.layout: horizontal { \
+	-1 \
+	vertical { \
+	    3 \
+	    menubar < +inf -inf * > \
+	    3 \
+	    imagewin < +inf -inf * +inf - inf > \
+	    3 \
+	    colorbar < +inf -inf * > \
+	} \
+	-1 \
+    }
+
+    *menubar.layout: horizontal { \
+	1 < -1 > \
+	fileButton 1 < -1 > viewButton 1 < -1 > optionsButton \
+	1 < -1 > \
+	imageTitle < +inff -inff * > \
+	1 < -1 > \
+	panelButton 1 < -1 > \
+	1 < -1 > \
+	xflipButton 1 < -1 > yflipButton \
+	1 < -1 > \
+	prevButton 1 < -1 > frameButton 1 < -1 > nextButton \
+	1 < -1 > \
+	helpButton \
+	1 < -1 > \
+    }
+
+    *menubar*SimpleMenu.foreground:		Black
+    *menubar*SimpleMenu.background:		gray65
+    *menubar*SimpleMenu.borderColor:		Black
+    *menubar*SimpleMenu.borderWidth:		1
+    *SmeBSB.vertSpace:				10
+
+    *SimpleMenu*font:	  -adobe-times-bold-r-normal-*-12-*-*-*-*-*-iso8859-1
+    *fileButton.font:	  -adobe-times-bold-i-normal-*-12-*-*-*-*-*-iso8859-1
+    *optionsButton.font:  -adobe-times-bold-i-normal-*-12-*-*-*-*-*-iso8859-1
+    *viewButton.font:     -adobe-times-bold-i-normal-*-12-*-*-*-*-*-iso8859-1
+
+    *menubar.width:				512
+    *menubar*background:			gray
+    *menubar*foreground:			black
+    *menubar*borderWidth:			0
+    *menubar*Command.label:			x
+    *menubar*Command.internalWidth:		0
+    *menubar*Command.borderWidth:		0
+    *menubar*Toggle.label:			x
+    *menubar*Toggle.internalWidth:		0
+    *menubar*Toggle.borderWidth:		0
+
+    *fileButton.label:				File
+    *fileButton.menuName:			fileMenu
+    *viewButton.label:				View
+    *viewButton.menuName:			viewMenu
+    *optionsButton.label:			Options
+    *optionsButton.menuName:			optionsMenu
+    *imageTitle*font:				*times-bold-r*12*
+    *imageTitle.width:				40
+    *imageTitle.height:				20
+    *frameButton.menuName:			frameMenu
+    *frameButton.label:				1
+    *frameButton.width:				20
+
+    *Gterm.cmapName:				image
+    *Gterm.basePixel:				64
+    *imagewin.warpCursor:			true
+    *imagewin.raiseWindow:			true
+    *imagewin.deiconifyWindow:			true
+    *imagewin.ginmodeCursor:			circle
+    *imagewin.ginmodeBlinkInterval:		500
+    *imagewin.resizable:			true
+    *imagewin.copyOnResize:			false
+    *imagewin.width:				512
+    *imagewin.height:				512
+    *imagewin.color8:				#7c8498
+    *imagewin.color9:				steelblue
+
+    *imagewin.translations:     \
+             ! <Key>1: call(cpSetFrame,frame1)               	\n\
+             ! <Key>2: call(cpSetFrame,frame2)               	\n\
+             ! <Key>3: call(cpSetFrame,frame3)               	\n\
+             ! <Key>4: call(cpSetFrame,frame4)               	\n\
+         !Ctrl <Key>1: call(cpZoom,1,1,fixed) 			\n\
+         !Ctrl <Key>2: call(cpZoom,2,2,fixed) 			\n\
+         !Ctrl <Key>3: call(cpZoom,3,3,fixed) 			\n\
+         !Ctrl <Key>4: call(cpZoom,4,4,fixed) 			\n\
+         !Ctrl <Key>5: call(cpZoom,5,5,fixed) 			\n\
+         !Ctrl <Key>6: call(cpZoom,6,6,fixed) 			\n\
+         !Ctrl <Key>7: call(cpZoom,7,7,fixed) 			\n\
+         !Ctrl <Key>8: call(cpZoom,8,8,fixed) 			\n\
+         !Ctrl <Key>9: call(cpZoom,9,9,fixed) 			\n\
+         !Ctrl <Key>b: call(prevFrame,$name)                 	\n\
+         !Ctrl <Key>c: call(cpZoomAction,centerFrame)        	\n\
+         !Ctrl <Key>f: call(nextFrame,$name)                 	\n\
+         !Ctrl <Key>h: call(Help)                 		\n\
+         !Ctrl <Key>i: call(cpInvert)                 		\n\
+         !Ctrl <Key>m: call(cpMatchFrames)                   	\n\
+         !Ctrl <Key>n: call(normalize)                       	\n\
+         !Ctrl <Key>q: call(Quit)               		\n\
+         !Ctrl <Key>r: call(cpRegisterFrames)                	\n\
+         !Ctrl <Key>s: call(Save)                       	\n\
+         !Ctrl <Key>t: call(tileFramesToggle)                  	\n\
+         !Ctrl <Key>u: call(cpZoom,1,1,fixed) 			\n\
+         !Ctrl <Key>w: call(Save)                       	\n\
+         !Ctrl <Key>x: call(cpFrameAction,flipX)               	\n\
+         !Ctrl <Key>y: call(cpFrameAction,flipY)               	\n\
+              !<Key>=: call(Print)                       	\n\
+               <Key>!: call(cpInitialize) 			\n\
+               <Key>+: call(cpZoom,2.0,2.0,relative) 		\n\
+              !<Key>-: call(cpZoom,0.5,0.5,relative) 		\n\
+              <Key> <: call(cpSetBlinkRate,BRdecrease) 		\n\
+              <Key> >: call(cpSetBlinkRate,BRincrease) 		\n\
+          !Alt <Key>b: call(toggleBlink)            		\n\
+          !Alt <Key>c: call(panel)               		\n\
+          !Alt <Key>f: call(fitFrame)            		\n\
+          !Alt <Key>h: call(Help)                 		\n\
+          !Alt <Key>i: call(infoPanel)               		\n\
+          !Alt <Key>l: call(loadPanel)               		\n\
+          !Alt <Key>p: call(printPanel)               		\n\
+          !Alt <Key>s: call(savePanel)               		\n\
+          !Alt <Key>t: call(tclPanel)               		\n\
+     !Ctrl Alt <Key>c: call(wcsPanel)  			        \n\
+     !Ctrl Alt <Key>p: call(pannerPanel)  			\n\
+          !<Btn1Down>: call(makeMarker,$name,$x,$y) m_create()	\n\
+    !Shift <Btn2Down>: crosshair(on)                         	\n\
+  !Shift <Btn2Motion>: crosshair(on)                         	\n\
+            !<Btn2Up>: crosshair(off)                        	\n\
+          !<Btn2Down>: call(zoom,$x,$y)                      	\n\
+          !<Btn3Down>: call(windowColormap,$x,$y)            	\n\
+        !<Btn3Motion>: call(windowColormap,$x,$y)            	\n\
+     !Ctrl <Btn1Down>: call(windowRGB,1,$x,$y,0)               	\n\
+   !Ctrl <Btn1Motion>: call(windowRGB,1,$x,$y,0)               	\n\
+       !Ctrl <Btn1Up>: call(windowRGB,1,$x,$y,1)               	\n\
+     !Ctrl <Btn2Down>: call(windowRGB,2,$x,$y,0)               	\n\
+   !Ctrl <Btn2Motion>: call(windowRGB,2,$x,$y,0)               	\n\
+       !Ctrl <Btn2Up>: call(windowRGB,2,$x,$y,1)               	\n\
+     !Ctrl <Btn3Down>: call(windowRGB,3,$x,$y,0)               	\n\
+   !Ctrl <Btn3Motion>: call(windowRGB,3,$x,$y,0)               	\n\
+       !Ctrl <Btn3Up>: call(windowRGB,3,$x,$y,1)               	\n\
+        <EnterWindow>: enter-window()                        	\n\
+        <LeaveWindow>: leave-window()                        	\n\
+           <KeyPress>: graphics-input()                      	\n\
+             <Motion>: track-cursor() call(wcsUpdate,$x,$y)
+
+
+    *colorbar.maxRasters:			1
+    *colorbar.maxMappings:			1
+    *colorbar.width:				512
+    *colorbar.height:				10
+
+    ! INFO box resources.
+    ! ------------------------------
+    *info.geometry:				420x240
+    *infoPanel*background:			gray
+    *infoDone.label:				Done
+    *infoDown.label:				Down
+    *infoDown.sensitive:			False
+    *infoUp.label:				Up
+    *infoUp.sensitive:				False
+    *infoSave.label:				Save
+    *infoSave.sensitive:			False
+    *infoUpdate.label:				Update
+    *infoClear.label:				Clear
+    *infoText*scrollVertical:			always
+    *infoText*scrollHorizontal:			always
+    *infoText*displayCaret:			False
+    *infoText*editType:				append
+
+    ! Main Control Panel.
+    ! ------------------------------
+    *controlShell.title:			XImtool Control
+    *controlShell.iconName:			XimCon
+    *controlPanel*background:			gray
+    *controlPanel*foreground:			black
+    *controlPanel*TextBox.background:		gray63
+    *controlPanel*internalWidth:		0
+    *controlPanel*borderWidth:			0
+    *controlPanel*Command.highlightThickness:	0
+
+    *TextBox.font:	7x13bold
+    *TextToggle.font:	-adobe-times-medium-r-normal-*-12-*-*-*-*-*-iso8859-1
+    *Command.font:	-adobe-times-medium-r-normal-*-12-*-*-*-*-*-iso8859-1
+    *Toggle.font:	-adobe-times-medium-r-normal-*-12-*-*-*-*-*-iso8859-1
+    *Label.font:	-*-helvetica-medium-r-normal-*-12-*-iso8859-1
+    *MultiList.font:	-adobe-times-medium-r-normal-*-12-*-*-*-*-*-iso8859-1
+    *toggleZoom.font:	-*-helvetica-medium-r-normal-*-12-*-iso8859-1
+    *centerFrame.font:	-*-helvetica-medium-r-normal-*-12-*-iso8859-1
+    *zoom*Command.font:	7x13bold
+    *blinkFrame1.font:	7x13bold
+    *blinkFrame2.font:	7x13bold
+    *blinkFrame3.font:	7x13bold
+    *blinkFrame4.font:	7x13bold
+
+    *controlPanel.debug:			False
+    *controlPanel.layout: vertical { \
+	5 < -5 > \
+	horizontal { \
+	    -1 \
+	    viewBox < +inf -inf * > \
+	    -1 \
+	} \
+	5 < -5 > \
+	horizontal { \
+	    -1 \
+	    enhancementBox < +inf -inf * +inf -inf > \
+	    -1 \
+	    vertical { \
+		-1 \
+		blinkBox < * +inf - inf > \
+		-1 \
+		optionsBox < * +inff -inff > \
+		-1 \
+	    } \
+	    -1 \
+	} \
+	controlBox < +inf * > \
+    }
+
+    ! VIEW
+    ! ------------------
+    *viewBox.label:				View
+    *viewBox.location:				0 0 410 0
+    *viewBox.shrinkToFit:			True
+    *viewBox.outerOffset:			5
+
+    *view.debug:				False
+    *view.layout: vertical { \
+	5 < +inf -5 > \
+	horizontal { \
+	    -1 \
+	    frameSelect \
+	    -1 \
+	    vertical { \
+		5 < -5 > \
+		frameDataBox < +inff -100% * +inff -100% > \
+		5 < -5 > \
+	    } \
+	    -1 \
+	    zoomBox \
+	    -1 \
+	} \
+	1 < +inf > \
+	viewButtons < +inf -inf * +inf -inf > \
+	5 < +inf -5 > \
+    }
+
+    *frameDataBox.frameType:			sunken
+    *frameDataBox.frameWidth:			2
+    *frameData.width:				130
+    *frameData.height:				50
+
+    *frameSelect.location:			0 0 72 0
+    *frameSelect.shrinkToFit:			True
+    *frameSelect.outerOffset:			5
+    *frameSelect.innerOffset:			5
+    *frameSelect.frameWidth:			2
+    *frameSelect*offIcon:			diamond0s
+    *frameSelect*onIcon:			diamond1s
+    *frameSelect*highlightColor:		blue
+    *frameSelect.label:				Frame:
+
+    *frameBox.debug:				False
+    *frameBox.layout: vertical { \
+	frame1 < +inf * > \
+	frame2 < +inf * > \
+	frame3 < +inf * > \
+	frame4 < +inf * > \
+	10 < +inf -10 > \
+	horizontal { \
+	    -1 \
+	    prevFrame \
+	    10 < +inf -5 > \
+	    nextFrame \
+	    -1 \
+	} \
+	-1 \
+    }
+
+    *frameBox*location:				0 0 10 20
+    *frameBox*alignment:			left
+    *frameBox*frameWidth:			0
+    *frameBox*highlightThickness:		0
+    *frameBox*frame1.label:			\ 1\ \ 
+    *frameBox*frame2.label:			\ 2\ \ 
+    *frameBox*frame3.label:			\ 3\ \ 
+    *frameBox*frame4.label:			\ 4\ \ 
+    *frameBox*Command.width:			24
+    *frameBox*prevFrame.label:			xx
+    *frameBox*nextFrame.label:			xx
+
+    *zoomBox.label:				Zoom:
+    *zoomBox.location:				0 0 160 127
+    *zoomBox.outerOffset:			5
+    *zoomBox.shrinkToFit:			True
+
+    *zoom.debug:				False
+    *controlPanel*zoom*internalWidth:		4
+    *zoom.layout: vertical { \
+	space = ((50% of width zoom) - (50% of width z5)) \
+	1 < +inf > \
+	horizontal { \
+	    vertical { \
+		toggleZoom < +inf * +inf > \
+		2 \
+	    } \
+	    2 \
+	    vertical { \
+		2 < +inf > \
+		z5 \
+		1 < +inf > \
+		z3 \
+		0 < +inf > \
+	    } \
+	    2 \
+	    vertical { \
+		zoomIn < +inf * +inf > \
+		2 \
+	    } \
+	} \
+	1 < +inf > \
+	horizontal { \
+	    2 < +inf > \
+	    d8 d4 d2 x1 z2 z4 z8 \
+	    2 < +inf > \
+	} \
+	1 < +inf > \
+	horizontal { \
+	    vertical { \
+		2 \
+		zoomOut < +inf * +inf > \
+	    } \
+	    2 \
+	    vertical { \
+		0 < +inf > \
+		d3 \
+		1 < +inf > \
+		d5 \
+		2 < +inf > \
+	    } \
+	    2 \
+	    vertical { \
+		2 \
+		centerFrame < +inf * +inf > \
+	    } \
+	} \
+	1 < +inf > \
+    }
+
+    *toggleZoom.label:				Toggle\nZoom
+    *toggleZoom.outerOffset:			0
+    *toggleZoom.width:				30
+    *toggleZoom.height:				25
+
+    *zoomIn.label:				Zoom\nIn
+    *zoomIn.outerOffset:			0
+    *zoomIn.width:				30
+    *zoomIn.height:				25
+
+    *x1.label:					1
+    *z2.label:					2
+    *z3.label:					3
+    *z4.label:					4
+    *z5.label:					5
+    *z8.label:					8
+
+    *controlPanel*zoomIn.foreground:		royalBlue3
+    *controlPanel*z4.foreground:		royalBlue3
+    *controlPanel*z5.foreground:		royalBlue3
+    *controlPanel*z8.foreground:		royalBlue3
+    *controlPanel*z2.foreground:		royalBlue3
+    *controlPanel*z3.foreground:		royalBlue3
+
+    *zoomOut.label:				Zoom\nOut
+    *zoomOut.outerOffset:			0
+    *zoomOut.width:				30
+    *zoomOut.height:				25
+
+    *centerFrame.label:				Center
+    *centerFrame.outerOffset:			0
+    *centerFrame.width:				30
+    *centerFrame.height:			25
+
+    *d2.label:					2
+    *d3.label:					3
+    *d4.label:					4
+    *d5.label:					5
+    *d8.label:					8
+
+    *controlPanel*zoomOut.foreground:		mediumVioletRed
+    *controlPanel*d2.foreground:		mediumVioletRed
+    *controlPanel*d3.foreground:		mediumVioletRed
+    *controlPanel*d4.foreground:		mediumVioletRed
+    *controlPanel*d5.foreground:		mediumVioletRed
+    *controlPanel*d8.foreground:		mediumVioletRed
+
+    *viewButtons.location:			0 0 100 80
+    *viewButtons.debug:				False
+    *viewButtons.layout: horizontal { \
+	5 < -2 > \
+	aspect < +inf * > \
+	5 < -2 > \
+	flipX < +inf * > \
+	5 < -2 > \
+	flipY < +inf * > \
+	5 < -2 > \
+	flipXY < +inf * > \
+	5 < -2 > \
+	clearFrame < +inf * > \
+	5 < -2 > \
+	fitFrame < +inf * > \
+	5 < -2 > \
+    }
+
+    *nextFrame.label:				Next Frame
+    *prevFrame.label:				Previous Frame
+    *fitFrame.label:				Fit Frame
+    *aspect.label:				Aspect
+    *clearFrame.label:				Clear Frame
+    *flipX.label:				Flip X
+    *flipY.label:				Flip Y
+    *flipXY.label:				Flip XY
+
+
+    ! ENHANCEMENT
+    ! ------------------
+    *enhancementBox.label:			Enhancement
+    *enhancementBox.location:			0 0 110 0
+    *enhancementBox.shrinkToFit:		True
+    *enhancementBox.outerOffset:		5
+
+    *enhance.debug:				False
+    *enhance.layout: vertical { \
+	3 < -3 > \
+	horizontal { \
+	    2 < -2 > \
+	    colorlistScroll < * +inff -inff > \
+	    -1 \
+	    colorlistFrame < +inf -inf * +inff -inff > \
+	    2 < -2 > \
+	} \
+	-1 \
+	horizontal { \
+	    2 < -2 > \
+	    colordataFrame < +inf -inf * +inf -inf > \
+	    2 < -2 > \
+	} \
+	5 < -5 > \
+	horizontal { \
+	    2 < -2 > \
+	    vertical { \
+		-1 \
+		contrastLabel \
+		3 < -3 > \
+		brightnessLabel \
+		-1 \
+	    } \
+	    3 < -3 > \
+	    vertical { \
+		-1 \
+		contrastSlider < +inf -inf * > \
+		3 < -3 > \
+		brightnessSlider < +inf -inf * > \
+		-1 \
+	    } \
+	    2 < -2 > \
+	} \
+	5 < -5 > \
+	horizontal { \
+	    3 < -3 > \
+	    invertButton < +inf -inf * > \
+	    5 < -5 > \
+	    optimizeButton < +inf -inf * > \
+	    3 < -3 > \
+	} \
+	3 < -3 > \
+    }
+
+    *enhance*FrameType:				sunken
+    *enhance*FrameWidth:			2
+    *enhance*BorderWidth:			0
+    *enhance*Label.ShadowWidth:			0
+    *enhance*thumbColor:			gray
+
+    *colorlistScroll.location:			0 0 20 10
+    *colorlistScroll.vertical:			True
+    *colorlistScroll*minsize:			10
+    *colorlist.width:				100
+    *colorlist.height:				78
+    *colordata.width:				100
+    *colordata.height:				45
+    *enhance*colordata.frameWidth:		0
+    *contrastLabel.label:			x
+    *contrastSlider.location:			0 0 100 20
+    *brightnessLabel.label:			x
+    *brightnessSlider.location:			0 0 100 20
+    *invertButton.label:			Invert
+    *optimizeButton.label:			Optimize
+
+    ! BLINK
+    ! ---------------------
+    *blinkBox.label:				Blink
+    *blinkBox.location:				0 0 230 0
+    *blinkBox.shrinkToFit:			True
+    *blinkBox.outerOffset:			5
+
+
+    *blink.debug:				False
+    *blink.layout: vertical { \
+	space = (width blinkFramesLabel - width blinkRateLabel) \
+	3 < -3 > \
+	horizontal { \
+	    0 \
+	    blinkFramesLabel \
+	    3 < +inf > \
+	    blinkFrame1 < -50% * > \
+	    blinkFrame2 < -50% * > \
+	    blinkFrame3 < -50% * > \
+	    blinkFrame4 < -50% * > \
+	    4 < +inf > \
+	    blinkReset \
+	    2 \
+	} \
+	5 < -5 > \
+	horizontal { \
+	    $space \
+	    blinkRateLabel \
+	    2  \
+	    BRframe < +inf * > \
+	} \
+	5 < +inf -100% > \
+	horizontal { \
+	    3 \
+	    registerButton < +inf * > \
+	    5 < -5 > \
+	    matchButton < +inf * > \
+	    5 < -5 > \
+	    blinkButton < +inf * > \
+	    2 \
+	} \
+	3 < -3 > \
+    }
+
+    *BRlayout.layout: horizontal { \
+	BRdecrease \
+	BRtext < +inf -100% * > \
+	BRincrease \
+    }
+
+    *blink.Label.borderWidth:			0
+    *blink.Label.shadowWidth:			0
+    *controlPanel*blink*internalWidth:		4
+    *controlPanel*blink*Arrow.foreground:	gray
+    *controlPanel*blink*Arrow.background:	gray63
+    *blink*Arrow.width:				16
+    *blink*Arrow.height:			25
+
+    *blinkFramesLabel.label:			Blink Frames:
+    *blinkFrame1.label:				1
+    *blinkFrame2.label:				2
+    *blinkFrame3.label:				3
+    *blinkFrame4.label:				4
+    *blinkReset.label:				Reset
+
+    *blinkRateLabel.label:			Blink Rate:
+    *BRframe.frameType:				sunken
+    *BRframe.frameWidth:			2
+    *BRtext.width:				40
+    *BRtext.height:				25
+    *BRdecrease.direction:			left
+    *BRincrease.direction:			right
+    *registerButton.label:			Register
+    *matchButton.label:				Match LUTs
+    *blinkButton.label:				Blink
+
+    ! OPTIONS
+    ! ---------------------
+    *optionsBox.label:				Options
+    *optionsBox.location:			0 0 220 0
+    *optionsBox.shrinkToFit:			False
+    *optionsBox.outerOffset:			5
+    *optionsBox*offIcon:			square0s
+    *optionsBox*onIcon:				square1s
+    *optionsBox*selectionStyle:			multi
+    *optionsBox*highlightColor:			yellow
+    *optionsBox.TextToggle.location:		0 0 102 25
+    *optionsBox.TextToggle.frameWidth:		0
+    *optionsBox*alignment:			left
+
+    *pannerButton.label:			Panner
+    *coordsBoxButton.label:			Coords Box
+    *autoscaleButton.label:			Autoscale
+    *antialiasButton.label:			Antialias
+    *tileFramesButton.label:			Tile Frames
+    *warningsButton.label:			Warnings
+
+    ! CONTROL
+    ! ----------------------
+    *controlBox.frameType:			chiseled
+    *controlBox.frameWidth:			2
+    *controlBox.outerOffset:			5
+    *controlBox.innerOffset:			5
+    *controlBox.height:				30
+
+    *control.debug:  False
+    *control.layout: horizontal { \
+	1 \
+	initializeButton < +inf * > \
+	5 < -5 > \
+	normalizeButton < +inf * > \
+	80 < +inf -100% > \
+	doneButton < +inf * > \
+	1 \
+    }
+
+    *initializeButton.label:			Initialize
+    *normalizeButton.label:			Normalize
+    *doneButton.label:				Done
+
+    ! WARNING dialog.
+    ! ---------------------
+    *warning.geometry:				+400+300
+    *warning*background:			gray
+    *warning*borderWidth:			0
+    *warning*TextBox.frameWidth:		0
+    *warning*TextButton.frameWidth:		2
+    *warning*TextButton.width:			40
+    *warning*TextButton.height:			25
+
+    *warn.layout: vertical { \
+	5 < -5 > \
+	horizontal { \
+	    5 < -5 > \
+	    warnFrame < +inf * +inf > \
+	    5 < -5 > \
+	} \
+	1 < -1 > \
+	horizontal { \
+	    5 < -5 > \
+	    warnOk < +inf * > \
+	    5 < +inf -5 > \
+	    warnCancel < +inf * > \
+	    5 < +inf -5 > \
+	    warnHelp < +inf * > \
+	    5 < -5 > \
+	} \
+	1 < -1 > \
+    }
+
+    *WFlayout.layout: horizontal { \
+	5 < -5 > \
+	vertical { \
+	    5 < +inf -5 > \
+	    warnIcon \
+	    5 < +inf -5 > \
+	} \
+	5 < -5 > \
+	warnText < +inf -inf * +inf -inf > \
+	5 < -5 > \
+    }
+
+    *warnLabel.label:				Warning
+    *warnLabel.width:				300
+    *warnLabel.height:				20
+    *warnFrame.frameType:			sunken
+    *warnFrame.frameWidth:			2
+    *warnIcon.location:				0 0 40 40
+    *warnIcon.image:				WARNING
+    *warnText.label:				generic warning text
+    *warnText.width:				270
+    *warnText.height:				60
+    *warnOk.label:				OK
+    *warnCancel.label:				Cancel
+    *warnHelp.label:				Help
+    *warnHelp.sensitive:			False
+
+
+    !=====================================
+    !  Print Setup Panel resources.      !
+    !=====================================
+    *print_panel.title:                         Printer Setup
+    *print_panel.highlightThickness:		1
+    *print_panel*background:			gray
+    *print_panel*TextBox.background:            gray63
+    *print_panel*TextBox.foreground:            black
+    *print_panel*TextToggle.alignment:          left
+    *print_panel*Arrow.background:              gray63
+    *print_panel*Arrow.foreground:              gray
+    *print_panel*Arrow.width:                   16
+    *print_panel*Arrow.height:                  25
+    *print_panel*TextToggle.frameWidth:		0
+    *print_panel*TextToggle.height:		20
+    *print_panel*Label.borderWidth:		0
+    *print_panel*Label.shadowWidth:		0
+    *print_panel*Label.background:		gray
+    *print_panel*TextButton.width:		40
+    *print_panel*TextButton.height:		25
+
+    *printLayout.borderWidth:			0
+    *printLayout.layout: vertical { \
+        -1 \
+        printCmdGroup < +inf * > \
+        -1 \
+        optGroup < +inf -inf * +inf -inf > \
+	-1 \
+	cmdGroup < +inf * > \
+        -1\
+    }
+
+
+    ! Print Group resources.
+    !----------------------------------
+    *printCmdGroup.borderWidth:			0
+    *printCmdGroup.outerOffset:			5
+    *printCmdGroup.label:			
+    *printCmdGroup.location:			0 0 400 85
+    *printCmdGroup*offIcon:                     diamond0s
+    *printCmdGroup*onIcon:                      diamond1s
+    *printCmdGroup*highlightColor:              cyan
+    *printCmdGroup*Frame.frameType:		sunken
+    *printCmdGroup*Frame.frameWidth:		2
+    *printCmdGroup*Frame.width:			300
+    *printCmdGroup*Label.justify:		right
+    *printCmdGroup*Text*editType:		edit
+    *printCmdGroup*TextToggle.width:		70
+    *printCmdGroup*shadowWidth:                 0
+    *printCmdGroup*borderWidth:                 0
+    *printCmdLayout.borderWidth: 		0
+    *printCmdLayout*Label.font:    		7x13bold
+    *printCmdLayout.layout: horizontal { \
+	-1 \
+	labelLayout \
+	5 < -5 > \
+	inputLayout < +inf -inf * +inf > \
+	2 \
+     }
+
+    *labelLayout.borderWidth:			0
+    *labelLayout.layout: vertical { \
+	5 \
+	toLabel \
+	11 \
+	printerLabel \
+	-3 \
+     }
+    *printerLabel.label:			Print Command:
+    *toLabel.label:				Print To:
+    *toPrinter.label:				Printer
+    *toPrinter.on:				True
+    *toFile.label:				File
+
+
+    *inputLayout.borderWidth:			0
+    *inputLayout.layout: horizontal { \
+	3 \
+	vertical { \
+	    5 \
+	    horizontal { \
+	        5 < -5 > \
+	        toPrinter \
+	        5 < -5 > \
+	        toFile \
+	        5 < +inf -inf > \
+	    } \
+	    5 \
+	    printcmdFrame < +inf -inf * > \
+	    5 \
+	} \
+	3 \
+     }
+    *printcmd*string:				lpr
+    *printcmd*height:				22
+    *printcmd*Text*editType:			edit
+
+    !  Main options groups layout resources.
+    !---------------------------------------
+    *optGroup.frameWidth:			2
+    *optGroup.frameType:			chiseled
+    *optGroup.label:			
+    *optGroup.location:				0 0 400 265
+    *optGroup.outerOffset:                 	5
+    *optGroup.innerOffset:                 	0
+    *optLayout*borderWidth:			0
+    *optLayout.layout: horizontal { \
+	-1 \
+        vertical { \
+            5 < -5 >  \
+	    epsPageGroup  < +inf -inf * > \
+	    0 < -0 > \
+	    optionsGroup  < +inf -inf * +inf -inf > \
+            -1 \
+        } \
+	0 < -0 > \
+        vertical { \
+            5 < -5 >  \
+	    printColorGroup  < +inf -inf * > \
+	    0 < -0 > \
+	    printerGroup  < +inf * +inf > \
+            -1 \
+        } \
+ 	-1 \
+    }
+
+
+    ! Postscript Options group resources.
+    ! -----------------------------------
+    *epsPageGroup.label:                        Postscript Options
+    *epsPageGroup.outerOffset:                  5
+    *epsPageGroup.innerOffset:                  5
+    *epsPageGroup.location:                     0 0 250 150
+    *epsPageGroup*offIcon:                      diamond0s
+    *epsPageGroup*onIcon:                       diamond1s
+    *epsPageGroup*highlightColor:               cyan
+    *epsPage*Label.justify:                     left
+    *epsPage*Label.font:                        7x13bold
+    *epsPage.layout: vertical { \
+        -1 \
+        epsOrientLabel \
+        4 < -4 > \
+        horizontal { \
+            10 \
+	    epsPortButton \
+	    epsLandButton \
+	    -1 \
+        } \
+        4 < -4 > \
+        epsSizeLabel \
+        -1 \
+        horizontal { \
+            10 \
+	    epsLetterButton \
+	    epsLegalButton \
+	    epsA4Button \
+	    -1 \
+        } \
+        5 < -5 > \
+        horizontal { \
+            -1 \
+            epsScaleLabel \
+            4 < -4 > \
+            ScaleFrame \
+        } \
+        -1 \
+    }
+
+
+    ! Page Layout resources.
+    ! -------------------------------
+    *epsOrientLabel.label:                      Orientation:
+    *epsPortButton.label:			Portrait
+    *epsPortButton.width:			90
+    *epsLandButton.label:			Landscape
+    *epsLandButton.width:			90
+
+    *epsSizeLabel.label:                        Paper Size:
+    *epsLetterButton.label:			Letter
+    *epsLetterButton.width:			75
+    *epsLegalButton.label:			Legal
+    *epsLegalButton.width:			75
+    *epsA4Button.label:				A4
+    *epsA4Button.width:				75
+
+    ! Image scale box resources.
+    ! -------------------------------
+    *epsScaleLabel.label:                       Image Scale:
+    *ScaleFrame.frameType:                      sunken
+    *ScaleFrame.frameWidth:                     2
+    *ScaleFrame*shadowWidth:                    0
+    *ScaleLayout.location:                      0 0 100 50
+    *ScaleLayout.label:                         
+    *ScaleLayout.layout: horizontal { \
+        SCdecrease \
+        SCtext < +inf -100% * > \
+        SCincrease \
+    }
+    *SCdecrease.direction:                      left
+    *SCtext.width:                              75
+    *SCtext.height:                             25
+    *SCtext.label:                              100 %
+    *SCincrease.direction:                      right
+
+
+    ! Miscellaneous print options box resources.
+    ! ------------------------------------
+    *optionsGroup.outerOffset:                  5
+    *optionsGroup.innerOffset:                  5
+    *optionsGroup*onIcon:                    	square1s
+    *optionsGroup*offIcon:                   	square0s
+    *optionsGroup.label:                        Processing Options
+    *optionsGroup*TextToggle.width:             100
+    *optionsGroup*TextToggle.highlightColor:    yellow
+    *options.frameWidth:                        2
+    *options.location:                          0 0 250 75
+    *options.layout: horizontal { \
+        10 \
+        vertical { \
+            -1 \
+            epsscaleButton \
+            2 \
+            autorotateButton \
+            2 \
+            aspectButton \
+            -1 \
+        } \
+        3 \
+        vertical { \
+            -1 \
+            annotateButton \
+            2 \
+            compressButton \
+            25 \
+	    -1 \
+        } \
+        -1 \
+    }
+    *epsscaleButton.label:                      Auto Scale
+    *autorotateButton.label:                    Auto Rotate
+    *annotateButton.label:                      Annotate
+    *aspectButton.label:                        Max Aspect
+    *compressButton.label:                      Compress
+    *compressButton.sensitive:                  False
+
+!    *epsscaleButton.on:                     	True
+!    *autorotateButton.on:                    	False
+!    *spectButton.on:                        	False
+!    *annotateButton.on:                      	True
+!    *compressButton.on:                      	False
+
+
+    ! Output color box resources.
+    ! ------------------------------
+    *printColorGroup.location:                     0 0 150 90
+    *printColorGroup.outerOffset:                  5
+    *printColorGroup.frameWidth:                   2
+    *printColorGroup*offIcon:                      diamond0s
+    *printColorGroup*onIcon:                       diamond1s
+    *printColorGroup*highlightColor:               cyan
+    *printColorGroup.innerOffset:                  5
+    *printColorGroup.label:                        Output Color
+    *printColorGroup*TextToggle.width:             100
+    *printColor.frameWidth:                        2
+    *printColor.location:                          0 0 250 75
+    *printColor.layout: horizontal { \
+        15 \
+        vertical { \
+            -1 \
+            prGrayButton \
+            2 \
+            prPseudoButton \
+            2 \
+            prRGBButton \
+            -1 \
+        } \
+	-1 \
+    }
+    *prGrayButton.label:			Grayscale
+    *prPseudoButton.label:			PseudoColor
+    *prRGBButton.label:				RGB
+
+    ! Printer Selection.
+    ! --------------------------
+    *printerGroup.label:                      	Printers
+    *printerGroup.location:                   	0 0 110 100
+    *printerGroup.shrinkToFit:                	True
+    *printerGroup.outerOffset:                	5
+
+    *printers.debug:                            False
+    *printers.layout: vertical { \
+        3 < -3 > \
+        horizontal { \
+            2 < -2 > \
+            printlistFrame < +inf -inf * +inff -inff > \
+            -1 \
+            printlistScroll < * +inff -inff > \
+            2 < -2 > \
+        } \
+        3 < -3 > \
+    }
+
+    *printers*FrameType:                         sunken
+    *printers*FrameWidth:                        2
+    *printers*BorderWidth:                       0
+    *printers*Label.ShadowWidth:                 0
+    *printers*thumbColor:                        gray
+
+    *printlistScroll.location:                  0 0 20 10
+    *printlistScroll.vertical:                  True
+    *printlistScroll*minsize:                   10
+    *printlist.width:                           100
+    *printlist.height:                          78
+
+
+    ! Panel command resources.
+    ! ------------------------------
+    *cmdGroup.frameType:			chiseled
+    *cmdGroup.frameWidth:			2
+    *cmdGroup.outerOffset:			5
+    *cmdGroup.innerOffset:			5
+    *cmdGroup.label:
+    *cmdGroup.location:				0 0 150 54
+    *cmdGroup*Command.font:			7x13bold
+    *cmdLayout.borderWidth:			0
+    *cmdLayout.layout: horizontal { \
+        -1 \
+        okayPrint < * +inf > \
+        1 < +inf -1 > \
+	printStatus < +inf -inf * +inf > \
+        1 < +inf -1 > \
+        cancelPrint < * +inf > \
+        -1 \
+    }
+    *cmdGroup*TextButton*location:		0 0 80 0
+    *okayPrint.label:				Print
+    *cancelPrint.label:				Cancel
+
+
+    !=====================================
+    !  Save Setup Panel resources.      !
+    !=====================================
+    *save_panel.title:				Save to Disk...
+    *save_panel*background:			gray
+    *save_panel*TextBox.background:		gray63
+    *save_panel*TextToggle.alignment:		left
+    *save_panel*AsciiText*background:		gray63
+    *save_panel*Arrow.background:		gray63
+    *save_panel*Arrow.foreground:		gray
+    *save_panel*Arrow.width:			16
+    *save_panel*Arrow.height:			25
+    *save_panel*TextToggle.frameWidth:		0
+    *save_panel*TextToggle.height:		20
+    *save_panel*Label.borderWidth:		0
+    *save_panel*Label.shadowWidth:		0
+    *save_panel*TextButton.width:		80
+
+
+    *save_panel*debug:				False
+    *saveLayout.borderWidth:			0
+    *saveLayout.layout: vertical { \
+        -1 \
+        saveNameGroup < +inf * > \
+        -1 \
+        saveOptGroup < +inf -inf * +inf -inf > \
+        -1 \
+        saveCmdGroup < +inf * > \
+        -1\
+    }
+
+    ! Save Name Group resources.
+    !----------------------------------
+    *saveNameGroup.borderWidth:			0
+    *saveNameGroup.outerOffset:			5
+    *saveNameGroup.label:			
+    *saveNameGroup.location:			0 0 400 60
+    *saveNameGroup*offIcon:                     diamond0s
+    *saveNameGroup*onIcon:                      diamond1s
+    *saveNameGroup*highlightColor:              cyan
+    *saveNameGroup*Frame.frameType:		sunken
+    *saveNameGroup*Frame.frameWidth:		2
+    *saveNameGroup*Label.justify:		right
+    *saveNameGroup*Text*editType:		edit
+    *saveNameGroup*shadowWidth:                 0
+    *saveNameGroup*borderWidth:                 0
+    *saveNameLayout.borderWidth: 		0
+    *saveNameLayout*Label.font:    		7x13bold
+    *saveNameLayout.layout: vertical { \
+	5 \
+	horizontal { \
+	    5 \
+	    saveLabel \
+	    5 \
+	    fnameFrame < +inf -inf * > \
+	    5 \
+	} \
+	5 \
+     }
+    *saveLabel.label:				File Name:
+    *saveFile.height:				22
+!   *save_panel*saveFile*background:		gray63
+
+    !  Main options groups layout resources.
+    !---------------------------------------
+    *saveOptGroup.frameWidth:			2
+    *saveOptGroup.frameType:			chiseled
+    *saveOptGroup.label:			
+    *saveOptGroup.location:			0 0 400 145
+    *saveOptGroup.outerOffset:                 	5
+    *saveOptGroup.innerOffset:                 	0
+    *saveOptLayout*borderWidth:			0
+    *saveOptLayout.layout: horizontal { \
+	-1 \
+        vertical { \
+            5 < -5 > \
+	    fmtGroup < +inf * +inf >  \
+            -1 \
+        } \
+	-1 \
+        vertical { \
+	    10 < -10 > \
+	    saveDataBox < +inff -100% * +inff -100% > \
+	    5 < -5 > \
+        } \
+ 	-1 \
+        vertical { \
+            5 < -5 >  \
+	    saveColorGroup < +inf * +inf >  \
+            -1 \
+        } \
+	-1 \
+    }
+
+    ! Output color box resources.
+    ! ------------------------------
+    *saveColorGroup.location:                     0 0 125 120
+    *saveColorGroup.outerOffset:                  5
+    *saveColorGroup.frameWidth:                   2
+    *saveColorGroup*offIcon:                      diamond0s
+    *saveColorGroup*onIcon:                       diamond1s
+    *saveColorGroup*highlightColor:               cyan
+    *saveColorGroup.innerOffset:                  5
+    *saveColorGroup.label:                        Output Color
+    *saveColorGroup*TextToggle.width:             100
+    *saveColor.frameWidth:                        2
+    *saveColor.layout: horizontal { \
+        3 \
+        vertical { \
+            5 \
+            svGrayButton \
+            2 \
+            svPseudoButton \
+            2 \
+            svRGBButton \
+            -1 \
+        } \
+	-1 \
+    }
+    *svGrayButton.label:			Grayscale
+    *svPseudoButton.label:			PseudoColor
+    *svPseudoButton.on:				true
+    *svRGBButton.label:				RGB
+
+    *saveDataBox*TextBox.background:		gray63
+    *saveDataBox.frameType:			sunken
+    *saveDataBox.frameWidth:			2
+
+
+    ! Output format box resources.
+    ! -----------------------------------
+    *fmtGroup.location:                		0 0 140 120
+    *fmtGroup.outerOffset:             		5
+    *fmtGroup.frameWidth:              		2
+    *fmtGroup*offIcon:                 		diamond0s
+    *fmtGroup*onIcon:                  		diamond1s
+    *fmtGroup*TextToggle.width:             	55
+    *fmtGroup*highlightColor:          		cyan
+    *fmtGroup.label:                   		File Format
+    *formats.layout: horizontal { \
+        3 \
+        vertical { \
+            7 \
+            fitsButton \
+            2 \
+            gifButton \
+            2 \
+            x11Button \
+            2 \
+            rawButton \
+            -1 \
+        } \
+        2 < -2 > \
+        vertical { \
+            7 \
+            rasButton \
+            2 \
+            jpegButton \
+            2 \
+            tiffButton \
+            2 \
+            pnmButton \
+            -1 \
+        } \
+        -1 \
+    }
+    *rasButton.label:                        	RAS
+    *gifButton.label:                           GIF
+    *jpegButton.label:                          JPEG
+    *tiffButton.label:                          TIFF
+    *fitsButton.label:                          FITS
+    *x11Button.label:                           X11
+    *pnmButton.label:                           PNM
+    *rawButton.label:                           Raw
+
+    ! Change the sensitivity once these formats are implemented. !
+    !-------------------------------------------------------------
+    *jpegButton.sensitive:                      false
+    *tiffButton.sensitive:                      false
+    *x11Button.sensitive:                       false
+    *pnmButton.sensitive:                       false
+    *rawButton.sensitive:                       false
+
+    ! Panel command resources.
+    ! ------------------------------
+    *saveCmdLayout.borderWidth:			0
+    *saveCmdGroup.frameType:			chiseled
+    *saveCmdGroup.frameWidth:			2
+    *saveCmdGroup.outerOffset:			5
+    *saveCmdGroup.innerOffset:			5
+    *saveCmdGroup.label:			
+    *saveCmdGroup.location:			0 0 400 54
+!   *saveCmdLayout*Command.font:		7x13bold
+    *saveCmdLayout.layout: horizontal { \
+        -1 \
+        okaySave \
+        1 < +inf -1 > \
+	saveStatus \
+        1 < +inf -1 > \
+        cancelSave \
+        -1 \
+    }
+    *okaySave.label:				Save
+    *cancelSave.label:				Cancel
+
+    ! File Load Control Panel.
+    !-------------------------------
+    *load_panel.geometry:			400x320
+    *load_panel.title:				File Load Panel
+    *filesLayout*borderWidth:			0
+    *filesLayout*highlightThickness:		0
+    *filesLayout*background:			gray
+    *filesLayout*Group.outerOffset:		7
+    *filesLayout*Group.shrinkToFit:		True
+    *filesLayout*Group.frameType:		chiseled
+    *filesLayout*Frame*frameType:		sunken
+    *filesLayout*Frame*frameWidth:		2
+    *filesLayout*Text*background:		gray63
+    *filesLayout*TextToggle.frameWidth:		0
+    *filesLayout*TextToggle.height:		28
+    *filesLayout*TextToggle.width:		80
+    *filesLayout*TextToggle.alignment:          left
+    *filesLayout*Scrollbar2*background:		gray63
+    *filesLayout*scrollbarForeground:		gray
+    *filesLayout*Scrollbar2*location:		0 0 20 10
+    *filesLayout*Scrollbar2*vertical:		True
+    *filesLayout*Scrollbar2*minsize:		20
+    *filesLayout*MultiList*background:		gray63
+    *filesLayout*MultiList*foreground:		black
+    *filesLayout*MultiList*shadeSurplus:	False
+    *filesLayout*MultiList*width:		120
+    *filesLayout*MultiList.font:    		7x13bold
+    *filesLayout*Label.font:    		7x13bold
+    *filesLayout*Label.borderWidth:             0
+    *filesLayout*Label.shadowWidth:             0
+    *filesLayout.layout: vertical { \
+        5 < +0 -5 > \
+        horizontal { \
+    	    0 < +0 -0 > \
+    	    imagesGroup < +inf -inf * +inf -inf > \
+    	    0 < +0 -0 > \
+        } \
+        0 < +0 -0 > \
+        horizontal { \
+    	    0 < +0 -0 > \
+    	    fbuttonsGroup < +inf -inf * > \
+    	    0 < +0 -0 > \
+        } \
+        0 < +0 -0 > \
+    }
+
+    *imagesGroup.label:				Images
+    *imagesGroup.frameWidth:			2
+!   *imagesGroup.outerOffset:			5
+    *imagesGroup*offIcon:                 	square0s
+    *imagesGroup*onIcon:                  	square1s
+    *imagesGroup*highlightColor:          	yellow
+    *imagesLayout*Label.shadowWidth:		0
+    *imagesLayout*Label.justify:		left
+    *imagesLayout*Command.width:		90
+    *imagesLayout*TextButton.height:		23
+    *imagesLayout*TextButton.font:		*times*medium*r*normal*-12-*
+    *imagesLayout.layout: vertical { \
+        7 < +0 -7 > \
+	horizontal { \
+    	    5 \
+    	    rootButton < +inf -inf * > \
+    	    2 \
+    	    homeButton < +inf -inf * > \
+    	    2 \
+    	    upButton < +inf -inf * > \
+    	    2 \
+    	    rescanButton < +inf -inf * > \
+    	    5 \
+	} \
+	7 \
+        horizontal { \
+    	    5 < +0 -5 > \
+            vertical { \
+    	        5 \
+    	        imtemplateLabel < * > \
+    	        5 \
+    	        imtemplateFrame < +inf -inf  * > \
+    	        10 < +inf -inf > \
+    	        grayToggle < * > \
+    	        5 \
+    	        browseToggle < * > \
+    	        5 \
+            } \
+    	    5 \
+	    horizontal { \
+    	        5 < +0 -5 > \
+    	        imlistFrame < +inf -inf * +inf -inf > \
+    	        3 < +0 -3 > \
+    	        imlistScrollbar < * +inf - inf > \
+    	        0 < +0 -0 > \
+	    } \
+    	    5 < +0 -5 > \
+        } \
+        5 \
+        horizontal { \
+    	    5 \
+            dirLabel < +inf -inf * > \
+    	    5 \
+	} \
+        10 \
+        horizontal { \
+    	    5 < +0 -5 > \
+            fnameLabel < * > \
+    	    5 < +0 -5 > \
+            filnamFrame < +inf -inf * > \
+    	    5 < +0 -5 > \
+            frameLabel < * > \
+    	    5 < +0 -5 > \
+            frameFrame < -50% * > \
+    	    5 < +0 -5 > \
+	} \
+        5 < +0 -5 > \
+    }
+    *imtemplateLabel.label:			File Pattern:
+    *imtemplateText*editType:			edit
+    *imtemplateText.height:			20
+    *imageList.width:				100
+    *upButton.label:				Up
+    *rootButton.label:				Root
+    *homeButton.label:				Home
+    *rescanButton.label:			Rescan
+    *browseToggle.label:			Browse
+    *browseToggle.on:				True
+    *grayToggle.label:				Greyscale
+    *dirLabel.label:				Directory:
+    *dirLabel.alignment:			left
+    *fnameLabel.label:				Load File:
+    *fnameText*editType:			edit
+    *fnameText.height:				20
+    *frameLabel.label:				Frame:
+    *frameFrame.label:				1
+    
+    *fbuttonsGroup.label:
+    *fbuttonsGroup*frameWidth:			2
+    *fbuttonsGroup*outerOffset:			5
+    *fbuttonsGroup*innerOffset:			5
+    *fbuttonsGroup.frameType:			sunken
+    *fbuttonsLayout*Command.height:		50
+    *fbuttonsLayout*Command.width:		70
+    *fbuttonsLayout.layout: horizontal { \
+        -1 \
+        filesLoadButton \
+        1 < +inf -1 > \
+        filesStatus \
+        1 < +inf -1 > \
+        filesCloseButton \
+        -1 \
+    }
+    
+    *filesLoadButton.label:			Load
+    *filesStatus.label:				
+    *filesCloseButton.label:			Cancel
+
+    ! Help panel resources.
+    !----------------------
+    *help_panel.title:				XImtool Help Summary
+    *help_panel.width:				450
+    *help_panel.height:				525
+    *helpLayout*borderWidth:                    0
+    *helpLayout.background:                     gray
+    *helpLayout*Frame*frameType:                sunken
+    *helpLayout*Frame*frameWidth:               2
+    *helpLayout*Frame.background:               gray
+    *helpLayout*Layout.background:              gray
+   
+    *helpLayout.layout: vertical { \
+        -1 \
+        horizontal { \
+            0 < +0 -0 > \
+            helpMenuLayout < +inf -inf * > \
+            0 < +0 -0 > \
+        } \
+        0 < +0 -0 > \
+        horizontal { \
+            0 < +0 -0 > \
+            helpTextFrame < +inf -inf * +inf -inf > \
+            0 \
+        } \
+        0 < +0 -0 > \
+        horizontal { \
+            0 < +0 -0 > \
+            helpInfoLayout < +inf -inf * > \
+            0 < +0 -0 > \
+        } \
+        -1 \
+    }
+    *helptext*background:			white
+    *helptext*foreground:			black
+      
+    *helpMenuLayout*background:			gray
+    *helpMenuLayout*Command.highlightThickness: 2
+    *helpMenuLayout*Command.internalHeight:     2
+    *helpMenuLayout*Command.font: 	-*-helvetica-bold-r-normal-*-12-*-*-*
+    *helpMenuLayout.layout: vertical { \
+        5 \
+	horizontal { \
+            5 < +0 -5 > \
+            helpBack \
+            2 < +0 -2 > \
+            helpForward \
+            2 < +0 -2 > \
+            helpHome \
+            20 < +inf -20 > \
+            helpClose \
+            5 < +0 -5 > \
+	} \
+        5 \
+    }
+    *helpBack.label:				Back
+    *helpBack.sensitive:			False
+    *helpForward.label:				Forward
+    *helpForward.sensitive:			False
+    *helpHome.label:				Home
+    *helpClose.label:				Close
+ 
+    *helpInfoLayout*background:		gray
+    *helpInfoLayout*Label.justify: 	center 
+    *helpInfoLayout*Label.internalHeight:	0
+    *helpInfoLayout.layout: horizontal { \
+        5 \
+        vertical { \
+            5 \
+            helpIRAFLogo \
+            5 \
+        } \
+        1 \
+        vertical { \
+	    5 \
+            horizontal { \
+                0 < +inf -inf > \
+                helpInfo1 \
+                0 < +inf -inf > \
+            } \
+	    0 < +inf -0 > \
+            horizontal { \
+                0 < +inf -inf > \
+                helpInfo2 \
+                0 < +inf -inf > \
+            } \
+	    0 < +inf -0 > \
+            horizontal { \
+                0 < +inf -inf > \
+                helpInfo3 \
+                0 < +inf -inf > \
+            } \
+	    5 \
+        } \
+        1 \
+        vertical { \
+	    5 \
+            helpNOAOLogo \
+	    5 \
+        } \
+        5 \
+    }
+    *helpInfo1.label:            XImtool V1.0   --   Released: 11/4/96
+    *helpInfo2.label:               iraf@noao.edu    (520) 318-4160
+    *helpInfo3.label:       NOAO is operated by AURA under cooperative agreement with the NSF
+    *helpInfoLayout*helpInfo1.font: -*-helvetica-medium-r-normal-*-12-*-*-*
+    *helpInfoLayout*helpInfo2.font: -*-helvetica-medium-r-normal-*-12-*-*-*
+    *helpInfoLayout*helpInfo3.font: -*-helvetica-medium-r-normal-*-10-*-*-*
+    *helpInfoLayout.helpIRAFLogo.internalWidth:       	0
+    *helpInfoLayout.helpIRAFLogo.internalheight:       	0
+    *helpInfoLayout.helpIRAFLogo.foreground:       	steelblue
+    *helpInfoLayout.helpIRAFLogo.background:       	white
+    *helpInfoLayout.helpNOAOLogo.internalWidth:       	0
+    *helpInfoLayout.helpNOAOLogo.internalheight:       	0
+    *helpInfoLayout.helpNOAOLogo.foreground:       	steelblue
+    *helpInfoLayout.helpNOAOLogo.background:       	white
+ 
+    *helpText.width:					450
+    *helpText.height:					500
+    *helpText.anchorUnderlines:				1
+    *helpText.visitedAnchorUnderlines:			1
+    *helpText.verticalScrollOnRight:			true
+    *helpText.plainFont:				6x13
+
+
+    ! Define a debug Tcl shell.
+    !--------------------------------
+    *tclForm.title:				Interactive Tcl Shell
+    *tclForm.background:			gray
+    *tclForm*Label.background:			gray
+    *tclForm*Label.borderWidth:			0
+    *tclForm*Command.background:		grey75
+    *tclLabel.label:				Server	Command	Entry
+    *tclClear.label:				Clear
+    *tclClear.fromHoriz:			tclLabel
+    *tclExecute.label:				Execute
+    *tclExecute.fromHoriz:			tclClear
+    *tclEntry.fromVert:				tclLabel
+    *tclEntry*width:				500
+    *tclEntry*borderWidth:			1
+    *tclEntry*height:				80
+    *tclEntry*editType:				edit
+    *tclEntry*scrollHorizontal:			whenNeeded
+    *tclEntry*scrollVertical:			never
+    *tclEntry*displayCaret:			True
+    *tclcloseButton.label:			Close
+    *tclcloseButton.fromHoriz:			tclExecute
+    *tclcloseButton.horizDistance:		200
+
+
+    ! GUI resources.
+    ! ------------------------------
+    *autoscale:					True
+    *zoomfactors:				1 2 4 8
+    *displayCoords:				True
+    *displayPanner:				True
+    *blinkRate:					1.0
+    *pannerArea:				150*150
+    *pannerGeom:				-5+5
+    *wcsboxGeom:				-5-5
+    *maxContrast:				5.0
+    *warnings:					True

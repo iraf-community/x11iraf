@@ -1,0 +1,70 @@
+# Imakefile for the XImtool image display server.
+# 18Aug93 - Doug Tody, NOAO/IRAF
+
+X11IRAFDIR = ../
+#include <../X11IRAF.tmpl>
+
+    CDEBUGFLAGS = -g
+         XAWLIB = LibXaw3d
+
+  LOCAL_LDFLAGS = $(X11IRAF_LDFLAGS)
+ EXTRA_INCLUDES = $(X11IRAF_INCLUDES)
+        OBMLIBS = LibObm LibXpm
+        MATHLIB = -lm
+         DEPOBM = DepLibObm
+
+           SRCS = eps.c iis.c load.c print.c raster.c save.c \
+		  rasio.c fitsio.c ximclient.c ximtool.c quant.c \
+		  zscale.c gifio.c irafio.c
+           OBJS = eps.o iis.o load.o print.o raster.o save.o \
+		  rasio.o fitsio.o ximclient.o ximtool.o quant.o \
+		  zscale.o gifio.o irafio.o
+
+# Hack to compile under SunPRO V4 on Solaris
+#if defined (SunArchitecture) && HasSunC && OSMajorVersion >= 5
+        CCOPTIONS = -Xs
+  EXTRA_LDOPTIONS = -xildoff
+#else 
+#if defined (HPArchitecture)
+        CCOPTIONS = -DHPUX
+#endif
+#if defined (UltrixArchitecture)
+        CCOPTIONS = -DULTRIX
+#endif
+#endif
+
+AllTarget(ximtool)
+
+NormalProgramTarget(ximtool,$(OBJS),${DEPOBM},${OBMLIBS} XawClientLibs, $(MATHLIB))
+
+${DEPOBM}:
+
+ximtool.o:	ximtool.gui.h
+ximtool.c:	ximtool.gui.h
+
+ximclient.o:	ximtool.html.h
+ximclient.c:	ximtool.html.h
+
+ximtool.gui.h: ximtool.gui
+	sed -f gui2c.sed ximtool.gui > ximtool.gui.h
+
+ximtool.html.h: ximtool.html
+	sed -f gui2c.sed ximtool.html > ximtool.html.h
+
+XCOMM XImtool.ad: ximtool.gui
+XCOMM 	sed -e '1,/^appInitialize/d' -e '/^}/,\$d' ximtool.gui > XImtool.ad
+
+#if InstallBinaries
+install:: ximtool
+	-@if [ -d X11irafBinDir ]; then set +x; \
+	        else (set -x; $(MKDIRHIER) X11irafBinDir); fi
+	$(CP) ximtool X11irafBinDir
+#endif
+
+#if InstallManuals
+install::
+	MakeDir(X11irafManDir)
+	$(CP) ximtool.man X11irafManDir/ximtool.1
+#endif
+
+DependTarget()

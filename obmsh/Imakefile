@@ -1,0 +1,34 @@
+# Imakefile for the OBM shell.
+
+X11IRAFDIR = ../
+#include <../X11IRAF.tmpl>
+
+    CDEBUGFLAGS = -g
+
+  LOCAL_LDFLAGS = $(X11IRAF_LDFLAGS)
+ EXTRA_INCLUDES = $(X11IRAF_INCLUDES)
+        OBMLIBS = LibObm LibXpm
+        MATHLIB = -lm
+         XAWLIB = LibXaw3d
+
+           SRCS = obmsh.c
+           OBJS = obmsh.o
+
+# Hack to compile under SunPRO V4 on Solaris
+#if defined (SunArchitecture) && HasSunC && OSMajorVersion >= 5
+        CCOPTIONS = -Xs
+  EXTRA_LDOPTIONS = -xildoff
+#endif
+
+AllTarget(obmsh)
+
+NormalProgramTarget(obmsh,$(OBJS),,${OBMLIBS} XawClientLibs,$(MATHLIB))
+
+#if InstallBinaries
+install:: obmsh
+	-@if [ -d X11irafBinDir ]; then set +x; \
+	        else (set -x; $(MKDIRHIER) X11irafBinDir); fi
+	$(CP) obmsh X11irafBinDir
+#endif
+
+DependTarget()
