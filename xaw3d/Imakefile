@@ -42,7 +42,12 @@ DEFINES =
 
        LINTLIBS = $(LINTXLIB) $(LINTXTOOL)
 
+#if defined(PpcDarwinArchitecture) || defined (TenonServer)
+XCOMM - The following is for OS X on a PowerPC
+  EXTRA_DEFINES = -DARROW_SCROLLBAR -traditional-cpp
+#else
   EXTRA_DEFINES = -DARROW_SCROLLBAR
+#endif
 
  EXTRA_INCLUDES = -I. -I../include
 

@@ -238,7 +238,7 @@ proc fileSetOptions args \
 	    return -1
 	} else {
             send client setLoadOption z1 $z1
-            send client setLoadOption z2 $z1
+            send client setLoadOption z2 $z2
 	}
     }
 

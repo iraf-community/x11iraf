@@ -560,23 +560,29 @@ float 	*rvalue;
 	ptr = 10;
 	while (ptr < 80 && card[ptr] == ' ') 
 	    ptr++;
-	if (ptr == 80) 
+	if (ptr == 80 || card[ptr] == '/') 
 	    return "FITS file has missing keyword value"; /* no value */
 
 	if (dtype == T_LOG) {
-	    if (ptr != 29 || (card[29] != 'T' && card[29] != 'F'))
+	    if ((card[ptr] != 'T' && card[ptr] != 'F'))
 	    	return "Keyword has bad logical value in FITS file";
-	    *kvalue = (card[29] == 'T');
+	    *kvalue = (card[ptr] == 'T');
+
 	} else /* an integer or real */    {
-	    int	j;
+	    int		j, end;
 	    long int	ival;
 	    float	fval;
 	    char	num[21];
 
+	    /*
 	    if (ptr > 29) 
 	    	return "Keyword has bad integer value in FITS file";
-	    memcpy(num, &card[ptr], 30 - ptr);
-	    num[30-ptr] = '\0';
+	    */
+	    end = ptr;
+	    while (end < 80 && (card[end] != ' ' && card[end] != '/'))
+	        end++;
+	    memcpy(num, &card[ptr], end - ptr);
+	    num[end-ptr] = '\0';
 	    if (dtype == T_INT) {
 	       j = sscanf(num, "%ld", &ival);
 	       if (j != 1) 

@@ -28,18 +28,23 @@ proc drawCompass args \
     }
 
     if { [info exists Compass($id)] } {
-        set angle     [lindex $Compass($id) 0]
-        set xflip     [lindex $Compass($id) 1]
-        set yflip     [lindex $Compass($id) 2]
-        set transpose [lindex $Compass($id) 3]
-        set xlab      [lindex $Compass($id) 4]
-        set ylab      [lindex $Compass($id) 5]
+        set angle  [lindex $Compass($id) 0]
+        set n_x    [lindex $Compass($id) 1]
+        set n_y    [lindex $Compass($id) 2]
+        set e_x    [lindex $Compass($id) 3]
+        set e_y    [lindex $Compass($id) 4]
+        set trans  [lindex $Compass($id) 5]
+        set xlab   [lindex $Compass($id) 6]
+        set ylab   [lindex $Compass($id) 7]
     } else {
-	set xflip -1   		; set yflip 1
-	set xlab X   		; set ylab Y
-        set angle 0.0   	; set transpose 0
-	set Compass($id) { 0.0 -1 1 X Y }
+	set n_x    0.0   ; set n_y    1.0
+	set e_x    1.0	 ; set e_y    0.0
+	set xlab     X   ; set ylab     Y
+        set angle  0.0   ; set trans    0
+	set Compass($id) { 0.0 0.0 1.0 1.0 0.0 0 X Y }
     }
+    set xflip 1
+    set yflip 1
 
     # Adjust the compass for the display orientation (e.g. image sections
     # used to flip an image during display).
@@ -48,7 +53,7 @@ proc drawCompass args \
         set yflip [expr $yflip * [lindex $Orient($id) 2] ]
     }
 
-
+    # Get the panner center position.
     set pcx [expr ($panner_x + $panner_width  / 2)]
     set pcy [expr ($panner_y + $panner_height / 2)]
 
@@ -70,47 +75,112 @@ proc drawCompass args \
 	{-1.2 0} {0 -1.2}
     }
 
+
     # Get rotation and scale factors.
-    set coso [expr (cos ($angle * 0.01745329))]
-    set sino [expr (sin ($angle * 0.01745329))]
+    set angle [expr "atan2($n_y,$n_x)"]
     set scale [expr ([min $panner_width $panner_height] * 0.3)]
 
-    # Now scale and rotate the compass points, do 'em all at once.
-    set pts {}
+    # Initialize the graphics.
+    send imagewin setColorIndex $compassColor
+    send imagewin setFillType solid
+
+    # Now draw the parts of the compass.
+    drawCompassAxes   $n_x $n_y $e_x $e_y $trans $xflip $yflip $scale \
+	$pcx $pcy
+    drawCompassLabels $n_x $n_y $e_x $e_y $trans $xflip $yflip $scale\
+	 $pcx $pcy $xlab $ylab
+    drawCompassPtr   $n_x $n_y $e_x $e_y $trans $xflip $yflip $scale \
+	$pcx $pcy $angle
+
+    # Reset the logical resolution of the window.
+    send imagewin setLogRes $sv_xl $sv_yl
+    set redraw_compass 0
+
+} ; foreach w {xflip yflip} { send $w addCallback drawCompass }
+
+
+proc drawCompassAxes {n_x n_y e_x e_y trans xflip yflip scale pcx pcy} \
+{
+    set cpoints { }
+    lappend cpoints [list $e_x  $e_y ]
+    lappend cpoints [list 0 0]
+    lappend cpoints [list $n_x $n_y]
     foreach p $cpoints {
-	if {$transpose == 0} {
-	    set sx [expr ($scale * [lindex $p 0])]
-	    set sy [expr ($scale * [lindex $p 1])]
-	} else {
-	    set sx [expr ($scale * [lindex $p 1])]
-	    set sy [expr ($scale * [lindex $p 0])]
-	}
-	set rx [expr int($pcx + $sx * $coso + $sy * $sino + 0.5)]
-	set ry [expr int($pcy - $sx * $sino + $sy * $coso + 0.5)]
-	set rx [expr (($xflip < 0) ? ($pcx + ($pcx - $rx)) : $rx)]
-	set ry [expr (($yflip < 0) ? ($pcy + ($pcy - $ry)) : $ry)]
+	# Get the scaled position.
+	set sx [expr ($scale * [lindex $p [expr "($trans > 0) ? 1 : 0"]])]
+	set sy [expr ($scale * [lindex $p [expr "($trans > 0) ? 0 : 1"]])]
+
+	# Translate to the scaled position.
+	set rx [expr int($pcx + $sx + 0.5)]
+	set ry [expr int($pcy - $sy + 0.5)]
+
 	lappend pts $rx $ry
     }
 
     # Draw the compass axes.
-    set compassPts [lrange $pts 0 5]
-    send imagewin setColorIndex $compassColor
-    send imagewin drawPolyline $compassPts
+    send imagewin drawPolyline $pts
+}
 
-    # Draw the compass pointer.
-    set head [lrange $pts 6 13]
-    send imagewin setFillType solid
-    send imagewin drawPolygon $head
+proc drawCompassLabels {n_x n_y e_x e_y trans xflip yflip scale pcx pcy xlab ylab} \
+{
+
+    set pts { }
+    set lpoints { }
+   
+    set xo [expr (0.2 * [expr "($xflip > 0) ? -1 : 1"])]
+    set yo [expr (0.2 * [expr "($yflip > 0) ? 1 : -1"])]
+
+    lappend lpoints [list [expr "$e_x+$xo"] $e_y ]
+    lappend lpoints [list $n_x [expr "$n_y+$yo"] ]
+    foreach p $lpoints {
+	# Get the scaled position.
+	set sx [expr ($scale * [lindex $p [expr "($trans > 0) ? 1 : 0"]])]
+	set sy [expr ($scale * [lindex $p [expr "($trans > 0) ? 0 : 1"]])]
+
+	# Translate to the scaled position.
+	set rx [expr int($pcx + $sx + 0.5)]
+	set ry [expr int($pcy - $sy - 0.5)]
+
+	lappend pts $rx $ry
+    }
 
     # Draw the labels.
-    send imagewin drawAlphaText [lindex $pts 14] [lindex $pts 15] $xlab
-    send imagewin drawAlphaText [lindex $pts 16] [lindex $pts 17] $ylab
+    send imagewin drawAlphaText [lindex $pts 0] [lindex $pts 1] $xlab
+    send imagewin drawAlphaText [lindex $pts 2] [lindex $pts 3] $ylab
+}
 
-    send imagewin setLogRes $sv_xl $sv_yl
+proc drawCompassPtr {n_x n_y e_x e_y trans xflip yflip scale pcx pcy angle} \
+{
 
-    set redraw_compass 0
+    set coso  [expr "cos (-$angle)"]
+    set sino  [expr "sin (-$angle)"]
 
-} ; foreach w {xflip yflip} { send $w addCallback drawCompass }
+    # Initialize the drawing points.
+    set pts {}
+    set hpoints { {0.0 0.0} {-0.1 -0.07} {-0.1 0.07} {0.0 0.0} }
+    foreach p $hpoints {
+	# Break out the position.
+	set sx [lindex $p [expr "($trans > 0) ? 1 : 0"]]
+	set sy [lindex $p [expr "($trans > 0) ? 0 : 1"]]
+
+	# Do the rotation of the head at the origin.
+	set rx [expr ($n_x + ($sx * $coso + $sy * $sino))]
+	set ry [expr ($n_y - ($sx * $sino + $sy * $coso))]
+
+	# Get the scaled position.
+	set sx [expr ($scale * $rx)]
+	set sy [expr ($scale * $ry)]
+
+	# Translate to the scaled position.
+	set rx [expr int($pcx + $sx + 0.5)]
+	set ry [expr int($pcy - $sy + 0.5)]
+
+	lappend pts $rx $ry
+    }
+
+    # Draw the compass pointer.
+    send imagewin drawPolygon $pts
+}
 
 
 proc eraseCompass args \

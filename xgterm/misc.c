@@ -521,7 +521,7 @@ register TScreen *screen;
 			free(screen->logfile);
 		if(log_default == NULL)
 			log_default = log_def_name;
-			mktemp(log_default);
+		mkstemp(log_default);
 		if((screen->logfile = malloc((unsigned)strlen(log_default) + 1)) == NULL)
 			return;
 		strcpy(screen->logfile, log_default);
@@ -953,16 +953,7 @@ char *SysErrorMsg (n)
     return strerror(n);
 #else
 
-#ifndef __DARWIN__
-#ifndef __FreeBSD__
-#ifndef _BSD_SOURCE
-    extern char *sys_errlist[];
-#endif
-#endif
-#endif
-    extern int sys_nerr;
-
-    return((n >= 0 && n < sys_nerr) ? (char *)sys_errlist[n] : "unknown error");
+    return((n >= 0) ? (char *)strerror(n) : "unknown error");
 #endif /* __STDC__ */
 }
 

@@ -312,8 +312,7 @@ static BuiltinFunc funcTable[] = {
     {"double", 1, {TCL_EITHER}, ExprDoubleFunc, 0},
     {"int", 1, {TCL_EITHER}, ExprIntFunc, 0},
     {"round", 1, {TCL_EITHER}, ExprRoundFunc, 0},
-
-    {0},
+    {0,0,{0},0,0},
 };
 
 /*

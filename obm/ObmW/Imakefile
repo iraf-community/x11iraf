@@ -21,6 +21,13 @@ X11IRAFDIR = ../../
         CCOPTIONS = -traditional-cpp
 #endif
 
+#if ((GccMajorVersion == 3) && (GccMinorVersion >= 1))
+        CCOPTIONS = -DUSE_STDARG
+#else
+        CCOPTIONS =
+#endif
+
+
 
 HEADERS = \
 	Arrow.h ArrowP.h Board.h BoardP.h Button.h ButtonP.h \
@@ -30,7 +37,24 @@ HEADERS = \
 	MenuBar.h MenuBarP.h MultiList.h MultiListP.h RadioGrp.h RadioGrpP.h \
 	RowCol.h RowColP.h Scrollbar.h ScrollbarP.h Slider2.h Slider2P.h \
 	TabString.h Toggle.h ToggleP.h done.h inkstore.h laygram.h scroll.h \
-	Tabs.h TabsP.h Gcs.h ListTree.h ListTreeP.h
+	Tabs.h TabsP.h Gcs.h ListTree.h ListTreeP.h 
+
+XRAW_HEADERS = \
+	3d.h AllWidgets.h Arrow.h ArrowP.h AsciiSink.h AsciiSinkP.h \
+	AsciiSrc.h AsciiSrcP.h AsciiText.h AsciiTextP.h Box.h BoxP.h \
+	Cardinals.h Clock.h ClockP.h Command.h CommandP.h Container.h \
+	ContainerP.h Dialog.h DialogP.h Form.h FormP.h Frame.h FrameP.h \
+	Grip.h GripP.h Label.h LabelP.h List.h ListP.h Logo.h LogoP.h \
+	Mailbox.h MailboxP.h MenuButtoP.h MenuButton.h Object.h Paned.h \
+	PanedP.h Panner.h PannerP.h Porthole.h PortholeP.h Repeater.h \
+	RepeaterP.h Reports.h Scrollbar.h ScrollbarP.h ScrolledTable.h \
+	ScrolledTableP.h Separator.h SeparatorP.h Simple.h SimpleMenP.h \
+	SimpleMenu.h SimpleP.h Sme.h SmeBSB.h SmeBSBP.h SmeLine.h SmeLineP.h \
+	SmeP.h StripCharP.h StripChart.h Table.h Table3d.h TableP.h \
+	TableUtil.h Template.h TemplateP.h Text.h TextP.h TextSink.h \
+	TextSinkP.h TextSrc.h TextSrcP.h Toggle.h ToggleP.h Tree.h TreeP.h \
+	Viewport.h ViewportP.h XawAll.h XawInit.h Xosdefs.h XrawInit.h \
+	color.h xraw_table.h
 
 SRCS = \
 	Arrow.c Board.c Button.c Common.c DrawIString.c DrawString.c \
@@ -39,7 +63,8 @@ SRCS = \
 	HTMLwidgets.c Icon.c Label.c Layout.c MenuBar.c MultiList.c \
 	RadioGrp.c RowCol.c Scrollbar.c Slider2.c Tablist2Tabs.c TextWidth.c \
 	Toggle.c cvtLong.c iconutil.c laygram.c laylex.c scroll.c strnchr.c \
-	Tabs.c Gcs.c ListTree.c
+	Tabs.c Gcs.c ListTree.c Separator.c Table.c Table3d.c TableUtil.c \
+	Container.c color.c 
 
 OBJS = \
 	Arrow.o Board.o Button.o Common.o DrawIString.o DrawString.o \
@@ -48,7 +73,8 @@ OBJS = \
 	HTMLwidgets.o Icon.o Label.o Layout.o MenuBar.o MultiList.o \
 	RadioGrp.o RowCol.o Scrollbar.o Slider2.o Tablist2Tabs.o TextWidth.o \
 	Toggle.o cvtLong.o iconutil.o laygram.o laylex.o scroll.o strnchr.o \
-	Tabs.o Gcs.o ListTree.o
+	Tabs.o Gcs.o ListTree.o Separator.o Table.o Table3d.o TableUtil.o \
+	Container.o color.o 
 
 #ifdef LexCmd
 LEX=LexCmd
@@ -195,6 +221,11 @@ includes:: laygram.h
 	@(set -x; for i in $(HEADERS); do \
 		$(RM) X11irafIncDir/ObmW/$$i; \
 		$(CP) -p $$i X11irafIncDir/ObmW/$$i; \
+	done)
+	MakeDir(X11irafIncDir/X11/Xraw)
+	@(set -x; for i in $(XRAW_HEADERS); do \
+		$(RM) X11irafIncDir/X11/Xraw/$$i; \
+		$(CP) -p Xraw/$$i X11irafIncDir/X11/Xraw/$$i; \
 	done)
 
 #if InstallIncludes

@@ -632,13 +632,14 @@ procedure img_send_compass (im, cp)
 pointer	im					#i image descriptor
 pointer	cp					#i cache element pointer
 
-pointer	sp, buf, img, co
-double	cx, cy, cx1, cy1, dx, dy, x1, y1
-double	cosa, sina, angle
-int	i, j, comp_x, comp_y
+pointer	sp, buf, img, co, mw
+double	r[IM_MAXDIM], w[IM_MAXDIM], cd[IM_MAXDIM,IM_MAXDIM]
+int	i, j
 long    axis[IM_MAXDIM], lv[IM_MAXDIM], pv1[IM_MAXDIM], pv2[IM_MAXDIM]
 
-int	sk_stati()
+real	north[2], east[2]
+
+int	mw_stati(), sk_stati()
 
 begin
 	call smark (sp)
@@ -652,41 +653,12 @@ begin
 	# Get world coords at the image corners.
 	if (IMG_CTW(img) != NULL) {
 
-	    if (IMG_ROT(img) > 0.0)
-		angle = -IMG_ROT(img)
-	    else
-		angle = IMG_ROT(img) + 360.0
-            cosa = cos (DEGTORAD(angle))
-            sina = sin (DEGTORAD(angle))
+	    # Get the CD matrix for the image.
+	    mw = IMG_MW(img)
+            call wcs_gfterm (mw, r, w, cd, mw_stati(mw, MW_NPHYSDIM))
 
-	    # Image center position
-	    cx = IM_LEN(im,1) / 2.0d0
-	    cy = IM_LEN(im,2) / 2.0d0
-            call mw_c2trand (IMG_CTW(img), cx, cy, cx1, cy1)
-
-	    # Extend a unit vector up from the center assuming it's North
-	    # and rotate it by the wcs angle.
-            dx  = cx + ( 10.0 * sina)
-            dy  = cy + ( 10.0 * cosa)
-            call mw_c2trand (IMG_CTW(img), dx, dy, x1, y1)
-
-	    # Check new point Y value relative to the center position.
-	    if (y1 >= cy1)
-	        comp_y = 1			# North is up
-	    else
-	        comp_y = -1			# North is down
-
-	    # Extend a unit vector left from the center assuming it's East
-	    # and rotate it by the wcs angle.
-            dx  = cx + (-10.0 * cosa)
-            dy  = cy + ( 10.0 * sina)
-            call mw_c2trand (IMG_CTW(img), dx, dy, x1, y1)
-
-	    # Check new point X value relative to the center position.
-	    if (x1 >= cx1)
-	        comp_x = 1			# East is left and we have a WCS
-	    else
-	        comp_x = -1			# East is right
+	    # Compute a Nort and East vector for the CD matrix.
+	    call img_cvectors (cd, 1.0, north, east)
 
 	} else {
             # Determine the logical to physical mapping by evaluating two
@@ -704,15 +676,19 @@ begin
                     i = i + 1
                 }
 	    }
-            comp_x = - (pv2[axis[1]] - pv1[axis[1]])
-            comp_y =   (pv2[axis[2]] - pv1[axis[2]])
+	    north[1] = 0.0
+	    north[2] =  (pv2[axis[2]] - pv1[axis[2]])
+	    east[1]  = -(pv2[axis[1]] - pv1[axis[1]])
+	    east[2]  = 0.0
 	}
 	
-	call sprintf (Memc[buf], SZ_LINE, "compass %d %g %d %d %d %s\0")
+	call sprintf (Memc[buf], SZ_LINE, "compass %d %g %g %g %g %g %d %s\0")
 	    call pargi (C_OBJID(cp))
 	    call pargr (IMG_ROT(img))
-	    call pargi (comp_x)
-	    call pargi (comp_y)
+	    call pargr (north[1])
+	    call pargr (north[2])
+	    call pargr (east[1])
+	    call pargr (east[2])
 	    if (sk_stati(co,S_PLATAX) < sk_stati(co,S_PLNGAX))
 	        call pargi (1)			# transposed image
 	    else
@@ -723,7 +699,44 @@ begin
 		call pargstr ("X Y")
 
 	call wcspix_message (Memc[buf])
+
 	call sfree (sp)
+end
+
+
+# IMG_CVECTORS -- Get north and east vectors for the compass
+
+procedure img_cvectors (cd, length, north, east)
+
+double  cd[2,2]         		#i CD matrix
+real    length          		#i length of vectors
+real    north[2]        		#o vector pointing north
+real    east[2]         		#o vector pointing east
+
+double  d               		# determinant of CD matrix
+double  x, y            		# scratch for vector components
+double  l               		# length of a vector
+
+begin
+        d = cd[1,1] * cd[2,2] - cd[1,2] * cd[2,1]
+        if (d == 0.d0)
+            call error (1, "CD matrix is singular")
+
+        # North.
+        x = -cd[1,2] / d
+        y =  cd[1,1] / d
+
+        # Normalize by the length and copy to output.
+        l = sqrt (x**2 + y**2)
+        north[1] = x * length / l
+        north[2] = y * length / l
+
+        # East.
+        x =  cd[2,2] / d
+        y = -cd[2,1] / d
+        l = sqrt (x**2 + y**2)
+        east[1] = x * length / l
+        east[2] = y * length / l
 end
 
 

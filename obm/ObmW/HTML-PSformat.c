@@ -48,12 +48,12 @@
 #include <math.h>
 #include "HTMLP.h"
 
+#if defined(__APPLE__) || (__APPLE_CC__ > 1151) || defined(USE_STDARG)
+#include <stdarg.h>
+#else
 #include <varargs.h>
-#if !defined(__DARWIN__)
-#include <malloc.h>
-#endif
 
-/* Workaround for our old varargs handling on LinuxPPC systems. */
+/* Workaround for our old varargs handling on LinuxPPC systems.
 #if defined(linux) && defined(__powerpc__)
 #undef va_start
 #undef va_alist
@@ -62,6 +62,12 @@
 #define va_start(AP) __va_start_common (AP, 1)
 #define va_alist __va_1st_arg
 #define va_dcl register int va_alist; ...
+#endif
+*/
+#endif
+
+#if !defined(__DARWIN__)
+#include <malloc.h>
 #endif
 
 
@@ -212,10 +218,14 @@ static int PSprintf ARG1V(char *,format, ...) {
         return(len);
 }
 #else /* not BROKEN_SOLARIS_COMPILER_STDARG */
-static int 
-PSprintf (format, va_alist)
+
+#if defined(__APPLE__) || (__APPLE_CC__ > 1151) || defined(USE_STDARG)
+static int PSprintf (char *format, ... )
+#else
+static int PSprintf (format, va_alist)
 char* format;
 va_dcl
+#endif
 {
 	int 	len;
 	char 	*s;
@@ -229,7 +239,11 @@ va_dcl
 		}
 		PS_string = s;
 	}
+#if defined(__APPLE__) || (__APPLE_CC__ > 1151) || defined(USE_STDARG)
+	va_start(args,format);
+#else
 	va_start(args);
+#endif
 	len = vsprintf(PS_string+PS_len, format, args);
 	/* this is a hack to make it work on systems were vsprintf(s,...)
 	 * returns s, instead of the len.

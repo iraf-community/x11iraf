@@ -593,7 +593,9 @@ void
 #if NeedFunctionPrototypes
 XawTextSinkClearToBackground (Widget w,
 #if NeedWidePrototypes
-			      int x, int y, int width, int height)
+			      int x, int y, 
+				unsigned int width, 
+				unsigned int height)
 #else
 			      Position x, Position y, 
 			      Dimension width, Dimension height)
@@ -724,7 +726,7 @@ int
 #if NeedFunctionPrototypes
 XawTextSinkMaxLines(Widget w,
 #if NeedWidePrototypes
-		    /* Dimension */ int height)
+		    /* Dimension */ unsigned int height)
 #else
 		    Dimension height)
 #endif

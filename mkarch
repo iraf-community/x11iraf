@@ -39,11 +39,7 @@ switch ($UNAME)
 	breaksw
     case linux:
         if (`$uname_cmd -m` == "ppc") then
-            if (-f /etc/redhat-release) then
-	        set mach = "linuxppc"
-	    else
-                set mach = "mklinux"
-	    endif
+	     set mach = "linuxppc"
 	else
             if (-f /etc/redhat-release) then
                 set mach = "redhat"
@@ -55,7 +51,13 @@ switch ($UNAME)
         endif
 	breaksw
     case darwin: 
-	set mach = "macosx"
+    case macosx:
+    case macintel:
+        if (`$uname_cmd -m` == "i386") then
+            set mach            = "macintel"
+        else
+            set mach            = "macosx"
+        endif
 	breaksw
     case freebsd: 
 	set mach = "freebsd"

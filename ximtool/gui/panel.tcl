@@ -204,7 +204,8 @@ proc cpFrameChanged {param old new} \
 
     # Update the header panel object list.
     catch {
-        if {[info exists frameCache($new)]} {
+	# Only update when the header panel is open.
+        if {[info exists frameCache($new)] && [send imageHeader get on]} {
             setHdrObjMenu $new
             getHeader [lindex $frameCache($new) 0] [lindex $frameCache($new) 1]
         }

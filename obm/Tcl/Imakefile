@@ -21,10 +21,15 @@ XCOMM - The following are for Macintosh A/UX
 
 #if defined(PpcDarwinArchitecture) || defined (TenonServer)
 XCOMM - The following are for OS X on a PowerPC
+#if ((OSMajorVersion == 10) && (OSMinorVersion < 4))
+      CPP_FLAGS = -traditional-cpp
+#else
+      CPP_FLAGS = 
+#endif
       GCC_FLAGS = -DNOSTDHDRS -DSYSV -DANSI -D_BSD_SOURCE -W \
-		  -traditional-cpp -fstrength-reduce -fpcc-struct-return
-       AC_FLAGS = -traditional-cpp -DHAVE_UNISTD_H=1
-         CFLAGS += -traditional-cpp -I. $(AC_FLAGS) $(GCC_FLAGS)
+		  $(CPP_FLAGS) -fstrength-reduce -fpcc-struct-return
+       AC_FLAGS = $(CPP_FLAGS) -DHAVE_UNISTD_H=1
+         CFLAGS += $(CPP_FLAGS) -I. $(AC_FLAGS) $(GCC_FLAGS)
     COMPAT_OBJS =
 #else
 
@@ -112,8 +117,22 @@ XCOMM - The following are for AIX on Rs/6000
 #endif
 #endif
 
-    DEPENDFLAGS = -I.. -I${SRC_DIR} ${AC_FLAGS}
-      CCOPTIONS = -I.. -I${SRC_DIR} ${AC_FLAGS} ${GCC_FLAGS} \
+
+# Platform flags.
+#if ((GccMajorVersion == 3) &&  (GccMinorVersion >= 1))
+       PL_FLAGS = -DUSE_STDARG
+#else
+#if ((GccMajorVersion == 4))
+       PL_FLAGS = -DUSE_STDARG
+      CPP_FLAGS = -traditional-cpp
+#else
+       PL_FLAGS =
+#endif
+#endif
+
+
+    DEPENDFLAGS = -I.. -I${SRC_DIR} ${AC_FLAGS} ${PL_FLAGS} 
+      CCOPTIONS = -I.. -I${SRC_DIR} ${AC_FLAGS} ${PL_FLAGS} ${GCC_FLAGS} \
                   -DTCL_LIBRARY=\"${TCL_LIBRARY}\"
 
 UNIX_OBJS = \

@@ -78,6 +78,20 @@ SOFTWARE.
 #include <X11/Xlocale.h>
 #endif
 
+#define TERMCAP_SIZE		1500
+
+
+/* choose a nice default value for speed - if we make it too low, users who
+ * mistakenly use $TERM set to vt100 will get padding delays
+ */
+#define B38400                   /* everyone should define this */
+#ifdef  B38400                   /* everyone should define this */
+#define VAL_LINE_SPEED B38400
+#else /* ...but xterm's used this for a long time */
+#define VAL_LINE_SPEED B9600
+#endif
+
+
 #include <X11/Xos.h>
 #include <X11/cursorfont.h>
 #include <X11/Xaw/SimpleMenu.h>
@@ -88,15 +102,63 @@ SOFTWARE.
 #include <grp.h>
 #endif
 
+#if defined(SYSV) && !defined(SVR4) && !defined(ISC22) && !defined(ISC30)
+/* older SYSV systems cannot ignore SIGHUP.
+   Shell hangs, or you get extra shells, or something like that */
+#define USE_SYSV_SIGHUP
+#endif
+
+#ifdef __DARWIN__
+#define NEW_GET_PTY
+#define NEW_SPAWN
+#define USE_HANDSHAKE
+#define USE_USG_PTYS
+#define TMODE(ind,var) if (ttymodelist[ind].set) var = ttymodelist[ind].value
+#define USE_STRUCT_WINSIZE 1
+#define TTYSIZE_STRUCT struct winsize
+
+#define TTYSIZE_STRUCT struct winsize
+#define SET_TTYSIZE(fd, data) ioctl(fd, TIOCSWINSZ, (char *) &data)
+#define TTYSIZE_COLS(data) data.ws_col
+#define TTYSIZE_ROWS(data) data.ws_row
+/*
+*/
+#endif
+
+/*
 #ifdef linux
+*/
+#if defined(linux)
+#define USE_ANY_SYSV_TERMIO
 #define USE_SYSV_TERMIO
 #define USE_SYSV_PGRP
 #define USE_SYSV_UTMP
 #define USE_SYSV_SIGNALS
+
+#define FEDORA
+#define NEW_GET_PTY
+#define NEW_SPAWN
+#define USE_USG_PTYS
+/*
+#define USE_STRUCT_WINSIZE
+*/
+#define TMODE(ind,var) if (ttymodelist[ind].set) var = ttymodelist[ind].value
+
+#define USE_STRUCT_WINSIZE 1
+#define TTYSIZE_STRUCT struct winsize
+
+#define TTYSIZE_STRUCT struct winsize
+#define SET_TTYSIZE(fd, data) ioctl(fd, TIOCSWINSZ, (char *) &data)
+#define TTYSIZE_COLS(data) data.ws_col
+#define TTYSIZE_ROWS(data) data.ws_row
+
+/*
 #ifndef SYSV
 #define SYSV
 #endif
-#endif
+*/
+#endif   /* linux */
+
 
 #ifdef att
 #define ATT
@@ -108,7 +170,9 @@ SOFTWARE.
 #define USE_TERMIOS
 #define USE_HANDSHAKE
 #define HAS_UTMP_UT_HOST
+/*
 #define HAS_BSD_GROUPS
+*/
 #undef TIOCCONS
 #define CONSLOG "/proc/kmsg"
 #endif
@@ -170,6 +234,7 @@ void *memmove(a,b,n) void *a, *b; int n; { bcopy(b,a,n); }
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 
+
 #ifdef USE_TERMIOS
 #include <termios.h>
 /* this hacked termios support only works on SYSV */
@@ -206,10 +271,17 @@ void *memmove(a,b,n) void *a, *b; int n; { bcopy(b,a,n); }
 #endif
 #include <poll.h>			/* for POLLIN */
 #endif /* USE_USG_PTYS */
+#ifdef FEDORA
+#define USE_USG_PTYS
+#endif
 #define USE_SYSV_TERMIO
 #define USE_SYSV_SIGNALS
 #define	USE_SYSV_PGRP
+
+#if !defined(TIOCSWINSZ)
 #define USE_SYSV_ENVVARS		/* COLUMNS/LINES vs. TERMCAP */
+#endif
+
 #ifndef SCO
 #undef USE_TERMCAP_ENVVARS      /* SCO wants both TERMCAP and TERMINFO env */
 #endif
@@ -457,6 +529,8 @@ static int parse_tty_modes ();
  * SYSV has the termio.c_cc[V] and ltchars; BSD has tchars and ltchars;
  * SVR4 has only termio.c_cc, but it includes everything from ltchars.
  */
+#define TTYMODE(name) { name, sizeof(name)-1, 0, 0 }
+
 static int override_tty_modes = 0;
 struct _xttymodes {
     char *name;
@@ -496,6 +570,12 @@ struct _xttymodes {
 #define XTTYMODE_weras 14
 { "lnext", 5, 0, '\0' },		/* ltchars.t_lnextc ; VLNEXT */
 #define XTTYMODE_lnext 15
+    TTYMODE("status"),          	/* VSTATUS */
+#define XTTYMODE_status 16
+    TTYMODE("erase2"),          	/* VERASE2 */
+#define XTTYMODE_erase2 17
+    TTYMODE("eol2"),            	/* VEOL2 */
+#define XTTYMODE_eol2   18
 { NULL, 0, 0, '\0' },			/* end of data */
 };
 
@@ -788,6 +868,33 @@ char *xgterm_version[] = {
 };
 
 
+/*
+ * If we're linked to terminfo, tgetent() will return an empty buffer.  We
+ * cannot use that to adjust the $TERMCAP variable.
+ */
+static Boolean
+get_termcap(char *name, char *buffer, char *resized)
+{
+    register TScreen *screen = &term->screen;
+
+    *buffer = 0;        /* initialize, in case we're using terminfo's tgetent */
+
+    if (name != 0) {
+        if (tgetent(buffer, name) == 1) {
+            if (*buffer) {
+                if (!screen->TekEmu) {
+                    resize(screen, buffer, resized);
+                }
+            }
+            return True;
+        } else {
+            *buffer = 0;        /* just in case */
+        }
+    }
+    return False;
+}
+
+
 static void Syntax (badOption)
     char *badOption;
 {
@@ -911,6 +1018,7 @@ XtActionsRec actionProcs[] = {
 };
 
 Atom wm_delete_window;
+
 
 main (argc, argv)
 int argc;
@@ -1310,8 +1418,15 @@ char **argv;
 	/* open a terminal for client */
 	get_terminal ();
 	spawn ();
+
+
 	/* Child process is out there, let's catch its termination */
-	signal (SIGCHLD, reapchild);
+#ifdef USE_POSIX_SIGNALS
+    (void) posix_signal(SIGCHLD, reapchild);
+#else
+    (void) signal(SIGCHLD, reapchild);
+#endif
+
 
 	/* Realize procs have now been executed */
 
@@ -1331,7 +1446,8 @@ char **argv;
         if (screen->TekEmu)
 	    hide_vt_window();
 
-	if (am_slave) { /* Write window id so master end can read and use */
+	/* Write window id so master end can read and use */
+	if (am_slave >= 0) { 
 	    char buf[80];
 
 	    buf[0] = '\0';
@@ -1347,9 +1463,9 @@ char **argv;
 	screen->inhibit = inhibit;
 
 #ifdef AIXV3
-	/* In AIXV3, xgterms started from /dev/console have CLOCAL set.
+	/* In AIXV3, xterms started from /dev/console have CLOCAL set.
 	 * This means we need to clear CLOCAL so that SIGHUP gets sent
-	 * to the slave-pty process when xgterm exits. 
+	 * to the slave-pty process when xterm exits. 
 	 */
 
 	{
@@ -1401,6 +1517,206 @@ char *name;
 	cp = strrchr(name, '/');
 	return(cp ? cp + 1 : name);
 }
+
+
+
+
+#ifdef NEW_GET_PTY
+
+
+#ifdef __DARWIN__
+#define USE_OPENPTY 1
+static int opened_tty = -1;
+#endif
+
+/*
+ * This function opens up a pty master and stuffs its value into pty.
+ *
+ * If it finds one, it returns a value of 0.  If it does not find one,
+ * it returns a value of !0.  This routine is designed to be re-entrant,
+ * so that if a pty master is found and later, we find that the slave
+ * has problems, we can re-enter this function and get another one.
+ */
+static int
+get_pty(int *pty, char *from)
+{
+    int result = 1;
+
+
+#if defined(USE_OPENPTY)
+    result = openpty(pty, &opened_tty, ttydev, NULL, NULL);
+
+#elif defined(__OpenBSD__)
+    static int m_tty = -1;
+    static int m_pty = -1;
+    struct group *ttygrp;
+
+
+    if (pty == NULL) {
+	result = openpty(&m_pty, &m_tty, ttydev, NULL, NULL);
+
+	seteuid(0);
+	if ((ttygrp = getgrnam(TTY_GROUP_NAME)) != 0) {
+	    set_owner(ttydev, getuid(), ttygrp->gr_gid, 0600);
+	} else {
+	    set_owner(ttydev, getuid(), getgid(), 0600);
+	}
+	seteuid(getuid());
+    } else if (m_pty != -1) {
+	*pty = m_pty;
+	result = 0;
+    } else {
+	result = -1;
+    }
+#elif defined(PUCC_PTYD)
+
+    result = ((*pty = openrpty(ttydev, ptydev,
+			       (resource.utmpInhibit ? OPTY_NOP : OPTY_LOGIN),
+			       getuid(), from)) < 0);
+
+/*
+#elif defined(__osf__) || (defined(__GLIBC__) && !defined(USE_USG_PTYS)) || defined(__NetBSD__)
+
+    int tty;
+    result = openpty(pty, &tty, ttydev, NULL, NULL);
+*/
+#elif defined(__QNXNTO__)
+
+    result = pty_search(pty);
+
+#else
+#if defined(USE_ISPTS_FLAG)
+
+    /*
+       The order of this code is *important*.  On SYSV/386 we want to open
+       a /dev/ttyp? first if at all possible.  If none are available, then
+       we'll try to open a /dev/pts??? device.
+
+       The reason for this is because /dev/ttyp? works correctly, where
+       as /dev/pts??? devices have a number of bugs, (won't update
+       screen correcly, will hang -- it more or less works, but you
+       really don't want to use it).
+
+       Most importantly, for boxes of this nature, one of the major
+       "features" is that you can emulate a 8086 by spawning off a UNIX
+       program on 80386/80486 in v86 mode.  In other words, you can spawn
+       off multiple MS-DOS environments.  On ISC the program that does
+       this is named "vpix."  The catcher is that "vpix" will *not* work
+       with a /dev/pts??? device, will only work with a /dev/ttyp? device.
+
+       Since we can open either a /dev/ttyp? or a /dev/pts??? device,
+       the flag "IsPts" is set here so that we know which type of
+       device we're dealing with in routine spawn().  That's the reason
+       for the "if (IsPts)" statement in spawn(); we have two different
+       device types which need to be handled differently.
+     */
+    result = pty_search(pty);
+    if (!result)
+	IsPts = 0;
+
+#endif
+#if defined(USE_USG_PTYS) || defined(__CYGWIN__) || defined(FEDORA)
+#ifdef __GLIBC__		/* if __GLIBC__ and USE_USG_PTYS, we know glibc >= 2.1 */
+    /* GNU libc 2 allows us to abstract away from having to know the
+       master pty device name. */
+    if ((*pty = getpt()) >= 0) {
+	char *name = ptsname(*pty);
+	if (name != 0) {	/* if filesystem is trashed, this may be null */
+	    strcpy(ttydev, name);
+	    result = 0;
+	}
+    }
+#elif defined(__MVS__)
+    result = pty_search(pty);
+#else
+#if defined(USE_ISPTS_FLAG)
+    if (result) {
+#endif
+	result = ((*pty = open("/dev/ptmx", O_RDWR)) < 0);
+#endif
+#if defined(SVR4) || defined(__SCO__) || defined(USE_ISPTS_FLAG)
+	if (!result)
+	    strcpy(ttydev, ptsname(*pty));
+#ifdef USE_ISPTS_FLAG
+	IsPts = !result;	/* true if we're successful */
+    }
+#endif
+#endif
+
+#elif defined(AIXV3)
+
+    if ((*pty = open("/dev/ptc", O_RDWR)) >= 0) {
+	strcpy(ttydev, ttyname(*pty));
+	result = 0;
+    }
+#elif defined(__convex__)
+
+    char *pty_name;
+    extern char *getpty(void);
+
+    while ((pty_name = getpty()) != NULL) {
+	if ((*pty = open(pty_name, O_RDWR)) >= 0) {
+	    strcpy(ptydev, pty_name);
+	    strcpy(ttydev, pty_name);
+	    *x_basename(ttydev) = 't';
+	    result = 0;
+	    break;
+	}
+    }
+
+#elif defined(sequent)
+
+    result = ((*pty = getpseudotty(&ttydev, &ptydev)) < 0);
+
+#elif defined(__sgi) && (OSMAJORVERSION >= 4)
+
+    char *tty_name;
+
+    tty_name = _getpty(pty, O_RDWR, 0622, 0);
+    if (tty_name != 0) {
+	strcpy(ttydev, tty_name);
+	result = 0;
+    }
+#elif (defined(__sgi) && (OSMAJORVERSION < 4)) || (defined(umips) && defined (SYSTYPE_SYSV))
+
+    struct stat fstat_buf;
+
+    *pty = open("/dev/ptc", O_RDWR);
+    if (*pty >= 0 && (fstat(*pty, &fstat_buf)) >= 0) {
+	result = 0;
+	sprintf(ttydev, "/dev/ttyq%d", minor(fstat_buf.st_rdev));
+    }
+#elif defined(__hpux)
+
+    /*
+     * Use the clone device if it works, otherwise use pty_search logic.
+     */
+    if ((*pty = open("/dev/ptym/clone", O_RDWR)) >= 0) {
+	char *name = ptsname(*pty);
+	if (name != 0) {
+	    strcpy(ttydev, name);
+	    result = 0;
+	} else {		/* permissions, or other unexpected problem */
+	    close(*pty);
+	    *pty = -1;
+	    result = pty_search(pty);
+	}
+    } else {
+	result = pty_search(pty);
+    }
+
+#else
+
+    result = pty_search(pty);
+
+#endif
+#endif
+
+    return result;
+}
+#else
+
+
 
 /* This function opens up a pty master and stuffs its value into pty.
  * If it finds one, it returns a value of 0.  If it does not find one,
@@ -1529,6 +1845,8 @@ get_pty (pty)
 #endif /* USE_GET_PSEUDOTTY else */
 #endif /* ATT else */
 }
+#endif
+
 
 /*
  * Called from get_pty to iterate over likely pseudo terminals
@@ -1726,6 +2044,1699 @@ void first_map_occurred ()
 #endif /* USE_HANDSHAKE else !USE_HANDSHAKE */
 
 
+#ifdef NEW_SPAWN
+
+extern char **environ;
+
+char *
+x_basename(char *name)
+{
+    char *cp;
+
+    cp = strrchr(name, '/');
+#ifdef __UNIXOS2__
+    if (cp == 0)
+        cp = strrchr(name, '\\');
+#endif
+    return (cp ? cp + 1 : name);
+}
+
+
+static void
+set_owner(char *device, int uid, int gid, int mode)
+{
+    if (chown(device, uid, gid) < 0) {
+        if (errno != ENOENT
+            && getuid() == 0) {
+            fprintf(stderr, "Cannot chown %s to %d,%d: %s\n",
+                    device, uid, gid, strerror(errno));
+        }
+    }
+    chmod(device, mode);
+}
+
+
+/*
+ * sets the value of var to be arg in the Unix 4.2 BSD environment env.
+ * Var should end with '=' (bindings are of the form "var=value").
+ * This procedure assumes the memory for the first level of environ
+ * was allocated using calloc, with enough extra room at the end so not
+ * to have to do a realloc().
+ */
+void
+xtermSetenv(register char *var, register char *value)
+{
+    register int envindex = 0;
+    register size_t len = strlen(var);
+
+    while (environ[envindex] != NULL) {
+        if (strncmp(environ[envindex], var, len) == 0) {
+            /* found it */
+            environ[envindex] = (char *) malloc((unsigned) len
+                                                + strlen(value) + 1);
+            strcpy(environ[envindex], var);
+            strcat(environ[envindex], value);
+            return;
+        }
+        envindex++;
+    }
+
+    environ[envindex] = (char *) malloc((unsigned) len + strlen(value) + 1);
+    (void) strcpy(environ[envindex], var);
+    strcat(environ[envindex], value);
+    environ[++envindex] = NULL;
+}
+
+
+/*
+ * Some platforms use names such as /dev/tty01, others /dev/pts/1.  Parse off
+ * the "tty01" or "pts/1" portion, and return that for use as an identifier for
+ * utmp.
+ */
+static char *
+my_pty_name(char *device)
+{
+    size_t len = strlen(device);
+    Boolean name = False;
+
+    while (len != 0) {
+        int ch = device[len - 1];
+        if (isdigit(ch)) {
+            len--;
+        } else if (ch == '/') {
+            if (name)
+                break;
+            len--;
+        } else if (isalpha(ch)) {
+            name = True;
+            len--;
+        } else {
+            break;
+        }
+    }
+    return device + len;
+}
+
+/*
+ * If the name contains a '/', it is a "pts/1" case.  Otherwise, return the
+ * last few characters for a utmp identifier.
+ */
+static char *
+my_pty_id(char *device)
+{
+    char *name = my_pty_name(device);
+    char *leaf = x_basename(name);
+
+    if (name == leaf) {         /* no '/' in the name */
+        int len = strlen(leaf);
+        if (PTYCHARLEN < len)
+            leaf = leaf + (len - PTYCHARLEN);
+    }
+    return leaf;
+}
+
+
+/*
+ * Set the tty/pty identifier
+ */
+static void
+set_pty_id(char *device, char *id)
+{
+    char *name = my_pty_name(device);
+    char *leaf = x_basename(name);
+
+    if (name == leaf) {
+        strcpy(my_pty_id(device), id);
+    } else {
+        strcpy(leaf, id);
+    }
+}
+
+
+
+
+spawn(void)
+/*
+ *  Inits pty and tty and forks a login process.
+ *  Does not close fd Xsocket.
+ *  If slave, the pty named in passedPty is already open for use
+ */
+{
+    register TScreen *screen = &term->screen;
+#if OPT_PTY_HANDSHAKE
+    handshake_t handshake;
+    int done;
+#endif
+#if OPT_INITIAL_ERASE
+    int initial_erase = VAL_INITIAL_ERASE;
+#endif
+    int rc = 0;
+    int tty = -1;
+#ifdef USE_ANY_SYSV_TERMIO
+    struct termio tio;
+#ifdef TIOCLSET
+    unsigned lmode;
+#endif /* TIOCLSET */
+#ifdef HAS_LTCHARS
+    struct ltchars ltc;
+#endif /* HAS_LTCHARS */
+#elif defined(USE_POSIX_TERMIOS)
+    struct termios tio;
+#else /* !USE_ANY_SYSV_TERMIO && !USE_POSIX_TERMIOS */
+    int ldisc = 0;
+    int discipline;
+    unsigned lmode;
+    struct tchars tc;
+    struct ltchars ltc;
+    struct sgttyb sg;
+#ifdef sony
+    int jmode;
+    struct jtchars jtc;
+#endif /* sony */
+#endif /* USE_ANY_SYSV_TERMIO */
+
+    char termcap[TERMCAP_SIZE];
+    char newtc[TERMCAP_SIZE];
+    char *ptr, *shname, *shname_minus;
+    int i, no_dev_tty = FALSE;
+    char **envnew;		/* new environment */
+    int envsize;		/* elements in new environment */
+    char buf[64];
+    char *TermName = NULL;
+#ifdef TTYSIZE_STRUCT
+    TTYSIZE_STRUCT ts;
+#endif
+    struct passwd *pw = NULL;
+    char *login_name = NULL;
+#ifndef USE_UTEMPTER
+#ifdef HAVE_UTMP
+    struct UTMP_STR utmp;
+#ifdef USE_SYSV_UTMP
+    struct UTMP_STR *utret = NULL;
+#endif
+#ifdef USE_LASTLOG
+    struct lastlog lastlog;
+#endif
+#ifdef USE_LASTLOGX
+    struct lastlogx lastlog;
+#endif /* USE_LASTLOG */
+#endif /* HAVE_UTMP */
+#endif /* !USE_UTEMPTER */
+    char *x_basename();
+
+    /* Noisy compilers (suppress some unused-variable warnings) */
+    (void) rc;
+#if defined(HAVE_UTMP) && defined(USE_SYSV_UTMP) && !defined(USE_UTEMPTER)
+    (void) utret;
+#endif
+
+    screen->uid = getuid();
+    screen->gid = getgid();
+
+    termcap[0] = '\0';
+    newtc[0] = '\0';
+
+#ifdef SIGTTOU
+    /* so that TIOCSWINSZ || TIOCSIZE doesn't block */
+    signal(SIGTTOU, SIG_IGN);
+#endif
+
+    if (am_slave >= 0) {
+	screen->respond = am_slave;
+	set_pty_id(ttydev, passedPty);
+#ifdef USE_PTY_DEVICE
+	set_pty_id(ptydev, passedPty);
+#endif
+	setgid(screen->gid);
+	setuid(screen->uid);
+    } else {
+	Bool tty_got_hung;
+
+	/*
+	 * Sometimes /dev/tty hangs on open (as in the case of a pty
+	 * that has gone away).  Simply make up some reasonable
+	 * defaults.
+	 */
+
+	signal(SIGALRM, hungtty);
+	alarm(2);		/* alarm(1) might return too soon */
+	if (!sigsetjmp(env, 1)) {
+	    tty = open("/dev/tty", O_RDWR);
+	    alarm(0);
+	    tty_got_hung = False;
+	} else {
+	    tty_got_hung = True;
+	    tty = -1;
+	    errno = ENXIO;
+	}
+#if OPT_INITIAL_ERASE
+	initial_erase = VAL_INITIAL_ERASE;
+#endif
+	signal(SIGALRM, SIG_DFL);
+
+	/*
+	 * Check results and ignore current control terminal if
+	 * necessary.  ENXIO is what is normally returned if there is
+	 * no controlling terminal, but some systems (e.g. SunOS 4.0)
+	 * seem to return EIO.  Solaris 2.3 is said to return EINVAL.
+	 * Cygwin returns ENOENT.
+	 */
+	no_dev_tty = FALSE;
+	if (tty < 0) {
+	    if (tty_got_hung || errno == ENXIO || errno == EIO ||
+#ifdef ENODEV
+		errno == ENODEV ||
+#endif
+#ifdef __CYGWIN__
+		errno == ENOENT ||
+#endif
+		errno == EINVAL || errno == ENOTTY || errno == EACCES) {
+		no_dev_tty = TRUE;
+#ifdef HAS_LTCHARS
+		ltc = d_ltc;
+#endif /* HAS_LTCHARS */
+#ifdef TIOCLSET
+		lmode = d_lmode;
+#endif /* TIOCLSET */
+#if defined(USE_ANY_SYSV_TERMIO) || defined(USE_POSIX_TERMIOS)
+		tio = d_tio;
+#else /* not USE_ANY_SYSV_TERMIO and not USE_POSIX_TERMIOS */
+		sg = d_sg;
+		tc = d_tc;
+		discipline = d_disipline;
+#ifdef sony
+		jmode = d_jmode;
+		jtc = d_jtc;
+#endif /* sony */
+#endif /* USE_ANY_SYSV_TERMIO or USE_POSIX_TERMIOS */
+	    } else {
+		SysError(ERROR_OPDEVTTY);
+	    }
+	} else {
+
+	    /* Get a copy of the current terminal's state,
+	     * if we can.  Some systems (e.g., SVR4 and MacII)
+	     * may not have a controlling terminal at this point
+	     * if started directly from xdm or xinit,
+	     * in which case we just use the defaults as above.
+	     */
+#ifdef HAS_LTCHARS
+	    if (ioctl(tty, TIOCGLTC, &ltc) == -1)
+		ltc = d_ltc;
+#endif /* HAS_LTCHARS */
+#ifdef TIOCLSET
+	    if (ioctl(tty, TIOCLGET, &lmode) == -1)
+		lmode = d_lmode;
+#endif /* TIOCLSET */
+#ifdef USE_ANY_SYSV_TERMIO
+	    if ((rc = ioctl(tty, TCGETA, &tio)) == -1)
+		tio = d_tio;
+#elif defined(USE_POSIX_TERMIOS)
+	    if ((rc = tcgetattr(tty, &tio)) == -1)
+		tio = d_tio;
+#else /* !USE_ANY_SYSV_TERMIO && !USE_POSIX_TERMIOS */
+	    if ((rc = ioctl(tty, TIOCGETP, (char *) &sg)) == -1)
+		sg = d_sg;
+	    if (ioctl(tty, TIOCGETC, (char *) &tc) == -1)
+		tc = d_tc;
+	    if (ioctl(tty, TIOCGETD, (char *) &discipline) == -1)
+		discipline = d_disipline;
+#ifdef sony
+	    if (ioctl(tty, TIOCKGET, (char *) &jmode) == -1)
+		jmode = d_jmode;
+	    if (ioctl(tty, TIOCKGETC, (char *) &jtc) == -1)
+		jtc = d_jtc;
+#endif /* sony */
+#endif /* USE_ANY_SYSV_TERMIO */
+
+	    /*
+	     * If ptyInitialErase is set, we want to get the pty's
+	     * erase value.  Just in case that will fail, first get
+	     * the value from /dev/tty, so we will have something
+	     * at least.
+	     */
+#if OPT_INITIAL_ERASE
+	    if (resource.ptyInitialErase) {
+#ifdef USE_ANY_SYSV_TERMIO
+		initial_erase = tio.c_cc[VERASE];
+#elif defined(USE_POSIX_TERMIOS)
+		initial_erase = tio.c_cc[VERASE];
+#else /* !USE_ANY_SYSV_TERMIO && !USE_POSIX_TERMIOS */
+		initial_erase = sg.sg_erase;
+#endif /* USE_ANY_SYSV_TERMIO */
+	    }
+#endif
+
+	    close(tty);
+	    /* tty is no longer an open fd! */
+	    tty = -1;
+	}
+
+#ifdef NEW_GET_PTY
+	if (get_pty(&screen->respond, XDisplayString(screen->display))) {
+	    SysError(ERROR_PTYS);
+	}
+#else
+	if (get_pty(&screen->respond))) {
+	    SysError(ERROR_PTYS);
+	}
+#endif
+#if OPT_INITIAL_ERASE
+	if (resource.ptyInitialErase) {
+#ifdef USE_ANY_SYSV_TERMIO
+	    struct termio my_tio;
+	    if ((rc = ioctl(screen->respond, TCGETA, &my_tio)) == 0)
+		initial_erase = my_tio.c_cc[VERASE];
+#elif defined(USE_POSIX_TERMIOS)
+	    struct termios my_tio;
+	    if ((rc = tcgetattr(screen->respond, &my_tio)) == 0)
+		initial_erase = my_tio.c_cc[VERASE];
+#else /* !USE_ANY_SYSV_TERMIO && !USE_POSIX_TERMIOS */
+	    struct sgttyb my_sg;
+	    if ((rc = ioctl(screen->respond, TIOCGETP, (char *) &my_sg)) == 0)
+		initial_erase = my_sg.sg_erase;
+#endif /* USE_ANY_SYSV_TERMIO */
+	}
+#endif /* OPT_INITIAL_ERASE */
+    }
+
+    /* avoid double MapWindow requests
+     */
+    XtSetMappedWhenManaged( XtParent(term), False );
+
+    wm_delete_window = XInternAtom(XtDisplay(toplevel), "WM_DELETE_WINDOW",
+				   False);
+
+    VTInit();		/* realize now so know window size for tty driver */
+#if defined(TIOCCONS) || defined(SRIOCSREDIR)
+    if (Console) {
+	/*
+	 * Inform any running xconsole program
+	 * that we are going to steal the console.
+	 */
+	XmuGetHostname(mit_console_name + MIT_CONSOLE_LEN, 255);
+	mit_console = XInternAtom(screen->display, mit_console_name, False);
+	/* the user told us to be the console, so we can use CurrentTime */
+	XtOwnSelection(XtParent(term),
+		       mit_console, CurrentTime,
+		       ConvertConsoleSelection, NULL, NULL);
+
+    }
+#endif
+
+    if (screen->TekEmu) {
+	envnew = tekterm;
+	ptr = newtc;
+    } else {
+	envnew = vtterm;
+	ptr = termcap;
+    }
+
+    /*
+     * This used to exit if no termcap entry was found for the specified
+     * terminal name.  That's a little unfriendly, so instead we'll allow
+     * the program to proceed (but not to set $TERMCAP) if the termcap
+     * entry is not found.
+     */
+    if (!get_termcap(TermName = resource.term_name, ptr, newtc)) {
+	char *last = NULL;
+	TermName = *envnew;
+	while (*envnew != NULL) {
+	    if ((last == NULL || strcmp(last, *envnew))
+		&& get_termcap(*envnew, ptr, newtc)) {
+		TermName = *envnew;
+		break;
+	    }
+	    last = *envnew;
+	    envnew++;
+	}
+    }
+
+    /*
+     * Check if ptyInitialErase is not set.  If so, we rely on the termcap
+     * (or terminfo) to tell us what the erase mode should be set to.
+     */
+#if OPT_INITIAL_ERASE
+    if (!resource.ptyInitialErase) {
+	char temp[1024], *p = temp;
+	char *s = tgetstr(TERMCAP_ERASE, &p);
+	if (s != 0) {
+	    initial_erase = decode_keyvalue(&s, True);
+	}
+    }
+
+    if (resource.backarrow_is_erase) {	/* see input.c */
+	if (initial_erase == 127) {
+	    term->keyboard.flags &= ~MODE_DECBKM;
+	} else {
+	    term->keyboard.flags |= MODE_DECBKM;
+	    term->keyboard.reset_DECBKM = 1;
+	}
+    } else {
+	term->keyboard.reset_DECBKM = 2;
+    }
+#endif /* OPT_INITIAL_ERASE */
+
+#ifdef TTYSIZE_STRUCT
+    /* tell tty how big window is */
+
+/*
+    if (screen->TekEmu) {
+	TTYSIZE_ROWS(ts) = 38;
+	TTYSIZE_COLS(ts) = 81;
+#if defined(USE_STRUCT_WINSIZE)
+	ts.ws_xpixel = TFullWidth(screen);
+	ts.ws_ypixel = TFullHeight(screen);
+#endif
+    } else
+*/
+
+    {
+	TTYSIZE_ROWS(ts) = screen->max_row + 1;
+	TTYSIZE_COLS(ts) = screen->max_col + 1;
+#if defined(USE_STRUCT_WINSIZE)
+	ts.ws_xpixel = FullWidth(screen);
+	ts.ws_ypixel = FullHeight(screen);
+#endif
+    }
+    i = SET_TTYSIZE(screen->respond, ts);
+#endif /* TTYSIZE_STRUCT */
+
+    added_utmp_entry = False;
+#if defined(USE_UTEMPTER)
+#undef UTMP
+    if (!resource.utmpInhibit) {
+	struct UTMP_STR dummy;
+	char host[sizeof(dummy.ut_host) + 1], *endptr;
+
+	(void) strncpy(host, DisplayString(screen->display), sizeof host);
+	host[sizeof(host) - 1] = '\0';
+	endptr = strrchr(host, ':');
+	if (endptr) {
+	    *endptr = '\0';
+	}
+	addToUtmp(ttydev, host, screen->respond);
+	added_utmp_entry = True;
+    }
+#endif
+
+    if (am_slave < 0) {
+#if OPT_PTY_HANDSHAKE
+	if (resource.ptyHandshake && (pipe(pc_pipe) || pipe(cp_pipe)))
+	    SysError(ERROR_FORK);
+#endif
+	if ((screen->pid = fork()) == -1)
+	    SysError(ERROR_FORK);
+
+	if (screen->pid == 0) {
+	    /*
+	     * now in child process
+	     */
+#if defined(_POSIX_SOURCE) || defined(SVR4) || defined(__convex__) || defined(__SCO__) || defined(__QNX__)
+		int pgrp = setsid();	/* variable may not be used... */
+#else
+		int pgrp = getpid();
+#endif
+
+#ifdef USE_USG_PTYS
+#ifdef USE_ISPTS_FLAG
+	    if (IsPts) {	/* SYSV386 supports both, which did we open? */
+#endif
+		int ptyfd = 0;
+		char *pty_name = 0;
+
+#ifdef __DARWIN__
+ ; 
+#else
+		setpgrp();
+#endif
+		grantpt(screen->respond);
+		unlockpt(screen->respond);
+		if ((pty_name = ptsname(screen->respond)) == 0) {
+		    SysError(ERROR_PTSNAME);
+		}
+		if ((ptyfd = open(pty_name, O_RDWR)) < 0) {
+		    SysError(ERROR_OPPTSNAME);
+		}
+#ifdef I_PUSH
+		if (ioctl(ptyfd, I_PUSH, "ptem") < 0) {
+		    SysError(ERROR_PTEM);
+		}
+#if !defined(SVR4) && !(defined(SYSV) && defined(i386))
+		if (!getenv("CONSEM") && ioctl(ptyfd, I_PUSH, "consem") < 0) {
+		    SysError(ERROR_CONSEM);
+		}
+#endif /* !SVR4 */
+		if (ioctl(ptyfd, I_PUSH, "ldterm") < 0) {
+		    SysError(ERROR_LDTERM);
+		}
+#ifdef SVR4			/* from Sony */
+		if (ioctl(ptyfd, I_PUSH, "ttcompat") < 0) {
+		    SysError(ERROR_TTCOMPAT);
+		}
+#endif /* SVR4 */
+#endif /* I_PUSH */
+		tty = ptyfd;
+		close(screen->respond);
+
+#ifdef TTYSIZE_STRUCT
+		/* tell tty how big window is */
+
+		if (screen->TekEmu) {
+		    TTYSIZE_ROWS(ts) = 24;
+		    TTYSIZE_COLS(ts) = 80;
+/*
+#ifdef USE_STRUCT_WINSIZE
+		    ts.ws_xpixel = TFullWidth(screen);
+		    ts.ws_ypixel = TFullHeight(screen);
+#endif
+*/
+		} else
+
+		{
+		    TTYSIZE_ROWS(ts) = screen->max_row + 1;
+		    TTYSIZE_COLS(ts) = screen->max_col + 1;
+/*
+#ifdef USE_STRUCT_WINSIZE
+		    ts.ws_xpixel = FullWidth(screen);
+		    ts.ws_ypixel = FullHeight(screen);
+#endif
+*/
+		}
+#endif /* TTYSIZE_STRUCT */
+
+#ifdef USE_ISPTS_FLAG
+	    } else {		/* else pty, not pts */
+#endif
+#endif /* USE_USG_PTYS */
+
+		(void) pgrp;	/* not all branches use this variable */
+
+#if OPT_PTY_HANDSHAKE		/* warning, goes for a long ways */
+		if (resource.ptyHandshake) {
+		    /* close parent's sides of the pipes */
+		    close(cp_pipe[0]);
+		    close(pc_pipe[1]);
+
+		    /* Make sure that our sides of the pipes are not in the
+		     * 0, 1, 2 range so that we don't fight with stdin, out
+		     * or err.
+		     */
+		    if (cp_pipe[1] <= 2) {
+			if ((i = fcntl(cp_pipe[1], F_DUPFD, 3)) >= 0) {
+			    (void) close(cp_pipe[1]);
+			    cp_pipe[1] = i;
+			}
+		    }
+		    if (pc_pipe[0] <= 2) {
+			if ((i = fcntl(pc_pipe[0], F_DUPFD, 3)) >= 0) {
+			    (void) close(pc_pipe[0]);
+			    pc_pipe[0] = i;
+			}
+		    }
+
+		    /* we don't need the socket, or the pty master anymore */
+		    close(ConnectionNumber(screen->display));
+		    close(screen->respond);
+
+		    /* Now is the time to set up our process group and
+		     * open up the pty slave.
+		     */
+#ifdef USE_SYSV_PGRP
+#if defined(CRAY) && (OSMAJORVERSION > 5)
+		    (void) setsid();
+#else
+		    (void) setpgrp();
+#endif
+#endif /* USE_SYSV_PGRP */
+
+#if defined(__QNX__) && !defined(__QNXNTO__)
+		    qsetlogin(getlogin(), ttydev);
+#endif
+		    while (1) {
+#if defined(TIOCNOTTY) && (!defined(__GLIBC__) || (__GLIBC__ < 2) || ((__GLIBC__ == 2) && (__GLIBC_MINOR__ < 1)))
+			if (!no_dev_tty
+			    && (tty = open("/dev/tty", O_RDWR)) >= 0) {
+			    ioctl(tty, TIOCNOTTY, (char *) NULL);
+			    close(tty);
+			}
+#endif /* TIOCNOTTY && !glibc >= 2.1 */
+#ifdef CSRG_BASED
+			(void) revoke(ttydev);
+#endif
+			if ((tty = open(ttydev, O_RDWR)) >= 0) {
+#if defined(CRAY) && defined(TCSETCTTY)
+			    /* make /dev/tty work */
+			    ioctl(tty, TCSETCTTY, 0);
+#endif
+#ifdef USE_SYSV_PGRP
+			    /* We need to make sure that we are actually
+			     * the process group leader for the pty.  If
+			     * we are, then we should now be able to open
+			     * /dev/tty.
+			     */
+			    if ((i = open("/dev/tty", O_RDWR)) >= 0) {
+				/* success! */
+				close(i);
+				break;
+			    }
+#else /* USE_SYSV_PGRP */
+			    break;
+#endif /* USE_SYSV_PGRP */
+			}
+			perror("open ttydev");
+#ifdef TIOCSCTTY
+			ioctl(tty, TIOCSCTTY, 0);
+#endif
+			/* let our master know that the open failed */
+			handshake.status = PTY_BAD;
+			handshake.error = errno;
+			strcpy(handshake.buffer, ttydev);
+			write(cp_pipe[1], (char *) &handshake,
+			      sizeof(handshake));
+
+			/* get reply from parent */
+			i = read(pc_pipe[0], (char *) &handshake,
+				 sizeof(handshake));
+			if (i <= 0) {
+			    /* parent terminated */
+			    exit(1);
+			}
+
+			if (handshake.status == PTY_NOMORE) {
+			    /* No more ptys, let's shutdown. */
+			    exit(1);
+			}
+
+			/* We have a new pty to try */
+			free(ttydev);
+			ttydev = (char *) malloc((unsigned)
+						 (strlen(handshake.buffer) + 1));
+			if (ttydev == NULL) {
+			    SysError(ERROR_SPREALLOC);
+			}
+			strcpy(ttydev, handshake.buffer);
+		    }
+
+		    /* use the same tty name that everyone else will use
+		     * (from ttyname)
+		     */
+		    if ((ptr = ttyname(tty)) != 0) {
+			/* it may be bigger */
+			ttydev = (char *) realloc(ttydev,
+						  (unsigned) (strlen(ptr) + 1));
+			if (ttydev == NULL) {
+			    SysError(ERROR_SPREALLOC);
+			}
+			(void) strcpy(ttydev, ptr);
+		    }
+		}
+#endif /* OPT_PTY_HANDSHAKE -- from near fork */
+
+#ifdef USE_ISPTS_FLAG
+	    }			/* end of IsPts else clause */
+#endif
+
+#ifdef USE_TTY_GROUP
+	    {
+		struct group *ttygrp;
+		if ((ttygrp = getgrnam("tty")) != 0) {
+		    /* change ownership of tty to real uid, "tty" gid */
+		    set_owner(ttydev, screen->uid, ttygrp->gr_gid, 0620);
+		} else {
+		    /* change ownership of tty to real group and user id */
+		    set_owner(ttydev, screen->uid, screen->gid, 0622);
+		}
+		endgrent();
+	    }
+#else /* else !USE_TTY_GROUP */
+	    /* change ownership of tty to real group and user id */
+	    set_owner(ttydev, screen->uid, screen->gid, 0622);
+#endif /* USE_TTY_GROUP */
+
+	    /*
+	     * set up the tty modes
+	     */
+	    {
+#if defined(USE_ANY_SYSV_TERMIO) || defined(USE_POSIX_TERMIOS)
+#if defined(umips) || defined(CRAY) || defined(linux)
+		/* If the control tty had its modes screwed around with,
+		   eg. by lineedit in the shell, or emacs, etc. then tio
+		   will have bad values.  Let's just get termio from the
+		   new tty and tailor it.  */
+		if (ioctl(tty, TCGETA, &tio) == -1)
+		    SysError(ERROR_TIOCGETP);
+		tio.c_lflag |= ECHOE;
+#endif /* umips */
+		/* Now is also the time to change the modes of the
+		 * child pty.
+		 */
+		/* input: nl->nl, don't ignore cr, cr->nl */
+		tio.c_iflag &= ~(INLCR | IGNCR);
+		tio.c_iflag |= ICRNL;
+		/* ouput: cr->cr, nl is not return, no delays, ln->cr/nl */
+#ifndef USE_POSIX_TERMIOS
+		tio.c_oflag &=
+		    ~(OCRNL
+		      | ONLRET
+		      | NLDLY
+		      | CRDLY
+		      | TABDLY
+		      | BSDLY
+		      | VTDLY
+		      | FFDLY);
+#endif /* USE_POSIX_TERMIOS */
+#ifdef ONLCR
+		tio.c_oflag |= ONLCR;
+#endif /* ONLCR */
+#ifdef OPOST
+		tio.c_oflag |= OPOST;
+#endif /* OPOST */
+#ifndef USE_POSIX_TERMIOS
+# if defined(Lynx) && !defined(CBAUD)
+#  define CBAUD V_CBAUD
+# endif
+		tio.c_cflag &= ~(CBAUD);
+#ifdef BAUD_0
+		/* baud rate is 0 (don't care) */
+#elif defined(HAVE_TERMIO_C_ISPEED)
+		tio.c_ispeed = tio.c_ospeed = VAL_LINE_SPEED;
+#else /* !BAUD_0 */
+		tio.c_cflag |= VAL_LINE_SPEED;
+#endif /* !BAUD_0 */
+#else /* USE_POSIX_TERMIOS */
+		cfsetispeed(&tio, VAL_LINE_SPEED);
+		cfsetospeed(&tio, VAL_LINE_SPEED);
+#ifdef __MVS__
+		/* turn off bits that can't be set from the slave side */
+		tio.c_cflag &= ~(PACKET | PKT3270 | PTU3270 | PKTXTND);
+#endif /* __MVS__ */
+		/* Clear CLOCAL so that SIGHUP is sent to us
+		   when the xterm ends */
+		tio.c_cflag &= ~CLOCAL;
+#endif /* USE_POSIX_TERMIOS */
+		tio.c_cflag &= ~CSIZE;
+		if (screen->input_eight_bits)
+		    tio.c_cflag |= CS8;
+		else
+		    tio.c_cflag |= CS7;
+		/* enable signals, canonical processing (erase, kill, etc),
+		 * echo
+		 */
+		tio.c_lflag |= ISIG | ICANON | ECHO | ECHOE | ECHOK;
+#ifdef ECHOKE
+		tio.c_lflag |= ECHOKE | IEXTEN;
+#endif
+#ifdef ECHOCTL
+		tio.c_lflag |= ECHOCTL | IEXTEN;
+#endif
+#ifndef __MVS__
+		/* reset EOL to default value */
+		tio.c_cc[VEOL] = CEOL;	/* '^@' */
+		/* certain shells (ksh & csh) change EOF as well */
+		tio.c_cc[VEOF] = CEOF;	/* '^D' */
+#else
+		if (tio.c_cc[VEOL] == 0)
+		    tio.c_cc[VEOL] = CEOL;	/* '^@' */
+		if (tio.c_cc[VEOF] == 0)
+		    tio.c_cc[VEOF] = CEOF;	/* '^D' */
+#endif
+#ifdef VLNEXT
+		tio.c_cc[VLNEXT] = CLNEXT;
+#endif
+#ifdef VWERASE
+		tio.c_cc[VWERASE] = CWERASE;
+#endif
+#ifdef VREPRINT
+		tio.c_cc[VREPRINT] = CRPRNT;
+#endif
+#ifdef VRPRNT
+		tio.c_cc[VRPRNT] = CRPRNT;
+#endif
+#ifdef VDISCARD
+		tio.c_cc[VDISCARD] = CFLUSH;
+#endif
+#ifdef VFLUSHO
+		tio.c_cc[VFLUSHO] = CFLUSH;
+#endif
+#ifdef VSTOP
+		tio.c_cc[VSTOP] = CSTOP;
+#endif
+#ifdef VSTART
+		tio.c_cc[VSTART] = CSTART;
+#endif
+#ifdef VSUSP
+		tio.c_cc[VSUSP] = CSUSP;
+#endif
+#ifdef VDSUSP
+		tio.c_cc[VDSUSP] = CDSUSP;
+#endif
+		if (override_tty_modes) {
+		    /* sysv-specific */
+		    TMODE(XTTYMODE_intr, tio.c_cc[VINTR]);
+		    TMODE(XTTYMODE_quit, tio.c_cc[VQUIT]);
+		    TMODE(XTTYMODE_erase, tio.c_cc[VERASE]);
+		    TMODE(XTTYMODE_kill, tio.c_cc[VKILL]);
+		    TMODE(XTTYMODE_eof, tio.c_cc[VEOF]);
+		    TMODE(XTTYMODE_eol, tio.c_cc[VEOL]);
+#ifdef VSWTCH
+		    TMODE(XTTYMODE_swtch, tio.c_cc[VSWTCH]);
+#endif
+#ifdef VSUSP
+		    TMODE(XTTYMODE_susp, tio.c_cc[VSUSP]);
+#endif
+#ifdef VDSUSP
+		    TMODE(XTTYMODE_dsusp, tio.c_cc[VDSUSP]);
+#endif
+#ifdef VREPRINT
+		    TMODE(XTTYMODE_rprnt, tio.c_cc[VREPRINT]);
+#endif
+#ifdef VRPRNT
+		    TMODE(XTTYMODE_rprnt, tio.c_cc[VRPRNT]);
+#endif
+#ifdef VDISCARD
+		    TMODE(XTTYMODE_flush, tio.c_cc[VDISCARD]);
+#endif
+#ifdef VFLUSHO
+		    TMODE(XTTYMODE_flush, tio.c_cc[VFLUSHO]);
+#endif
+#ifdef VWERASE
+		    TMODE(XTTYMODE_weras, tio.c_cc[VWERASE]);
+#endif
+#ifdef VLNEXT
+		    TMODE(XTTYMODE_lnext, tio.c_cc[VLNEXT]);
+#endif
+#ifdef VSTART
+		    TMODE(XTTYMODE_start, tio.c_cc[VSTART]);
+#endif
+#ifdef VSTOP
+		    TMODE(XTTYMODE_stop, tio.c_cc[VSTOP]);
+#endif
+#ifdef VSTATUS
+		    TMODE(XTTYMODE_status, tio.c_cc[VSTATUS]);
+#endif
+#ifdef VERASE2
+		    TMODE(XTTYMODE_erase2, tio.c_cc[VERASE2]);
+#endif
+#ifdef VEOL2
+		    TMODE(XTTYMODE_eol2, tio.c_cc[VEOL2]);
+#endif
+#ifdef HAS_LTCHARS
+		    /* both SYSV and BSD have ltchars */
+		    TMODE(XTTYMODE_susp, ltc.t_suspc);
+		    TMODE(XTTYMODE_dsusp, ltc.t_dsuspc);
+		    TMODE(XTTYMODE_rprnt, ltc.t_rprntc);
+		    TMODE(XTTYMODE_flush, ltc.t_flushc);
+		    TMODE(XTTYMODE_weras, ltc.t_werasc);
+		    TMODE(XTTYMODE_lnext, ltc.t_lnextc);
+#endif
+		}
+#ifdef HAS_LTCHARS
+#ifdef __hpux
+		/* ioctl chokes when the "reserved" process group controls
+		 * are not set to _POSIX_VDISABLE */
+		ltc.t_rprntc = ltc.t_rprntc = ltc.t_flushc =
+		    ltc.t_werasc = ltc.t_lnextc = _POSIX_VDISABLE;
+#endif /* __hpux */
+		if (ioctl(tty, TIOCSLTC, &ltc) == -1)
+		    HsSysError(cp_pipe[1], ERROR_TIOCSETC);
+#endif /* HAS_LTCHARS */
+#ifdef TIOCLSET
+		if (ioctl(tty, TIOCLSET, (char *) &lmode) == -1)
+		    HsSysError(cp_pipe[1], ERROR_TIOCLSET);
+#endif /* TIOCLSET */
+#ifndef USE_POSIX_TERMIOS
+		if (ioctl(tty, TCSETA, &tio) == -1)
+		    HsSysError(cp_pipe[1], ERROR_TIOCSETP);
+#else /* USE_POSIX_TERMIOS */
+		if (tcsetattr(tty, TCSANOW, &tio) == -1)
+		    HsSysError(cp_pipe[1], ERROR_TIOCSETP);
+#endif /* USE_POSIX_TERMIOS */
+#else /* USE_ANY_SYSV_TERMIO or USE_POSIX_TERMIOS */
+		sg.sg_flags &= ~(ALLDELAY | XTABS | CBREAK | RAW);
+		sg.sg_flags |= (ECHO | CRMOD);
+		/* make sure speed is set on pty so that editors work right */
+/*
+		sg.sg_ispeed = VAL_LINE_SPEED;
+		sg.sg_ospeed = VAL_LINE_SPEED;
+*/
+		/* reset t_brkc to default value */
+		tc.t_brkc = -1;
+#ifdef LPASS8
+		if (screen->input_eight_bits)
+		    lmode |= LPASS8;
+		else
+		    lmode &= ~(LPASS8);
+#endif
+#ifdef sony
+		jmode &= ~KM_KANJI;
+#endif /* sony */
+
+		ltc = d_ltc;
+
+		if (override_tty_modes) {
+		    TMODE(XTTYMODE_intr, tc.t_intrc);
+		    TMODE(XTTYMODE_quit, tc.t_quitc);
+		    TMODE(XTTYMODE_erase, sg.sg_erase);
+		    TMODE(XTTYMODE_kill, sg.sg_kill);
+		    TMODE(XTTYMODE_eof, tc.t_eofc);
+		    TMODE(XTTYMODE_start, tc.t_startc);
+		    TMODE(XTTYMODE_stop, tc.t_stopc);
+		    TMODE(XTTYMODE_brk, tc.t_brkc);
+		    /* both SYSV and BSD have ltchars */
+		    TMODE(XTTYMODE_susp, ltc.t_suspc);
+		    TMODE(XTTYMODE_dsusp, ltc.t_dsuspc);
+		    TMODE(XTTYMODE_rprnt, ltc.t_rprntc);
+		    TMODE(XTTYMODE_flush, ltc.t_flushc);
+		    TMODE(XTTYMODE_weras, ltc.t_werasc);
+		    TMODE(XTTYMODE_lnext, ltc.t_lnextc);
+		}
+
+		if (ioctl(tty, TIOCSETP, (char *) &sg) == -1)
+		    HsSysError(cp_pipe[1], ERROR_TIOCSETP);
+		if (ioctl(tty, TIOCSETC, (char *) &tc) == -1)
+		    HsSysError(cp_pipe[1], ERROR_TIOCSETC);
+		if (ioctl(tty, TIOCSETD, (char *) &discipline) == -1)
+		    HsSysError(cp_pipe[1], ERROR_TIOCSETD);
+		if (ioctl(tty, TIOCSLTC, (char *) &ltc) == -1)
+		    HsSysError(cp_pipe[1], ERROR_TIOCSLTC);
+		if (ioctl(tty, TIOCLSET, (char *) &lmode) == -1)
+		    HsSysError(cp_pipe[1], ERROR_TIOCLSET);
+#ifdef sony
+		if (ioctl(tty, TIOCKSET, (char *) &jmode) == -1)
+		    HsSysError(cp_pipe[1], ERROR_TIOCKSET);
+		if (ioctl(tty, TIOCKSETC, (char *) &jtc) == -1)
+		    HsSysError(cp_pipe[1], ERROR_TIOCKSETC);
+#endif /* sony */
+#endif /* !USE_ANY_SYSV_TERMIO */
+#if defined(TIOCCONS) || defined(SRIOCSREDIR)
+		if (Console) {
+#ifdef TIOCCONS
+		    int on = 1;
+		    if (ioctl(tty, TIOCCONS, (char *) &on) == -1)
+			fprintf(stderr, "%s: cannot open console: %s\n",
+				"xgterm", strerror(errno));
+#endif
+#ifdef SRIOCSREDIR
+		    int fd = open("/dev/console", O_RDWR);
+		    if (fd == -1 || ioctl(fd, SRIOCSREDIR, tty) == -1)
+			fprintf(stderr, "%s: cannot open console: %s\n",
+				"xgterm", strerror(errno));
+		    (void) close(fd);
+#endif
+		}
+#endif /* TIOCCONS */
+	    }
+
+	    signal(SIGCHLD, SIG_DFL);
+#ifdef USE_SYSV_SIGHUP
+	    /* watch out for extra shells (I don't understand either) */
+	    signal(SIGHUP, SIG_DFL);
+#else
+	    signal(SIGHUP, SIG_IGN);
+#endif
+	    /* restore various signals to their defaults */
+	    signal(SIGINT, SIG_DFL);
+	    signal(SIGQUIT, SIG_DFL);
+	    signal(SIGTERM, SIG_DFL);
+
+	    /*
+	     * If we're not asked to make the parent process set the
+	     * terminal's erase mode, and if we had no ttyModes resource,
+	     * then set the terminal's erase mode from our best guess.
+	     */
+#if OPT_INITIAL_ERASE
+	    if (!resource.ptyInitialErase
+		&& !override_tty_modes
+		&& !ttymodelist[XTTYMODE_erase].set) {
+#ifdef USE_ANY_SYSV_TERMIO
+		if (ioctl(tty, TCGETA, &tio) == -1)
+		    tio = d_tio;
+		tio.c_cc[VERASE] = initial_erase;
+		rc = ioctl(tty, TCSETA, &tio);
+#elif defined(USE_POSIX_TERMIOS)
+		if (tcgetattr(tty, &tio) == -1)
+		    tio = d_tio;
+		tio.c_cc[VERASE] = initial_erase;
+		rc = tcsetattr(tty, TCSANOW, &tio);
+#else /* !USE_ANY_SYSV_TERMIO && !USE_POSIX_TERMIOS */
+		if (ioctl(tty, TIOCGETP, (char *) &sg) == -1)
+		    sg = d_sg;
+		sg.sg_erase = initial_erase;
+		rc = ioctl(tty, TIOCSETP, (char *) &sg);
+#endif /* USE_ANY_SYSV_TERMIO */
+	    }
+#endif
+
+	    /* copy the environment before Setenving */
+	    for (i = 0; environ[i] != NULL; i++) ;
+	    /* compute number of xtermSetenv() calls below */
+	    envsize = 1;	/* (NULL terminating entry) */
+	    envsize += 3;	/* TERM, WINDOWID, DISPLAY */
+#ifdef HAVE_UTMP
+	    envsize += 1;	/* LOGNAME */
+#endif /* HAVE_UTMP */
+#ifdef USE_SYSV_ENVVARS
+	    envsize += 2;	/* COLUMNS, LINES */
+#ifdef HAVE_UTMP
+	    envsize += 2;	/* HOME, SHELL */
+#endif /* HAVE_UTMP */
+#ifdef OWN_TERMINFO_DIR
+	    envsize += 1;	/* TERMINFO */
+#endif
+#else /* USE_SYSV_ENVVARS */
+	    envsize += 1;	/* TERMCAP */
+#endif /* USE_SYSV_ENVVARS */
+	    envnew = (char **) calloc((unsigned) i + envsize, sizeof(char *));
+	    memmove((char *) envnew, (char *) environ, i * sizeof(char *));
+	    environ = envnew;
+	    xtermSetenv("TERM=", TermName);
+	    if (!TermName)
+		*newtc = 0;
+
+	    sprintf(buf, "%lu",
+		    ((unsigned long) XtWindow(XtParent(term))));
+	    xtermSetenv("WINDOWID=", buf);
+
+	    /* put the display into the environment of the shell */
+	    xtermSetenv("DISPLAY=", XDisplayString(screen->display));
+
+	    signal(SIGTERM, SIG_DFL);
+
+	    /* this is the time to go and set up stdin, out, and err
+	     */
+	    {
+#if defined(CRAY) && (OSMAJORVERSION >= 6)
+		(void) close(tty);
+		(void) close(0);
+
+		if (open("/dev/tty", O_RDWR)) {
+		    SysError(ERROR_OPDEVTTY);
+		}
+		(void) close(1);
+		(void) close(2);
+		dup(0);
+		dup(0);
+#else
+		/* dup the tty */
+		for (i = 0; i <= 2; i++)
+		    if (i != tty) {
+			(void) close(i);
+			(void) dup(tty);
+		    }
+#ifndef ATT
+		/* and close the tty */
+		if (tty > 2)
+		    (void) close(tty);
+#endif
+#endif /* CRAY */
+	    }
+
+#if !defined(USE_SYSV_PGRP)
+#ifdef TIOCSCTTY
+	    setsid();
+	    ioctl(0, TIOCSCTTY, 0);
+#endif
+	    ioctl(0, TIOCSPGRP, (char *) &pgrp);
+	    setpgrp(0, 0);
+	    close(open(ttydev, O_WRONLY));
+	    setpgrp(0, pgrp);
+#if defined(__QNX__)
+	    tcsetpgrp(0, pgrp /*setsid() */ );
+#endif
+#endif /* !USE_SYSV_PGRP */
+
+#ifdef Lynx
+	    {
+		struct termio t;
+		if (ioctl(0, TCGETA, &t) >= 0) {
+		    /* this gets lost somewhere on our way... */
+		    t.c_oflag |= OPOST;
+		    ioctl(0, TCSETA, &t);
+		}
+	    }
+#endif
+
+#ifdef HAVE_UTMP
+	    pw = getpwuid(screen->uid);
+	    login_name = NULL;
+	    if (pw && pw->pw_name) {
+#ifdef HAVE_GETLOGIN
+		/*
+		 * If the value from getlogin() differs from the value we
+		 * get by looking in the password file, check if it does
+		 * correspond to the same uid.  If so, allow that as an
+		 * alias for the uid.
+		 *
+		 * Of course getlogin() will fail if we're started from
+		 * a window-manager, since there's no controlling terminal
+		 * to fuss with.  In that case, try to get something useful
+		 * from the user's $LOGNAME or $USER environment variables.
+		 */
+		if (((login_name = getlogin()) != NULL
+		     || (login_name = getenv("LOGNAME")) != NULL
+		     || (login_name = getenv("USER")) != NULL)
+		    && strcmp(login_name, pw->pw_name)) {
+		    struct passwd *pw2 = getpwnam(login_name);
+		    if (pw2 != 0
+			&& pw->pw_uid != pw2->pw_uid) {
+			login_name = NULL;
+		    }
+		}
+#endif
+		if (login_name == NULL)
+		    login_name = pw->pw_name;
+		if (login_name != NULL)
+		    login_name = x_strdup(login_name);
+	    }
+	    if (login_name != NULL) {
+		xtermSetenv("LOGNAME=", login_name);	/* for POSIX */
+	    }
+#ifndef USE_UTEMPTER
+#ifdef USE_SYSV_UTMP
+	    /* Set up our utmp entry now.  We need to do it here
+	     * for the following reasons:
+	     *   - It needs to have our correct process id (for
+	     *     login).
+	     *   - If our parent was to set it after the fork(),
+	     *     it might make it out before we need it.
+	     *   - We need to do it before we go and change our
+	     *     user and group id's.
+	     */
+	    (void) setutent();
+	    /* set up entry to search for */
+	    bzero((char *) &utmp, sizeof(utmp));
+	    (void) strncpy(utmp.ut_id, my_utmp_id(ttydev), sizeof(utmp.ut_id));
+
+	    utmp.ut_type = DEAD_PROCESS;
+
+	    /* position to entry in utmp file */
+	    /* Test return value: beware of entries left behind: PSz 9 Mar 00 */
+	    if (!(utret = getutid(&utmp))) {
+		(void) setutent();
+		utmp.ut_type = USER_PROCESS;
+		if (!(utret = getutid(&utmp))) {
+		    (void) setutent();
+		}
+	    }
+
+	    /* set up the new entry */
+	    utmp.ut_type = USER_PROCESS;
+#ifdef HAVE_UTMP_UT_XSTATUS
+	    utmp.ut_xstatus = 2;
+#endif
+	    (void) strncpy(utmp.ut_user,
+			   (login_name != NULL) ? login_name : "????",
+			   sizeof(utmp.ut_user));
+	    /* why are we copying this string again?  (see above) */
+	    (void) strncpy(utmp.ut_id, my_utmp_id(ttydev), sizeof(utmp.ut_id));
+	    (void) strncpy(utmp.ut_line,
+			   my_pty_name(ttydev), sizeof(utmp.ut_line));
+
+#ifdef HAVE_UTMP_UT_HOST
+	    (void) strncpy(buf, DisplayString(screen->display), sizeof(buf));
+#ifndef linux
+	    {
+		char *disfin = strrchr(buf, ':');
+		if (disfin)
+		    *disfin = '\0';
+	    }
+#endif
+	    (void) strncpy(utmp.ut_host, buf, sizeof(utmp.ut_host));
+#endif
+	    (void) strncpy(utmp.ut_name,
+			   (login_name) ? login_name : "????",
+			   sizeof(utmp.ut_name));
+
+	    utmp.ut_pid = getpid();
+#if defined(HAVE_UTMP_UT_XTIME)
+#if defined(HAVE_UTMP_UT_SESSION)
+	    utmp.ut_session = getsid(0);
+#endif
+	    utmp.ut_xtime = time((time_t *) 0);
+	    utmp.ut_tv.tv_usec = 0;
+#else
+	    utmp.ut_time = time((time_t *) 0);
+#endif
+
+	    /* write out the entry */
+	    if (!resource.utmpInhibit) {
+		errno = 0;
+		pututline(&utmp);
+	    }
+#ifdef WTMP
+#if defined(WTMPX_FILE) && (defined(SVR4) || defined(__SCO__))
+	    if (term->misc.login_shell)
+		updwtmpx(WTMPX_FILE, &utmp);
+#elif defined(linux) && defined(__GLIBC__) && (__GLIBC__ >= 2) && !(defined(__powerpc__) && (__GLIBC__ == 2) && (__GLIBC_MINOR__ == 0))
+	    if (term->misc.login_shell)
+		updwtmp(etc_wtmp, &utmp);
+#else
+	    if (term->misc.login_shell &&
+		(i = open(etc_wtmp, O_WRONLY | O_APPEND)) >= 0) {
+		write(i, (char *) &utmp, sizeof(utmp));
+		close(i);
+	    }
+#endif
+#endif
+	    /* close the file */
+	    (void) endutent();
+
+#else /* USE_SYSV_UTMP */
+	    /* We can now get our ttyslot!  We can also set the initial
+	     * utmp entry.
+	     */
+	    tslot = ttyslot();
+	    added_utmp_entry = False;
+	    {
+		if (tslot > 0 && pw && !resource.utmpInhibit &&
+		    (i = open(etc_utmp, O_WRONLY)) >= 0) {
+		    bzero((char *) &utmp, sizeof(utmp));
+		    (void) strncpy(utmp.ut_line,
+				   my_pty_name(ttydev),
+				   sizeof(utmp.ut_line));
+		    (void) strncpy(utmp.ut_name, login_name,
+				   sizeof(utmp.ut_name));
+#ifdef HAVE_UTMP_UT_HOST
+		    (void) strncpy(utmp.ut_host,
+				   XDisplayString(screen->display),
+				   sizeof(utmp.ut_host));
+#endif
+		    /* cast needed on Ultrix 4.4 */
+		    time((time_t *) & utmp.ut_time);
+		    lseek(i, (long) (tslot * sizeof(utmp)), 0);
+		    write(i, (char *) &utmp, sizeof(utmp));
+		    close(i);
+		    added_utmp_entry = True;
+#if defined(WTMP)
+		    if (term->misc.login_shell &&
+			(i = open(etc_wtmp, O_WRONLY | O_APPEND)) >= 0) {
+			int status;
+			status = write(i, (char *) &utmp, sizeof(utmp));
+			status = close(i);
+		    }
+#elif defined(MNX_LASTLOG)
+		    if (term->misc.login_shell &&
+			(i = open(_U_LASTLOG, O_WRONLY)) >= 0) {
+			lseek(i, (long) (screen->uid *
+					 sizeof(utmp)), 0);
+			write(i, (char *) &utmp, sizeof(utmp));
+			close(i);
+		    }
+#endif /* WTMP or MNX_LASTLOG */
+		} else
+		    tslot = -tslot;
+	    }
+
+	    /* Let's pass our ttyslot to our parent so that it can
+	     * clean up after us.
+	     */
+#if OPT_PTY_HANDSHAKE
+	    if (resource.ptyHandshake) {
+		handshake.tty_slot = tslot;
+	    }
+#endif /* OPT_PTY_HANDSHAKE */
+#endif /* USE_SYSV_UTMP */
+
+#ifdef USE_LASTLOGX
+	    if (term->misc.login_shell) {
+		bzero((char *) &lastlog, sizeof(lastlog));
+		(void) strncpy(lastlog.ll_line,
+			       my_pty_name(ttydev),
+			       sizeof(lastlog.ll_line));
+		X_GETTIMEOFDAY(&lastlog.ll_tv);
+		(void) strncpy(lastlog.ll_host,
+			       XDisplayString(screen->display),
+			       sizeof(lastlog.ll_host));
+		updlastlogx(_PATH_LASTLOGX, screen->uid, &lastlog);
+	    }
+#endif
+
+#ifdef USE_LASTLOG
+	    if (term->misc.login_shell &&
+		(i = open(etc_lastlog, O_WRONLY)) >= 0) {
+		bzero((char *) &lastlog, sizeof(struct lastlog));
+		(void) strncpy(lastlog.ll_line,
+			       my_pty_name(ttydev),
+			       sizeof(lastlog.ll_line));
+		(void) strncpy(lastlog.ll_host,
+			       XDisplayString(screen->display),
+			       sizeof(lastlog.ll_host));
+		time(&lastlog.ll_time);
+		lseek(i, (long) (screen->uid * sizeof(struct lastlog)), 0);
+		write(i, (char *) &lastlog, sizeof(struct lastlog));
+		close(i);
+	    }
+#endif /* USE_LASTLOG */
+
+#ifdef __OpenBSD__
+	    /* Switch to real gid after writing utmp entry */
+	    utmpGid = getegid();
+	    if (getgid() != getegid()) {
+		utmpGid = getegid();
+		setegid(getgid());
+	    }
+#endif
+
+#if OPT_PTY_HANDSHAKE
+	    /* Let our parent know that we set up our utmp entry
+	     * so that it can clean up after us.
+	     */
+	    if (resource.ptyHandshake) {
+		handshake.status = UTMP_ADDED;
+		handshake.error = 0;
+		strcpy(handshake.buffer, ttydev);
+		(void) write(cp_pipe[1], (char *) &handshake, sizeof(handshake));
+	    }
+#endif /* OPT_PTY_HANDSHAKE */
+#endif /* USE_UTEMPTER */
+#endif /* HAVE_UTMP */
+
+	    (void) setgid(screen->gid);
+#ifdef HAS_BSD_GROUPS
+	    if (geteuid() == 0 && pw) {
+		if (initgroups(login_name, pw->pw_gid)) {
+		    perror("initgroups failed");
+		    SysError(ERROR_INIGROUPS);
+		}
+	    }
+#endif
+	    if (setuid(screen->uid)) {
+		SysError(ERROR_SETUID);
+	    }
+#if OPT_PTY_HANDSHAKE
+	    if (resource.ptyHandshake) {
+		/* mark the pipes as close on exec */
+		fcntl(cp_pipe[1], F_SETFD, 1);
+		fcntl(pc_pipe[0], F_SETFD, 1);
+
+		/* We are at the point where we are going to
+		 * exec our shell (or whatever).  Let our parent
+		 * know we arrived safely.
+		 */
+		handshake.status = PTY_GOOD;
+		handshake.error = 0;
+		(void) strcpy(handshake.buffer, ttydev);
+		(void) write(cp_pipe[1], (char *) &handshake, sizeof(handshake));
+
+		if (waiting_for_initial_map) {
+		    i = read(pc_pipe[0], (char *) &handshake,
+			     sizeof(handshake));
+		    if (i != sizeof(handshake) ||
+			handshake.status != PTY_EXEC) {
+			/* some very bad problem occurred */
+			exit(ERROR_PTY_EXEC);
+		    }
+		    if (handshake.rows > 0 && handshake.cols > 0) {
+			screen->max_row = handshake.rows;
+			screen->max_col = handshake.cols;
+#ifdef TTYSIZE_STRUCT
+			TTYSIZE_ROWS(ts) = screen->max_row + 1;
+			TTYSIZE_COLS(ts) = screen->max_col + 1;
+#if defined(USE_STRUCT_WINSIZE)
+			ts.ws_xpixel = FullWidth(screen);
+			ts.ws_ypixel = FullHeight(screen);
+#endif
+#endif /* TTYSIZE_STRUCT */
+		    }
+		}
+	    }
+#endif /* OPT_PTY_HANDSHAKE */
+
+#ifdef USE_SYSV_ENVVARS
+	    {
+		char numbuf[12];
+		sprintf(numbuf, "%d", screen->max_col + 1);
+		xtermSetenv("COLUMNS=", numbuf);
+		sprintf(numbuf, "%d", screen->max_row + 1);
+		xtermSetenv("LINES=", numbuf);
+	    }
+#ifdef HAVE_UTMP
+	    if (pw) {		/* SVR4 doesn't provide these */
+		if (!getenv("HOME"))
+		    xtermSetenv("HOME=", pw->pw_dir);
+		if (!getenv("SHELL"))
+		    xtermSetenv("SHELL=", pw->pw_shell);
+	    }
+#endif /* HAVE_UTMP */
+#ifdef OWN_TERMINFO_DIR
+	    xtermSetenv("TERMINFO=", OWN_TERMINFO_DIR);
+#endif
+#else /* USE_SYSV_ENVVARS */
+	    if (!screen->TekEmu && *newtc) {
+		strcpy(termcap, newtc);
+		resize(screen, termcap, newtc);
+	    }
+/*
+	    if (term->misc.titeInhibit && !term->misc.tiXtraScroll) {
+*/
+	    if (term->misc.titeInhibit) {
+		remove_termcap_entry(newtc, "ti=");
+		remove_termcap_entry(newtc, "te=");
+	    }
+	    /*
+	     * work around broken termcap entries */
+	    if (resource.useInsertMode) {
+		remove_termcap_entry(newtc, "ic=");
+		/* don't get duplicates */
+		remove_termcap_entry(newtc, "im=");
+		remove_termcap_entry(newtc, "ei=");
+		remove_termcap_entry(newtc, "mi");
+		if (*newtc)
+		    strcat(newtc, ":im=\\E[4h:ei=\\E[4l:mi:");
+	    }
+	    if (*newtc) {
+#if OPT_INITIAL_ERASE
+		unsigned len;
+		remove_termcap_entry(newtc, TERMCAP_ERASE "=");
+		len = strlen(newtc);
+		if (len != 0 && newtc[len - 1] == ':')
+		    len--;
+		sprintf(newtc + len, ":%s=\\%03o:",
+			TERMCAP_ERASE,
+			initial_erase & 0377);
+#endif
+		xtermSetenv("TERMCAP=", newtc);
+	    }
+#endif /* USE_SYSV_ENVVARS */
+
+	    /* need to reset after all the ioctl bashing we did above */
+#if OPT_PTY_HANDSHAKE
+	    if (resource.ptyHandshake) {
+#ifdef TTYSIZE_STRUCT
+		i = SET_TTYSIZE(0, ts);
+#endif /* TTYSIZE_STRUCT */
+	    }
+#endif /* OPT_PTY_HANDSHAKE */
+	    signal(SIGHUP, SIG_DFL);
+
+#ifdef HAVE_UTMP
+	    if (((ptr = getenv("SHELL")) == NULL || *ptr == 0) &&
+		((pw == NULL && (pw = getpwuid(screen->uid)) == NULL) ||
+		 *(ptr = pw->pw_shell) == 0))
+#else /* HAVE_UTMP */
+	    if (((ptr = getenv("SHELL")) == NULL || *ptr == 0) &&
+		((pw = getpwuid(screen->uid)) == NULL ||
+		 *(ptr = pw->pw_shell) == 0))
+#endif /* HAVE_UTMP */
+		ptr = "/bin/sh";
+	    shname = x_basename(ptr);
+
+#if OPT_LUIT_PROG
+	    /*
+	     * Use two copies of command_to_exec, in case luit is not actually
+	     * there, or refuses to run.  In that case we will fall-through to
+	     * to command that the user gave anyway.
+	     */
+	    if (command_to_exec_with_luit) {
+		execvp(*command_to_exec_with_luit, command_to_exec_with_luit);
+		/* print error message on screen */
+		fprintf(stderr, "%s: Can't execvp %s: %s\n",
+			"xgterm", *command_to_exec_with_luit, strerror(errno));
+		fprintf(stderr, "%s: cannot support your locale.\n",
+			"xgterm");
+	    }
+#endif
+	    if (command_to_exec) {
+		execvp(*command_to_exec, command_to_exec);
+		if (command_to_exec[1] == 0)
+		    execlp(ptr, shname, "-c", command_to_exec[0], (void *) 0);
+		/* print error message on screen */
+		fprintf(stderr, "%s: Can't execvp %s: %s\n",
+			"xgterm", *command_to_exec, strerror(errno));
+	    }
+#ifdef USE_SYSV_SIGHUP
+	    /* fix pts sh hanging around
+	    signal(SIGHUP, SIG_DFL);
+	     */
+#endif
+
+	    shname_minus = (char *) malloc(strlen(shname) + 2);
+	    (void) strcpy(shname_minus, "-");
+	    (void) strcat(shname_minus, shname);
+#if !defined(USE_ANY_SYSV_TERMIO) && !defined(USE_POSIX_TERMIOS)
+	    ldisc = XStrCmp("csh", shname + strlen(shname) - 3) == 0 ?
+		NTTYDISC : 0;
+	    ioctl(0, TIOCSETD, (char *) &ldisc);
+#endif /* !USE_ANY_SYSV_TERMIO && !USE_POSIX_TERMIOS */
+
+#ifdef USE_LOGIN_DASH_P
+	    if (term->misc.login_shell && pw && added_utmp_entry)
+		execl(bin_login, "login", "-p", "-f", login_name, (void *) 0);
+#endif
+	    execlp(ptr,
+		   (term->misc.login_shell ? shname_minus : shname),
+		   (void *) 0);
+
+	    /* Exec failed. */
+	    fprintf(stderr, "%s: Could not exec %s: %s\n", "xgterm",
+		    ptr, strerror(errno));
+	    (void) sleep(5);
+	    exit(ERROR_EXEC);
+	}
+	/* end if in child after fork */
+#if OPT_PTY_HANDSHAKE
+	if (resource.ptyHandshake) {
+	    /* Parent process.  Let's handle handshaked requests to our
+	     * child process.
+	     */
+
+	    /* close childs's sides of the pipes */
+	    close(cp_pipe[1]);
+	    close(pc_pipe[0]);
+
+	    for (done = 0; !done;) {
+		if (read(cp_pipe[0],
+			 (char *) &handshake,
+			 sizeof(handshake)) <= 0) {
+		    /* Our child is done talking to us.  If it terminated
+		     * due to an error, we will catch the death of child
+		     * and clean up.
+		     */
+		    break;
+		}
+
+		switch (handshake.status) {
+		case PTY_GOOD:
+		    /* Success!  Let's free up resources and
+		     * continue.
+		     */
+		    done = 1;
+		    break;
+
+		case PTY_BAD:
+		    /* The open of the pty failed!  Let's get
+		     * another one.
+		     */
+		    (void) close(screen->respond);
+#ifdef NEW_GET_PTY
+		    if (get_pty(&screen->respond, XDisplayString(screen->display))) {
+#else
+		    if (get_pty(&screen->respond)) {
+#endif
+			/* no more ptys! */
+			fprintf(stderr,
+				"%s: child process can find no available ptys: %s\n",
+				"xgterm", strerror(errno));
+			handshake.status = PTY_NOMORE;
+			write(pc_pipe[1], (char *) &handshake, sizeof(handshake));
+			exit(ERROR_PTYS);
+		    }
+		    handshake.status = PTY_NEW;
+		    (void) strcpy(handshake.buffer, ttydev);
+		    write(pc_pipe[1], (char *) &handshake, sizeof(handshake));
+		    break;
+
+		case PTY_FATALERROR:
+		    errno = handshake.error;
+		    close(cp_pipe[0]);
+		    close(pc_pipe[1]);
+		    SysError(handshake.fatal_error);
+		    /*NOTREACHED */
+
+		case UTMP_ADDED:
+		    /* The utmp entry was set by our slave.  Remember
+		     * this so that we can reset it later.
+		     */
+		    added_utmp_entry = True;
+#ifndef	USE_SYSV_UTMP
+		    tslot = handshake.tty_slot;
+#endif /* USE_SYSV_UTMP */
+		    free(ttydev);
+		    ttydev = x_strdup(handshake.buffer);
+		    break;
+		default:
+		    fprintf(stderr, "%s: unexpected handshake status %d\n",
+			    "xgterm", handshake.status);
+		}
+	    }
+	    /* close our sides of the pipes */
+	    if (!waiting_for_initial_map) {
+		close(cp_pipe[0]);
+		close(pc_pipe[1]);
+	    }
+	}
+#endif /* OPT_PTY_HANDSHAKE */
+    }
+
+    /* end if no slave */
+    /*
+     * still in parent (xterm process)
+     */
+#ifdef USE_SYSV_SIGHUP
+    /* hung sh problem?  (Fedora)
+    signal(SIGHUP, SIG_DFL);
+	*/
+    signal(SIGHUP, SIG_IGN);
+#else
+    signal(SIGHUP, SIG_IGN);
+#endif
+
+/*
+ * Unfortunately, System V seems to have trouble divorcing the child process
+ * from the process group of xterm.  This is a problem because hitting the
+ * INTR or QUIT characters on the keyboard will cause xterm to go away if we
+ * don't ignore the signals.  This is annoying.
+ */
+
+#if defined(USE_SYSV_SIGNALS) && !defined(SIGTSTP)
+    signal(SIGINT, SIG_IGN);
+
+#ifndef SYSV
+    /* hung shell problem */
+    signal(SIGQUIT, SIG_IGN);
+#endif
+    signal(SIGTERM, SIG_IGN);
+#elif defined(SYSV) || defined(__osf__)
+    /* if we were spawned by a jobcontrol smart shell (like ksh or csh),
+     * then our pgrp and pid will be the same.  If we were spawned by
+     * a jobcontrol dumb shell (like /bin/sh), then we will be in our
+     * parent's pgrp, and we must ignore keyboard signals, or we will
+     * tank on everything.
+     */
+    if (getpid() == getpgrp()) {
+	(void) signal(SIGINT, Exit);
+	(void) signal(SIGQUIT, Exit);
+	(void) signal(SIGTERM, Exit);
+    } else {
+	(void) signal(SIGINT, SIG_IGN);
+	(void) signal(SIGQUIT, SIG_IGN);
+	(void) signal(SIGTERM, SIG_IGN);
+    }
+    (void) signal(SIGPIPE, Exit);
+#else /* SYSV */
+    signal(SIGINT, Exit);
+    signal(SIGQUIT, Exit);
+    signal(SIGTERM, Exit);
+    signal(SIGPIPE, Exit);
+#endif /* USE_SYSV_SIGNALS and not SIGTSTP */
+
+    return 0;
+}				/* end spawn */
+
+#else
+
+
 spawn ()
 /* 
  *  Inits pty and tty and forks a login process.
@@ -1916,7 +3927,11 @@ spawn ()
 				(resource.utmpInhibit ?  OPTY_NOP : OPTY_LOGIN),
 				getuid(), XDisplayString(screen->display)))) {
 #else /* not PUCC_PTYD */
-		if (get_pty (&screen->respond)) {
+#ifdef NEW_GET_PTY
+		if (get_pty(&screen->respond,XDisplayString(screen->display))) {
+#else
+		if (get_pty(&screen->respond)) {
+#endif
 #endif /* PUCC_PTYD */
 			/*  no ptys! */
 			(void) fprintf(stderr, "%s: no available ptys\n",
@@ -2059,6 +4074,7 @@ spawn ()
 		if ((ptyfd = open (ptsname(screen->respond), O_RDWR)) < 0) {
 		    SysError (1);
 		}
+#ifdef I_PUSH
 		if (ioctl (ptyfd, I_PUSH, "ptem") < 0) {
 		    SysError (2);
 		}
@@ -2077,6 +4093,7 @@ spawn ()
 		}
 #endif /* !defined(sgi) */
 #endif /* SVR4 */
+#endif /* I_PUSH */
 		tty = ptyfd;
 		close (screen->respond);
 #ifdef TIOCSWINSZ
@@ -2236,8 +4253,11 @@ spawn ()
 		 * set up the tty modes
 		 */
 		{
+/*
 #ifdef USE_SYSV_TERMIO
-#if defined(umips) || defined(CRAY)
+*/
+#if defined(USE_ANY_SYSV_TERMIO) || defined(USE_POSIX_TERMIOS)
+#if defined(umips) || defined(CRAY)  || defined(linux)
 		    /* If the control tty had its modes screwed around with,
 		       eg. by lineedit in the shell, or emacs, etc. then tio
 		       will have bad values.  Let's just get termio from the
@@ -2836,7 +4856,11 @@ spawn ()
 			 * another one.
 			 */
 			(void) close(screen->respond);
+#ifdef NEW_GET_PTY
+			if (get_pty(&screen->respond, XDisplayString(screen->display))) {
+#else
 			if (get_pty(&screen->respond)) {
+#endif
 			    /* no more ptys! */
 			    (void) fprintf(stderr,
 			      "%s: child process can find no available ptys\n",
@@ -2935,6 +4959,9 @@ spawn ()
 
 	return 0;
 }							/* end spawn */
+#endif
+
+
 
 SIGNAL_T
 Exit(n)
@@ -3152,7 +5179,7 @@ char *fmt;
  	char buf[ BUFSIZ ];
 
 	oerrno = errno;
- 	strcpy(buf, "xgterm: ");
+ 	strcpy(buf, "new-xgterm: ");
  	sprintf(buf+strlen(buf), fmt, x0,x1,x2,x3,x4,x5,x6,x7,x8,x9);
  	strcat(buf, ": ");
  	strcat(buf, SysErrorMsg (oerrno));

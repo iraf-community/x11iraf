@@ -18,7 +18,6 @@ X11IRAFDIR = ../
 
     CDEBUGFLAGS = -g
          XAWLIB = LibXaw3d
-         XPmLIB = LibXpm
 
 ##############################################################################
 # Nothing to change below here...

@@ -102,7 +102,7 @@ register XimDataPtr xim;
 	if ((ism_path = getenv ("ISMDEV")) != NULL) {
 	    char *dev = ism_path;
 
-	    while (*dev) {
+	    while (1) {
 		if (*dev == (char)NULL) {
 		    dev = ism_path;
 		    break;

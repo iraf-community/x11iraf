@@ -1,4 +1,11 @@
 
+cdl.h
+	Added missing procedure declarations for cdl_isFITS(), cdl_isIRAF(),
+	and cdl_markPointLabel().  (12/12/02)
+
+cdlzscal.c
+	Added a missing <stdlib.h>  (12/12/02)
+
 =============
 V1.8 Released
 =============

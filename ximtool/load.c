@@ -78,7 +78,7 @@ register XimDataPtr xim;
             xim_message (xim, "loadOptions", buf);
         sprintf (buf, "z1 %g\0", flp->z1);
             xim_message (xim, "loadOptions", buf);
-        sprintf (buf, "z2 %g\0", flp->z1);
+        sprintf (buf, "z2 %g\0", flp->z2);
             xim_message (xim, "loadOptions", buf);
         sprintf (buf, "nsample %d\0", flp->nsample);
             xim_message (xim, "loadOptions", buf);

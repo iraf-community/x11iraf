@@ -823,6 +823,63 @@ xaw3d/XawInit.c
     the effect of keeping the DYLD_FLAT_NAMESPACE workaround from doing
     anything.  (7/5/02)
 
+------------------------------
+X11IRAF V1.3.1 Released (7/15/02)
+
 obm/server.c
     Modified serverActivate() to supply input focus hints to workaround 
     problems with certain window managers (e.g. FVWM2).  (7/8/02)
+
+guidemo/table.gui
+    Added demo GUI for the TABLE widget which includes "metawidget" code
+    to encapsulate row/col labels, scrollbars, support routines etc around
+    a simple Table widget.  The code provides an interface to a composite
+    "widget" which can be instantiated any number of times and is addressed
+    by a name assigned at creation time.  (10/02)
+
+ximtool/load.c
+ximtool/gui/load.tcl
+    Fixed a bug where setting z1/z2 values in the Load panel would overwrite
+    the z2 with the z1 value.  (10/4/02)
+
+Imakefile
+    Updated 'RELEASE' to v1.3.2 (1/14/03)
+
+ximtool/gui/compass.tcl
+ximtool/clients/wcspix/wcimage.x
+    Fixed a problem in the compass indicator which assumed North was always
+    either up or down.  For images where N was to the right and E up the
+    rotation could legally be zero degrees but the indicator was wrong.
+    Switched to a new algorithm in which the compass arms are computed
+    directly from the image CD matrix.  (1/16/03)
+
+xgterm/charproc.c
+    Had to add an "#ifndef X_NOT_STDC_ENV" to include <stdlib.h> instead 
+    of the char* declarations for malloc/realloc to workaround a declaration
+    type conflict under FreeBSD 4.7 (1/16/03)
+
+ximtool/fitsio.c
+    Removed a restriction on the FITS header reader that the card value
+    end at column 30.  Fixes a problem with FITS files produced by Image-
+    Magick where BITPIX is in the "wrong" place.  (7/1/03)
+
+vximtool/vximtool.c
+    Fixed a bug in displaying to frame 16. (2/22/04)
+
+ximtool/gui/panel.tcl
+    Modified the changeFrame callback to only request image header updates
+    when the panel is visible to improve response time (3/3/04)
+
+ximtool/Imakefile
+ximtool/ximtool-old.csh		+
+ximtool/gui/mkgui
+ximtool/gui/main.obj     -> main-old.obj
+ximtool/gui/main.res     -> main-old.res
+ximtool/gui/main-alt.obj -> main.obj
+ximtool/gui/main-alt.res -> main.res
+ximtool/gui/alt.tcl 	 -> toolbars.tcl
+    Changed the default GUI for XImtool to be the 'alt' gui.   The original
+    gui is accessible through an 'ximtool-old' script command, and the
+    'ximtool-alt' is still around as a compatability command for people who
+    have this in WM menu files.  Just typing 'ximtool' however, now brings 
+    up the alt gui.  (3/3/04)

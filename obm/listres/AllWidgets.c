@@ -70,6 +70,11 @@ extern WidgetClass xfwfSlider2WidgetClass;
 extern WidgetClass xfwfToggleWidgetClass;
 extern WidgetClass tabsWidgetClass;
 extern WidgetClass listtreeWidgetClass;
+extern WidgetClass separatorWidgetClass;
+extern WidgetClass tableWidgetClass;
+extern WidgetClass scrolledTableWidgetClass;
+/*
+*/
 
 XmuWidgetNode XawWidgetArray[] = {
 { "applicationShell", &applicationShellWidgetClass },
@@ -124,7 +129,6 @@ XmuWidgetNode XawWidgetArray[] = {
 { "frame", &xfwfFrameWidgetClass },
 { "group", &xfwfGroupWidgetClass },
 { "icon", &xfwfIconWidgetClass },
-{ "listtree", &listtreeWidgetClass },
 { "multiList", &xfwfMultiListWidgetClass },
 { "radioGroup", &xfwfRadioGroupWidgetClass },
 { "rowCol", &xfwfRowColWidgetClass },
@@ -133,7 +137,14 @@ XmuWidgetNode XawWidgetArray[] = {
 { "textToggle", &xfwfToggleWidgetClass },
 { "scrollbar2", &xfwfScrollbarWidgetClass },
 { "slider2d", &xfwfSlider2WidgetClass },
+
+{ "listtree", &listtreeWidgetClass },
 { "tabs", &tabsWidgetClass },
+{ "separator", &separatorWidgetClass },
+{ "table", &tableWidgetClass },
+{ "scrolledtable", &scrolledTableWidgetClass },
+/*
+*/
 };
 
 int XawWidgetCount = XtNumber(XawWidgetArray);

@@ -91,13 +91,9 @@ static void RemoveOldStringOrFile(),  CvtStringToAsciiType();
 static void ClassInitialize(), Initialize(), Destroy(), GetValuesHook();
 static String MyStrncpy(), StorePiecesInString();
 static Boolean SetValues(), WriteToFile();
-extern int errno, sys_nerr;
-#ifndef __DARWIN__
-#ifndef __FreeBSD__
-#ifndef _BSD_SOURCE
-extern char* sys_errlist[];
-#endif
-#endif
+extern int errno;
+#if !defined(__APPLE__) || (__APPLE_CC__ < 1151)
+extern int sys_nerr;
 #endif
 
 #define superclass		(&textSrcClassRec)
@@ -969,7 +965,7 @@ Boolean newString;
     case XawtextEdit:
 	if (src->ascii_src.string == NULL) {
 	    src->ascii_src.string = fileName;
-	    (void) tmpnam(src->ascii_src.string);
+	    (void) mkstemp(src->ascii_src.string);
 	    src->ascii_src.is_tempfile = TRUE;
 	    open_mode = "w";
 	} else
@@ -1002,8 +998,8 @@ Boolean newString;
 	    char msg[11];
 	    
 	    params[0] = src->ascii_src.string;
-	    if (errno <= sys_nerr)
-		params[1] = (char *)sys_errlist[errno];
+	    if (errno > 0)
+		params[1] = (char *)strerror(errno);
 	    else {
 		(void) sprintf(msg, "errno=%.4d", errno);
 		params[1] = msg;

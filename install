@@ -91,7 +91,13 @@ switch ($UNAME)
         endif
 	breaksw
     case darwin: 
-	set arch = "macosx"
+    case macosx:
+    case macintel:
+        if (`$uname_cmd -m` == "i386") then
+            set arch            = "macintel"
+        else
+            set arch            = "macosx"
+        endif
 	breaksw
     case freebsd: 
 	set arch = "freebsd"
@@ -214,9 +220,25 @@ endif
 clear
 NEWLINE
 BOLD_ON
-echo "			X11IRAF V1.3.1 Installation"
+echo "			X11IRAF V1.3.2 Installation"
 echo "			==========================="
 BOLD_OFF
+NEWLINE
+
+# Print a quick usage summary.
+NEWLINE
+echo -n "  For each prompt: hit "
+BOLD_ON ; echo -n "<CR>"; BOLD_OFF;
+echo -n " to accept the default value, "
+BOLD_ON ; echo -n "'q'" ; BOLD_OFF
+echo ' to quit,'
+
+echo -n "  or "
+BOLD_ON ; echo -n "'help'"; BOLD_OFF
+echo -n " or ";
+BOLD_ON ; echo -n "'?'"; BOLD_OFF
+echo -n " to print an explanation of the prompt."
+NEWLINE
 NEWLINE
 
 
@@ -496,7 +518,7 @@ if (-e app-defaults) then
     echo -n "   Installing app-defaults in $xapp ..."
     if ("$exec" == "yes") then
         foreach i (*)
-	    if ($i == "XGterm" && $arch == "macosx") then
+	    if($i == "XGterm" && ($arch == "macosx"||$arch == "macintel")) then
 		; # no-op
 	    else
 	        cp $i $xapp >& /dev/null

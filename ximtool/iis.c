@@ -146,7 +146,7 @@ register XimDataPtr xim;
 }
 
 
-/* OPEN_FIFO -- Ooen the (x)imtool fifo port and make ready to accept client
+/* OPEN_FIFO -- Open the imtool fifo port and make ready to accept client
  * connections and begin processing client requests.  There is no client
  * yet at this stage.
  */
@@ -376,10 +376,12 @@ XtPointer id;
 	/* Accept connection. */
 	if ((s = accept ((int)*source, (struct sockaddr *)0, (int *)0)) < 0)
 	    return;
-/* 	if (fcntl (s, F_SETFL, O_RDWR|O_NDELAY) < 0) {
+/* 	
+	if (fcntl (s, F_SETFL, O_RDWR|O_NDELAY) < 0) {
 	    close (s);
 	    return;
-	} */
+	}
+*/
 
 	/* Allocate and fill in i/o channel descriptor. */
 	if (chan = get_iochan(xim)) {
@@ -1253,6 +1255,17 @@ char *obuf;			/* receives encoded string */
 		wx = ct->a * sx + ct->c * sy + ct->tx;
             	wy = ct->b * sx + ct->d * sy + ct->ty;
 
+/*
+printf ("sx: %f   sy: %f\n", sx, sy);
+printf ("ct: %s\n%f %f %f %f %f %f %f %f %d\n",
+    ct->imtitle, ct->a, ct->b, ct->c, ct->d,
+    ct->tx, ct->ty, ct->z1, ct->z2, ct->zt);
+printf ("mp: %s %f %f %d %d %d %d %d %d\n%s\n\n",
+    mp->region, mp->sx, mp->sy, mp->snx, mp->sny, 
+    mp->dx, mp->dy, mp->dnx, mp->dny, mp->ref);
+printf ("wx: %f   wy: %f\n", wx, wy);
+*/
+
 		/* Found the image mapping so request the WCS
          	 * and pixel information from the WPIX ISM.
 		 */
@@ -1341,7 +1354,7 @@ int	frame;
 	        for (i=0; i < fb->nmaps; i++) {
 	            mp = &fb->mapping[i];
 		    if (map_debug) {
-			printf ("sx=%.2f  sy=%.2f / %.2f --> ", sx, sy, y);
+			printf ("%d: sx=%.2f  sy=%.2f / %.2f --> ",i,sx,sy,y);
 			printf ("mp->dx=%d+%d=%d   mp->dy=%d+%d=%d",
 			    mp->dx, mp->dnx, mp->dx+mp->dnx,
 			    mp->dy, mp->dny, mp->dy+mp->dny);

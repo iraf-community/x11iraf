@@ -103,3 +103,9 @@
 #define	ERROR_SBRALLOC2	111	/* ScrollBarOn: realloc() failed on rows */
 /* util.c */
 #define	ERROR_UBACK	120	/* ReverseVideo: can't make background */
+
+#define ERROR_PTSNAME   217     /* spawn: ptsname() failed */
+#define ERROR_OPPTSNAME 218     /* spawn: open() failed on ptsname */
+#define ERROR_INIGROUPS 228     /* spawn: initgroups() failed */
+#define ERROR_SETUID    235     /* spawn: setuid() failed */
+

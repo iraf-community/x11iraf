@@ -53,21 +53,44 @@
  *
  * Class specific functions:
  *
- *	         append text				# text widget
- *     value = getValue					# dialog widget
+ *	           append text				# text widget
+ *       value = getValue				# dialog widget
  *
- *		setList list [resize]			# list widget
- * 	value = getItem itemno
- *	      highlight itemno
- *	    unhighlight [itemno]
+ *		  setList list [resize]			# list widget
+ * 	  value = getItem itemno
+ *	        highlight itemno
+ *	      unhighlight [itemno]
  *
- *	       getThumb x [y [width height]]		# sliders
- *	      moveThumb x [y]
- *	    resizeThumb width [height]
- *	   setScrollbar position size			# scrollbars
+ *	         getThumb x [y [width height]]		# sliders
+ *	        moveThumb x [y]
+ *	      resizeThumb width [height]
  *
- *		 setTop widget				# tabs
- *	    setListTree list				# list tree
+ *	     setScrollbar position size			# scrollbars
+ *
+ *	      setLocation x y				# viewport
+ *	   setCoordinates x y
+ *
+ *		   setTop widget			# tabs
+ *
+ *	      setListTree list				# list tree
+ *	   listTreeSelect item [top [child_only] ]
+ *      listTreeHighlight item [top [child_only] ]
+ *	   listTreeDelete item [top]
+ *
+ *	         setTable nrows ncols data		# table
+ *     attr = getCellAttr row col attr
+ *            setCellAttr row col attr value
+ *      attr = getColAttr col attr
+ *             setColAttr col attr value
+ *      attr = getRowAttr row attr
+ *             setRowAttr row attr value
+ *              deleteCol col 
+ *              deleteRow row 
+ *                 addCol col width [where]
+ *                 addRow row [where]
+ *           setTableSize nrows ncols
+ *           getTableSize nrows ncols
+ *
  *
  * Ideally the widget class should be subclassed for widgets that require
  * class-specific functions, but in simple cases involving standard widgets
@@ -122,17 +145,17 @@ struct callbackType {
 
 /* Widget callback types. */
 struct callbackType callbackTypes[] = {
-    {	Ctcallback,		"callback" },
-    {	Ctcharmode,		"charmode" },
-    {	Ctlinemode,		"linemode" },
-    {	CtgetValue,		"getValue" },
-    {	CtjumpProc,		"jump" },
-    {	CtscrollProc,		"scroll" },
-    {	CtpopupCallback,	"popup" },
-    {	CtpopdownCallback,	"popdown" },
-    {	CtreportCallback,	"report" },
-    {	CtstartCallback,	"start" },
-    {	CtstopCallback,		"stop" },
+    {	Ctcallback,			"callback" },
+    {	Ctcharmode,			"charmode" },
+    {	Ctlinemode,			"linemode" },
+    {	CtgetValue,			"getValue" },
+    {	CtjumpProc,			"jump" },
+    {	CtscrollProc,			"scroll" },
+    {	CtpopupCallback,		"popup" },
+    {	CtpopdownCallback,		"popdown" },
+    {	CtreportCallback,		"report" },
+    {	CtstartCallback,		"start" },
+    {	CtstopCallback,			"stop" },
 };
 
 
@@ -189,6 +212,7 @@ static	void widgetCallback(), widgetSCCallback(), widgetJPCallback();
 static	void widgetSPCallback(), widgetPUCallback(), widgetPDCallback();
 static	void widgetSBCallback(), widgetSECallback(), widgetRPCallback();
 static	void widgetRGCallback(), widgetLTHCallback(), widgetLTACallback();
+static	void widgetTCCCallback();
 static	int widgetSet(), widgetGet(), widgetMap(), widgetUnmap();
 static	int widgetRealize(), widgetUnrealize(), widgetIsRealized();
 static	int widgetPopup(), widgetPopupSpringLoaded(), widgetPopdown();
@@ -202,8 +226,14 @@ static	int widgetHighlight(), widgetUnhighlight(), widgetSetTop();
 static	int widgetSetList(), widgetGetItem(), widgetGetValue();
 static	int widgetGetThumb(), widgetMoveThumb(), widgetResizeThumb();
 static	int widgetSetScrollbar(), widgetSetTTName(), widgetGetTTName();
-static	int widgetSetListTree();
-static	int get_itemno(), buildTreeList();
+static	int widgetSetListTree(), widgetListTreeSelect();
+static	int widgetListTreeHighlight(), widgetListTreeDelete();
+static 	int widgetSetLocation(), widgetSetCoordinates();
+static	int widgetSetTable(), widgetSetCellAttr(), widgetGetCellAttr();
+static	int widgetGetColAttr(), widgetSetColAttr(), widgetSetRowAttr();
+static	int widgetDeleteRow(), widgetAddRow(), widgetGetTableSize();
+static	int widgetDeleteCol(), widgetAddCol(), widgetSetTableSize();
+static	int get_itemno(), buildTreeList(), widgetGetRowAttr();
 
 
 /* WidgetClassInit -- Initialize the class record for the widget class.
@@ -258,8 +288,12 @@ register ObjClassRec classrec;
 		"set", widgetSet, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
 		"get", widgetGet, (ClientData)msg, NULL);
+
+	    /* Text Widget Callbacks */
 	    Tcl_CreateCommand (tcl,
 		"append", widgetAppend, (ClientData)msg, NULL);
+
+	    /* List Widget Callbacks */
 	    Tcl_CreateCommand (tcl,
 		"setList", widgetSetList, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
@@ -268,20 +302,71 @@ register ObjClassRec classrec;
 		"highlight", widgetHighlight, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
 		"unhighlight", widgetUnhighlight, (ClientData)msg, NULL);
+
+	    /* Dialog Widget Callbacks */
 	    Tcl_CreateCommand (tcl,
 		"getValue", widgetGetValue, (ClientData)msg, NULL);
+
+	    /* Slider Widget Callbacks */
 	    Tcl_CreateCommand (tcl,
 		"getThumb", widgetGetThumb, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
 		"moveThumb", widgetMoveThumb, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
 		"resizeThumb", widgetResizeThumb, (ClientData)msg, NULL);
+
+	    /* Scrollbar Widget Callbacks */
 	    Tcl_CreateCommand (tcl,
 		"setScrollbar", widgetSetScrollbar, (ClientData)msg, NULL);
+
+	    /* Viewport Widget Callbacks */
+	    Tcl_CreateCommand (tcl,
+		"setLocation", widgetSetLocation, (ClientData)msg, NULL);
+	    Tcl_CreateCommand (tcl,
+		"setCoordinates", widgetSetCoordinates, (ClientData)msg, NULL);
+
+	    /* Tabs Widget Callbacks */
 	    Tcl_CreateCommand (tcl,
 		"setTop", widgetSetTop, (ClientData)msg, NULL);
+
+	    /* Tree Widget Callbacks */
 	    Tcl_CreateCommand (tcl,
 		"setListTree", widgetSetListTree, (ClientData)msg, NULL);
+	    Tcl_CreateCommand (tcl,
+		"listTreeSelect", widgetListTreeSelect, (ClientData)msg, NULL);
+	    Tcl_CreateCommand (tcl,
+		"listTreeDelete", widgetListTreeDelete, (ClientData)msg, NULL);
+	    Tcl_CreateCommand (tcl,
+		"listTreeHighlight", widgetListTreeHighlight,
+		(ClientData)msg, NULL);
+
+	    /* Table Widget Callbacks */
+	    Tcl_CreateCommand (tcl,
+		"setTable", widgetSetTable, (ClientData)msg, NULL);
+	    Tcl_CreateCommand (tcl,
+		"getCellAttr", widgetGetCellAttr, (ClientData)msg, NULL);
+	    Tcl_CreateCommand (tcl,
+		"setCellAttr", widgetSetCellAttr, (ClientData)msg, NULL);
+	    Tcl_CreateCommand (tcl,
+		"setColAttr", widgetSetColAttr, (ClientData)msg, NULL);
+	    Tcl_CreateCommand (tcl,
+		"getColAttr", widgetGetColAttr, (ClientData)msg, NULL);
+	    Tcl_CreateCommand (tcl,
+		"setRowAttr", widgetSetRowAttr, (ClientData)msg, NULL);
+	    Tcl_CreateCommand (tcl,
+		"getRowAttr", widgetGetRowAttr, (ClientData)msg, NULL);
+	    Tcl_CreateCommand (tcl,
+		"deleteCol", widgetDeleteCol, (ClientData)msg, NULL);
+	    Tcl_CreateCommand (tcl,
+		"deleteRow", widgetDeleteRow, (ClientData)msg, NULL);
+	    Tcl_CreateCommand (tcl,
+		"addCol", widgetAddCol, (ClientData)msg, NULL);
+	    Tcl_CreateCommand (tcl,
+		"addRow", widgetAddRow, (ClientData)msg, NULL);
+	    Tcl_CreateCommand (tcl,
+		"setTableSize", widgetSetTableSize, (ClientData)msg, NULL);
+	    Tcl_CreateCommand (tcl,
+		"getTableSize", widgetGetTableSize, (ClientData)msg, NULL);
 
 	    Tcl_CreateCommand (tcl,
 		"realize", widgetRealize, (ClientData)msg, NULL);
@@ -1015,7 +1100,8 @@ caddr_t call_data;
 	/* The message is the string value of the list element selected
 	 * and a bottom-up path to the root.
 	 */
-	sprintf (message, "{%s} ", list->items[0]->text);
+	sprintf (message, "{%s %d} ",
+	    list->items[0]->text, list->items[0]->open);
 
 	strncat (message, "{ ", 2);
 	for (i=0; i < list->count; i++) {
@@ -1053,7 +1139,7 @@ caddr_t call_data;
 	/* The message is the string value of the list element selected,
 	 * and a bottom-up path to the root.
 	 */
-	sprintf (message, "{%s} ", ret->item->text);
+	sprintf (message, "{%s %d} ", ret->item->text, ret->item->open);
 
 	strncat (message, "{ ", 2);
 	item = ret->item;
@@ -1064,12 +1150,7 @@ caddr_t call_data;
 	    sprintf (buf, "{ %s } ", item->text);
 	    strcat (message, buf);
         }
-
 	strncat (message, "}", 1);
-
-/* 	ListTreeSetHighlighted (w, ret->path, ret->count, True);
-        ListTreeGetHighlighted (w, &ret2);
-        ListTreeSetHighlighted (w, ret2.items, ret2.count, True); */
 
 	call_callbacks (obj, Ctcallback, message);
 }
@@ -2667,6 +2748,80 @@ char **argv;
 }
 
 
+/* widgetSetLocation -- Set the position of a Viewport.
+ *
+ * Usage:	setLocation x y
+ *
+ */
+static int 
+widgetSetLocation (msg, tcl, argc, argv)
+MsgContext msg;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+	WidgetObject obj = (WidgetObject) msg->object[msg->level];
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	float x, y;
+	double atof();
+
+	if (!(obmClass (obj->core.classrec, WtViewport))) {
+	    obm->tcl->result = "not a viewport widget";
+	    return (TCL_ERROR);
+	}
+
+	if (argc < 3) {
+	    obm->tcl->result = "missing argument";
+	    return (TCL_ERROR);
+	} else {
+	    x = atof (argv[1]);
+	    y = atof (argv[2]);
+	}
+
+	XawViewportSetLocation (wp->w, x, y);
+
+	return (TCL_OK);
+}
+
+
+/* widgetSetCoordinates -- Set the coordinates of a Viewport.
+ *
+ * Usage:	setCoordinates x y
+ *
+ */
+static int 
+widgetSetCoordinates (msg, tcl, argc, argv)
+MsgContext msg;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+	WidgetObject obj = (WidgetObject) msg->object[msg->level];
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	int	 x, y;
+	double atof();
+
+	if (!(obmClass (obj->core.classrec, WtViewport))) {
+	    obm->tcl->result = "not a viewport widget";
+	    return (TCL_ERROR);
+	}
+
+	if (argc < 3) {
+	    obm->tcl->result = "missing argument";
+	    return (TCL_ERROR);
+	} else {
+	    x = atoi (argv[1]);
+	    y = atoi (argv[2]);
+	}
+
+	XawViewportSetCoordinates (wp->w, (int)x, (int)y);
+
+	return (TCL_OK);
+}
+
+
 /* widgetSetTop -- Raise the child of a Tabs widget.
  *
  * Usage:	setTop widget
@@ -2807,8 +2962,8 @@ char	*item;
 
 	/* Split the list so we can parse as needed. */
         if (Tcl_SplitList (tcl, item, &nfields, &fields) != TCL_OK) {
-            sprintf (buf, "'%s' ", item);
-            Tcl_AppendResult (tcl, "bad item ", buf, "in tree list", NULL);
+            sprintf (buf, "bad item '%s' in tree list", item);
+            Tcl_AppendResult (tcl, buf, NULL);
             return (TCL_ERROR);
 	}
 
@@ -2828,8 +2983,991 @@ char	*item;
 	        buildTreeList (w, tcl, level, entry[i]);
 	}
 
+	free ((char *) fields);
+/*	free ((char *) entry);*/
 	return (TCL_OK);
 }
+
+
+/* widgetListTreeSelect -- Select the specified item from a ListTree.
+ *
+ * Usage:       listTreeSelect item [ top [children_only] ]
+ *
+ * The 'item' may be one of:
+ *
+ *		all			open all children in list
+ *		none			close all children in list
+ *
+ * If 'toplevel' is specified then 'item' is assumed to be a child of
+ * that node.  If 'children_only' is set then only the children of the
+ * specified item will be opened (applies to all/none only). The return
+ * message is a pair of lists of the form
+ *
+ *	{ value state } { parent1 parent2 ... }
+ *
+ * where the 'value' is the label of the item selected, 'state' is an int
+ * indicating whether the node is open or closed, and 'parentN' is a list
+ * of node names chaining back to the top level of the tree.
+ *
+ */
+static int
+widgetListTreeSelect (msg, tcl, argc, argv)
+MsgContext msg;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+        WidgetObject obj = (WidgetObject) msg->object[msg->level];
+        WidgetPrivate wp = &obj->widget;
+        ObmContext obm = wp->obm;
+	char *top, *name;
+	char message[SZ_COMMAND], buf[SZ_LINE];
+	int i, count;
+	ListTreeItem *item, *titem, *first;
+
+	extern ListTreeItem *ListTreeFindSiblingName();
+	extern ListTreeItem *ListTreeFindChildName();
+	extern ListTreeItem *ListTreeFindChildNameInTree();
+
+
+	if (argc < 2)
+	    return (TCL_ERROR);
+
+	name = argv[1];
+	first = ListTreeFirstItem (wp->w);
+
+	if (strcmp(argv[1], "all") == 0) {
+	    if (argc == 4) {
+		top = argv[2];
+	        titem = ListTreeFindSiblingName (wp->w, first, top);
+	        item = ListTreeFindChildName (wp->w, titem, name);
+	        ListTreeOpenAll (wp->w, (item ? item : titem), 1);
+		ListTreeHighlightItem (wp->w, (item ? item : titem));
+	        sprintf (message, "{%s 1} { }",
+		    (item ? item->text : titem->text));
+	    } else {
+	        ListTreeOpenAll (wp->w, (ListTreeItem *)NULL, 0);
+	        strcpy (message, "{all 1} { }");
+	    }
+
+
+	} else if (strcmp(argv[1], "none") == 0) {
+	    if (argc == 4) {
+		top = argv[2];
+	        titem = ListTreeFindSiblingName (wp->w, first, top);
+	        item = ListTreeFindChildName (wp->w, titem, name);
+	        ListTreeCloseAll (wp->w, (item ? item : titem), 0);
+	        sprintf (message, "{%s 0} { }",
+		    (item ? item->text : titem->text));
+	    } else {
+	        ListTreeCloseAll (wp->w, (ListTreeItem *)NULL, 0);
+	        strcpy (message, "{all 0} { }");
+	    }
+
+	} else {
+	    if (argc == 3) {
+		top = argv[2];
+	        titem = ListTreeFindSiblingName (wp->w, first, top);
+	        if (titem)
+		    ListTreeOpenAll (wp->w, titem, 0);
+	        item = ListTreeFindChildNameInTree (wp->w, titem, name);
+	        item = (item ? item : titem);
+	    } else {
+	        titem = ListTreeFindSiblingName (wp->w, first, name);
+		if (strcmp (name, titem->text) == 0)
+		    item = titem;
+		else
+	            item = ListTreeFindChildNameInTree (wp->w, titem, name);
+	    }
+	    ListTreeHighlightItem (wp->w, item);
+	    ListTreeOpenAll (wp->w, item, 0);
+
+	    /* The message is the string value of the list element selected,
+	     * and a bottom-up path to the root.
+	     */
+	    sprintf (message, "{%s %d} ", item->text, item->open);
+
+	    strncat (message, "{ ", 2);
+	    sprintf (buf, "{ %s } ", item->text);
+	    strcat (message, buf);
+	    while (item->parent) {
+	        item = item->parent;
+	        sprintf (buf, "{ %s } ", item->text);
+	        strcat (message, buf);
+            }
+
+	    strncat (message, "}", 1);
+
+	}
+
+	/* Call all the callbacks with the message. */
+	call_callbacks (obj, Ctcallback, message);
+
+        return (TCL_OK);
+}
+
+
+/* widgetListTreeHighlight -- Highlight but do not select the specified item
+ * from a ListTree.
+ *
+ * Usage:       listTreeHighlight item [ top ]
+ *
+ * The 'item' is given as a node name of the tree.  If 'top' is specified
+ * then 'item' is assumed to be a child of that node.  If 'children_only' is
+ * set then only the children of the specified item will be opened (applies
+ * to all/none only). The return message is a pair of lists of the form
+ *
+ *	{ value state } { parent1 parent2 ... }
+ *
+ * where the 'value' is the label of the item selected, 'state' is an int
+ * indicating whether the node is open or closed, and 'parentN' is a list
+ * of node names chaining back to the top level of the tree.
+ *
+ */
+static int
+widgetListTreeHighlight (msg, tcl, argc, argv)
+MsgContext msg;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+        WidgetObject obj = (WidgetObject) msg->object[msg->level];
+        WidgetPrivate wp = &obj->widget;
+        ObmContext obm = wp->obm;
+	char *top, *name;
+	char message[SZ_COMMAND], buf[SZ_LINE];
+	int i, count;
+	ListTreeItem *item, *titem, *first, *op;
+
+	extern ListTreeItem *ListTreeFindSiblingName();
+	extern ListTreeItem *ListTreeFindChildName();
+	extern ListTreeItem *ListTreeFindChildNameInTree();
+
+
+	if (argc < 2)
+	    return (TCL_ERROR);
+
+	name = argv[1];
+	first = ListTreeFirstItem (wp->w);
+
+	if (argc == 3) {
+	    top = argv[2];
+	    titem = ListTreeFindSiblingName (wp->w, first, top);
+	    item = ListTreeFindChildNameInTree (wp->w, titem, name);
+	    item = (item ? item : titem);
+
+	    /* Now chain back up thru the parents and open the nodes.
+	    */
+	    for (op=item ; op->parent && op->parent != first; op = op->parent) {
+	        if (op->open == 0) 
+		    ListTreeOpenAll (wp->w, op, 1);
+	    }
+
+	} else {
+	    if (first->open == 0)
+	        ListTreeOpenAll (wp->w, first, 0);
+	    titem = ListTreeFindChildNameInTree (wp->w, first, name);
+	    if (titem && strcmp (name, titem->text) == 0)
+		item = titem;
+	    else
+	        item = ListTreeFindChildNameInTree (wp->w, titem, name);
+	}
+	ListTreeHighlightItem (wp->w, item);
+
+	/* The message is the string value of the list element selected,
+	 * and a bottom-up path to the root.
+	 */
+	sprintf (message, "{%s %d} ", item->text, item->open);
+
+	strncat (message, "{ ", 2);
+	sprintf (buf, "{ %s } ", item->text);
+	strcat (message, buf);
+	while (item->parent) {
+	    item = item->parent;
+	    sprintf (buf, "{ %s } ", item->text);
+	    strcat (message, buf);
+        }
+	strncat (message, "}", 1);
+
+	/* Call all the callbacks with the message. */
+	call_callbacks (obj, Ctcallback, message);
+
+        return (TCL_OK);
+}
+
+
+/* widgetListTreeDelete -- Delete the specified item from a ListTree.
+ *
+ * Usage:       listTreeDelete item [top]
+ *
+ * The 'item' may 'all' to delete the entire list or a named element.
+ * If 'toplevel' is specified then 'item' is assumed to be a child of
+ * that node.  If 'children_only' is set then only the children of the
+ * specified item will be opened (applies to all/none only). The return
+ * message is a pair of lists of the form
+ *
+ *	{ value state } { parent1 parent2 ... }
+ *
+ * where the 'value' is the label of the item selected, 'state' is an int
+ * indicating whether the node is open or closed, and 'parentN' is a list
+ * of node names chaining back to the top level of the tree.
+ *
+ */
+static int
+widgetListTreeDelete (msg, tcl, argc, argv)
+MsgContext msg;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+        WidgetObject obj = (WidgetObject) msg->object[msg->level];
+        WidgetPrivate wp = &obj->widget;
+        ObmContext obm = wp->obm;
+	char *top, *name;
+	ListTreeItem *item, *titem, *first;
+
+	extern ListTreeItem *ListTreeFindSiblingName();
+	extern ListTreeItem *ListTreeFindChildName();
+	extern ListTreeItem *ListTreeFirstItem();
+
+
+	if (argc < 2)
+	    return (TCL_ERROR);
+
+	name = argv[1];
+	first = ListTreeFirstItem (wp->w);
+
+	if (strcmp(argv[1], "all") == 0) {
+	    if (argc == 3) {
+		top = argv[2];
+	        titem = ListTreeFindSiblingName (wp->w, first, top);
+		if (strcmp (top, titem->text) == 0)
+		    item = titem;
+		else
+	            item = ListTreeFindChildName (wp->w, titem, name);
+
+	        ListTreeDelete(wp->w, item);
+
+	    } else {
+	        while ((item = ListTreeFirstItem(wp->w)))
+	            ListTreeDelete (wp->w, item);
+	    }
+
+	} else {
+	    if (argc == 3) {
+		top = argv[2];
+	        titem = ListTreeFindSiblingName (wp->w, first, top);
+	        item = ListTreeFindChildName (wp->w, titem, name);
+	    } else {
+	        titem = ListTreeFindSiblingName (wp->w, first, name);
+		if (strcmp (name, titem->text) == 0)
+		    item = titem;
+		else
+	            item = ListTreeFindChildName (wp->w, titem, name);
+	    }
+
+	    /* Now delete the item from the list. */
+	    ListTreeDelete(wp->w, item);
+	}
+
+
+	/* Call all the callbacks with the message.
+	call_callbacks (obj, Ctcallback, message);
+	 */
+
+        return (TCL_OK);
+}
+
+
+/* widgetSetTable -- Set the contents of a Table widget.
+ *
+ * Usage:       setTable nrows ncols data
+ *
+ * The table data is specified as a Tcl list of the form:
+ *
+ *	{ {r1c1 r1c2 ... r1cN}
+ *	  {r2c1 r2c2 ... r2cN}
+ *	  	:
+ *	  {rNc1 rNc2 ... rNcN} }
+ *
+ * String values must be quoted, rows/cols will be truncated or cleared if
+ * the specified table size does not agree with the size of the data table
+ * being loaded.
+ *
+ */
+static int
+widgetSetTable (msg, tcl, argc, argv)
+MsgContext msg;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+        WidgetObject obj = (WidgetObject) msg->object[msg->level];
+        WidgetPrivate wp = &obj->widget;
+        ObmContext obm = wp->obm;
+
+	register int i, j;
+	int	nrows, ncols, ndrows=0, ndcols=0, onrows, oncols;
+	char	*list = NULL, **rows = NULL, **cols = NULL;
+
+
+	if (argc < 4)
+	    return (TCL_ERROR);
+
+	/* Get the arguments */
+	nrows = atoi(argv[1]);
+	ncols = atoi(argv[2]);
+	list  = argv[3];
+
+	/* Resize the table if needed. */	        
+	XawTableGetSize (wp->w, &onrows, &oncols);
+	if (onrows != nrows || oncols != ncols)
+	    XawTableSetNewSize (wp->w, nrows, ncols);
+
+       /* Split the list so we can parse the rows.  */
+        if (Tcl_SplitList (tcl, list, &ndrows, &rows) != TCL_OK)
+            return (TCL_ERROR);
+
+	/* Set the labels for the table.  Clear any extra row or column
+	 * labels in case we didn't get enough data, ignore extra data in
+	 * the table if it's more than the size we're trying to create.
+	 */
+	for (i=0; i < ndrows; i++) {
+            if (Tcl_SplitList (tcl, rows[i], &ndcols, &cols) != TCL_OK)
+                return (TCL_ERROR);
+
+	    for (j=0; j < ndcols; j++)
+	        XawTableSetLabel (wp->w, i, j, cols[j]);
+	}
+
+	free ((char *) rows);
+	free ((char *) cols);
+        return (TCL_OK);
+}
+
+
+/* widgetGetCellAttr -- Get the given attribute of a Table cell.
+ *
+ * Usage:       setGellAttr row col attribute value
+ *
+ *
+ * The cell position is given as a 1-indexed array element where the UL
+ * of the table is cell (1,1).  Allowed attributes for a cell include:
+ *
+ *		label			label text (string)
+ *		background		background color (string)
+ *		foreground		foreground color (string)
+ *
+ */
+static int
+widgetGetCellAttr (msg, tcl, argc, argv)
+MsgContext msg;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+        WidgetObject obj = (WidgetObject) msg->object[msg->level];
+        WidgetPrivate wp = &obj->widget;
+        ObmContext obm = wp->obm;
+        XrmValue from, to;
+	unsigned long bg, fg;
+	int	row, col;
+	char	*attr, *value;
+
+
+	if (argc < 4)
+	    return (TCL_ERROR);
+
+	row 	= atoi(argv[1]) - 1;
+	col 	= atoi(argv[2]) - 1;
+	attr  	= argv[3];
+
+	if (strcmp(attr, "label") == 0) 
+	    value = XawTableGetLabelByPosition (wp->w, row, col);
+	else 
+	    return (TCL_ERROR);
+
+        Tcl_SetResult (wp->obm->tcl, value, TCL_VOLATILE);
+        return (TCL_OK);
+}
+
+
+/* widgetSetCellAttr -- Set the given attribute of a Table cell.
+ *
+ * Usage:       setCellAttr row col attribute value
+ *
+ *
+ * The cell position is given as a 1-indexed array element where the UL
+ * of the table is cell (1,1).  Allowed attributes for a cell include:
+ *
+ *		label			label text (string)
+ *		background		background color (string)
+ *		foreground		foreground color (string)
+ *
+ */
+static int
+widgetSetCellAttr (msg, tcl, argc, argv)
+MsgContext msg;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+        WidgetObject obj = (WidgetObject) msg->object[msg->level];
+        WidgetPrivate wp = &obj->widget;
+        ObmContext obm = wp->obm;
+        XrmValue from, to;
+	unsigned long bg, fg;
+	int	row, col;
+	char	*attr, *value;
+
+
+	if (argc < 5)
+	    return (TCL_ERROR);
+
+	/* Get the arguments. */
+	row 	= atoi(argv[1]) - 1;
+	col 	= atoi(argv[2]) - 1;
+	attr  	= argv[3];
+	value  	= argv[4];
+
+	if (strcmp(attr, "label") == 0) {
+	    XawTableSetLabel (wp->w, row, col, value);
+
+	} else if (strcmp(attr, "background") == 0) {
+            from.size = strlen (value) + 1;
+            from.addr = value;
+            to.addr = (caddr_t) &bg;
+            to.size = sizeof(bg);
+
+            if (!XtConvertAndStore (wp->w, XtRString, &from, XtRPixel, &to))
+                bg = BlackPixelOfScreen (obm->screen);
+
+	    XawTableSetCellBackground (wp->w, row, col, bg);
+
+	} else if (strcmp(attr, "foreground") == 0) {
+            from.size = strlen (value) + 1;
+            from.addr = value;
+            to.addr = (caddr_t) &fg;
+            to.size = sizeof(fg);
+
+            if (!XtConvertAndStore (wp->w, XtRString, &from, XtRPixel, &to))
+                fg = BlackPixelOfScreen (obm->screen);
+
+	    XawTableSetCellForeground (wp->w, row, col, fg);
+	}
+
+        return (TCL_OK);
+}
+
+
+/* widgetSetColAttr -- Set the given attribute of a Table column.
+ *
+ * Usage:       setColAttr col attribute value
+ *
+ * The column position is given as a 1-indexed array element where the UL
+ * of the table is cell (1,1).  Allowed attributes for a column include:
+ *
+ *		width			column width (pixels)
+ *		background		background color (string)
+ *		foreground		foreground color (string)
+ *		justify			text justification (string)
+ *
+ */
+static int
+widgetSetColAttr (msg, tcl, argc, argv)
+MsgContext msg;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+        WidgetObject obj = (WidgetObject) msg->object[msg->level];
+        WidgetPrivate wp = &obj->widget;
+        ObmContext obm = wp->obm;
+        XrmValue from, to;
+	unsigned long bg, fg;
+	int	cols[128], widths[128];
+	int	nitems, row, col, nrows, ncols, i;
+	String	*items;
+	char	*attr;
+
+
+	if (argc < 4)
+	    return (TCL_ERROR);
+
+	/* Get the arguments.  NOTE: need to bounds check the length of the
+	 * list with the array.
+ 	 */
+        if (Tcl_SplitList (tcl, argv[1], &nitems, &items) != TCL_OK)
+            return (TCL_ERROR);
+	else {
+	    if (nitems == 1)
+	        col = atoi(argv[1]) - 1;
+	    else {
+	        if (nitems > 128)
+                    return (TCL_ERROR);
+	        for (i=0; i < nitems; i++)
+	            cols[i] = atoi(items[i]) - 1;
+	    }
+	}
+	attr  	= argv[2];
+
+	/* Get current table size. */
+	XawTableGetSize (wp->w, &nrows, &ncols);
+
+	if (strcmp(attr, "width") == 0) {
+	    /* Reset the column width. */
+	    if (nitems == 1)
+	        XawTableSetColumnWidth (wp->w, col, atoi(argv[3]));
+	    else {
+        	if (Tcl_SplitList (tcl, argv[3], &nitems, &items) != TCL_OK)
+	            return (TCL_ERROR);
+	        if (nitems > 128)
+                    return (TCL_ERROR);
+	        for (i=0; i < nitems; i++)
+	            widths[i] = atoi(items[i]) - 1;
+	        XawTableSetMultiColumnWidths (wp->w, cols, widths, nitems);
+	    }
+
+	} else if (strcmp(attr, "background") == 0) {
+	    /* Reset the column background color. */
+            from.size = strlen (argv[3]) + 1;
+            from.addr = argv[3];
+            to.addr = (caddr_t) &bg;
+            to.size = sizeof(bg);
+
+            if (!XtConvertAndStore (wp->w, XtRString, &from, XtRPixel, &to))
+                bg = BlackPixelOfScreen (obm->screen);
+
+	    for (i=0; i < nrows; i++)
+	        XawTableSetCellBackground (wp->w, i, col, bg);
+
+	} else if (strcmp(attr, "foreground") == 0) {
+	    /* Reset the column foreground color. */
+            from.size = strlen (argv[3]) + 1;
+            from.addr = argv[3];
+            to.addr = (caddr_t) &fg;
+            to.size = sizeof(fg);
+
+            if (!XtConvertAndStore (wp->w, XtRString, &from, XtRPixel, &to))
+                fg = BlackPixelOfScreen (obm->screen);
+
+	    for (i=0; i < nrows; i++)
+	        XawTableSetCellForeground (wp->w, i, col, fg);
+
+	} else if (strcmp(attr, "justify") == 0) {
+	    /* Reset the column text justification. */
+	    if (strcmp(argv[3], "left") == 0)
+	        XawTableSetColumnJustify (wp->w, col, XtJustifyLeft);
+	    else if (strcmp(argv[3], "center") == 0)
+	        XawTableSetColumnJustify (wp->w, col, XtJustifyCenter);
+	    else if (strcmp(argv[3], "right") == 0)
+	        XawTableSetColumnJustify (wp->w, col, XtJustifyRight);
+	    else 
+	        XawTableSetColumnJustify (wp->w, col, XtJustifyLeft);
+	}
+
+        return (TCL_OK);
+}
+
+
+/* widgetGetColAttr -- Get the requested attribute of a Table column.
+ *
+ * Usage:       attr = getColAttr col attribute
+ *
+ *
+ * The column position is given as a 1-indexed array element where the UL
+ * of the table is cell (1,1).  Allowed attributes for a column include:
+ *
+ *	width			column width
+ *	pixelWidth		foreground color
+ *	justify			text justification
+ *
+ */
+static int
+widgetGetColAttr (msg, tcl, argc, argv)
+MsgContext msg;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+        WidgetObject obj = (WidgetObject) msg->object[msg->level];
+        WidgetPrivate wp = &obj->widget;
+        ObmContext obm = wp->obm;
+	char rbuf[SZ_MESSAGE];
+	char *result = rbuf, *attr;
+	int col, nrows, ncols, width, pixelWidth;
+	XtJustify justify;
+
+
+	if (argc < 3)
+	    return (TCL_ERROR);
+
+	/* Get the arguments. */
+	col 	= atoi(argv[1]) - 1;
+	attr  	= argv[2];
+
+	/* Get current table size. */
+	XawTableGetSize (wp->w, &nrows, &ncols);
+
+	if (strcmp(attr, "width") == 0) {
+	    width = XawTableGetColumnWidth (wp->w, col);
+
+	} else if (strcmp(attr, "pixelWidth") == 0) {
+	    pixelWidth = XawTableGetColumnPixelWidth (wp->w, col);
+
+	} else if (strcmp(attr, "justify") == 0) {
+	    justify = XawTableGetColumnJustify (wp->w, col);
+
+	    /* Reset the column text justification. */
+	    if (justify == XtJustifyLeft)
+		strcpy (result, "left");
+	    else if (justify == XtJustifyCenter)
+		strcpy (result, "center");
+	    else if (justify == XtJustifyRight)
+		strcpy (result, "right");
+	    else 
+		strcpy (result, "left");
+	}
+
+        Tcl_SetResult (wp->obm->tcl, result, TCL_VOLATILE);
+        return (TCL_OK);
+}
+
+
+/* widgetSetRowAttr -- Set the given attribute of a Table row.
+ *
+ * Usage:       setRowAttr row attribute value
+ *
+ * The row position is given as a 1-indexed array element where the UL
+ * of the table is cell (1,1).  Allowed attributes for a row include:
+ *
+ *	background		background color
+ *	foreground		foreground color
+ */
+static int
+widgetSetRowAttr (msg, tcl, argc, argv)
+MsgContext msg;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+        WidgetObject obj = (WidgetObject) msg->object[msg->level];
+        WidgetPrivate wp = &obj->widget;
+        ObmContext obm = wp->obm;
+        XrmValue from, to;
+	unsigned long bg, fg;
+	int	row, col, nrows, ncols, i;
+	char	*attr;
+
+
+	if (argc < 4)
+	    return (TCL_ERROR);
+
+	/* Get the arguments. */
+	row 	= atoi(argv[1]) - 1;
+	attr  	= argv[2];
+
+	/* Get current table size. */
+	XawTableGetSize (wp->w, &nrows, &ncols);
+
+	if (strcmp(attr, "background") == 0) {
+	    /* Reset the column background color. */
+            from.size = strlen (argv[3]) + 1;
+            from.addr = argv[3];
+            to.addr = (caddr_t) &bg;
+            to.size = sizeof(bg);
+
+            if (!XtConvertAndStore (wp->w, XtRString, &from, XtRPixel, &to))
+                bg = BlackPixelOfScreen (obm->screen);
+
+	    for (i=0; i < ncols; i++)
+	        XawTableSetCellBackground (wp->w, row, i, bg);
+
+	} else if (strcmp(attr, "foreground") == 0) {
+	    /* Reset the column foreground color. */
+            from.size = strlen (argv[3]) + 1;
+            from.addr = argv[3];
+            to.addr = (caddr_t) &fg;
+            to.size = sizeof(fg);
+
+            if (!XtConvertAndStore (wp->w, XtRString, &from, XtRPixel, &to))
+                fg = BlackPixelOfScreen (obm->screen);
+
+	    for (i=0; i < ncols; i++)
+	        XawTableSetCellForeground (wp->w, row, i, fg);
+	}
+
+        return (TCL_OK);
+}
+
+
+/* widgetGetRowAttr -- Get the requested attribute of a Table column.
+ *
+ * Usage:       attr = getRowAttr row attribute
+ *
+ *
+ * The column position is given as a 1-indexed array element where the UL
+ * of the table is cell (1,1).  Allowed attributes for a column include:
+ *
+ *	<none yet>
+ *
+ */
+static int
+widgetGetRowAttr (msg, tcl, argc, argv)
+MsgContext msg;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+        WidgetObject obj = (WidgetObject) msg->object[msg->level];
+        WidgetPrivate wp = &obj->widget;
+        ObmContext obm = wp->obm;
+	char rbuf[SZ_MESSAGE];
+	char *result = rbuf, *attr;
+	int row, nrows, ncols, width, pixelWidth;
+	XtJustify justify;
+
+
+	if (argc < 3)
+	    return (TCL_ERROR);
+
+	/* Get the arguments. */
+	row 	= atoi(argv[1]) - 1;
+	attr  	= argv[2];
+
+	/* Get current table size. */
+	XawTableGetSize (wp->w, &nrows, &ncols);
+
+        return (TCL_OK);
+}
+
+
+/* widgetDeleteCol -- Delete the specified columns from the table.
+ *
+ * Usage:       deleteCol column
+ *
+ */
+static int
+widgetDeleteCol (msg, tcl, argc, argv)
+MsgContext msg;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+        WidgetObject obj = (WidgetObject) msg->object[msg->level];
+        WidgetPrivate wp = &obj->widget;
+	int	col;
+
+
+	if (argc < 2)
+	    return (TCL_ERROR);
+
+	/* Get the arguments. */
+	col 	= atoi(argv[1]) - 1;
+
+	/* Delete the specified row. */
+	XawTableDeleteColumn (wp->w, col);
+
+        return (TCL_OK);
+}
+
+
+/* widgetAddCol -- Add a new column to the Table.
+ *
+ * Usage:       addCol col width
+ *
+ * The column may be specified in one of the following ways:
+ *
+ *	first		make column the first column in the table
+ *	last		make column the last column in the table
+ *	<num>		make column the N-th column in the table
+ *
+ * The column width is specified as a character width.  Data for the
+ * column must be added separately using the setColAttr function to
+ * set individual labels.
+ *
+ */
+static int
+widgetAddCol (msg, tcl, argc, argv)
+MsgContext msg;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+        WidgetObject obj = (WidgetObject) msg->object[msg->level];
+        WidgetPrivate wp = &obj->widget;
+        ObmContext obm = wp->obm;
+	char	*col = NULL;
+	int 	nrows, ncols, width, colnum = 0;
+
+
+	if (argc < 3)
+	    return (TCL_ERROR);
+
+	/* Get the arguments. */
+	col = argv[1];
+	width = atoi(argv[2]);
+
+	/* Add the specified column. */
+	XawTableGetSize (wp->w, &nrows, &ncols);
+	colnum = max (0, min (ncols, atoi (col) - 1));
+
+	if (colnum == 0 || streq(col, "first"))
+	    XawTablePrependColumn (wp->w, width);
+	else if (colnum == ncols || streq (col, "last"))
+	    XawTableAppendColumn (wp->w, width);
+	else
+	    XawTableInsertColumn (wp->w, colnum, width);
+
+        return (TCL_OK);
+}
+
+
+/* widgetDeleteRow -- Delete the specified rows from the table.
+ *
+ * Usage:       deleteRow row
+ *
+ */
+static int
+widgetDeleteRow (msg, tcl, argc, argv)
+MsgContext msg;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+        WidgetObject obj = (WidgetObject) msg->object[msg->level];
+        WidgetPrivate wp = &obj->widget;
+	int	row;
+
+
+	if (argc < 2)
+	    return (TCL_ERROR);
+
+	/* Get the arguments. */
+	row 	= atoi(argv[1]) - 1;
+
+	/* Delete the specified row. */
+	XawTableDeleteRow (wp->w, row);
+
+        return (TCL_OK);
+}
+
+
+/* widgetAddRow -- Add a new row to the Table.
+ *
+ * Usage:       addRow row
+ *
+ * The row may be specified in one of the following ways:
+ *
+ *	first		make row the first row in the table
+ *	last		make row the last row in the table
+ *	<num>		make row the N-th row in the table
+ *
+ * Data for the column must be added separately using the setColAttr
+ * function to set individual labels.
+ *
+ */
+static int
+widgetAddRow (msg, tcl, argc, argv)
+MsgContext msg;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+        WidgetObject obj = (WidgetObject) msg->object[msg->level];
+        WidgetPrivate wp = &obj->widget;
+        ObmContext obm = wp->obm;
+	char *row = NULL;
+	int nrows, ncols, rownum = 0;
+
+
+	if (argc < 2)
+	    return (TCL_ERROR);
+
+	/* Get the arguments. */
+	row = argv[1];
+
+	/* Add the specified column. */
+	XawTableGetSize (wp->w, &nrows, &ncols);
+	rownum = max (0, min (nrows, atoi (row) - 1));
+
+	if (rownum == 0 || streq(row, "first"))
+	    XawTablePrependRow (wp->w);
+	else if (rownum == nrows || streq (row, "last"))
+	    XawTableAppendRow (wp->w);
+	else
+	    XawTableInsertRow (wp->w, rownum);
+
+        return (TCL_OK);
+}
+
+
+/* widgetSetTableSize -- Set the size of the specified table.
+ *
+ * Usage:       setTableSize nrows ncols
+ *
+ */
+static int
+widgetSetTableSize (msg, tcl, argc, argv)
+MsgContext msg;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+        WidgetObject obj = (WidgetObject) msg->object[msg->level];
+        WidgetPrivate wp = &obj->widget;
+        ObmContext obm = wp->obm;
+	int	nrows, ncols;
+
+
+	if (argc < 3)
+	    return (TCL_ERROR);
+
+	nrows = atoi (argv[1]);
+	ncols = atoi (argv[2]);
+	if (XawTableSetNewSize (wp->w, nrows, ncols) >= 0)
+            return (TCL_OK);
+	else
+            return (TCL_ERROR);
+}
+
+
+
+/* widgetGetTableSize -- Get the size of the specified table.
+ *
+ * Usage:       getTableSize nrows ncols
+ *
+ */
+static int
+widgetGetTableSize (msg, tcl, argc, argv)
+MsgContext msg;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+        WidgetObject obj = (WidgetObject) msg->object[msg->level];
+        WidgetPrivate wp = &obj->widget;
+        ObmContext obm = wp->obm;
+	char	buf[16], *nrows, *ncols;
+	int	nr, nc;
+
+
+	if (argc < 3)
+	    return (TCL_ERROR);
+
+	nrows = argv[1];
+	ncols = argv[2];
+
+	XawTableGetSize (wp->w, &nr, &nc);
+
+	sprintf (buf, "%d", nr);
+        Tcl_SetVar (wp->obm->tcl, nrows, buf, 0);
+	sprintf (buf, "%d", nc);
+        Tcl_SetVar (wp->obm->tcl, ncols, buf, 0);
+
+        return (TCL_OK);
+}
+
 
 
 /* widgetRealize -- Realize a widget.  This activates and assigns windows for

@@ -60,13 +60,9 @@ SOFTWARE.
 #include <X11/Xos.h>		/* for O_RDONLY */
 #include <errno.h>
 
-extern int errno, sys_nerr;
-#ifndef __DARWIN__
-#ifndef __FreeBSD__
-#ifndef _BSD_SOURCE
-extern char* sys_errlist[];
-#endif
-#endif
+extern int errno;
+#if !defined(__APPLE__) || (__APPLE_CC__ < 1151)
+extern int sys_nerr;
 #endif
 
 #define INSERT_FILE ("Enter Filename:")
@@ -245,10 +241,8 @@ XtPointer call_data;		/* unused */
     }
     else
       (void) sprintf( msg, "*** Error: %s ***",
-	      (errno > 0 && errno < sys_nerr) ?
-	      (char *)sys_errlist[errno] : "Can't open file" );
+	      (errno > 0) ?  (char *)strerror(errno) : "Can't open file" );
   
-
   (void)SetResourceByName(ctx->text.file_insert, 
 			  LABEL_NAME, XtNlabel, (XtArgVal) msg);
   XBell(XtDisplay(w), 0);

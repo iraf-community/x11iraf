@@ -1041,8 +1041,11 @@ Tcl_SetResult(interp, string, freeProc)
  */
 
 	/* VARARGS2 */
-#ifndef lint
 void
+#ifdef USE_STDARG
+Tcl_AppendResult(Tcl_Interp *interp, ...)
+#else
+#ifndef lint
 Tcl_AppendResult(va_alist)
 #else
 void
@@ -1054,9 +1057,10 @@ Tcl_AppendResult(interp, p, va_alist)
 				 * result, terminated with NULL. */
 #endif
     va_dcl
+#endif
 {
     va_list argList;
-    register Interp *iPtr;
+    Interp *iPtr = (Interp *) interp;
     char *string;
     int newSpace;
 
@@ -1065,8 +1069,12 @@ Tcl_AppendResult(interp, p, va_alist)
      * needed.
      */
 
+#ifdef USE_STDARG
+    va_start(argList, interp);
+#else
     va_start(argList);
-    iPtr = va_arg(argList, Interp *);
+    (void) va_arg(argList, Interp *);
+#endif
     newSpace = 0;
     while (1) {
 	string = va_arg(argList, char *);
@@ -1093,8 +1101,12 @@ Tcl_AppendResult(interp, p, va_alist)
      * them into the buffer.
      */
 
+#ifdef USE_STDARG
+    va_start(argList, interp);
+#else
     va_start(argList);
-    (void) va_arg(argList, Tcl_Interp *);
+    (void) va_arg(argList, Interp *);
+#endif
     while (1) {
 	string = va_arg(argList, char *);
 	if (string == NULL) {
@@ -1295,8 +1307,11 @@ Tcl_ResetResult(interp)
  *----------------------------------------------------------------------
  */
 	/* VARARGS2 */
-#ifndef lint
 void
+#ifdef USE_STDARG
+Tcl_SetErrorCode(Tcl_Interp *interp, ...)
+#else
+#ifndef lint
 Tcl_SetErrorCode(va_alist)
 #else
 void
@@ -1308,19 +1323,24 @@ Tcl_SetErrorCode(interp, p, va_alist)
 				 * terminated with NULL. */
 #endif
     va_dcl
+#endif
 {
     va_list argList;
     char *string;
     int flags;
-    Interp *iPtr;
+    Interp *iPtr = (Interp *)interp;
 
     /*
      * Scan through the arguments one at a time, appending them to
      * $errorCode as list elements.
      */
 
+#ifdef USE_STDARG
+    va_start(argList, interp);
+#else
     va_start(argList);
-    iPtr = va_arg(argList, Interp *);
+#endif
+    (void) va_arg(argList, Tcl_Interp *);
     flags = TCL_GLOBAL_ONLY | TCL_LIST_ELEMENT;
     while (1) {
 	string = va_arg(argList, char *);

@@ -186,7 +186,7 @@ FindVariable(name, lengthPtr)
 				 * searches). */
 {
     int i;
-    CONST register char *p1, *p2;
+    CONST char *p1, *p2;
 
     for (i = 0, p1 = environ[i]; p1 != NULL; i++, p1 = environ[i]) {
 	for (p2 = name; *p2 == *p1; p1++, p2++) {

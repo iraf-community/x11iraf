@@ -1081,14 +1081,23 @@ String *params;
 Cardinal *num_params;
 {
   ListTreeWidget w = (ListTreeWidget) aw;
+  ListTreeItem *item;
 
-  if (w->list.timer_id) {
+
     /* don't call highlightCallback if we are waiting for a double click */
+/*
+  if (w->list.timer_id) {
   }
   else if (w->list.timer_type==TIMER_WAITING) {
+*/
+    HighlightAll(w, False, True);
+    item = GetItem(w, event->xbutton.y);
+    HighlightItem(w, item, True, True);
     HighlightDoCallback(w);
     w->list.timer_type=TIMER_CLEAR;
+/*
   }
+*/
 }
 
 /* ListTree private drawing functions */
@@ -2015,6 +2024,82 @@ ListTreeFindSiblingName(ListTreeWidget w, ListTreeItem *item, char *name)
   return NULL;
 }
 
+ListTreeOpen(ListTreeWidget w, ListTreeItem *item)
+{
+  item->open = True;
+  ListTreeRefresh(w);
+}
+
+ListTreeClose(ListTreeWidget w, ListTreeItem *item)
+{
+  item->open = False;
+  ListTreeRefresh(w);
+}
+
+ListTreeOpenAll(ListTreeWidget w, ListTreeItem *start, int child_only)
+{
+  ListTreeItem *item;
+
+  /* Get first child in list; */
+  if (start == (ListTreeItem *)NULL)
+      item = w->list.first;
+  else 
+      item = start;
+
+  while (item) {
+    if (item->firstchild)
+        ChildrenOpen (w, item->firstchild);
+    item->open = True;
+    item = item->nextsibling;
+    if (child_only)
+	break;
+  }
+  ListTreeRefresh(w);
+}
+
+ChildrenOpen (ListTreeWidget w, ListTreeItem *item)
+{
+  while (item) {
+    if (item->firstchild)
+      ChildrenOpen(w, item->firstchild);
+    item->open = True;
+    item = item->nextsibling;
+  }
+}
+
+
+ListTreeCloseAll(ListTreeWidget w, ListTreeItem *start, int child_only)
+{
+  ListTreeItem *item;
+
+  /* Get first child in list; */
+  if (start == (ListTreeItem *)NULL)
+      item = w->list.first;
+  else 
+      item = start;
+
+  while (item) {
+    if (item->firstchild)
+        ChildrenClose (w, item->firstchild);
+    item->open = False;
+    item = item->nextsibling;
+    if (child_only)
+	break;
+  }
+  ListTreeRefresh(w);
+}
+
+ChildrenClose (ListTreeWidget w, ListTreeItem *item)
+{
+  while (item) {
+    if (item->firstchild)
+      ChildrenClose(w, item->firstchild);
+    item->open = False;
+    item = item->nextsibling;
+  }
+}
+
+
 ListTreeItem *
 ListTreeFindChildName(ListTreeWidget w, ListTreeItem *item, char *name)
 {
@@ -2035,6 +2120,53 @@ ListTreeFindChildName(ListTreeWidget w, ListTreeItem *item, char *name)
   }
   return NULL;
 }
+
+
+ListTreeItem *
+ListTreeFindChildNameInTree(ListTreeWidget w, ListTreeItem *item, char *name)
+{
+  ListTreeItem *found = (ListTreeItem *)NULL, *ChildFind();
+
+  TreeCheck(w, "in ListTreeFindChildName");
+/* Get first child in list; */
+  if (item && item->firstchild)
+    item = item->firstchild;
+  else if (!item && w->list.first)
+    item =w->list.first;
+  else 
+    item=NULL;
+
+  while (item) {
+    if (item && strcmp(item->text, name) == 0)
+      return item;
+    if (item->firstchild) {
+      found = ChildFind(w, item->firstchild, name);
+      if (found)
+        return found;
+    }
+    item = item->nextsibling;
+  }
+  return NULL;
+}
+
+ListTreeItem *
+ChildFind (ListTreeWidget w, ListTreeItem *item, char*name)
+{
+  ListTreeItem *found = (ListTreeItem *)NULL, *ChildFind();
+
+  while (item) {
+    if (item && strcmp(item->text, name) == 0)
+      return item;
+    if (item->firstchild) {
+      found = ChildFind(w, item->firstchild, name);
+      if (found)
+        return found;
+    }
+    item = item->nextsibling;
+  }
+  return NULL;
+}
+
 
 void
 ListTreeHighlightItem(ListTreeWidget w, ListTreeItem *item)

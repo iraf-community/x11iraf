@@ -85,7 +85,8 @@ proc ismInitInfoText args \
 set cur_objid		0
 set cur_regid		0
 set redraw_compass	0
-set Compass(0)		{ 0.0 1 1 0 X Y }
+#set Compass(0)		{ 0.0 1 1 0 X Y }
+set Compass(0)		{ 0.0 0.0 1.0 -1.0 0.0 0 X Y }
 set Orient(0)		{ 1 1 1 }
 
 set wcspix_debug	0
@@ -322,14 +323,25 @@ proc wcspix_compass { argv } \
 
     set objid     [lindex $argv 0]
     set angle     [lindex $argv 1]
-    set xflip     [lindex $argv 2]
-    set yflip     [lindex $argv 3]
-    set transpose [lindex $argv 4]
-    set xlab      [lindex $argv 5]
-    set ylab      [lindex $argv 6]
+
+    #set xflip     [lindex $argv 2]
+    #set yflip     [lindex $argv 3]
+    #set transpose [lindex $argv 4]
+    #set xlab      [lindex $argv 5]
+    #set ylab      [lindex $argv 6]
+
+    set north_x   [lindex $argv 2]
+    set north_y   [lindex $argv 3]
+    set east_x    [lindex $argv 4]
+    set east_y    [lindex $argv 5]
+    set transpose [lindex $argv 6]
+    set xlab      [lindex $argv 7]
+    set ylab      [lindex $argv 8]
 
     #lappend Compass($objid) $angle $xflip $yflip $transpose $xlab $ylab
-    set Compass($objid) [list $angle $xflip $yflip $transpose $xlab $ylab]
+    #set Compass($objid) [list $angle $xflip $yflip $transpose $xlab $ylab]
+    set Compass($objid) [list $angle $north_x $north_y $east_x $east_y \
+	$transpose $xlab $ylab]
     drawCompass
 }
 

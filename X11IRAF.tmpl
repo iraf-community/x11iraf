@@ -84,23 +84,12 @@
 #ifndef LibObm
 #define LibObm 		-lobm
 #endif
-
 #ifndef LibXpm
-#if defined (PpcDarwinArchitecture) || defined (TenonServer)
-#define LibXpm 		../lib/libXpm.a
-#else
 #define LibXpm 		-lXpm
 #endif
-#endif
-
 #ifndef LibXaw3d
-#if defined (PpcDarwinArchitecture) || defined (TenonServer)
-#define LibXaw3d 	../lib/libXaw3d.a
-#else
 #define LibXaw3d 	-lXaw3d
 #endif
-#endif
-
 #ifndef LibCDL
 #define LibCDL 		-lcdl
 #endif

@@ -611,16 +611,7 @@ void xt_error(message)
 char *SysErrorMsg (n)
     int n;
 {
-#ifndef __DARWIN__
-#ifndef __FreeBSD__
-#ifndef _BSD_SOURCE
-    extern char *sys_errlist[];
-#endif
-#endif
-#endif
-    extern int sys_nerr;
-
-    return((n >= 0 && n < sys_nerr) ? (char *)sys_errlist[n] : "unknown error");
+    return((n >= 0) ? (char *)strerror(n) : "unknown error");
 }
 
 

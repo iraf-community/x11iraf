@@ -312,6 +312,9 @@ obm/widget.c
     Added a new 'setTop' command for the Tabs widget that can be used to
     raise a particular tab from within the GUI.  (8/29/00)
 
+obm/server.c
+    Commented out an XtFree() on a static array ('table')  (03/05/01)
+
 obm/ObmP.h                                                              MF043
 obm/obmres.c
 obm/obmres.dat
@@ -326,7 +329,22 @@ obm/listres/AllWidgets.c
     lower level lists.  The selection callback returns the selected item
     label, it's level, and a full path of all parent items.  The widget
     can used for things like directory browsers, or organizing documentation
-    into sections, subsections, etc.
+    into sections, subsections, etc. (8/26/02)
 
-obm/server.c
-    Commented out an XtFree() on a static array ('table')  (03/05/01)
+
+obm/ObmP.h
+obm/obmres.c
+obm/obmres.dat
+obm/widget.c
+obm/OBMW/Table.c
+obm/OBMW/Table.h
+obm/OBMW/color.c
+obm/OBMW/TableP.h
+obm/OBMW/Table3d.c
+obm/OBMW/Table3d.h
+obm/OBMW/TableUtil.c
+obm/OBMW/TableUtil.h
+    Added a new Table widget and support code.  The Table widget supports a
+    grid layout of data items with col/row selection and cell editing.  It
+    is a bit primitive so additional code was added to improve functionality.
+    (09/10/02)

@@ -80,7 +80,7 @@ int debug = 0; 		/* true causes error messages to be displayed */
 #endif	/* DEBUG */
 XgtermWidget term;		/* master data structure for client */
 char *xgterm_name;	/* argv[0] */
-int am_slave = 0;	/* set to 1 if running as a slave process */
+int am_slave = -1;	/* set to 1 if running as a slave process */
 int max_plus1;
 int pty_mask;
 int Select_mask;

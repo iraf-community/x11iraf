@@ -1,7 +1,6 @@
 /*
  * $XConsortium: charproc.c,v 1.180 94/04/17 20:23:25 hersh Exp $
  */
-
 /*
  
 Copyright (c) 1988  X Consortium
@@ -75,6 +74,7 @@ in this Software without prior written authorization from the X Consortium.
 #include <setjmp.h>
 #include <ctype.h>
 
+
 /*
  * Check for both EAGAIN and EWOULDBLOCK, because some supposedly POSIX
  * systems are broken and return EWOULDBLOCK when they should return EAGAIN.
@@ -95,8 +95,13 @@ extern jmp_buf VTend;
 extern XtAppContext app_con;
 extern Widget toplevel;
 extern void exit();
+#ifndef X_NOT_STDC_ENV
+#include <stdlib.h>
+#else
 extern char *malloc();
 extern char *realloc();
+#endif
+
 
 static void VTallocbuf();
 static int finput();
@@ -1698,9 +1703,13 @@ do_write (w, fd, id)
 init_ttyio (pty)
     int pty;
 {
-    if (!input_handler)
+    if (pty < 0) {
+        Panic ("init_ttyio: invalid pty=%d\n", pty);
+
+    } else if (!input_handler) {
 	input_handler = XtAppAddInput (app_con, pty,
 	    (XtPointer)XtInputReadMask, do_read, (XtPointer)NULL);
+    }
 }
 
 

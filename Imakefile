@@ -9,7 +9,7 @@
 #define IHaveSubdirs
 #define PassCDebugFlags 'CDEBUGFLAGS=$(CDEBUGFLAGS)'
 
-RELEASE		= v1.3.1
+RELEASE		= v1.5DEV
 
 LIBDIRS 	= obm xaw3d xpm cdl
 APPDIRS 	= xgterm ximtool xtapemon obmsh vximtool
@@ -63,7 +63,7 @@ libs::
 	for i in $(LIBDIRS) ;\
 	do \
 	(cd $$i ; echo "making" linklibs "in $(CURRENT_DIR)/$$i..."; \
-	$(MAKE) $(MFLAGS) 'CDEBUGFLAGS=$(CDEBUGFLAGS)' linklibs); \
+	$(MAKE) $(MFLAGS) 'CDEBUGFLAGS=$(CDEBUGFLAGS)' all linklibs); \
 	done
 #endif
 
@@ -99,6 +99,8 @@ linuxppc:
 	@(./mkarch linuxppc)
 macosx:
 	@(./mkarch macosx)
+macintel:
+	@(./mkarch macintel)
 mklinux:
 	@(./mkarch mklinux)
 redhat:

@@ -96,6 +96,17 @@
 #endif	/* !__hpux */
 #endif	/* !PTYCHAR2 */
 
+#ifndef PTYCHARLEN
+#ifdef CRAY
+#define PTYCHARLEN 3
+#elif defined(__MVS__)
+#define PTYCHARLEN 8     /* OS/390 stores, e.g. ut_id="ttyp1234"  */
+#else
+#define PTYCHARLEN 2
+#endif
+#endif
+
+
 /* Until the translation manager comes along, I have to do my own translation of
  * mouse events into the proper routines. */
 

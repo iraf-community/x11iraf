@@ -1100,6 +1100,7 @@ static void HandleEnterWindow (widget, event, params, param_count)
     register GtermWidget w = (GtermWidget)widget;
     register XEnterWindowEvent *ev = (XEnterWindowEvent *) event;
 
+/*printf ("HandleEnterWindow....");*/
     if (!w->gterm.useDefaultCM && w->gterm.haveColormap) {
 	int update = w->gterm.cmapUpdate;
 
@@ -1113,8 +1114,10 @@ static void HandleEnterWindow (widget, event, params, param_count)
 	}
 
 	/* Advise the window manager to load our colormap. */
+/*printf ("requesting focus....");*/
 	request_colormap_focus (w);
     }
+/*printf ("\n");*/
 
     w->gterm.in_window++;
 }
@@ -1129,6 +1132,7 @@ static void HandleLeaveWindow (widget, event, params, param_count)
     register GtermWidget w = (GtermWidget)widget;
     register XLeaveWindowEvent *ev = (XLeaveWindowEvent *) event;
 
+/*printf ("HandleLeaveWindow....");*/
     if (!w->gterm.useDefaultCM && w->gterm.haveColormap) {
 	int shadow = w->gterm.cmapShadow;
 
@@ -1141,8 +1145,10 @@ static void HandleLeaveWindow (widget, event, params, param_count)
 	    w->gterm.cmapLastShadow = ev->time;
 	}
 
+/*printf ("restoring focus....");*/
 	restore_colormap_focus (w);
     }
+/*printf ("\n");*/
 
     w->gterm.in_window = 0;
 }
@@ -5355,7 +5361,9 @@ get_colormap (w)
      * colortable for the window.
      */
     if (w->gterm.in_window)
+{ printf ("get_colormap ... requesting focus...\n");
 	request_colormap_focus (w);
+}
 
     return (colormap);
 

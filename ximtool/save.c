@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <errno.h>
 #include <X11/Intrinsic.h>
 #include <X11/StringDefs.h>
 

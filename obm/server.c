@@ -1004,9 +1004,8 @@ char **argv;
 
 	for (item=0;  item < nitems;  item++) {
 	    if (Tcl_SplitList (tcl, items[item], &nfields, &fields) != TCL_OK) {
-err:		sprintf (buf, "%d ", item + 1);
-		Tcl_AppendResult (tcl,
-		    "bad item ", buf, "in resource list", NULL);
+err:		sprintf (buf, "bad item '%d' in resource list", item + 1);
+		Tcl_AppendResult (tcl, buf, NULL);
 		for (i=0;  i < item;  i++)
 		    free (values[item].item_list);
 		return (TCL_ERROR);

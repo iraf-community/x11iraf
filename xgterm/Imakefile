@@ -17,6 +17,7 @@ X11IRAFDIR = ../
  */
 #ifdef SetTtyGroup			/* turn on in config/machine.cf */
    TTYGROUPDEF = -DUSE_TTY_GROUP
+   TTYGROUPDEF =
 #endif
 #ifdef UsePUCCPtyd			/* turn on in config/site.def */
     PUCCPTYDDEF = -DPUCC_PTYD		/* does not need to be setuid */
@@ -40,8 +41,6 @@ X11IRAFDIR = ../
     CDEBUGFLAGS = -g
          XAWLIB = LibXaw3d
       DEPXAWLIB = DepLibXaw3d
-         XPMLIB = LibXpm
-      DEPXPMLIB = DepLibXpm
      X11IRAFDIR = ../
 
    MAIN_DEFINES = -DUTMP $(TTYGROUPDEF) $(PUCCPTYDDEF) \
@@ -84,7 +83,7 @@ X11IRAFDIR = ../
 
 
      TERMCAPLIB = TermcapLibrary
-        OBMLIBS = LibObm LibXpm
+        OBMLIBS = -lobm -lXpm
         MATHLIB = -lm
 
 AllTarget($(PROGRAMS))
