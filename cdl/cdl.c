@@ -46,6 +46,10 @@
  *         cdl_lookupFBSize  (cdl, configno, &w, &h, &nframes)
  *
  *         cdl_[set|get]WCS  (cdl, name, title, a, b, c, d, tx, ty, z1, z2, zt)
+ *     cdl_[set|get]Mapping  (cdl, region, sx,sy,snx,sny, dx,dy,dnx,dny, ref)
+ *             cdl_queryMap  (cdl, wcs, region, sx,sy,snx,sny, 
+ *					dx,dy,dnx,dny, objref)
+ *
  *       cdl_[set|get]Frame  (cdl, frame)
  *      cdl_[set|get]ZTrans  (cdl, ztrans)
  *      cdl_[set|get]ZScale  (cdl, z1, z2)
@@ -188,13 +192,13 @@ char	*imtdev;                        /* connection device	*/
 	}
 
         /* Initialize the CDL structure. */
-        cdl->frame    = 1;	   /* imd_setFrame (cdl->imd, 1);	*/
-        cdl->fbconfig = 1;	   /* imd_setFBConfig (cdl->imd, 1);	*/
-	cdl->fbwidth  = 512;
-	cdl->fbheight = 512;
-	cdl->fbnf     = 2;
-	cdl->im_nx    = 512;
-	cdl->im_ny    = 512;
+        cdl->frame      = 1;
+        cdl->fbconfig   = 1;
+	cdl->fbwidth    = 512;
+	cdl->fbheight   = 512;
+	cdl->fbnf       = 2;
+	cdl->im_nx      = 512;
+	cdl->im_ny      = 512;
 
 	cdl->contrast   = DEF_CONTRAST;
 	cdl->nsample    = DEF_NSAMPLE;
@@ -206,20 +210,33 @@ char	*imtdev;                        /* connection device	*/
 	cdl->linestyle  = L_SOLID;
 
         /* Initialize a WCS. */
-        cdl->a       = 1.0;
-        cdl->b       = 0.0;
-        cdl->c       = 0.0;
-        cdl->d       = -1.0;
-        cdl->tx      = 1.0;                  /* default for 512x512 fb */
-        cdl->ty      = 512.0;                /* default for 512x512 fb */
-        cdl->z1      = 0.0;
-        cdl->z2      = 255.0;
-        cdl->ztrans  = CDL_LINEAR;
-/*	imd_setWCS (cdl->imd, "", "", cdl->a, cdl->b, cdl->c, cdl->d,
- *	    cdl->tx, cdl->ty, cdl->z1, cdl->z2, cdl->ztrans);
- */
-        cdl->imname  = (char *) calloc (SZ_NAME, sizeof(char));
-        cdl->imtitle = (char *) calloc (SZ_NAME, sizeof(char));
+        cdl->a          = 1.0;
+        cdl->b          = 0.0;
+        cdl->c          = 0.0;
+        cdl->d          = -1.0;
+        cdl->tx         = 1.0;                  /* default for 512x512 fb */
+        cdl->ty         = 512.0;                /* default for 512x512 fb */
+        cdl->z1         = 0.0;
+        cdl->z2         = 255.0;
+        cdl->ztrans     = CDL_LINEAR;
+
+        /* Initialize the mapping. */
+        cdl->sx         = 1.0;
+        cdl->sy         = 1.0;
+        cdl->snx        = 512;
+        cdl->sny        = 512;
+        cdl->dx         = 0;
+        cdl->dy         = 0;
+        cdl->dnx        = 511;
+        cdl->dny        = 511;
+
+        cdl->iis_version = cdl->imd->iis_version;
+        cdl->iis_valid   = cdl->imd->iis_valid;
+
+        cdl->imname     = (char *) calloc (SZ_NAME, sizeof(char));
+        cdl->imtitle    = (char *) calloc (SZ_NAME, sizeof(char));
+        cdl->region     = (char *) calloc (SZ_NAME, sizeof(char));
+        cdl->ref        = (char *) calloc (SZ_NAME, sizeof(char));
 
 	/* Initialize the display list. */
 	for (i=0; i < MAX_FRAMES; i++)
@@ -410,6 +427,9 @@ float	 z1, z2;                 	/* zscale values        */
 int	 zt;                     	/* transformation type  */
 #endif
 {
+	int  status = 0;
+
+
 	if (cdl_debug) {
 	    printf ("[cdl_setWCS] name='%s' title='%s'\n", (imname?imname:""),
 		(imtitle?imtitle:""));
@@ -428,8 +448,15 @@ int	 zt;                     	/* transformation type  */
 	cdl->z1     = z1;
 	cdl->z2     = z2;
 	cdl->ztrans = zt;
-	return (imd_setWCS (cdl->imd, imname, imtitle, a, b, c, d, tx, ty,
-	    z1, z2, zt));
+
+	/* Send the WCS. */
+	status = imd_setWCS (cdl->imd, imname, imtitle, a, b, c, d, tx, ty,
+	    z1, z2, zt);
+
+	/* Invalidate the mapping once it's been sent. */
+	cdl->iis_valid = 0;
+
+	return (status);
 }
 
 
@@ -466,8 +493,11 @@ float   *z1, *z2;               	/* zscale values        */
 int     *zt;                    	/* transformation type  */
 #endif
 {
-	int status = imd_getWCS (cdl->imd, name, title, a, b, c, d,
+	int wcs = 0;			/* get the frame WCS	*/
+	int status = imd_getWCS (cdl->imd, wcs, name, title, a, b, c, d,
 	    tx, ty, z1, z2, zt);
+
+	cdl->iis_valid = cdl->imd->iis_valid;
 
 	if (cdl_debug) {
 	    printf ("[cdl_getWCS] name='%s' title='%s'\n", (name ? name : ""),
@@ -480,6 +510,173 @@ int     *zt;                    	/* transformation type  */
 }
 
 
+/*  CDL_SETMAPPING -- Set the mapping information to be sent with the next
+ *  cdl_setWcs() call.
+ */
+#ifdef ANSI_FUNC
+
+int 
+cdl_setMapping  (
+    CDLPtr  cdl,                        /* package ptr          */
+    char    *region,                  	/* region name 		*/
+    float   sx,				/* source rect		*/
+    float   sy,
+    int	    snx, 			/* source extent	*/
+    int	    sny,
+    int	    dx, 			/* dest rect		*/
+    int	    dy,
+    int	    dnx, 			/* dest extent		*/
+    int	    dny,
+    char    *ref                   	/* reference name	*/
+)
+#else
+
+int 
+cdl_setMapping  (cdl, region, sx,sy,snx,sny, dx,dy,dnx,dny, ref)
+CDLPtr  cdl;                            /* package ptr          */
+char    *region;                  	/* region name 		*/
+float	sx, sy;				/* source rect		*/
+int	snx, sny;			/* source extent	*/
+int	dx, dy;				/* dest rect		*/
+int	dnx, dny;			/* dest extent		*/
+char    *ref;                  		/* reference name	*/
+#endif
+{
+        if (cdl_debug) {
+            printf ("[cdl_setMapping] region='%s' ref='%s'\n",
+		(region ? region : ""), (ref ? ref : ""));
+            printf ("\tsrc = %g,%g,%d,%d   dest = %d,%d,%d,%d\n",
+               sx, sy, snx, sny, dx, dy, dnx, dny);
+        }
+
+        strcpy (cdl->region, (region ? region : ""));
+        strcpy (cdl->ref, (ref ? ref : ""));
+        cdl->sx   = sx;
+        cdl->sy   = sy;
+        cdl->snx  = snx;
+        cdl->sny  = sny;
+        cdl->dx   = dx;
+        cdl->dy   = dy;
+        cdl->dnx  = dnx;
+        cdl->dny  = dny;
+
+        return ((cdl->iis_valid = imd_setMapping (cdl->imd, 
+		region, sx,sy,snx,sny, dx,dy,dnx,dny, ref)));
+}
+
+
+/*  CDL_GETMAPPING --  Get the mapping information returned with the last
+ *  cdl_getWcs() call.
+ */
+#ifdef ANSI_FUNC
+int 
+cdl_getMapping  (
+    CDLPtr  cdl,                        /* package ptr          */
+    char    *region,                  	/* region name 		*/
+    float   *sx,			/* source rect		*/
+    float   *sy,
+    int	    *snx, 			/* source extent	*/
+    int	    *sny,
+    int	    *dx, 			/* dest rect		*/
+    int	    *dy,
+    int	    *dnx, 			/* dest extent		*/
+    int	    *dny,
+    char    *ref                   	/* reference name	*/
+)
+
+#else
+int 
+cdl_getMapping  (cdl, region, sx,sy,snx,sny, dx,dy,dnx,dny, ref)
+CDLPtr  cdl;                            /* package ptr          */
+char    *region;                  	/* region name 		*/
+float	*sx, *sy;			/* source rect		*/
+int	*snx, *sny;			/* source extent	*/
+int	*dx, *dy;			/* dest rect		*/
+int	*dnx, *dny;			/* dest extent		*/
+char    *ref;                  		/* reference name	*/
+#endif
+{
+        int  
+	status = imd_getMapping (cdl->imd, region, 
+			sx,sy,snx,sny, dx,dy,dnx,dny, ref);
+
+        if (cdl_debug) {
+            printf ("[cdl_getMapping] region='%s' ref='%s'\n",
+		(region ? region : ""), (ref ? ref : ""));
+            printf ("\tsrc = %g,%g,%d,%d   dest = %d,%d,%d,%d\n",
+               *sx, *sy, *snx, *sny, *dx, *dy, *dnx, *dny);
+        }
+
+        return (status);
+}
+
+
+/*  CDL_QUERYMAP -- Query a mapping given the wcs number.
+ */
+#ifdef ANSI_FUNC
+
+int 
+cdl_queryMap  (
+    CDLPtr  cdl,                        /* package ptr          */
+    int     wcs,                  	/* requested wcs number	*/
+    char    *region,			/* region name		*/
+    float   *sx,			/* source rect		*/
+    float   *sy,
+    int	    *snx, 			/* source extent	*/
+    int	    *sny,
+    int	    *dx, 			/* dest rect		*/
+    int	    *dy,
+    int	    *dnx, 			/* dest extent		*/
+    int	    *dny,
+    char    *objref                   	/* reference name	*/
+)
+#else
+
+int 
+cdl_queryMap  (cdl, wcs, region, sx,sy,snx,sny, dx,dy,dnx,dny, objref)
+CDLPtr  cdl;                            /* package ptr          */
+int     wcs;                  		/* requested wcs number	*/
+char    *region;                  	/* region name 		*/
+float	*sx, *sy;			/* source rect		*/
+int	*snx, *sny;			/* source extent	*/
+int	*dx, *dy;			/* dest rect		*/
+int	*dnx, *dny;			/* dest extent		*/
+char    *objref;                  	/* reference name	*/
+#endif
+{
+	float a, b, c, d, tx, ty, z1, z2;
+	int   zt;
+	char  name[256], title[256];
+	int   wcs_status = ERR;
+	int   frame = wcs / 100;
+
+
+	if (cdl->iis_version > 0) {
+	    /* Do a WCS query so we get the requested mapping. */
+	    wcs_status = imd_getWCS (cdl->imd, wcs, name, title, 
+		&a, &b, &c, &d, &tx, &ty, &z1, &z2, &zt);
+
+	    /* What we really want is the mapping info for the WCS */
+	    wcs_status = cdl_getMapping (cdl, region, sx,sy,snx,sny,
+		dx,dy,dnx,dny, objref);
+
+	    if (cdl_debug) {
+	        printf ("[cdl_queryMap] wcs=%d name='%s' title='%s'\n",
+		    wcs, (name ? name : ""), (title ? title : ""));
+                printf ("\ta=%g b=%g c=%g d=%g tx=%g ty=%g z1=%g z2=%g zt=%d\n",
+                   a, b, c, d, tx, ty, z1, z2, zt);
+                printf ("\tregion='%s' ref='%s'\n",
+		    (region ? region : ""), (objref ? objref : ""));
+                printf ("\tsrc = %g,%g,%d,%d   dest = %d,%d,%d,%d\n",
+                   sx, sy, snx, sny, dx, dy, dnx, dny);
+            }
+	}
+
+	return (wcs_status);
+}
+
+
+
 /*  CDL_CLEARFRAME -- Erase the current display frame.
  */
 
@@ -487,7 +684,7 @@ int     *zt;                    	/* transformation type  */
 
 int 
 cdl_clearFrame (
-    CDLPtr cdl                            /* package ptr          */
+    CDLPtr cdl                          /* package ptr          */
 )
 #else
 
@@ -604,6 +801,8 @@ CDLPtr  cdl;                            /* package ptr          */
 
 	free ((char *) cdl->imname);
 	free ((char *) cdl->imtitle);
+	free ((char *) cdl->region);
+	free ((char *) cdl->ref);
 
 	imd_close (cdl->imd);
 	free ((CDLPtr) cdl);

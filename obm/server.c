@@ -19,6 +19,7 @@
  *
  *           reset-server
  *          appInitialize appname, appclass, resources
+ *              appExtend new-resources [overwrite]
  *          createObjects [resource-name]
  *	    destroyObject object
  *	      queryObject object [class [subclass]]
@@ -88,7 +89,7 @@ static	ObmObject ServerCreate();
 static	void ServerDestroy();
 static	int ServerEvaluate(), serverQueryObject();
 static	int serverCreateMenu(), serverDestroyMenu();
-static	int serverAppInitialize(), serverCreateObjects();
+static	int serverAppInitialize(), serverAppExtend(), serverCreateObjects();
 static	int serverSend(), serverPrint(), serverDestroyObject();
 static	int serverReset(), serverActivate(), serverDeactivate();
 static	int serverCreateBitmap(), serverCreatePixmap(), serverCreateCursor();
@@ -174,6 +175,8 @@ int nargs;
 	    (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
 	    "appInitialize", serverAppInitialize, (ClientData)obj, NULL);
+	Tcl_CreateCommand (tcl,
+	    "appExtend", serverAppExtend, (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
 	    "createObjects", serverCreateObjects, (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
@@ -409,6 +412,55 @@ char **argv;
 	XtAppSetFallbackResources (obm->app_context, NULL);
 
 	obm->specified++;
+	return (TCL_OK);
+}
+
+
+/* serverAppExtend -- TCL command to extend the application resource database
+ * to allow for the creation of new widgets loaded since the application was
+ * first started.  The 'overwrite' option, if present, says to allow the new
+ * resource strings to overwrite the existing resources, otherwise the older
+ * ones will not be changed.
+ *
+ *   Usage:	appExtend new-resources [overwrite]
+ */
+static int
+serverAppExtend (object, tcl, argc, argv)
+ObmObject object;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+	register ServerObject obj = (ServerObject) object;
+	register ObmContext obm = obj->server.obm;
+	XrmDatabase old_db, extended_db;
+	Boolean overwrite = False;
+	char *resources;
+
+
+	if (!obm->specified || !obm->display || argc < 2)
+	    return (TCL_ERROR);
+
+	/* Get arguments. */
+	resources = argv[1];
+        overwrite = (argc > 2) ? (strcmp (argv[2], "overwrite") == 0) : False;
+
+	/* Get the current fallback resource database. */
+	old_db = XrmGetDatabase (obm->display);
+	if (old_db == (XrmDatabase) NULL)
+	    return (TCL_ERROR);
+
+	/* Create a database structure from the resource string. */
+	extended_db = XrmGetStringDatabase (resources);
+	if (extended_db == (XrmDatabase) NULL)
+	    return (TCL_ERROR);
+
+	/* Combine the old an new databases. */
+	XrmCombineDatabase (extended_db, &old_db, overwrite);
+
+	/* Update the application resource database. */
+	XrmSetDatabase (obm->display, old_db);
+
 	return (TCL_OK);
 }
 
@@ -1008,7 +1060,7 @@ char **argv;
 	    /* Allocate and initialize the callback structure. */
 	    nchars = sizeof(serverCallback) + strlen(userproc)+1 +
 		(client_data ? strlen(client_data)+1 : 0);
-	    if (!(cb = (ServerCallback) XtMalloc (nchars)))
+	    if (!(cb = (ServerCallback) XtCalloc (nchars,1)))
 		return (TCL_ERROR);
 
 	    cb->obj = (XtPointer) obj;
@@ -1059,7 +1111,7 @@ XtIntervalId *id;
 	}
 
 	unlink_callback (&obj->server, cb);
-	XtFree ((char *)cb);
+/*	XtFree ((char *)cb);*/
 }
 
 
@@ -1322,7 +1374,7 @@ char *pixels;
 	int nchars;
 
 	if (!obm->specified || !obm->display)
-	    return (ERR);
+	    return (TCL_ERROR);
 
 	/* Check if bitmap is already in cache. */
 	for (last_lp = lp = obm->pixmap_cache;  lp;  lp = lp->next) {
@@ -1359,7 +1411,7 @@ char *pixels;
 
 	/* Create the bitmap. */
 	if (!(icon = (Icon *) XtCalloc (1, sizeof (*icon))))
-	    return (ERR);
+	    return (TCL_ERROR);
 	icon->pixmap = XCreateBitmapFromData (obm->display,
 	    RootWindowOfScreen (obm->screen), data, width, height);
 	lp->ptr = (caddr_t) icon;
@@ -1475,7 +1527,7 @@ unsigned long fg, bg;
 	int nchars;
 
 	if (!obm->specified || !obm->display)
-	    return (ERR);
+	    return (TCL_ERROR);
 
 	/* Check if pixmap is already in cache. */
 	for (last_lp = lp = obm->pixmap_cache;  lp;  lp = lp->next) {
@@ -1499,7 +1551,7 @@ unsigned long fg, bg;
 	}
 
 	if (!(icon = (Icon *) XtCalloc (1, sizeof (*icon))))
-	    return (ERR);
+	    return (TCL_ERROR);
 
 	/* Get pixmap data. */
 	if (pixmap) {
@@ -1664,7 +1716,7 @@ char *description;
 	Widget w;
 
 	if (!obm->specified || !obm->display)
-	    return (ERR);
+	    return (TCL_ERROR);
 
 	/* Get reference widget if any. */
 	w = NULL;
@@ -1675,7 +1727,7 @@ char *description;
 	 */
 	status = XpmCreateXpmImageFromBuffer (description, &image, NULL, NULL);
 	if (status != XpmSuccess)
-	    return (ERR);
+	    return (TCL_ERROR);
 	XpmCreateDataFromXpmImage (&data, &image, NULL);
 
 	if (data) {
@@ -1683,7 +1735,7 @@ char *description;
 	    Cardinal n;
 
 	    if (!(icon = (Icon *) XtCalloc (1, sizeof(*icon))))
-		return (ERR);
+		return (TCL_ERROR);
 
 	    build_colorlist (w, table, XtNumber(table), &n);
 	    icon->attributes.colorsymbols = table;
@@ -1695,12 +1747,12 @@ char *description;
 	        &icon->pixmap, &icon->mask, &icon->attributes);
 
 	    XtFree ((String) data);
-	    XtFree ((String) table);
+/*	    XtFree ((String) table);*/
 	    XpmFreeXpmImage (&image);
 
 	} else {
 	    XpmFreeXpmImage (&image);
-	    return (ERR);
+	    return (TCL_ERROR);
 	}
 
 	/* Check if pixmap is already in cache. */
@@ -1843,7 +1895,7 @@ char **argv;
 	char *name;
 
 	if (!obm->specified || !obm->display)
-	    return (ERR);
+	    return (TCL_ERROR);
 
 	if (argc < 8)
 	    return (TCL_ERROR);

@@ -8,6 +8,10 @@
 #define	SZ_NAME			256	/* size of an image name	*/
 #define	SZ_LINE			256	/* size of temp buffer		*/
 #define	SZ_IMTDEV		128	/* size of an IMTDEV string 	*/
+#define SZ_IMCURVAL     	160     /* cursor value str length 	*/
+#define SZ_OLD_WCSBUF   	320     /* old wcs buffer length   	*/
+#define SZ_WCSBUF       	1024    /* wcs buffer length       	*/
+
 #define	OK			0	/* success			*/
 #define	ERR			1	/* failure			*/
 #define	EOS			'\0'	/* end of statement		*/
@@ -40,22 +44,31 @@ typedef struct {
 } FBTab;
 
 struct IMD {
-        int     datain, dataout;        /* connection file descriptors  */
-        int     domain;                 /* connection type              */
+    int     datain, dataout;        	/* connection file descriptors  */
+    int     domain;                 	/* connection type              */
 
-        short   frame;                  /* display frame number         */
-        short   fbconfig;               /* frame buffer config number   */
-        FBTab   *fbtab[MAX_FBCONFIG];   /* fb configuration table       */
+    short   frame;                  	/* display frame number         */
+    short   fbconfig;               	/* frame buffer config number   */
+    FBTab   *fbtab[MAX_FBCONFIG];   	/* fb configuration table       */
 
-        short   xs, xe;                 /* X start/end values           */
-        short   ys, ye;                 /* Y start/end values           */
-        char    *name;                  /* image name                   */
-        char    *title;                 /* image title                  */
-        float   a, b, c, d;             /* WCS values                   */
-        float   tx, ty;                 /* translation values           */
-        float   z1, z2;                 /* zscale values                */
-        short   ztrans;                 /* Z trans type                 */
+    short   xs, xe;                 	/* X start/end values           */
+    short   ys, ye;                 	/* Y start/end values           */
+    char    *name;                  	/* image name                   */
+    char    *title;                 	/* image title                  */
+    float   a, b, c, d;             	/* WCS values                   */
+    float   tx, ty;                 	/* translation values           */
+    float   z1, z2;                 	/* zscale values                */
+    short   ztrans;                 	/* Z trans type                 */
 
+    /* Coordinate mappings on the frame buffer. */
+    int     iis_version;            	/* server IIS version   */
+    int     iis_valid;              	/* valid mapping flag   */
+    char    *ref;        		/* img reference        */
+    char    *region;     		/* region name          */
+    float   sx, sy;                 	/* source rect          */
+    int     snx, sny;
+    int     dx, dy;                 	/* destination rect     */
+    int     dnx, dny;
 };
 typedef struct IMD *IMDPtr;
 

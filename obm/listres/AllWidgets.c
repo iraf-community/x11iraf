@@ -69,6 +69,7 @@ extern WidgetClass xfwfScrollbarWidgetClass;
 extern WidgetClass xfwfSlider2WidgetClass;
 extern WidgetClass xfwfToggleWidgetClass;
 extern WidgetClass tabsWidgetClass;
+extern WidgetClass listtreeWidgetClass;
 
 XmuWidgetNode XawWidgetArray[] = {
 { "applicationShell", &applicationShellWidgetClass },
@@ -123,6 +124,7 @@ XmuWidgetNode XawWidgetArray[] = {
 { "frame", &xfwfFrameWidgetClass },
 { "group", &xfwfGroupWidgetClass },
 { "icon", &xfwfIconWidgetClass },
+{ "listtree", &listtreeWidgetClass },
 { "multiList", &xfwfMultiListWidgetClass },
 { "radioGroup", &xfwfRadioGroupWidgetClass },
 { "rowCol", &xfwfRowColWidgetClass },

@@ -17,8 +17,8 @@
  * accepting connections from remote network clients and communicating with
  * them via the imtool/iis image display server communications prototcol.
  *
- *	   fd = xim_iisopen (xim)
- *	       xim_iisclose (xim)
+ *	   fd = xim_iisOpen (xim)
+ *	       xim_iisClose (xim)
  *		  xim_iisio (xim, &fd, &id)
  *
  *           xim_frameLabel (xim)
@@ -42,6 +42,8 @@
 #define	MAXCONN		5
 
 
+#define	IIS_VERSION	10		/* version 10 -> 1.0		*/
+
 #define	SZ_IMCURVAL	160
 #define	PACKED		0040000
 #define	COMMAND		0100000
@@ -59,15 +61,25 @@ struct	iism70 {
 	short	t;
 };
 
-extern int errno;
-static void set_fbconfig();
-static int decode_frameno();
-static int bswap2(), iis_read(), iis_write();
-static CtranPtr wcs_update();
+/* Running id for frame mappings.  We keep a separate id for each of the
+ * currently allowed MAX_FRAMES since the object id is used in the WCS
+ * code for the image along with the (frame_num * 100).
+ */
+int objid[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };			
+static int *wcspix_enabled = NULL;
+	
+static	int iis_debug = -1;				/* protocol debug */
 
-static IoChanPtr open_fifo(), open_inet(), open_unix();
+static void set_fbconfig(), add_mapping();
 static void xim_connectClient(), xim_disconnectClient();
+static int chan_read(), chan_write(), decode_frameno();
+
+static CtranPtr wcs_update();
+static IoChanPtr open_fifo(), open_inet(), open_unix();
 static IoChanPtr get_iochan();
+static MappingPtr xim_getMapping();
+
+extern int errno;
 
 
 /* XIM_IISOPEN -- Initialize the IIS protocol module and ready the module to
@@ -76,7 +88,7 @@ static IoChanPtr get_iochan();
  * UNIX domain socket connection.  All three types of server ports are
  * simultaneously ready to receive client connections.
  */
-xim_iisopen (xim)
+xim_iisOpen (xim)
 register XimDataPtr xim;
 {
 	int nopen = 0;
@@ -95,7 +107,7 @@ register XimDataPtr xim;
 /* XIM_IISCLOSE -- Close down the IIS protocol module.
  */
 void
-xim_iisclose (xim)
+xim_iisClose (xim)
 register XimDataPtr xim;
 {
 	register IoChanPtr chan;
@@ -146,6 +158,12 @@ register XimDataPtr xim;
 	int datain, dataout;
 	int keepalive;
 
+#ifdef __DARWIN__
+	/* On OS X we don't use fifos. */
+	strcpy (xim->input_fifo, "none");
+	return (NULL);
+#endif
+
 	/* Setting the input fifo to "none" or the null string disables
 	 * fifo support.
 	 */
@@ -190,9 +208,11 @@ done:
 	    chan->dataout = dataout;
 	    chan->keepalive = keepalive;
 	    chan->reference_frame = 1;
+	    chan->version = 0;
 	    chan->rf_p = &xim->frames[0];
 	} else {
 	    fprintf (stderr, "Warning: cannot open %s\n", xim->output_fifo);
+	    strcpy (xim->input_fifo, "none");
 	    chan = NULL;
 	}
 
@@ -237,6 +257,7 @@ register XimDataPtr xim;
         if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse,
 	    sizeof(reuse)) < 0)
                 goto err;
+
 	if (bind (s, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) < 0)
 	    goto err;
 
@@ -250,6 +271,7 @@ register XimDataPtr xim;
 	    chan->datain = s;
 	    chan->dataout = s;
 	    chan->reference_frame = 1;
+	    chan->version = 0;
 	    chan->rf_p = &xim->frames[0];
 
 	    /* Register connectClient callback. */
@@ -257,8 +279,14 @@ register XimDataPtr xim;
 	    return (chan);
 	}
 err:
-	fprintf (stderr, "ximtool: cannot open socket on port %d, errno=%d\n",
-	    xim->port, errno);
+	if (errno == EADDRINUSE) {
+	    fprintf (stderr,"ximtool: inet port %d already in use - disabled\n",
+	        xim->port);
+	} else {
+	    fprintf (stderr, "ximtool: can't open inet socket %d, errno=%d\n",
+	        xim->port, errno);
+	}
+	xim->port = 0;
 	if (s)
 	    close (s);
 	return (NULL);
@@ -275,6 +303,7 @@ register XimDataPtr xim;
 	register int s = 0;
 	register IoChanPtr chan;
 	struct sockaddr_un sockaddr;
+	int	addrlen;
 	char path[256];
 
 	/* Setting the addr to "none" or the null string disables unix
@@ -293,7 +322,8 @@ register XimDataPtr xim;
 	memset ((void *)&sockaddr, 0, sizeof(sockaddr));
 	sockaddr.sun_family = AF_UNIX;
 	strcpy (sockaddr.sun_path, path);
-	if (bind (s, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) < 0)
+        addrlen = sizeof(sockaddr) - sizeof(sockaddr.sun_path) + strlen(path);
+	if (bind (s, (struct sockaddr *)&sockaddr, addrlen) < 0)
 	    goto err;
 
 	if (listen (s, MAXCONN) < 0)
@@ -306,6 +336,7 @@ register XimDataPtr xim;
 	    chan->datain = s;
 	    chan->dataout = s;
 	    chan->reference_frame = 1;
+	    chan->version = 0;
 	    chan->rf_p = &xim->frames[0];
 	    strncpy (chan->path, path, SZ_FNAME);
 
@@ -314,8 +345,14 @@ register XimDataPtr xim;
 	    return (chan);
 	}
 err:
-	fprintf (stderr, "ximtool: cannot open socket on port %s, errno=%d\n",
-	    path, errno);
+	if (errno == EADDRINUSE) {
+	    fprintf (stderr,"ximtool: unix addr %s already in use - disabled\n",
+	        path);
+	} else {
+	    fprintf (stderr,"ximtool: cannot open unix socket '%s', errno=%d\n",
+	        path, errno);
+	}
+	strcpy (xim->unixaddr, "none");
 	if (s)
 	    close (s);
 	return (NULL);
@@ -339,10 +376,10 @@ XtPointer id;
 	/* Accept connection. */
 	if ((s = accept ((int)*source, (struct sockaddr *)0, (int *)0)) < 0)
 	    return;
-	if (fcntl (s, F_SETFD, O_RDWR|O_NDELAY) < 0) {
+/* 	if (fcntl (s, F_SETFL, O_RDWR|O_NDELAY) < 0) {
 	    close (s);
 	    return;
-	}
+	} */
 
 	/* Allocate and fill in i/o channel descriptor. */
 	if (chan = get_iochan(xim)) {
@@ -351,6 +388,7 @@ XtPointer id;
 	    chan->datain = s;
 	    chan->dataout = s;
 	    chan->reference_frame = 1;
+	    chan->version = 0;
 	    chan->rf_p = &xim->frames[0];
 	    chan->id = xim_addInput (xim, s, xim_iisio, (XtPointer)chan);
 	}
@@ -408,6 +446,8 @@ int *fd_addr;
 XtInputId *id_addr;
 {
 	register XimDataPtr xim = (XimDataPtr) chan->xim;
+	register MappingPtr mp = (MappingPtr) NULL;
+	register FrameBufPtr fb;
 	register int sum, i;
 	register short *p;
 	int	datain = *fd_addr;
@@ -416,7 +456,6 @@ XtInputId *id_addr;
 	struct	iism70 iis;
 	char	buf[SZ_FIFOBUF];
 	static	int errmsg=0, bswap=0;
-	static	int iis_debug = -1;
 
 
 	/* Initialize the debug output. */
@@ -424,7 +463,7 @@ XtInputId *id_addr;
 	    iis_debug = (getenv("DEBUG_IIS") != (char *)NULL);
 
 	/* Get the IIS header. */
-	if ((n = iis_read (datain, (char *)&iis, sizeof(iis))) < sizeof(iis)) {
+	if ((n = chan_read (datain, (char *)&iis, sizeof(iis))) < sizeof(iis)) {
 	    if (n != 0) 
 	        fprintf (stderr, 
 	            "ximtool: command input read error, n=%d of %d, errno=%d\n",
@@ -487,12 +526,35 @@ XtInputId *id_addr;
 
 	switch (iis.subunit & 077) {
 	case FEEDBACK:
-	    /* The feedback unit is used only to clear a frame.
+	    /* The feedback unit is used only to clear a frame.  The 
+	     * xim_eraseFrame() procedure takes care of uncaching the
+	     * mappings associated with this frame.
 	     */
-	    newframe =  decode_frameno (iis.z & 07777);
+	    newframe = decode_frameno (iis.z & 0177777);
 	    xim_setReferenceFrame (chan, newframe);
 	    if (newframe == chan->reference_frame)
 	        xim_eraseFrame (xim, chan->reference_frame);
+
+            /* ISM: Uncache all mappings associated with this frame. */
+	    fb = &xim->frames[newframe-1];
+            for (i=0; i < fb->nmaps; i++) {
+                mp = &fb->mapping[i];
+                if (mp->id) {
+                    sprintf (buf, "uncache %d", mp->id);
+                    ism_message (xim, "wcspix", buf);
+                    wcspix_message (xim, buf);
+		    mp->id = 0;
+                }
+            }
+
+	    /* Reset various counters for the new frame and release the
+	     * mappings.
+	     */
+	    fb->nmaps = 0;
+	    fb->ctran.valid = 0;
+	    objid[newframe-1] = 0;
+            fb->nmaps = 0;                
+
 	    if (iis_debug)
   		fprintf (stderr, "erase frame %d - ref = %d\n", 
 		    newframe, chan->reference_frame);
@@ -508,9 +570,9 @@ XtInputId *id_addr;
 	     */
 	    if (iis.subunit & COMMAND) {
 		int	frame, z, n;
-		short	x[14];
+		short	x[17];
 
-		if (iis_read (datain, (char *)x, ndatabytes) == ndatabytes) {
+		if (chan_read (datain, (char *)x, ndatabytes) == ndatabytes) {
 		    if (bswap)
 			bswap2 ((char *)x, (char *)x, ndatabytes);
 
@@ -553,9 +615,8 @@ XtInputId *id_addr;
 		int     nbytes, nleft, n, x, y;
 		long    starttime;
 
-		/* Get the frame to be read from. */
-		
-		xim_setReferenceFrame (chan, decode_frameno (iis.z & 07777));
+		/* Get the frame to read from. */
+		xim_setReferenceFrame (chan, decode_frameno (iis.z & 0177777));
 
 		nbytes = ndatabytes;
 		x = iis.x & XYMASK;
@@ -579,9 +640,9 @@ XtInputId *id_addr;
 		starttime = time(0);
 		for (nleft=nbytes, ip=iobuf;  nleft > 0;  nleft -= n) {
 		    n = (nleft < SZ_FIFOBUF) ? nleft : SZ_FIFOBUF;
-		    if ((n = iis_write (dataout, ip, n)) <= 0) {
+		    if ((n = chan_write (dataout, ip, n)) <= 0) {
 			if (n < 0 || (time(0) - starttime > IO_TIMEOUT)) {
-			    fprintf (stderr, "IMTOOL: timeout on write\n");
+			    fprintf (stderr, "XIMTOOL: timeout on write\n");
 			    break;
 			}
 		    } else
@@ -601,7 +662,7 @@ XtInputId *id_addr;
 		 * each frame, 01 is frame 1, 02 is frame 2, 04 is frame 3,
 		 * and so on).
 		 */
-		xim_setReferenceFrame (chan, decode_frameno (iis.z & 07777));
+		xim_setReferenceFrame (chan, decode_frameno (iis.z & 0177777));
 
 		nbytes = ndatabytes;
 		x = iis.x & XYMASK;
@@ -612,9 +673,11 @@ XtInputId *id_addr;
 		starttime = time(0);
 		for (nleft=nbytes, op=iobuf;  nleft > 0;  nleft -= n) {
 		    n = (nleft < SZ_FIFOBUF) ? nleft : SZ_FIFOBUF;
-		    if ((n = iis_read (datain, op, n)) <= 0) {
-			if (n < 0 || (time(0) - starttime > IO_TIMEOUT))
+		    if ((n = chan_read (datain, op, n)) <= 0) {
+			if (n < 0 || (time(0) - starttime > IO_TIMEOUT)) {
+			    fprintf (stderr, "XIMTOOL: timeout on read\n");
 			    break;
+			}
 		    } else
 			op += n;
 		}
@@ -647,51 +710,121 @@ XtInputId *id_addr;
 	    if (iis.tid & IIS_READ) {
 		/* Return the WCS for the referenced frame.
 		 */
-		char emsg[SZ_FNAME];
+		char emsg[SZ_WCSBUF];
 		char *text;
-		int frame;
+		int frame, wcsnum;
 
-		frame = decode_frameno (iis.z & 07777);
-		xim_setReferenceFrame (chan, frame);
+		memset ((char *)emsg, 0, SZ_WCSBUF);
 
-		if (chan->rf_p->frameno <= 0)
-		    strcpy (text=emsg, "[NOSUCHFRAME]\n");
-		else
-		    text = chan->rf_p->wcsbuf;
+	        if ((iis.x & 017777) && (iis.y & 017777)) {
+		    /* This is a check by the client on our capabilities.
+		     * Return with a version number which can be used by the
+		     * client.  However we write back using the old WCS 
+		     * buffer size for compatability.
+		     */
+		    sprintf (text=emsg, "version=%d", IIS_VERSION);
+		    chan->version = IIS_VERSION;
 
-		iis_write (dataout, text, SZ_WCSBUF);
-		if (iis_debug) {
-                    fprintf (stderr, "query wcs:\n");
-                    write (2, text, SZ_WCSBUF);
-		}
+		    chan_write (dataout, text, SZ_OLD_WCSBUF);
+		    if (iis_debug) 
+			fprintf (stderr, "version query wcs: %s\n",text);
+
+	        } else if ((iis.x & 017777) && (iis.t & 017777)) {
+		    /* Return the buffer for a specified WCS number.
+		     */
+		    CtranPtr ct = (CtranPtr) NULL;
+		    FrameBufPtr fr = (FrameBufPtr) NULL;
+		    int    wcsnum = (iis.t & 017777);
+		    register int i, j;
+
+
+		    /* Decode the requested wcs number. */
+		    frame  = decode_frameno (iis.z & 0177777);
+
+		    /* Search for the requested WCS number. */
+		    mp = (MappingPtr) NULL;
+		    for (j=0; j < xim->nframes; j++) {
+			fr = &xim->frames[j];
+			if (fr->frameno != frame)
+                    	    continue;
+                	for (i=0; i < fr->nmaps; i++) {
+               	    	    mp = &fr->mapping[i];
+                    	    if (mp->id == wcsnum) {
+				/* found the mapping */
+				ct = &(mp->ctran);
+				goto map_found;
+			    }
+			}
+	    	    }
+
+		    /* Encode the WCS and mapping information. */
+map_found:	    if (ct) {
+			char wcs[SZ_WCSBUF], mapping[SZ_WCSBUF];
+
+			sprintf (wcs, "%s\n%f %f %f %f %f %f %f %f %d\n",
+			    ct->imtitle, ct->a, ct->b, ct->c, ct->d,
+			    ct->tx, ct->ty, ct->z1, ct->z2, ct->zt);
+			sprintf (mapping, "%s %f %f %d %d %d %d %d %d\n%s\n",
+			    mp->region, mp->sx, mp->sy, mp->snx, mp->sny, 
+			    mp->dx, mp->dy, mp->dnx, mp->dny, mp->ref);
+
+		        strcpy (text=emsg, wcs);
+		        strcat (text, mapping);
+		    } else
+		        strcpy (text=emsg, "[NOSUCHWCS]\n");
+
+		    chan_write (dataout, text, SZ_WCSBUF);
+
+		    if (iis_debug) {
+                        fprintf (stderr, "query specified wcs=%d frame=%d\n",
+			    wcsnum, frame);
+                        write (2, text, strlen (text));
+		    }
+
+	        } else {
+		    frame = decode_frameno (iis.z & 0177777);
+		    xim_setReferenceFrame (chan, frame);
+
+		    if (chan->rf_p->frameno <= 0)
+		        strcpy (text=emsg, "[NOSUCHFRAME]\n");
+		    else
+		        text = chan->rf_p->wcsbuf;
+
+		    if ((iis.x & 0777))
+		        chan_write (dataout, text, SZ_WCSBUF);
+		    else
+		        chan_write (dataout, text, SZ_OLD_WCSBUF);
+
+		    if (iis_debug) {
+                        fprintf (stderr, "query wcs: frame = %d\n", frame);
+                        write (2, text, strlen(text));
+		    }
+	        }
 
 	    } else {
 		/* Set the WCS for the referenced frame.
 		 */
 		register CtranPtr ct;
-		int fb_config, frame;
+		int fb_config, frame, new_wcs = 0;
 
-		frame = decode_frameno (iis.z & 07777);
+		frame = decode_frameno (iis.z & 0177777);
 		fb_config = (iis.t & 0777) + 1;
+		new_wcs   = (iis.x & 0777);
 
 		/* See if we need to change the frame buffer configuration,
 		 * or allocate a new frame.
-	
-		if (fb_config == 1) {
-		    if (xim->fb_config[0].width != xim->width || 
-		        xim->fb_config[0].height != xim->height)
-		            set_fbconfig (chan, fb_config, frame);
-		} else 
 		*/
 		if (fb_config != xim->fb_configno)
-		        set_fbconfig (chan, fb_config, frame);
-		else if (frame > xim->nframes && frame < MAX_FRAMES)
+		    set_fbconfig (chan, fb_config, frame);
+		else if (frame > xim->nframes && frame <= MAX_FRAMES)
 		    set_fbconfig (chan, xim->fb_configno, frame);
 
 		/* Read in and set up the WCS. */
 		xim_setReferenceFrame (chan, frame);
-		if (iis_read (datain, buf, ndatabytes) == ndatabytes)
-		    strncpy (chan->rf_p->wcsbuf, buf, SZ_WCSBUF);
+		memset ((char *)buf, 0, SZ_WCSBUF);
+		if (chan_read (datain, buf, ndatabytes) == ndatabytes)
+		    strncpy (chan->rf_p->wcsbuf, buf,
+		        (new_wcs ? SZ_WCSBUF : SZ_OLD_WCSBUF));
 
 		if (iis_debug) {
                     fprintf (stderr, "set wcs:\n");
@@ -701,8 +834,17 @@ XtInputId *id_addr;
 		strcpy (chan->rf_p->ctran.format, W_DEFFORMAT);
 		chan->rf_p->ctran.imtitle[0] = '\0';
 		chan->rf_p->ctran.valid = 0;
-
 		ct = wcs_update (xim, chan->rf_p);
+
+		/* If we're connected to an old-style client, disable the
+	 	 * WCSPIX ISM, otherwise just let the GUI know it capable.
+		 */
+		wcspix_message (xim, (new_wcs ? "capable" : "disable"));
+
+	 	/* Add the mapping information. */
+		add_mapping (xim, ct, chan->rf_p->wcsbuf, 
+		    &xim->frames[chan->reference_frame-1]);
+
 		xim_message (xim, "frameTitle", ct->imtitle);
 	    }
 	    return;
@@ -787,8 +929,12 @@ XtInputId *id_addr;
 	if (!(iis.tid & IIS_READ))
 	    for (nbytes = ndatabytes;  nbytes > 0;  nbytes -= n) {
 		n = (nbytes < SZ_FIFOBUF) ? nbytes : SZ_FIFOBUF;
-		if ((n = iis_read (datain, buf, n)) <= 0)
+		if ((n = chan_read (datain, buf, n)) <= 0) {
+		    if (iis_debug)
+                        fprintf (stderr,
+			    "discarding %d bytes following header:\n", n);
 		    break;
+		}
 	    }
 }
 
@@ -931,6 +1077,11 @@ int frame;
             if (xim->tileFrames)
                 xim_tileFrames (xim, xim->tileFramesList);
 
+	    /* Initialize the ISM to uncache all images when we change
+	     * frame buffer configs.
+	     */
+	    ism_message (xim, "wcspix", "initialize");
+
 	} else if (frame > xim->nframes) {
 	    /* Add additional frames.  */
 	    for (i=1;  i <= frame;  i++) {
@@ -976,33 +1127,6 @@ register int	z;
 }
 
 
-/* BSWAP2 - Move bytes from array "a" to array "b", swapping successive
- * pairs of bytes.  The two arrays may be the same but may not be offset
- * and overlapping.
- */
-static
-bswap2 (a, b, nbytes)
-char 	*a, *b;		/* input array			*/
-int	nbytes;		/* number of bytes to swap	*/
-{
-	register char *ip=a, *op=b, *otop;
-	register unsigned temp;
-
-	/* Swap successive pairs of bytes.
-	 */
-	for (otop = op + (nbytes & ~1);  op < otop;  ) {
-	    temp  = *ip++;
-	    *op++ = *ip++;
-	    *op++ = temp;
-	}
-
-	/* If there is an odd byte left, move it to the output array.
-	 */
-	if (nbytes & 1)
-	    *op = *ip;
-}
-
-
 /* XIM_RETCURSORVAL -- Return the cursor value on the output datastream to
  * the client which requested the cursor read.
  */
@@ -1015,6 +1139,7 @@ int	key;			/* keystroke used as trigger */
 char	*strval;		/* optional string value */
 {
 	register CtranPtr ct;
+	register MappingPtr mp = (MappingPtr) NULL;
 	int dataout, wcscode;
 	char curval[SZ_IMCURVAL];
 	char keystr[20];
@@ -1047,6 +1172,16 @@ char	*strval;		/* optional string value */
 
 	/* Compute WCS code. */
 	wcscode = frame * 100 + wcs;
+	if (wcspix_enabled != NULL && *wcspix_enabled) {
+	    if ((mp = xim_getMapping (xim, sx, sy, frame))) {
+		wcscode = mp->id;
+
+		/* Return the coordinates in terms of the mapping. */
+        	ct = &(mp->ctran);
+		wx = ct->a * sx + ct->c * sy + ct->tx;
+            	wy = ct->b * sx + ct->d * sy + ct->ty;
+	    }
+	}
 
 	/* Encode the cursor value. */
 	if (key == EOF)
@@ -1062,8 +1197,11 @@ char	*strval;		/* optional string value */
 		wx, wy, wcscode, keystr, strval);
 	}
 
+	    		    
+	if (iis_debug) fprintf (stderr, "curval: %s", curval);
+
 	/* Send it to the client program and terminate cursor mode. */
-	iis_write (dataout, curval, sizeof(curval));
+	chan_write (dataout, curval, sizeof(curval));
 	xim_cursorMode (xim, 0);
 	xim->cursor_chan = NULL;
 }
@@ -1079,18 +1217,58 @@ float sx, sy;			/* screen (raster) pixel coordinates */
 int sz;				/* screen pixel value */
 char *obuf;			/* receives encoded string */
 {
-	register FrameBufPtr fr = xim->df_p;
 	register CtranPtr ct;
-	float wx, wy, wz;
-	int ch;
+	MappingPtr  mp = (MappingPtr) NULL;
+	float 	wx, wy, wz;
+	float 	y = xim->height - sy;
+	register int j=0, i=0, ch, map_found = 0;
+	char buf[SZ_LINE];
 
-	ct = wcs_update (xim, fr);
+
+        /* The first time we're called get the address of the wcspix
+         * connected flag so we can check whether to get screen pixel
+         * or real-image values.
+         */
+        if (wcspix_enabled == NULL) {
+            register IsmModule ism;
+            extern ismModule ism_modules[];
+            extern int ism_nmodules;
+
+            for (i=0; i < ism_nmodules; i++) {
+                ism = &ism_modules[i];
+                if (strcmp ("wcspix", ism->name) == 0)
+                    wcspix_enabled = &(ism->connected);
+            }
+        }
+
+
+	/* Now lookup the coordinate mapping and update the WCS and real
+	 * pixel value if the ISM is running.
+	 */
+	if (wcspix_enabled != NULL && *wcspix_enabled) {
+	    if ((mp = xim_getMapping (xim, sx+1.0, sy, xim->display_frame))) {
+        	ct = &(mp->ctran);
+	        sx -= 0.5;
+	        sy -= 0.5;
+		wx = ct->a * sx + ct->c * sy + ct->tx;
+            	wy = ct->b * sx + ct->d * sy + ct->ty;
+
+		/* Found the image mapping so request the WCS
+         	 * and pixel information from the WPIX ISM.
+		 */
+		if (mp->ref != NULL) {
+		    sprintf (buf, "wcstran %d %g %g\n", mp->id, wx, wy);
+		    ism_message (xim, "wcspix", buf);
+		}
+		map_found++;
+	    }
+	}
+
+	ct = wcs_update (xim, xim->df_p);
         if (ct->valid) {
 	    /* The imtool WCS assumes that the center of the first display
 	     * pixel is at (0,0) but actually it is at (0.5,0.5).
 	     */
-	    sx -= 0.5;
-	    sy -= 0.5;
 
             wx = ct->a * sx + ct->c * sy + ct->tx;
             wy = ct->b * sx + ct->d * sy + ct->ty;
@@ -1108,7 +1286,6 @@ char *obuf;			/* receives encoded string */
                     break;
                 }
             }
-
         } else {
             wx = sx;
             wy = sy;
@@ -1129,8 +1306,57 @@ char *obuf;			/* receives encoded string */
                     ch = '+';
             }
         }
-
         sprintf (obuf, ct->format, wx + 0.005, wy + 0.005, wz, ch);
+}
+
+
+/* XIM_GETMAPPING -- Return the mapping struct for the given screen coords.
+ */
+static MappingPtr
+xim_getMapping (xim, sx, sy, frame)
+register XimDataPtr xim;
+float 	sx, sy;			/* screen (raster) pixel coordinates */
+int	frame;
+{
+	FrameBufPtr fb = (FrameBufPtr) NULL;
+	MappingPtr mp = (MappingPtr) NULL;
+	register int j=0, i=0;
+	float y = xim->height - sy;
+	char buf[SZ_LINE];
+	register map_debug = 0;
+
+
+	/* Loop through the frame buffers until we find the current one.
+	 * The mappings aren't stored in the display fb so we need to 
+	 * search.
+	 */
+	for (j=0; j < xim->nframes; j++) {
+	    fb = &xim->frames[j];
+
+	    if (frame == fb->frameno) {
+	        /* Got the right frame, now search for mappings on this
+	         * frame which intersect the screen coords.  We assume there
+	         * are no overlapping image mappings.
+	         */
+	        for (i=0; i < fb->nmaps; i++) {
+	            mp = &fb->mapping[i];
+		    if (map_debug) {
+			printf ("sx=%.2f  sy=%.2f / %.2f --> ", sx, sy, y);
+			printf ("mp->dx=%d+%d=%d   mp->dy=%d+%d=%d",
+			    mp->dx, mp->dnx, mp->dx+mp->dnx,
+			    mp->dy, mp->dny, mp->dy+mp->dny);
+		    }
+	            if ((sx >= mp->dx && sx <= (mp->dx + mp->dnx)) &&
+	                (sy >= mp->dy && sy <= (mp->dy + mp->dny))) {
+		    	    if (map_debug) printf (" YES\n");
+			    return (mp);
+	            }
+		    if (map_debug)  printf (" NO\n");
+	        }
+	    }
+	}
+
+	return ((MappingPtr) NULL);
 }
 
 
@@ -1157,7 +1383,8 @@ register XimDataPtr xim;
  *	a b c d tx ty z1 z2 zt
  *
  * The WCS text is passed in via the data stream as a write to the subunit
- * WCS and left in the buffer "wcsbuf".
+ * WCS and left in the buffer "wcsbuf".  Mapping information is parsed 
+ * elsewhere if needed, our only purpose here is to extract the frame WCS.
  */
 static CtranPtr 
 wcs_update (xim, fr)
@@ -1166,6 +1393,7 @@ FrameBufPtr fr;
 {
 	register CtranPtr ct = &fr->ctran;
 	char buf[1024], *format;
+
 
 	/* Get the new WCS. */
 	if (!ct->valid) {
@@ -1200,10 +1428,12 @@ FrameBufPtr fr;
 	    z1 = ct->z1;
 	    z2 = ct->z2;
 	    zrange = (z1 > z2) ? z1 - z2 : z2 - z1;
-	    if (zrange < 100.0 && (abs(z1) + abs(z2)) / 2.0 < 200.0)
+	    if (zrange < 0.01 || (abs(z1) + abs(z2)) / 2.0 < 0.01)
+		format = " %7.2f %7.2f %9.3g%c";
+	    else if (zrange < 100.0 && (abs(z1) + abs(z2)) / 2.0 < 200.0)
 		format = " %7.2f %7.2f %7.3f%c";
 	    else if (zrange > 99999.0 || (abs(z1) + abs(z2)) / 2.0 > 99999.0)
-		format = " %7.2f %7.2f %7.3g%c";
+		format = " %7.2f %7.2f %9.3g%c";
 	    else
 		format = W_DEFFORMAT;
 	} else
@@ -1214,11 +1444,134 @@ FrameBufPtr fr;
 }
 
 
-/* IIS_READN -- Read exactly "n" bytes from a descriptor. 
+/* ADD_MAPPING --  Add a mapping for the current frame.  
+ *
+ * File format (two lines):
+ *
+ *	image title (imtool header label string)\n
+ *	a b c d tx ty z1 z2 zt \n
+ *	region_name sx sy snx sny dx dy dnx dny\n
+ *	object_ref
+ *
+ * The WCS text is passed in via the data stream as a write to the subunit
+ * WCS and left in the buffer "wcsbuf".  Mapping information is parsed 
+ * elsewhere if needed, our only purpose here is to extract the frame WCS.
  */
 
-static int                                   
-iis_read (fd, vptr, nbytes)
+static void
+add_mapping (xim, ctran, wcsbuf, fr)
+register XimDataPtr xim;
+CtranPtr ctran;
+char	*wcsbuf;
+FrameBufPtr fr;
+{
+	register MappingPtr mp = &fr->mapping[fr->nmaps];
+        register CtranPtr   ct = &mp->ctran;
+	register int  i, j, frame = fr->frameno;
+	char buf[SZ_WCSBUF], *format;
+
+        /* Attempt to read the WCS and set up a unitary transformation
+         * if the information cannot be read.
+         */
+        if (sscanf (wcsbuf, "%[^\n]\n%f%f%f%f%f%f%f%f%d",
+            buf, &ct->a, &ct->b, &ct->c, &ct->d, &ct->tx, &ct->ty,
+            &ct->z1, &ct->z2, &ct->zt) < 7) {
+
+            if (wcsbuf[0])
+                fprintf (stderr, "ximtool: error decoding WCS\n");
+
+            strncpy (ct->imtitle, "[NO WCS]\n", SZ_IMTITLE);
+            ct->a  = ct->d  = 1;
+            ct->b  = ct->c  = 0;
+            ct->tx = ct->ty = 0;
+            ct->zt = W_UNITARY;
+        } else
+            strncpy (ct->imtitle, buf, SZ_IMTITLE);
+
+        ct->valid = 1;
+
+
+	/* Skip over the first two lines of WCS data.
+	 */
+	strcpy (buf, wcsbuf);
+	for (i=0, j=0; j < 2 && buf[i]; i++)
+	    if (buf[i] == '\n')
+	        j++;
+
+	/* Attempt to read the mapping.
+	 */
+	mp->regid = (++objid[frame-1]) + (frame * 100);
+	mp->id = mp->regid;
+	mp->ref[0] = '\0';
+	mp->region[0] = '\0';
+
+	if (sscanf (&buf[i], "%s%f%f%d%d%d%d%d%d\n%s\n",
+	    mp->region, &mp->sx, &mp->sy, &mp->snx, &mp->sny, 
+	    &mp->dx, &mp->dy, &mp->dnx, &mp->dny, mp->ref) < 10) {
+
+	        if (!wcsbuf[0])
+	            fprintf (stderr, "ximtool: error decoding WCS mapping\n");
+	        strncpy (mp->region, "none", SZ_IMTITLE);
+	        strncpy (mp->ref, "none", SZ_IMTITLE);
+
+	        mp->sx  = 1.0;
+	        mp->sy  = 1.0;
+	        mp->snx = xim->width;
+	        mp->sny = xim->height;
+	        mp->dx  = 1;
+	        mp->dy  = 1;
+	        mp->dnx = xim->width;
+	        mp->dny = xim->height;
+	}
+	memmove (ctran, &mp->ctran, sizeof (Ctran));
+
+
+	/* Tell the ISM to cache this mapping if we have an object ref. */
+        sprintf (buf, "cache %s %d", mp->ref, mp->id);
+        ism_message (xim, "wcspix", buf);
+        sprintf (buf, "wcslist %d", mp->id);
+        ism_message (xim, "wcspix", buf);
+
+	/* Send the object ref to the GUI. */
+        sprintf (buf, "cache %s %d %d", mp->ref, fr->frameno, mp->id);
+        wcspix_message (xim, buf);
+        sprintf (buf, "orient %d %d %d %d",
+	    mp->id, fr->frameno, (int)ctran->a, (int)(-1 * ctran->d));
+        wcspix_message (xim, buf);
+
+	fr->nmaps++;
+
+
+	/* Debug the mappings. */
+	if (getenv("DEBUG_MAPPINGS") != NULL) print_mappings (fr);
+}
+
+
+/* PRINT_MAPPINGS -- Debug routine to print all mappings on a frame.
+ */
+print_mappings (fr)
+FrameBufPtr fr;
+{
+	MappingPtr mp;
+	register int i;
+
+	if (fr->nmaps == 0) printf ("No mappings for frame %d\n", fr->frameno);
+	for (i=0; i < fr->nmaps; i++) {
+	    mp = &fr->mapping[i];
+	    printf ("Mapping %d of %d:  id=%d  frame=%d:\n",
+		i+1, fr->nmaps, mp->id, fr->frameno);
+	    printf ("\t%s %f %f %d %d %d %d %d %d\n\t%s\n", 
+	        mp->region, mp->sx, mp->sy, mp->snx, mp->sny, 
+	        mp->dx, mp->dy, mp->dnx, mp->dny, mp->ref);
+	}
+}
+
+
+/* CHAN_READ -- Read exactly "n" bytes from a descriptor. 
+ */
+
+static int
+chan_read (fd, vptr, nbytes)
 int 	fd; 
 void 	*vptr; 
 int 	nbytes;
@@ -1242,10 +1595,11 @@ int 	nbytes;
 }
 
 
-/* IIS_WRITEN -- Write exactly "n" bytes to a descriptor. 
+/* CHAN_WRITE -- Write exactly "n" bytes to a descriptor. 
  */
-static int                                   
-iis_write (fd, vptr, nbytes)
+
+static int
+chan_write (fd, vptr, nbytes)
 int 	fd; 
 void 	*vptr; 
 int 	nbytes;

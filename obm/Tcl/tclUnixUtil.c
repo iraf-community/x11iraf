@@ -510,7 +510,11 @@ Tcl_CreatePipeline(interp, argc, argv, pidArrayPtr, inPipePtr,
 	     * file.
 	     */
 
+#ifdef linux
+	    mkstemp(inName);
+#else
 	    tmpnam(inName);
+#endif
 	    inputId = open(inName, O_RDWR|O_CREAT|O_TRUNC, 0600);
 	    closeInput = 1;
 	    if (inputId < 0) {
@@ -581,7 +585,11 @@ Tcl_CreatePipeline(interp, argc, argv, pidArrayPtr, inPipePtr,
     if (errFilePtr != NULL) {
 	char errName[L_tmpnam];
 
+#ifdef linux
+	mkstemp(errName);
+#else
 	tmpnam(errName);
+#endif
 	*errFilePtr = open(errName, O_RDONLY|O_CREAT|O_TRUNC, 0600);
 	if (*errFilePtr < 0) {
 	    errFileError:

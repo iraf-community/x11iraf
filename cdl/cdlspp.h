@@ -124,4 +124,8 @@ define	cdl_deleteMark		cdelmk_
 define	cdl_clearOverlay	cclrov_
 define	cdl_redrawOverlay	crdrov_
 define	cdl_setDebug		cstdbg_
+define  cdl_setMapping          cstmap_
+define  cdl_getMapping          cgtmap_
+define  cdl_queryMap            cqrmap_
+
 

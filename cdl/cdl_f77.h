@@ -71,6 +71,10 @@
 #define	CDF_CLEAROVERLAY	cfclearoverlay
 #define	CDF_REDRAWOVERLAY	cfredrawoverlay
 #define	CDF_SETDEBUG		cfsetdebug
+#define CDF_SETMAPPING          cfsetmapping
+#define CDF_GETMAPPING          cfgetmapping
+#define CDF_QUERYMAP            cfquerymap
+
 
 #else
 
@@ -137,6 +141,9 @@
 #define	CDF_CLEAROVERLAY	cfclearoverlay_
 #define	CDF_REDRAWOVERLAY	cfredrawoverlay_
 #define	CDF_SETDEBUG		cfsetdebug_
+#define CDF_SETMAPPING          cfsetmapping_
+#define CDF_GETMAPPING          cfgetmapping_
+#define CDF_QUERYMAP            cfquerymap_
 
 #endif
 
@@ -206,6 +213,10 @@ void CDF_DELETEMARK(int *x, int *y, int *ier);
 void CDF_CLEAROVERLAY(int *ier);
 void CDF_REDRAWOVERLAY(int *ier);
 void CDF_SETDEBUG(int *state);
+void CDF_SETMAPPING(char *region, float *sx, float *sy, int *snx, int *sny, int *dx, int *dy, int *dnx, int *dny, char *ref, int *ier, int reglen, int reflen);
+void CDF_GETMAPPING(char *region, float *sx, float *sy, int *snx, int *sny, int *dx, int *dy, int *dnx, int *dny, char *ref, int *ier, int reglen, int reflen);
+void CDF_QUERYMAP(int *wcs, char *region, float *sx, float *sy, int *snx, int *sny, int *dx, int *dy, int *dnx, int *dny, char *ref, int *ier, int reglen, int reflen);
+
 
 #else
 
@@ -225,6 +236,7 @@ void    CDF_ISIRAF(), CDF_ISFITS(), CDF_SETDEBUG();
 void    CDF_PRINTPIX (), CDF_PRINTPIXTOFILE ();
 void    CDF_SETSAMPLELINES (), CDF_GETSAMPLELINES ();
 void    CDF_SETWCS(), CDF_GETWCS();
+void 	CDF_SETMAPPING(), CDF_GETMAPPING(), CDF_QUERYMAP();
 
 /* Marker Function Definitions. */
 void    CDF_MARKPOINT(), CDF_MARKLINE(), CDF_MARKBOX(), CDF_MARKPOLYLINE();

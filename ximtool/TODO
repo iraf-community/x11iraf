@@ -1,5 +1,22 @@
 			  TODO -- XIMTOOL -- TODO
 
+==============================================================================
+V1.3 TODO List
+
+    - Revise installation script
+    - CDL needs the new WCS mappings
+    - Update documentation
+	- online help
+	- document ISM protocol
+    - loading image standalone
+	- WCS/Info shows incorrect dest rect dnx/dny
+        - switching images seems to hang ISM 
+    - MEF support in ISM
+
+==============================================================================
+
+
+==============================================================================
 - Translations should use #augment so users can add translations easily
 - Gui box to edit/create/save LUTs
 - snap to equal aspect

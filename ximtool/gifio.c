@@ -38,8 +38,41 @@ typedef unsigned char	uchar;
 #define	TRUE	  1
 #define	FALSE	  0
 
+#define CM_RED			0
+#define CM_GREEN		1
+#define CM_BLUE			2
+
+#define	GIFBITS			12
+
+#define INTERLACE		0x40
+#define LOCALCOLORMAP		0x80
+
+#define BitSet(byte, bit)	(((byte) & (bit)) == (bit))
+#define	ReadOK(file,buffer,len)	(fread(buffer, len, 1, file) != 0)
+#define LM_to_uint(a,b)		    (((b)<<8)|(a))
+
+static struct {
+	unsigned int	Width;
+	unsigned int	Height;
+	unsigned int	BitPixel;
+	unsigned int	ColorResolution;
+	unsigned int	Background;
+	unsigned int	AspectRatio;
+} GifScreen;
+
+static struct {
+	int	transparent;
+	int	delayTime;
+	int	inputFlag;
+	int	disposal;
+} Gif89 = { 
+	-1, -1, -1, 0 };
+
+
+
 /* MONO returns total intensity of r,g,b components */
 #define MONO(rd,gn,bl) (((rd)*11 + (gn)*16 + (bl)*5) >> 5)  /*.33R+ .5G+ .17B*/
+
 
 /* Function prototypes */
 #ifdef __STDC__
@@ -84,8 +117,8 @@ static int  	ReadColorMap (), DoExtension (), GetDataBlock ();
 static int  	GetCode (), LWZReadByte ();
 #endif
 
-byte	*pixels;
-int	nrows, ncols;
+static byte	*pixels;
+static int	nrows, ncols;
 static char	*errstr = NULL;
 
 
@@ -190,6 +223,49 @@ char	*fname;	    	    /* input filename */
 }
 
 
+/* getGIFHdr -- Get some set of header information for the GUI.
+ */
+
+char *
+getGIFHdr (fname)
+char    *fname;
+{
+        FILE    *fp;
+        char    *line;
+        uchar   buf[16], version[4];
+	int	nx, ny, ncolors;
+
+
+        /* Open the image. */
+        fp = fopen (fname, "r");
+        if (!fp)
+            return NULL;
+
+	/* Get the version. */
+        if (!ReadOK(fp, buf, 6) || strncmp(buf, "GIF", 3) != 0)
+            return NULL;
+        strncpy(version, buf + 3, 3);
+        version[3] = '\0';
+
+
+        /* Read the image header. */
+        if (!ReadOK(fp, buf, 7))
+            return NULL;
+        nx      = LM_to_uint(buf[0], buf[1]);
+        ny      = LM_to_uint(buf[2], buf[3]);
+        ncolors = 2 << (buf[4] & 0x07);
+
+        /* Format the description. */
+        line = (char *) malloc (80);
+        sprintf (line, "%-16.16s   8   %5dx%-5d  GIF%s Image (%d colors)",
+            fname, nx, ny, version, ncolors);
+
+        fclose (fp);
+        return (line);
+}
+
+
+
 /* ------------------
  * Private Procedures
  * ------------------*/
@@ -243,40 +319,6 @@ int	colors;
  * |   provided "as is" without express or implied warranty.           |
  * +-------------------------------------------------------------------+
  */
-
-
-#define CM_RED			0
-#define CM_GREEN		1
-#define CM_BLUE			2
-
-#define	GIFBITS			12
-
-#define INTERLACE		0x40
-#define LOCALCOLORMAP		0x80
-
-#define BitSet(byte, bit)	(((byte) & (bit)) == (bit))
-#define	ReadOK(file,buffer,len)	(fread(buffer, len, 1, file) != 0)
-#define LM_to_uint(a,b)		    (((b)<<8)|(a))
-
-struct {
-	unsigned int	Width;
-	unsigned int	Height;
-	unsigned int	BitPixel;
-	unsigned int	ColorResolution;
-	unsigned int	Background;
-	unsigned int	AspectRatio;
-} GifScreen;
-
-struct {
-	int	transparent;
-	int	delayTime;
-	int	inputFlag;
-	int	disposal;
-} Gif89 = { 
-	-1, -1, -1, 0 };
-
-
-
 
 
 static char *
@@ -437,7 +479,7 @@ int	label;
 }
 
 
-int	ZeroDataBlock = FALSE;
+static int ZeroDataBlock = FALSE;
 
 static int	
 GetDataBlock(fd, buf)

@@ -2421,7 +2421,7 @@ int		x, y;			/* pixel coords		*/
 #endif
 {
 	MarkerPtr	mk, nearest;
-	register float  dmin = 10.0e9, mk_dist, dist = 10.0e9, A, C;
+	register float  dmin = 10.0e9, mk_dist, dist = 10.0e9, A, C, cx, cy;
 	register int	i;
 
 	if (head == (MarkerPtr) NULL)
@@ -2443,12 +2443,11 @@ int		x, y;			/* pixel coords		*/
 		break;
 
 	    case MK_BOX:
-		/* See if it's between the verticals... */
-		if (x >= mk->xp[0] && x <= mk->xp[1])
-		    mk_dist = min (ABS(y - mk->yp[0]), ABS(y - mk->yp[1]));
-		else if (y >= mk->yp[0] && y <= mk->yp[1])
-		    /* See if it's between the horizontals... */
-		    mk_dist = min (ABS(x - mk->xp[0]), ABS(x - mk->xp[1]));
+		/* Select the box center closest to the point. */
+		cx = (mk->xp[1] + mk->xp[0]) / 2;
+		cy = (mk->yp[1] + mk->yp[0]) / 2;
+		mk_dist = sqrt ((double)(ABS(x - cx) * ABS(x - cx) +
+			        	 ABS(y - cy) * ABS(y - cy)) );
 		break;
 
 	    case MK_LINE:
@@ -2473,8 +2472,8 @@ int		x, y;			/* pixel coords		*/
 	    }
 
 	    if (cdl_debug) 
-		printf ("Marker type=%2d  dist=%g  mk_dist=%g  N=%d\n",
-		    mk->type, dist, mk_dist,nearest->type);
+		printf ("Nearest: Marker type=%2d  dist=%g  mk_dist=%g  N=%d\n",
+		    mk->type, dist, mk_dist, nearest->type);
 	}
 	return (nearest);
 }

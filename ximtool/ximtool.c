@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <signal.h>
 #include <errno.h>
 #include <X11/Intrinsic.h>
 #include <X11/StringDefs.h>
@@ -9,6 +10,13 @@
 
 #define XIMTOOL_MAIN
 #include "ximtool.h"
+
+/* The X11IRAF version. */
+char *ximtool_version[] = {
+#   include "../version.h"
+    NULL
+};
+
 
 /*
  * XIMTOOL -- X11 based image display server and standalone image display
@@ -36,6 +44,14 @@ char *defgui_text[] = {
 };
 
 
+#ifdef AUX
+#define SIGFUNC sigfunc_t
+#else
+typedef void  (*SIGFUNC)();
+#endif
+
+void	xim_onsig();
+
 
 /* MAIN -- XImtool main program.  This is the only ximtool routine containing
  * window system specific code.
@@ -46,9 +62,17 @@ char *argv[];
 {
 	register XimDataPtr xim = &ximtool_data;
 	register int i;
+        register IsmModule ism;
+
+	Screen *screen;
+	Visual *visual;
+	Widget toplevel;
 	XtPointer obm;
 	char **sv_argv, *init_file = NULL, *str;
 	int sv_argc, ncolors, base;
+	int depth, tile = 0;
+
+	extern IsmModule ismNameToPtr();
 	int 	xerror(), xioerror();
 
 
@@ -59,6 +83,10 @@ char *argv[];
 	if (argc > 1) {
 	    if (strcmp (argv[1], "-help") == 0) {
       	        Usage ();
+      	        exit (1);
+
+    	    } else if (strcmp (argv[1], "-version") == 0) {
+		printf ("Version:  %s\n", ximtool_version[0]);
       	        exit (1);
 
     	    } else if (strcmp (argv[1], "-defgui") == 0) {
@@ -109,6 +137,12 @@ char *argv[];
 		argv[i] = (char *) malloc (256);
 		sprintf (argv[i], "XImtool*displayPanner:%s", str);
 
+           } else if (strcmp (argv[i], "-displayMagnifier") == 0) {
+                str = argv[++i];
+                strcpy (argv[i-1], "-xrm\0");
+                argv[i] = (char *) malloc (256);
+                sprintf (argv[i], "XImtool*displayMagnifier:%s", str);
+
 	    } else if (strcmp (argv[i], "-displayCoords") == 0) {
 		str = argv[++i];
 		strcpy (argv[i-1], "-xrm\0");
@@ -136,7 +170,7 @@ char *argv[];
 	 * connection to the display server and manages a separate window
 	 * hierarchy with its own top level shell.
 	 */
-	xim->toplevel = XtAppInitialize (&app_context, "XImtool",
+	xim->toplevel = toplevel = XtAppInitialize (&app_context, "XImtool",
 	    (XrmOptionDescList) NULL, 0, &sv_argc, sv_argv,
 	    (String *) NULL, (ArgList) NULL, 0);
 
@@ -148,6 +182,17 @@ char *argv[];
 	    resources, XtNumber(resources),
 	    /* Add any resource overrides here */
 	    NULL);
+
+	/* Check to see if we have the correct visual to proceed, if not
+	 * shut down more gracefully and informatively than the BadMatch
+	 * error from X that awaits us.
+	 */
+	screen = XtScreen (toplevel);
+    	visual = DefaultVisualOfScreen(screen);
+    	depth = DefaultDepthOfScreen(screen);
+    	if (depth != 8 || visual->class != PseudoColor)
+	    xim_badVisual (depth, visual->class);
+
 
 	/* Initialize the object manager. */
 	xim->obm = obm = (XtPointer) ObmOpen (app_context, argc, argv);
@@ -167,8 +212,13 @@ char *argv[];
 	    if (argv[i][0] != '-') { 			    /* File name */
 		if (!init_file) {
 		    init_file = argv[i];
-		    if (access (init_file, R_OK) < 0) {
+		    if (access (init_file, F_OK) < 0) {
 			fprintf (stderr, "%s: File does not exist: '%s'\n", 
+			    argv[0], init_file);
+			exit (1);
+		    } else if (access (init_file, R_OK) < 0) {
+			fprintf (stderr, 
+			    "%s: File doesn't have read permission: '%s'\n", 
 			    argv[0], init_file);
 			exit (1);
 		    }
@@ -186,7 +236,7 @@ char *argv[];
 	    } else if (strcmp (argv[i], "-cmapDir1") == 0) {
 		xim->userCMapDir1 = argv[++i];
 
-	    } else if (strcmp (argv[i], "-cmapDir1") == 0) {
+	    } else if (strcmp (argv[i], "-cmapDir2") == 0) {
 		xim->userCMapDir2 = argv[++i];
 
 	    } else if (strcmp (argv[i], "-imtoolrc") == 0) {
@@ -203,28 +253,26 @@ char *argv[];
 		xim->def_nframes = min (MAX_FRAMES, atoi (argv[i]));
 
 	    } else if (strcmp (argv[i], "-tile") == 0) {
-                xim->tileFrames++;
+                tile = ++xim->tileFrames;
 
 	    } else if (strcmp (argv[i], "-invert") == 0) {
 		xim->invert++;
 
 	    } else if (strcmp (argv[i], "-fifo") == 0) {
-                xim->input_fifo = malloc (strlen(argv[++i])+2);
-                xim->output_fifo = malloc (strlen(argv[i])+2);
-		sprintf (xim->input_fifo, "%si", argv[i]);
-		sprintf (xim->output_fifo, "%so", argv[i]);
+		if (strcmp ("none", argv[++i]) == 0) {
+		    xim->input_fifo = "none";
+		} else {
+                    xim->input_fifo = malloc (strlen(argv[i])+2);
+                    xim->output_fifo = malloc (strlen(argv[i])+2);
+		    sprintf (xim->input_fifo, "%si", argv[i]);
+		    sprintf (xim->output_fifo, "%so", argv[i]);
+		}
 
 	    } else if (strcmp (argv[i], "-port") == 0) {
-		if (xim->port != 0 )
-		    xim->port = atoi (argv[++i]);
-		else 
-		    i++;
+		xim->port = atoi (argv[++i]);
 
 	    } else if (strcmp (argv[i], "-unix") == 0) {
-		if (strcmp ("none", xim->input_fifo) )
-		    xim->unixaddr = argv[++i];
-		else 
-		    i++;
+		xim->unixaddr = argv[++i];
 
 	    } else if (strcmp (argv[i], "-fifo_only") == 0) {
 		xim->unixaddr = "none";
@@ -238,6 +286,12 @@ char *argv[];
 	    } else if (strcmp (argv[i], "-unix_only") == 0) {
 		xim->input_fifo = "";
 		xim->port = 0;
+
+	    } else if (strcmp (argv[i], "-ismdev") == 0) {
+		if (strcmp ("none", xim->ism_addr) )
+		    xim->ism_addr = argv[++i];
+		else 
+		    i++;
 
 
 	    /* Skip any standard X toolkit flags, they're handled above. 
@@ -280,7 +334,7 @@ char *argv[];
 	    char *message;
 	    int i;
 
-	    message = (char *) malloc (204800);
+	    message = (char *) malloc (409600);
 	    for (i=0, op=message;  ip = defgui_text[i];  i++) {
 		while (*ip)
 		    *op++ = *ip++;
@@ -297,10 +351,12 @@ char *argv[];
 	ObmActivate (obm);
 
 	/* Initialize the frame buffers and graphics pipeline. */
+	xim->tileFrames = tile;
 	xim_initialize (xim, xim->def_config, xim->def_nframes, 1);
 
 	/* Listen for a client connection. */
-	xim_iisopen (xim);
+	xim_iisOpen (xim);
+	xim_ismOpen (xim);
 
 	/* Initialize the hardcopy option and printer configuration. */
 	xim_initPrinterOps (xim);
@@ -313,8 +369,17 @@ char *argv[];
 	if ( init_file != NULL )
 	    xim_loadFile (xim, init_file, 1);
 
+        /* Lookup the ISM command for the WCSPIX task and start it.
+         */
+        if ((ism = ismNameToPtr ("wcspix"))) {
+            system (ism->command);
+	    ism_message (ism, "wcspix", "initialize");
+	}
+
         XSetErrorHandler(xerror);
         XSetIOErrorHandler(xioerror);
+
+/*	signal (SIGINT, (SIGFUNC)xim_onsig);*/
 
 	/* EXECUTE */
 	XtAppMainLoop (app_context);
@@ -332,7 +397,8 @@ register XimDataPtr xim;
 	xim_loadClose (xim);
 	xim_saveClose (xim);
 	xim_clientClose (xim);
-	xim_iisclose (xim);
+	xim_iisClose (xim);
+	xim_ismClose (xim);
 	xim_close (xim);
 	ObmClose (xim->obm);
 	exit (0);
@@ -370,36 +436,38 @@ XtPointer id;
  */
 Usage ()
 {
-	fprintf (stderr, "Usage:\n\n");
-	printoption ("    ximtool");
-	printoption ("[-basePixel <num>]");   	   /* base cmap pixel */
-	printoption ("[-cmap1 <file>]");	   /* User cmap 1 */
-	printoption ("[-cmap2 <file>]");    	   /* User cmap 2 */
-	printoption ("[-cmapDir1 <dir>]");   	   /* User cmapDir 1 */
-	printoption ("[-cmapDir1 <dir>]");   	   /* User cmapDir 2 */
-	printoption ("[-cmapInitialize <bool>]");  /* initialize colormap */
-	printoption ("[-cmapName <name>]");   	   /* colormap name */
-	printoption ("[-config <num>]");	   /* initial config */
-	printoption ("[-defgui]");		   /* Print default GUI */
-	printoption ("[-displayPanner <bool>]");   /* display panner box */
-	printoption ("[-displayCoords <bool>]");   /* display wcs coords box */
-	printoption ("[-fifo <pipe>]");	    	   /* fifo pipe */
-	printoption ("[-fifo_only]");  		   /* use fifo only */
-	printoption ("[-gui <file>]");	    	   /* GUI file */
-	printoption ("[-help]");		   /* Print help */
-	printoption ("[-imtoolrc <file>]");   	   /* fbconfig file */
-	printoption ("[-inet_only | -port_only]"); /* use inet only */
-	printoption ("[-invert]");       	   /* invert colormap */
-	printoption ("[-maxColors <num>]");   	   /* # of colors */
-	printoption ("[-memModel <type>]");   	   /* memory model */
-	printoption ("[-nframes <num>]");    	   /* # of frames */
-	printoption ("[-port <num>]");	    	   /* inet port */
-	printoption ("[-printConfig <name>]");     /* printer config file */
-	printoption ("[-tile]");       		   /* tile frames */
-	printoption ("[-unix <name>]");	    	   /* unix socket */
-	printoption ("[-unix_only]");  		   /* use unix only */
-	printoption ("[<file>]");  		   /* file to load */
-  	fprintf (stderr,"\n");
+    fprintf (stderr, "Usage:\n\n");
+    printoption ("    ximtool");
+    printoption ("[-basePixel <num>]");   	/* base cmap pixel        */
+    printoption ("[-cmap1 <file>]");	   	/* User cmap 1            */
+    printoption ("[-cmap2 <file>]");    	/* User cmap 2            */
+    printoption ("[-cmapDir1 <dir>]");   	/* User cmapDir 1         */
+    printoption ("[-cmapDir2 <dir>]");   	/* User cmapDir 2         */
+    printoption ("[-cmapInitialize <bool>]");  	/* initialize colormap    */
+    printoption ("[-cmapName <name>]");   	/* colormap name          */
+    printoption ("[-config <num>]");	   	/* initial config         */
+    printoption ("[-defgui]");		   	/* Print default GUI      */
+    printoption ("[-displayPanner <bool>]");   	/* display panner box     */
+    printoption ("[-displayMagnifier <bool>]");	/* display magnifier box  */
+    printoption ("[-displayCoords <bool>]");   	/* display wcs coords box */
+    printoption ("[-fifo <pipe>]");	    	/* fifo pipe              */
+    printoption ("[-fifo_only]");  		/* use fifo only          */
+    printoption ("[-gui <file>]");	    	/* GUI file               */
+    printoption ("[-help]");		   	/* Print help             */
+    printoption ("[-imtoolrc <file>]");   	/* fbconfig file          */
+    printoption ("[-inet_only | -port_only]"); 	/* use inet only          */
+    printoption ("[-invert]");       	   	/* invert colormap        */
+    printoption ("[-ismdev <dev>]");      	/* ISM device template    */
+    printoption ("[-maxColors <num>]");   	/* # of colors            */
+    printoption ("[-memModel <type>]");   	/* memory model           */
+    printoption ("[-nframes <num>]");    	/* # of frames            */
+    printoption ("[-port <num>]");	    	/* inet port              */
+    printoption ("[-printConfig <name>]");     	/* printer config file    */
+    printoption ("[-tile]");       		/* tile frames            */
+    printoption ("[-unix <name>]");	    	/* unix socket            */
+    printoption ("[-unix_only]");  		/* use unix only          */
+    printoption ("[<file>]");  		   	/* file to load           */
+    fprintf (stderr,"\n");
 }
 
 
@@ -415,6 +483,81 @@ char 	*st;
   	}
   	fprintf (stderr,"%s ",st);
   	cpos = cpos + strlen(st) + 1;
+}
+
+
+/* xim_badVisual --  A bad X visual has been detected for the screen which
+ * will cause us to crash with a BadMatch error.  Instead, abort with a
+ * more informative message so the user can correct the visual.
+ */
+xim_badVisual (depth, class)
+int	depth;
+int	class;
+{
+  fprintf (stderr, 
+	"\n---------------------------------------------------------------\n");
+  fprintf (stderr, 
+	"ERROR: Detected incorrect X visual:  depth=%d class=", depth);
+        switch (class) {
+        case StaticGray:    fprintf (stderr, "StaticGray")  ; break;
+        case GrayScale:     fprintf (stderr, "GrayScale")   ; break;
+        case StaticColor:   fprintf (stderr, "StaticColor") ; break;
+        case PseudoColor:   fprintf (stderr, "PseudoColor") ; break;
+        case TrueColor:     fprintf (stderr, "TrueColor")   ; break;
+        case DirectColor:   fprintf (stderr, "DirectColor") ; break;
+        default: 	    fprintf (stderr, "DirectColor") ; break;
+        }
+  fprintf (stderr, 
+	"\n---------------------------------------------------------------\n");
+
+  fprintf (stderr,  "\n");
+  fprintf (stderr, 
+    "XImtool currently requires an 8-bit PseudoColor visual in order to\n");
+  fprintf (stderr, 
+    "operate properly.  Unfortunately the only workaround for this at\n");
+  fprintf (stderr, 
+    "present is to start an 8-bit server using commands such as\n\n");
+  fprintf (stderr, 
+    "    %% startx -- -bpp 8\t\t\t\t\t    # XFree86 V3.x\n");
+  fprintf (stderr, 
+    "    %% startx -- -depth 8\t\t\t\t    # XFree86 V4.x\n");
+  fprintf (stderr, 
+    "    %% Xsun :0 -dev /dev/fb defclass PseudoColor defdepth 8  # Sun\n");
+  fprintf (stderr, 
+    "    %% Xdec -vclass0 PseudoColor\t\t\t\t    # Digital Unix\n");
+  fprintf (stderr, "\n");
+
+  fprintf (stderr, 
+     "If you use a graphical login manager such as xdm or CDE on Solaris\n");
+  fprintf (stderr, 
+     "you'll need to change the default depth by adding the above flags to\n");
+  fprintf (stderr, 
+     "the X server config file. This would be e.g. /etc/X11/xdm/Xservers\n");
+  fprintf (stderr, 
+     "for a Linux system or /usr/dt/config/Xservers for Solaris CDE.\n");
+  fprintf (stderr, "\n");
+  fprintf (stderr, 
+     "The actual commands used will vary depending on the platform,\n");
+  fprintf (stderr, 
+     "window manager/desktop used, and in some cases video hardware.\n");
+  fprintf (stderr, 
+     "See the Xserver(1) and xinit(1) man page for details. Users should\n");
+  fprintf (stderr, 
+     "also contact IRAF site support (iraf@noao.edu) with any questions\n");
+  fprintf (stderr, 
+     "or problems.\n\n");
+  fprintf (stderr, 
+     "Additional information and workarounds may be found at:\n\n");
+  fprintf (stderr, 
+     "\thttp://hea-www.harvard.edu/RD/ds9/\n");
+  fprintf (stderr, 
+     "\thttp://sparky.rice.edu/~hartigan/vnc.html\n");
+  fprintf (stderr, 
+     "\thttp://tdc-www.harvard.edu/software/saoimage/saoimage.16bit.html\n");
+
+  fprintf (stderr, "\n");
+  fprintf (stderr, "\n");
+  exit (1);
 }
 
 
@@ -472,14 +615,14 @@ register XErrorEvent *event;
 xioerror(dpy)
 Display *dpy;
 {
-	char *SysErrorMsg();
+    char *SysErrorMsg();
 
-        (void) fprintf (stderr,
-            "ximtool: fatal IO error %d (%s) or KillClient on X server \"%s\"\r\n",
-            errno, SysErrorMsg (errno),
-            DisplayString (dpy));
+    (void) fprintf (stderr,
+        "ximtool: fatal IO error %d (%s) or KillClient on X server \"%s\"\r\n",
+        errno, SysErrorMsg (errno),
+        DisplayString (dpy));
 
-        exit (ERROR_XIOERROR);
+    exit (ERROR_XIOERROR);
 }
 
 void xt_error(message)
@@ -493,13 +636,27 @@ void xt_error(message)
 char *SysErrorMsg (n)
     int n;
 {
+#ifndef __DARWIN__
 #ifndef __FreeBSD__
 #ifndef _BSD_SOURCE
     extern char *sys_errlist[];
 #endif
 #endif
+#endif
     extern int sys_nerr;
 
     return((n >= 0 && n < sys_nerr) ? (char *)sys_errlist[n] : "unknown error");
+}
+
+
+/* XIM_ONSIG -- Catch interrupt and shutdown gracefully.
+ */
+void
+xim_onsig (sig, code, scp)
+int     sig;                    /* signal which was trapped     */
+int     *code;                  /* not used */
+int     *scp;                   /* not used */
+{
+        xim_shutdown (&ximtool_data);
 }
 

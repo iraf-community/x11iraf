@@ -12,11 +12,12 @@
 /* LOAD.C -- Package for browsing directories and loading raster files into
  * the display.
  *
- *		   xim_initLoad (xim)
- *		  xim_loadClose (xim)
+ *		   xim_initLoad  (xim)
+ *		  xim_loadClose  (xim)
  *
- *	 status = xim_dirRescan (xim)
- *	  status = xim_loadFile (xim, fname, frame)
+ *	          xim_dirRescan  (xim)
+ *              xim_scanHeaders  (xim)
+ *	  status = xim_loadFile  (xim, fname, frame)
  *
  * xim_dirRescan scans the current directory and sends the file list to
  * the GUI "filelist" parameter.  xim_loadFile loads the named raster file
@@ -31,11 +32,11 @@
 #undef min
 #define min(a,b) ((a) < (b) ? (a) : (b)) 
 
-extern char 	*getwd(), *getenv();
-
 static char 	**listFiles();
-static int 	fileCompare(), globExpression(), fileType();
+static int 	fileCompare(), globExpression(), fileType(), ucharCompare();
 static void 	amapc(), sortGraymap(), loadstat(), strsort();
+
+extern char 	*getcwd(), *getenv();
 
 static int debug = False;
 
@@ -56,14 +57,31 @@ register XimDataPtr xim;
 	strcpy (flp->homedir, getenv("HOME"));
 	if (getcwd (flp->curdir, SZ_FNAME) == NULL) 
 	    strcpy (flp->curdir, flp->homedir);
-	strcpy (flp->pattern, "*");
+	strcpy (flp->pattern, "*.fits,*.imh");
 	flp->gray = 0;
+	flp->zscale = 1;
+	flp->zrange = 1;
+	flp->z1 = 0.0;
+	flp->z2 = 0.0;
+	flp->nsample = 1000;
 
 	/* Update the GUI with the initial state. */
         sprintf (buf, "curdir %s\0", flp->curdir);
-        xim_message (xim, "loadOptions", buf);
+            xim_message (xim, "loadOptions", buf);
         sprintf (buf, "pattern %s\0", flp->pattern);
-        xim_message (xim, "loadOptions", buf);
+            xim_message (xim, "loadOptions", buf);
+        sprintf (buf, "gray %d\0", flp->gray);
+            xim_message (xim, "loadOptions", buf);
+        sprintf (buf, "zscale %d\0", flp->zscale);
+            xim_message (xim, "loadOptions", buf);
+        sprintf (buf, "zrange %d\0", flp->zrange);
+            xim_message (xim, "loadOptions", buf);
+        sprintf (buf, "z1 %g\0", flp->z1);
+            xim_message (xim, "loadOptions", buf);
+        sprintf (buf, "z2 %g\0", flp->z1);
+            xim_message (xim, "loadOptions", buf);
+        sprintf (buf, "nsample %d\0", flp->nsample);
+            xim_message (xim, "loadOptions", buf);
 }
 
 
@@ -96,10 +114,13 @@ int frame;
 	register int i, new_config=-1;
 	register char *ip;
 	register fileLoadPtr flp = xim->flp;
-	register FrameBufPtr fb;
+	register FrameBufPtr fr;
+	register MappingPtr mp;
 	register FbConfigPtr cf;
+
 	float	 z1=0.0, z2=0.0;
 	int status = 0, has_private_cmap = 0, pixtype, w, h, ncolors;
+	int	zscale = flp->zscale, zrange = flp->zrange, nsamp=flp->nsample;
 	unsigned char *pix=NULL, r[256], g[256], b[256];
 	char *mapname, *err, buf[SZ_LINE];
 
@@ -107,6 +128,7 @@ int frame;
 	extern char *loadFITS();
 	extern char *loadGIF();
 	extern char *loadIRAF();
+	extern int objid[];
 
         /* Make sure the file exists. */
 	if (access(fname, R_OK) != 0) {
@@ -116,7 +138,7 @@ int frame;
 	}
 
         switch (fileType(fname)) {
-        case XIM_RAS: 					/* Sun rasterfile. */
+        case XIM_RAS: 					/* Sun rasterfile.  */
 	    loadstat (xim, "Reading rasterfile...");
 	    if (err = loadSunRas(fname,&pix,&pixtype,&w,&h,r,g,b,&ncolors,
 		flp->gray)) {
@@ -131,38 +153,43 @@ int frame;
 	    has_private_cmap =  1;
 	    break;
 
-        case XIM_FITS: 					/* FITS file. */
+        case XIM_FITS: 					/* FITS file. 	    */
 	    loadstat (xim, "Reading FITS file...");
-	    if (err = loadFITS(fname, &pix, &w, &h, r,g,b, &ncolors, &z1, &z2)){
-		pix = NULL;
-		xim_alert (xim, err, NULL, NULL);
+	    z1 = flp->z1;
+	    z2 = flp->z2;
+	    if (err = loadFITS(fname, &pix, &w, &h, r,g,b, &ncolors,
+		zscale, zrange, &z1, &z2, flp->nsample)){
+		    pix = NULL;
+		    xim_alert (xim, err, NULL, NULL);
 	    }
 	    has_private_cmap = 0;
 	    break;
 
-        case XIM_GIF:
+        case XIM_GIF:					/* GIF image 	    */
 	    loadstat (xim, "Reading GIF fle...");
-	    if (err = loadGIF(fname,&pix,&w,&h,r,g,b,&ncolors, flp->gray)) {
+	    if (err = loadGIF(fname, &pix, &w,&h, r,g,b, &ncolors, flp->gray)) {
 		pix = NULL;
 		xim_alert (xim, err, NULL, NULL);
 	    }
 	    has_private_cmap =  1;
 	    break;
 
-        case XIM_OIF:
+        case XIM_OIF:					/* OIF image 	    */
 	    loadstat (xim, "Reading IRAF image...");
-	    if (err = loadIRAF(fname, &pix, &w, &h, r,g,b, &ncolors, &z1, &z2)){
-		pix = NULL;
-		xim_alert (xim, err, NULL, NULL);
+	    z1 = flp->z1;
+	    z2 = flp->z2;
+	    if (err = loadIRAF(fname, &pix, &w, &h, r,g,b, &ncolors,
+		zscale, zrange, &z1, &z2, flp->nsample)){
+		    pix = NULL;
+		    xim_alert (xim, err, NULL, NULL);
 	    }
 	    has_private_cmap = 0;
 	    break;
 
-        case XIM_TIFF:
-        case XIM_JPEG:
-        case XIM_PNM:
-        case XIM_X11:
-        case XIM_RAW:
+        case XIM_TIFF:					/* TIFF image 	    */
+        case XIM_JPEG:					/* JPEG image 	    */
+        case XIM_X11:					/* X11 image 	    */
+        case XIM_RAW:					/* RAW binary image */
 	    /* fall through */
 
         default:
@@ -236,10 +263,11 @@ int frame;
                 }
 	    }
 
-	    if (debug)
+	    if (debug) {
 	        fprintf (stderr, "Load: new_config=%d w=%d h=%d\n", new_config,
 		    xim->fb_config[new_config-1].width,
 		    xim->fb_config[new_config-1].height);
+	    }
 
 
 	    /* We didn't find a large enough buffer, so create a new one with
@@ -287,24 +315,87 @@ int frame;
         xim_message (xim, "frameTitle", mapname);
 	eps_setLabel (xim->psim, mapname);
 
+
+        /* Notify the GUI that we are capable of using the ISM.
+         */
+        wcspix_message (xim, "capable");
+
+
+        /* ISM: Uncache all mappings associated with this frame. */
+	fr = &xim->frames[frame-1];
+        for (i=0; i < fr->nmaps; i++) {
+            mp = &fr->mapping[i];
+            if (mp->id) {
+                sprintf (buf, "uncache %d", mp->id);
+                ism_message (xim, "wcspix", buf);
+                wcspix_message (xim, buf);
+                mp->id = 0;
+            }
+        }
+
+	/* Now save the mapping information */
+	fr->nmaps = 0;
+	mp = &(fr->mapping[fr->nmaps]);
+	objid[fr->frameno-1] = 0;
+
+        mp->id  = mp->regid = (++objid[fr->frameno-1]) + (fr->frameno * 100);
+	sprintf (mp->region, "%s", "image");
+	if (fname[0] != '/' && getcwd (buf, (size_t) SZ_LINE))
+	    sprintf (mp->ref, "%s/%s", buf, fname);
+	else
+	    sprintf (mp->ref, "%s", fname);
+
+	mp->sx  = 1.0;
+	mp->sy  = 1.0;
+	mp->snx = w;
+	mp->sny = h;
+	mp->dx  = (float) (xim->width  - w) / 2.0;
+	mp->dy  = (float) (xim->height - h) / 2.0;
+	mp->dnx = w;
+	mp->dny = h;
+
 	/* Load a WCS for the frame. */
-	fb = &xim->frames[frame-1];
-	fb->ctran.z1 = z1; 			
-	fb->ctran.z2 = z2;
-	fb->ctran.zt = W_LINEAR;
-	fb->ctran.a  = 1.;
-	fb->ctran.b  = 0.;
-	fb->ctran.c  = 0.;
-	fb->ctran.d  = -1.;
-	fb->ctran.tx = ((float)w / 2.) - ((float) xim->width / 2.) + 1;
-	fb->ctran.ty = ((float)xim->height / 2.) + ((float) h / 2.);
-	fb->ctran.valid = 1;
-	strcpy (fb->ctran.imtitle, mapname);
-	if (debug)
+	mp->ctran.z1 = fr->ctran.z1 = z1; 			
+	mp->ctran.z2 = fr->ctran.z2 = z2;
+	mp->ctran.zt = fr->ctran.zt = W_LINEAR;
+	mp->ctran.a  = fr->ctran.a  = 1.;
+	mp->ctran.b  = fr->ctran.b  = 0.;
+	mp->ctran.c  = fr->ctran.c  = 0.;
+	mp->ctran.d  = fr->ctran.d  = -1.;
+	mp->ctran.tx = fr->ctran.tx = ((float)w/2.)-((float)xim->width/2.) + 1;
+	mp->ctran.ty = fr->ctran.ty = ((float)xim->height/2.)+((float)h / 2.);
+	mp->ctran.valid = fr->ctran.valid = 1;
+	strcpy (fr->ctran.imtitle, mapname);
+	strcpy (mp->ctran.imtitle, mapname);
+
+
+        /* Tell the ISM to cache this mapping if we have an object ref. */
+        sprintf (buf, "cache %s %d", mp->ref, mp->id);
+        ism_message (xim, "wcspix", buf);
+        sprintf (buf, "wcslist %d", mp->id);
+        ism_message (xim, "wcspix", buf);
+
+        /* Send the object ref to the GUI. */
+        sprintf (buf, "cache %s %d %d", mp->ref, fr->frameno, mp->id);
+        wcspix_message (xim, buf);
+        sprintf (buf, "orient %d %d 1 1", mp->id, fr->frameno);
+        wcspix_message (xim, buf);
+
+	fr->nmaps++;				/* update number of mappings */
+
+
+	/* DEBUG prints. */
+	if (debug || getenv("DEBUG_MAPPINGS") != NULL)  {
 	    fprintf (stderr,"%s -\n%g %g %g %g %g %g %g %g %d\n", mapname,
-		fb->ctran.a, fb->ctran.b, fb->ctran.c, fb->ctran.d,
-		fb->ctran.tx, fb->ctran.ty, fb->ctran.z1, fb->ctran.z2,
-		fb->ctran.zt);
+		fr->ctran.a, fr->ctran.b, fr->ctran.c, fr->ctran.d,
+		fr->ctran.tx, fr->ctran.ty, fr->ctran.z1, fr->ctran.z2,
+		fr->ctran.zt);
+	    fprintf (stderr,"%s %d\n%g %g %d %d %d %d %d %d\n", 
+		mp->region, mp->regid, mp->sx, mp->sy, mp->snx, mp->sny,
+		mp->dx, mp->dy, mp->dnx, mp->dny);
+
+	    print_mappings (fr);
+	}
 
 
 	if (pix != NULL)
@@ -324,11 +415,12 @@ register XimDataPtr xim;
 	register char *ip, *op, *flist;
 	register int i;
 
-	if (flp->FileList)
+	if (flp->FileList) {
 	    for (i=0;  i < flp->nfiles;  i++)
 	        free (flp->FileList[i]);
+	}
 
-	flp->FileList = listFiles (flp->curdir, flp->pattern, &flp->nfiles);
+	flp->FileList = listFiles (flp->curdir, flp->pattern, &flp->nfiles, 0);
 
         /* Turn the directory listing into something the GUI wants. */
         if (!(flist = (char *) malloc (SZ_NAME * flp->nfiles)))
@@ -351,7 +443,64 @@ register XimDataPtr xim;
 }
 
 
-/*
+/* XIM_SCANHEADERS --
+ */
+void
+xim_scanHeaders (xim)
+register XimDataPtr xim;
+{
+        register fileLoadPtr flp = xim->flp;
+	register char *ip, *op;
+	register char *entry = (char *)NULL, *flist = (char *)NULL;
+	register int i;
+	extern char *getFITSHdr(), *getIRAFHdr();
+	extern char *getSunRasHdr(), *getGIFHdr();
+
+	if (flp->FileList) {
+	    for (i=0;  i < flp->nfiles;  i++)
+	        free (flp->FileList[i]);
+	}
+
+	flp->FileList = listFiles (flp->curdir, flp->pattern, &flp->nfiles, 1);
+
+        /* Turn the directory listing into something the GUI wants. */
+        if (!(flist = (char *) malloc (SZ_NAME * flp->nfiles)))
+	    return;
+
+	strcpy (flist, "setValue {");
+        op = flist+10;
+        for (i=0; i < flp->nfiles;  i++) {
+
+	    switch (fileType (flp->FileList[i])) {
+	    case XIM_FITS:  entry = getFITSHdr (flp->FileList[i]);   break;
+	    case XIM_OIF:   entry = getIRAFHdr (flp->FileList[i]);   break;
+	    case XIM_GIF:   entry = getGIFHdr (flp->FileList[i]);    break;
+	    case XIM_RAS:   entry = getSunRasHdr (flp->FileList[i]); break;
+	    }
+
+	    if (entry) {
+	        /* Copy the entry to the list. */
+                *op++ = '"';
+                for (ip = entry;  *op = *ip++;  op++)
+                    ;
+                *op++ = '"';
+                *op++ = '\n';
+
+                free ((char *) entry);
+		entry = NULL;
+	    }
+        }
+        *op++ = '}';
+        *op = '\0';
+
+        /* Send the file list to the GUI.  */
+        ObmDeliverMsg (xim->obm, "filelist", flist);
+        free ((char *) flist);
+}
+
+
+
+/* ------------------
  * Internal routines.
  * ------------------
  */
@@ -364,14 +513,14 @@ char *fname;
 {
 	int format;
 
-	if (isSunRas (fname))
-	    format = XIM_RAS;
-	else if (isFITS (fname))
+	if (isFITS (fname))
 	    format = XIM_FITS;
-	else if (isGIF (fname))
-	    format = XIM_GIF;
 	else if (isIRAF (fname))
 	    format = XIM_OIF;
+	else if (isSunRas (fname))
+	    format = XIM_RAS;
+	else if (isGIF (fname))
+	    format = XIM_GIF;
 	else {
 	    /*
 	     *  FILL IN WITH REMAINDER OF FORMATS LATER.
@@ -390,17 +539,20 @@ char *fname;
  * Adapted from the ImageMagick package originally developed by John Christy.
  */
 static char **
-listFiles (directory, pattern, number_entries)
-char *directory; 			/* directory to be listed */
-char *pattern;				/* pattern to be matched */
+listFiles (directory, pattern, number_entries, files_only)
+char *directory; 			/* directory to be listed 	   */
+char *pattern;				/* pattern to be matched 	   */
 int *number_entries;			/* number of filenames in the list */
+int files_only;				/* list only files, not dirs	   */
 {
-	char **filelist;
+	char **filelist, *ip;
+	char patterns[64][20];
 	DIR *current_directory;
 	struct dirent *entry;
 	struct stat file_info;
 	unsigned int max_entries;
-	int status;
+	register int i=0, npatterns = 0;
+	int status, pattern_matches;
 
 	/* Open directory.  */
 	*number_entries = 0;
@@ -420,6 +572,22 @@ int *number_entries;			/* number of filenames in the list */
 	    return((char **) NULL);
 	}
 
+	/* Split the pattern list. */
+	if (pattern) {
+	    for (ip=pattern, i=0;  *ip;  ip++) {
+	        if (*ip == ',') {
+	            patterns[npatterns][i] = '\0'; 
+		    npatterns++;
+		    i = 0;
+	        } else
+	            patterns[npatterns][i++] = *ip; 
+	    }
+	    patterns[npatterns][i] = '\0'; 
+	    npatterns++;
+	} else 
+	    npatterns = 0;
+
+
 	/* Save the current and change to the new directory.  */
 	(void) chdir (directory);
 	entry = readdir (current_directory);
@@ -430,9 +598,23 @@ int *number_entries;			/* number of filenames in the list */
 	    }
 	    (void) stat (entry->d_name, &file_info);
 
-	    if (S_ISDIR(file_info.st_mode) ||
-		    globExpression(entry->d_name, pattern)) {
+	    /* Directory always matches. */
+	    pattern_matches = 0;
+	    if ((S_ISDIR(file_info.st_mode) && !files_only)) {
+		pattern_matches = 1;
+	    } else {
+	        /* Otherwise, check the filename against the pattern list. */
+	        for (i=0; i < npatterns; i++) {
+		    if (globExpression(entry->d_name, &patterns[i])) {
+			pattern_matches = 1;
+			break;
+		    }
+	        }
+	    }
 
+	    if (pattern_matches) {
+
+		/* Reallocate the list if necessary. */
 	    	if (*number_entries >= max_entries) {
 	    	    max_entries <<= 1;
 	    	    filelist = (char **)
@@ -486,10 +668,12 @@ void *x, *y;
  */
 static int	
 globExpression (expression, pattern)
-char *expression; 	/* file name */
-char *pattern; 		/* pattern */
+char *expression; 				/* file name 		*/
+char *pattern; 					/* matching pattern 	*/
 {
-	int done;
+	register int done, match, status;
+	register char c, *p;
+
 
 	if (pattern == (char *) NULL)
 	    return (True);
@@ -503,37 +687,43 @@ char *pattern; 		/* pattern */
 	    if (*expression == '\0')
 	    	if ((*pattern != '{') && (*pattern != '*'))
 	    	    break;
+
 	    switch (*pattern) {
 	    case '\\':
-	    	 {
+		pattern++;
+	    	if (*pattern != '\0')
 	    	    pattern++;
-	    	    if (*pattern != '\0')
-	    	    	pattern++;
-	    	    break;
-	    	}
+	    	break;
 	    case '*':
-	    	 {
-	    	    int status;
-
-	    	    pattern++;
-	    	    status = False;
-	    	    while ((*expression != '\0') && !status)
-	    	    	status = globExpression((char *) expression++, pattern);
-	    	    if (status) {
-	    	    	while (*expression != '\0')
-	    	    	    expression++;
-	    	    	while (*pattern != '\0')
-	    	    	    pattern++;
-	    	    }
-	    	    break;
+	    	pattern++;
+	    	status = False;
+	    	while ((*expression != '\0') && !status)
+	    	    status = globExpression((char *) expression++, pattern);
+	    	if (status) {
+	    	    while (*expression != '\0')
+	    	        expression++;
+	    	    while (*pattern != '\0')
+	    	        pattern++;
 	    	}
+	    	break;
 	    case '[':
-	    	 {
-	    	    char c;
-
-	    	    pattern++;
-	    	    for ( ; ; ) {
-	    	    	if ((*pattern == '\0') || (*pattern == ']')) {
+		pattern++;
+	    	for ( ; ; ) {
+	    	    if ((*pattern == '\0') || (*pattern == ']')) {
+	    	    	done = True;
+	    	    	break;
+	    	    }
+	    	    if (*pattern == '\\') {
+	    	    	pattern++;
+	    	    	if (*pattern == '\0') {
+	    	    	    done = True;
+	    	    	    break;
+	    	    	}
+	    	    }
+	    	    if (*(pattern + 1) == '-') {
+	    	    	c = (*pattern);
+	    	    	pattern += 2;
+	    	    	if (*pattern == ']') {
 	    	    	    done = True;
 	    	    	    break;
 	    	    	}
@@ -544,105 +734,79 @@ char *pattern; 		/* pattern */
 	    	    	    	break;
 	    	    	    }
 	    	    	}
-	    	    	if (*(pattern + 1) == '-') {
-	    	    	    c = (*pattern);
-	    	    	    pattern += 2;
-	    	    	    if (*pattern == ']') {
-	    	    	    	done = True;
-	    	    	    	break;
-	    	    	    }
-	    	    	    if (*pattern == '\\') {
-	    	    	    	pattern++;
-	    	    	    	if (*pattern == '\0') {
-	    	    	    	    done = True;
-	    	    	    	    break;
-	    	    	    	}
-	    	    	    }
-	    	    	    if ((*expression < c) || (*expression > *pattern)) {
-	    	    	    	pattern++;
-	    	    	    	continue;
-	    	    	    }
-	    	    	} else if (*pattern != *expression) {
+	    	    	if ((*expression < c) || (*expression > *pattern)) {
 	    	    	    pattern++;
 	    	    	    continue;
 	    	    	}
+	    	    } else if (*pattern != *expression) {
 	    	    	pattern++;
-	    	    	while ((*pattern != ']') && (*pattern != '\0')) {
+	    	    	continue;
+	    	    }
+	    	    pattern++;
+	    	    while ((*pattern != ']') && (*pattern != '\0')) {
 	    	    	    if ((*pattern == '\\') && (*(pattern + 1) != '\0'))
 	    	    	    	pattern++;
 	    	    	    pattern++;
-	    	    	}
-	    	    	if (*pattern != '\0') {
+	    	    }
+	    	    if (*pattern != '\0') {
 	    	    	    pattern++;
 	    	    	    expression++;
-	    	    	}
-	    	    	break;
 	    	    }
 	    	    break;
 	    	}
+	    	break;
 	    case '?':
-	    	 {
-	    	    pattern++;
-	    	    expression++;
-	    	    break;
-	    	}
+		pattern++;
+	    	expression++;
+	    	break;
 	    case '{':
-	    	 {
-	    	    int match;
-	    	    register char *p;
-
-	    	    pattern++;
-	    	    while ((*pattern != '}') && (*pattern != '\0')) {
-	    	    	p = expression;
-	    	    	match = True;
-	    	    	while ((*p != '\0') && (*pattern != '\0') && 
-	    	    	    (*pattern != ',') && (*pattern != '}') && match) {
-	    	    	    if (*pattern == '\\')
-	    	    	    	pattern++;
-	    	    	    match = (*pattern == *p);
-	    	    	    p++;
+	    	pattern++;
+	    	while ((*pattern != '}') && (*pattern != '\0')) {
+	    	    p = expression;
+	    	    match = True;
+	    	    while ((*p != '\0') && (*pattern != '\0') && 
+	    	    	(*pattern != ',') && (*pattern != '}') && match) {
+	    	    	if (*pattern == '\\')
 	    	    	    pattern++;
-	    	    	}
-	    	    	if (*pattern == '\0') {
-	    	    	    match = False;
-	    	    	    done = True;
-	    	    	    break;
-	    	    	} else if (match) {
-	    	    	    expression = p;
-	    	    	    while ((*pattern != '}') && (*pattern != '\0')) {
-	    	    	    	pattern++;
-	    	    	    	if (*pattern == '\\') {
-	    	    	    	    pattern++;
-	    	    	    	    if (*pattern == '}')
-					pattern++;
-	    	    	    	}
-	    	    	    }
-	    	    	} else
-	    	    	 {
-	    	    	    while ((*pattern != '}') && (*pattern != ',') && 
-	    	    	        (*pattern != '\0')) {
-	    	    	    	pattern++;
-	    	    	    	if (*pattern == '\\') {
-	    	    	    	    pattern++;
-	    	    	    	    if ((*pattern == '}') || (*pattern == ','))
-					pattern++;
-	    	    	    	}
-	    	    	    }
-	    	    	}
-	    	    	if (*pattern != '\0')
-	    	    	    pattern++;
-	    	    }
-	    	    break;
-	    	}
-	    default:
-	    	 {
-	    	    if (*expression != *pattern)
-	    	    	done = True;
-	    	    else
-	    	     {
-	    	    	expression++;
+	    	    	match = (*pattern == *p);
+	    	    	p++;
 	    	    	pattern++;
 	    	    }
+	    	    if (*pattern == '\0') {
+	    	    	match = False;
+	    	    	done = True;
+	    	    	break;
+	    	    } else if (match) {
+	    	    	expression = p;
+	    	    	while ((*pattern != '}') && (*pattern != '\0')) {
+	    	    	    pattern++;
+	    	    	    if (*pattern == '\\') {
+	    	    	    	pattern++;
+	    	    	    	if (*pattern == '}')
+				    pattern++;
+	    	    	    }
+	    	    	}
+	    	    } else {
+	    	    	while ((*pattern != '}') && (*pattern != ',') && 
+	    	    	    (*pattern != '\0')) {
+	    	    	    pattern++;
+	    	    	    if (*pattern == '\\') {
+	    	    	    	pattern++;
+	    	    	    	if ((*pattern == '}') || (*pattern == ','))
+				    pattern++;
+	    	    	    }
+	    	    	}
+	    	    }
+	    	    if (*pattern != '\0')
+	    	    	pattern++;
+	    	}
+	    	break;
+	    default:
+	    	if (*expression != *pattern)
+	    	    done = True;
+	    	else {
+	    	    expression++;
+	    	    pattern++;
 	    	}
 	    }
 	}
@@ -681,7 +845,7 @@ int	npix, a1, a2, b1, b2;
 }   
 
 
-/* SORGRAYMAP -- Sort a random grayscale colormap.
+/* SORTGRAYMAP -- Sort a random grayscale colormap.
  */
 
 static void
@@ -692,7 +856,6 @@ int	npix, ncols;
 {
 	register int	i, pmin=0, pmax=255;
 	register float scale;
-	int ucharCompare();
 
 	/* Reset the pixels so they are the final grayscale values. */
 	scale = 255.0 / (float) (ncols - 1);
@@ -711,7 +874,8 @@ int	npix, ncols;
 	    red[i] = green[i] = blue[i] = 0;
 }
 
-int ucharCompare (i, j)
+static int
+ucharCompare (i, j)
 unsigned char *i, *j;
 {
 	return (*i - *j);

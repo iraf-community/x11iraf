@@ -117,6 +117,12 @@ char *argv[];
 	obm->debug = ((s = getenv("OBMDEBUG")) != NULL);
 	if (s && (i = atoi(s)))
 	    obm->debug = i;
+	if (s = getenv("OBMOBJECTS")) {
+	    obm->debug_objs = (char *) XtCalloc (1, strlen(s)+1);
+	    strcpy (obm->debug_objs, s);
+	} else
+	    obm->debug_objs = (char *)NULL;
+	    
 
 	/* Initialize object classes. */
 	for (i=0;  i < XtNumber(UiObjects);  i++) {
@@ -156,6 +162,8 @@ ObmContext obm;
 	    (*(classrec->ClassDestroy)) (obm, classrec);
 	}
 
+	if (obm->debug_objs)
+	    XtFree ((char *)obm->debug_objs);
 	XtFree ((char *)obm);
 }
 
@@ -431,8 +439,10 @@ char *message;
 	int status = TCL_ERROR;
 
 	if (obm->debug) {
-	    printf ("%s: %s\n", object, message);
-	    fflush (stdout);
+	    if (!obm->debug_objs || strstr (obm->debug_objs, object) != NULL) {
+	        printf ("%s: %s\n", object, message);
+	        fflush (stdout);
+	    }
 	}
 	    
 

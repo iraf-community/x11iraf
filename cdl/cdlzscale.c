@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <math.h>
+#define  CDL_LIBRARY_SOURCE
+#include "cdl.h"
+
 
 /*
  * ZSCALE -- Compute the optimal Z1, Z2 (range of greyscale values to be
@@ -28,7 +31,6 @@
 #define	REJECT_PIXEL	2	     /* reject pixel after a bit             */
 #define	KREJ		2.5	     /* k-sigma pixel rejection factor       */
 #define	MAX_ITERATIONS	5	     /* maximum number of fitline iterations */
-#define	INDEF		0
 
 #undef max
 #define max(a,b) ((a) > (b) ? (a) : (b))
@@ -38,6 +40,8 @@
 #define mod(a,b) ((a) % (b))
 #undef nint
 #define nint(a) ((int)(a + 0.5))
+#undef abs
+#define abs(a) ((a) >= 0 ? (a) : -(a))
 
 
 extern	int	cdl_debug;
@@ -49,9 +53,10 @@ int sampleImage(unsigned char *im, int bitpix, float **sample, int nx, int ny, i
 
 static void subSample(float *a, float *b, int npix, int step);
 int fitLine(float *data, int npix, float *zstart, float *zslope, float krej, int ngrow, int maxiter);
-static void flattenData(float *data, float *flat, float *x, int npix, float z0, float dz);
-int computeSigma(float *a, short *badpix, int npix, float *mean, float *sigma);
-int rejectPixels(float *data, float *flat, float *normx, short *badpix, int npix, double *sumxsqr, double *sumxz, double *sumx, double *sumz, float threshold, int ngrow);
+static void flattenData(float *data, float *flat, float *x, int npix, double
+z0, double dz);
+int computeSigma(float *a, char *badpix, int npix, double *mean, double *sigma);
+int rejectPixels(float *data, float *flat, float *normx, char *badpix, int npix, double *sumxsqr, double *sumxz, double *sumx, double *sumz, double threshold, int ngrow);
 int floatCompare(float *i, float *j);
 
 #else
@@ -127,6 +132,7 @@ int	len_stdline;		/* optimal number of pixels per line	*/
 	float	zstart, zslope;
 	float 	*sample = NULL, *left = NULL;
 
+
 	if (cdl_debug)
 	    printf ("[cdl_zscale] %dx%d-%d  cont=%g optsz=%d len=%d\n",
 		nx, ny, bitpix, contrast, opt_size, len_stdline);
@@ -134,7 +140,6 @@ int	len_stdline;		/* optimal number of pixels per line	*/
 	/* Subsample the image. */
 	npix = sampleImage((unsigned char *)im, bitpix, &sample, nx, ny,
 	    opt_size, len_stdline);
-	center_pixel = max (1, (npix + 1) / 2);
 
 	/* Sort the sample, compute the minimum, maximum, and median pixel
 	 * values.
@@ -146,6 +151,7 @@ int	len_stdline;		/* optimal number of pixels per line	*/
 	/* The median value is the average of the two central values if there 
 	 * are an even number of pixels in the sample.
 	 */
+	center_pixel = max (1, (npix + 1) / 2);
 	left = &(sample[center_pixel - 1]);
 	if (mod (npix, 2) == 1 || center_pixel >= npix)
 	    median = *left;
@@ -378,10 +384,10 @@ int	maxiter;		/* max iterations			  */
 #endif
 {
 	int	i, ngoodpix, last_ngoodpix, minpix, niter;
-	float	xscale, z0, dz, x, z, mean, sigma, threshold;
+	double	xscale, z0, dz, o_dz, x, z, mean, sigma, threshold;
 	double	sumxsqr, sumxz, sumz, sumx, rowrat;
 	float 	*flat, *normx;
-	short	*badpix;
+	char	*badpix;
 
 	if (npix <= 0)
 	    return (0);
@@ -397,7 +403,7 @@ int	maxiter;		/* max iterations			  */
 	 */
 	flat = (float *) malloc (npix * sizeof (float));
 	normx = (float *) malloc (npix * sizeof (float));
-	badpix = (short *) calloc (npix, sizeof(short));
+	badpix = (char *) calloc (npix, sizeof(char));
 
 	/* Compute normalized X vector.  The data X values [1:npix] are
 	 * normalized to the range [-1:1].  This diagonalizes the lsq matrix
@@ -426,7 +432,7 @@ int	maxiter;		/* max iterations			  */
 
 	/* Solve for the coefficients of the fitted line. */
 	z0 = sumz / npix;
-	dz = sumxz / sumxsqr;
+	dz = o_dz = sumxz / sumxsqr;
 
 	/* Iterate, fitting a new line in each iteration.  Compute the flattened
 	 * data vector and the sigma of the flat vector.  Compute the lower and
@@ -475,10 +481,12 @@ int	maxiter;		/* max iterations			  */
 	/* Transform the line coefficients back to the X range [1:npix]. */
 	*zstart = z0 - dz;
 	*zslope = dz * xscale;
+        if (abs(*zslope) < 0.001)
+            *zslope = o_dz * xscale;
 
 	free ((float *)flat);
 	free ((float *)normx);
-	free ((short *)badpix);
+	free ((char *)badpix);
 	return (ngoodpix);
 }
 
@@ -495,8 +503,8 @@ flattenData (
     float *flat,		/* flattened data  (output)		*/
     float *x,			/* x value of each pixel		*/
     int npix,			/* number of pixels			*/
-    float z0,
-    float dz			/* z-intercept, dz/dx of fitted line	*/
+    double z0,
+    double dz			/* z-intercept, dz/dx of fitted line	*/
 )
 #else
 
@@ -506,7 +514,7 @@ float	*data;			/* raw data array			*/
 float	*flat;			/* flattened data  (output)		*/
 float	*x;			/* x value of each pixel		*/
 int	npix;			/* number of pixels			*/
-float	z0, dz;			/* z-intercept, dz/dx of fitted line	*/
+double	z0, dz;			/* z-intercept, dz/dx of fitted line	*/
 #endif
 {
 	register int i;
@@ -525,10 +533,10 @@ float	z0, dz;			/* z-intercept, dz/dx of fitted line	*/
 int 
 computeSigma (
     float *a,			/* flattened data array			*/
-    short *badpix,		/* bad pixel flags (!= 0 if bad pixel)	*/
+    char *badpix,		/* bad pixel flags (!= 0 if bad pixel)	*/
     int npix,
-    float *mean,
-    float *sigma		/* (output)				*/
+    double *mean,
+    double *sigma		/* (output)				*/
 )
 #else
 
@@ -536,9 +544,9 @@ int
 computeSigma (a, badpix, npix, mean, sigma)
 
 float	*a;			/* flattened data array			*/
-short	*badpix;		/* bad pixel flags (!= 0 if bad pixel)	*/
+char	*badpix;		/* bad pixel flags (!= 0 if bad pixel)	*/
 int	npix;
-float	*mean, *sigma;		/* (output)				*/
+double	*mean, *sigma;		/* (output)				*/
 #endif
 {
 	float	pixval;
@@ -565,8 +573,9 @@ float	*mean, *sigma;		/* (output)				*/
 	    *sigma = INDEF;
 	    break;
 	default:
-	    *mean = sum / ngoodpix;
-	    temp = sumsq / (ngoodpix-1) - (sum*sum) / (ngoodpix*(ngoodpix - 1));
+	    *mean = sum / (double) ngoodpix;
+	    temp = sumsq / (double) (ngoodpix-1) -
+			(sum*sum) / (double) (ngoodpix*(ngoodpix - 1));
 	    if (temp < 0)		/* possible with roundoff error */
 		*sigma = 0.0;
 	    else
@@ -595,13 +604,13 @@ rejectPixels (
     float *data,		/* raw data array			*/
     float *flat,		/* flattened data array			*/
     float *normx,		/* normalized x values of pixels	*/
-    short *badpix,		/* bad pixel flags (!= 0 if bad pixel)	*/
-    int npix,
+    char  *badpix,		/* bad pixel flags (!= 0 if bad pixel)	*/
+    int   npix,
     double *sumxsqr,
     double *sumxz,
     double *sumx,
     double *sumz,/* matrix sums				*/
-    float threshold,		/* threshold for pixel rejection	*/
+    double threshold,		/* threshold for pixel rejection	*/
     int ngrow			/* number of pixels of growing		*/
 )
 #else
@@ -613,10 +622,10 @@ rejectPixels (data, flat, normx, badpix, npix,
 float	*data;				/* raw data array		  */
 float	*flat;				/* flattened data array		  */
 float	*normx;				/* normalized x values of pixels  */
-short	*badpix;			/* bad pixel flags (!= 0 if bad)  */
+char	*badpix;			/* bad pixel flags (!= 0 if bad)  */
 int	npix;
 double	*sumxsqr,*sumxz,*sumx,*sumz;	/* matrix sums			  */
-float	threshold;			/* threshold for pixel rejection  */
+double	threshold;			/* threshold for pixel rejection  */
 int	ngrow;				/* number of pixels of growing	  */
 #endif
 {
@@ -644,8 +653,8 @@ int	ngrow;				/* number of pixels of growing	  */
 		    for (j=max(0,i-ngrow); j < min(npix,i+ngrow); j++) {
 			if (badpix[j] != BAD_PIXEL) {
 			    if (j <= i) {
-				x = normx[j];
-				z = data[j];
+				x = (double) normx[j];
+				z = (double) data[j];
 				*sumxsqr = *sumxsqr - (x * x);
 				*sumxz = *sumxz - z * x;
 				*sumx = *sumx - x;

@@ -12,16 +12,16 @@
  *  without affecting the tasks which use it as long as the basic steps re-
  *  quired for image display are the same.
  *  
- *            com_writeData  (fd, x, y, pix, nx, ny)
- *             com_readData  (fd, x, y, &pix, &nx, &ny)
- *           com_readCursor  (fd, sample, &x, &y, &wcs, &key)
- *            com_setCursor  (fd, x, y, wcs)
- *          com_setFBConfig  (fd, configno)
- *             com_setFrame  (fd, frame)
- *             com_writeWCS  (fd, name, a, b, c, d, tx, ty, z1, z2, zt)
- *              com_readWCS  (fd, &name, &a, &b, &c, &d, &tx, &ty,
- *  				  &z1, &z2, &zt)
- *           com_eraseFrame  (fd)
+ *            com_writeData  (fdout, x, y, pix, nx, ny)
+ *             com_readData  (fdin, x, y, &pix, &nx, &ny)
+ *           com_readCursor  (fdin, fdout, sample, &x, &y, &wcs, &key)
+ *            com_setCursor  (fdout, x, y, wcs)
+ *          com_setFBConfig  (fdout, configno)
+ *             com_setFrame  (fdout, frame)
+ *             com_writeWCS  (fdout, buffer, nbytes, version)
+ *              com_readWCS  (fdin, fdout, &buffer, &nbytes, &version)
+ *           com_eraseFrame  (fdout)
+ *           com_wcsVersion  (fdin, fdout)
  * 
  *	We do not actually display images here, all we do is send the individual
  *  set frame, write a data chunk, etc commands.  The caller is responsible for
@@ -36,26 +36,20 @@
 #endif
 
 
+/* Command definitions */
 #define MEMORY          01              	/* frame buffer i/o        */
 #define LUT             02              	/* lut i/o                 */
 #define FEEDBACK        05              	/* used for frame clears   */
 #define IMCURSOR        020             	/* logical image cursor    */
 #define WCS             021             	/* used to set WCS         */
-#define	SZ_IMCURVAL	160			/* cursor value str length */
-#define	SZ_WCSBUF	320			/* wcs buffer length       */
 
-/* Command definitions */
 #define PACKED          0040000
 #define IMC_SAMPLE   	0040000
 #define COMMAND         0100000
 #define IIS_WRITE       0400000
 #define IIS_READ        0100000
 
-#define	OK		0
-#define ERR		1
 
-#undef	min
-#define	min(a,b)	(a < b ? a : b)
 
 /* IIS header packet structure.  DO NOT CHANGE. */
 typedef struct  {
@@ -212,7 +206,7 @@ char	*key;				/* keystroke hit		*/
 
     	/* Send the IIS command for a cursor read. */
 	if (com_whdr (fdout, (IIS_READ | (sample ? IMC_SAMPLE : 0)), IMCURSOR,
-	    0, 0, 0, 0, 0)) {
+	    0, 0, 0, *wcs, 0)) {
 		if (com_debug >= 2)
 		    printf ("com_readCursor: error return from header read.\n");
 	        return (ERR);
@@ -223,10 +217,10 @@ char	*key;				/* keystroke hit		*/
     	if (com_read (fdin, buf, n, &n))
             return (ERR);
 
-	*key = NULL;
+	*key = (char)NULL;
     	status = sscanf (buf, "%f %f %d %c", x, y, wcs, key);
 	if (*key == '\\') {		/* fixup octal char read */
-    	    status = sscanf (buf, "%f %f %d \\%d", x, y, wcs, &octal);
+    	    status = sscanf (buf, "%f %f %d \\%o", x, y, wcs, &octal);
 	    *key = octal;
 	}
 
@@ -345,50 +339,44 @@ int	frame_num;			/* frame number			*/
 int 
 com_writeWCS (
     int fd,				/* connection file descriptor  	*/
-    char *name,				/* image name			*/
-    float a,
-    float b,
-    float c,
-    float d,				/* wcs coefficients		*/
-    float tx,
-    float ty,				/* translation values		*/
-    float z1,
-    float z2,				/* min/max			*/
-    int zt				/* Z transform type		*/
+    char *buffer,			/* wcs buffer string		*/
+    int  nbytes,			/* nbytes to transmit		*/
+    int version				/* iis version type		*/
 )
 #else
 
 int
-com_writeWCS (fd, name, a, b, c, d, tx, ty, z1, z2, zt)
+com_writeWCS (fd, buffer, nbytes, version)
 int	fd;				/* connection file descriptor  	*/
-char	*name;				/* image name			*/
-float	a, b, c, d;			/* wcs coefficients		*/
-float	tx, ty;				/* translation values		*/
-float	z1, z2;				/* min/max			*/
-int	zt;				/* Z transform type		*/
+char 	*buffer;			/* wcs buffer string		*/
+int 	nbytes;				/* nbytes to transmit		*/
+int 	version;			/* iis version type		*/
 #endif
 {
 	char wcs_info[SZ_WCSBUF];
-	int  nbytes, status = 0;
-
-    	/* Format the string to set world coordinate parameters.  */
-    	(void) sprintf (wcs_info, "%s\n%g %g %g %g %g %g %g %g %d\n",
-                name, a, b, c, d, tx, ty, z1, z2, zt);
-	nbytes = strlen (wcs_info) + 1;
+	int  status = 0;
+	short x = 0, y = 0, z = (1 << (frame-1)), t = (fbconfig - 1);
 
     	/* Send the IIS header to set a WCS. */
-	if (com_whdr (fd, IIS_WRITE | PACKED, WCS, -nbytes, 0, 0, 1<<(frame-1),
-	    fbconfig-1)) {
-	        if (com_debug >= 2)
-	            printf (
-			"com_writeWCS: error return from header write.\n");
-	        return (ERR);
+	if (version == 0) {
+	    /* Do the old-style WCS read. Set registers and size.*/
+	    x = 0, y = 0, z = (1 << (frame-1)), t = (fbconfig - 1);
+	} else {
+	    /* Do the new-style WCS read. Set registers and size.*/
+	    x = 1, y = 0, z = (1 << (frame-1)), t = (fbconfig - 1);
+	}
+
+    	/* Send the setWcs header. */
+	if (com_whdr (fd, IIS_WRITE|PACKED, WCS, -nbytes, x, y, z, t)) {
+	    if (com_debug >= 2)
+	        printf ("com_writeWCS: error return from header write.\n");
+	    return (ERR);
 	}
 
     	/* Send the wcs info. */
-    	status =  com_write (fd, wcs_info, nbytes);
-        if (status && com_debug >= 2) {
-	    printf ("com_writeWCS: error return from data write.\n");
+        if (com_write (fd, buffer, nbytes)) {
+	    if (com_debug >= 2)
+	        printf ("com_writeWCS: error return from data write.\n");
 	    return (ERR);
 	}
     	return (OK);
@@ -402,58 +390,55 @@ int	zt;				/* Z transform type		*/
 
 int 
 com_readWCS (
-    int fdin,
-    int fdout,				/* connection file descriptors 	*/
-    char *name,				/* image name			*/
-    float *a,
-    float *b,
-    float *c,
-    float *d,				/* wcs coefficients		*/
-    float *tx,
-    float *ty,				/* translation values		*/
-    float *z1,
-    float *z2,				/* min/max			*/
-    int *zt				/* Z transform type		*/
+    int  fdin,
+    int  fdout,				/* connection file descriptors 	*/
+    char *buffer,			/* wcs string buffer		*/
+    int  *nbytes,			/* length of string		*/
+    int  wcs,				/* requested WCS number		*/
+    int  version			/* iis version number		*/
 )
 #else
 
 int
-com_readWCS (fdin, fdout, name, a, b, c, d, tx, ty, z1, z2, zt)
+com_readWCS (fdin, fdout, buffer, nbytes, wcs, version)
 int	fdin, fdout;			/* connection file descriptors 	*/
-char	*name;				/* image name			*/
-float	*a, *b, *c, *d;			/* wcs coefficients		*/
-float	*tx, *ty;			/* translation values		*/
-float	*z1, *z2;			/* min/max			*/
-int	*zt;				/* Z transform type		*/
+char 	*buffer;			/* wcs string buffer		*/
+int 	*nbytes;			/* length of string		*/
+int  	wcs;				/* requested WCS number		*/
+int 	version;			/* iis version number		*/
 #endif
 {
-	char wcs_info[SZ_WCSBUF];
-	int	n = SZ_WCSBUF, tokens, status = 0;
+	int   nread, tokens, len;
+	short x, y, z, t;
+	char  wcs_info[SZ_WCSBUF];
 
-	/* Send the IIS command to read the WCS. */
-	if (com_whdr (fdout, IIS_READ, WCS, 0, 0, 0, 1<<(frame-1), 0)) {
+
+	/* Set registers and size.  Note that 'version' and 'wcs' will
+	 * be zero when using the old WCS protocols.
+	 */
+	x = version;  
+	y = 0;  
+	z = (1 << (frame-1));  
+	t = wcs;
+	len = (version == 0) ? SZ_OLD_WCSBUF : SZ_WCSBUF;
+
+	/* Send the WCS query string. */
+	if (com_whdr (fdout, IIS_READ, WCS, 0, x, y, z, t)) {
 	    if (com_debug >= 2)
 	        printf ("com_readWCS: error return from header read.\n");
 	    return (ERR);
 	}
 
-    	status = com_read (fdin, wcs_info, n, &n);
-        if (status && com_debug >= 2) {
-	    printf ("com_readWCS: error return from data read.\n");
+	/* Read the reply string. */
+        if (com_read (fdin, wcs_info, len, &nread)) {
+	    if (com_debug >= 2)
+		printf ("com_readWCS: error return from data read.\n");
 	    return (ERR);
 	}
 
-    	tokens = sscanf (wcs_info, "%[^\n]\n%g%g%g%g%g%g%g%g%d",
-	    name, a, b, c, d, tx, ty, z1, z2, zt);
-    	if (tokens == EOF) {
-            /* Had no WCS info, can't even get name.  no error.  */
-            name[0] = '\0';
-            *a = *b = *c = *d = *tx = *ty = *z1 = *z2 = 0.0;
-            *zt = 0;
-
-    	} else if (tokens < 10)
-            /* partial read, something must be wrong.  */
-            return (ERR);
+	/* Copy the data string to the return buffer. */
+	*nbytes = nread;
+	strncpy (buffer, wcs_info, nread);
 
 	return (OK);
 }
@@ -484,6 +469,56 @@ int	fd;				/* connection file descriptor 	*/
 	}
 	return (OK);
 }
+
+
+/*  COM_WCSVERSION -- Determine the server WCS version.
+ */
+
+#ifdef ANSI_FUNC
+
+int 
+com_wcsVersion (
+    int fdin,				/* connection file descriptor 	*/
+    int fdout				/* connection file descriptor 	*/
+)
+#else
+
+int
+com_wcsVersion (fdin, fdout)
+int	fdin;				/* connection file descriptor 	*/
+int	fdout;				/* connection file descriptor 	*/
+#endif
+{
+	char  wcstext[SZ_OLD_WCSBUF];
+	int   n = SZ_OLD_WCSBUF, status = 0, version = 0;
+	short x = 1, y = 1, z = (1 << (frame-1)), t = 0;
+
+
+    	/* Send IIS command to return the WCS version (subunitof getWCS) */
+	if (com_whdr (fdout, IIS_READ, WCS, 0, x, y, z, t)) {
+	    if (com_debug >= 2)
+	        printf ("com_eraseFrame: error return from header write.\n");
+	    return (0);
+	}
+
+	/* Read the reply string. */
+    	status = com_read (fdin, wcstext, SZ_OLD_WCSBUF, &n);
+	if (status && com_debug >= 2) {
+	    printf ("com_wcsVersion: error return from version read.\n");
+	    return (0);
+	}
+
+        /* Decode the version from the WCS text. */
+        if (strncmp (wcstext, "version=", 8) == 0) {
+            if (sscanf (wcstext, "version=%d", &version) < 1)
+                version = 0;
+        } else
+            version = 0;
+
+	return (version);
+}
+
+
 
 
 /*------------------

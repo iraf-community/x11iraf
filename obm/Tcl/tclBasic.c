@@ -700,6 +700,7 @@ Tcl_Eval(interp, cmd)
      * The storage immediately below is used to generate a copy
      * of the command, after all argument substitutions.  Pv will
      * contain the argv values passed to the command procedure.
+#   define NUM_CHARS 1024
      */
 
 #   define NUM_CHARS 200

@@ -61,9 +61,11 @@ SOFTWARE.
 #include <errno.h>
 
 extern int errno, sys_nerr;
+#ifndef __DARWIN__
 #ifndef __FreeBSD__
 #ifndef _BSD_SOURCE
 extern char* sys_errlist[];
+#endif
 #endif
 #endif
 

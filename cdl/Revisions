@@ -1,10 +1,64 @@
 
 =============
-V1.7 Changes
+V1.8 Released
 =============
 
-cdl.h
-	Fixed a typo in the prototype declaration for cdl_readCursor (4/14/00)
+cdl.c				**** INTERFACE CHANGE ****
+imd.c				**** INTERFACE CHANGE ****
+cdl.h				**** INTERFACE CHANGE ****
+cdl_spp.c			**** INTERFACE CHANGE ****
+cdl_spp.h			**** INTERFACE CHANGE ****
+cdl_f77.c			**** INTERFACE CHANGE ****
+cdl_77.h			**** INTERFACE CHANGE ****
+cdlspp.h			**** INTERFACE CHANGE ****
+	Added new interface routines for the set/get/query mapping calls.
+	See the detailed Revisions notes for specifics (8/4/01)
+
+imd.c
+comm.c
+cdlP.h
+cdlProto.h
+	Added a new com_wcsVersion() routine to query server for the
+	WCS version (i.e. new XImtool mapping support) (6/14/01)
+
+eps.c
+	Made certain variables static, other lint cleanups (6/14/01)
+
+cdlzscale.c
+	Changed to handle the case of a very small slope produced by the
+	fitting rejection (5/31/01)
+
+cdlfits.c
+	Minor change to variable names. (5/30/01)
+
+imd.c
+        Fixed a minor bug where the last line of a display was being left
+        off due to an incorrect indexing of the last block being written
+        in imd_writeSubRaster().  (4/17/01)
+
+Imakefile
+        Incremented version to 1.8 (4/17/01)
+
+comm.c
+	Fixed a bug in reading octal cursor values (e.g. space) (11/20/2000)
+
+cdlzscale.c
+        Added a '#include "cdl.h"' so the ANSI_FUNC was defined (11/17/2000)
+
+cdlmark.c
+	Fixed a bug in the selection of BOX markers for deletion (10/27/2000)
+
+cdl_f77.c
+	Fixed a bug preventing cfreadiraf() from getting the pixels
+	correctly (5/23/2000)
+
+cdliraf.c
+	Fixed a bug in getting the V2 image title (5/23/2000)
+
+
+=============
+V1.7 Released
+=============
 
 cdl.c				**** INTERFACE CHANGE ****
 	Modified the behavior of cdl_getFrame() to do a sampling cursor
@@ -15,6 +69,7 @@ cdl.c				**** INTERFACE CHANGE ****
 cdl.[ch]			**** INTERFACE CHANGE ****
 imd.c				**** INTERFACE CHANGE ****
 comm.c				**** INTERFACE CHANGE ****
+cdlProto.h			**** INTERFACE CHANGE ****
 cdl_f77.[ch]			**** INTERFACE CHANGE ****
 cdl_spp.c			**** INTERFACE CHANGE ****
 examples/tvmark.c		**** INTERFACE CHANGE ****

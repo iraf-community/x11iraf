@@ -75,13 +75,14 @@ char *argv[];
 	} else {
 	    register int ch;
 	    register char *op;
-	    char message[1024000];
+	    char *message = (char *) XtMalloc (1024000);
 
 	    for (op=message;  (ch = getc(stdin)) != EOF;  )
 		*op++ = ch;
 	    *op++ = '\0';
 
 	    ObmDeliverMsg (obm, server, message);
+	    free (message);
 	}
 
 	/* Activate the GUI. */
@@ -109,9 +110,10 @@ Widget toplevel;
  * to the "client" object, which is this routine in the case of obmsh.
  */
 static void
-output (obm, tcl, key, string)
+output (obm, tcl, objname, key, string)
 XtPointer obm;
 XtPointer tcl;			/* not used */
+char *objname;			/* not used */
 int key;
 char *string;
 {

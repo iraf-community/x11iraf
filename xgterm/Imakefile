@@ -91,6 +91,8 @@ SpecialObjectRule(main.o,NullParameter,$(MAIN_DEFINES))
 SpecialObjectRule(misc.o,NullParameter,$(MISC_DEFINES))
 SpecialObjectRule(charproc.o,NullParameter,$(MISC_DEFINES))
 
+main.o:			../version.h
+
 #if InstallXgtermSetUID
 SetUIDProgramTarget(xgterm,$(OBJS1),$(DEPLIBS1),$(OBMLIBS) XawClientLibs,$(TERMCAPLIB) $(PTYLIB) $(MATHLIB)) 
 #else

@@ -5,7 +5,7 @@
 #ifndef	_CDL_Defined
 #define	_CDL_Defined
 
-#define	CDL_VERSION	"Client Display Library V1.7 04/28/99"
+#define	CDL_VERSION	"Client Display Library V1.8 07/28/01"
 
 /* Declare prototypes if using ANSI C */
 #ifdef  CDL_ANSIC
@@ -14,13 +14,14 @@
 
 #define MAX_FBCONFIG     128            /* max size of FB config table  */
 #define MAX_FRAMES        16            /* max frames support by server */
+#define MAX_MAPPINGS      32            /* max image mappings per frame */
 #define DEF_CONTRAST    0.25            /* default zscale contrast      */
 #define DEF_NSAMPLE      600            /* default number of samples    */
 #define DEF_NSAMPLINES    -1            /* default no. of sample lines  */
 #define INDEF           -999            /* INDEF value flag             */
 
 
-/* Include private definitions when compiling linrary sources. */
+/* Include private definitions when compiling library sources. */
 #ifdef   CDL_LIBRARY_SOURCE
 #include "eps.h"
 #include "cdlP.h"
@@ -32,7 +33,7 @@
 /* Types of greyscale transformations. */
 #define CDL_UNITARY       0            	/* values map without change	*/
 #define CDL_LINEAR        1            	/* linear mapping		*/
-#define CDL_LOG           2            	/* logarithmic mapping	*/
+#define CDL_LOG           2            	/* logarithmic mapping		*/
 
 /* Overlay colors. */
 #define	C_BLACK		202		/* Static overlay color defs	*/
@@ -126,6 +127,16 @@ struct CDL {
 	float	tx, ty;			/* translation values	*/
 	float	z1, z2;			/* zscale values	*/
 	int	ztrans;			/* Z trans type		*/
+
+	/* Coordinate mappings on the frame buffer. */
+	char	*ref;			/* img reference	*/
+	char	*region;		/* region name		*/
+	float	sx, sy;			/* source rect		*/
+	int	snx, sny;
+	int	dx, dy;			/* destination rect	*/
+	int	dnx, dny;
+	int	iis_version;		/* server IIS version 	*/
+	int	iis_valid;		/* valid mapping flag	*/
 };
 
 
@@ -197,6 +208,7 @@ int	cdl_readImage(), cdl_readFrameBuffer(), cdl_readSubRaster();
 int	cdl_writeSubRaster(), cdl_setCursor();
 int	cdl_printPix(), cdl_printPixToFile();
 int	cdl_setWCS(), cdl_getWCS();
+int 	cdl_getMapping(), cdl_setMapping(), cdl_queryMap();
 
 void	cdl_selectFB(), cdl_close(), cdl_computeZscale(), cdl_zscaleImage();
 void	cdl_setFrame(), cdl_setFBConfig(), cdl_setZTrans(), cdl_setZoom();
@@ -230,6 +242,9 @@ char cdl_readCursor(CDLPtr cdl, int sample, float *x, float *y, int *wcs, char *
 int cdl_setCursor(CDLPtr cdl, int x, int y, int wcs);
 int cdl_setWCS(CDLPtr cdl, char *imname, char *imtitle, float a, float b, float c, float d, float tx, float ty, float z1, float z2, int zt);
 int cdl_getWCS(CDLPtr cdl, char *name, char *title, float *a, float *b, float *c, float *d, float *tx, float *ty, float *z1, float *z2, int *zt);
+int cdl_getMapping(CDLPtr cdl, char *region, float *sx, float *sy, int *snx, int *sny, int *dx, int *dy, int *dnx, int *dny, char *ref);
+int cdl_setMapping(CDLPtr cdl, char *region, float sx, float sy, int snx, int sny, int dx, int dy, int dnx, int dny, char *ref);
+int cdl_queryMap(CDLPtr cdl, int wcs, char *region, float *sx, float *sy, int *snx, int *sny, int *dx, int *dy, int *dnx, int *dny, char *objref);
 int cdl_clearFrame(CDLPtr cdl);
 void cdl_selectFB(CDLPtr cdl, int nx, int ny, int *fb, int *w, int *h, int *nf, int reset);
 void cdl_close(CDLPtr cdl);

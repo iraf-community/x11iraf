@@ -1,5 +1,4 @@
-# PANEL.GUI -- Test GUI for the frame and layout widgets.
-# This gui can be run as "cl> hello gui=panel.gui".
+# PANEL.GUI -- Test GUI for the Tabs widget.
 
 reset-server
 appInitialize panel Panel {

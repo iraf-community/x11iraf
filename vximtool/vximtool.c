@@ -4,6 +4,9 @@
 #include <sys/times.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#if defined(AIX) || defined(AIXV3) || defined (AIXV4)
+#include <sys/select.h>
+#endif
 #include <netinet/in.h>
 #include <sys/un.h> 
 #include <errno.h>
@@ -54,8 +57,9 @@
  */
 #define	MAX_FBCONFIG		128	/* max possible frame buf sizes	*/
 #ifndef	HAVE_CDL
-#define	MAX_FRAMES		4	/* max number of frames		*/
+#define	MAX_FRAMES		16	/* max number of frames		*/
 #endif
+#define	MAX_MAPPINGS		32	/* max number mappings/frame	*/
 #define	MAX_CLIENTS		8	/* max display server clients	*/
 #define	DEF_NFRAMES		1	/* save memory; only one frame	*/
 #define	DEF_FRAME_WIDTH		512	/* 512 square frame		*/
@@ -63,7 +67,6 @@
 
 #define	SZ_LABEL	256		/* main frame label string	*/
 #define	SZ_IMTITLE	128		/* image title string		*/
-#define	SZ_WCSBUF	320		/* WCS text buffer size		*/
 #define	SZ_FIFOBUF	4000		/* transfer size for FIFO i/o	*/
 #define	SZ_FNAME	256
 #define	SZ_LINE		256
@@ -84,9 +87,12 @@
 #define MAXCONN         5
 #define SZ_IOBUF        65536           /* max size data transfer       */
 #define SZ_FIFOBUF      4000
-#define SZ_WCSBUF       320             /* WCS text buffer size         */
+#define SZ_OLD_WCSBUF   320             /* old WCS text buffer size     */
+#define SZ_WCSBUF       1024            /* WCS text buffer size         */
 #define SZ_FNAME        256
 #define SZ_IMCURVAL     160
+
+#define IIS_VERSION     10              /* version 10 -> 1.0            */
 
 #define MEMORY          01              /* frame buffer i/o             */
 #define LUT             02              /* lut i/o                      */
@@ -133,6 +139,19 @@ typedef struct {
 	char imtitle[SZ_IMTITLE+1];	/* image title from WCS	*/
 } Ctran, *CtranPtr;
 
+/* Coordinate mappings on each frame buffer. */
+typedef struct {
+        int   id;                       /* object id                    */
+        Ctran ctran;                    /* world coordinate system      */
+        char  ref[SZ_FNAME+1];          /* image reference from WCS     */
+        int   regid;                    /* region id                    */
+        char  region[SZ_FNAME+1];       /* region name from WCS         */
+        float sx, sy;                   /* source rect                  */
+        int   snx, sny;                 
+        int   dx, dy;                   /* destination rect             */
+        int   dnx, dny;                 
+} Mapping, *MappingPtr;
+
 /* The frame buffers. */
 typedef struct {
 	int frameno;			/* frame number			   */
@@ -140,6 +159,8 @@ typedef struct {
 	char label[SZ_LABEL+1];		/* frame label string		   */
 	Ctran ctran;			/* world coordinate system	   */
 	char wcsbuf[SZ_WCSBUF];		/* wcs info string		   */
+        Mapping mapping[MAX_MAPPINGS];  /* coordinate mappings          */
+        int     nmaps;                  /* number of defined mappings   */
 } FrameBuf, *FrameBufPtr;
 
 /* Possible frame buffer sizes. */
@@ -151,7 +172,7 @@ typedef struct {
 
 /* Client I/O channel. */
 typedef struct {
-	void	*vxim;			/* backpointer to vxim descriptor   */
+	void *vxim;			/* backpointer to vxim descriptor   */
 	int type;			/* channel type 		   */
 	int listen_fd;			/* socket server fd		   */
 	int datain;			/* input channel 		   */
@@ -161,6 +182,7 @@ typedef struct {
 	int port;			/* inet port number 		   */
 	char path[SZ_FNAME+1];		/* for unix sockets 		   */
 	int reference_frame;		/* reference (cmd i/o) frame 	   */
+        int version;                    /* flags capability of client    */
 	FrameBufPtr rf_p;		/* reference frame descriptor 	   */
 } IoChan, *IoChanPtr;
 
@@ -238,6 +260,7 @@ CDLPtr	cdl[MAX_CLIENTS];
 static	int	keep_raster = 1;
 extern	int	errno;
 static	int	background = 0;
+static	int	objid = 0;
 static	int	verbose = 0;
 static	int	interactive = 0;
 static	float	cursor_x = 1.0, cursor_y = 1.0;
@@ -270,6 +293,8 @@ static void 	 vx_eraseFrame(register VXimDataPtr vxim, int frame);
 static void 	 get_fbconfig(register VXimDataPtr vxim);
 static void 	 Usage(void);
 static void 	 printoption(char *st);
+static void	 add_mapping(register VXimDataPtr vxim, CtranPtr ctran, 
+		     char *wcsbuf, FrameBufPtr fr);
 #ifdef	HAVE_CDL
 static void 	 vx_flip(char *buffer, int nx, int ny);
 #endif
@@ -282,6 +307,7 @@ static void 	 vx_iisclose(), vx_connectClient(), vx_disconnectClient();
 static void	 vx_iisio(), set_fbconfig(), vx_retCursorVal();
 static void 	 vx_initialize(), vx_initFrame(), vx_eraseFrame();
 static void 	 get_fbconfig(), Usage(), printoption();
+static void	 add_mapping();
 #ifdef	HAVE_CDL
 static void 	 vx_flip();
 #endif
@@ -790,10 +816,12 @@ int *source;
 	/* Accept connection. */
 	if ((s = accept ((int)*source, (struct sockaddr *)0, (int *)0)) < 0)
 	    return;
+/*	
 	if (fcntl (s, F_SETFD, O_RDWR|O_NDELAY) < 0) {
 	    close (s);
 	    return;
 	}
+*/
 
 	/* Allocate and fill in i/o channel descriptor. */
 	FD_SET(s, &allset);
@@ -802,6 +830,17 @@ int *source;
 	chan->connected = 1;
 	chan->reference_frame = 1;
 	chan->rf_p = &vxim->frames[0];
+
+	switch (chan->type) {
+	case IO_INET:
+	    if (verbose) 
+		fprintf (stderr,
+		    "connecting client on port %d\n", chan->port);
+	case IO_UNIX:
+	    if (verbose && chan->type == IO_UNIX) 
+		fprintf (stderr,
+		    "connecting client on %s\n", chan->path);
+	}
 }
 
 
@@ -892,10 +931,12 @@ int source;
 
 	/* Get the IIS header. */
 	if ((n = iis_read (datain, (char *)&iis, sizeof(iis))) < sizeof(iis)) {
+	    if (n != 0)
+		fprintf (stderr, 
+		   "vximtool: command input read error, n=%d of %d, errno=%d\n",
+			n, sizeof(iis), errno);
 	    if (n <= 0)
 		vx_disconnectClient (chan);
-	    else
-		fprintf (stderr, "vximtool: command input read error\n");
 	    return;
 	} else if (bswap)
 	    bswap2 ((char *)&iis, (char *)&iis, sizeof(iis));
@@ -966,7 +1007,7 @@ int source;
 #endif
 	    if (verbose)
   	        fprintf (stderr, "erase frame %d - ref = %d\n", 
-		    decode_frameno(iis.z & 07777), chan->reference_frame);
+		    decode_frameno(iis.z & 0177777), chan->reference_frame);
 	    break;
 
 	case LUT:
@@ -1034,7 +1075,7 @@ int source;
 		long    starttime;
 
 		/* Get the frame to be read from. */
-	        chan->reference_frame = decode_frameno (iis.z & 07777);
+	        chan->reference_frame = decode_frameno (iis.z & 0177777);
         	fb = &vxim->frames[chan->reference_frame-1];
 
 		nbytes = ndatabytes;
@@ -1046,13 +1087,13 @@ int source;
 			"vximtool: attempted read out of bounds on framebuf\n");
 		    fprintf (stderr,
 			"read %d bytes at [%d,%d]\n", nbytes, x, y);
-		    memset ((void *)iobuf, 0, nbytes);
+		    memset ((void *)iobuf, 0, min(SZ_IOBUF,nbytes));
 		} else {
                     if (verbose) 
 			fprintf (stderr, "read %d bytes at [%d,%d]\n",
 			    nbytes, x, y);
 		    if (keep_raster)
- 		        bcopy(&fb->framebuf[(y * vxim->width)+x], iobuf, nbytes);
+ 		        bcopy(&fb->framebuf[(y * vxim->width)+x], iobuf,nbytes);
 		    else
  		        bzero (iobuf, nbytes);
 #ifdef	HAVE_CDL
@@ -1060,7 +1101,8 @@ int source;
 		 	unsigned char *pix = (unsigned char *)malloc(SZ_IOBUF);
 			cdl_readSubRaster (cdl[0], x,
 			    (vxim->height-y-max(1, nbytes/vxim->width)),
-			    min(vxim->width, nbytes), max(1, nbytes/vxim->width),
+			    min(vxim->width, nbytes), 
+			    max(1, nbytes/vxim->width),
 			    &pix);
  		        bcopy(pix, iobuf, nbytes);
 			vx_flip ((char *)iobuf, min(vxim->width, nbytes), 
@@ -1097,7 +1139,7 @@ int source;
 		 * each frame, 01 is frame 1, 02 is frame 2, 04 is frame 3,
 		 * and so on).
 		 */
-	        chan->reference_frame = decode_frameno (iis.z & 07777);
+	        chan->reference_frame = decode_frameno (iis.z & 0177777);
         	fb = &vxim->frames[chan->reference_frame-1];
 
 		nbytes = ndatabytes;
@@ -1118,7 +1160,7 @@ int source;
 
 		if (x < 0 || x >= vxim->width || y < 0 || y >= vxim->height) {
 		    fprintf (stderr,
-			"vximtool: attempted write out of bounds on framebuf\n");
+		       "vximtool: attempted write out of bounds on framebuf\n");
 		    fprintf (stderr,
 			"write %d bytes at [%d,%d]\n", nbytes, x, y);
 		    bzero ((void *)iobuf, nbytes);
@@ -1127,7 +1169,7 @@ int source;
 			fprintf (stderr, "write %d bytes at x=%d, y=%d\n",
 			    nbytes, x, y);
 		    if (keep_raster)
- 		        bcopy(iobuf, &fb->framebuf[(y * vxim->width)+x], nbytes);
+ 		        bcopy(iobuf, &fb->framebuf[(y * vxim->width)+x],nbytes);
 #ifdef	HAVE_CDL
 		    if (proxy) {
 			vx_flip ((char *)iobuf, min(vxim->width, nbytes), 
@@ -1160,34 +1202,54 @@ int source;
 		char *text;
 		int frame;
 
-		frame = decode_frameno (iis.z & 07777);
-	        chan->reference_frame = frame;
+		if ((iis.y & 0177777)) {
+		    /* This is a check by the client on our capabilities.
+		     * Return with a version number which can be used by the
+		     * client.  However we write back using the old WCS 
+		     * buffer size for compatability.
+		     */
+		    sprintf (text=emsg, "version=%d", IIS_VERSION);
+		    chan->version = IIS_VERSION;
 
-		if (chan->rf_p->frameno <= 0)
-		    strcpy (text=emsg, "[NOSUCHFRAME]\n");
-		else
-		    text = chan->rf_p->wcsbuf;
+		    iis_write (dataout, text, SZ_OLD_WCSBUF);
+		    if (verbose) 
+			fprintf (stderr, "version query wcs: %s\n",text);
 
-		iis_write (dataout, text, SZ_WCSBUF);
+		} else {
+		    frame = decode_frameno (iis.z & 0177777);
+	            chan->reference_frame = frame;
 
-		if (verbose) {
-                    fprintf (stderr, "query wcs:\n");
-                    write (2, text, SZ_WCSBUF);
+		    if (chan->rf_p->frameno <= 0)
+		        strcpy (text=emsg, "[NOSUCHFRAME]\n");
+		    else
+		        text = chan->rf_p->wcsbuf;
+
+		    if ((iis.x & 0177777))
+		        iis_write (dataout, text, SZ_WCSBUF);
+		    else
+		        iis_write (dataout, text, SZ_OLD_WCSBUF);
+
+		    if (verbose) {
+                        fprintf (stderr, "query wcs:\n");
+                        write (2, text, SZ_WCSBUF);
+		    }
 		}
 
 	    } else {
 		/* Set the WCS for the referenced frame.
 		 */
 		register CtranPtr ct;
-		int fb_config, frame;
+		int fb_config, frame, new_wcs = 0;
 
-		frame = decode_frameno (iis.z & 07777);
+		frame = decode_frameno (iis.z & 0177777);
 		fb_config = (iis.t & 0777) + 1;
+		new_wcs   = (iis.t & 0777);
 
 		/* See if we need to change the frame buffer configuration,
 		 * or allocate a new frame.
 		 */
 		if (fb_config != vxim->fb_configno) {
+		    set_fbconfig (chan, fb_config, frame);
 #ifdef	HAVE_CDL
 		    if (proxy) {
 			for (i=0; i < nclients; i++) {
@@ -1196,8 +1258,8 @@ int source;
 			}
 		    }
 #endif
-		    set_fbconfig (chan, fb_config, frame);
 		} else if (frame > vxim->nframes && frame < MAX_FRAMES) {
+		    set_fbconfig (chan, vxim->fb_configno, frame);
 #ifdef	HAVE_CDL
 		    if (proxy) {
 			for (i=0; i < nclients; i++) {
@@ -1206,24 +1268,25 @@ int source;
 			}
 		    }
 #endif
-		    set_fbconfig (chan, vxim->fb_configno, frame);
 		}
 
 		/* Read in and set up the WCS. */
 		chan->reference_frame = frame;
+		memset ((char *)buf, 0, SZ_WCSBUF);
 		if (iis_read (datain, buf, ndatabytes) == ndatabytes)
-		    strncpy (chan->rf_p->wcsbuf, buf, SZ_WCSBUF);
+		    strncpy (chan->rf_p->wcsbuf, buf,
+			(new_wcs ? SZ_WCSBUF : SZ_OLD_WCSBUF));
 
 		if (verbose) {
-                    fprintf (stderr, "set wcs:\n");
+                    fprintf (stderr, "set wcs:  nbytes=%d\n", ndatabytes);
                     write (2, buf, ndatabytes);
 		}
 
 		strcpy (chan->rf_p->ctran.format, W_DEFFORMAT);
 		chan->rf_p->ctran.imtitle[0] = '\0';
 		chan->rf_p->ctran.valid = 0;
-
 		ct = wcs_update (vxim, chan->rf_p);
+
 #ifdef	HAVE_CDL
 		if (proxy) {
 		    for (i=0; i < nclients; i++)
@@ -1232,6 +1295,10 @@ int source;
 			    ct->tx, ct->ty, ct->z1, ct->z2, ct->zt);
 		}
 #endif
+
+		/* Add the mapping information.  */
+                add_mapping (vxim, ct, chan->rf_p->wcsbuf,
+                    &vxim->frames[chan->reference_frame-1]);
 	    }
 	    return;
 
@@ -1694,75 +1761,109 @@ get_fbconfig (vxim)
 register VXimDataPtr vxim;
 #endif
 {
-        register char   *ip;
-        register FILE   *fp = NULL;
-        int     config, nframes, width, height, i;
-        char    lbuf[SZ_LINE+1], *fname;
+	register char	*ip;
+	register FILE	*fp = NULL;
+	int	config, nframes, width, height, i;
+	char	lbuf[SZ_LINE+1], *fname;
+	static char *fb_paths[] = {
+		"/usr/local/lib/imtoolrc",
+		"/opt/local/lib/imtoolrc",
+		"/iraf/iraf/dev/imtoolrc",
+		"/local/lib/imtoolrc",
+		"/usr/iraf/dev/imtoolrc",
+		"/usr/local/iraf/dev/imtoolrc",
+		NULL};
 
-        /* Initialize the config table. */
-        vxim->fb_configno = 1;
-        for (i=0;  i < MAX_FBCONFIG;  i++) {
-            vxim->fb_config[i].nframes = 1;
-            vxim->fb_config[i].width = DEF_FRAME_WIDTH;
-            vxim->fb_config[i].height = DEF_FRAME_HEIGHT;
-        }
+	/* Initialize the config table. */
+	vxim->fb_configno = 1;
+	for (i=0;  i < MAX_FBCONFIG;  i++) {
+	    vxim->fb_config[i].nframes = 1;
+	    vxim->fb_config[i].width = DEF_FRAME_WIDTH;
+	    vxim->fb_config[i].height = DEF_FRAME_HEIGHT;
+	}
 
-        /* Attempt to open the config file. */
-        if ((fname=getenv(FBCONFIG_ENV1)) || (fname=getenv(FBCONFIG_ENV2)))
-            fp = fopen (fname, "r");
-        if (!fp && (fname = getenv ("HOME"))) {
-            sprintf (lbuf, "%s/%s", fname, FBCONFIG_1);
-            fp = fopen (fname = lbuf, "r");
-        }
-        if (!fp)
-            fp = fopen (fname = vxim->imtoolrc, "r");
-        if (!fp)
-            return;
+	/* Now add in some defaults for commonly used sizes based on the
+ 	 * standard IRAF imtoolrc file, we'll avoid any instrument specific
+	 * configurations.
+	 */
+	vxim->fb_config[0].width = vxim->fb_config[0].height =  512;
+	vxim->fb_config[1].width = vxim->fb_config[1].height =  800;
+	vxim->fb_config[2].width = vxim->fb_config[2].height = 1024;
+	vxim->fb_config[3].width = vxim->fb_config[3].height = 1600;
+	vxim->fb_config[4].width = vxim->fb_config[4].height = 2048;
+	vxim->fb_config[5].width = vxim->fb_config[5].height = 4096;
 
-        /* Scan the frame buffer configuration file.
-         */
-	lbuf[0] = '\0';
-        while (fgets (lbuf, SZ_LINE, fp) != NULL) {
-            /* Skip comment lines and blank lines. */
-            for (ip=lbuf;  *ip == ' ' || *ip == '\t';  ip++)
-                ;
-            if (*ip == '\n' || *ip == '#')
-                continue;
-            if (!isdigit (*ip))
-                continue;
-            switch (sscanf (ip, "%d%d%d%d", &config,&nframes,&width,&height)) {
-            case 4:
-                break;                  /* normal case */
-            case 3:
-                height = width;         /* default to square format */
-                break;
-            default:
-                fprintf (stderr, "vximtool: bad config `%s'\n", ip);
-                continue;
-            }
+	/* Attempt to open the config file. */
+	if ((fname=getenv(FBCONFIG_ENV1)) || (fname=getenv(FBCONFIG_ENV2)))
+	    fp = fopen (fname, "r");
+	if (!fp && (fname = getenv ("HOME"))) {
+	    sprintf (lbuf, "%s/%s", fname, FBCONFIG_1);
+	    fp = fopen (fname = lbuf, "r");
+	    if (fp) {
+	        vxim->imtoolrc = (char *) calloc (strlen(fname+1),sizeof(char));
+		strncpy (vxim->imtoolrc, fname, strlen(fname));
+	    }
+	}
+	if (!fp)
+	    fp = fopen (fname = vxim->imtoolrc, "r");
+ 	for (i=0; !fp && fb_paths[i]; i++) {
+	    if ((fp = fopen (fname = fb_paths[i], "r"))) {
+	        vxim->imtoolrc = (char *) calloc (strlen(fb_paths[i]+1),
+		    sizeof(char));
+		strncpy (vxim->imtoolrc, fb_paths[i],strlen(fb_paths[i]));
+		break;
+	    }
+	}
+	if (!fp) {
+	    fprintf (stderr, 
+		"Warning: No frame buffer configuration file found.\n");
+	    return;
+	}
 
-            nframes = max (1, nframes);
-            width   = max (1, width);
-            height  = max (1, height);
 
-            /* Since the frame buffer is stored in a memory pixrect
-             * (effectively), the line length should be an integral number
-             * of 16 bit words.
-             */
-            if (width & 1) {
-                fprintf (stderr, "imtool warning: fb config %d [%d-%dx%d] - ",
-                    config, nframes, width, height);
-                fprintf (stderr, "frame width should be even, reset to %d\n",
-                   --width);
-            }
+	/* Scan the frame buffer configuration file.
+	 */
+	while (fgets (lbuf, SZ_LINE, fp) != NULL) {
+	    /* Skip comment lines and blank lines. */
+	    for (ip=lbuf;  *ip == ' ' || *ip == '\t';  ip++)
+		;
+	    if (*ip == '\n' || *ip == '#')
+		continue;
+	    if (!isdigit (*ip))
+		continue;
+	    switch (sscanf (ip, "%d%d%d%d", &config,&nframes,&width,&height)) {
+	    case 4:
+		break;			/* normal case */
+	    case 3:
+		height = width;		/* default to square format */
+		break;
+	    default:
+		fprintf (stderr, "vximtool: bad config `%s'\n", ip);
+		continue;
+	    }
 
-            config = max(1, min(MAX_FBCONFIG, config)) - 1;
-            vxim->fb_config[config].nframes = nframes;
-            vxim->fb_config[config].width   = width;
-            vxim->fb_config[config].height  = height;
-        }
+	    nframes = max (1, nframes);
+	    width   = max (1, width);
+	    height  = max (1, height);
 
-        fclose (fp);
+	    /* Since the frame buffer is stored in a memory pixrect
+	     * (effectively), the line length should be an integral number
+	     * of 16 bit words.
+	     */
+	    if (width & 1) {
+		fprintf (stderr, "imtool warning: fb config %d [%d-%dx%d] - ",
+		    config, nframes, width, height);
+		fprintf (stderr, "frame width should be even, reset to %d\n",
+		    --width);
+	    }
+
+	    config = max(1, min(MAX_FBCONFIG, config)) - 1;
+	    vxim->fb_config[config].nframes = nframes;
+	    vxim->fb_config[config].width   = width;
+	    vxim->fb_config[config].height  = height;
+	}
+
+	fclose (fp);
 }
 
 
@@ -1854,6 +1955,109 @@ int     ny;
         }
 }
 #endif
+
+
+/* ADD_MAPPING --  Add a mapping for the current frame.  
+ *
+ * File format (two lines):
+ *
+ *	image title (imtool header label string)\n
+ *	a b c d tx ty z1 z2 zt \n
+ *	region_name sx sy snx sny dx dy dnx dny\n
+ *	object_ref
+ *
+ * The WCS text is passed in via the data stream as a write to the subunit
+ * WCS and left in the buffer "wcsbuf".  Mapping information is parsed 
+ * elsewhere if needed, our only purpose here is to extract the frame WCS.
+ */
+
+static void
+add_mapping (vxim, ctran, wcsbuf, fr)
+register VXimDataPtr vxim;
+CtranPtr ctran;
+char	*wcsbuf;
+FrameBufPtr fr;
+{
+	register MappingPtr mp = &fr->mapping[fr->nmaps];
+        register CtranPtr   ct = &mp->ctran;
+	register int i, j;
+	char buf[SZ_WCSBUF], *format;
+
+        /* Attempt to read the WCS and set up a unitary transformation
+         * if the information cannot be read.
+         */
+        if (sscanf (wcsbuf, "%[^\n]\n%f%f%f%f%f%f%f%f%d",
+            buf, &ct->a, &ct->b, &ct->c, &ct->d, &ct->tx, &ct->ty,
+            &ct->z1, &ct->z2, &ct->zt) < 7) {
+
+            if (wcsbuf[0])
+                fprintf (stderr, "vximtool: error decoding WCS\n");
+
+            strncpy (ct->imtitle, "[NO WCS]\n", SZ_IMTITLE);
+            ct->a  = ct->d  = 1;
+            ct->b  = ct->c  = 0;
+            ct->tx = ct->ty = 0;
+            ct->zt = W_UNITARY;
+        } else
+            strncpy (ct->imtitle, buf, SZ_IMTITLE);
+
+        ct->zt = W_UNITARY;
+        ct->valid = 1;
+
+
+	mp->ref[0] = '\0';
+	mp->region[0] = '\0';
+
+	/* Skip over the first two lines of WCS data.
+	 */
+	strcpy (buf, wcsbuf);
+	for (i=0, j=0; j < 2 && buf[i]; i++)
+	    if (buf[i] == '\n')
+	        j++;
+
+	/* Attempt to read the mapping.
+	 */
+	mp->id = mp->regid = ++objid;
+	if (sscanf (&buf[i], "%s%f%f%d%d%d%d%d%d\n%s\n",
+	    mp->region, &mp->sx, &mp->sy, &mp->snx, &mp->sny, 
+	    &mp->dx, &mp->dy, &mp->dnx, &mp->dny, mp->ref) < 10) {
+
+	        if (!wcsbuf[0])
+	            fprintf (stderr, "vximtool: error decoding WCS mapping\n");
+	        strncpy (mp->ref, "none", SZ_IMTITLE);
+
+	        mp->sx  = 1.0;
+	        mp->sy  = 1.0;
+	        mp->snx = vxim->width;
+	        mp->sny = vxim->height;
+	        mp->dx  = 1;
+	        mp->dy  = 1;
+	        mp->dnx = vxim->width;
+	        mp->dny = vxim->height;
+	}
+	memmove (ctran, &mp->ctran, sizeof (Ctran));
+
+	fr->nmaps++;
+}
+
+
+/* PRINT_MAPPINGS -- Debug routine to print all mappings on a frame.
+ */
+print_mappings (fr)
+FrameBufPtr fr;
+{
+	MappingPtr mp;
+	register int i;
+
+	if (fr->nmaps == 0) printf ("No mappings for frame %d\n", fr->frameno);
+	for (i=0; i < fr->nmaps; i++) {
+	    mp = &fr->mapping[i];
+	    printf ("Mapping %d frame=%d:\n", fr->nmaps, fr->frameno);
+	    printf ("\t%s %f %f %d %d %d %d %d %d\n\t%s\n", 
+	        mp->region, mp->sx, mp->sy, mp->snx, mp->sny, 
+	        mp->dx, mp->dy, mp->dnx, mp->dny, mp->ref);
+	}
+}
 
 
 /* IIS_READ -- Read exactly "n" bytes from a descriptor. 

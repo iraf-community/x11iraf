@@ -2024,8 +2024,10 @@ char **argv;
 		return (TCL_ERROR);	/* no window */
 
 	    if (obmClass (obj->core.classrec, WtGterm)) {
-		/* Gterm widget. */
+		/* Gterm widget.
 		drawable = (XtPointer) widgetGetPointer (obj);
+		 */
+		drawable = (XtPointer) XtWindow (widgetGetPointer(obj));
 		type = GtWidget;
 
 	    } else {
@@ -4288,8 +4290,8 @@ int *npoints;
 		ip++;
 
 	    ip_save = ip;
-	    pv[npts].x = strtod (ip, &ipp);  ip = ipp;
-	    pv[npts].y = strtod (ip, &ipp);  ip = ipp;
+	    pv[npts].x = (short) strtod (ip, &ipp);  ip = ipp;
+	    pv[npts].y = (short) strtod (ip, &ipp);  ip = ipp;
 	    if (ip == ip_save) {
 		XtFree ((char *) pv);
 		return (NULL);

@@ -2,7 +2,7 @@
 # $XConsortium: imake.c,v 1.89 94/08/12 00:45:51 gildea Exp $
 
 # -----------------------------------------------------------------------
-# Makefile generated from "Imake.tmpl" and </tmp/IIf.EcaWve>
+# Makefile generated from "Imake.tmpl" and </tmp/IIf.deaiiY>
 # $XConsortium: Imake.tmpl,v 1.219 94/05/13 15:58:31 matt Exp $
 # $SunSoft: @(#)Imake.tmpl	1.1 01/13/97 16:16:22 $
 #
@@ -571,7 +571,7 @@ HEADERS = \
 	MenuBar.h MenuBarP.h MultiList.h MultiListP.h RadioGrp.h RadioGrpP.h \
 	RowCol.h RowColP.h Scrollbar.h ScrollbarP.h Slider2.h Slider2P.h \
 	TabString.h Toggle.h ToggleP.h done.h inkstore.h laygram.h scroll.h \
-	Tabs.h TabsP.h Gcs.h
+	Tabs.h TabsP.h Gcs.h ListTree.h ListTreeP.h
 
 SRCS = \
 	Arrow.c Board.c Button.c Common.c DrawIString.c DrawString.c \
@@ -579,8 +579,8 @@ SRCS = \
 	HTMLformat.c HTMLimages.c HTMLjot.c HTMLlists.c HTMLparse.c \
 	HTMLwidgets.c Icon.c Label.c Layout.c MenuBar.c MultiList.c \
 	RadioGrp.c RowCol.c Scrollbar.c Slider2.c Tablist2Tabs.c TextWidth.c \
-	Toggle.c cvtLong.c icon.c laygram.c laylex.c scroll.c strnchr.c \
-	Tabs.c Gcs.c
+	Toggle.c cvtLong.c iconutil.c laygram.c laylex.c scroll.c strnchr.c \
+	Tabs.c Gcs.c ListTree.c
 
 OBJS = \
 	Arrow.o Board.o Button.o Common.o DrawIString.o DrawString.o \
@@ -588,14 +588,15 @@ OBJS = \
 	HTMLformat.o HTMLimages.o HTMLjot.o HTMLlists.o HTMLparse.o \
 	HTMLwidgets.o Icon.o Label.o Layout.o MenuBar.o MultiList.o \
 	RadioGrp.o RowCol.o Scrollbar.o Slider2.o Tablist2Tabs.o TextWidth.o \
-	Toggle.o cvtLong.o icon.o laygram.o laylex.o scroll.o strnchr.o \
-	Tabs.o Gcs.o
+	Toggle.o cvtLong.o iconutil.o laygram.o laylex.o scroll.o strnchr.o \
+	Tabs.o Gcs.o ListTree.o
 
 LEX=/usr/ccs/bin/lex
 
 YACC=/usr/ccs/bin/yacc
 
 depend:: laygram.c laylex.c
+all:: laygram.c laylex.c
 
 all:: DONE
 
@@ -677,8 +678,8 @@ Toggle.o:
 	$(CC) $(FWFCFLAGS) Toggle.c
 cvtLong.o:
 	$(CC) $(FWFCFLAGS) cvtLong.c
-icon.o:
-	$(CC) $(FWFCFLAGS) icon.c
+iconutil.o:
+	$(CC) $(FWFCFLAGS) iconutil.c
 laylex.o:
 	$(CC) $(FWFCFLAGS) laylex.c
 
@@ -692,6 +693,8 @@ laygram.c laygram.h : laygram.y
 
 Tabs.o:
 	$(CC) -Xc $(EXTRA_INCLUDES) -c Tabs.c
+ListTree.o:
+	$(CC) -Xc $(EXTRA_INCLUDES) -c ListTree.c
 
 # Hack to compile under SunPRO V4 on Solaris
 

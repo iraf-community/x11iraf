@@ -19,6 +19,15 @@ XCOMM - The following are for Macintosh A/UX
     COMPAT_OBJS = strerror.o strtoul.o tclMtherr.o
 #else
 
+#if defined(PpcDarwinArchitecture) || defined (TenonServer)
+XCOMM - The following are for OS X on a PowerPC
+      GCC_FLAGS = -DNOSTDHDRS -DSYSV -DANSI -D_BSD_SOURCE -W \
+		  -traditional-cpp -fstrength-reduce -fpcc-struct-return
+       AC_FLAGS = -traditional-cpp -DHAVE_UNISTD_H=1
+         CFLAGS += -traditional-cpp -I. $(AC_FLAGS) $(GCC_FLAGS)
+    COMPAT_OBJS =
+#else
+
 #if defined(SunArchitecture) && (OSMajorVersion <= 4)
 XCOMM - The following are for SunOS
       GCC_FLAGS = 
@@ -48,11 +57,12 @@ XCOMM - The following are for Solaris x86
     COMPAT_OBJS = tclMtherr.o
 #else
 
-#if defined(i386BsdArchitecture)
+#if defined(FreeBSDArchitecture)
 XCOMM - The following are for FreeBSD
       GCC_FLAGS = -DNOSTDHDRS -DSYSV -DANSI -D_BSD_SOURCE -W \
 		  -fstrength-reduce -fpcc-struct-return
        AC_FLAGS = -DHAVE_UNISTD_H=1
+         CFLAGS += -I. $(AC_FLAGS) $(GCC_FLAGS)
     COMPAT_OBJS =
 #else
 
@@ -88,9 +98,10 @@ XCOMM - The following are for AIX on Rs/6000
 
 #else
 
-      GCC_FLAGS = 
+      GCC_FLAGS =
        AC_FLAGS =
     COMPAT_OBJS =
+#endif
 #endif
 #endif
 #endif

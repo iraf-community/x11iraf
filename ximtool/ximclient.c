@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <ctype.h>
+#include <math.h>
 #include <sys/stat.h>
 #include <X11/Intrinsic.h>
 #include <X11/StringDefs.h>
@@ -15,62 +16,80 @@
  *
  *	     xim_clientOpen (xim)
  *	    xim_clientClose (xim)
- *	  xim_clientExecute (xim, key, cmd)
+ *	  xim_clientExecute (xim, objname, key, cmd)
  *
  * The clientExecute callback is called by the GUI code in the object manager
  * to execute ximtool client commands.
  *
  * Client commands:
  *
- *		   setFrame frameno
- *       frameno = getFrame [raster]
- *	 raster = getRaster [frameno]
- *	  frame = getSource [raster [sx sy snx sny]]
+ *		   setFrame  frameno
+ *       frameno = getFrame  [raster]
+ *	 raster = getRaster  [frameno]
+ *	  frame = getSource  [raster [sx sy snx sny]]
  *		  nextFrame
  *		  prevFrame
- *		matchFrames [frames [reference_frame]]
- *	     registerFrames [frames [reference_frame]]
+ *		matchFrames  [frames [reference_frame]]
+ *	     registerFrames  [frames [reference_frame]]
+ *	    offfsetRegister  [frames [reference_frame]]
  *		   fitFrame
- *		 clearFrame [frame]
+ *		 clearFrame  [frame]
  *
- *		  setOption option value [args]
- *		setColormap colormap
- *	     windowColormap offset scale
- *	          windowRGB color offset scale save_flag
- *		       zoom [mag | xmag ymag [ xcen ycen ]]
- *		    zoomAbs [mag | xmag ymag [ xcen ycen ]]
- *			pan xcen ycen
- *		       flip axis [axis ...]
+ *		  setOption  option value [args]
+ *		setColormap  colormap
+ *		  setOffset  xoff yoff
+ *	     windowColormap  offset scale
+ *	          windowRGB  color offset scale save_flag
+ *		       zoom  [mag | xmag ymag [ xcen ycen ]]
+ *		    zoomAbs  [mag | xmag ymag [ xcen ycen ]]
+ *        center = centroid  xcen ycen size [type]
+ *          pix = getPixels  x0 y0 nx ny [format]
+ *			pan  xcen ycen
+ *		       flip  axis [axis ...]
  *
- *           setPrintOption option value [args]
- *                    print [x0 y0 nx ny]
- *            setSaveOption option value [args]
- *                     save [x0 y0 nx ny]
- *            setLoadOption option value [args]
+ *           setPrintOption  option value [args]
+ *                    print  [x0 y0 nx ny]
+ *            setSaveOption  option value [args]
+ *                     save  [x0 y0 nx ny]
+ *            setLoadOption  option value [args]
  *                     load
  *                     help
+ *                     info  option
  *
- *       wcsstr = encodewcs sx sy sz
- *	       retCursorVal sx sy [frame [wcs [key [strval]]]]
+ *       wcsstr = encodewcs  sx sy sz
+ *	       retCursorVal  sx sy [frame [wcs [key [strval]]]]
+ *
+ *		  ism_start  task
+ *		   ism_stop  task
+ *		    ism_cmd  task [args]
  *
  *		 initialize
  *		      Reset
  *		       Quit
  */
 
+
+/* Client callback struct. */
 typedef struct {
-	XimDataPtr xim;
-	Tcl_Interp *tcl;
-	Tcl_Interp *server;
+        XimDataPtr xim;
+        Tcl_Interp *tcl;
+        Tcl_Interp *server;
 } XimClient, *XimClientPtr;
+
+
 
 static int initialize(), Reset(), Quit();
 static int setColormap(), windowColormap(), zoom(), pan(), getSource();
 static int setFrame(), getFrame(), getRaster(), nextFrame(), prevFrame();
 static int fitFrame(), matchFrames(), registerFrames(), retCursorVal();
-static int encodewcs(), flip(), clearFrame(), setOption();
+static int encodewcs(), flip(), clearFrame(), setOption(), setOffset();
 static int setPrintOption(), setSaveOption(), setLoadOption();
-static int print(), save(), load(),    help(), windowRGB();
+static int print(), save(), load(), help(), windowRGB();
+static int centroid(), getPixels();
+static int ism_start(), ism_stop(), ism_cmd();
+
+extern int ism_evaluate(), info();
+extern IsmModule ismNameToPtr();
 extern double atof();
 
 
@@ -116,17 +135,25 @@ XimDataPtr xim;
 	Tcl_CreateCommand (tcl,
 	    "registerFrames", registerFrames, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
+	    "offsetRegister", registerFrames, (ClientData)xc, NULL);
+	Tcl_CreateCommand (tcl,
 	    "clearFrame", clearFrame, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
 	    "setOption", setOption, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
 	    "setColormap", setColormap, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
+	    "setOffset", setOffset, (ClientData)xc, NULL);
+	Tcl_CreateCommand (tcl,
 	    "windowColormap", windowColormap, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
 	    "zoom", zoom, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
 	    "zoomAbs", zoom, (ClientData)xc, NULL);
+	Tcl_CreateCommand (tcl,
+	    "centroid", centroid, (ClientData)xc, NULL);
+	Tcl_CreateCommand (tcl,
+	    "getPixels", getPixels, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
 	    "pan", pan, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
@@ -151,7 +178,17 @@ XimDataPtr xim;
 	Tcl_CreateCommand (tcl,
 	    "help", help, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
+	    "info", info, (ClientData)xc, NULL);
+	Tcl_CreateCommand (tcl,
 	    "windowRGB", windowRGB, (ClientData)xc, NULL);
+
+	/* ISM module callbacks. */
+        Tcl_CreateCommand (tcl,
+            "ism_start", ism_start, (ClientData)xc, NULL);
+        Tcl_CreateCommand (tcl,
+            "ism_stop", ism_stop, (ClientData)xc, NULL);
+        Tcl_CreateCommand (tcl,
+            "ism_cmd", ism_cmd, (ClientData)xc, NULL);
 }
 
 
@@ -169,16 +206,20 @@ XimDataPtr xim;
 /* xim_clientExecute -- Called by the GUI code to send a message to the
  * "client", which from the object manager's point of view is ximtool itself.
  */
-xim_clientExecute (xc, tcl, key, command)
+xim_clientExecute (xc, tcl, objname, key, command)
 register XimClientPtr xc;
 Tcl_Interp *tcl;		/* caller's Tcl */
+char *objname;			/* object name */
 int key;			/* notused */
 char *command;
 {
 	register XimDataPtr xim = xc->xim;
 
 	xc->server = tcl;
-        Tcl_Eval (xc->tcl, command);
+	if (strcmp (objname, "client") == 0)
+            Tcl_Eval (xc->tcl, command);
+	else
+	    ism_evaluate (xim, objname, command);
 
 	return (0);
 }
@@ -469,7 +510,7 @@ char **argv;
 	    for (i=0, frames=frame_list;  i < nitems;  i++)
 		frames[i] = atoi (items[i]);
 	    frames[i] = (int) NULL;
-	    free ((char *)items);
+	    XtFree ((char *)items);
 	} else
 nolist:	    frames = NULL;
 
@@ -484,6 +525,7 @@ nolist:	    frames = NULL;
  * display frame.
  *
  * Usage:	registerFrames [frames [reference_frame]]
+ * 		offsetRegister [frames [reference_frame]]
  */
 static int 
 registerFrames (xc, tcl, argc, argv)
@@ -494,7 +536,7 @@ char **argv;
 {
 	register XimDataPtr xim = xc->xim;
 	int *frames, frame_list[32], reference_frame;
-	int nitems, i;
+	int nitems, i, offsets;
 	char **items;
 
 	/* Get reference frame. */
@@ -510,13 +552,61 @@ char **argv;
 	    for (i=0, frames=frame_list;  i < nitems;  i++)
 		frames[i] = atoi (items[i]);
 	    frames[i] = (int) NULL;
-	    free ((char *)items);
+	    XtFree ((char *)items);
 	} else
 nolist:	    frames = NULL;
 
-	xim_registerFrames (xc->xim, frames, reference_frame);
+	offsets = (strcmp (argv[0], "offsetRegister") == 0);
+	xim_registerFrames (xc->xim, frames, reference_frame, offsets);
 	return (TCL_OK);
 }
+
+
+/* setOffset -- Set the offset for the current display frame buffer.
+ *
+ * Usage:	setOffset xoff yoff
+ */
+static int 
+setOffset (xc, tcl, argc, argv)
+register XimClientPtr xc;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+	register XimDataPtr xim = xc->xim;
+        register FrameBufPtr fb = xim->df_p;
+	float	 xcen, ycen;
+	float	 xmag, ymag;
+	float	 xoff, yoff;
+	Boolean  absolute = False;
+	int	 frame = xim->display_frame - 1;
+
+
+	if (argc < 3)
+	    return (TCL_ERROR);
+
+	xcen = fb->xcen;
+	ycen = fb->ycen;
+	xmag = fb->xmag;
+	ymag = fb->ymag;
+
+	/* Get offset values for the frame. */
+	xoff = atof (argv[1]);
+	yoff = atof (argv[2]);
+
+	/* Set frame offset.  */
+        xim_setZoom (xim, fb, fb->frameno, fb->zoommap,
+            fb->raster, fb->zoomras, xcen, ycen, xmag, ymag, xoff, yoff,
+	    absolute);
+
+	/* Now set he frame values independent of the display frame. */
+	fb = &xim->frames[frame];
+	fb->xoff = xoff;
+	fb->yoff = yoff;
+
+	return (TCL_OK);
+}
+
 
 
 /* clearFrame -- Clear the given frame, or the current frame in no frame
@@ -571,7 +661,17 @@ char **argv;
  *	autoscale	true|false
  *	antialias	true|false [type]
  *	tileFrames	true|false [frames]
+ *	tileByRow	true|false
+ *	tileTopDown	true|false
+ *	tileGeom	type|geom  [frames]
  */
+char *h_orient[] = {
+    "1x1","2x1","3x1","2x2", "3x2","3x2","4x2","4x2", "3x3","5x2","4x3","4x3"
+};
+char *v_orient[] = {
+    "1x1","1x2","1x3","2x2", "2x3","2x3","2x4","2x4", "3x3","2x5","3x4","3x4"
+};
+
 static int 
 setOption (xc, tcl, argc, argv)
 register XimClientPtr xc;
@@ -581,9 +681,10 @@ char **argv;
 {
 	register XimDataPtr xim = xc->xim;
 	register FrameBufPtr fb = xim->df_p;
-	char *option, *strval;
+	char *option, *strval, **items;
 	char buf[SZ_LINE];
-	int ch, value;
+	int ch, value, nx, ny, nitems, i, frame_list=0;
+
 
 	if (argc < 3)
 	    return (TCL_ERROR);
@@ -591,13 +692,15 @@ char **argv;
 	    option = argv[1];
 	    strval = argv[2];
 
-	    ch = strval[0];
-	    if (isdigit (ch))
-		value = atoi (strval);
-	    else if (ch == 'T' || ch == 't')
-		value = 1;
-	    else if (ch == 'F' || ch == 'f')
-		value = 0;
+	    if (strcmp (option, "tileGeom") != 0) {
+	        ch = strval[0];
+	        if (isdigit (ch))
+		    value = atoi (strval);
+	        else if (ch == 'T' || ch == 't')
+		    value = 1;
+	        else if (ch == 'F' || ch == 'f')
+		    value = 0;
+	    }
 	}
 
 	if (strcmp (option, "autoscale") == 0) {
@@ -621,28 +724,92 @@ char **argv;
 		sprintf (buf, "%s", value ? "True" : "False");
 		xim_message (xim, "antialias", buf);
 	    }
+
 	} else if (strcmp (option, "tileFrames") == 0) {
 	    if (xim->tileFrames != value) {
-		int frame_list=0, i;
-
 		/* Get list of frames to be tiled. */
 		if (argc > 3) {
-		    int nitems;
-		    char **items;
-
 		    if (Tcl_SplitList (tcl, argv[3], &nitems, &items) != TCL_OK)
-			goto nolist;
+			goto nolist1;
 		    for (i=0;  i < nitems;  i++)
 			frame_list |= (1 << (atoi(items[i]) - 1));
-		    free ((char *)items);
+		    XtFree ((char *)items);
 		} else {
-nolist:		    for (i=0;  i < xim->nframes;  i++)
+nolist1:	    for (i=0;  i < xim->nframes;  i++)
 			frame_list |= (1 << i);
+		    nitems = xim->nframes;
 		}
 
 		/* Set or clear tile frame mode. */
 		xim_tileFrames (xim, value ? frame_list : 0);
 	    }
+
+	} else if (strcmp (option, "tileByRows") == 0) {
+	    xim->tileByRows = value;
+	    xim_tileFrames (xim, xim->tileFramesList);
+
+	} else if (strcmp (option, "tileTopDown") == 0) {
+	    xim->tileTopDown = value;
+	    xim_tileFrames (xim, xim->tileFramesList);
+
+	} else if (strcmp (option, "tileLabels") == 0) {
+	    xim->tileLabels = value;
+	    xim_tileFrames (xim, xim->tileFramesList);
+
+	} else if (strcmp (option, "tileGeom") == 0) {
+	    /* Get list of frames to be tiled. */
+	    if (argc > 3) {
+	        if (Tcl_SplitList (tcl, argv[3], &nitems, &items) != TCL_OK)
+	    	    goto nolist2;
+	        for (i=0;  i < nitems;  i++)
+	    	    frame_list |= (1 << (atoi(items[i]) - 1));
+	        XtFree ((char *)items);
+	    } else {
+nolist2:        for (i=0;  i < xim->nframes;  i++)
+	    	    frame_list |= (1 << i);
+		nitems = xim->nframes;
+	    }
+	    nitems = max (nitems, 1);
+
+
+	    /* Get the option or tile geometry. */
+	    if (strcmp (strval, "Best") == 0) {
+		if (xim->width < xim->height)
+		    goto horient;
+		else
+		    goto vorient;
+	    } else if (strcmp (strval, "Square") == 0) {
+		for (i=0; (i*i) < nitems; i++)
+		    ;
+		nx = ny = i;
+	    } else if (strcmp (strval, "Horizontal") == 0) {
+horient:	if (nitems >= 13)
+		    nx = ny = 4;
+		else
+		    sscanf (h_orient[nitems-1], "%dx%d", &nx, &ny);
+	    } else if (strcmp (strval, "Vertical") == 0) {
+vorient:	if (nitems >= 13)
+		    nx = ny = 4;
+		else
+		    sscanf (v_orient[nitems-1], "%dx%d", &nx, &ny);
+	    } else if (strcmp (strval, "Row") == 0) {
+		nx = nitems;
+		ny = 1;
+	    } else if (strcmp (strval, "Column") == 0) {
+		nx = 1;
+		ny = nitems;
+	    } else {
+		sscanf (strval, "%dx%d", &nx, &ny);
+	    }
+
+	    /* Set or clear tile frame mode. */
+	    xim->tileRows = ny;
+	    xim->tileCols = nx;
+	    xim->tileFramesList = frame_list;
+	    sprintf (buf, "%d %d", nx, ny);
+	    xim_message (xim, "tileOptions", buf);
+
+	    xim_tileFrames (xim, xim->tileFramesList);
 	}
 
 	return (TCL_OK);
@@ -751,14 +918,21 @@ char **argv;
 	register FrameBufPtr fb = xim->df_p;
 	float xmag, ymag;
 	float xcen, ycen;
+	float xoff, yoff;
 	Boolean absolute;
 
 	xmag = fb->xmag;
 	ymag = fb->ymag;
 	xcen = fb->xcen;
 	ycen = fb->ycen;
+	xoff = fb->xoff;
+	yoff = fb->yoff;
 
 	switch (argc) {
+	case 7:
+	    xoff = atof (argv[5]);
+	    yoff = atof (argv[6]);
+	    /* fall through */
 	case 5:
 	    xcen = atof (argv[3]);
 	    ycen = atof (argv[4]);
@@ -774,7 +948,8 @@ char **argv;
 
 	absolute = (strcmp (argv[0], "zoomAbs") == 0);
 	xim_setZoom (xim, fb, fb->frameno, fb->zoommap,
-	    fb->raster, fb->zoomras, xcen, ycen, xmag, ymag, absolute);
+	    fb->raster, fb->zoomras, xcen, ycen, xmag, ymag, xoff, yoff,
+	    absolute);
 
 	return (TCL_OK);
 }
@@ -796,18 +971,301 @@ char **argv;
 	Boolean absolute = False;
 	float xmag, ymag;
 	float xcen, ycen;
+	float xoff, yoff;
 	double atof();
 
 	xmag = fb->xmag;
 	ymag = fb->ymag;
+	xoff = fb->xoff;
+	yoff = fb->yoff;
 
 	if (argc == 3) {
 	    xcen = atof (argv[1]);
 	    ycen = atof (argv[2]);
 
 	    xim_setZoom (xim, fb, fb->frameno, fb->zoommap,
-		fb->raster, fb->zoomras, xcen, ycen, xmag, ymag, absolute);
+		fb->raster, fb->zoomras, xcen, ycen, xmag, ymag, xoff, yoff,
+		absolute);
 	}
+
+	return (TCL_OK);
+}
+
+
+/* centroid -- Center the cursor on the feature given an initial position
+ * and box size.  Return a correction to the center.
+ *
+ * Usage:	centroid <xcen> <ycen> <size> [ <type> ]
+ */
+static int 
+centroid (xc, tcl, argc, argv)
+register XimClientPtr xc;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+	register XimDataPtr  xim = xc->xim;
+	register FrameBufPtr fb  = xim->df_p;
+        register CtranPtr    ct  = (CtranPtr) &fb->ctran;
+        unsigned char junk[MAX_COLORS];
+	unsigned char *pix = NULL;
+	float 	 *data=NULL, *xm=NULL, *ym=NULL;
+	float    xsum, ysum, xsumx, ysumx;
+	float    cx, cy, lo, hi, px, xcen, ycen, size;
+	float    xmin=999999.0, xmax=-999999.0;
+	int	 w, h, ncolors, i, j;
+	int	 dist=0, mind=99999, maxd=99999, imin=0, imax=0;
+	int	 x0, y0, nx, npix, min_max=-1;
+ 	char     buf[SZ_LINE];
+	double   atof();
+
+
+	if (argc < 4)
+	    return (TCL_ERROR);
+
+	xcen = atof (argv[1]);
+	ycen = atof (argv[2]);
+	size = atof (argv[3]);
+	if (argc == 5)
+	    min_max = strcmp (argv[4],"max");
+
+	x0 = xcen - size;
+	y0 = ycen - size;
+	nx = size * 2 + 1;
+	npix = nx * nx;
+
+	/* Read the display raster. */
+	pix = xim_readDisplay (xim, x0,y0,nx,nx, &w,&h, junk,junk,junk,
+		 &ncolors);
+
+	/* Scale the data to the WCS pixel values for centroiding. */
+	data = (float *) XtMalloc (npix * sizeof(float));
+	for (i=0; i < npix; i++) {
+            if (pix[i] == 0) {
+                data[i] = 0.0;
+            } else {
+                if (ct->zt == W_LINEAR) {
+                    data[i] = ((pix[i]-1) * (ct->z2 - ct->z1) / 199) + ct->z1;
+                    data[i] = max (ct->z1, min (ct->z2, data[i]));
+                } else
+                    data[i] = (float) pix[i];
+            }
+	    cx = (nx / 2) - (i % nx);
+	    cy = (nx / 2) - (i / nx);
+	    dist = (int) (sqrt (cx*cx + cy*cy) + 0.5);
+
+	    if (data[i] > xmax)
+		xmax = data[i], maxd = dist, imax = i;
+	    else if (data[i] == xmax && dist < maxd)
+		maxd = dist, imax = i;
+
+	    if (data[i] < xmin)
+		xmin = data[i], mind = dist, imin = i;
+	    else if (data[i] == xmin && dist < mind)
+		mind = dist, imin = i;
+	}
+	XtFree ((char *)pix);
+
+	if (min_max >= 0) {
+	    if (min_max == 0) {
+	        if (data[npix/2] == xmax)
+	            sprintf (buf, "0 0");
+		else
+	            sprintf (buf, "%g %g", (imax%nx)-size, (imax/nx)-size);
+	    } else {
+	        if (data[npix/2] == xmin)
+	            sprintf (buf, "0 0");
+		else
+	            sprintf (buf, "%g %g", (imin%nx)-size, (imin/nx)-size);
+	    }
+
+	    /* Return the correction to the position. */
+	    Tcl_SetResult (xc->server, buf, TCL_VOLATILE);
+	    return (TCL_OK);
+	}
+
+
+	/* Find the low threshold for the subraster (i.e. the mean). */
+	lo = hi = xsum = data[0];
+	for (i=1; i < npix ; i++) {
+	    xsum += data[i];
+	    lo = (data[i] < lo ? data[i] : lo);
+	    hi = (data[i] > hi ? data[i] : hi);
+	}
+
+	/* Check for a raster with all the same pixels, in which case
+	 * just return a zero offset.
+	 */
+	if (lo == hi) {
+	    sprintf (buf, "0 0");
+	    Tcl_SetResult (xc->server, buf, TCL_VOLATILE);
+	    return (TCL_OK);
+
+	} else
+	    lo   = xsum / (float)npix; 
+
+	/* Accumulate the x and y marginals. */
+	xm = (float *) XtMalloc (nx * sizeof(float));
+	ym = (float *) XtMalloc (nx * sizeof(float));
+	for (i=0; i < nx; i++) {
+	    xsum = xm[i] = 0.0, ysum = ym[i] = 0.0;
+	    for (j=0; j < nx; j++) {
+		px = data[(j*nx)+i];			/* column sum 	*/
+		if (lo <= px)
+		    xsum += px - lo;
+
+		px = data[(i*nx)+j];			/* row sum 	*/
+		if (lo <= px)
+		    ysum += px - lo;
+	    }
+	    xm[i] = xsum;
+	    ym[i] = ysum;
+	}
+	XtFree ((char *)data);
+
+	/* Now calculate the centroids as the first moment.  If all the 
+	 * marginals are zero (i.e. all pixels the same) then return a
+	 * zero correction. 
+	 */
+	xsum = xsumx = 0.0, ysum = ysumx = 0.0;
+	px = (float) nx;
+	for (i=0; i < nx; i++) {
+            xsum  += (xm[i] / px);
+            xsumx += (xm[i] / px) * i;
+	
+            ysum  += (ym[i] / px);
+            ysumx += (ym[i] / px) * i;
+	}
+	cx = (xsum == 0.0) ? size : xsumx / xsum;
+	cy = (ysum == 0.0) ? size : ysumx / ysum;
+
+	XtFree ((char *)xm); 		/* clean up */
+	XtFree ((char *)ym);
+
+	/* Return the correction to the position. */
+	sprintf (buf, "%d %d", nint(cx-size), nint(cy-size));
+	Tcl_SetResult (xc->server, buf, TCL_VOLATILE);
+
+	return (TCL_OK);
+}
+
+
+/* getPixels -- Get an array of pixels around the given center position.
+ *
+ * Usage:	getPixels <x0> <y0> <nx> <ny> [format [scale]]
+ */
+
+#define PF_NONE		0		/* don't format the output pixels */
+#define PF_PIXTAB	1		/* format for pixel table 	  */
+#define PF_HCUT		2		/* format for horizontal cut-plot */
+#define PF_VCUT		3		/* format for vertical cut-plot   */
+
+static int 
+getPixels (xc, tcl, argc, argv)
+register XimClientPtr xc;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+	register XimDataPtr  xim = xc->xim;
+	register FrameBufPtr fb  = xim->df_p;
+        register CtranPtr    ct  = (CtranPtr) &fb->ctran;
+	register int	 i, j, k, l;
+	unsigned char *pix = NULL;
+	char 	 *buf = NULL, ch, val[32];
+	float 	 *data = NULL;
+	float	 z1 = ct->z1, z2 = ct->z2;
+	float    scale=1.0, yscale = 128.0 / (z2 - z1);
+	int	 x0, y0, nx, ny, format=0, npix, sample=1, raster=0;
+	double   atof();
+
+
+	if (argc < 5)
+	    return (TCL_ERROR);
+
+	x0 = atof (argv[1]);
+	y0 = atof (argv[2]);
+	nx = atof (argv[3]);
+	ny = atof (argv[4]);
+	if (argc >= 6) {
+	    if (isdigit ((ch = *argv[5])))
+		format = atoi (argv[5]);
+	    else if (ch == 'T' || ch == 't')
+		format = 1;
+	    else
+		format = 0;
+	}
+	if (argc >= 7) 
+	    sample = (isdigit(*argv[6]) ? atoi (argv[6]) : 1);
+	if (argc == 8)
+	    scale = atof (argv[7]);
+	
+	npix = nx * ny;
+
+
+	/* Read the display raster. */
+	pix = (unsigned char *) XtMalloc (npix);
+        if (GtReadPixels (xim->gt, raster, pix, 8, x0, y0, nx, ny) < 0)
+	    return (TCL_ERROR);
+
+	/* Scale the data to the WCS pixel values for display.  We don't
+	 * get here if an ISM is running that provides access to the real
+	 * pixel values.
+	 */
+	data = (float *) XtCalloc (npix, sizeof(float));
+	for (i=0; i < npix; i+=sample) {
+	    if (pix[i] == 0) {
+	        data[i] = 0.0;
+	    } else {
+		if (ct->zt == W_LINEAR) {
+	    	    data[i] = ((pix[i]-1) * (z2 - z1) / 199) + z1;
+	    	    data[i] = max (z1, min (z2, data[i]));
+		} else
+	            data[i] = (float) pix[i];
+	    }
+	    if (format > 1) { data[i] = (z2 - data[i]) * yscale; }
+	}
+	XtFree ((char *)pix);
+
+        /* Get a text buffer large enough to hold the encoded data. */
+        if (!(buf = (char *) XtMalloc ((npix + 4) * 30))) {
+            XtFree ((char *)data);
+            return (TCL_ERROR);
+        }
+
+        /* Encode the data as {ddd} {ddd} {ddd}...{ddd}.  The first four
+	 * elements are the zscale values and the array min/max.
+	 */
+	strcpy (buf, "");
+	sprintf (val, "{%10.1f} ", z1);   strcat (buf, val);
+	sprintf (val, "{%10.1f} ", z2);   strcat (buf, val);
+
+	if (format == PF_PIXTAB) {
+	    for (i=0; i < npix; i++) {
+	    	sprintf (val, "{%10.1f%c} ", data[i],
+	        	(data[i] <= z1 ? '-' : (data[i] >= z2 ? '+' : ' ')) );
+		strcat (buf, val);
+	    }
+	} else if (format == PF_HCUT) {
+	    for (i=0; i < npix; i+=sample) {
+	    	sprintf (val, "{%g %g} ", i * scale, data[i]);
+		strcat (buf, val);
+	    }
+	} else if (format == PF_VCUT) {
+	    for (i=0; i < npix; i+=sample) {
+	    	sprintf (val, "{%g %g} ", data[i], i * scale);
+		strcat (buf, val);
+	    }
+	} else {
+	    for (i=0; i < npix; i++) {
+	    	sprintf (val, "{%f} ", data[i]);
+	    	strcat (buf, val);
+	    }
+	}
+            
+        Tcl_SetResult (xc->server, buf, TCL_VOLATILE);
+        XtFree ((char *)data);
+        XtFree ((char *)buf);
 
 	return (TCL_OK);
 }
@@ -928,7 +1386,7 @@ char **argv;
  *	compress	true|false
  *
  * 	orientation	portrait|landscape
- *	papersize	letter|legal|A4
+ *	papersize	letter|legal|A4|B5
  *	imscale		value
  *
  *	colortype	gray|pseudo|rgb
@@ -1040,7 +1498,7 @@ char **argv;
 	 	psim->annotate = 1;
 	    } else {
 		if (psim->label) {
-		    free ((char *)psim->label);
+		    XtFree ((char *)psim->label);
 		    psim->label = NULL;
 		}
 	 	psim->annotate = 0;
@@ -1071,6 +1529,8 @@ char **argv;
 		psim->page.page_type = EPS_LEGAL;
 	    else if (strval[0] == 'A' || strval[0] == 'a')
 		psim->page.page_type = EPS_A4;
+	    else if (strval[0] == 'B' || strval[0] == 'b')
+		psim->page.page_type = EPS_B5;
 	    sprintf (buf, "%s %s", option, strval);
 	    xim_message (xim, "printOptions", buf);
 
@@ -1221,9 +1681,9 @@ char **argv;
 		fsp->format = XIM_FITS; 
 		strcpy (fsp->fname, "frame%d.fits");
 		break;
-	    case 'p': 	
-		fsp->format = XIM_PNM; 	
-		strcpy (fsp->fname, "frame%d.pnm");
+	    case 'e': 	
+		fsp->format = XIM_EPS; 	
+		strcpy (fsp->fname, "frame%d.eps");
 		break;
 	    case 'x': 	
 		fsp->format = XIM_X11; 	
@@ -1264,8 +1724,14 @@ char **argv;
  *	root
  *	home
  * 	rescan
+ * 	headers
  *	pattern	patstr
  *	gray    0|1
+ *	zscale  0|1
+ *	zrange  0|1
+ *	z1 value
+ *	z2 value
+ *	nsample value
  *
  */
 static int
@@ -1288,7 +1754,7 @@ char **argv;
             strval = (argc == 3 ? argv[2] : "" );
         }
 
-	if (strcmp (option, "up") == 0) {	       		/* UP */
+	if (strcmp (option, "up") == 0) {	       		/* UP      */
 	    if (strcmp("/", flp->curdir) != 0) {
 		for (i=strlen(flp->curdir); i > 1; i--) {
 		    if (flp->curdir[i] == '/')
@@ -1300,13 +1766,13 @@ char **argv;
 	        xim_dirRescan (xim);
 	    }
 
-	} else if (strcmp (option, "root") == 0) {	      	/* ROOT */
+	} else if (strcmp (option, "root") == 0) {	      	/* ROOT    */
 	    strcpy (flp->curdir, "/");
 	    sprintf (buf, "curdir %s", flp->curdir);
 	    xim_message (xim, "loadOptions", buf);
 	    xim_dirRescan (xim);
 
-	} else if (strcmp (option, "home") == 0) {	      	/* HOME */
+	} else if (strcmp (option, "home") == 0) {	      	/* HOME    */
 	    strcpy (flp->curdir, flp->homedir);
 	    sprintf (buf, "curdir %s", flp->curdir);
 	    xim_message (xim, "loadOptions", buf);
@@ -1320,12 +1786,40 @@ char **argv;
 	        xim_dirRescan (xim);
 	    }
 
-	} else if (strcmp (option, "rescan") == 0) {	       	/* RESCAN */
+	} else if (strcmp (option, "rescan") == 0) {	       	/* RESCAN  */
 	    xim_dirRescan (xim);
 
-	} else if (strcmp (option, "gray") == 0) {	      	/* GRAY */
+	} else if (strcmp (option, "headers") == 0) {	       	/* HEADERS */
+	    xim_scanHeaders (xim);
+
+	} else if (strcmp (option, "gray") == 0) {	      	/* GRAY    */
 	    flp->gray = (strval[0] == '0' ? 0 : 1);
 	    sprintf (buf, "gray %s", strval[0] == '0' ? "off" : "on");
+	    xim_message (xim, "loadOptions", buf);
+
+	} else if (strcmp (option, "zscale") == 0) {	      	/* ZSCALE  */
+	    flp->zscale = (strval[0] == '0' ? 0 : 1);
+	    sprintf (buf, "zscale %s", strval[0] == '0' ? "off" : "on");
+	    xim_message (xim, "loadOptions", buf);
+
+	} else if (strcmp (option, "zrange") == 0) {	      	/* ZRANGE  */
+	    flp->zrange = (strval[0] == '0' ? 0 : 1);
+	    sprintf (buf, "zrange %s", strval[0] == '0' ? "off" : "on");
+	    xim_message (xim, "loadOptions", buf);
+
+	} else if (strcmp (option, "z1") == 0) {	      	/* Z1      */
+	    sscanf (argv[2], "%g", &(flp->z1));
+	    sprintf (buf, "z1 %s", argv[2]);
+	    xim_message (xim, "loadOptions", buf);
+
+	} else if (strcmp (option, "z2") == 0) {	      	/* Z2      */
+	    sscanf (argv[2], "%g", &(flp->z2));
+	    sprintf (buf, "z2 %s", argv[2]);
+	    xim_message (xim, "loadOptions", buf);
+
+	} else if (strcmp (option, "nsample") == 0) {	      	/* NSAMPLE */
+	    sscanf (argv[2], "%d", &(flp->nsample));
+	    sprintf (buf, "nsample %s", argv[2]);
 	    xim_message (xim, "loadOptions", buf);
 	}
 
@@ -1460,8 +1954,12 @@ char **argv;
 	 */
         if (fname[strlen(fname)-1] == '/') {
             fname[strlen(fname)-1] = '\0';
-            strcat (flp->curdir, "/");
-            strcat (flp->curdir, fname);
+	    if (fname[0] == '/') {
+                sprintf (flp->curdir, "%s", fname);
+	    } else {
+                strcat (flp->curdir, "/");
+                strcat (flp->curdir, fname);
+	    }
             sprintf (buf, "curdir %s", flp->curdir);
             xim_message (xim, "loadOptions", buf);
 
@@ -1473,7 +1971,7 @@ char **argv;
 	     */
 	    (void) stat (fname, &file_info);
 	    if (S_ISDIR(file_info.st_mode)) {
-                sprintf (flp->curdir, "%s/%s", flp->curdir, fname);
+                sprintf (flp->curdir, "%s", fname);
                 sprintf (buf, "curdir %s", flp->curdir);
                 xim_message (xim, "loadOptions", buf);
                 xim_dirRescan (xim);
@@ -1487,6 +1985,7 @@ char **argv;
 
 	return (TCL_OK);
 }
+
 
 /* Help -- Send the default help text (HTML) to the GUI.
  *
@@ -1512,7 +2011,7 @@ char **argv;
         register char *ip, *op, *helptxt;
         register int i;
 
-        helptxt = (char *) malloc (51200);
+        helptxt = (char *) XtMalloc (1024000);
         for (i=0, op=helptxt;  ip = help_text[i];  i++) {
             while (*ip)
                 *op++ = *ip++;
@@ -1521,9 +2020,305 @@ char **argv;
         *op++ = '\0';
 
         ObmDeliverMsg (xim->obm, "help", helptxt);
-        free ((char *)helptxt);
+        XtFree ((char *)helptxt);
 
 	return (TCL_OK);
+}
+
+
+/* Info -- Send various kinds of information to the GUI.  The 'args' option
+ * allows us to pass in information from the GUI that cannot be easily
+ * obtained otherwise, e.g. private information inthe Gterm widget such as
+ * the basePixel resource.
+ *
+ * Usage:       info  option [ args ... ] 
+ */
+
+info (xc, tcl, argc, argv)
+register XimClientPtr xc;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+        register XimDataPtr xim = xc->xim;
+        char line[SZ_LINE], path[80], *option, *message;
+
+        if (argc < 2)
+            return (TCL_ERROR);
+        else
+            option = argv[1];
+
+        message = (char *) XtCalloc (8182, sizeof(char));
+
+	if (strcmp (option, "server") == 0) {
+	    info_server (xim, argc, argv, message);
+
+	} else if (strcmp (option, "wcs") == 0) {
+	    info_wcs (xim, message);
+
+	} else if (strcmp (option, "clients") == 0) {
+	    info_clients (xim, message);
+
+	} else if (strcmp (option, "imtoolrc") == 0) {
+	    info_imtoolrc (xim, message);
+
+        } else {
+            XtFree ((char *)message);
+            return (TCL_ERROR);
+	}
+
+	strcat (message, "\n\0");
+
+	if (*message)
+            xim_message (xim, "info", message);
+        XtFree ((char *)message);
+
+	return (TCL_OK);
+}
+
+
+/* INFO_SERVER -- Helper routine to report server state information.
+ */
+info_server (xim, argc, argv, text)
+register XimDataPtr xim;
+int	argc;
+char	**argv;
+char	*text;
+{
+	extern char *ximtool_version[];
+	extern int ncolormaps, first_color;
+	char cmapname[80], line[SZ_LINE];
+        ColorMapPtr cm;
+
+	sprintf (text, "\t%s\n\n", ximtool_version[0]);
+
+	sprintf (line, "%20s:  %s\n", "Base Pixel",
+		(argc >= 3 ? argv[2] :""));
+	strcat (text, line);
+	sprintf (line, "%20s:  %s\n", "Max Colors",
+		(argc >= 4 ? argv[3] :""));
+	strcat (text, line);
+	sprintf (line, "%20s:  %s\n", "Memory Model", xim->memModel);
+	strcat (text, line);
+	sprintf (line, "%20s:  %s\n", "Antialias Type", xim->antialiasType);
+	strcat (text, line);
+	strcat (text, "\n");
+
+        cm = &colormaps[DEF_COLORMAP-1];
+        strcpy (cmapname, cm->name);
+	sprintf (line, "%20s:  %s\n", "Current Colormap", cmapname);
+	strcat (text, line);
+	sprintf (line, "%20s:  %d\n", "Colormaps Available", ncolormaps);
+	strcat (text, line);
+	sprintf (line, "%20s:  %s\n", "User Cmap 1", xim->userCMap1);
+	strcat (text, line);
+	sprintf (line, "%20s:  %s\n", "User Cmap 2", xim->userCMap1);
+	strcat (text, line);
+	sprintf (line, "%20s:  %s\n", "Cmap Dir 1", xim->userCMapDir1);
+	strcat (text, line);
+	sprintf (line, "%20s:  %s\n", "Cmap Dir 2", xim->userCMapDir2);
+	strcat (text, line);
+	strcat (text, "\n");
+	sprintf (line, "%20s:  %s\n", "Printer Config", xim->printConfig);
+	strcat (text, line);
+	sprintf (line, "%20s:  %s\n", "Printer File", xim->pcp->printFile);
+	strcat (text, line);
+	sprintf (line, "%20s:  %s\n", "Printer Cmd", xim->pcp->printCmd);
+	strcat (text, line);
+}
+
+
+/* INFO_CLIENTS -- Helper routine to report client (display or ISM) state.
+ */
+info_clients (xim, text)
+register XimDataPtr xim;
+char	*text;
+{
+        register IsmModule ism;
+	register int i;
+        char line[SZ_LINE], path[80];
+	extern ismModule ism_modules[];
+	extern int ism_nmodules;
+
+	strcpy (text, "\t\tClient Communications Channels\n\n");
+
+	strcat (text, "  Display Client Connections\t    ");
+	strcat (text, "ISM Client Connections\n");
+	strcat (text, "  --------------------------\t    ");
+	strcat (text, "----------------------\n");
+
+	if (xim->port)
+	    sprintf (line, "  inet:  %d\t\t\t    ", xim->port);
+	else
+	    sprintf (line, "  inet:  Disabled\t\t");
+	strcat (text, line);
+
+	sprintf (path, xim->ism_addr, getuid());
+	sprintf (line, "unix:  %s\n", path);
+	strcat (text, line);
+
+	if (strcmp(xim->unixaddr, "none") != 0) {
+	    sprintf (path, xim->unixaddr, getuid());
+	    sprintf (line, "  unix:  %s\n", path);
+	} else
+	    sprintf (line, "  unix:  Disabled\n");
+	strcat (text, line);
+
+	if (strcmp(xim->input_fifo,"") != 0 && 
+	    strcmp(xim->input_fifo,"none") != 0)
+	        sprintf (line, "  fifo:  %s\n\t %s\n\n",
+		    xim->input_fifo, xim->output_fifo);
+	else
+	    sprintf (line, "  fifo:  Disabled\n\n");
+	strcat (text, line);
+
+	strcat (text, "\n");
+	strcat (text, "\t\t   Available ISM Components\n\n");
+	strcat (text, "  Name      Channel         Command\n");
+	strcat (text, "  ----      -------         -------\n");
+        for (i=0; i < ism_nmodules; i++) {
+            ism = &ism_modules[i];
+	    sprintf (line, "  %-9.9s %-15.15s '%s'\n", 
+		    ism->name,
+		    (ism->connected ? ism->chan->path : "Disabled"),
+		    ism->command);
+	    strcat (text, line);
+        }
+}
+
+
+/* INFO_WCS -- Helper routine to report WCS and mapping information for 
+ * each frame in the display.
+ */
+info_wcs (xim, text)
+register XimDataPtr xim;
+char	*text;
+{
+        register FrameBufPtr fr = xim->df_p;
+        register CtranPtr ct = &fr->ctran;
+	register int i;
+        MappingPtr mp = (MappingPtr) NULL;
+	char	 line[SZ_LINE];
+
+	/* Write the current frame WCS. */
+	sprintf (line,
+	    "\t\tFrame %d  WCS & Mappings\n\t\t------------------------\n\n",
+		fr->frameno);
+	strcat (text, line);
+
+	strcat (text, "Frame WCS:\n");
+	sprintf (line, "    a = %9.3f\t b = %9.3f %s\n",
+	    ct->a, ct->b, "# Scale factors");
+	strcat (text, line);
+
+	sprintf (line, "    c = %9.3f\t d = %9.3f %s\n",
+	    ct->c, ct->d, "# Cross factors");
+	strcat (text, line);
+
+	sprintf (line, "   tx = %9.3f\tty = %9.3f %s\n",
+	    ct->tx, ct->ty, "# Translation");
+	strcat (text, line);
+	sprintf (line, "   z1 = %9.3f\tz2 = %9.3f %s\n",
+	    ct->z1, ct->z2, "# z-scale range");
+	strcat (text, line);
+
+	sprintf (line, "   zt = %9s\t%30s\n",
+	    (ct->zt == W_UNITARY ? "unitary" : 
+	    (ct->zt == W_LINEAR  ? "linear" : 
+	    (ct->zt == W_LOG     ? "log" : "unknown"))),
+	    "# z-scale type\n");
+	strcat (text, line);
+		
+
+	fr = (FrameBufPtr) NULL; 
+	for (i=0; i < xim->nframes; i++) {
+	    fr = &xim->frames[i];
+	    if (xim->display_frame == fr->frameno)
+		break;
+	}
+
+	if (!fr) {
+	    strcat (text, " \n \n");
+	    return;
+	}
+
+	for (i=0; i < fr->nmaps; i++) {
+	    mp = &(fr->mapping[i]);
+            ct = &(mp->ctran);
+
+	    sprintf (line, "\nMapping %d: \n", mp->id);
+	    strcat (text, line);
+
+	    sprintf (line, "    a = %7.3f    b = %7.3f\n", ct->a, ct->b);
+	    strcat (text, line);
+	    sprintf (line, "    c = %7.3f    d = %7.3f\n", ct->c, ct->d);
+	    strcat (text, line);
+	    sprintf (line, "   tx = %7.3f   ty = %7.3f\n", ct->tx, ct->ty);
+	    strcat (text, line);
+	    sprintf (line, "   z1 = %7.3f   z2 = %7.3f\tzt: %s\n",
+		ct->z1, ct->z2,
+	        (ct->zt == W_UNITARY ? "unitary" : 
+	        (ct->zt == W_LINEAR  ? "linear" : 
+	        (ct->zt == W_LOG     ? "log" : "unknown"))) );
+	    strcat (text, line);
+
+	    sprintf (line, "   region %d: %s\n", mp->regid, mp->region);
+	    strcat (text, line);
+	    sprintf (line, "      src: x=%9f  y=%9f  nx=%d ny=%d\n",
+		mp->sx, mp->sy, mp->snx, mp->sny);
+	    strcat (text, line);
+	    sprintf (line, "     dest: x=%9d  y=%9d  nx=%d ny=%d\n",
+		mp->dx, mp->dy, mp->dnx, mp->dny);
+
+	    strcat (text, line);
+	    sprintf (line, "      ref: %s\n", mp->ref);
+	    strcat (text, line);
+	}
+	strcat (text, " \n \n");
+}
+
+
+/* INFO_IMTOOLRC -- Helper routine to report the frame buffer configuration
+ * table.
+ */
+info_imtoolrc (xim, text)
+register XimDataPtr xim;
+char	*text;
+{
+	register int last_fb_used = MAX_FBCONFIG;
+	register int i, w, h, nf, fb_config = xim->fb_configno;
+	char	 line[SZ_LINE];
+
+	strcpy (text, "    Frame Buffer Configuration Table\n");
+	strcat (text, "    --------------------------------\n\n");
+
+	sprintf (line, "  Imtoolrc File:  %s\n", xim->imtoolrc);
+	strcat (text, line);
+	strcat (text, "\n  Config      NFrames\tWidth\tHeight\n");
+	strcat (text, "  ------      -------\t-----\t------\n");
+
+	/* Find the index of the last FB defined. */
+	for (i=MAX_FBCONFIG; i > 1; i--)
+	    if (xim->fb_config[i-1].width != DEF_FRAME_WIDTH || 
+	        xim->fb_config[i-1].height != DEF_FRAME_HEIGHT) {
+	            last_fb_used = i;
+	            break;
+	    }
+
+	/* Print out the frame buffer configurations. */
+	for (i=1; i <= last_fb_used; i++) {
+	    w = xim->fb_config[i-1].width;
+	    h = xim->fb_config[i-1].height;
+	    nf = xim->fb_config[i-1].nframes;
+	    if (i > 1 && (w == DEF_FRAME_WIDTH && h == DEF_FRAME_HEIGHT)) {
+	        sprintf (line, "  %4d\t\t 0\t  n/a\t  n/a\n", i);
+	    } else {
+	        sprintf (line, "  %4d\t\t%2d\t%5d\t%5d\t  %s\n",
+	            i, nf, w, h, ((i==fb_config) ? "<--- current" : " "));
+	    }
+	    strcat (text, line);
+	}
+	strcat (text, " \n \n");
 }
 
 
@@ -1629,4 +2424,108 @@ float offset, slope;
 
 	for (i=0; i < MAX_COLORS; i++)
 	    map[i] = out[i];
+}
+
+
+
+/* ISM_START -- Start the ISM task.  The named task must be listed in
+ * the array of ISM modules.
+ *
+ * Usage:       ism_start  task
+ */
+static int
+ism_start (xc, tcl, argc, argv)
+register XimClientPtr xc;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+	register IsmModule ism;
+
+        if (argc < 2)
+            return (TCL_ERROR);
+
+	/* Lookup the command for the task and start it.
+	 */
+	if ((ism = ismNameToPtr (argv[1]))) {
+            system (ism->command);
+            return (TCL_OK);
+	}
+
+	/* Task not found, return an error. */
+        return (TCL_ERROR);
+}
+
+
+/* ISM_STOP -- Stop the ISM task.  The named task is told to shut itself
+ * down by executing the registered shutdown callback.  We return OK if
+ * the shutdown can be executed, an ERR is returned if the named task is
+ * not currently running.
+ *
+ * Usage:       ism_stop  task
+ */
+static int
+ism_stop (xc, tcl, argc, argv)
+register XimClientPtr xc;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+	register XimDataPtr xim = xc->xim;
+	register IsmModule ism;
+
+        if (argc < 2)
+            return (TCL_ERROR);
+
+	/* Lookup the command for the task and stop it.  */
+	if ((ism = ismNameToPtr (argv[1]))) {
+            (*ism->shutdownCB) (xim, ism);
+            ism->connected = 0;
+            return (TCL_OK);
+ 	}
+
+	/* Task not found, return an error. */
+        return (TCL_ERROR);
+}
+
+
+/* ISM_CMD -- Send a command to the named ISM command callback.  Return
+ * values are sent as messages to the GUI 'ism_msg' parameter object, we
+ * simply pass the argv to the appropriate function.
+ *
+ * Usage:       ism_cmd  task <args>
+ */
+static int
+ism_cmd (xc, tcl, argc, argv)
+register XimClientPtr xc;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+	register XimDataPtr xim = xc->xim;
+	register IsmModule ism;
+	char 	 **cmd_argv;
+	int  	 cmd_argc;
+
+        if (argc < 2)
+            return (TCL_ERROR);
+
+	/* Lookup the command callback for the task and run it.  */
+	if ((ism = ismNameToPtr (argv[1]))) {
+
+	    /* Get local copy of argc and argv containing only the commands
+	     * for the ISM callback.
+	     */
+            if ((cmd_argc = (argc - 2) > 0)) {
+                cmd_argv = (char **) XtMalloc (cmd_argc * sizeof(char *));
+                memmove (cmd_argv, &argv[2], cmd_argc * sizeof(char *)); 
+            }
+
+            /* Process the command. */
+	    (*ism->commandCB) (xim, ism, cmd_argc, cmd_argv);
+            return (TCL_OK);
+	}
+
+	/* Task not found, return an error. */
+        return (TCL_ERROR);
 }

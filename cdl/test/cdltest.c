@@ -22,8 +22,9 @@ main()
 	int	lx, ly, ux, uy;
 	int	fb_w, fb_h, nframes, wcs;
 	int	xarray[1024], yarray[1024];
-	float	rx=128., ry=128.;
+	float	rx=128., ry=128., sx, sy;
 	float	a, b, c, d, tx, ty, z1=0.0, z2=0.0;
+	int	snx, sny, dnx, dny, dx, dy;
 	uchar	*pix, *c_ras;
 	double 	sin();
 
@@ -171,7 +172,7 @@ main()
 	    case 'r':					/* READ CURSOR	  */
                 (void) cdl_readCursor (cdl, 0, &rx, &ry, &wcs, &key);
                 ix = (int) (rx + 0.5);      iy = (int) (ry + 0.5);
-		printf("cursor: x=%g/%d  y=%g/%d  wcs = %d key='%c' frame=%d\n", 
+		printf("cursor: x=%g/%d  y=%g/%d  wcs = %d key='%c' frame=%d\n",
 		    rx, ix, ry, iy,  wcs, key, wcs / 100);
 		break;
 
@@ -368,8 +369,8 @@ main()
                 cdl_markPoint (cdl,ix+60,iy-32,0,13, M_PLUS|M_CIRCLE, C_GREEN);
                 cdl_markPoint (cdl,ix+90,iy-32,0,13, M_HLINE|M_POINT, C_GREEN);
                 cdl_markPoint (cdl,ix+105,iy-32,0,13, M_VLINE|M_POINT, C_GREEN);
-                cdl_markPoint (cdl,ix+120,iy-32,0,13, M_HBLINE|M_POINT, C_GREEN);
-                cdl_markPoint (cdl,ix+135,iy-32,0,13, M_VBLINE|M_POINT, C_GREEN);
+                cdl_markPoint (cdl,ix+120,iy-32,0,13, M_HBLINE|M_POINT,C_GREEN);
+                cdl_markPoint (cdl,ix+135,iy-32,0,13, M_VBLINE|M_POINT,C_GREEN);
                 cdl_markPoint (cdl,ix+00,iy-48,0,13, M_CROSS|M_BOX, C_GREEN);
                 cdl_markPoint (cdl,ix+45,iy-48,0,13, M_CROSS|M_DIAMOND,C_GREEN);
                 cdl_markPoint (cdl,ix+60,iy-48,0,13, M_CROSS|M_CIRCLE, C_GREEN);
@@ -438,6 +439,20 @@ main()
                 printf ("takes %d microseconds\n", clock());
 		break;
  
+	    case 'Q':
+                (void) cdl_readCursor (cdl, 0, &rx, &ry, &wcs, &key);
+                ix = (int) (rx + 0.5);      iy = (int) (ry + 0.5);
+		printf("cursor: x=%g/%d  y=%g/%d  wcs = %d key='%c' frame=%d\n",
+		    rx, ix, ry, iy,  wcs, key, wcs / 100);
+
+                (void) cdl_queryMap (cdl, wcs, name, &sx, &sy, &snx, &sny,
+			&dx, &dy, &dnx, &dny, obj);
+                printf ("\tregion='%s' ref='%s'\n", name, obj);
+                printf ("\tsrc = %g,%g,%d,%d   dest = %d,%d,%d,%d\n",
+                     sx, sy, snx, sny, dx, dy, dnx, dny);
+
+		break;
+
 	    case '?':
 		print_help();
 		break;
@@ -576,7 +591,8 @@ print_help ()
 	printf ("    [ -  dec textwidth    ");
 	printf ("    ] -  inc textwidth    "); printf ("\n");
 	printf ("    { -  dec linestyle    ");
-	printf ("    } -  inc linestyle    "); printf ("\n");
+	printf ("    } -  inc linestyle    ");
+	printf ("    Q -  query mapping    "); printf ("\n");
 }
 
 

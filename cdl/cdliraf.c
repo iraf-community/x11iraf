@@ -39,7 +39,8 @@
 
 /* Image header parmeters. */
 #define SZ_V2PIXFILE 	255
-#define SZ_V2HDR 	513
+#define SZ_V2TITLE 	383
+#define SZ_V2HDR 	1024
 
 /* Offsets into header (in sizeof(int) units) for various parameters */
 #define	IM_V2PIXTYPE	10		/* datatype of the pixels 	*/
@@ -49,7 +50,7 @@
 #define	IM_V2PHYSLEN	50		/* physical length (as stored) 	*/
 #define	IM_V2PIXOFF	86		/* offset of the pixels 	*/
 #define	IM_V2PIXFILE	126		/* name of pixel storage file 	*/
-#define	IM_V2TITLE	159		/* title of image		*/
+#define	IM_V2TITLE	638		/* title of image		*/
 
 /* IRAF dataype codes */
 #define	TY_CHAR		2
@@ -405,7 +406,7 @@ char	*title; 			/* image title		 */
 
 	    /* Find the image title string */
 	    if (title == (char *)NULL)
-		title = (char *) malloc (128);
+		title = (char *) malloc (SZ_V1TITLE+1);
 	    cdl_strpak ((char *)&header_v1[IM_V1TITLE], title, SZ_V1TITLE);
 
 	} else if (*version == VERSION_2) {
@@ -459,10 +460,10 @@ char	*title; 			/* image title		 */
 	    (void) strcpy (pfile, pixfile_v2);
 
 	    /* Find the image title string */
-	    tp = (char *)&header_v2[IM_V1TITLE] + 2;
+	    tp = (char *)&header_v2[IM_V2TITLE];
 	    if (title == (char *)NULL)
-		title = (char *) malloc (128);
-	    cdl_strpak ((char *)tp, title, SZ_V1TITLE);
+		title = (char *) malloc (SZ_V2TITLE+1);
+	    strcpy (title, (char *)tp);
 	}
 
 	if (cdl_debug) {

@@ -171,7 +171,7 @@ char **argv;
 
 	if (argc >= 2) {
 	    char *message = Tcl_Concat (argc-1, &argv[1]);
-	    stat = client_output (obm, ':', message);
+	    stat = client_output (obm, obj->core.name, ':', message);
 	    free ((char *)message);
 	} else
 	    stat = -1;
@@ -198,7 +198,7 @@ char **argv;
 	int stat;
 
 	if (argc >= 2)
-	    stat = client_output (obm, *argv[1], "");
+	    stat = client_output (obm, obj->core.name, *argv[1], "");
 	else
 	    stat = -1;
 
@@ -223,7 +223,7 @@ char **argv;
 
 	if (argc >= 2) {
 	    char *message = Tcl_Concat (argc-1, &argv[1]);
-	    stat = client_output (obm, 0, message);
+	    stat = client_output (obm, obj->core.name, 0, message);
 	    free ((char *)message);
 	} else
 	    stat = -1;
@@ -235,8 +235,9 @@ char **argv;
 /* client_output -- Call the client output callbacks if any.
  */
 static int
-client_output (obm, key, strval)
+client_output (obm, objname, key, strval)
 register ObmContext obm;
+char *objname;
 int key;
 char *strval;
 {
@@ -245,7 +246,8 @@ char *strval;
 
 	for (cb = obm->callback_list;  cb;  cb = cb->next)
 	    if ((cb->callback_type & OBMCB_clientOutput) && cb->u.fcn)
-		stat |= ((*cb->u.fcn) (cb->client_data, obm->tcl, key, strval));
+		stat |= ((*cb->u.fcn) (cb->client_data, obm->tcl,
+			     objname, key, strval));
 
 	return (stat != 0);
 }

@@ -155,6 +155,14 @@ static	char	rcsid[] = "$Id: Tabs.c,v 1.27 1999/12/16 18:44:18 falk Exp $" ;
  *
  ****************************************************************/
 
+#ifdef SUNOS
+static	char	defaultTranslations[] = "\
+	<BtnUp>:		select()	\n\
+	<FocusIn>:		highlight()	\n\
+	<FocusOut>:		unhighlight()	\n\
+	<Key> :			page(select)	\n\
+	 " ;
+#else
 static	char	defaultTranslations[] = "\
 	<BtnUp>:		select()	\n\
 	<FocusIn>:		highlight()	\n\
@@ -177,7 +185,13 @@ static	char	defaultTranslations[] = "\
 	<Key>KP_Down:		highlight(down)	\n\
 	<Key> :			page(select)	\n\
 	 " ;
+#endif
 
+#ifdef SUNOS
+static	char	accelTable[] = "	#augment\n\
+	<Key> :			page(select)	\n\
+	 " ;
+#else
 static	char	accelTable[] = "	#augment\n\
 	<Key>Page_Up:		page(up)	\n\
 	<Key>KP_Page_Up:	page(up)	\n\
@@ -197,6 +211,7 @@ static	char	accelTable[] = "	#augment\n\
 	<Key>KP_Down:		highlight(down)	\n\
 	<Key> :			page(select)	\n\
 	 " ;
+#endif
 static	XtAccelerators	defaultAccelerators ;
 
 #define	offset(field)	XtOffsetOf(TabsRec, tabs.field)
@@ -1424,7 +1439,8 @@ TabsFreeGCs(TabsWidget tw)
 #ifdef USE_XMU_STIPPLE
 	XmuReleaseStippledPixmap(XtScreen(w), tw->tabs.grey50) ;
 #else
-        XFreePixmap(XtDisplay(w), tw->tabs.grey50 );
+/*      XFreePixmap(XtDisplay(w), tw->tabs.grey50 );*/
+	;
 #endif
 }
 

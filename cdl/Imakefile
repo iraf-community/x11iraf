@@ -1,5 +1,5 @@
 # 
-#   Imakefile for the Client Display Library V1.7
+#   Imakefile for the Client Display Library V1.8
 # 
 #   Mike Fitzpatrick, National Optical Astronomy Observatories, IRAF project.
 #   Feb 1997
@@ -41,7 +41,7 @@ X11IRAFDIR = ../
         HEADERS = cdl.h cdlspp.h cdlftn.inc
 
 World::
-	@echo "Building Release 1.7 of the IRAF CLient Display Library"
+	@echo "Building Release 1.8 of the IRAF CLient Display Library"
 	@echo "" ; date ; echo ""
 	$(MAKE) $(MFLAGS) Makefiles
 	$(MAKE) $(MFLAGS) clean

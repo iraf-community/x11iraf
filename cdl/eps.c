@@ -73,9 +73,10 @@
 #undef  min
 #undef  max
 
-char	*hextab = "0123456789abcdef";
-int	pixnum 	= 0, lpix = 0;
-uchar   *pixbuf;
+static char	*hextab = "0123456789abcdef";
+static int	pixnum 	= 0, lpix = 0;
+static uchar   *pixbuf;
+
 
 #define PageXdim(ps)    ( PageInfo[ps->page.page_type].npixx )
 #define PageYdim(ps)    ( PageInfo[ps->page.page_type].npixy )       

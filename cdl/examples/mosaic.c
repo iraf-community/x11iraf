@@ -77,10 +77,10 @@ char	**argv;
 		    break;
 	    }
 	} else {
-   	    printf("Usage:\n");
- 	    printf("\tmosaic [-fbconfig N] [-frame N] [-color N] [-label] [-nozscale]\n");
- 	    printf("\t[-raw -xdim N -ydim N -bitpix N [-hskip N] ]\n");
- 	    printf("\t[-nx N] [-ny N] [-pad N] [-sample N] image1 ....\n");
+   	    printf("Usage:\n\tmosaic ");
+ 	    printf("[-fbconfig N] [-frame N] [-color N] [-label] [-nozscale]");
+ 	    printf("\n\t[-raw -xdim N -ydim N -bitpix N [-hskip N] ]");
+ 	    printf("\n\t[-nx N] [-ny N] [-pad N] [-sample N] image1 ....\n");
 	    exit (1);
 	}
 	nimages = argc - i;

@@ -154,6 +154,7 @@ SRCS = \
 	XawInit.c \
 	sharedlib.c 
 
+
 #if SharedDataSeparation
 UNSHAREDOBJS = AllWidgets.o sharedlib.o
 #endif
@@ -192,9 +193,9 @@ OBJS = \
 	ThreeD.o \
 	Toggle.o \
 	Tree.o \
-	Vendor.o \
 	Viewport.o \
 	XawInit.o 
+
 
 #ifdef LexCmd
 LEX=LexCmd
@@ -212,15 +213,25 @@ TextTr.o:
         acc $(EXTRA_INCLUDES) -c TextTr.c
 #endif
 
+#if defined (PpcDarwinArchitecture) || defined (TenonServer)
 libXaw3d.a: $(OBJS)
 	$(RM) $@
 	$(AR) $@ $(OBJS)
 	RanLibrary($@)
+#else
+libXaw3d.a: $(OBJS) Vendor.o
+	$(RM) $@
+	$(AR) $@ $(OBJS) Vendor.o
+	RanLibrary($@)
+#endif
 
 includes::
 	MakeDir(X11irafIncDir)
 	MakeDir(X11irafIncDir/X11)
 	MakeDir(X11irafIncDir/X11/Xaw3d)
+#if defined (PpcDarwinArchitecture) || defined (TenonServer)
+	$(LN) Xaw3d X11irafIncDir/X11/Xaw
+#endif
 	@(set -x; for i in $(HEADERS); do \
 	    $(RM) X11irafIncDir/X11/Xaw3d/$$i; \
 	    $(CP) -p $$i X11irafIncDir/X11/Xaw3d/$$i; \

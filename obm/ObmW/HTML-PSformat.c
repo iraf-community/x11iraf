@@ -44,11 +44,14 @@
 
 #include <string.h>
 #include <stdio.h>
-#include <varargs.h>
 #include <ctype.h>
 #include <math.h>
-#include <malloc.h>
 #include "HTMLP.h"
+
+#include <varargs.h>
+#if !defined(__DARWIN__)
+#include <malloc.h>
+#endif
 
 /* Workaround for our old varargs handling on LinuxPPC systems. */
 #if defined(linux) && defined(__powerpc__)

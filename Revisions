@@ -541,3 +541,284 @@ xgterm/Imakefile
 V1.2 Release  (5/1/2000)
 ------------------------
 
+ximtool/tiffio.c
+	Fixed a byte order problem for TIFF images on swapped systems (7/10/00)
+
+vximtool/vximtool.c
+cdl/vximtool.c
+	Added an #ifdef AIX for <sys/select.h> on AIX systems (7/10/00)
+
+obm/ObmW/Gterm.c
+    Removed the comment chars for XRecolorCursor first done for MF030.
+    While these do trigger BadCursor errors these will now be ignored by
+    the xgterm error handler.  (4/7/00)
+
+obm/server.c
+    Changed a malloc to a calloc call for the timer struct.  Also deleted
+    an XtFree for the callback in serverTimedProc() which would corrupt
+    memory if the timer callback were later deleted. (7/28/00)
+
+obm/ObmP.h
+obm/Obm.c
+    Added support for a new environent variable OBMOBJECTS which will help
+    restrict the messages printed during debugging.  For example, it can be
+    set as
+
+        setenv OBMOBJECTS "client imagewin"
+
+    to have OBMDEBUG print only messages for the 'client' and 'imagewin'
+    objects.  (8/3/00)
+
+ximtool/Imakefile
+ximtool/ximtool.c
+ximtool/ximtool.gui
+ximtool/ximtool-mag.*		-
+    Removed the ximtool-mag command to the 'OLD' subdirectory and merged 
+    the magnifier marker into the default GUI.  (7/28/00)
+    
+ximtool/raster.c
+ximtool/ximclient.c
+ximtool/ximtool.gui
+ximtool/ximtool-alt.gui
+    Added new client callbacks 'centroid', 'offsetRegister' and 'setOffset'
+    as part of the implementation of the DEIMOS peak-up and auto-register
+    features.  (8/3/00).
+
+ximtool/ximtool.c
+    Added a check for the visual at startup so the task can exit with a
+    more informative message than just the BadMatch error.  (8/3/00)
+
+obm/client.c
+obmsh/obmsh.c
+xgterm/gtermio.c
+ximtool/ximclient.c
+    Modified the clientOutput callbacks to accept a new 'objname' argument.
+    By default this will be "client" but in the case of XImtool this would
+    allow a new client (the ISM) to be connected to the OBM by name.  (8/11/00)
+
+obm/widget.c
+    Added a new 'setTop' command for the Tabs widget that can be used to
+    raise a particular tab from within the GUI.  (8/29/00)
+
+ximtool/ximclient.c
+ximtool/gui/print.tcl
+    Minor fixes to finish implementing B5 paper size (1/8/02)
+
+version.h
+ximtool/gui/main.obj
+ximtool/gui/main-alt.obj
+    Updated the version string from V1.3DEVELOP to V1.3EXPORT (1/25/02)
+
+ximtool/clients/wcspix/wcimage.x
+    Fixed a bug in the WCS info computation for images which don't actually
+    have a WCS, causing a segvio under sparc (1/31/02)
+
+ximtool/gui
+    Changed the default width/height of the hcut/vcut plots to 1 pixel
+    from zero to avoid problems found on some X servers.  Also fixed a 
+    bug in the tile-mode initialization.
+
+-----------------------------
+V1.3Beta Release (02/03/2002)
+-----------------------------
+
+ximtool/gui/global.res
+    Prefixed all resources with a Class name to avoid mixups with desktop
+    color settings.  (2/8/02)
+
+ximtool/raster.c
+    Modified the xim_labelTiles() procedure to draw the labels by creating
+    text markers internally for each label.  This avoids problems with using
+    X text drawing and allows the markers to be moved by the user as needed.
+    (2/8/02)
+
+ximtool/gui/panel.obj
+ximtool/gui/tile.res
+    Fixed some color problems in the GUI.  (2/8/02)
+
+ximtool/clients/lib/dspmmap.x	(from V2.12 code)
+    Added the feature that the bad pixel mask or overlay mask may be
+    specified by a keyword value with the syntax !<keyword>.  This is
+    important for multiextension files where various masks are set
+    as keywords.  The new task OBJMASKS also writes the object mask name
+    that is created for an image in the header.  Use of !objmask then
+    allows the object mask to be used for the bad pixel mask (to set
+    the scaling using only sky pixels) and for overlay.
+
+cdl/vximtool.c
+ximtool/raster.c
+vximtool/vximtool.c
+    Fixed a pointer allocation problem in the get_fbconfig() procedure
+    causing a segfault.  (2/15/02)
+
+ximtool/ximtool.c
+    Fixed a bug in the -tile flag not starting up in tile mode (2/24/02)
+
+ximtool/gui
+ximtool/clients
+    Reworked the code to be more efficient when doing cursor translations.
+    Also disabled the BPM mapping at startup to speed startup of the ISM
+    cache. (2/24/02)
+
+ximtool/gui/main.res
+ximtool/gui/main-alt.res
+ximtool/gui/plots.tcl
+    Changed the plotOps object to be completely resizeable and unmapped
+    at the start to avoid a BadAlloc msg on sun older OW servers. (2/26/02)
+
+ximtool/ximtool.c
+    Local variable used to store the tile option wasn't properly initialized
+    meaning the task could start up in tile mode. (2/28/02)
+
+ximtool/clients/wcspix/t_wcspix.x
+    The new wp_read() routine wasn't properly returning an EOF meaning the
+    task could be left a zombie if the server crashed.  (2/28/02)
+
+ximtool/gui/main.res
+ximtool/gui/main-alt.res
+ximtool/gui/plots.tcl
+    More fixes same as above but on the cut-plot widgets. (2/28/02)
+
+ximtool/gui/global.tcl
+ximtool/gui/main-alt.obj
+ximtool/gui/main.obj
+    Updated GUI version strings to V1.3EXPORT from V1.3DEVELOP (2/28/02)
+
+ximtool/gui
+    Minor fixes for getting '-geometry' to work, the alt-gui resizing when
+    closing the toolbars, and cut-graph geometry causing the gui to die
+    on some sun systems. (3/2/02)
+
+ximtool/iis.c
+    Minor fix for ISM readout error when displaying image sections (3/3/02)
+
+ximtool/gui
+ximtool/clients/wcspix
+    Implemented a "display" coordinate readout as the default when there is
+    no image WCS.  This is essentially the coordinate system used by
+    calculating from the frame buffer wcs and the one you get when the ISM
+    isn't running.  When displaying image sections this becomes the 'physical'
+    coordinate referenced to the parent image same as always rather than the
+    true 'logical' coordinate that was printed previously.  (3/4/02)
+
+install
+    Fixed a bug in the install script not supplying a proper default.  (3/6/02)
+
+ximtool/clients/wcspix/wcimage.x
+    Fixed a but in the transformation of GAPPT/FK4-NO-E projections (3/20/02)
+
+ximtool/gui/ism.tcl
+ximtool/gui/compass.tcl
+ximtool/clients/wcspix/wcimage.x
+ximtool/clients/wcspix/wcunknown.x
+    Various fixes to allow the ISM to work on transposed images (coord
+    readout and compass indicator). (3/21/02)
+
+ximtool/gui/main.obj
+ximtool/gui/main.res
+ximtool/gui/panel.tcl
+ximtool/gui/imagewin.tcl
+    The control panel Dismiss wasn't toggling the control panel button on
+    the "classic" gui menubar.  Also found that there was a potential name
+    conflict with objects used in the alt-gui for 'panelButton'  (3/21/02)
+
+ximtool/iis.c
+ximtool/clients/wcspix/wcimage.x
+    Fixes related to coord readout when displaying image sections (3/22/02)
+
+ximtool/gui/ism.tcl
+ximtool/gui/pixtab.tcl
+ximtool/clients/wcspix/wcimage.x
+    Pixel table data was being sent when it wasn't needed, optimized to
+    avoid this case.  (3/22/02)
+
+----------------
+Mac OS X port
+----------------
+
+./mkarch
+./install
+    Added branch for OS X (4/1/02)
+
+obm/Tcl/Imakefile
+    Added a branch for OS X (4/1/02)
+
+obm/Tcl/tclInt.h
+    Added an #ifdef __DARWIN__ to use <stdarg.h> instead of <varargs.h>,
+    modified the va_start stuff just below that to trigger on only 
+    __powerpc__ to work with both linux and darwin.
+
+xaw3d/AsciiSrc.c
+xaw3d/TextPop.c
+xgterm/misc.c
+ximtool/ximtool.c
+    Added an #ifdef __DARWIN__ for the sys_errlist declarations (4/4/02)
+
+xaw3d/Imakefile
+    Added a case in the 'includes' to create a symlink 'Xaw' pointing to
+    the x11iraf$include/X11/Xaw3d dir so we pick up the local .h files.  Some
+    files, esp TextSink.h, appear broken under Darwin.  (4/5/02)
+
+X11IRAF.tmpl
+    Added a '-w' flag to the default CCOPTIONS for 'PpcDarwinArchitecture'
+    to shut up the warnings.  (4/5/02)
+
+obm/ObmW/Imakefile
+obm/ObmW/icon.c		-> iconutil.c
+obm/ObmW/icon.c.ORIG	-> iconutil.c.ORIG
+    Incredibly filenames under OS X are case-insensitive and the 'Icon.c'
+    widget source was being wiped out by the 'icon.c' utility code.  Renamed
+    the file to avoid this.  (4/5/02)
+
+obm/ObmW/Imakefile
+obm/Tcl/Imakefile
+     Added '-traditional-cpp' compile flags to work around the problems with
+     <varargs.h>  (4/5/02)
+
+Imakefile
+    Ifdef'd out the 'make depend' for OS X since I couldn't find a way to
+    make this work without getting the <varargs.h> errors that's fixed by
+    the -traditional-cpp flag. (4/5/02)
+
+obm/ObmW/Imakefile
+    Added a target to 'all' to build laylex.c and laygram.c (4/5/02)
+
+-----------------
+System builds now
+-----------------
+
+obmsh/obmsh.c
+    The OBMSH task would segfault in main() due to a problem with the static
+    allocation of a 1Mb char buffer for the GUI message when used as a shell.
+    Changed to an allocated pointer and it works now.  (4/6/02)
+
+install
+    OS X puts the app-defaults in /etc/X11/app-defaults, added that as a
+    fallback for the install script prompt.  (4/6/02)
+
+Imakefile
+X11IRAF.tmpl
+xaw3d/Imakefile
+obm/ObmW/Imakefile
+obm/Tcl/Imakefile
+    Modified the PpcDarwinArchitecture defines to also check 'TenonServer'
+    for systems not using the XFree86 server (4/23/02)
+
+ximtool/iis.c
+ximtool/ximtool.c
+ximtool/ximclient.c
+    Minor changes to allow the cmdline flags to properly disable input
+    connections (fifo, etc) and show a 'disabled' status in the info box.
+    Also clarified the warnings printed for EADDRINUSE and ifdef'd the
+    fifo opening so it's never used (we can't write to /dev in OS X).
+    (4/29/02)
+
+ximtool/ximtool.c
+    Added more text to the BadMatch explanation (5/3/02)
+
+System frozen, PS documentation and GUIs regenerated, junk cleaned out (5/6/02)
+
+-------------------------------
+V1.3EXPORT Release (05/06/2002)
+-------------------------------
+

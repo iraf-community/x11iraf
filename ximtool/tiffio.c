@@ -27,8 +27,8 @@ typedef struct {
         unsigned short  blue[256];
 } Colors;
 
-static char     *order = "MM";
-static short    tiff = 42;
+static char    *h_order = "MM\0*";
+static char    *l_order = "II*\0";
 
 /* Tag Definitions */
 #define IMAGEWIDTH      256
@@ -50,6 +50,7 @@ static short    tiff = 42;
 #define MONO(rd,gn,bl) (((rd)*11 + (gn)*16 + (bl)*5) >> 5)  /*.33R+ .5G+ .17B*/
 
 
+
 /* writeTIFF -- Write a TIFF 6.0 image.
 */
 
@@ -67,6 +68,7 @@ unsigned char *r, *g, *b;		/* colormap			*/
 	unsigned char	*dta, r1, b1, g1;
 	unsigned short	*rr, *gg, *bb;
 	int	bitspersample=8, compression=1, photo=3, resolution=2;
+	int 	width = w, height = h;
 
 	tt = (TiffTag *) calloc (dirs, sizeof(TiffTag));
 	size = w * h;
@@ -76,27 +78,37 @@ unsigned char *r, *g, *b;		/* colormap			*/
 	bb = (unsigned short *) calloc (MAXCOLORS, sizeof(unsigned short));
 	memcpy(dta, data, size * sizeof(unsigned char));
 
-	fwrite (order, 2, 1, fa);
-	fwrite (&tiff, 2, 1, fa);
+	if (is_swapped()) {
+	    fwrite (l_order, 4, 1, fa);
+	} else {
+	    fwrite (h_order, 4, 1, fa);
+	    width 	    = w << 16;
+	    height 	    = h << 16;
+	    bitspersample <<= 16;
+	    compression   <<= 16;
+	    photo         <<= 16;
+	    resolution    <<= 16;
+	}
+
 	offset = 8;
 	fwrite (&offset, 4, 1, fa);
 	fwrite (&dirs, 2, 1, fa); 		/* number of IFD's */
 
 	/* Create TIFF IFD's.
 	 */
-	create_TIFFtag (tt+0, IMAGEWIDTH, 3, 1, (w << 16));
-	create_TIFFtag (tt+1, IMAGELENGTH, 3, 1, (h << 16));
-	create_TIFFtag (tt+2, BITSPERSAMPLE, 3, 1, (bitspersample << 16));
-	create_TIFFtag (tt+3, COMPRESSION, 3, 1, (compression << 16));
-	create_TIFFtag (tt+4, PHOTOMETRIC, 3, 1, (photo << 16));
+	create_TIFFtag (tt+0, IMAGEWIDTH, 3, 1, (width));
+	create_TIFFtag (tt+1, IMAGELENGTH, 3, 1, (height));
+	create_TIFFtag (tt+2, BITSPERSAMPLE, 3, 1, (bitspersample));
+	create_TIFFtag (tt+3, COMPRESSION, 3, 1, (compression));
+	create_TIFFtag (tt+4, PHOTOMETRIC, 3, 1, (photo));
 	create_TIFFtag (tt+5, STRIPOFFSETS, 4, 1, 10+(dirs*12)+4);
-	create_TIFFtag (tt+6, ROWSPERSTRIP, 3, 1, (w << 16));
+	create_TIFFtag (tt+6, ROWSPERSTRIP, 3, 1, (width));
 	create_TIFFtag (tt+7, STRIPBYTECOUNT, 4, 1, size);
 	create_TIFFtag (tt+8, XRESOLUTION, 5, 1,
 	    (tt+5)->offset+(2*768)+(size+(size%4)));
 	create_TIFFtag (tt+9, YRESOLUTION, 5, 1,
 	    (tt+5)->offset+(2*768)+(size+(size%4))+8);
-	create_TIFFtag (tt+10, RESOLUTIONUNIT, 3, 1, (resolution << 16));
+	create_TIFFtag (tt+10, RESOLUTIONUNIT, 3, 1, (resolution));
 	create_TIFFtag (tt+11, COLORMAP, 3, 768,
 	    (tt+5)->offset+(size+(size%4)));
 

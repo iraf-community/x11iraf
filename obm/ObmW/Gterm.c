@@ -1819,6 +1819,7 @@ GtSetCursorType (w, type)
 			XMapWindow (display, XtWindow(pw));
 		    if (w->gterm.raiseWindow)
 			XRaiseWindow (display, XtWindow(pw));
+		    XSync (display, False);
 		}
 
 	/* The first time this is done after a GtActivate causes the cursor
@@ -3711,8 +3712,7 @@ usedef:	    /* Allocate private r/w colors from default colormap. */
 	    timeval = time((long *)NULL);
 
 	    if (shadow && (!w->gterm.in_window ||
-		    (timeval - w->gterm.cmapLastShadow > shadow))) {
-
+		    (timeval - w->gterm.cmapLastShadow > shadow * 1000))) {
 		update_default_colormap (w);
 		w->gterm.cmapLastShadow = timeval;
 	    }
@@ -7266,6 +7266,10 @@ update_mapping (w, mp)
     dy = p_mp.dy;
     xmax = dnx - 1;
     ymax = dny - 1;
+
+    /* Discard the temporary mapping.
+    free_mapping (w, &p_mp);
+     */
 
     /* Get scale factors. */
     mp->xscale = (float)dnx / (float)snx;

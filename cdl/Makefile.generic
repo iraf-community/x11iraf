@@ -23,7 +23,7 @@
 
 
 World::
-	@echo "Building Release 1.6 of the IRAF CLient Display Library"
+	@echo "Building Release 1.8 of the IRAF CLient Display Library"
 	@echo "" ; date ; echo ""
 	$(MAKE) $(MFLAGS) all
 	@echo "Done." ; date ; echo ""

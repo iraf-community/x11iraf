@@ -15,7 +15,7 @@ IMDPtr imd_open(char *imtdev);
 int imd_displayImage(IMDPtr imd, uchar *pix, int nx, int ny, int frame, int fbconfig, int comp_wcs);
 int imd_readCursor(IMDPtr imd, int sample, float *x, float *y, int *wcs, char *key);
 int imd_setWCS(IMDPtr imd, char *name, char *title, float a, float b, float c, float d, float tx, float ty, float z1, float z2, int zt);
-int imd_getWCS(IMDPtr imd, char *name, char *title, float *a, float *b, float *c, float *d, float *tx, float *ty, float *z1, float *z2, int *zt);
+int imd_getWCS(IMDPtr imd, int wcs, char *name, char *title, float *a, float *b, float *c, float *d, float *tx, float *ty, float *z1, float *z2, int *zt);
 int imd_close(IMDPtr imd);
 int imd_writeImage(IMDPtr imd, uchar *pix, int nx, int ny, int llx, int lly);
 int imd_readImage(IMDPtr imd, uchar *pix, int *nx, int *ny);
@@ -33,11 +33,11 @@ int imd_setDebug(int state);
 
 #else
                      
-IMDPtr  	imd_open();
-int     	imd_setFBConfig(), imd_writeDisplay(), imd_readDisplay();
-int		imd_setFrame(), imd_setCursor(), imd_readCursor();
-int     	imd_close(), imd_readSubRaster(), imd_writeSubRaster();
-int     	imd_clearFrame(), imd_setWCS(), imd_getWCS();
+IMDPtr  imd_open();
+int     imd_setFBConfig(), imd_writeDisplay(), imd_readDisplay();
+int	imd_setFrame(), imd_setCursor(), imd_readCursor();
+int     imd_close(), imd_readSubRaster(), imd_writeSubRaster();
+int     imd_clearFrame(), imd_setWCS(), imd_getWCS();
 
 #endif
 
@@ -57,18 +57,19 @@ int com_readCursor(int fdin, int fdout, int sample, float *x, float *y, int *wcs
 int com_setCursor(int fd, int x, int y, int wcs);
 int com_setFBConfig(int fd, int configno);
 int com_setFrame(int fd, int frame_num);
-int com_writeWCS(int fd, char *name, float a, float b, float c, float d, float tx, float ty, float z1, float z2, int zt);
-int com_readWCS(int fdin, int fdout, char *name, float *a, float *b, float *c, float *d, float *tx, float *ty, float *z1, float *z2, int *zt);
+int com_writeWCS(int fd, char *buffer, int nbytes, int version);
+int com_readWCS(int fdin, int fdout, char *buffer, int *nbytes, int wcs,int version);
 int com_eraseFrame(int fd);
+int com_wcsVersion(int fdin, int fdout);
 
 int com_setDebug(int state);
 
 #else
 
-int		com_writeData(), com_readData(), com_setFBConfig();
-int		com_readCursor(), com_setCursor(), com_setFrame();
-int		com_writeWCS(), com_readWCS(), com_eraseFrame();
-int 		com_setDebug();
+int	com_writeData(), com_readData(), com_setFBConfig();
+int	com_readCursor(), com_setCursor(), com_setFrame();
+int	com_writeWCS(), com_readWCS(), com_eraseFrame();
+int 	com_setDebug(), com_wcsVersion();
 
 #endif
 

@@ -66,6 +66,9 @@
  *	    resizeThumb width [height]
  *	   setScrollbar position size			# scrollbars
  *
+ *		 setTop widget				# tabs
+ *	    setListTree list				# list tree
+ *
  * Ideally the widget class should be subclassed for widgets that require
  * class-specific functions, but in simple cases involving standard widgets
  * the support is built into the widget class code as a special case.
@@ -99,6 +102,8 @@
 typedef struct rtype *Rtype;
 #define	LEN_RHASH 197
 Rtype	rhash[LEN_RHASH];
+
+#define	MAX_TREE_LEVELS 10
 
 /* Global widget resources table. */
 struct rtype {
@@ -183,7 +188,7 @@ static	void widgetEvent(), widgetSetDestroy(), widgetDestroy();
 static	void widgetCallback(), widgetSCCallback(), widgetJPCallback();
 static	void widgetSPCallback(), widgetPUCallback(), widgetPDCallback();
 static	void widgetSBCallback(), widgetSECallback(), widgetRPCallback();
-static	void widgetRGCallback();
+static	void widgetRGCallback(), widgetLTHCallback(), widgetLTACallback();
 static	int widgetSet(), widgetGet(), widgetMap(), widgetUnmap();
 static	int widgetRealize(), widgetUnrealize(), widgetIsRealized();
 static	int widgetPopup(), widgetPopupSpringLoaded(), widgetPopdown();
@@ -193,11 +198,12 @@ static	int widgetParseGeometry(), widgetGetGeometry();
 static	int widgetSetSensitive(), widgetIsSensitive();
 static	int widgetManage(), widgetUnmanage(), widgetAppend();
 static	int widgetAddEventHandler(), widgetRemoveEventHandler();
-static	int widgetHighlight(), widgetUnhighlight();
+static	int widgetHighlight(), widgetUnhighlight(), widgetSetTop();
 static	int widgetSetList(), widgetGetItem(), widgetGetValue();
 static	int widgetGetThumb(), widgetMoveThumb(), widgetResizeThumb();
 static	int widgetSetScrollbar(), widgetSetTTName(), widgetGetTTName();
-static	int get_itemno();
+static	int widgetSetListTree();
+static	int get_itemno(), buildTreeList();
 
 
 /* WidgetClassInit -- Initialize the class record for the widget class.
@@ -272,6 +278,10 @@ register ObjClassRec classrec;
 		"resizeThumb", widgetResizeThumb, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
 		"setScrollbar", widgetSetScrollbar, (ClientData)msg, NULL);
+	    Tcl_CreateCommand (tcl,
+		"setTop", widgetSetTop, (ClientData)msg, NULL);
+	    Tcl_CreateCommand (tcl,
+		"setListTree", widgetSetListTree, (ClientData)msg, NULL);
 
 	    Tcl_CreateCommand (tcl,
 		"realize", widgetRealize, (ClientData)msg, NULL);
@@ -421,6 +431,10 @@ int nargs;
 	    obmClass (classrec, WtArrow)) {
 
 	    XtAddCallback (w, XtNcallback, widgetCallback, obj);
+
+	} else if (obmClass (classrec, WtListTree)) {
+	    XtAddCallback (w, XtNhighlightCallback, widgetLTHCallback, obj);
+	    XtAddCallback (w, XtNactivateCallback, widgetLTACallback, obj);
 
 	} else if (obmClass (classrec, WtRepeater)) {
 	    XtAddCallback (w, XtNcallback, widgetCallback, obj);
@@ -975,6 +989,87 @@ caddr_t call_data;
 		op++;
 	}
 	*op++ = '\0';
+
+	call_callbacks (obj, Ctcallback, message);
+}
+
+
+/* widgetLTHCallback -- ListTree highlight callback.
+ */
+static void
+widgetLTHCallback (w, obj, call_data)
+Widget w;
+WidgetObject obj;
+caddr_t call_data;
+{
+	ListTreeMultiReturnStruct *list;
+	ListTreeItem *item;
+	char message[SZ_COMMAND], buf[SZ_LINE];
+	register int i;
+
+	list = (ListTreeMultiReturnStruct *) call_data;
+	if (!list->items)
+	    return;
+
+
+	/* The message is the string value of the list element selected
+	 * and a bottom-up path to the root.
+	 */
+	sprintf (message, "{%s} ", list->items[0]->text);
+
+	strncat (message, "{ ", 2);
+	for (i=0; i < list->count; i++) {
+	    item = list->items[i];
+	    sprintf (buf, "{ %s } ", item->text);
+	    strcat (message, buf);
+	    while (item->parent) {
+		item = item->parent;
+		sprintf (buf, "{ %s } ", item->text);
+		strcat (message, buf);
+	    }
+	}
+	strncat (message, "}", 1);
+
+	call_callbacks (obj, Ctcallback, message);
+}
+
+
+/* widgetLTACallback -- ListTree activate callback.
+ */
+static void
+widgetLTACallback (w, obj, call_data)
+Widget w;
+WidgetObject obj;
+caddr_t call_data;
+{
+	ListTreeActivateStruct *ret;
+	ListTreeMultiReturnStruct ret2;
+	ListTreeItem *item;
+	char message[SZ_COMMAND], buf[SZ_LINE];
+	int i, count;
+
+        ret = (ListTreeActivateStruct *) call_data;
+
+	/* The message is the string value of the list element selected,
+	 * and a bottom-up path to the root.
+	 */
+	sprintf (message, "{%s} ", ret->item->text);
+
+	strncat (message, "{ ", 2);
+	item = ret->item;
+	sprintf (buf, "{ %s } ", item->text);
+	strcat (message, buf);
+	while (item->parent) {
+	    item = item->parent;
+	    sprintf (buf, "{ %s } ", item->text);
+	    strcat (message, buf);
+        }
+
+	strncat (message, "}", 1);
+
+/* 	ListTreeSetHighlighted (w, ret->path, ret->count, True);
+        ListTreeGetHighlighted (w, &ret2);
+        ListTreeSetHighlighted (w, ret2.items, ret2.count, True); */
 
 	call_callbacks (obj, Ctcallback, message);
 }
@@ -2567,6 +2662,171 @@ char **argv;
 	    XawScrollbarSetThumb (wp->w, position, size);
 	else
 	    XfwfSetScrollbar (wp->w, position, size);
+
+	return (TCL_OK);
+}
+
+
+/* widgetSetTop -- Raise the child of a Tabs widget.
+ *
+ * Usage:	setTop widget
+ *
+ */
+static int 
+widgetSetTop (msg, tcl, argc, argv)
+MsgContext msg;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+	WidgetObject obj = (WidgetObject) msg->object[msg->level];
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	ObmObject child = (ObmObject) NULL;
+
+	if (!(obmClass (obj->core.classrec, WtTabs))) {
+	    obm->tcl->result = "not a Tabs widget";
+	    return (TCL_ERROR);
+	} else if (argc < 2) {
+	    obm->tcl->result = "missing argument";
+	    return (TCL_ERROR);
+	}
+
+	/* Get the child object pointer and raise it. */
+	child = obmFindObject (obm, argv[1]);
+	if (child)
+	    XawTabsSetTop (widgetGetPointer (child), False);
+
+	return (TCL_OK);
+}
+
+
+/* widgetSetListTree -- Set a ListTree hierarchy.
+ *
+ * Usage:	setListTree list [append]
+ *
+ * The list is specified as a hierarchical Tcl list of the form
+ *
+ *	     {a1 {b1 {a2 {a3 b3}} b2} c1}
+ *
+ * This would produce an indented list something like:
+ *
+ *		a1
+ *		b1
+ *		 |- a2
+ *		    |- a3
+ *		    |- b3
+ *		 |- b2
+ *		c1
+ *
+ */
+static int 
+widgetSetListTree (msg, tcl, argc, argv)
+MsgContext msg;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+	WidgetObject obj = (WidgetObject) msg->object[msg->level];
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	Boolean append;
+	char *list, **items, buf[SZ_LINE];
+	int nitems, item;
+	static char **sv_items = NULL;
+	static int sv_nitems;
+	ListTreeItem *val;
+	extern ListTreeItem *ListTreeAdd(), *ListTreeFirstItem();
+
+
+	/* Do some error checking first. */
+	if (!(obmClass (obj->core.classrec, WtListTree))) {
+	    obm->tcl->result = "not a ListTree widget";
+	    return (TCL_ERROR);
+	} else if (argc < 2) {
+	    obm->tcl->result = "missing list argument";
+	    return (TCL_ERROR);
+	}
+
+	list = argv[1];
+	append = (argc > 2) ? (strcmp (argv[2], "append") == 0) : False;
+
+	/* Delete the old tree. */
+	if (!append && sv_items) {
+	    while ((val = ListTreeFirstItem(wp->w)))
+	        ListTreeDelete (wp->w, val);
+	    free ((char *) sv_items);
+	    sv_items = NULL;
+	}
+
+	/* Split the list so we can parse as needed. */
+        if (Tcl_SplitList (tcl, list, &nitems, &items) != TCL_OK)
+            return (TCL_ERROR);
+
+        /* Get local copy of argc and argv.  */
+        if (!sv_nitems) {
+            sv_items = (char **) XtMalloc (nitems * sizeof(char *));
+            memmove (sv_items, items, nitems * sizeof(char *)); 
+        }
+
+	if (append && sv_items) {
+            sv_items = (char **) XtRealloc ((char *)sv_items,
+		(sv_nitems + nitems * 1) * sizeof(char *));
+            memmove (sv_items+sv_nitems, items, nitems * sizeof(char *)); 
+	}
+
+	for (item=0; item < nitems; item++) {
+	    /* Build the top-level tree, children are built recursively
+	     * in the routine.
+	     */
+	    if (buildTreeList (wp->w, tcl, NULL, items[item]) != TCL_OK) {
+		free ((char *) items);
+		return (TCL_ERROR);
+	    }
+	}
+
+ret:	free ((char *) items);
+	return (TCL_OK);
+}
+
+
+/* buildTreeList -- Recursively build a tree from a list of nested Tcl
+ * lists.  This is used to fill out the ListTree widget values.
+ */
+static int
+buildTreeList (w, tcl, parent, item)
+Widget	w;
+Tcl_Interp *tcl;
+ListTreeItem *parent;
+char	*item;
+{
+	char **fields, **entry;
+	int i, nentries, nfields, field;
+	char buf[SZ_LINE];
+	ListTreeItem *level;
+
+	/* Split the list so we can parse as needed. */
+        if (Tcl_SplitList (tcl, item, &nfields, &fields) != TCL_OK) {
+            sprintf (buf, "'%s' ", item);
+            Tcl_AppendResult (tcl, "bad item ", buf, "in tree list", NULL);
+            return (TCL_ERROR);
+	}
+
+	/* First item is always added to the list, it may be either the
+ 	 * parent of another list or a single item.
+	 */
+	level = ListTreeAdd (w, parent, fields[0]);
+
+	/* For each of the items, split it and recursively call ourselves
+	 * until it gets added as a single item.
+	 */
+	for (field=1; field < nfields; field++) {
+            if (Tcl_SplitList (tcl, fields[field], &nentries, &entry) != TCL_OK)
+                return (TCL_ERROR);
+
+	    for (i=0; i < nentries; i++)
+	        buildTreeList (w, tcl, level, entry[i]);
+	}
 
 	return (TCL_OK);
 }

@@ -1,7 +1,7 @@
 # X11IRAF -- X11/GUI development utilities and applications developed by the
 # IRAF Project, National Optical Astronomy Observatories, 1994.
 #
-# Version 1.2 - Fri Apr 28 14:01:32 MST 2000
+# Version 1.3BETA - Mon Aug 13 00:13:38 MST 2001
 # (Principal authors Doug Tody, Mike Fitzpatrick. Email: iraf@noao.edu)
 
 
@@ -29,6 +29,19 @@ To build the GUIDEMO IRAF package type "mkpkg" in the guidemo directory.
 
 The LIB and INCLUDE directories should be referenced in applications which
 use any of the x11iraf libaries (libobm.a, libXaw3d.a, libXpm.a, libcdl.a).
+
+
+USING THE INSTALL SCRIPT
+
+To install the files you can use the new 'install' script by logging in as
+the root user and issuing the command:
+
+                # ./install
+
+Just answer the questions about path destinations and the files will be
+moved automatically.  Root permissions are required to install the files to
+system diretories, however the install script can be used by "normal" users
+wishing to install in a private directory.
 
 
 BINARY DISTRIBUTION INSTALLATION

@@ -195,7 +195,14 @@ int w, h, d;
 unsigned char *r, *g, *b;
 int ncolors;
 {
+	register fileSavePtr fsp = xim->fsp;
+        register PSImagePtr psim = xim->psim;
+        register FrameBufPtr fb = xim->df_p;
+        register ColorMapPtr cm = &colormaps[fb->colormap-1];
+	register int sv_annotate = psim->annotate;
+	register int sv_colorClass = psim->colorClass;
 	int gray=0, status=0;
+
 
         switch (fileformat) {
         case XIM_RAS:
@@ -233,8 +240,27 @@ int ncolors;
             status = writeTIFF (fp, pixels, w, h, ncolors, gray, r, g, b);
 	    break;
 
+        case XIM_EPS:
+	    /* Write an EPS file.
+	     */
+            savestat (xim, "Generating postscript output...");
+
+	    /* Temporarily reset the values. */
+	    psim->annotate   = 0;
+	    psim->colorClass = xim->fsp->colorType;
+
+            /* Set up some of the EPS options print to the file.  */
+            eps_setCmap (psim, r, g, b, ncolors);
+            eps_setTransform (psim, fb->ctran.z1, fb->ctran.z2, fb->ctran.zt,
+                fb->offset, fb->scale, cm->name);
+            eps_print (psim, fp, pixels, w, h, 8, 0);
+
+	    /* Restore the saved values. */
+	    psim->annotate   = sv_annotate;
+	    psim->colorClass = sv_colorClass;
+	    break;
+
         case XIM_JPEG:
-        case XIM_PNM:
         case XIM_X11:
         case XIM_RAW:
         default:
@@ -335,8 +361,8 @@ int w, h, d;
 	case XIM_RAW:
 	    fmt = "Raw bytes";
 	    break;
-	case XIM_PNM:
-	    fmt = "PNM file";
+	case XIM_EPS:
+	    fmt = "EPS file";
 	    break;
 	default:
 	    fmt = "unknown format";

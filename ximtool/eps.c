@@ -70,9 +70,9 @@ typedef unsigned char 	uchar;
 #endif
 
 
-char	*hextab = "0123456789abcdef";
-int	pixnum 	= 0, lpix = 0;
-uchar   *pixbuf;
+static char	*hextab = "0123456789abcdef";
+static int	pixnum 	= 0, lpix = 0;
+static uchar   *pixbuf;
 
 
 /* Public procedures. */

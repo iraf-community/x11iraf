@@ -1,5 +1,9 @@
 
-typedef union  {
+typedef union
+#ifdef __cplusplus
+	YYSTYPE
+#endif
+ {
     int		    ival;
     XrmQuark	    qval;
     BoxPtr	    bval;

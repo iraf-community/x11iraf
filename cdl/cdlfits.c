@@ -348,16 +348,16 @@ int	*bitpix;			/* pixel size		*/
                 for (i=(nelem-1); i >= 0; i--)
                     buf[i] = (float) old[i] * fs.bscale + fs.bzero;
             } else if (fs.bitpix ==  -64) {
-                register double *old = (double *) *pix, *buf;
+                register double *old = (double *) *pix, *dbuf;
                 register float *fpix;
 
-                buf = (double *) malloc (nelem * sizeof(double));
+                dbuf = (double *) malloc (nelem * sizeof(double));
                 for (i=(nelem-1); i >= 0; i--)
-                    buf[i] = (float) old[i] * fs.bscale + fs.bzero;
+                    dbuf[i] = (float) old[i] * fs.bscale + fs.bzero;
                 fpix = (float *) *pix;
                 for (i=0; i<nelem; i++)
-                    fpix[i] = (float) buf[i];
-                free ((double *) buf);
+                    fpix[i] = (float) dbuf[i];
+                free ((double *) dbuf);
             }
         
             fs.size   = 4;

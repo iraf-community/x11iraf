@@ -51,6 +51,7 @@
 #include <ObmW/Icon.h>
 #include <ObmW/Label.h>
 #include <ObmW/Layout.h>
+#include <ObmW/ListTree.h>
 #include <ObmW/MenuBar.h>
 #include <ObmW/MultiList.h>
 #include <ObmW/RadioGrp.h>
@@ -167,6 +168,7 @@ extern	void GtermClassInit(), MarkerClassInit(), HTMLClassInit();
 #define WtXfwfCommon		00000200000, 00000000000
 #define WtXfwfMenuBar		00000400000, 00000000000
 #define WtTabs			00001000000, 00000000000
+#define WtListTree		00002000000, 00000000000
 
 /* Object base classes. */
 typedef struct {
@@ -235,6 +237,8 @@ objClassRec UiObjects[] = {
 	{ "Label",	OtNonShell, &labelWidgetClass, WtLabel,
 			WidgetClassInit, NULL, NULL, NULL, NULL, NULL },
 	{ "List",	OtNonShell, &listWidgetClass, WtList,
+			WidgetClassInit, NULL, NULL, NULL, NULL, NULL },
+	{ "ListTree",	OtNonShell, &listtreeWidgetClass, WtListTree,
 			WidgetClassInit, NULL, NULL, NULL, NULL, NULL },
 	{ "MenuButton",	OtNonShell, &menuButtonWidgetClass, WtMenuButton,
 			WidgetClassInit, NULL, NULL, NULL, NULL, NULL },
@@ -436,7 +440,9 @@ struct obmContext {
 	Boolean specified;		/* UI has been specified */
 	Boolean activated;		/* UI has been activated */
 	Boolean mapped;			/* toplevel is mapped */
-	int debug;			/* print debug messages */
+
+	int  debug;			/* print debug messages */
+	char *debug_objs;		/* debug objects, NULL=>all objs */
 };
 
 typedef	struct obmContext *ObmContext;

@@ -40,7 +40,7 @@
  *
  *	     xim_setMapping (xim, fb, frame, mapping, src, dst, fill_mode)
  *		xim_setZoom (xim, fb, frame, mapping, src, dst,
- *			     xcen,ycen, xmag,ymag, absolute)
+ *			     xcen,ycen, xmag,ymag, xoff,yoff, absolute)
  *		xim_setFlip (xim, fb, flip_x, flip_y)
  *	    xim_setColormap (name, dirs, red, green, blue, ncolors)
  *		 xim_setRop (xim, fb, rop)
@@ -205,6 +205,11 @@ int hardreset;
 	    xim->fb_configno = config = max(1, min(MAX_FBCONFIG, config));
 	    set_nframes (xim, nframes);
 
+	    /* Initialize the tile framing options. */
+	    xim->tileByRows = 1;
+	    xim->tileTopDown = 1;
+	    xim->tileLabels = 0;
+
 	    /* Set the new frame size. */
 	    sprintf (buf, "%d %d %d", cf->width, cf->height, 8);
 	    xim_message (xim, "frameSize", buf);
@@ -283,8 +288,8 @@ int hardreset;
 	dirs[2] = xim->userCMapDir2;
 	dirs[3] = NULL;
 
-	for (i=1, op=sbuf;  dirs[i];  i++)
-	    if (strcmp (dirs[i], "none") != 0)
+	for (i=1, op=sbuf;  dirs[i];  i++) {
+	    if (strcmp (dirs[i], "none") != 0) {
 		if (dir = opendir (dirs[i])) {
 		    while ((n = get_dirfile (dir, op, SZ_FNAME)) > 0) {
 			maps[nfiles++] = op;
@@ -294,6 +299,8 @@ int hardreset;
 		    }
 		    closedir (dir);
 		}
+	    }
+	}
 
 	/* Add all the user specified colormaps to the colormap table.
 	 */
@@ -394,7 +401,7 @@ Widget w;
 {
 	register FrameBufPtr fb;
 	int junk, sx, sy, width, height, depth;
-	int active, frame, mapping, zoomtype;
+	int i, active, frame, mapping, zoomtype;
 	float xscale, yscale, scale;
 	char buf[SZ_LINE];
 
@@ -402,8 +409,19 @@ Widget w;
 	if (xim->nframes <= 0)
 	    return;
 
-	/* Get new screen size. */
-	xim_getScreen (xim, 1, &sx, &sy, &width, &height, &depth);
+	/* Get new screen size.  In tile frame mode select the first frame
+	 * in the list for the size, which may not always be frame 1.
+	 */
+	if (xim->tileFrames && !(xim->tileFramesList & 1)) {
+	    if (xim->nframes == 0)
+		return;
+	    for (i=1;  i <= xim->nframes;  i++)
+                if (xim->tileFramesList & (1 << (i-1))) {
+	    	    xim_getScreen (xim, i, &sx, &sy, &width, &height, &depth);
+		    break;
+		}
+	} else
+	    xim_getScreen (xim, 1, &sx, &sy, &width, &height, &depth);
 
 	/* Compute the new scale factor required to scale the source to the
 	 * destination at magnification 1.0.
@@ -453,7 +471,8 @@ Widget w;
 	    /* Set the new mapping. */
 	    fb->xscale = fb->yscale = scale;
 	    xim_setZoom (xim, fb, frame, mapping, fb->raster, fb->zoomras,
-		fb->xcen, fb->ycen, fb->xmag, fb->ymag, False);
+		fb->xcen, fb->ycen, fb->xmag, fb->ymag, 
+		fb->xoff, fb->yoff, False);
 	}
 
 	/* Refresh the screen for any active mappings.  Any mappings
@@ -571,7 +590,7 @@ int frame;
 		    GtClearScreen (gt);
 		else if (!tile_old && tile_new) {
 		    GtClearScreen (gt);
-		    xim_resize (xim, gt);
+/*		    xim_resize (xim, gt);*/
 		}
 	    }
 
@@ -587,9 +606,9 @@ int frame;
 	    }
 
 	    /* Display the new frame. */
-	    if (GtActiveMapping (gt, fb->zoommap))
+	    if (GtActiveMapping (gt, fb->zoommap)) {
 		GtRefreshMapping (gt, fb->dispmap);
-	    else {
+	    } else {
 		GtEnableMapping (gt, fb->zoommap, 0);
 		GtRefreshMapping (gt, fb->zoommap);
 	    }
@@ -613,8 +632,10 @@ int frame;
 	    xim_message (xim, "xflip", fb->xflip ? "true" : "false");
 	    xim_message (xim, "yflip", fb->yflip ? "true" : "false");
 	    xim_frameRegion (xim, fb);
-	    sprintf (buf, "%g %g %g %g %g %g",
-		fb->xmag, fb->ymag, fb->xcen, fb->ycen, fb->xscale, fb->yscale);
+
+	    sprintf (buf, "%g %g %g %g %g %g %g %g",
+		fb->xmag, fb->ymag, fb->xcen, fb->ycen, 
+		fb->xscale, fb->yscale, fb->xoff, fb->yoff);
 	    xim_message (xim, "frameView", buf);
 	}
 }
@@ -811,10 +832,11 @@ int frame_list;
 	/* Entering tile frame mode.
 	 */
 	if (xim->tileFrames) {
+			
 	    /* Ensure that the display frame is set to one of the
 	     * tiled frames.
 	     */
-	    if (!(xim->tileFramesList & (1 << xim->display_frame-1)))
+	    if (!(xim->tileFramesList & (1 << xim->display_frame-1))) {
 		for (i=1;  i <= xim->nframes;  i++)
 		    if (xim->tileFramesList & (1 << (i-1))) {
 			xim->df_p = NULL;
@@ -822,6 +844,8 @@ int frame_list;
 			xim_setFrame (xim, i);
 			break;
 		    }
+	    }
+
 
 	    /* Change the stacking order of the frame mappings if
 	     * necessary so that any frames not in the tile list are 
@@ -877,20 +901,121 @@ int frame;
 		gm = (XtPointer) GmCreate (xim->gt, Gm_Box,
 		    interactive=False);
 
-		XtSetArg (args[nargs], GmX, sx + (width-1)/2);    nargs++;
-		XtSetArg (args[nargs], GmY, sy + (height-1)/2);   nargs++;
-		XtSetArg (args[nargs], GmWidth, (width-1)/2+1);   nargs++;
-		XtSetArg (args[nargs], GmHeight, (height-1)/2+1); nargs++;
-		XtSetArg (args[nargs], GmLineWidth, 3);           nargs++;
-		XtSetArg (args[nargs], GmSensitive, False);       nargs++;
-		XtSetArg (args[nargs], GmVisible, True);          nargs++;
-		XtSetArg (args[nargs], GmActivated, True);        nargs++;
+		XtSetArg (args[nargs], GmX, sx + (width-1)/2);        nargs++;
+		XtSetArg (args[nargs], GmY, sy + (height-1)/2);       nargs++;
+		XtSetArg (args[nargs], GmWidth, (width-1)/2+1);       nargs++;
+		XtSetArg (args[nargs], GmHeight, (height-1)/2+1);     nargs++;
+		XtSetArg (args[nargs], GmLineWidth, xim->tileBorder); nargs++;
+		XtSetArg (args[nargs], GmSensitive, False);           nargs++;
+		XtSetArg (args[nargs], GmVisible, True);              nargs++;
+		XtSetArg (args[nargs], GmActivated, True);            nargs++;
 
 		GmLower (gm, NULL);
 		GmSetAttribute (gm, GmLineColor, xim->borderColor, XtRString);
 		GmSetAttributes (gm, args, nargs, XtRInt);
 
 		xim->gm_border = gm;
+	    }
+	    xim_labelTiles (xim);
+	}
+}
+
+
+/* XIM_LABELTILES -- Label the tile with the frame number.
+ */
+xim_labelTiles (xim)
+register XimDataPtr xim;
+{
+	FrameBufPtr  fb;
+	MappingPtr   mp;
+	Widget       gt = xim->gt;
+	XtPointer    gm;
+	Arg 	     args[10];
+	char	     text[256], tw[16];
+	register int i, j, len;
+	int 	     sx, sy, width, height, depth, nargs=0;
+
+	static XtPointer labels[MAX_FRAMES];
+	static int label_init = 1;
+	    
+	if (!(xim->tileFrames && xim->tileLabels > 0))
+	    return;
+
+	/* Initialize the label markers. */
+	if (label_init) {
+	    /* First time through make sure we're all NULL.  */
+	    for (i=0;  i < MAX_FRAMES; i++)  
+		labels[i] = (XtPointer) NULL;
+	    label_init = 0;
+	} else {
+	    /* Free up the existing labels.  */
+	    for (i=0;  labels[i] && i < MAX_FRAMES; i++) {
+	    	GmDestroy (labels[i]);
+	    	labels[i] = (XtPointer) NULL;
+	    }
+	}
+
+
+	for (i=0;  i < xim->nframes;  i++) {
+	    if (xim->tileFramesList & (1 << i)) {
+		xim_getScreen (xim, i+1, &sx, &sy, &width, &height, &depth);
+		fb = &xim->frames[i];
+		switch (xim->tileLabels) {
+		case 1: 				/* frame number */
+		    sprintf (text, " %d ", i+1);
+		    break;
+		case 2: 				/* image name 	*/
+		    if (fb->nmaps == 0) {
+			strcpy (text, " Blank ");
+		    } else {
+		        mp = &fb->mapping[0];
+		        len = strlen (mp->ref);
+		        for (j=len-1; mp->ref[j] != '/' && j > 0; j--) ;
+		        sprintf (text, " %s ", &mp->ref[++j]);
+		    }
+		    break;
+		case 3: 				/* image title	*/
+		    if (fb->nmaps == 0) {
+			strcpy (text, " Blank ");
+		    } else {
+		        len = strlen (fb->ctran.imtitle);
+		        for (j=0; fb->ctran.imtitle[j] != ' ' && j < len; j++) ;
+		        j += 3;
+		        sprintf (text, " %s ", &fb->ctran.imtitle[j]);
+		    }
+		    break;
+		}
+
+
+		/* Now draw the label as a text marker on the tile.  We use
+		 * markers since they can be placed as needed in the frame
+		 * and provide a background which lets them be read despite
+		 * whatever image scaling is in place.
+		 */
+		gm = (XtPointer) GmCreate (xim->gt, Gm_Text, False);
+
+		nargs = 0;			/* initialize		*/
+		len = strlen (text);
+		sprintf (tw, "%dch", len);
+
+		XtSetArg (args[nargs], GmX, sx + 10);            nargs++;
+		XtSetArg (args[nargs], GmY, sy + height - 20);   nargs++;
+		XtSetArg (args[nargs], GmLineWidth, 0);          nargs++;
+		XtSetArg (args[nargs], GmSensitive, True);       nargs++;
+		XtSetArg (args[nargs], GmVisible, True);         nargs++;
+		XtSetArg (args[nargs], GmActivated, True);       nargs++;
+		XtSetArg (args[nargs], GmImageText, True);       nargs++;
+
+		GmSetAttribute (gm, GmWidth, tw, XtRString);
+		GmSetAttribute (gm, GmHeight, "1ch", XtRString);
+		GmSetAttribute (gm, GmTextBgColor, "black", XtRString);
+		GmSetAttribute (gm, GmTextColor, "yellow", XtRString);
+		GmSetAttribute (gm, GmText, text, XtRString);
+		GmSetAttributes (gm, args, nargs, XtRInt);
+        	GmMarkpos (gm);
+        	GmRedraw (gm, GXcopy, True);
+
+		labels[i] = gm;			/* save the marker ptr 	*/
 	    }
 	}
 }
@@ -941,10 +1066,11 @@ int reference_frame;
  * reference frame.
  */
 void
-xim_registerFrames (xim, frames, reference_frame)
+xim_registerFrames (xim, frames, reference_frame, offsets)
 XimDataPtr xim;
 int *frames;
 int reference_frame;
+int offsets;
 {
 	register int *ip, i;
 	register FrameBufPtr fr, fb = &xim->frames[reference_frame-1];
@@ -972,17 +1098,48 @@ int reference_frame;
 	for (i=0;  i < xim->nframes;  i++) {
 	    fr = &xim->frames[i];
 
-	    if (fr != fb && (bits & (1 << (fr->frameno - 1)))) {
+/*	    if (fr != fb && (bits & (1 << (fr->frameno - 1)))) {*/
+	    if ((bits & (1 << (fr->frameno - 1)))) {
 		fr->xcen = fb->xcen;  fr->ycen = fb->ycen;
 		fr->xmag = fb->xmag;  fr->ymag = fb->ymag;
 		fr->xflip = fb->xflip;  fr->yflip = fb->yflip;
 
 		if (!xim_onScreen (xim, fb->frameno))
 		    GtDisableMapping (gt, fr->zoommap, 0);
-		GtSetMapping (gt, fr->zoommap, xim->rop,
-		    fr->raster,st,sx,sy,snx,sny, fr->zoomras,dt,dx,dy,dnx,dny);
+
+		if (offsets) {
+		    /* fb is the current display buffer, fr is some other
+		     * frame in the list.  To do the offsets we must
+		     * first subtract the offset of the current display
+		     * and then add the offset peculiar to the frame.
+		     */
+
+		    int nsx, nsy;
+
+		    nsx = (int)(sx - fb->xoff + fr->xoff);
+		    nsy = (int)(sy - fb->yoff + fr->yoff);
+
+		    GtSetMapping (gt, fr->zoommap, xim->rop,
+		        fr->raster, st,nsx,nsy, snx,sny, 
+		        fr->zoomras,dt,dx,dy,dnx,dny);
+		    GtRefreshMapping (gt, fr->zoommap);
+
+		} else {
+		    GtSetMapping (gt, fr->zoommap, xim->rop,
+		        fr->raster, st,sx,sy, snx,sny, 
+		        fr->zoomras,dt,dx,dy,dnx,dny);
+		}
 	    }
 	}
+	    
+	/* A normal registration zeroes the offsets for each frame.  */
+	if (!offsets) {
+	    for (i=0;  i < xim->nframes;  i++) {
+	        fr = &xim->frames[i];
+	        fr->xoff = fr->yoff = 0;
+	    }
+	}
+	xim_labelTiles (xim);
 }
 
 
@@ -1114,7 +1271,7 @@ int fill_mode;
  * view center and zoom factors.
  */
 void
-xim_setZoom (xim, fb, frame, mapping, src, dst, xcen,ycen,xmag,ymag, absolute)
+xim_setZoom (xim, fb, frame, mapping, src, dst, xcen,ycen,xmag,ymag, xoff,yoff, absolute)
 register XimDataPtr xim;
 register FrameBufPtr fb;
 int frame;
@@ -1122,6 +1279,7 @@ int mapping;
 int src, dst;
 float xcen, ycen;	/* center of source raster region to be mapped */
 float xmag, ymag;	/* magnification in each axis */
+float xoff, yoff;	/* offset in each axis */
 Boolean absolute;	/* ignore xscale/yscale */
 {
 	register Widget gt = xim->gt;
@@ -1189,9 +1347,9 @@ src_recenter:
 	snx = (int) (dst_width / xscale) + 1;
 	sny = (int) (dst_height / yscale) + 1;
 
-	sx1 = (int) (xcen - snx / 2.0 + 0.5);
+	sx1 = (int) (xcen - snx / 2.0 + 0.5 + xoff);		/*********/
 	sx2 = (int) (xcen + snx / 2.0 + 0.5);
-	sy1 = (int) (ycen - sny / 2.0 + 0.5);
+	sy1 = (int) (ycen - sny / 2.0 + 0.5 + yoff);		/*********/
 	sy2 = (int) (ycen + sny / 2.0 + 0.5);
 
 	/* Fiddle the source rect slightly if necessary to achieve the
@@ -1238,6 +1396,8 @@ src_recenter:
 	snx = sx2 - sx1 + 1;
 	sny = sy2 - sy1 + 1;
 
+/*printf ("           :  sx (%3d,%3d)  sy (%3d,%3d)  sn (%3d,%3d)\n",
+sx1,sx2, sy1,sy2, snx,sny); */
 	/* Map the zoomed, possibly centered, and clipped source rect back
 	 * to the destination.
 	 */
@@ -1297,6 +1457,8 @@ src_recenter:
 	dnx = dx2 - dx1 + 1;
 	dny = dy2 - dy1 + 1;
 
+/*printf ("           :  dx (%3d,%3d)  dy (%3d,%3d)  dn (%3d,%3d)\n",
+dx1,dx2, dy1,dy2, dnx,dny); */
 	/* Attempt to integerize things if integer scaling is selected.  This
 	 * can leave a blank pixel or two at the edge depending upon the
 	 * window size and scaling.
@@ -1338,8 +1500,8 @@ src_recenter:
 		fb->yflip ? -dny : dny);
 
 	/* Update the frame buffer zoom/pan/flip parameters. */
-	fb->xcen = xcen;
-	fb->ycen = ycen;
+	fb->xcen = xcen;     fb->ycen = ycen;
+	fb->xoff = xoff;     fb->yoff = yoff;
 
 	if (absolute) {
 	    fb->xmag = xmag / fb->xscale;
@@ -1350,8 +1512,9 @@ src_recenter:
 	}
 
 	xim_frameRegion (xim, fb);
-	sprintf (buf, "%g %g %g %g %g %g",
-	    fb->xmag, fb->ymag, fb->xcen, fb->ycen, fb->xscale, fb->yscale);
+	sprintf (buf, "%g %g %g %g %g %g %g %g",
+	    fb->xmag, fb->ymag, fb->xcen, fb->ycen, 
+	    fb->xscale, fb->yscale, fb->xoff, fb->yoff);
 	xim_message (xim, "frameView", buf);
 }
 
@@ -1368,7 +1531,9 @@ int *width, *height, *depth;
 	register int i;
 	int border = xim->tileBorder;
 	int rtype, scr_width, scr_height;
-	int hwidth, hheight, frameno;
+	int twidth, theight, tileno, frameno;
+	int tilex, tiley;
+	int nrows = xim->tileRows, ncols = xim->tileCols;
 
 	if (GtQueryRaster (xim->gt, 0,
 		&rtype, &scr_width, &scr_height, depth) == 0)
@@ -1386,70 +1551,37 @@ int *width, *height, *depth;
 	    return;
 	}
 
-	hwidth = (scr_width - 3*border) / 2;
-	hheight = (scr_height - 3*border) / 2;
-
 	/* Get index of frame in tile Frames list. */
-	for (i=1, frameno=0;  i <= xim->nframes;  i++)
+	for (i=1, frameno=0;  i <= xim->nframes;  i++) {
 	    if (xim->tileFramesList & (1 << (i-1))) {
 		frameno++;
 		if (frame == i)
 		    break;
 	    }
-
-	/* There are three options for tiling frames: 2 frames side by side,
-	 * 2 frames one above the other, or 4 frames in the four quadrants of
-	 * the display window.
-	 */
-	if (xim->nTileFrames == 2) {
-	    /* If we have only two frames we need to decide whether to lay
-	     * them out horizontally or vertically.
-	     */
-	    float aspect, h_aspect, v_aspect;
-	    int horizontal;
-
-	    aspect = (float)xim->width / (float)xim->height;
-	    h_aspect = (scr_width / 2.0) / scr_height;
-	    v_aspect = scr_width / (scr_height / 2.0);
-	    horizontal = abs(h_aspect - aspect) <= abs(v_aspect - aspect);
-
-	    if (horizontal) {
-		*sx = (frameno == 1) ? border : hwidth + 2*border;
-		*sy = border;
-		*width = hwidth;
-		*height = scr_height - 2*border;
-
-	    } else {
-		*sx = border;
-		*sy = (frameno == 1) ? border : hheight + 2*border;
-		*width = scr_width - 2*border;
-		*height = hheight;
-	    }
-
-	} else {
-	    /* Divide the display window into four quadrants.
-	     */
-	    switch (frameno) {
-	    case 1:
-		*sx = *sy = border;
-		break;
-	    case 2:
-		*sx = hwidth + 2*border;
-		*sy = border;
-		break;
-	    case 3:
-		*sx = border;
-		*sy = hheight + 2*border;
-		break;
-	    case 4:
-		*sx = hwidth + 2*border;
-		*sy = hheight + 2*border;
-		break;
-	    }
-
-	    *width = hwidth;
-	    *height = hheight;
 	}
+
+	/* Now compute the size of each tile. */
+	tileno  = frameno - 1;
+	twidth  = (scr_width  - (ncols * 2 * border)) / ncols;
+	theight = (scr_height - (nrows * 2 * border)) / nrows;
+
+	/* Get the "coordinates" of the tile in the mosaic. */
+	if (xim->tileByRows) {
+	    tilex = tileno % ncols;
+	    tiley = tileno / ncols;
+	} else {
+	    tilex = tileno / nrows;
+	    tiley = tileno % nrows;
+	}
+	if (!xim->tileTopDown)
+	    tiley = (nrows - tiley - 1);
+
+	/* Finally, get the placement of the tile on the screen. */
+	*sx = tilex * twidth  + ((tilex*2+1) * border);
+	*sy = tiley * theight + ((tiley*2+1) * border);
+
+	*width = twidth;
+	*height = theight;
 }
 
 
@@ -1746,8 +1878,28 @@ int ncolors;
 	ColorMapPtr cm;
 
 	/* If frame=0 use the current display frame. */
-	if (frame < 1 || frame > xim->nframes)
-	    frame = xim->display_frame;
+	if (frame < 1) frame = xim->display_frame;
+
+	/* Create additional frames if needed. */
+	if (frame > xim->nframes) {
+            for (i=1;  i <= frame;  i++) {
+                fb = &xim->frames[i-1];
+                if (fb->frameno != i) {
+                    xim_initFrame (xim, i, frame,
+                        &xim->fb_config[xim->fb_configno-1], xim->memModel);
+
+                    /* If we're in tile mode, add the frame to the tile list
+                     * and if needed resize the tile frames.
+                     */
+                    if (xim->tileFrames) {
+                        xim->tileFramesList |= (1 << (i-1));
+                        xim->nTileFrames++;
+                        xim_tileFrames (xim, xim->tileFramesList);
+                    }
+                }
+            }
+	}
+
 
 	/* Erase the existing frame before disabling the mapping, otherwise
 	 * we get a white background when the new image is loaded.
@@ -1878,7 +2030,8 @@ int ncolors;
 
 	/* Zoom it to fill the display window. */
 	xim_setZoom (xim, fb, frame, fb->zoommap, fb->raster, fb->zoomras,
-	    fb->xcen, fb->ycen, fb->xmag, fb->ymag, True);
+	    fb->xcen, fb->ycen, fb->xmag, fb->ymag, 
+	    fb->xoff, fb->yoff, True);
 
 	/* Check if the named colortable is already defined.  If not, add
 	 * another one.  If ncolors=0 omit the colortable handling, e.g.
@@ -1940,6 +2093,7 @@ char *object;
 char *message;
 {
 	char msgbuf[SZ_MSGBUF];
+
 	sprintf (msgbuf, "setValue {%s}", message);
 	ObmDeliverMsg (xim->obm, object, msgbuf);
 }
@@ -1998,9 +2152,10 @@ register FrameBufPtr fb;
 	int dt, dx, dy, dnx, dny;
 	char buf[SZ_LINE];
 
-	GtGetMapping (xim->gt, fb->zoommap, &rop,
+	if (GtGetMapping (xim->gt, fb->zoommap, &rop,
 	    &src, &st, &sx, &sy, &snx, &sny,
-	    &dst, &dt, &dx, &dy, &dnx, &dny);
+	    &dst, &dt, &dx, &dy, &dnx, &dny) == -1)
+		return;
 
 	/* args: frame x y width height */
 	sprintf (buf, "%d %d %d %d %d", fb->frameno, sx, sy, snx, sny);
@@ -2097,16 +2252,26 @@ register XimDataPtr xim;
 	if (!fp && (fname = getenv ("HOME"))) {
 	    sprintf (lbuf, "%s/%s", fname, FBCONFIG_1);
 	    fp = fopen (fname = lbuf, "r");
+	    if (fp) {
+	        xim->imtoolrc = (char *) XtCalloc (SZ_LINE, sizeof(char));
+		strncpy (xim->imtoolrc, fname, strlen(fname));
+	    }
 	}
 	if (!fp)
 	    fp = fopen (fname = xim->imtoolrc, "r");
- 	for (i=0; !fp && fb_paths[i]; i++)
-	    fp = fopen (fname = fb_paths[i], "r");
+ 	for (i=0; !fp && fb_paths[i]; i++) {
+	    if ((fp = fopen (fname = fb_paths[i], "r"))) {
+	        xim->imtoolrc = XtCalloc(strlen(fb_paths[i]+1),sizeof(char));
+		strncpy (xim->imtoolrc, fb_paths[i],strlen(fb_paths[i]));
+		break;
+	    }
+	}
 	if (!fp) {
 	    fprintf (stderr, 
 		"Warning: No frame buffer configuration file found.\n");
 	    return;
 	}
+
 
 	/* Scan the frame buffer configuration file.
 	 */
@@ -2150,7 +2315,7 @@ register XimDataPtr xim;
 	    xim->fb_config[config].height  = height;
 	}
 
-	fclose (fp);
+	if (fp) fclose (fp);
 }
 
 

@@ -9,6 +9,10 @@ X11IRAFDIR = ../
  * system.  This also avoids the binary requiring the shared lib version on
  * systems which may not have it.
  */
+
+#define IHaveSubdirs
+#define PassCDebugFlags 'CDEBUGFLAGS=$(CDEBUGFLAGS)'
+
 #if defined(HPArchitecture) && OSMajorVersion >= 10
          XMULIB = /usr/lib/X11R6/libXmu.a
          XAWLIB = /usr/lib/X11R6/libXaw.a
@@ -25,14 +29,21 @@ X11IRAFDIR = ../
          DEPOBM = DepLibObm
 
            SRCS = eps.c iis.c load.c print.c raster.c save.c \
-		  rasio.c fitsio.c ximclient.c ximtool.c quant.c \
-		  zscale.c gifio.c tiffio.c irafio.c
+		  rasio.c fitsio.c ximclient.c ximtool.c quant.c util.c \
+		  zscale.c gifio.c tiffio.c irafio.c ism.c ism_wcspix.c
            OBJS = eps.o iis.o load.o print.o raster.o save.o \
-		  rasio.o fitsio.o ximclient.o ximtool.o quant.o \
-		  zscale.o gifio.o tiffio.o irafio.o
+		  rasio.o fitsio.o ximclient.o ximtool.o quant.o util.o \
+		  zscale.o gifio.o tiffio.o irafio.o ism.o ism_wcspix.o
+       ISM_DIRS = clients
+       ISM_DONE = clients/DONE
+
+        SUBDIRS = $(ISM_DIRS)
 
 
-AllTarget(ximtool ximtool-alt ximtool-mag)
+AllTarget(ximtool ximtool-alt ism_clients)
+
+all::
+	@(cd clients; $(MAKE) $(MFLAGS) all X11IRAFDIR=../../)
 
 NormalProgramTarget(ximtool,$(OBJS),${DEPOBM},${OBMLIBS} XawClientLibs, $(MATHLIB))
 
@@ -40,17 +51,19 @@ ximtool-alt::
 	cat ximtool-alt.csh ximtool-alt.gui > ximtool-alt
 	chmod 755 ximtool-alt
 
-ximtool-mag::
-	cat ximtool-alt.csh ximtool-mag.gui > ximtool-mag
-	chmod 755 ximtool-mag
+ism_clients: $(ISM_DIRS) $(ISM_DONE)
+	@(cd clients; $(MAKE) $(MFLAGS) all X11IRAFDIR=../../)
 
+#install::
+#	@(cd clients; $(MAKE) $(MFLAGS) install X11IRAFDIR=../../)
+ 
 clean::
-	$(RM) ximtool-alt ximtool-mag
+	$(RM) ximtool-alt
 
 
 ${DEPOBM}:
 
-ximtool.o:		ximtool.gui.h
+ximtool.o:		ximtool.gui.h ../version.h
 ximtool.c:		ximtool.gui.h
 ximclient.o:		ximtool.html.h
 ximclient.c:		ximtool.html.h
@@ -68,27 +81,13 @@ install:: ximtool
 	-@if [ -d X11irafBinDir ]; then set +x; \
 	        else (set -x; $(MKDIRHIER) X11irafBinDir); fi
 	$(CP) ximtool X11irafBinDir
-
-install:: alt-install
-
-alt-install:: ximtool-alt ximtool-mag
-	-@if [ -d X11irafBinDir ]; then set +x; \
-	        else (set -x; $(MKDIRHIER) X11irafBinDir); fi
 	$(CP) ximtool-alt X11irafBinDir
-	$(CP) ximtool-mag X11irafBinDir
 #endif
 
 #if InstallManuals
 install::
 	MakeDir(X11irafManDir)
 	$(CP) ximtool.man X11irafManDir/ximtool.1
-
-install:: alt-install
-
-alt-install::
-	MakeDir(X11irafManDir)
-	$(CP) ximtool-alt.man X11irafManDir/ximtool-alt.1
-	$(CP) ximtool-mag.man X11irafManDir/ximtool-mag.1
 #endif
 
 DependTarget()

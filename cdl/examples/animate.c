@@ -103,8 +103,7 @@ char	*argv[];
 
 	/* Now animate the image. */
 	line = (uchar *) malloc (nx);
-	status = 1;
-	while (status) {
+	while (1) {
 	    /* Shift the image down one line, roll the botton line to the
 	     * top and redisplay the subraster/
 	     */

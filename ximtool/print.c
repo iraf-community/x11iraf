@@ -27,10 +27,11 @@
  * startup to initialize the print options and load the list of local printers.
  */
 
-void xim_initPrinterOps();
-void xim_initPrinterList();
-int xim_getPrinterInfo();
+void 	xim_initPrinterOps();
+int 	xim_getPrinterInfo();
+
 static void printstat();
+static void xim_initPrinterList();
 
 
 /* XIM_PRINT -- Print the indicated region of the current display frame to
@@ -239,7 +240,7 @@ register XimDataPtr xim;
  * the structure with the list of printers and commands.  Send the printer
  * list to the GUI, maintain the command list internally.
  */
-void
+static void
 xim_initPrinterList (xim)
 register XimDataPtr xim;
 {

@@ -9,7 +9,7 @@
 #define IHaveSubdirs
 #define PassCDebugFlags 'CDEBUGFLAGS=$(CDEBUGFLAGS)'
 
-RELEASE		= v1.2
+RELEASE		= v1.3
 
 LIBDIRS 	= obm xaw3d xpm cdl
 APPDIRS 	= xgterm ximtool xtapemon obmsh vximtool
@@ -27,7 +27,9 @@ World::
 	$(MAKE) $(MFLAGS) Makefile  X11IRAFDIR=$$PWD
 	$(MAKE) $(MFLAGS) Makefiles X11IRAFDIR=$$PWD
 	$(MAKE) $(MFLAGS) includes  X11IRAFDIR=$$PWD
+#if !defined (PpcDarwinArchitecture) && !defined (TenonServer)
 	$(MAKE) $(MFLAGS) depend    X11IRAFDIR=$$PWD
+#endif
 	$(MAKE) $(MFLAGS) libs      X11IRAFDIR=$$PWD
 	$(MAKE) $(MFLAGS) apps	    X11IRAFDIR=$$PWD
 	$(MAKE) $(MFLAGS) install   X11IRAFDIR=$$PWD
@@ -47,6 +49,15 @@ update::
 	@echo "" ; date ; echo ""
 	@echo "Done."
 
+#if defined (PpcDarwinArchitecture) || defined (TenonServer)
+libs::
+	@case '${MFLAGS}' in *[ik]*) set +e;; esac; \
+	for i in $(LIBDIRS) ;\
+	do \
+	(cd $$i ; echo "making" linklibs "in $(CURRENT_DIR)/$$i..."; \
+	$(MAKE) $(MFLAGS) 'CDEBUGFLAGS=$(CDEBUGFLAGS)' all linklibs); \
+	done
+#else
 libs::
 	@case '${MFLAGS}' in *[ik]*) set +e;; esac; \
 	for i in $(LIBDIRS) ;\
@@ -54,6 +65,7 @@ libs::
 	(cd $$i ; echo "making" linklibs "in $(CURRENT_DIR)/$$i..."; \
 	$(MAKE) $(MFLAGS) 'CDEBUGFLAGS=$(CDEBUGFLAGS)' linklibs); \
 	done
+#endif
 
 apps::
 	@case '${MFLAGS}' in *[ik]*) set +e;; esac; \
@@ -85,6 +97,8 @@ linux:
 	@(./mkarch linux)
 linuxppc:
 	@(./mkarch linuxppc)
+macosx:
+	@(./mkarch macosx)
 mklinux:
 	@(./mkarch mklinux)
 redhat:
@@ -110,12 +124,10 @@ unknown:
 BTARFILE   = x11iraf-$(RELEASE)-bin.`./mkarch -arch`.tar
 DISTFILES = bin.`./mkarch -arch`/[a-z]* \
 	    lib.`./mkarch -arch`/libcdl.a \
-	    include/cdl* app-defaults man \
-	    README.install
+	    include/cdl* app-defaults man mkarch README.install install
 
 bindist::
 	(./mkarch -current -noclean)
-	(cd ximtool ; make alt-install)
 	@(echo "Making tar file....$(BTARFILE)" ; \
 	     tar -chf $(BTARFILE) $(DISTFILES) )
 	@(echo "Compressing files...." ; \
@@ -125,9 +137,10 @@ bindist::
 
 archive::
 	$(MAKE) $(MFLAGS) pristine
-	@tar -cf - . | gzip > ../x11iraf-$(RELEASE).tar.gz
+	@tar -cf - . | gzip > ../x11iraf-$(RELEASE)-src.tar.gz
 
 pristine::
+	$(MAKE) $(MFLAGS) clean
 	$(MAKE) $(MFLAGS) generic
 	$(RM) -rf bin.[a-fh-z]* lib.[a-fh-z]* \
 	  bin.tar* include app-defaults man spool* Makefile\

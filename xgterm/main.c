@@ -780,6 +780,14 @@ static char *message[] = {
 "default.",
 NULL};
 
+
+/* The X11IRAF version. */
+char *xgterm_version[] = {
+#   include "../version.h"
+    NULL
+};
+
+
 static void Syntax (badOption)
     char *badOption;
 {
@@ -1177,6 +1185,12 @@ char **argv;
 		if (argc <= 1) Syntax (*argv);
 		command_to_exec = ++argv;
 		argc = 0;
+		break;
+	     case 'v':
+		if (strcmp (*argv, "-version") == 0) {
+                    printf ("Version:  %s\n", xgterm_version[0]);
+                    exit (1);
+		}
 		break;
 	     default:
 		Syntax (*argv);

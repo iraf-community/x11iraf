@@ -237,7 +237,7 @@ static struct GT_function gio_functions[] = {
 extern void HandlePopupMenu();
 extern void DeleteWindow();
 extern char *gtermio_getResource();
-static Atom wm_delete_window;   /* for ICCCM delete window */
+static Atom wm_delete_window = 0;   /* for ICCCM delete window */
 
 static char *gio_shellTrans =
 	"<ClientMessage>WM_PROTOCOLS: DeleteWindow()\n";
@@ -771,9 +771,10 @@ Widget w;
  * read) pending, the request will be passed on immediately.
  */
 static int
-gio_queue_output (fd, tcl, key, strval)
+gio_queue_output (fd, tcl, objname, key, strval)
 int fd;				/* pty */
 XtPointer tcl;			/* not used */
+char *objname;			/* client object name (not used) */
 int key;			/* cursor keystroke or NULL */
 char *strval;			/* cursor strval or literal command */
 {
@@ -1205,8 +1206,6 @@ again:
 		    }
 		    msgbuf[msg_op++] = ch - 040;
 		} else {
-printf ("WIMAGE: %d,%d at %d,%d  msg_op=%d  len_msgbuf=%d\n",
-wi_x1, wi_y1, wi_nx, wi_ny, msg_op, len_msgbuf);
 		    if (gw && wi_nx*wi_ny <= len_msgbuf)
 			GtWritePixels (gw, wi_raster, msgbuf, wi_bp,
 			    wi_x1, wi_y1, wi_nx, wi_ny);

@@ -5,6 +5,9 @@
 #include "cdl_f77.h"
 
 
+#define ABS(a)          (((a)<0) ? -(a) : (a))
+
+
 /*  CDL_F77.C -- Fortran binding for the CDL package.
  */
 
@@ -203,7 +206,15 @@ int	*ier;				/* error code		*/
 int	len;				/* string length	*/
 #endif
 {
-	*ier = cdl_readIRAF (sstrip(fname, len), *band, &pix, nx, ny, bitpix, title);
+	uchar *data = (uchar) NULL;
+
+	*ier = cdl_readIRAF (sstrip(fname, len), 
+		   *band, &data, nx, ny, bitpix, title);
+
+	spad(title, len);
+	bcopy (data, pix, ((*nx) * (*ny) * (ABS(*bitpix)/8)) );
+
+	free (data);
 }
 
 
@@ -232,7 +243,8 @@ int	*ier;				/* error code		*/
 int	len;				/* string length	*/
 #endif
 {
-	*ier = cdl_displayFITS (cdl_f, sstrip(fname, len), *frame, *fbconfig, *zscale);
+	*ier = cdl_displayFITS (cdl_f, sstrip(fname, len), 
+		   *frame, *fbconfig, *zscale);
 }
 
 
@@ -398,6 +410,134 @@ int	nlen, tlen;			/* string lengths	*/
 	spad (name, nlen);
 	spad (title, tlen);
 } 
+
+
+/*  CDF_SETMAPPING -- Set the mapping information to be sent with the next
+ *  cdl_setWcs() call.
+ */
+#ifdef ANSI_FUNC
+
+void 
+CDF_SETMAPPING  (
+    char *region,                  	/* region name 		*/
+    float *sx,				/* source rect		*/
+    float *sy,
+    int *snx, 				/* source extent	*/
+    int *sny,
+    int *dx, 				/* dest rect		*/
+    int *dy,
+    int *dnx, 				/* dest extent		*/
+    int *dny,
+    char *ref,                   	/* reference name	*/
+    int *ier,				/* error code		*/
+    int reglen,				/* string lengths	*/
+    int reflen
+)
+#else
+
+void 
+CDF_SETMAPPING  (region, sx,sy,snx,sny, dx,dy,dnx,dny, ref, ier, reglen, reflen)
+char    *region;                  	/* region name 		*/
+float	*sx, *sy;			/* source rect		*/
+int	*snx, *sny;			/* source extent	*/
+int	*dx, *dy;			/* dest rect		*/
+int	*dnx, *dny;			/* dest extent		*/
+char    *ref;                  		/* reference name	*/
+int	*ier;				/* error code		*/
+int	reglen, reflen;			/* string lengths	*/
+#endif
+{
+	char objreg[SZ_FNAME], objref[SZ_FNAME];
+
+	strcpy (objreg, sstrip (region, min(reglen, SZ_FNAME)));
+	strcpy (objref, sstrip (ref, min(reflen, SZ_FNAME)));
+	*ier = cdl_setMapping (cdl_f, objreg, *sx,*sy,*snx,*sny,
+		*dx,*dy,*dnx,*dny, objref);
+}
+
+
+/*  CDF_GETMAPPING --  Get the mapping information returned with the last
+ *  cdl_getWcs() call.
+ */
+#ifdef ANSI_FUNC
+void 
+CDF_GETMAPPING  (
+    char *region,                  	/* region name 		*/
+    float *sx,				/* source rect		*/
+    float *sy,
+    int *snx, 				/* source extent	*/
+    int *sny,
+    int *dx, 				/* dest rect		*/
+    int *dy,
+    int *dnx, 				/* dest extent		*/
+    int *dny,
+    char *ref,                   	/* reference name	*/
+    int *ier,				/* error code		*/
+    int reglen,				/* string lengths	*/
+    int reflen
+)
+
+#else
+void 
+CDF_GETMAPPING  (region, sx,sy,snx,sny, dx,dy,dnx,dny, ref, ier, reglen, reflen)
+char    *region;                  	/* region name 		*/
+float	*sx, *sy;			/* source rect		*/
+int	*snx, *sny;			/* source extent	*/
+int	*dx, *dy;			/* dest rect		*/
+int	*dnx, *dny;			/* dest extent		*/
+char    *ref;                  		/* reference name	*/
+int	*ier;				/* error code		*/
+int	reglen, reflen;			/* string lengths	*/
+#endif
+{
+	*ier = cdl_getMapping (cdl_f, region, sx,sy,snx,sny,
+	    dx,dy,dnx,dny, ref);
+	spad (region, reglen);
+	spad (ref, reflen);
+}
+
+
+/*  CDF_QUERYMAP -- Query a mapping given the wcs number.
+ */
+#ifdef ANSI_FUNC
+
+void 
+CDF_QUERYMAP  (
+    int *wcs,                  		/* requested wcs number	*/
+    char *region,                   	/* region name		*/
+    float *sx,				/* source rect		*/
+    float *sy,
+    int *snx, 				/* source extent	*/
+    int *sny,
+    int *dx, 				/* dest rect		*/
+    int *dy,
+    int *dnx, 				/* dest extent		*/
+    int *dny,
+    char *objref,                   	/* reference name	*/
+    int *ier,				/* error code		*/
+    int reglen,				/* string lengths	*/
+    int reflen
+)
+#else
+
+void 
+CDF_QUERYMAP (wcs, region, sx,sy,snx,sny, dx,dy,dnx,dny, objref, ier, reglen, reflen)
+int     *wcs;                  		/* requested wcs number	*/
+char    *region;                  	/* region name 		*/
+float	*sx, *sy;			/* source rect		*/
+int	*snx, *sny;			/* source extent	*/
+int	*dx, *dy;			/* dest rect		*/
+int	*dnx, *dny;			/* dest extent		*/
+char    *objref;                  	/* reference name	*/
+int	*ier;				/* error code		*/
+int	reglen, reflen;			/* string lengths	*/
+#endif
+{
+	*ier = cdl_queryMap (cdl_f, *wcs, region, sx,sy,snx,sny,
+	    dx,dy,dnx,dny, objref);
+	spad (region, reglen);
+	spad (objref, reflen);
+}
 
 
 /*  CDF_CLEARFRAME -- Erase the current display frame.  */

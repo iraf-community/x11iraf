@@ -33,6 +33,12 @@
 
 #define ABS(x)	(x > 0 ? x : -x)
 
+#ifdef SOLARIS
+char    *getcwd();
+#else
+char    *getwd();
+#endif
+
 
 main (argc, argv)
 int	argc;
@@ -46,6 +52,10 @@ char	*argv[];
 	float 	z1, z2;
 	int	fb_w, fb_h, nf;
 	unsigned char *pix = NULL;
+        char    *path_prefix = (char *) calloc (1025, sizeof(char));
+        char    *path = (char *) calloc (512, sizeof(char));
+        char    *node = (char *) calloc (512, sizeof(char));
+
 	
 	/* Process the command line options. */
 	if (argc > 1) {
@@ -175,32 +185,54 @@ char	*argv[];
 		    cdl_zscaleImage (cdl, &pix, nx, ny, depth, z1, z2);
 		}
 
-		/* Now select a frame buffer large enough for the image.  We'll
-		 * ask that this be reset but the change won't go to the server
-		 * until we send in a WCS, so compute that as well.  For the
-		 * WCS we assume a simple linear transform where the image is
-		 * Y-flipped, the (x,y) translation is computed so it is correct
-		 * for an frame buffer >= than the image size.
+		/* Select and clear the requested frame prior to display. */
+	        cdl_setFrame (cdl, frame);
+		cdl_clearFrame (cdl);
+
+		/* Now select a frame buffer large enough for the image.  
+		 * We'll ask that this be reset but the change won't go to
+		 * the server until we send in the WCS below.  
 		 */
                 cdl_selectFB (cdl, nx, ny, &fbconfig, &fb_w, &fb_h, &nf, 1);
+
+		/* Compute the image placement so it's centered in the frame,
+		 * but note the cdl_writeSubRaster() routine can place an
+		 * arbitrary raster anywhere in the frame buffer.  
+        	lx = (fb_w / 2) - (nx / 2);
+        	ly = fb_h - ((fb_h / 2) + (ny / 2));
+
+		/* Set the mapping we'll send with the WCS which must be
+		 * called before the cdl_setWCS() call since the data is sent
+		 * with the WCS and not as a separate call.
+		 */
+
+                /* First we must compose a node!path prefix for the image */
+                gethostname (node, 512);
+#ifdef SOLARIS
+                (void) getcwd (path, 512);
+#else
+                (void) getwd (path);
+#endif
+                if (*fname == '/')
+                    (void) sprintf (path_prefix, "%s!%s", node, fname);
+                else
+                    (void) sprintf (path_prefix, "%s!%s/%s", node, path, fname);
+
+		cdl_setMapping (cdl, "image", 0., 0., nx, ny, lx, ly, nx, ny,
+		    path_prefix);
+
+		/* For the WCS we assume a simple linear transform where the
+		 * image is Y-flipped, the (x,y) translation is computed so
+		 * it is correct for an frame buffer >= than the image size.
+		 */
                 cdl_setWCS (cdl, fname, "", 1., 0., 0., -1., 
                     (float) (nx / 2) - (fb_w / 2) + 1,	    /* X trans.     */
                     (float) (fb_h / 2) + (ny / 2),	    /* Y trans.     */
 		    z1, z2, CDL_LINEAR);		    /* Z transform  */
 
 
-		/* Select and clear the requested frame prior to display. */
-	        cdl_setFrame (cdl, frame);
-		cdl_clearFrame (cdl);
-
-		/* Now display the pixels.  We'll compute the image placement
-	   	 * ourselves and write the image as a raw subraster of the frame
-		 * buffer.  In this case we'll center the image, but the CDL
-		 * cdl_writeSubRaster() procedure can be used to write arbitrary
-		 * rasters at any point in the frame buffer.
+		/* Now display the pixels.  
 		 */
-        	lx = (fb_w / 2) - (nx / 2);
-        	ly = fb_h - ((fb_h / 2) + (ny / 2));
                 if (cdl_writeSubRaster (cdl, lx, ly, nx, ny, pix))
                     status = 1;
 

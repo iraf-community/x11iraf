@@ -54,6 +54,9 @@ switch ($UNAME)
             endif
         endif
 	breaksw
+    case darwin: 
+	set mach = "macosx"
+	breaksw
     case freebsd: 
 	set mach = "freebsd"
 	breaksw

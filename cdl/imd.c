@@ -24,6 +24,7 @@
  *         imd_displayImage  (imd, pix, nx, ny, frame, fbconfig, comp_wcs)
  *           imd_readCursor  (imd, sample, &x, &y, &wcs, &key)
  *         imd_[set|get]WCS  (imd, name, title, a, b, c, d, tx, ty, z1, z2, zt)
+ *     imd_[set|get]Mapping  (imd, region, sx,sy,snx,sny, dx,dy,dnx,dny, ref)
  *                imd_close  (imd)
  *
  *     Low Level Procedures
@@ -79,8 +80,8 @@
 #define DEF_FRAME_HEIGHT 512
 
 
-int	imd_debug = 0;		/* deug flag	*/
-char	buf[SZ_LINE];		/* temp buffer	*/
+int	imd_debug = 0;			/* deug flag	*/
+char	buf[SZ_LINE];			/* temp buffer	*/
 
 
 #ifdef ANSI_FUNC
@@ -92,15 +93,21 @@ static int imd_parseImtdev(char *imtdev, char *unixaddr, unsigned short *host_po
 static int imd_loadImtoolrc(IMDPtr imd);
 static int imd_getstr(char **ipp, char *obuf, int maxch);
 static void imd_minmax(uchar *pix, int nbytes, int *pmin, int *pmax);
+static int imd_wcsVersion (IMDPtr imd);
 
 #else
 
 static  IMDPtr  imd_initialize();
 static  int     imd_parseImtdev(), imd_loadImtoolrc(), imd_getstr();
-static  int     imd_writeLine(), imd_readLine();
+static  int     imd_writeLine(), imd_readLine(), imd_wcsVersion();
 static  void    imd_minmax();
 
 #endif
+
+#ifndef __STDC__
+	char	*getenv();
+#endif
+
 
 
 /*  IMD_OPEN -- Open a connection to the display server.  The caller may 
@@ -185,7 +192,7 @@ char 	*imtdev;		/* connection type 	*/
 		    printf ("Can't connect to socket '%s'\n",sockaddr.sun_path);
 	        goto retry;		/* no connection */
             } else {
-		imtdev = (char *) malloc (SZ_IMTDEV);
+		imtdev = (char *) calloc (SZ_IMTDEV, sizeof(char));
 		free_imtdev++;
 		strcpy (imtdev, sockaddr.sun_path);
                 fdin = fdout = fd;
@@ -277,6 +284,7 @@ retry: 	    domain =  imd_parseImtdev (imtdev, unixaddr, &host_port, &host_addr,
 	/* Allocate and initialize imd structure.  */
 	imd = imd_initialize (fdin, fdout, domain);
 
+
 	if (imd_debug)
 	    fprintf (stderr, "Connection established on '%s'\n", imtdev);
 	if (free_imtdev)
@@ -348,38 +356,45 @@ int	comp_wcs;		/* compute a WCS	  */
 	    printf("[imd_displayImage] nnx=%d nny=%d xo=%d yo=%d\n",
 		nnx, nny, x_off, y_off);
 
+	/* Center the placement in user coords.
+	 */
+	lx = (fbwidth / 2) - (nnx / 2);
+	ly = fbheight - ((fbheight / 2) + (nny / 2));
+
 	/* Compute a WCS for this image if it's not already defined. */
 	if (comp_wcs) {
 	    imd->a  =  1.0;
 	    imd->b  =  0.0;
 	    imd->c  =  0.0;
 	    imd->d  = -1.0;
-	    imd->tx = (float) (nnx / 2) - (fbwidth / 2) + 1;
-	    imd->ty = (float) (fbheight / 2) + (nny / 2);
-	    if (x_off)
-	        imd->tx += (float) x_off;
-	    if (y_off)
-	        imd->ty += (float) y_off;
-	    if (imd->name == (char *)NULL)
-                imd->name  = (char *) calloc (SZ_NAME, sizeof(char));
-	    if (imd->title == (char *)NULL)
-                imd->title = (char *) calloc (SZ_NAME, sizeof(char));
-	    if (imd->z1 == INDEF || imd->z2 == INDEF)
+	    imd->tx = (float) (nnx / 2) - (fbwidth / 2) + 1 + (float) x_off;
+	    imd->ty = (float) (fbheight / 2) + (nny / 2) + (float) y_off;
+
+	    if (imd->z1 == INDEF || imd->z2 == INDEF) {
 	        imd_minmax (pix, nnx*nny, &pmin, &pmax);
-	    if (imd->z1 == INDEF)
-	        imd->z1 = (float) pmin;
-	    if (imd->z2 == INDEF)
-	        imd->z2 = (float) pmax;
+		imd->z1 = (imd->z1 == INDEF) ? (float) pmin : imd->z1;
+		imd->z2 = (imd->z2 == INDEF) ? (float) pmax : imd->z2;
+	    }
 	    imd->ztrans = W_LINEAR;
+
+            /* Initialize the mapping. */
+            imd->sx        = 1.0;
+            imd->sy        = 1.0;
+            imd->snx       = nnx;
+            imd->sny       = nny;
+            imd->dx        = lx;
+            imd->dy        = ly;
+            imd->dnx       = nnx;
+            imd->dny       = nny;
+            imd->iis_valid = 1;
+
 	    if (imd_setWCS (imd, imd->name, imd->title, imd->a, imd->b, imd->c,
 		imd->d, imd->tx, imd->ty, imd->z1, imd->z2, imd->ztrans))
 	            return (ERR);
 	}
 
-	/* Finally, display the image. Compute the placement is user coords.
+	/* Finally, display the image.
 	 */
-	lx = (fbwidth / 2) - (nnx / 2);
-	ly = fbheight - ((fbheight / 2) + (nny / 2));
 	status = imd_writeImage (imd, ip, nnx, nny, lx, ly);
 
 	if (use_subras)
@@ -440,11 +455,11 @@ int
 imd_setWCS (
     IMDPtr imd,			/* package pointer	*/
     char *name,			/* name string		*/
-    char *title,			/* title string		*/
+    char *title,		/* title string		*/
     float a,
     float b,
     float c,
-    float d,		/* WCS values		*/
+    float d,			/* WCS values		*/
     float tx,
     float ty,			/* translation		*/
     float z1,
@@ -464,16 +479,142 @@ float	z1, z2;			/* zscale values	*/
 int	zt;			/* transformation type	*/
 #endif
 {
-	if (imd_debug) {
-	    printf ("[imd_setWCS] name='%s' title='%s'\n", name, title);
-	    printf ("\ta=%g b=%g c=%g d=%g tx=%g ty=%g z1=%g z2=%g zt=%d\n", 
-		a, b, c, d, tx, ty, z1, z2, zt);
+	int   nbytes = 0, status = 0, version = imd->iis_version;
+        char  old_wcs[SZ_OLD_WCSBUF], mapping[SZ_OLD_WCSBUF];
+        char  wcstext[SZ_WCSBUF];
+
+
+        /* Format the string to set world coordinate parameters.  */
+        (void) sprintf (old_wcs, "%s%s%s\n%g %g %g %g %g %g %g %g %d\n",
+	    (*name ? name : " "), (title ? " - " : " "), (*title ? title : " "),
+            a, b, c, d, tx, ty, z1, z2, zt);
+
+	if (imd->iis_version > 0 && imd->iis_valid) {
+            char  *path_prefix, *node, *path;
+#ifdef SOLARIS
+            char    *getcwd();
+#else
+            char    *getwd();
+#endif
+
+	    path_prefix = (char *) calloc (1025, sizeof(char));
+	    path = (char *) calloc (512, sizeof(char));
+	    node = (char *) calloc (512, sizeof(char));
+
+
+	    /* Get a node!path prefix for the data file. */
+            gethostname (node, SZ_FNAME);
+
+#ifdef SOLARIS
+            (void) getcwd (path, 511);
+#else
+            (void) getwd (path);
+#endif
+	    if (*name == '/')
+                (void) sprintf (path_prefix, "%s!%s", node, name);
+	    else
+                (void) sprintf (path_prefix, "%s!%s/%s", node, path, name);
+
+            (void) sprintf (mapping, "%s %g %g %d %d %d %d %d %d\n%s\n",
+                (*imd->region ?  imd->region : "image"),
+                imd->sx, imd->sy, imd->snx, imd->sny,
+                imd->dx, imd->dy, imd->dnx, imd->dny,
+                (*imd->ref ? imd->ref : path_prefix));
+
+	    (void) sprintf (wcstext, "%s%s", old_wcs, mapping);
+
+	    free ((char *)path_prefix);
+	    free ((char *)path);
+	    free ((char *)node);
+
+	} else
+	    (void) strcpy (wcstext, old_wcs);
+
+
+	if (imd_debug) { printf ("[imd_setWCS] wcs='%s'\n", wcstext); }
+
+	/* Send the WCS buffer. */
+        nbytes = strlen (wcstext) + 1;
+	status = com_writeWCS (imd->dataout, wcstext, nbytes, version);
+
+	/* Invalidate the mapping once it's been sent. */
+	imd->iis_valid = 0;
+
+	return (status);
+}
+
+
+#ifdef USE_OLD_GETWCS
+
+/* IMD_OLDGETWCS -- Get the current display frame WCS information.
+ */
+
+#ifdef ANSI_FUNC
+
+int 
+imd_getWCS (
+    IMDPtr imd,			/* package pointer	*/
+    int wcs,			/* WCS number to get	*/
+    char *name,			/* name string		*/
+    char *title,		/* title string		*/
+    float *a,
+    float *b,
+    float *c,
+    float *d,			/* WCS values		*/
+    float *tx,
+    float *ty,			/* translation		*/
+    float *z1,
+    float *z2,			/* zscale values	*/
+    int *zt			/* transformation type	*/
+)
+#else
+
+int
+imd_getWCS (imd, wcs, name, title, a, b, c, d, tx, ty, z1, z2, zt)
+IMDPtr	imd;			/* package pointer	*/
+int 	wcs;			/* WCS number to get	*/
+char	*name;			/* name string		*/
+char	*title;			/* title string		*/
+float	*a, *b, *c, *d;		/* WCS values		*/
+float	*tx, *ty;		/* translation		*/
+float	*z1, *z2;		/* zscale values	*/
+int	*zt;			/* transformation type	*/
+#endif
+{
+	int   datain   = imd->datain;
+	int   dataout  = imd->dataout;
+	int   nbytes = 0, version = imd->iis_version;
+	int   tokens, status = 0;
+	char  wcs_info[SZ_WCSBUF];
+
+
+	/* Read the WCS from the server. */
+	if (com_readWCS (datain, dataout, wcs_info, &nbytes, wcs, version))
+	    return (ERR);
+
+	/* Parse the return buffer. */
+	name[0] = title[0] = '\0';
+	if (version == 0) {
+            tokens = sscanf (wcs_info, "%[^\n]\n%g%g%g%g%g%g%g%g%d",
+                buf, a, b, c, d, tx, ty, z1, z2, zt);
+            if (tokens == EOF) {
+                /* Had no WCS info, can't even get name, but no error.  */
+                *a = *b = *c = *d = *tx = *ty = *z1 = *z2 = *zt = 0;
+
+            } else if (tokens < 10) {
+                /* partial read, something must be wrong.  */
+                return (ERR);
+            }
+	    sscanf (buf, "%s - %s", name, title);
 	}
 
-	sprintf (buf, "%s%s%s", (name ? name : " "), (title ? " - " : " "),
-	    (title ? title : " "));
-	return(com_writeWCS(imd->dataout, buf, a, b, c, d, tx, ty, z1, z2, zt));
+	if (imd_debug) { 
+	    printf ("[imd_getWCS] wcs=%d wcsbuf='%s'\n", wcs, wcsbuf);
+	}
+ 
+	return (OK);
 }
+#endif
 
 
 /* IMD_GETWCS -- Get the current display frame WCS information.
@@ -484,23 +625,25 @@ int	zt;			/* transformation type	*/
 int 
 imd_getWCS (
     IMDPtr imd,			/* package pointer	*/
+    int wcs,			/* WCS number to get	*/
     char *name,			/* name string		*/
-    char *title,			/* title string		*/
+    char *title,		/* title string		*/
     float *a,
     float *b,
     float *c,
-    float *d,		/* WCS values		*/
+    float *d,			/* WCS values		*/
     float *tx,
-    float *ty,		/* translation		*/
+    float *ty,			/* translation		*/
     float *z1,
-    float *z2,		/* zscale values	*/
+    float *z2,			/* zscale values	*/
     int *zt			/* transformation type	*/
 )
 #else
 
 int
-imd_getWCS (imd, name, title, a, b, c, d, tx, ty, z1, z2, zt)
+imd_getWCS (imd, wcs, name, title, a, b, c, d, tx, ty, z1, z2, zt)
 IMDPtr	imd;			/* package pointer	*/
+int 	wcs;			/* WCS number to get	*/
 char	*name;			/* name string		*/
 char	*title;			/* title string		*/
 float	*a, *b, *c, *d;		/* WCS values		*/
@@ -509,20 +652,188 @@ float	*z1, *z2;		/* zscale values	*/
 int	*zt;			/* transformation type	*/
 #endif
 {
-	if (com_readWCS(imd->datain, imd->dataout, buf, a, b, c, d, tx, ty,
-	    z1, z2, zt))
-	        return (ERR);
+	int   fbwidth  = imd->fbtab[imd->fbconfig-1]->width;
+	int   fbheight = imd->fbtab[imd->fbconfig-1]->height;
+	int   datain   = imd->datain;
+	int   dataout  = imd->dataout;
+	int   nbytes = 0, version = imd->iis_version;
+	int   tokens, status = 0;
+	char  wcsbuf[SZ_WCSBUF];
 
-	name[0] = title[0] = '\0';
-	sscanf (buf, "%s - %s", name, title);
 
-	if (imd_debug) {
-	    printf ("[imd_getWCS] name='%s' title='%s'\n", name, title);
-	    printf ("\ta=%g b=%g c=%g d=%g tx=%g ty=%g z1=%g z2=%g zt=%d\n", 
-		*a, *b, *c, *d, *tx, *ty, *z1, *z2, *zt);
+	/* Read the WCS from the server. */
+	if (com_readWCS (datain, dataout, wcsbuf, &nbytes, wcs, version))
+	    return (ERR);
+
+	if (imd_debug) { 
+	    printf ("[imd_getWCS] wcs=%d wcsbuf='%s'\n", wcs, wcsbuf);
 	}
  
+        /* Attempt to read the WCS and set up a unitary transformation
+         * if the information cannot be read.
+         */
+        if (sscanf (wcsbuf, "%[^\n]\n%f%f%f%f%f%f%f%f%d",
+            buf, a, b, c, d, tx, ty, z1, z2, zt) < 7) {
+
+            strcpy (title, "[NO WCS]\n");
+            *a  = *d  = 1;
+            *b  = *c  = 0;
+            *tx = *ty = 0;
+            *zt = 0;
+        } else {
+	    if (name == NULL) 
+		name = imd->name;
+	    if (title == NULL) 
+		title = imd->title;
+	    sscanf (buf, "%s - %s", name, title);
+        }
+
+	/* Now try to read the mapping if we're expecting one, otherwise
+	 * set up a default mapping of the entire frame buffer.
+	 */
+	if (imd->iis_version > 0) {
+	    register int i, j;
+
+	    /* Skip over the first two lines of WCS data. */
+	    strcpy (buf, wcsbuf);
+	    for (i=0, j=0; j < 2 && buf[i]; i++)
+	        if (buf[i] == '\n') j++;
+
+	    /* Attempt to read the mapping. */
+	    imd->ref[0] = '\0';
+	    imd->region[0] = '\0';
+	    if (sscanf (&buf[i], "%s%f%f%d%d%d%d%d%d\n%s\n",
+	        imd->region, &imd->sx, &imd->sy, &imd->snx, &imd->sny, 
+	        &imd->dx, &imd->dy, &imd->dnx, &imd->dny, imd->ref) < 10) {
+
+		    /* Error in the read, set a default. */
+	            strcpy (imd->region, "none");
+	            strcpy (imd->ref, "none");
+	            imd->sx  = 1.0;
+	            imd->sy  = 1.0;
+	            imd->snx = fbwidth;
+	            imd->sny = fbheight;
+	            imd->dx  = 1;
+	            imd->dy  = 1;
+	            imd->dnx = fbwidth;
+	            imd->dny = fbheight;
+
+        	    imd->iis_valid = 0;
+		    return (ERR);
+	    } else
+        	imd->iis_valid = 1;
+	}
+
 	return (OK);
+}
+
+
+/*  IMD_SETMAPPING -- Set the mapping information to be sent with the next
+ *  imd_setWcs() call.
+ */
+#ifdef ANSI_FUNC
+
+int 
+imd_setMapping  (
+    IMDPtr  imd,                /* package ptr          */
+    char    *region,            /* region name 		*/
+    float   sx,			/* source rect		*/
+    float   sy,
+    int	    snx, 		/* source extent	*/
+    int	    sny,
+    int	    dx, 		/* dest rect		*/
+    int	    dy,
+    int	    dnx, 		/* dest extent		*/
+    int	    dny,
+    char    *ref                /* reference name	*/
+)
+#else
+
+int 
+imd_setMapping  (imd, region, sx,sy,snx,sny, dx,dy,dnx,dny, ref)
+IMDPtr  imd;                    /* package ptr          */
+char    *region;                /* region name 		*/
+float	sx, sy;			/* source rect		*/
+int	snx, sny;		/* source extent	*/
+int	dx, dy;			/* dest rect		*/
+int	dnx, dny;		/* dest extent		*/
+char    *ref;                  	/* reference name	*/
+#endif
+{
+        if (imd_debug) {
+            printf ("[imd_setMapping] region='%s' ref='%s'\n",
+		( region ? region : ""), (ref ? ref : ""));
+            printf ("\tsrc = %g,%g%d,%d   dest = %d,%d,%d,%d\n",
+               sx, sy, snx, sny, dx, dy, dnx, dny);
+        }
+
+        strcpy (imd->region, (region ? region : ""));
+        strcpy (imd->ref, (ref ? ref : ""));
+        imd->sx   = sx;
+        imd->sy   = sy;
+        imd->snx  = snx;
+        imd->sny  = sny;
+        imd->dx   = dx;
+        imd->dy   = dy;
+        imd->dnx  = dnx;
+        imd->dny  = dny;
+
+        return ((imd->iis_valid = 1));
+}
+
+
+/*  IMD_GETMAPPING --  Get the mapping information returned with the last
+ *  imd_getWcs() call.
+ */
+#ifdef ANSI_FUNC
+int 
+imd_getMapping  (
+    IMDPtr  imd,                /* package ptr          */
+    char    *region,            /* region name 		*/
+    float   *sx,		/* source rect		*/
+    float   *sy,
+    int	    *snx, 		/* source extent	*/
+    int	    *sny,
+    int	    *dx, 		/* dest rect		*/
+    int	    *dy,
+    int	    *dnx, 		/* dest extent		*/
+    int	    *dny,
+    char    *ref                /* reference name	*/
+)
+
+#else
+int 
+imd_getMapping  (imd, region, sx,sy,snx,sny, dx,dy,dnx,dny, ref)
+IMDPtr  imd;                    /* package ptr          */
+char    *region;                /* region name 		*/
+float	*sx, *sy;		/* source rect		*/
+int	*snx, *sny;		/* source extent	*/
+int	*dx, *dy;		/* dest rect		*/
+int	*dnx, *dny;		/* dest extent		*/
+char    *ref;                  	/* reference name	*/
+#endif
+{
+        if (imd->iis_valid) {
+            strcpy (region, imd->region);
+            *sx  = imd->sx;
+            *sy  = imd->sy;
+            *snx = imd->snx;
+            *sny = imd->sny;
+            *dx  = imd->dx;
+            *dy  = imd->dy;
+            *dnx = imd->dnx;
+            *dny = imd->dny;
+            strcpy (ref, imd->ref);
+	}
+
+        if (imd_debug) {
+            printf ("[imd_getMapping] valid=%d region='%s' ref='%s'\n",
+		imd->iis_valid, (region ? region : ""), (ref ? ref : ""));
+            printf ("\tsrc = %g,%g,%d,%d   dest = %d,%d,%d,%d\n",
+               *sx, *sy, *snx, *sny, *dx, *dy, *dnx, *dny);
+        }
+
+        return (imd->iis_valid);
 }
 
 
@@ -561,6 +872,8 @@ IMDPtr	imd;			/* package pointer	*/
 	    /* Free the pointers in the imd structure. */
 	    free (imd->title);
 	    free (imd->name);
+	    free (imd->region);
+	    free (imd->ref);
 	    free (imd);
 	}
 
@@ -837,7 +1150,7 @@ imd_getFBConfig (
     IMDPtr imd,			/* package pointer	*/
     int *configno,		/* frame config number	*/
     int *width,
-    int *height,	/* frame buffer size	*/
+    int *height,		/* frame buffer size	*/
     int *nframes		/* number of frames	*/
 )
 #else
@@ -1193,7 +1506,7 @@ uchar	*pix;			/* subraster pixels 	*/
             nbytes = nl * fbwidth;
 
             /* Read the last block. */
-	    y += lines_per_block - nl + 1;
+	    y += lines_per_block - nl;
 	    if (nnx != fbwidth)
                 if (imd_readLine(imd, block, nbytes, 0, y))
                     return (ERR);
@@ -1290,7 +1603,7 @@ int	x, y;				/* coords for start	*/
 static IMDPtr 
 imd_initialize (
     int fdin,
-    int fdout,			/* device descriptors  	*/
+    int fdout,				/* device descriptors  	*/
     int domain				/* connection type	*/
 )
 #else
@@ -1305,25 +1618,43 @@ int	domain;				/* connection type	*/
 
         /* Allocate and initialize imd structure. */
         imd = (struct IMD *) calloc (1, sizeof (struct IMD));
-        imd->datain   = fdin;
-        imd->dataout  = fdout;
-        imd->domain   = domain;
-        imd->ztrans   = W_LINEAR;
-        imd->frame    = 1;
-        imd->fbconfig = 1;
 
-        /* Initialize a WCS. */
-        imd->a  = 1.0;                  
-        imd->b  = 0.0;
-        imd->c  = 0.0;
-        imd->d  = -1.0;
-        imd->tx = 1.0;                  /* default for 512x512 fb */
-        imd->ty = 512.0;                /* default for 512x512 fb */
-        imd->z1 = 0.0;
-        imd->z2 = 255.0;
+        imd->datain    = fdin;
+        imd->dataout   = fdout;
+        imd->domain    = domain;
+        imd->ztrans    = W_LINEAR;
+        imd->frame     = 1;
+        imd->fbconfig  = 1;
 
-        imd->name  = (char *) calloc (SZ_NAME, sizeof(char));
-        imd->title = (char *) calloc (SZ_NAME, sizeof(char));
+        /* Initialize a WCS, set the defaults for 512x512 framebuffer. */
+        imd->a         = 1.0;                  
+        imd->b         = 0.0;
+        imd->c         = 0.0;
+        imd->d         = -1.0;
+        imd->tx        = 1.0;
+        imd->ty        = 512.0;
+        imd->z1        = 0.0;
+        imd->z2        = 255.0;
+
+        /* Initialize the mapping. */
+        imd->sx        = 1.0;
+        imd->sy        = 1.0;
+        imd->snx       = 512;
+        imd->sny       = 512;
+        imd->dx        = 0;
+        imd->dy        = 0;
+        imd->dnx       = 511;
+        imd->dny       = 511;
+        imd->iis_valid = 0;
+
+	/* Allocate the structure pointers. */
+        imd->name      = (char *) calloc (SZ_NAME, sizeof(char));
+        imd->title     = (char *) calloc (SZ_NAME, sizeof(char));
+        imd->region    = (char *) calloc (SZ_NAME, sizeof(char));
+        imd->ref       = (char *) calloc (SZ_NAME, sizeof(char));
+
+	/* Get the server IIS version number. */
+	imd->iis_version = imd_wcsVersion (imd);
 
         /* Load the frame buffer configuration file. */
         imd_loadImtoolrc (imd);
@@ -1341,12 +1672,12 @@ int	domain;				/* connection type	*/
 
 static int 
 imd_parseImtdev (
-    char *imtdev,		/* device string     */
-    char *unixaddr,		/* unix socket path  */
+    char *imtdev,			/* device string     */
+    char *unixaddr,			/* unix socket path  */
     unsigned short *host_port,		/* inet port number  */
     unsigned long *host_addr,		/* inet host address */
-    char *ififo,
-    char *ofifo		/* fifo paths	     */
+    char *ififo,			/* fifo paths	     */
+    char *ofifo
 )
 #else
 
@@ -1430,6 +1761,30 @@ char		*ififo, *ofifo;		/* fifo paths	     */
 }
 
 
+/* IMD_WCSVERSION -- Query the server for the support IIS WCS version.
+ */
+
+#ifdef ANSI_FUNC
+
+static int
+imd_wcsVersion (
+    IMDPtr imd				/* package pointer	*/
+)
+#else
+
+static int
+imd_wcsVersion (imd)
+IMDPtr 	imd;				/* package pointer	*/
+#endif
+{
+	/* Allow the user to disable the use of maps. */
+	if (getenv ("CDL_NOMAPS"))
+	    return (0);
+	else
+	    return (com_wcsVersion (imd->datain, imd->dataout));
+}
+
+
 /* IMD_LOADIMTOOLRC -- Load the frame buffer configuration table into a
  * runtime table.  An error is returned if the table cannot be found and
  * a default frame buffer size of 512x512 with 2 frames is available (this
@@ -1440,26 +1795,24 @@ char		*ififo, *ofifo;		/* fifo paths	     */
 
 static int 
 imd_loadImtoolrc (
-    IMDPtr imd			/* package pointer	*/
+    IMDPtr imd				/* package pointer	*/
 )
 #else
 
 static int
 imd_loadImtoolrc (imd)
-IMDPtr	imd;			/* package pointer	*/
+IMDPtr	imd;				/* package pointer	*/
 #endif
 {
         register char   *ip;
         register FILE   *fp = NULL;
         int     config, nframes, width, height, i;
         char    *fname;
-#ifndef __STDC__
-	char	*getenv();
-#endif
+
 
         /* Initialize the config table. */
         for (i=0;  i < MAX_FBCONFIG;  i++) {
-	    imd->fbtab[i] = (FBTab *) malloc (sizeof (FBTab));
+	    imd->fbtab[i] = (FBTab *) calloc (sizeof(FBTab), sizeof(char));
             imd->fbtab[i]->config  = i;
             imd->fbtab[i]->nframes = 2;
             imd->fbtab[i]->width   = DEF_FRAME_WIDTH;

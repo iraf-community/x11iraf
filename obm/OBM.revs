@@ -291,3 +291,42 @@ obm/ObmW/Gterm.c
     Removed the comment chars for XRecolorCursor first done for MF030.
     While these do trigger BadCursor errors these will now be ignored by
     the xgterm error handler.  (4/7/00)
+
+obm/server.c
+    Changed a malloc to a calloc call for the timer struct.  Also deleted
+    an XtFree for the callback in serverTimedProc() which would corrupt
+    memory if the timer callback were later deleted. (7/28/00)
+
+obm/ObmP.h
+obm/Obm.c
+    Added support for a new environent variable OBMOBJECTS which will help
+    restrict the messages printed during debugging.  For example, it can be
+    set as
+
+	setenv OBMOBJECTS "client imagewin"
+
+    to have OBMDEBUG print only messages for the 'client' and 'imagewin'
+    objects.  (8/3/00)
+
+obm/widget.c
+    Added a new 'setTop' command for the Tabs widget that can be used to
+    raise a particular tab from within the GUI.  (8/29/00)
+
+obm/ObmP.h                                                              MF043
+obm/obmres.c
+obm/obmres.dat
+obm/widget.c
+obm/ObmW/ListTree.c	+
+obm/ObmW/ListTree.h     +
+obm/ObmW/ListTree.h     +
+obm/ObmW/Imakefile
+obm/listres/AllWidgets.c
+    Added a new ListTree widget which creates an indented list of items
+    in a user defined hierarchy.  Selecting an item "opens" it to reveal
+    lower level lists.  The selection callback returns the selected item
+    label, it's level, and a full path of all parent items.  The widget
+    can used for things like directory browsers, or organizing documentation
+    into sections, subsections, etc.
+
+obm/server.c
+    Commented out an XtFree() on a static array ('table')  (03/05/01)

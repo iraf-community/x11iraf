@@ -953,9 +953,11 @@ char *SysErrorMsg (n)
     return strerror(n);
 #else
 
+#ifndef __DARWIN__
 #ifndef __FreeBSD__
 #ifndef _BSD_SOURCE
     extern char *sys_errlist[];
+#endif
 #endif
 #endif
     extern int sys_nerr;

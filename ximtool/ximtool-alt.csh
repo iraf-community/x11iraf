@@ -9,7 +9,6 @@
 # be used.
 #	Arguments specific to this GUI include:
 #
-#	    -displayMagnifier <bool>	show magnifier marker on startup
 #	    -showToolBar <bool>		show toolbar on startup
 #	    -showPanelBar <bool>	show panelbar on startup
 #
@@ -25,14 +24,14 @@ set	XIMTOOL		= ximtool	# Path to default ximtool binary
 unset 	noclobber
 onintr	cleanup
 
-set	SKIP		= 106		# offset to GUI file
+set	SKIP		= 99		# offset to GUI file
 
 # Dump the GUI from this script file.
 tail +$SKIP $0 > /tmp/_gui.$$
 
 # Check for no arguments.
 set q	= '"'
-set cmd = "-gui /tmp/_gui.$$ -title $q XImtool Experimental GUI $q"
+set cmd = "-gui /tmp/_gui.$$ -title $q XImtool V1.3 - Alternative GUI $q"
 
 # Process the script arguments, quoting args when necessary.
 if ($#argv > 0) then
@@ -51,14 +50,6 @@ if ($#argv > 0) then
         else if ("$1" == "-defgui") then
 	    tail +$SKIP $0
 	    exit 0
-        else if ("$1" == "-displayMagnifier") then
-	    if ("$2" != "") then
-	        shift
-	    else
-	        echo "missing argument to '-displayMagnifier <bool>' switch"
-	        exit 1
-	    endif
-	    set cmd = "$cmd -xrm $q XImtool.displayMagnifier:$1$q"
         else if ("$1" == "-showToolBar") then
 	    if ("$2" != "") then
 	        shift
@@ -90,6 +81,7 @@ endif
 # Run the command.
 echo  "$XIMTOOL $cmd ; /bin/rm -f /tmp/_gui*.$$" > /tmp/_gui.cmds.$$
 sh /tmp/_gui.cmds.$$
+exit 0
 
 cleanup:
 	/bin/rm -f /tmp/_gui*.$$

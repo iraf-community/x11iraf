@@ -257,6 +257,8 @@ char **argv;
 
 	/* Notify clients that value has changed. */
 	for (i=0;  i < ncb && (cb = cbl[i]) != NULL;  i++) {
+/*printf ("setValue: i=%d  obj='%s' cb='%s' new='%s'\n", 
+i, obj->core.name, cb->name, new_value);*/
 	    status = Tcl_VarEval (obm->tcl,
 		cb->name, " ",
 		obj->core.name, " ",

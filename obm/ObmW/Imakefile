@@ -17,6 +17,11 @@ X11IRAFDIR = ../../
 #endif
 #endif
 
+#if defined (PpcDarwinArchitecture) || defined (TenonServer)
+        CCOPTIONS = -traditional-cpp
+#endif
+
+
 HEADERS = \
 	Arrow.h ArrowP.h Board.h BoardP.h Button.h ButtonP.h \
 	Common.h CommonP.h Converters.h DrawingArea.h DrawingAreaP.h \
@@ -25,7 +30,7 @@ HEADERS = \
 	MenuBar.h MenuBarP.h MultiList.h MultiListP.h RadioGrp.h RadioGrpP.h \
 	RowCol.h RowColP.h Scrollbar.h ScrollbarP.h Slider2.h Slider2P.h \
 	TabString.h Toggle.h ToggleP.h done.h inkstore.h laygram.h scroll.h \
-	Tabs.h TabsP.h Gcs.h
+	Tabs.h TabsP.h Gcs.h ListTree.h ListTreeP.h
 
 SRCS = \
 	Arrow.c Board.c Button.c Common.c DrawIString.c DrawString.c \
@@ -33,8 +38,8 @@ SRCS = \
 	HTMLformat.c HTMLimages.c HTMLjot.c HTMLlists.c HTMLparse.c \
 	HTMLwidgets.c Icon.c Label.c Layout.c MenuBar.c MultiList.c \
 	RadioGrp.c RowCol.c Scrollbar.c Slider2.c Tablist2Tabs.c TextWidth.c \
-	Toggle.c cvtLong.c icon.c laygram.c laylex.c scroll.c strnchr.c \
-	Tabs.c Gcs.c
+	Toggle.c cvtLong.c iconutil.c laygram.c laylex.c scroll.c strnchr.c \
+	Tabs.c Gcs.c ListTree.c
 
 OBJS = \
 	Arrow.o Board.o Button.o Common.o DrawIString.o DrawString.o \
@@ -42,8 +47,8 @@ OBJS = \
 	HTMLformat.o HTMLimages.o HTMLjot.o HTMLlists.o HTMLparse.o \
 	HTMLwidgets.o Icon.o Label.o Layout.o MenuBar.o MultiList.o \
 	RadioGrp.o RowCol.o Scrollbar.o Slider2.o Tablist2Tabs.o TextWidth.o \
-	Toggle.o cvtLong.o icon.o laygram.o laylex.o scroll.o strnchr.o \
-	Tabs.o Gcs.o
+	Toggle.o cvtLong.o iconutil.o laygram.o laylex.o scroll.o strnchr.o \
+	Tabs.o Gcs.o ListTree.o
 
 #ifdef LexCmd
 LEX=LexCmd
@@ -54,6 +59,7 @@ YACC=YaccCmd
 
 
 depend:: laygram.c laylex.c
+all:: laygram.c laylex.c
 
 SubdirLibraryRule($(OBJS))
 NormalLintTarget($(SRCS))
@@ -120,8 +126,8 @@ Toggle.o:
 	$(CC) $(FWFCFLAGS) Toggle.c
 cvtLong.o:
 	$(CC) $(FWFCFLAGS) cvtLong.c
-icon.o:
-	$(CC) $(FWFCFLAGS) icon.c
+iconutil.o:
+	$(CC) $(FWFCFLAGS) iconutil.c
 laylex.o:
 	$(CC) $(FWFCFLAGS) laylex.c
 
@@ -136,23 +142,31 @@ laygram.c laygram.h : laygram.y
 #if !defined (i386Architecture)
 Tabs.o:
 	$(CC) -Xc $(EXTRA_INCLUDES) -c Tabs.c
+ListTree.o:
+	$(CC) -Xc $(EXTRA_INCLUDES) -c ListTree.c
 #endif
 #else
 #if defined (SunArchitecture) && OSMajorVersion == 4
 Tabs.o:
-	acc -w $(EXTRA_INCLUDES) -c Tabs.c
+	acc -w $(EXTRA_INCLUDES) -DSUNOS -c Tabs.c
 Gcs.o:
 	acc -w $(EXTRA_INCLUDES) -c Gcs.c
+ListTree.o:
+	acc -w $(EXTRA_INCLUDES) -c ListTree.c
 #else
 #if defined (HPArchitecture)
 Tabs.o:
 	c89 -w $(CFLAGS) $(EXTRA_INCLUDES) -c Tabs.c
 Gcs.o:
 	c89 -w $(CFLAGS) $(EXTRA_INCLUDES) -c Gcs.c
+ListTree.o:
+	c89 -w $(CFLAGS) $(EXTRA_INCLUDES) -c ListTree.c
 #else
 #if defined (AlphaArchitecture) && OSMajorVersion >= 4
 Tabs.o:
 	$(CC) -std $(CFLAGS) $(EXTRA_INCLUDES) -c Tabs.c
+ListTree.o:
+	$(CC) -std $(CFLAGS) $(EXTRA_INCLUDES) -c ListTree.c
 #endif
 #endif
 #endif

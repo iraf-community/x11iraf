@@ -65,9 +65,17 @@
 #include <string.h>
 #endif
 
+/*
+#ifdef __DARWIN__
+#include <stdarg.h>
+#else
+#endif
+*/
 #include <varargs.h>
 
-/* Workaround for our old varargs handling on LinuxPPC systems. */
+/* Workaround for our old varargs handling on LinuxPPC systems.
+#if defined(__powerpc__)
+*/
 #if defined(linux) && defined(__powerpc__)
 #undef va_start
 #undef va_alist

@@ -8,6 +8,7 @@
  *  ival = isSunRas (fname)
  *	 loadSunRas (fname, pixels, pixtype, w,h, r,g,b, ncolors, colorstyle)
  *      writeSunRas (fp, pixels, pixtype, w,h, r,g,b, ncolors, colorstyle)
+ *     getSunRasHdr (fname)
  *
  * isSunRas returns nonzero if the named file is a Sun rasterfile.
  * loadSunRas reads a Sun rasterfile and returns the decoded pixel array and
@@ -439,6 +440,47 @@ char *fname;				/* input filename */
 	}
 
 	return (value);
+}
+
+
+/* getSunRasHdr -- Get some set of header information for the GUI.
+ */
+
+char *
+getSunRasHdr (fname)
+char    *fname;
+{
+        FILE    *fp;
+        char 	*line;
+        struct rasterfile hdr;
+
+        /* Open the image. */
+        fp = fopen (fname, "r");
+        if (!fp) 
+            return NULL;
+
+	/* Read the image header. */
+        read_sun_long (&hdr.ras_magic, fp);
+        read_sun_long (&hdr.ras_width, fp);
+        read_sun_long (&hdr.ras_height, fp);
+        read_sun_long (&hdr.ras_depth, fp);
+        read_sun_long (&hdr.ras_length, fp);
+        read_sun_long (&hdr.ras_type, fp);
+        read_sun_long (&hdr.ras_maptype, fp);
+        read_sun_long (&hdr.ras_maplength, fp);
+
+	/* Format the description. */
+        line = (char *) malloc (80);
+        sprintf (line, "%-16.16s  %3d  %5dx%-5d  %s %s",
+            fname, hdr.ras_depth, hdr.ras_width, hdr.ras_height, 
+	    "Sun Rasterfile",
+	    ((((hdr.ras_type == RT_OLD) ? "(OLD)" : 
+	       (hdr.ras_type == RT_STANDARD) ? "(Standard)" : 
+	       (hdr.ras_type == RT_BYTE_ENCODED) ? "(Byte-Encoded)" : 
+	       (hdr.ras_type == RT_FORMAT_RGB) ? "(RGB)" : " "))) ); 
+
+	fclose (fp);
+        return (line);
 }
 
 
