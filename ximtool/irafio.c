@@ -3,9 +3,6 @@
  *
  *  ival = isIRAF (fname)
  *       loadIRAF (fname, pixels, w,h, r,g,b, ncolors, z1, z2)
-
- * LoadIRAF(fname, numcols)  -  loads a IRAF file
- * WriteIRAF(fp, pic, w, h, rmap, gmap, bmap, numcols)
  *
  * isIRAF    -- returns nonzero if the named file is a IRAF file.
  * loadIRAF  -- reads a IRAF file and returns the decoded pixel array and gray-
@@ -21,19 +18,34 @@
 #include <unistd.h>
 
 
+#define VERSION_1       1
+#define VERSION_2       2
+
 /* Image header parmeters. */
-#define SZ_IMPIXFILE 	79
-#define LEN_IMHDR 	513
-#define SZ_IMHDR 	2048
+#define SZ_V1PIXFILE 	79
+#define SZ_V1HDR 	2048
 
 /* Offsets into header (in sizeof(int) units) for various parameters */
-#define	IM_PIXTYPE	4		/* datatype of the pixels */
-#define	IM_NDIM		5		/* number of dimensions */
-#define	IM_LEN		6		/* image dimensions */
-#define	IM_PHYSLEN	13		/* physical length (as stored) */
-#define	IM_PIXOFF	22		/* offset of the pixels */
-#define	IM_PIXFILE	103		/* name of pixel storage file */
+#define	IM_V1PIXTYPE	4		/* datatype of the pixels */
+#define	IM_V1NDIM	5		/* number of dimensions */
+#define	IM_V1LEN	6		/* image dimensions */
+#define	IM_V1PHYSLEN	13		/* physical length (as stored) */
+#define	IM_V1PIXOFF	22		/* offset of the pixels */
+#define	IM_V1PIXFILE	103		/* name of pixel storage file */
 
+/* Image header parmeters. */
+#define SZ_V2PIXFILE    255
+#define SZ_V2HDR        513
+
+/* Offsets into header (in sizeof(int) units) for various parameters */
+#define IM_V2PIXTYPE    10              /* datatype of the pixels */
+#define IM_V2SWAPPED    14              /* number of dimensions */
+#define IM_V2NDIM       18              /* number of dimensions */
+#define IM_V2LEN        22              /* image dimensions */
+#define IM_V2PHYSLEN    50              /* physical length (as stored) */
+#define IM_V2PIXOFF     86              /* offset of the pixels */
+#define IM_V2PIXFILE    126             /* name of pixel storage file */
+         
 /* IRAF dataype codes */
 #define	TY_CHAR		2
 #define	TY_SHORT	3
@@ -49,7 +61,9 @@
 #define MONO(rd,gn,bl) (((rd)*11 + (gn)*16 + (bl)*5) >> 5)  /*.33R+ .5G+ .17B*/
 
 #ifndef AIXV3
+#ifndef OSF1
 typedef unsigned char uchar;
+#endif
 #endif
 
 /* Function prototypes */
@@ -63,7 +77,8 @@ typedef unsigned char uchar;
 #endif
 
 static char *irafReadPixels();
-static void strpak(), flip();
+static void strpak(), flip(), bswap2(), bswap4();
+static int is_swapped_machine();
 char *index();
 
 
@@ -84,63 +99,103 @@ uchar   *r, *g, *b;                     /* colormap             */
 int     *ncolors;                       /* number of colors     */
 float   *z1, *z2;                       /* zscale values        */
 {
-	FILE *hdr;
-	register int i, len, px, py;
-	int header[SZ_IMHDR], ptype, offset;
-	char temp[SZ_IMPIXFILE], *ip;
-	char path[SZ_IMPIXFILE], pixfile[SZ_IMPIXFILE];
+	FILE 	*hdr, *pf;
+	int 	i, len, px, py, version, swapped;
+	int  	ptype, offset;
+	char 	temp[SZ_V1PIXFILE], *ip;
+	char 	path[SZ_V1PIXFILE];
 
+
+        /* Get the format version. */
+        version = isIRAF (fname);
+ 
         if ((hdr = fopen (fname, "r")) == NULL)
 	    return "cannot open image";
 
-	/* Read in the image header. */
-        fread (header, sizeof (char), SZ_IMHDR, hdr);
-	if (header[IM_NDIM] != 2)
-	    return "Not a 2-D image";
+        if (version == VERSION_1) {
+            int         header_v1[SZ_V1HDR];
+            char        pixfile_v1[SZ_V1PIXFILE];
 
-	/* Get the interesting stuff. */
-	px = header[IM_PHYSLEN];
-	py = header[IM_PHYSLEN+1];
-	*nx = header[IM_LEN];
-	*ny = header[IM_LEN+1];
-	ptype = header[IM_PIXTYPE];
-	offset = (header[IM_PIXOFF] - 1) * sizeof(short);
+            /* Read in the image header. */
+            fread (header_v1, sizeof (char), SZ_V1HDR, hdr);
 
-	/* Find the pixfile and see if it exists. */
-	strpak ((char *)&header[IM_PIXFILE], pixfile, SZ_IMPIXFILE);
-	if (strncmp (pixfile, "HDR$", 4) == 0) {
-	    /* Handle the special case if a HDR$ pixfile path, prepend the
-	     * current working directory name to the pixfile.
-	     */
-    	    strncpy(temp, &pixfile[4], SZ_IMPIXFILE);
-    	    strncpy(pixfile, fname, SZ_IMPIXFILE);
+            /* Get the interesting stuff. */
+            px = header_v1[IM_V1PHYSLEN];
+            py = header_v1[IM_V1PHYSLEN+1];
+            *nx = header_v1[IM_V1LEN];
+            *ny = header_v1[IM_V1LEN+1];
+            ptype = header_v1[IM_V1PIXTYPE];
+            offset = (header_v1[IM_V1PIXOFF] - 1) * sizeof(short);
 
-    	    /* Find the end of the pathname. */
-    	    len = strlen(pixfile);
-    	    while( (len > 0) && (pixfile[len-1] != '/') )
-    	      len--;
+            /* Find the pixfile and see if it exists. */
+            strpak ((char *)&header_v1[IM_V1PIXFILE], pixfile_v1, SZ_V1PIXFILE);
+            irafGetPixfile (fname, pixfile_v1);
+            if (access (pixfile_v1, R_OK) != 0) {
+                fclose (hdr);
+                return "Cannot access pixel file";
+            }
 
-    	    /* Add the image name. */
-    	    pixfile[len] = '\0';
-    	    strncat(pixfile, temp, SZ_IMPIXFILE);
+            /* Open the pixel file and seek to the beginning of the data. */
+            if ((pf = fopen (pixfile_v1, "r")) == NULL)
+                return "Cannot open pixel file.";
 
-	} else if (index (pixfile, '!') != NULL) {
-	    /* Strip out the leading node! prefix from the pixfile path.
-	     */
-	    for (ip = pixfile; *ip != '!' ; )
-		ip++;
-	    strcpy (pixfile, ++ip);
-	}
+	    /* Now read the data and return a pointer to the scaled pixels. */
+	    irafReadPixels (pixfile_v1, 0, offset, ptype, image,
+		*nx, *ny, px, py, z1, z2);
 
-	if (access (pixfile, R_OK) != 0) {
-	    fclose (hdr);	
-	    return "cannot access pixel file";
-	}
+        }  else if (version == VERSION_2) {
+            char        header_v2[SZ_V2HDR];
+            char        pixfile_v2[SZ_V2PIXFILE];
+
+            /* Read in the image header. */
+            fread (header_v2, sizeof (char), SZ_V2HDR, hdr);
+
+            /* Get the interesting stuff. */
+            bcopy ((char *)&header_v2[IM_V2SWAPPED], &swapped, sizeof(int));
+            if (!swapped &&  is_swapped_machine() ||
+                 swapped && !is_swapped_machine()) {
+                     bswap4 (&header_v2[IM_V2PHYSLEN], 1, &px, 1, sizeof(int));
+                     bswap4 (&header_v2[IM_V2PHYSLEN+sizeof(int)], 1, &py, 1,
+                         sizeof(int));
+                     bswap4 (&header_v2[IM_V2LEN], 1, nx, 1, sizeof(int));
+                     bswap4 (&header_v2[IM_V2LEN+sizeof(int)], 1, ny, 1,
+                         sizeof(int));
+                     bswap4 (&header_v2[IM_V2PIXTYPE], 1, &ptype, 1,
+                         sizeof(int));
+                     bswap4 (&header_v2[IM_V2PIXOFF], 1, &offset, 1,
+                         sizeof(int));
+		     swapped = 1;
+            } else {
+                bcopy ((char *)&header_v2[IM_V2PHYSLEN], &px, sizeof(int));
+                bcopy ((char *)&header_v2[IM_V2PHYSLEN+sizeof(int)], &py,
+                    sizeof(int));
+                bcopy ((char *)&header_v2[IM_V2LEN], nx, sizeof(int));
+                bcopy ((char *)&header_v2[IM_V2LEN+sizeof(int)], ny,
+                    sizeof(int));
+                bcopy ((char *)&header_v2[IM_V2PIXTYPE], &ptype, sizeof(int));
+                bcopy ((char *)&header_v2[IM_V2PIXOFF], &offset, sizeof(int));
+		swapped = 0;
+            }
+            offset = (offset - 1) * sizeof(short);
+
+            /* Find the pixfile and see if it exists. */
+            bcopy ((char *)&header_v2[IM_V2PIXFILE], pixfile_v2, SZ_V2PIXFILE);
+            irafGetPixfile (fname, pixfile_v2);
+            if (access (pixfile_v2, R_OK) != 0) {
+                fclose (hdr);  
+                return "Cannot access pixel file";
+            }
+
+            /* Open the pixel file and seek to the beginning of the data. */
+            if ((pf = fopen (pixfile_v2, "r")) == NULL)
+                return "Cannot open pixel file.";
+
+	    /* Now read the data and return a pointer to the scaled pixels. */
+	    irafReadPixels (pixfile_v2, swapped, offset, ptype, image,
+		*nx, *ny, px, py, z1, z2);
+        }         
+
 	fclose (hdr); 			/* we're done with the header */
-
-	/* Now read the data and return a pointer to the scaled pixels. */
-	irafReadPixels (pixfile, offset, ptype, image, *nx, *ny, px, py,
-	    z1, z2);
 
 	/* Set the (grayscale) colormap. */
 	for (i=0; i<256; i++)
@@ -164,11 +219,18 @@ char	*fname;				/* input filename */
 
         if (fp = fopen (fname, "r")) {
             fread (magic, sizeof (char), 12, fp);
-	    strpak (magic, magic, 5);
-	    if (strncmp(magic, "imhdr", 5) == 0)
-	        value = 1;
-	    fclose (fp);
-	}
+            fclose (fp);
+
+            /* See if this is a valid OIF header file. */
+            if (strncmp(magic, "imhv2", 5) == 0)
+                value = 2;
+            else {
+                strpak (magic, magic, 5);
+                if (strncmp(magic, "imhdr", 5) == 0)
+                    value = 1;
+            }
+            return value;
+        }
 
 	return value;
 }
@@ -186,18 +248,56 @@ char	*fname;				/* input filename */
 
 
 
+/*  CDL_GETPIXFILE -- Get the pixelfile pathname.
+ */
+
+irafGetPixfile (fname, pfile)
+char    *fname;
+char    *pfile;
+{
+        char    temp[SZ_V1PIXFILE], *ip;
+        int     len;
+        char    *index();
+
+        if (strncmp (pfile, "HDR$", 4) == 0) {
+            /* Handle the special case of a HDR$ pixfile path, prepend the
+             * current working directory name to the pixfile.
+             */
+            ip = pfile + 4;
+            (void) strncpy (temp, ip, SZ_V1PIXFILE);
+            (void) strncpy (pfile, fname, SZ_V1PIXFILE);
+
+            /* Find the end of the pathname. */
+            len = strlen (pfile);
+            while ( (len > 0) && (pfile[len-1] != '/') )
+              len--;
+
+            /* Add the image name. */
+            pfile[len] = '\0';
+            (void) strncat (pfile, temp, SZ_V1PIXFILE);
+
+        } else if (index (pfile, '!') != NULL) {
+            /* Strip out the leading node! prefix from the pixfile path.  */
+            for (ip = pfile; *ip != '!' ; )
+                ip++;
+            (void) strcpy (pfile, ++ip);
+        }
+} 
+
+
 /* IRAFREADPIXELS -- Read the pixel file and scale the data.
  */
 
 static char *
-irafReadPixels (pixfile, pix_offset, pixtype, image, nx, ny, px, py, z1, z2)
-char *pixfile;				/* pixfile pathname      */
-int pix_offset;				/* offset to pixel data	 */
-int pixtype;				/* pixel types		 */
-uchar **image;				/* output image pixels   */
-int nx, ny;				/* image dimensions      */
-int px, py;				/* physical storage dims */
-float *z1, *z2;
+irafReadPixels (pixfile, swap, pix_offset, pixtype, image, nx,ny, px,py, z1,z2)
+char    *pixfile;			/* pixfile pathname      */
+int	swap;				/* byte-swap pixels      */
+int     pix_offset;			/* offset to pixel data	 */
+int     pixtype;			/* pixel types		 */
+uchar   **image;			/* output image pixels   */
+int     nx, ny;				/* image dimensions      */
+int     px, py;				/* physical storage dims */
+float   *z1, *z2;
 {
 	FILE *fd;
 	register int i, j, npix;
@@ -228,6 +328,9 @@ float *z1, *z2;
 	    }
 	    free ((unsigned short *)usline);
 
+	    if (swap)
+		bswap2 ((char *)uspix, (char *)uspix, nx * ny * sizeof(short));
+
 	    /* Do the zscale of the image. */
 	    zscale ((char *)uspix, nx, ny, 16, z1, z2, 0.25, 600, 120);
 
@@ -249,6 +352,9 @@ float *z1, *z2;
 		    spix[i*nx+j] = sline[j];
 	    }
 	    free ((short *)sline);
+
+	    if (swap)
+		bswap2 ((char *)spix, (char *)spix, nx * ny * sizeof(short));
 
 	    /* Do the zscale of the image. */
 	    zscale ((char *)spix, nx, ny, 16, z1, z2, 0.25, 600, 120);
@@ -273,6 +379,9 @@ float *z1, *z2;
 	    }
 	    free ((int *)iline);
 
+	    if (swap)
+		bswap4((char *)ipix, 1, (char *)ipix, 1, nx * ny * sizeof(int));
+
 	    /* Do the zscale of the image. */
 	    zscale ((char *)ipix, nx, ny, 32, z1, z2, 0.25, 600, 120);
 
@@ -295,6 +404,10 @@ float *z1, *z2;
 	    }
 	    free ((float *)fline);
 
+	    if (swap)
+		bswap4((char *)fpix, 1, (char *)fpix, 1, 
+		    nx * ny * sizeof(float));
+
 	    /* Do the zscale of the image. */
 	    zscale ((char *)fpix, nx, ny, -32, z1, z2, 0.25, 600, 120);
 
@@ -316,6 +429,10 @@ float *z1, *z2;
 		    dpix[i*nx+j] = dline[j];
 	    }
 	    free ((double *)dline);
+
+	    if (swap)
+		bswap8((char *)dpix, 1, (char *)dpix, 1, 
+		    nx * ny * sizeof(double));
 
 	    /* Do the zscale of the image. */
 	    zscale ((char *)dpix, nx, ny, -64, z1, z2, 0.25, 600, 120);
@@ -388,3 +505,138 @@ int  nx, ny;
             }
         }
 }    
+
+
+/* BSWAP2 - Move bytes from array "a" to array "b", swapping successive
+ * pairs of bytes.  The two arrays may be the same but may not be offset
+ * and overlapping.
+ */
+static void
+bswap2 (a, b, nbytes)
+char    *a, *b;         	/* input array                  */
+int     nbytes;         	/* number of bytes to swap      */
+{
+        register char *ip=a, *op=b, *otop;
+        register unsigned temp;
+
+        /* Swap successive pairs of bytes.
+         */
+        for (otop = op + (nbytes & ~1);  op < otop;  ) {
+            temp  = *ip++;
+            *op++ = *ip++;
+            *op++ = temp;
+        }
+
+        /* If there is an odd byte left, move it to the output array.
+         */
+        if (nbytes & 1)
+            *op = *ip;
+}
+
+
+/* BSWAP4 - Move bytes from array "a" to array "b", swapping the four bytes
+ * in each successive 4 byte group, i.e., 12345678 becomes 43218765.
+ * The input and output arrays may be the same but may not partially overlap.
+ */
+static void
+bswap4 (a, aoff, b, boff, nbytes)
+char	*a;			/* input array			*/
+int	aoff;			/* first byte in input array	*/
+char	*b;			/* output array			*/
+int	boff;			/* first byte in output array	*/
+int	nbytes;			/* number of bytes to swap	*/
+{
+	register char	*ip, *op, *tp;
+	register int	n;
+	static	char temp[4];
+
+	tp = temp;
+	ip = (char *)a + aoff - 1;
+	op = (char *)b + boff - 1;
+
+	/* Swap successive four byte groups.
+	 */
+	for (n = nbytes >> 2;  --n >= 0;  ) {
+	    *tp++ = *ip++;
+	    *tp++ = *ip++;
+	    *tp++ = *ip++;
+	    *tp++ = *ip++;
+	    *op++ = *--tp;
+	    *op++ = *--tp;
+	    *op++ = *--tp;
+	    *op++ = *--tp;
+	}
+
+	/* If there are any odd bytes left, move them to the output array.
+	 * Do not bother to swap as it is unclear how to swap a partial
+	 * group, and really incorrect if the data is not modulus 4.
+	 */
+	for (n = nbytes & 03;  --n >= 0;  )
+	    *op++ = *ip++;
+}
+
+
+/* BSWAP8 - Move bytes from array "a" to array "b", swapping the eight bytes
+ * in each successive 8 byte group, i.e., 12345678 becomes 87654321.
+ * The input and output arrays may be the same but may not partially overlap.
+ */
+bswap8 (a, aoff, b, boff, nbytes)
+char	*a;			/* input array			*/
+int	aoff;			/* first byte in input array	*/
+char	*b;			/* output array			*/
+int	boff;			/* first byte in output array	*/
+int	nbytes;		/* number of bytes to swap	*/
+{
+	register char	*ip, *op, *tp;
+	register int	n;
+	static	char temp[8];
+
+	tp = temp;
+	ip = (char *)a + aoff - 1;
+	op = (char *)b + boff - 1;
+
+	/* Swap successive eight byte groups.
+	 */
+	for (n = nbytes >> 3;  --n >= 0;  ) {
+	    *tp++ = *ip++;
+	    *tp++ = *ip++;
+	    *tp++ = *ip++;
+	    *tp++ = *ip++;
+	    *tp++ = *ip++;
+	    *tp++ = *ip++;
+	    *tp++ = *ip++;
+	    *tp++ = *ip++;
+	    *op++ = *--tp;
+	    *op++ = *--tp;
+	    *op++ = *--tp;
+	    *op++ = *--tp;
+	    *op++ = *--tp;
+	    *op++ = *--tp;
+	    *op++ = *--tp;
+	    *op++ = *--tp;
+	}
+
+	/* If there are any odd bytes left, move them to the output array.
+	 * Do not bother to swap as it is unclear how to swap a partial
+	 * group, and really incorrect if the data is not modulus 8.
+	 */
+	for (n = nbytes & 03;  --n >= 0;  )
+	    *op++ = *ip++;
+}
+
+
+/* IS_SWAPPED_MACHINE -- See if this is a byte-swapped (relative to Sun)
+ * machine.
+ */
+
+static int
+is_swapped_machine ()
+{
+        union {
+            char ch[4];
+            int  i;
+        } u;
+
+        u.i = 1;
+        return ((int) u.ch[0]);
+}

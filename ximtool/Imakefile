@@ -24,30 +24,42 @@ X11IRAFDIR = ../
 #if defined (SunArchitecture) && HasSunC && OSMajorVersion >= 5
         CCOPTIONS = -Xs
   EXTRA_LDOPTIONS = -xildoff
-#else 
+#endif
 #if defined (HPArchitecture)
         CCOPTIONS = -DHPUX
 #endif
 #if defined (UltrixArchitecture)
         CCOPTIONS = -DULTRIX
 #endif
+#if defined (OSF1Architecture) && OSMajorVersion >= 4
+        CCOPTIONS = -DOSF1
 #endif
 
-AllTarget(ximtool)
+AllTarget(ximtool ximtool-alt ximtool-mag)
 
 NormalProgramTarget(ximtool,$(OBJS),${DEPOBM},${OBMLIBS} XawClientLibs, $(MATHLIB))
 
+ximtool-alt::
+	cat ximtool-alt.csh ximtool-alt.gui > ximtool-alt
+	chmod 755 ximtool-alt
+
+ximtool-mag::
+	cat ximtool-alt.csh ximtool-mag.gui > ximtool-mag
+	chmod 755 ximtool-mag
+
+clean::
+	$(RM) ximtool-alt ximtool-mag
+
+
 ${DEPOBM}:
 
-ximtool.o:	ximtool.gui.h
-ximtool.c:	ximtool.gui.h
-
-ximclient.o:	ximtool.html.h
-ximclient.c:	ximtool.html.h
+ximtool.o:		ximtool.gui.h
+ximtool.c:		ximtool.gui.h
+ximclient.o:		ximtool.html.h
+ximclient.c:		ximtool.html.h
 
 ximtool.gui.h: ximtool.gui
 	sed -f gui2c.sed ximtool.gui > ximtool.gui.h
-
 ximtool.html.h: ximtool.html
 	sed -f gui2c.sed ximtool.html > ximtool.html.h
 
@@ -59,12 +71,23 @@ install:: ximtool
 	-@if [ -d X11irafBinDir ]; then set +x; \
 	        else (set -x; $(MKDIRHIER) X11irafBinDir); fi
 	$(CP) ximtool X11irafBinDir
+
+alt-install:: ximtool-alt ximtool-mag
+	-@if [ -d X11irafBinDir ]; then set +x; \
+	        else (set -x; $(MKDIRHIER) X11irafBinDir); fi
+	$(CP) ximtool-alt X11irafBinDir
+	$(CP) ximtool-mag X11irafBinDir
 #endif
 
 #if InstallManuals
 install::
 	MakeDir(X11irafManDir)
 	$(CP) ximtool.man X11irafManDir/ximtool.1
+
+alt-install::
+	MakeDir(X11irafManDir)
+	$(CP) ximtool-alt.man X11irafManDir/ximtool-alt.1
+	$(CP) ximtool-mag.man X11irafManDir/ximtool-mag.1
 #endif
 
 DependTarget()

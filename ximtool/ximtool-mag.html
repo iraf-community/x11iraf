@@ -19,7 +19,7 @@ More <a href=#toc>detailed help</a> is available on the following topics:
 <LI><A HREF="#gui">GUI Overview</A> -- What it looks like. </LI>
 <LI><A HREF="#mouse">Mouse Operations</A> -- Doing stuff. </LI>
 <LI><A HREF="#keystroke">Keystroke Accelerators</A> -- Keystroke summary.</LI>
-<LI><A HREF="#markers">Markers</A> -- Panner/WCS markers, general markers.</LI>
+<LI><A HREF="#markers">Markers</A> -- Pan/Mag/WCS markers, general markers.</LI>
 <LI><A HREF="#control">Control Panel</A> -- Operating the Control panel.</LI>
 <LI><A HREF="#load">Load Panel</A> -- Load panel operation and options.</LI>
 <LI><A HREF="#save">Save Panel</A> -- Save panel operation and options.</LI>
@@ -51,6 +51,7 @@ Please contact <I>iraf@noao.edu</I> with comments, bugs, or suggestions.
 	<A HREF="#framebuf">Frame Buffers</A>
         <A HREF="#markers">Markers</A>
             <A HREF="#panner">Panner Marker</A>
+            <A HREF="#magnifier">Magnifier Marker</A>
             <A HREF="#coords">Coords Box Marker</A>
             <A HREF="#genmark">General Markers</A>
                 <A HREF="#markmenu">Menu Options</A>
@@ -166,6 +167,10 @@ Ctrl-=   Print
 Ctrl-<   Decrease blink rate   Ctrl-+   Zoom in
 Ctrl->   Increase blink rate   Ctrl--   Zoom out
    
+Ctrl-[hjkl]           Move cursor one pixel
+Ctrl-[arrow]          Move cursor one pixel
+Ctrl-Shift-[hjkl]     Move cursor ten pixels
+Ctrl-Shift-[arrow]    Move cursor ten pixels
 Alt-1 thru Alt-4      Set frame displayed
 Ctrl-1 thru Ctrl-9    Set integer zoom factor  
 </pre>
@@ -229,6 +234,7 @@ At most 128 frame buffer sizes may be defined.
   -defgui                  Print default GUI to stdout
   -displayPanner &lt bool &gt  Display panner box
   -displayCoords &lt bool &gt  Display wcs coords box
+  -displayMagnifier &lt bool &gt  Display magnifier box
   -fifo &lt pipe &gt           Fifo pipe to use
   -fifo_only               Use fifo pipes only 
   -gui &lt file &gt            GUI file to use 
@@ -269,6 +275,23 @@ deletes the panner.
 A special case is MB2.  Hitting MB2 anywhere in the panner window pans the
 image to that point.  This is analogous to typing MB2 in the main display
 window to pan the image.
+
+<h3><a name=#magnifier>Magnifier Marker</a></h3>
+<P>
+The magnifier marker can be used to zoom in on a small area around the
+cursor.  It will be updated as the cursor moves but only for small motions
+(either mouse movement or with the <a href=#mouse>cursor movement
+keystrokes</a>) to minimize the
+impact on the system.  The zoom factor is expressed as some fraction of the
+size of the magnifier marker itself.  The default zoom is 4, i.e. the area
+in the marker represents and area in the image that's one-fourth the size
+of the marker.  Other zoom factors may be selected using the popup menu 
+created by hitting MB1 in the marker.
+<P>
+By default the magnifier marker is not visible, to toggle it select the
+<I>Magnifier</I> option from the <I>Options</I> menubar button.  Alternatively,
+for just a quick look holding down the Shift and MB1 buttons will display
+the marker until the button is released.
 
 <h3><a name=#coords>Coords Box Marker</a></h3>
 <P>

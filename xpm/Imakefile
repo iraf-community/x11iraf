@@ -97,6 +97,8 @@ HEADERS = xpm.h xpmP.h
 
 #else
 
+all:: libXpm.a
+
     LibraryObjectRule()
 
 #if DoSharedLib

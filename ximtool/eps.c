@@ -59,7 +59,9 @@
 #define	SZ_EPSBUF		8193
 
 #ifndef AIXV3
+#ifndef OSF1
 typedef unsigned char 	uchar;
+#endif
 #endif
 
 
@@ -870,7 +872,7 @@ PSImagePtr psim;
 FILE	   *fp;
 {
         register char **line;
-        int 	icols=0, irows=0, scols=0, srows=0, turnflag=0, margin;
+        int 	icols=0, irows=0, scols=0, srows=0, turnflag=0;
         float 	llx = 0.0, lly = 0.0;
         time_t  timer;
 
@@ -879,18 +881,25 @@ FILE	   *fp;
 	    &turnflag);
 
 	/* Now write header and prolog stuff */
-	margin = (psim->annotate ? ANNOT_MARGIN : 2);
-        fprintf (fp, "%%!PS-Adobe-2.0 EPSF-2.0\n" );
+        fprintf (fp, "%%!PS-Adobe-3.0 EPSF-3.0\n" );
 	fprintf (fp, "%%%%Title: XImtool Screen Hardcopy\n");
 	fprintf (fp, "%%%%Creator: XImtool\n");
   	timer = time ((time_t *) NULL);
 	(void) localtime (&timer);
 	fprintf (fp, "%%%%CreationDate: %s", ctime(&timer));
-        fprintf (fp, "%%%%BoundingBox: %d %d %d %d\n",
-            (int) (llx - margin), 
-	    (int) (lly - margin),
-            (int) ( llx + scols + 0.5 + margin), 
-	    (int) ( lly + srows + 0.5 + margin ) );
+        if (psim->annotate)
+            fprintf (fp, "%%%%BoundingBox: %d %d %d %d\n",
+                (int) (MAX (0, llx - X_ANNOT_MARGIN)),
+                (int) (MAX (0, lly - Y_ANNOT_MARGIN)),
+                (int) ( llx + scols + 0.5 + X_ANNOT_MARGIN),
+                (int) ( lly + srows + 0.5 + Y_ANNOT_MARGIN) );
+        else
+            fprintf (fp, "%%%%BoundingBox: %d %d %d %d\n",
+                (int) (MAX (0, llx - 10)),
+                (int) (MAX (0, lly - 10)),
+                (int) ( llx + scols + 0.5 + 10),
+                (int) ( lly + srows + 0.5 + 10) );
+	fprintf (fp, "%%%%Pages: 1\n");
         fprintf (fp, "%%%%EndComments\n" );
 
     	if ( psim->compression == RLECompression ) {
@@ -910,7 +919,7 @@ FILE	   *fp;
             fprintf (fp, "/picstr %d string def\n", icols );
         fprintf (fp, "%%%%EndProlog\n" );
         fprintf (fp, "%%%%Page: 1 1\n" );
-        fprintf (fp, "grestore\ngsave\n" );
+        fprintf (fp, "gsave\n" );
 
         fprintf (fp, "%g %g translate\n", llx, lly );
         fprintf (fp, "%d %d scale\n", scols, srows );
@@ -950,6 +959,7 @@ FILE       *fp;
 	int	xpos, xstep, ypos, ystep;
 	float	Mval, xval, yval, tic, mtic, Mtic;
         float   llx = 0.0, lly = 0.0;
+
 
         /* Get the common page parameters. */
         eps_pageParams (psim, &llx, &lly, &icols, &irows, &scols, &srows,
@@ -1044,16 +1054,16 @@ FILE       *fp;
 	fprintf (fp, "    %g setlinewidth\n    stroke\n", MINOR_TICK_WIDTH);
 	fprintf (fp, "} def\n");
 
-	/* The axis labeling. */
+	/* The axis labeling.  */
 	if (turnflag)
 	    eps_landLabels (fp, psim, scols, srows, icols, irows, llx, lly);
 	else
 	    eps_portLabels (fp, psim, scols, srows, icols, irows, llx, lly);
 
-	/* The colorbar. */
+	/* The colorbar.  */
     	eps_doColorbar (fp, psim, scols, srows, llx, lly, turnflag);
 
-	/* Print the transform information. */
+	/* Print the transform information.  */
         fprintf (fp, "grestore\n/Times-Roman findfont 8 scalefont setfont\n");
 	if (turnflag) {
             cbar_size = MIN (512, MAX (256, srows + 2));
@@ -1101,7 +1111,7 @@ float	llx, lly;
 {
 	int	start, end, range, nlabels;
 	float 	xpos, xstep, ypos, ystep;
-        float   Mval, xval, yval, tic, mtic, Mtic;
+        float   Mval, xval=0.0, yval=0.0, tic, mtic, Mtic;
 
 	/* X Axis labeling and ticmarks. */
 	nlabels = (scols > 256 ? 5 : 3);
@@ -1198,7 +1208,7 @@ float	llx, lly;
 {
 	float	xpos, xstep, ypos, ystep;
 	int	start, end, range, nlabels;
-        float   Mval, xval, yval, tic, mtic, Mtic;
+        float   Mval, xval=0.0, yval=0.0, tic, mtic, Mtic;
 
 	/* X Axis labeling and ticmarks. */
 	nlabels = (srows > 256 ? 5 : 3);
@@ -1669,7 +1679,7 @@ PSImagePtr psim;
 FILE	   *fp;
 {
 	register char **line;
-	int icols=0, irows=0, scols=0, srows=0, turnflag=0, margin;
+	int icols=0, irows=0, scols=0, srows=0, turnflag=0;
 	float   llx = 0.0, lly = 0.0;
  	time_t  timer;
 
@@ -1678,18 +1688,24 @@ FILE	   *fp;
 	    &turnflag);
 
 	/* Now write header and prolog stuff */
-	margin = (psim->annotate ? ANNOT_MARGIN : 2);
 	fprintf (fp, "%%!PS-Adobe-3.0 EPSF-3.0\n");
 	fprintf (fp, "%%%%Title: XImtool Screen Hardcopy\n");
 	fprintf (fp, "%%%%Creator: XImtool\n");
   	timer = time ((time_t *) NULL);
 	(void) localtime (&timer);
 	fprintf (fp, "%%%%CreationDate: %s", ctime(&timer));
-	fprintf (fp, "%%%%BoundingBox: %d %d %d %d\n",
-            (int) (llx - margin), 
-	    (int) (lly - margin),
-            (int) ( llx + scols + 0.5 + margin), 
-	    (int) ( lly + srows + 0.5 + margin ) );
+	if (psim->annotate) 
+	    fprintf (fp, "%%%%BoundingBox: %d %d %d %d\n",
+                (int) (MAX (0, llx - X_ANNOT_MARGIN)), 
+	        (int) (MAX (0, lly - Y_ANNOT_MARGIN)),
+                (int) ( llx + scols + 0.5 + X_ANNOT_MARGIN), 
+	        (int) ( lly + srows + 0.5 + Y_ANNOT_MARGIN) );
+	else
+	    fprintf (fp, "%%%%BoundingBox: %d %d %d %d\n",
+                (int) (MAX (0, llx - 10)), 
+	        (int) (MAX (0, lly - 10)),
+                (int) ( llx + scols + 0.5 + 10), 
+	        (int) ( lly + srows + 0.5 + 10) );
 	fprintf (fp, "%%%%Pages: 1\n");
 	fprintf (fp, "%%%%EndComments\n");
 

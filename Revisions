@@ -1,0 +1,216 @@
+X11IRAF V1.0 Notes File
+Begun 6 Mar 1997
+-----------------------
+
+X11IRAF.tmpl
+	Removed a /* from the comment causing aix to complain
+
+ximtool/Imakefile
+	Removed the !@#^% app-defaults install
+	Change man page install, wasn't working on Solaris
+
+ximtool/load.c
+	Removed a qsort call and replaced with a local string sort, avoids
+	crashes on various platforms
+
+ximtool/ximtool.c
+	Fixed -memModel and -fifo_flag bugs
+
+ximtool/ximtool.gui
+ximtool/ximtool-alt.gui
+	Minor mod to workaround Layout crash on alpha.  Also changed "Close"
+	buttons to be "Done" so all subpanels are consistent.
+
+ximtool/save.c
+	Added a missing arg to sprintf causing a segvio.
+
+obm/widget.c
+	Changed encoding of obm pointer address for do_text to %lx since
+	pointers on the alpha overflowed the %x and the pointer was lost.
+
+ximtool/ximtool.c
+	Fixed a bug w/ the -fifo flag
+
+ximtool/ximtool.gui
+ximtool/ximtool-alt.gui
+	Defined width for TextButton widgets to workaround bug on Xterminals.
+
+ximtool/eps.c
+	Fixed a missing grestore causing problems for Digital PrintServer 17
+	printers.
+
+ximtool/ximtool.c
+ximtool/ximtool.man
+ximtool/ximtool.html
+ximtool/ximtool.ps
+	Fixed a bug preventing the resource command line args from actually
+	taking effect.  Also clarified the explanation of the ximprint.cfg
+	file, regenerated postscript man page.
+
+xtapemon/xtapemon.man
+xtapemon/xtapemon.ps
+	Following a user suggestion moved the discussion of the amount of
+	tape used being acurately calculated from the BUGS section to the 
+	DISCUSSION section since it will usually be the case that the count
+	will be incorrect unless MTEXAMINE is used to position the tape, this
+	wasn't as obvious before.  Regenerated postscript man page.
+
+obm/ObmW/LayoutP.h
+xaw3d/LayoutP.h
+	Changed the XtMalloc call for creating new objects to XtCalloc calls
+	so values are properly initialized. Fixes OSF V3.2d1 bug.
+
+ximtool/fitsio.c
+	Ifndef AIXV3 for typedef uchar 'cuz it was conflicting
+
+---------------------------
+V1.0 Patch-1 release 4/5/97
+---------------------------
+
+xgterm/main.c
+	Undef'd memove for SunOS and X11R6 systems
+
+ximtool/load.c
+	For large directories the message containing the directory listing
+	was overflowing the xim_message static buffer, modified to call
+	OBM directly. 
+
+ximtool/ximclient.c
+	Fixed a typo in the page size setting page orientation.
+
+ximtool/ximtool.gui
+ximtool/ximtool-alt.gui
+	Added "send <widget> activate" msgs to the main display and colorbar
+	widgets so the saved cursor position is intialized in the widget.  If
+	this is not done a WCSLAB will sample the cursor before beginning the
+	display causing the widget to restore unitialized positions which can
+	blow away the app with a server error.
+
+ximtool/iis.c
+	Added IIS packet debugging output triggered by a DEBUG_IIS env var.
+
+ximtool/iis.c
+	Removed some code related to setting the fbconfig in the special
+	case of fbconfig=1 and the window not the same size as the frame
+	buffer.  This was apparently done originally when experimenting with
+	resizing the window automatically but that was abandoned and this		code was never removed.  It causes a bug in displaying to an un-
+	initialized frame.
+
+ximtool/ximtool.h
+	Changed FBCONFIG_ENV2 from 'XIMTOOLRC' to 'IMTOOLRC' (6/1)
+
+ximtool/irafio.c
+	Modified to handle new OIF V2 images. (6/8)
+
+ximtool/ximtool.gui
+ximtool/newimtool.gui
+	Deleted windowRGB translations. (6/11)
+
+ximtool/iis.c
+	Fixed a missing pair of braces. (7/9)
+
+ximtool/ximtool.c
+	Fixed a bug in the -nframes flag (7/9)
+
+obm/ObmW/Gterm.c
+ximtool/ximtool-alt.gui
+	Implemented magnify marker and cursor movement keystrokes for alt gui.
+	Fixed bug in scaling raster zero cursor values causing keystroke
+	moves to 'jump', change in get_draw_context() (7/11)
+
+ximtool/eps.c
+ximtool/eps.h
+ximtool/ximtool.gui
+ximtool/ximtool-alt.gui
+	Fixed BoundingBox errors and unmatched grestore preventing inclusion
+	of images in AASTex docs (8/6)
+
+ximtool/ximtool.gui
+ximtool/ximtool-alt.gui
+	Added Shift-MB2Up translation to turn off crosshair when button 
+	released. (8/6)
+
+ximtool/ximtool.c
+	Added "-rv" toolkit flag. (8/22)
+
+ximtool/ximtool-alt.gui
+	Fixed size of magnifier marker, added some common keystroke trans-
+	lations to markers. (8/22)
+
+Imakefile
+vximtool/		+
+	Added the Virtual XImtool dummy server (8/22)
+
+obm/ObmW/Gterm.c
+	Fixed a bug in GtSetMapping which wasn't returning a success value,
+	caused an evaluation error on HP  (8/26)
+
+obm/ObmW/Gterm.c
+	Fixed a bug in refresh_destination() in which only the left side of
+	an image would be displayed if the FB was bigger than 512x512 and
+	memModel=beNiceToServer.  (8/27)
+
+obm/ObmW/Gterm.c
+	Fixed a bug in scale_intzoom in which a beNiceToServer memModel would
+	display odd zooms factors w/ a yflip. (8/27)
+
+ximtool/ximtool.man
+ximtool/ximtool.html
+	Misc. typos.  (8/28)
+
+Imakefile
+ximtool/ximtool.gui
+ximtool/ximtool.html
+	Changed version to V1.1 set release date as 9/1/97?  (8/28)
+
+ximtool/Imakefile
+	Modified to automatically build a separate ximtool-alt binary.
+	Eventually one or the other GUI should be used as the default so
+	for now there are copies of the needed files and each binary builds
+	from a different list, but the directory should be cleaned up when
+	the new features are added permanently (8/28)
+
+obmsh/Imakefile
+obmsh/obmsh.man		+
+	Added a man page for the task (8/28)
+
+ximtool/raster.c
+	Fixed an off-by-one bug in the computation of the center when doing
+	an integer zoom.  Caused a one pixel boundary on two sides of a
+	hardcopy plot (8/29)
+
+ximtool/ximtool-alt.man
+ximtool/ximtool-alt.html
+	Added documentation for the alt GUI. (8/29)
+
+ximtool/ximtool.gui
+ximtool/ximtool.html
+	Removed cursor movement commands (9/10)
+
+obm/Tcl/Imakefile
+	DU4 now defines OSF1Architecture instead of OSF1, wasn't getting
+	the right flags. (9/10)
+
+obm/Imakefile
+obm/ObmP.h
+ximtool/Imakefile
+ximtool/eps.c
+ximtool/fitsio.c
+ximtool/gifio.c
+ximtool/irafio.c
+	Digital Unix 4 now defines a uchar typedef so had I had to define
+	an OSF1 flag to workaround the local typedefs causing compiler errors.
+	(9/10)
+
+xpm/Imakefile
+xaw3d/Imakefile
+	Needed to add a 'all' target specifying the library to be built.
+	On AIX these Imakefiles create an enpty all target and the library
+	is skipped since it thinks the (empty) target is up to date. (9/10)
+
+vximtool/vximtool.c
+	Need to ifdef include <sys/select.h> for AIX (9/10)
+
+--------------------
+V1.1 Release  (9/10)
+--------------------

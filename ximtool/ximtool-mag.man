@@ -1,9 +1,9 @@
 .\" @(#)ximtool.1 1.1 10-Dec-96 MJF
 .TH XIMTOOL 1 "10 Dec 1996" "X11IRAF Project"
 .SH NAME
-ximtool \- interactive image display program for the X Window System
+ximtool-mag \- interactive image display program for the X Window System with experimental GUI
 .SH SYNOPSIS
-.B "ximtool" [\-\fItoolkitoption\fP ...] [ \fIoptions\fP ...] [\fIimagename\fP]
+.B "ximtool-mag" [\-\fItoolkitoption\fP ...] [ \fIoptions\fP ...] [\fIimagename\fP]
 .SH OPTIONS
 .TP 5
 .B "-basePixel \fIN\fP"       
@@ -55,6 +55,11 @@ the \fIgui\fP resource parameter.
 Display panner marker window at startup.  If set, a panner window showing
 the full frame buffer will appear in the upper-right side of the main display
 window.
+.TP 5
+.B "-displayMagnifier \fIbool\fP"
+Display magnifier marker window at startup.  If set, a magnifier window showing
+a zoomed section around the cursor will appear in the upper-left side of the
+mail display window.
 .TP 5
 .B "-displayCoords \fIbool\fP"
 Display WCS coordinate marker window at startup.  If set, a coordinate
@@ -463,6 +468,10 @@ True
 True
 .sp -0.5
 .TP 35
+ *displayMagnifier:
+False
+.sp -0.5
+.TP 35
  *blinkRate:
 1.0
 .sp -0.5
@@ -473,6 +482,14 @@ True
 .TP 35
  *pannerGeom:
 -5+5
+.sp -0.5
+.TP 35
+ *magnifierArea:
+100*100
+.sp -0.5
+.TP 35
+ *magnifierGeom:
++5+5
 .sp -0.5
 .TP 35
  *wcsboxGeom:
@@ -563,6 +580,12 @@ Area in pixels of the panner window.
 .B "*pannerGeom"
 Where to place the panner window.
 .TP 22
+.B "*magnifierArea"
+Area in pixels of the magnifier window.
+.TP 22
+.B "*magnifierGeom"
+Where to place the magnifier window.
+.TP 22
 .B "*wcsboxGeom"
 Where to place the coords box.
 .TP 22
@@ -603,7 +626,7 @@ the marker. See below for more information on markers.
 Clicking on MB2 in the main image window pans (one click) or zooms (two
 clicks) the image. Further clicks cycle through the builtin zoom factors.
 Moving the pointer to a new location and clicking moves the feature under
-the pointer to the center of the display window.   Holding down the Shift
+the pointer to the center of the display window.  Holding down the Shift
 key while clicking MB2 will cause a full-screen crosshair cursor to appear
 until the button is released, this can be useful for fine positioning of the
 cursor.
@@ -722,6 +745,13 @@ Zoom in
 .B "Ctrl--"
 Zoom out
 
+.TP 12
+.B "Ctrl-[hjkl]  or  Ctrl-[arrow_key]"
+Move cursor one pixel in each direction
+.sp -0.5
+.TP 12
+.B "Ctrl-Shift-[hjkl]  or  Ctrl-Shift-[arrow_key]"
+Move cursor ten pixels in each direction
 .sp -0.5
 .TP 12
 .B "Alt-1 thru Alt-4"
@@ -824,9 +854,10 @@ the IRAF \fIdev$graphcap\fR file.
 Although ximtool doesn't do much with markers currently, they are a general
 feature of the \fIGterm\fP widget and are used more extensively in other
 programs (e.g. the prototype IRAF science GUI applications). XImtool uses 
-markers for the marker zoom feature discussed above, and also for the panner
-and the coords box. All markers share some of the same characteristics, so it
-is worthwhile learning basic marker manipulation keystrokes.
+markers for the marker zoom feature discussed above, and also for the panner,
+magnifier and the coordinates box. All markers share some of the same
+characteristics, so it is worthwhile learning basic marker manipulation
+keystrokes.
 .TP 3
 \fBo\fP
 MB1 anywhere inside a marker may be used to drag the marker.
@@ -885,6 +916,26 @@ window to pan the image.
 The panner marker can be disabled by defining the \fIdisplayPanner\fP
 GUI resource, its size and location can be controlled using the
 \fIpannerArea\fP and \fIpannerGeom\fP GUI resources respectively.
+
+.SS "MAGNIFIER MARKER"
+
+The magnifier marker can be used to zoom in on a small area around the cursor.
+It will be updated as the cursor moves but only for small motions (either
+mouse movement or with the cursor movement keystrokes) to minimize the
+impact on the system.  The zoom factor is expressed as some fraction of the
+size of the magnifier marker itself.  The default zoom is 4, i.e. the area
+in the marker represents and area in the image that's one-fourth the size
+of the marker.  Other zoom factors may be selected using the popup menu 
+created by hitting MB1 in the marker.
+
+By default the magnifier marker is not visible, to toggle it select the
+\fIMagnifier\fR option from the \fIOptions\fR menubar button.  Alternatively,
+for just a quick look holding down the Shift and MB1 buttons will display
+the marker until the button is released.
+
+The magnifier marker can be disabled by defining the \fIdisplayMagnifier\fP
+GUI resource, its size and location can be controlled using the
+\fImagnifierArea\fP and \fImagnifierGeom\fP GUI resources respectively.
 
 .SS "COORDS BOX MARKER"
 

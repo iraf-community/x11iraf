@@ -10,17 +10,13 @@
  *
  * isGIF    -- returns nonzero if the named file is a GIF file.
  * loadGIF  -- reads a GIF file and returns the decoded pixel array and gray-
- * 	        scale 8 bit colormap.  The caller is responsible for freeing
- * 	        the pixels buffer.  
+ *	       scale 8 bit colormap.  The caller is responsible for freeing
+ * 	       the pixels buffer.  
  * writeGIF -- performs the converse operation, writing the given pixel array
- * 	    and colormap to the output Sun rasterfile.
+ * 	       and colormap to the output GIF file.
  *
  * Based on GIFENCOD by David Rowley <mgardi@watdscu.waterloo.edu>.A
  * Lempel-Zim compression based on "compress".
- *
- * The Graphics Interchange Format(c) is the Copyright property of
- * CompuServe Incorporated.  GIF(sm) is a Service Mark property of
- * CompuServe Incorporated.
  */
 
 #include <stdio.h>
@@ -33,7 +29,9 @@ typedef int	    	code_int;
 typedef long int	count_int;
 typedef unsigned char	byte;
 #ifndef AIXV3
+#ifndef OSF1
 typedef unsigned char	uchar;
+#endif
 #endif
 
 #define MAXCOLORS 256

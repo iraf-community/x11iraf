@@ -1,0 +1,40 @@
+# Imakefile for the Virtual XImtool display server.
+
+X11IRAFDIR = ../
+#include <../X11IRAF.tmpl>
+
+    CDEBUGFLAGS = -g
+
+  LOCAL_LDFLAGS = $(X11IRAF_LDFLAGS)
+ EXTRA_INCLUDES = $(X11IRAF_INCLUDES)
+        OBMLIBS =
+        MATHLIB = -lm
+         XAWLIB =
+
+           SRCS = vximtool.c
+           OBJS = vximtool.o
+
+# Hack to compile under SunPRO V4 on Solaris
+#if defined (SunArchitecture) && HasSunC && OSMajorVersion >= 5
+        CCOPTIONS = -Xs
+  EXTRA_LDOPTIONS = -xildoff
+#endif
+
+AllTarget(vximtool)
+
+NormalProgramTarget(vximtool,$(OBJS),,${OBMLIBS} XawClientLibs,$(MATHLIB))
+
+#if InstallManuals
+install:: 
+	MakeDir(X11irafManDir)
+	$(CP) vximtool.man X11irafManDir/vximtool.1
+#endif
+
+#if InstallBinaries
+install:: vximtool
+	-@if [ -d X11irafBinDir ]; then set +x; \
+	        else (set -x; $(MKDIRHIER) X11irafBinDir); fi
+	$(CP) vximtool X11irafBinDir
+#endif
+
+DependTarget()

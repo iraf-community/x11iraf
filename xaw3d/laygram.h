@@ -1,27 +1,5 @@
-#define OC 257
-#define CC 258
-#define OA 259
-#define CA 260
-#define OP 261
-#define CP 262
-#define NAME 263
-#define NUMBER 264
-#define INFINITY 265
-#define VERTICAL 266
-#define HORIZONTAL 267
-#define EQUAL 268
-#define DOLLAR 269
-#define PLUS 270
-#define MINUS 271
-#define TIMES 272
-#define DIVIDE 273
-#define PERCENTOF 274
-#define PERCENT 275
-#define WIDTH 276
-#define HEIGHT 277
-#define UMINUS 278
-#define UPLUS 279
-typedef union {
+
+typedef union  {
     int		    ival;
     XrmQuark	    qval;
     BoxPtr	    bval;
@@ -32,3 +10,26 @@ typedef union {
     Operator	    oval;
 } YYSTYPE;
 extern YYSTYPE LayYYlval;
+# define OC 257
+# define CC 258
+# define OA 259
+# define CA 260
+# define OP 261
+# define CP 262
+# define NAME 263
+# define NUMBER 264
+# define INFINITY 265
+# define VERTICAL 266
+# define HORIZONTAL 267
+# define EQUAL 268
+# define DOLLAR 269
+# define PLUS 270
+# define MINUS 271
+# define TIMES 272
+# define DIVIDE 273
+# define PERCENTOF 274
+# define PERCENT 275
+# define WIDTH 276
+# define HEIGHT 277
+# define UMINUS 278
+# define UPLUS 279

@@ -42,9 +42,9 @@ DEFINES =
 
        LINTLIBS = $(LINTXLIB) $(LINTXTOOL)
 
-  EXTRA_DEFINES = -DARROW_SCROLLBAR
+#  EXTRA_DEFINES = -DARROW_SCROLLBAR
 
- EXTRA_INCLUDES = -I. -I../include
+#  EXTRA_INCLUDES = -I.
 
 HEADERS = \
 	AllWidgets.h \
@@ -113,6 +113,7 @@ HEADERS = \
 	ToggleP.h \
 	Tree.h \
 	TreeP.h \
+	VendorEP.h \
 	Viewport.h \
 	ViewportP.h \
 	XawInit.h
@@ -211,36 +212,19 @@ LEX=LexCmd
 YACC=YaccCmd
 #endif
 
-all:: libXaw3d.a
+all::
 
 LinkFileList(linklibs,libXaw3d.a,X11irafLibDir,Xaw3dDir)
 
 libXaw3d.a: $(OBJS)
-	$(RM) $@
-	$(AR) $@ $(OBJS)
-	RanLibrary($@)
-
-includes::
-	MakeDir(X11irafIncDir)
-	MakeDir(X11irafIncDir/X11)
-	MakeDir(X11irafIncDir/X11/Xaw3d)
-	@(set -x; for i in $(HEADERS); do \
-	    $(RM) X11irafIncDir/X11/Xaw3d/$$i; \
-	    $(LN) ../../../xaw3d/$$i X11irafIncDir/X11/Xaw3d/$$i; \
-	done)
-
-#if InstallIncludes
-install::
-	@(set -x; for i in $(HEADERS); do \
-	    $(RM) X11irafIncDir/X11/Xaw3d/$$i; \
-	    $(CP) $$i X11irafIncDir/X11/Xaw3d; \
-	done)
-#endif  
+        $(RM) $@
+        $(AR) $@ $(OBJS)
+        RanLibrary($@)
 
 #if InstallLibraries
 install::
 	@(set -x; $(RM) X11irafLibDir/libXaw3d.a)
-	@(set -x; $(LN) ../xaw3d/libXaw3d.a X11irafLibDir/libXaw3d.a)
+InstallLibrary(Xaw3d,X11irafLibDir)
 #endif
 
 depend:: laygram.c laylex.c

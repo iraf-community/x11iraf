@@ -31,4 +31,11 @@ install:: obmsh
 	$(CP) obmsh X11irafBinDir
 #endif
 
+#if InstallManuals
+install:: 
+	MakeDir(X11irafManDir)
+	$(CP) obmsh.man X11irafManDir/obmsh.1
+#endif
+
 DependTarget()
+

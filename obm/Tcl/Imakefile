@@ -54,7 +54,7 @@ XCOMM - The following are for HP-UX
     COMPAT_OBJS = tclMtherr.o
 #else
 
-#if defined(OSF1)
+#if defined(OSF1Architecture)
 XCOMM - The following are for OSF/1 on Alpha
       GCC_FLAGS =
        AC_FLAGS = -DHAVE_UNISTD_H=1 -DNO_UNION_WAIT=1 -DNEED_MATHERR=1

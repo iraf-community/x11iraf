@@ -1181,14 +1181,21 @@ src_recenter:
 	     * source raster, but only if only one edge extends beyond the
 	     * raster boundary.  If both edges are out of bounds we just
 	     * clip below.
+	     *
+	     * MJF 9/29  - The changes to fx2/fy2 below are to fix an off-by-one
+	     * error in the center pixel computed by an integer zoom.  For
+	     * example, display a 256sq image, invert the cmap and zoom by
+	     * two, the center is different than a straight centering op done
+	     * by the pan function.  The effect is that hardcopy has an extra
+	     * border on two sides.
 	     */
 	    fx1 = (sx1 < 0) ? -sx1 : 0;
-	    fx2 = (sx2 > max_x) ? (max_x - sx2) : 0;
+	    fx2 = (sx2 > max_x) ? (max_x - sx2 + 1) : 0;
 	    if (fx1 && !fx2 || !fx1 && fx2)
 		xcen += (fx1 + fx2);
 
 	    fy1 = (sy1 < 0) ? -sy1 : 0;
-	    fy2 = (sy2 > max_y) ? (max_y - sy2) : 0;
+	    fy2 = (sy2 > max_y) ? (max_y - sy2 + 1) : 0;
 	    if (fy1 && !fy2 || !fy1 && fy2)
 		ycen += (fy1 + fy2);
 

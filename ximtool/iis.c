@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -407,9 +408,15 @@ XtInputId *id_addr;
 	int	datain = *fd_addr;
 	int	dataout = chan->dataout;
 	int	ndatabytes, nbytes, n, ntrys=0;
-	static	int errmsg=0, bswap=0;
 	struct	iism70 iis;
 	char	buf[SZ_FIFOBUF];
+	static	int errmsg=0, bswap=0;
+	static	int iis_debug = -1;
+
+
+	/* Initialize the debug output. */
+	if (iis_debug == -1)
+	    iis_debug = (getenv("DEBUG_IIS") != (char *)NULL);
 
 	/* Get the IIS header. */
 	if ((n = read (datain, (char *)&iis, sizeof(iis))) < sizeof(iis)) {
@@ -457,12 +464,29 @@ XtInputId *id_addr;
 	if (!(iis.tid & PACKED))
 	    ndatabytes *= 2;
 
+	if (iis_debug) {
+            fprintf (stderr,
+               "subunit=%06o tid=%06o nbytes=%7d x=%06o y=%06o z=%06o t=%06o\n",
+               iis.subunit & 077,
+               iis.tid,
+	       ndatabytes,
+               iis.x & 0177777,
+               iis.y & 0177777,
+               iis.z & 0177777,
+               iis.t & 0177777);
+            fflush (stderr);
+        }
+
+
 	switch (iis.subunit & 077) {
 	case FEEDBACK:
 	    /* The feedback unit is used only to clear a frame.
 	     */
 	    xim_setReferenceFrame (chan, decode_frameno (iis.z & 07777));
 	    xim_eraseFrame (xim, chan->reference_frame);
+	    if (iis_debug)
+  		fprintf (stderr, "erase frame %d - ref = %d\n", 
+		    decode_frameno(iis.z & 07777), chan->reference_frame);
 	    break;
 
 	case LUT:
@@ -488,9 +512,12 @@ XtInputId *id_addr;
 
 		    frame = max (1, n + 1);
 		    if (frame > xim->nframes) {
-			if (frame < MAX_FRAMES)
+			if (frame < MAX_FRAMES) {
 			    set_fbconfig (chan, xim->fb_configno, frame);
-			else {
+	    		    if (iis_debug)
+                                fprintf (stderr, "set_fbconfig (%d, %d)\n",
+                                    xim->fb_configno, frame);
+			} else {
 			    fprintf (stderr, "imtool warning: ");
 			    fprintf (stderr, 
 				"attempt to display nonexistent frame %d\n",
@@ -500,6 +527,8 @@ XtInputId *id_addr;
 		    }
 
 		    xim_setDisplayFrame (xim, frame);
+		    if (iis_debug)
+                        fprintf (stderr, "set_frame (%d)\n", frame);
 		    return;
 		}
 	    }
@@ -531,6 +560,9 @@ XtInputId *id_addr;
 		} else {
 		    GtReadPixels (xim->gt, chan->rf_p->raster, iobuf, 8, x, y,
 			min(xim->width-x,nbytes), max(1,nbytes/xim->width));
+		    if (iis_debug)
+                        fprintf (stderr,
+                            "read %d bytes at [%d,%d]\n", nbytes, x, y);
 		}
 
 		/* Return the data from the frame buffer. */
@@ -586,6 +618,9 @@ XtInputId *id_addr;
 		} else {
 		    GtWritePixels (xim->gt, chan->rf_p->raster, iobuf, 8, x, y,
 			min(xim->width-x,nbytes), max(1,nbytes/xim->width));
+		    if (iis_debug)
+                	fprintf (stderr, "write %d bytes at x=%d, y=%d\n",
+                    	    nbytes, x, y);
 		}
 
 		return;
@@ -615,6 +650,10 @@ XtInputId *id_addr;
 		    text = chan->rf_p->wcsbuf;
 
 		write (dataout, text, SZ_WCSBUF);
+		if (iis_debug) {
+                    fprintf (stderr, "query wcs:\n");
+                    write (2, text, SZ_WCSBUF);
+		}
 
 	    } else {
 		/* Set the WCS for the referenced frame.
@@ -627,12 +666,14 @@ XtInputId *id_addr;
 
 		/* See if we need to change the frame buffer configuration,
 		 * or allocate a new frame.
-	    	 */
+	
 		if (fb_config == 1) {
 		    if (xim->fb_config[0].width != xim->width || 
 		        xim->fb_config[0].height != xim->height)
 		            set_fbconfig (chan, fb_config, frame);
-		} else if (fb_config != xim->fb_configno)
+		} else 
+		*/
+		if (fb_config != xim->fb_configno)
 		        set_fbconfig (chan, fb_config, frame);
 		else if (frame > xim->nframes && frame < MAX_FRAMES)
 		    set_fbconfig (chan, xim->fb_configno, frame);
@@ -641,6 +682,11 @@ XtInputId *id_addr;
 		xim_setReferenceFrame (chan, frame);
 		if (read (datain, buf, ndatabytes) == ndatabytes)
 		    strncpy (chan->rf_p->wcsbuf, buf, SZ_WCSBUF);
+
+		if (iis_debug) {
+                    fprintf (stderr, "set wcs:\n");
+                    write (2, buf, ndatabytes);
+		}
 
 		strcpy (chan->rf_p->ctran.format, W_DEFFORMAT);
 		chan->rf_p->ctran.imtitle[0] = '\0';
@@ -665,6 +711,8 @@ XtInputId *id_addr;
 		 * read all we do is initiate a cursor read; completion occurs
 		 * when the user hits a key or button.
 		 */
+		if (iis_debug)
+		    fprintf (stderr, "read cursor position\n");
 		if (iis.tid & IMC_SAMPLE) {
 		    /* Sample the cursor position and return the cursor value
 		     * on the output datastream encoded in a fixed size
@@ -703,6 +751,8 @@ XtInputId *id_addr;
 		float wx = sx, wy = sy;
 		int wcs = iis.z;
 
+		if (iis_debug)
+		    fprintf(stderr, "write cursor position: [%d,%d]\n", sx, sy);
 		if (wcs) {
 		    ct = wcs_update (xim, xim->df_p);
 		    if (ct->valid) {

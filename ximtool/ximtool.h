@@ -53,7 +53,7 @@
 #define	FBCONFIG_2		"/usr/local/lib/imtoolrc"
 #define	CMAPCONFIG		"/usr/local/lib/imtoolcmap"
 #define	FBCONFIG_ENV1		"imtoolrc"
-#define	FBCONFIG_ENV2		"XIMTOOLRC"
+#define	FBCONFIG_ENV2		"IMTOOLRC"
 #define	PRINTCONFIG		"/usr/local/lib/ximprint.cfg"
 
 /* WCS definitions. */

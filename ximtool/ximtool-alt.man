@@ -1,7 +1,7 @@
 .\" @(#)ximtool.1 1.1 10-Dec-96 MJF
 .TH XIMTOOL 1 "10 Dec 1996" "X11IRAF Project"
 .SH NAME
-ximtool \- interactive image display program for the X Window System
+ximtool-alt \- interactive image display program for the X Window System with experimental GUI
 .SH SYNOPSIS
 .B "ximtool" [\-\fItoolkitoption\fP ...] [ \fIoptions\fP ...] [\fIimagename\fP]
 .SH OPTIONS
@@ -55,6 +55,11 @@ the \fIgui\fP resource parameter.
 Display panner marker window at startup.  If set, a panner window showing
 the full frame buffer will appear in the upper-right side of the main display
 window.
+.TP 5
+.B "-displayMagnifier \fIbool\fP"
+Display magnifier marker window at startup.  If set, a magnifier window showing
+a zoomed section around the cursor will appear in the upper-left side of the
+mail display window.
 .TP 5
 .B "-displayCoords \fIbool\fP"
 Display WCS coordinate marker window at startup.  If set, a coordinate
@@ -114,6 +119,12 @@ communication with a client program.
 Specifies the printer configuration file to use.  By default this will be
 /usr/local/lib/ximprint.cfg.  See below for more information on configuring
 output devices.
+.TP 5
+.B "-showToolBar"                  
+Show the Toolbox menubar at startup.
+.TP 5
+.B "-showPanelBar"                  
+Show the Panels menubar at startup.
 .TP 5
 .B "-tile"                  
 The default display mode is to view one frame at a time. In tile frames mode,
@@ -463,6 +474,19 @@ True
 True
 .sp -0.5
 .TP 35
+ *displayMagnifier:
+False
+.sp -0.5
+.TP 35
+ *showToolBar:
+False
+.sp -0.5
+.TP 35
+ *showPanelBar:
+False
+.sp -0.5
+.TP 35
+.TP 35
  *blinkRate:
 1.0
 .sp -0.5
@@ -473,6 +497,14 @@ True
 .TP 35
  *pannerGeom:
 -5+5
+.sp -0.5
+.TP 35
+ *magnifierArea:
+100*100
+.sp -0.5
+.TP 35
+ *magnifierGeom:
++5+5
 .sp -0.5
 .TP 35
  *wcsboxGeom:
@@ -558,16 +590,28 @@ Width of the main image window.
 Height of the main image window.
 .TP 22
 .B "*pannerArea"
-Area in pixels of the panner window.
+Area in pixels of the panner/magnifier window.
 .TP 22
 .B "*pannerGeom"
-Where to place the panner window.
+Where to place the panner/magnifier window.
+.TP 22
+.B "*magnifierArea"
+Area in pixels of the magnifier window.
+.TP 22
+.B "*magnifierGeom"
+Where to place the magnifier window.
 .TP 22
 .B "*wcsboxGeom"
 Where to place the coords box.
 .TP 22
 .B "*maxContrast"
 Maximum contrast value.
+.TP 22
+.B "*showToolBar"
+Show the Toolbox menubar on startup.
+.TP 22
+.B "*showPanelBar"
+Show the Panels menubar on startup.
 
 
 .SH DESCRIPTION
@@ -590,6 +634,61 @@ or simple FITS formats are permitted) may be loaded on the command line or by
 using the Load Panel. This allows you to browse images and perform the same
 manipulations as if they had been displayed by a client.
 
+.SS "GUI OVERVIEW"
+
+The GUI consists of a large image display window and a number of smaller
+pannels that control various specific functions such as image Load, Save
+and Print as well as a general purpose Control Panel.  The main window
+menubar has several menu buttons to the left: the \fIFiles\fR menu is used
+to load/save/print an image as well as quit the task. The \fIView\fR menu
+let's you select the image orientation, zoom, colormap or frame. The
+\fIOptions\fR menu allows you to call up control panels, toggle markers
+or blinking etc.  Some of this functionality is duplicated elsewhere in
+the GUI.  
+
+The right side of the menubar contains command buttons to flip the
+image as well as buttons for frame selection.  The \fIToolbox Button\fR is
+labelled with a 'T', when this is enabled a second menubar appears below
+the main one containing a number of command buttons providing quick access
+to functions otherwise found elsewhere in the GUI.   From the left these
+buttons include:
+.nf
+    + symbol		- zoom in
+    Magnify		- set zoom factor 1
+    - symbol		- zoom out
+    Inv			- Invert contrast
+    Norm		- Normalize colormap
+    Match		- Match LUTs
+    Reg			- Register
+    Cntr		- Center frame
+    < arrow		- decrease blink interval
+    Blink		- Toggle frame blink
+    > arrow		- inrease blink interval
+    <-> symbol		- X-flip and Y-flip
+    |+| symbol		- Tile Frame toggle
+    < arrow		- previous frame
+    <number>		- select frame
+    > arrow		- next frame
+.fi
+The image flip and 
+frame selection buttons are also moved from the main menubar to provide
+more space for the image title.  Next to the toolbox toggle is the
+\fIControl Panels\fR button which operates in a similar manner.  When enabled
+a second menubar appears with more buttons:  on the left side are two icons
+used as accelerators for a disk save (the floppy icon) and print function
+(the printer icon), the parameters used for these operations are those which
+have seen set through their respective control panel or the task resources.
+The middle two sections of buttons are toggles which manage the control
+panels for each function or the main imagewindow markers.  Finally a help
+and a quit button for the task.  By default these two extra menubars are
+disabled to provide more screen space for the image, they are controlled
+by the task \fI*showToolBar\fR and \fI*showPanelBar\fR resources or the
+\fI-showToolBar\fR and \fI-showPanelBar\fR command line flags.
+
+For more detailed information on the operation of the control panels please
+see the on-line help (i.e. use the '?' button or Alt-h keystroke in the
+main image window).
+
 .SS "MOUSE OPERATIONS"
 
 Clicking and dragging MB1 (mouse button 1) in the main image window creates
@@ -603,7 +702,7 @@ the marker. See below for more information on markers.
 Clicking on MB2 in the main image window pans (one click) or zooms (two
 clicks) the image. Further clicks cycle through the builtin zoom factors.
 Moving the pointer to a new location and clicking moves the feature under
-the pointer to the center of the display window.   Holding down the Shift
+the pointer to the center of the display window.  Holding down the Shift
 key while clicking MB2 will cause a full-screen crosshair cursor to appear
 until the button is released, this can be useful for fine positioning of the
 cursor.
@@ -722,6 +821,13 @@ Zoom in
 .B "Ctrl--"
 Zoom out
 
+.TP 12
+.B "Ctrl-[hjkl]  or  Ctrl-[arrow_key]"
+Move cursor one pixel in each direction
+.sp -0.5
+.TP 12
+.B "Ctrl-Shift-[hjkl]  or  Ctrl-Shift-[arrow_key]"
+Move cursor ten pixels in each direction
 .sp -0.5
 .TP 12
 .B "Alt-1 thru Alt-4"
@@ -824,9 +930,10 @@ the IRAF \fIdev$graphcap\fR file.
 Although ximtool doesn't do much with markers currently, they are a general
 feature of the \fIGterm\fP widget and are used more extensively in other
 programs (e.g. the prototype IRAF science GUI applications). XImtool uses 
-markers for the marker zoom feature discussed above, and also for the panner
-and the coords box. All markers share some of the same characteristics, so it
-is worthwhile learning basic marker manipulation keystrokes.
+markers for the marker zoom feature discussed above, and also for the panner,
+magnifier and the coordinates box. All markers share some of the same
+characteristics, so it is worthwhile learning basic marker manipulation
+keystrokes.
 .TP 3
 \fBo\fP
 MB1 anywhere inside a marker may be used to drag the marker.
@@ -885,6 +992,26 @@ window to pan the image.
 The panner marker can be disabled by defining the \fIdisplayPanner\fP
 GUI resource, its size and location can be controlled using the
 \fIpannerArea\fP and \fIpannerGeom\fP GUI resources respectively.
+
+.SS "MAGNIFIER MARKER"
+
+The magnifier marker can be used to zoom in on a small area around the cursor.
+It will be updated as the cursor moves but only for small motions (either
+mouse movement or with the cursor movement keystrokes) to minimize the
+impact on the system.  The zoom factor is expressed as some fraction of the
+size of the magnifier marker itself.  The default zoom is 4, i.e. the area
+in the marker represents and area in the image that's one-fourth the size
+of the marker.  Other zoom factors may be selected using the popup menu 
+created by hitting MB1 in the marker.
+
+By default the magnifier marker is not visible, to toggle it select the
+\fIMagnifier\fR option from the \fIOptions\fR menubar button.  Alternatively,
+for just a quick look holding down the Shift and MB1 buttons will display
+the marker until the button is released.
+
+The magnifier marker can be disabled by defining the \fIdisplayMagnifier\fP
+GUI resource, its size and location can be controlled using the
+\fImagnifierArea\fP and \fImagnifierGeom\fP GUI resources respectively.
 
 .SS "COORDS BOX MARKER"
 

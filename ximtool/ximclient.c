@@ -1033,11 +1033,11 @@ char **argv;
 
 	} else if (strcmp (option, "papersize") == 0) {	       /* PAPER SIZE */
 	    if (strval[2] == 'T' || strval[2] == 't')
-		psim->page.orientation = EPS_LETTER;
+		psim->page.page_type = EPS_LETTER;
 	    else if (strval[2] == 'G' || strval[2] == 'g')
-		psim->page.orientation = EPS_LEGAL;
+		psim->page.page_type = EPS_LEGAL;
 	    else if (strval[0] == 'A' || strval[0] == 'a')
-		psim->page.orientation = EPS_A4;
+		psim->page.page_type = EPS_A4;
 	    sprintf (buf, "%s %s", option, strval);
 	    xim_message (xim, "printOptions", buf);
 

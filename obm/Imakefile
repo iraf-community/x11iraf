@@ -17,6 +17,10 @@ X11IRAFDIR = ../
 #if defined (SunArchitecture) && HasSunC && OSMajorVersion >= 5
         CCOPTIONS = -Xs
   EXTRA_LDOPTIONS = -xildoff
+#else
+#if defined (OSF1Architecture) && OSMajorVersion >= 4
+        CCOPTIONS = -DOSF1
+#endif
 #endif
 
 #if HasLargeTmp | SystemV4

@@ -99,7 +99,8 @@ typedef struct {
 #define PageHeight(ps)	( PageInfo[ps->page.page_type].sizey )       
 
 /* Page layout definitions. */
-#define ANNOT_MARGIN	  100		/* margin in pixels for annotation */
+#define X_ANNOT_MARGIN	  30		/* margin in pixels for annotation   */
+#define Y_ANNOT_MARGIN	  60		/* margin in pixels for annotation   */
 #define TITLE_OFFSET	  20		/* Offset for title string           */
 #define AXIS_OOFFSET	   7		/* Outer offset for axis             */
 #define AXIS_IOFFSET	   2		/* Inner offset for axis             */

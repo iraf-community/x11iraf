@@ -14,9 +14,6 @@
  * 	        the pixels buffer.  
  * writeFITS -- performs the converse operation, writing the given pixel array
  * 		and colormap to the output Sun rasterfile.
-#ifndef AIXV3
- *
-#endif
  * Based on contributed FITS I/O software for XV by David Robinson.
  */
 
@@ -35,7 +32,11 @@
 enum datatype { T_INT, T_LOG, T_REAL, T_NOVAL };
 
 typedef unsigned char byte;
+#ifndef AIXV3
+#ifndef OSF1
 typedef unsigned char uchar;
+#endif
+#endif
 
 typedef struct {
 	FILE      *fp;              /* file pointer */

@@ -1,7 +1,7 @@
 # X11IRAF -- X11/GUI development utilities and applications developed by the
 # IRAF Project, National Optical Astronomy Observatories, 1994.
 #
-# Version 1.0 - Thu Mar  6 10:30:16 MST 1997 (updated April 5 1997)
+# Version 1.1 - Mon Sep  8 15:59:42 MST 1997 (updated Sep 8 1997)
 # (Principal authors Doug Tody, Mike Fitzpatrick. Email: iraf@noao.edu)
 
     README		This file
@@ -19,6 +19,7 @@
     ximtool		Source for ximtool (image display server/browser)
     guidemo		Some sample GUI applications
     xtapemon		IRAF tape monitor GUI
+    vximtool		Source for Virtual XImtool dummy display server
 
     obm			Source for the Object Manager (OBM)
     xpm			OBM-compatible copy of the X pixmap source

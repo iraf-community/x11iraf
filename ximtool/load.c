@@ -321,17 +321,19 @@ register XimDataPtr xim;
         if (!(flist = (char *) malloc (SZ_NAME * flp->nfiles)))
 	    return;
 
-        for (i=0, op=flist;  i < flp->nfiles;  i++) {
+	strcpy (flist, "setValue {");
+        for (i=0, op = flist+10; i < flp->nfiles;  i++) {
             *op++ = '"';
             for (ip = flp->FileList[i];  *op = *ip++;  op++)
                 ;
             *op++ = '"';
             *op++ = '\n';
         }
+        *op++ = '}';
         *op = '\0';
 
-        /* Send the file list to the GUI. */
-        xim_message (xim, "filelist", flist);
+        /* Send the file list to the GUI.  */
+        ObmDeliverMsg (xim->obm, "filelist", flist);
         free ((char *)flist);
 }
 
@@ -398,7 +400,7 @@ int *number_entries;			/* number of filenames in the list */
 	    return((char **) NULL);
 
 	/* Allocate filelist.  */
-	max_entries = 2048;
+	max_entries = 4096;
 	filelist = (char **) malloc (max_entries * sizeof(char *));
 	if (filelist == (char **) NULL) {
 	    (void) closedir (current_directory);
@@ -407,7 +409,7 @@ int *number_entries;			/* number of filenames in the list */
 
 	/* Save the current and change to the new directory.  */
 	(void) chdir (directory);
-	entry = readdir  (current_directory);
+	entry = readdir (current_directory);
 	while (entry != (struct dirent *) NULL) {
 	    if (*entry->d_name == '.') {
 	    	entry = readdir (current_directory);
@@ -421,7 +423,7 @@ int *number_entries;			/* number of filenames in the list */
 	    	if (*number_entries >= max_entries) {
 	    	    max_entries <<= 1;
 	    	    filelist = (char **)
-	    	    realloc((char *) filelist, max_entries * sizeof(char *));
+	    	        realloc((char *)filelist, max_entries * sizeof(char *));
 	    	    if (filelist == (char **) NULL) {
 	    	    	(void) closedir(current_directory);
 	    	    	return((char **) NULL);
@@ -440,7 +442,7 @@ int *number_entries;			/* number of filenames in the list */
 	}
 	(void) closedir (current_directory);
 
-	/* Sort filelist in ascending order.  */
+	/* Sort filelist in ascending order. */
 	(void) strsort(filelist, *number_entries);
 
 	return (filelist);

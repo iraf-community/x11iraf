@@ -452,7 +452,9 @@ extern	ObmContext global_obm_handle;
 #define SQR(a)		((a)*(a))
 
 #ifndef AIXV3
+#ifndef OSF1
 typedef unsigned char	uchar;
+#endif
 #endif
 
 /* The following are the string values returned to Tcl for boolean values. */

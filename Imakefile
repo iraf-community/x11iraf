@@ -9,11 +9,11 @@ XCOMM  Aug 9 1996
 #define PassCDebugFlags 'CDEBUGFLAGS=$(CDEBUGFLAGS)'
 
 LIBDIRS 	= obm xaw3d xpm
-APPDIRS 	= xgterm ximtool xtapemon obmsh
+APPDIRS 	= xgterm ximtool xtapemon obmsh vximtool
 SUBDIRS 	= $(LIBDIRS) $(APPDIRS)
 
 World::
-	@echo "Building the X11IRAF software tree"
+	@echo "Building the X11IRAF V1.1 software tree"
 	@echo "" ; date ; echo ""
 	MakeDir (include)
 	MakeDir (lib)
@@ -46,6 +46,7 @@ apps::
 	done
 
 bindist::
+	(cd ximtool ; make alt-install)
 	@tar -cf bin.tar bin app-defaults man
 
 archive::

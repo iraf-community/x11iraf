@@ -156,6 +156,7 @@ extern char *ttyname();
 void *memmove(a,b,n) void *a; const void *b; size_t n; { bcopy(b,a,n); }
 #endif
 #if defined(sun) && OSMAJORVERSION < 5
+#undef memmove
 void *memmove(a,b,n) void *a, *b; int n; { bcopy(b,a,n); }
 #endif
 

@@ -106,6 +106,12 @@ char *argv[];
 		argv[i] = (char *) malloc (30);
 		sprintf (argv[i], "XImtool*displayPanner:%s", str);
 
+	    } else if (strcmp (argv[i], "-displayMagnifier") == 0) {
+		str = argv[++i];
+		strcpy (argv[i-1], "-xrm\0");
+		argv[i] = (char *) malloc (30);
+		sprintf (argv[i], "XImtool*displayMagnifier:%s", str);
+
 	    } else if (strcmp (argv[i], "-displayCoords") == 0) {
 		str = argv[++i];
 		strcpy (argv[i-1], "-xrm\0");
@@ -364,36 +370,37 @@ XtPointer id;
  */
 Usage ()
 {
-	fprintf (stderr, "Usage:\n\n");
-	printoption ("    ximtool");
-	printoption ("[-basePixel <num>]");   	   /* base cmap pixel */
-	printoption ("[-cmap1 <file>]");	   /* User cmap 1 */
-	printoption ("[-cmap2 <file>]");    	   /* User cmap 2 */
-	printoption ("[-cmapDir1 <dir>]");   	   /* User cmapDir 1 */
-	printoption ("[-cmapDir1 <dir>]");   	   /* User cmapDir 2 */
-	printoption ("[-cmapInitialize <bool>]");  /* initialize colormap */
-	printoption ("[-cmapName <name>]");   	   /* colormap name */
-	printoption ("[-config <num>]");	   /* initial config */
-	printoption ("[-defgui]");		   /* Print default GUI */
-	printoption ("[-displayPanner <bool>]");   /* display panner box */
-	printoption ("[-displayCoords <bool>]");   /* display wcs coords box */
-	printoption ("[-fifo <pipe>]");	    	   /* fifo pipe */
-	printoption ("[-fifo_only]");  		   /* use fifo only */
-	printoption ("[-gui <file>]");	    	   /* GUI file */
-	printoption ("[-help]");		   /* Print help */
-	printoption ("[-imtoolrc <file>]");   	   /* fbconfig file */
-	printoption ("[-inet_only | -port_only]"); /* use inet only */
-	printoption ("[-invert]");       	   /* invert colormap */
-	printoption ("[-maxColors <num>]");   	   /* # of colors */
-	printoption ("[-memModel <type>]");   	   /* memory model */
-	printoption ("[-nframes <num>]");    	   /* # of frames */
-	printoption ("[-port <num>]");	    	   /* inet port */
-	printoption ("[-printConfig <name>]");     /* printer config file */
-	printoption ("[-tile]");       		   /* tile frames */
-	printoption ("[-unix <name>]");	    	   /* unix socket */
-	printoption ("[-unix_only]");  		   /* use unix only */
-	printoption ("[<file>]");  		   /* file to load */
-  	fprintf (stderr,"\n");
+    fprintf (stderr, "Usage:\n\n");
+    printoption ("    ximtool");
+    printoption ("[-basePixel <num>]");   	/* base cmap pixel 	*/
+    printoption ("[-cmap1 <file>]");	   	/* User cmap 1 		*/
+    printoption ("[-cmap2 <file>]");    	/* User cmap 2 		*/
+    printoption ("[-cmapDir1 <dir>]");   	/* User cmapDir 1 	*/
+    printoption ("[-cmapDir1 <dir>]");   	/* User cmapDir 2 	*/
+    printoption ("[-cmapInitialize <bool>]");   /* initialize colormap 	*/
+    printoption ("[-cmapName <name>]");   	/* colormap name 	*/
+    printoption ("[-config <num>]");	   	/* initial config 	*/
+    printoption ("[-defgui]");		   	/* Print default GUI 	*/
+    printoption ("[-displayPanner <bool>]");   	/* display panner box 	*/
+    printoption ("[-displayMagnifier <bool>]");	/* display magnifier    */
+    printoption ("[-displayCoords <bool>]");   	/* display coords box 	*/
+    printoption ("[-fifo <pipe>]");	    	/* fifo pipe 		*/
+    printoption ("[-fifo_only]");  		/* use fifo only 	*/
+    printoption ("[-gui <file>]");	    	/* GUI file 		*/
+    printoption ("[-help]");		   	/* Print help 		*/
+    printoption ("[-imtoolrc <file>]");   	/* fbconfig file 	*/
+    printoption ("[-inet_only | -port_only]"); 	/* use inet only 	*/
+    printoption ("[-invert]");       	   	/* invert colormap 	*/
+    printoption ("[-maxColors <num>]");   	/* # of colors 		*/
+    printoption ("[-memModel <type>]");   	/* memory model	 	*/
+    printoption ("[-nframes <num>]");    	/* # of frames 		*/
+    printoption ("[-port <num>]");	    	/* inet port 		*/
+    printoption ("[-printConfig <name>]");     	/* printer config file 	*/
+    printoption ("[-tile]");       		/* tile frames 		*/
+    printoption ("[-unix <name>]");	    	/* unix socket 		*/
+    printoption ("[-unix_only]");  		/* use unix only 	*/
+    printoption ("[<file>]");  		   	/* file to load 	*/
+    fprintf (stderr,"\n");
 }
 
 

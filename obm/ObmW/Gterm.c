@@ -609,6 +609,11 @@ Realize (gw, valueMask, attrs)
     XSetWindowAttributes *attrs;
 {
     GtermWidget w = (GtermWidget) gw;
+    /* MJF
+    XVisualInfo rvinfo, *vinfo = (XVisualInfo *) NULL;
+    Visual	*ourVisual = (Visual *) NULL;
+    int		i, nvis;
+    */
 
     /* Set default window size. */
     XtMakeResizeRequest (gw, w->core.width, w->core.height,
@@ -618,7 +623,19 @@ Realize (gw, valueMask, attrs)
      * default visual.
      */
 
-    /* Create graphics window. */
+    /* Create graphics window.  We first look for an 8-Bit PseudoColor
+     * visual to use, otherwise we fail.  (MJF  8/22/97)
+    vinfo = XGetVisualInfo (w->gterm.display, 0L, &rvinfo, &nvis);
+    for (i=0; i < nvis; i++)
+	if (vinfo[i].depth == 8 && vinfo[i].class == PseudoColor)
+	    ourVisual = vinfo[i].visual;
+    if (ourVisual)
+        XtCreateWindow (gw, InputOutput, ourVisual, *valueMask, attrs);
+    else {
+        fprintf (stderr, "No 8-bit PseudoColor visual found.\n");
+        exit(1);
+    }
+    */
     XtCreateWindow (gw, InputOutput, (Visual *)CopyFromParent,
 	*valueMask, attrs);
 
@@ -2379,6 +2396,14 @@ get_draw_context (w)
 	    mx->pixmap = w->gterm.window;
 	    mx->drawGC = w->gterm.drawGC;
 	    mx->GC_private = 0;
+
+/* (7/16/97) MJF - we don't scale raster 0 since it's already in screen coords.
+   Otherwise the cursor movement keystrokes scale incorrectly and quickly move
+   to (0,0).
+	    mx->xoffset = mx->yoffset = mx->scale = 0;
+   [DCT] This doesn't look entirely right as it disables logical coords for
+   the screen.  Leave as is until this can be studied more carefully.
+ */
 
 	    mx->xoffset = mx->yoffset = 0;
 	    if (xres == rp->width && yres == rp->height)
@@ -4585,14 +4610,14 @@ GtSetMapping (w, mapping, rop, src,st,sx,sy,snx,sny, dst,dt,dx,dy,dnx,dny)
     if (!defined || src != mp->src || dst != mp->dst) {
 	mp->enabled = mp->defined = 1;
 	mp->refresh = 0;
-	return;
+	return (OK);
     } else if (!mp->enabled) {
-	return;
+	return (OK);
     } else if (snx == 0 || sny == 0 || dnx == 0 || dny == 0)
-	return;
+	return (OK);
 
     if (rop & R_RefreshNone)
-	return;
+	return (OK);
 
     /* Convert input mappings to pixel coordinates, we deal with only pixel
      * coordinates from here on.
@@ -4734,6 +4759,8 @@ GtSetMapping (w, mapping, rop, src,st,sx,sy,snx,sny, dst,dt,dx,dy,dnx,dny)
     free_mapping (w, o_mp);
     mp = &w->gterm.mappings[mapping];
     mp->refresh = 0;
+
+    return (OK);
 }
 
 
@@ -5846,7 +5873,7 @@ refresh_destination (w, mp, x1, y1, nx, ny)
 	if (clip && dr->type == ImageRaster)
 	    goto zoom;
 
-	xin_lp = (uchar *)xin->data + sy * xin_bpl;
+	xin_lp = (uchar *)xin->data + sy * xin_bpl + sx;
 	xout_lp = (uchar *)xout->data + oy * xout_bpl + ox;
 
 	for (j=0;  j < dny;  j++) {
@@ -6114,8 +6141,14 @@ scale_intzoom (idata,ibpl,odata,obpl, sx,sy,dx,dy,dnx,dny, xflip,yflip, nx,ny)
     if (xflip) {
 	for (j=0, k=0;  j < dny;  j += ny, k++) {
 	    ip = idata + (sy + k) * ibpl + sx;
-	    op = odata + (dy + yflip ? (dny-ny-j) : j) * obpl + dx + dnx;
+
+	    op = odata + (dy + (yflip ? (dny-ny-j) : j)) * obpl + dx + dnx;
 	    otop = lp = op - dnx;
+
+
+	    /* Why are the case statements below necessary, doesn't the
+	     * default case do the same thing regardless of what nx is?  MJF
+	     */
 
 	    /* Replicate a block of pixels. */
 	    switch (nx) {
@@ -6193,7 +6226,7 @@ scale_intzoom (idata,ibpl,odata,obpl, sx,sy,dx,dy,dnx,dny, xflip,yflip, nx,ny)
     } else {
 	for (j=0, k=0;  j < dny;  j += ny, k++) {
 	    ip = idata + (sy + k) * ibpl + sx;
-	    op = lp = odata + (dy + yflip ? (dny-ny-j) : j) * obpl + dx;
+	    op = lp = odata + (dy + (yflip ? (dny-ny-j) : j)) * obpl + dx;
 	    otop = op + dnx;
 
 	    /* Replicate a block of pixels. */
