@@ -618,9 +618,9 @@ ximtool/gui
     from zero to avoid problems found on some X servers.  Also fixed a 
     bug in the tile-mode initialization.
 
------------------------------
-V1.3Beta Release (02/03/2002)
------------------------------
+-------------------------
+V1.3 Release (02/03/2002)
+-------------------------
 
 ximtool/gui/global.res
     Prefixed all resources with a Class name to avoid mixups with desktop
@@ -813,12 +813,16 @@ ximtool/ximclient.c
     fifo opening so it's never used (we can't write to /dev in OS X).
     (4/29/02)
 
-ximtool/ximtool.c
-    Added more text to the BadMatch explanation (5/3/02)
+------------------------------
+X11IRAF V1.3 Released (5/7/02)
 
-System frozen, PS documentation and GUIs regenerated, junk cleaned out (5/6/02)
+xaw3d/AllWidgets.c
+xaw3d/XawInit.c
+    Removed __DARWIN__ ifdefs around vendorShellWidgetClass definitions.
+    This was put in originally to avoid link-time errors under OSX but had
+    the effect of keeping the DYLD_FLAT_NAMESPACE workaround from doing
+    anything.  (7/5/02)
 
--------------------------------
-V1.3EXPORT Release (05/06/2002)
--------------------------------
-
+obm/server.c
+    Modified serverActivate() to supply input focus hints to workaround 
+    problems with certain window managers (e.g. FVWM2).  (7/8/02)

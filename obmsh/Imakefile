@@ -21,6 +21,7 @@ X11IRAFDIR = ../
         OBMLIBS = LibObm LibXpm
         MATHLIB = -lm
          XAWLIB = LibXaw3d
+         XPMLIB = LibXpm
 
            SRCS = obmsh.c
            OBJS = obmsh.o

@@ -1,11 +1,9 @@
 .\" @(#)vximtool.1 1.1 18-Jun-97 MJF
 .TH VXIMTOOL 1 "18 Jun 1997" "IRAF Project"
 .SH NAME
-vximtool \-- A virtual and/or proxy display server for IRAF IIS protocol clients
+vximtool \-- A virtual display server for IRAF IIS protocol clients
 .SH SYNOPSIS
 \fBvximtool\fP [ \fIoptions\fP ...]
-.br
-\fBvximtool\fP -proxy [ \fIoptions ...] server [ server\fP ... ]
 
 .SH "DESCRIPTION"
 .LP
@@ -15,11 +13,7 @@ to read and write to internal frame buffers maintained as arrays in memory.
 Multiple frame buffers and frame buffer configurations are supported.  It
 can be used to debug IIS protocol client programs by printing out the 
 protocol packets recieved, or can simply be used as a dummy server in cases
-where no image display is really needed.  By enabling the \fI-proxy\fR
-flag the server can also be used to repeat the datastream requests to a
-list of other servers, effectively splitting the image display to a number
-of other servers.  See below for details on using the program in this
-manner.
+where no image display is really needed.
 
 The \fI-verbose\fR flag will log all datastream requests to the stderr, 
 otherwise the task runs silently except for error messages.  The process is
@@ -87,7 +81,7 @@ fifo pipes and unix sockets will be disabled.
 .TP 5
 .B "-noraster"
 If set no client data will be stored in memory, and image readback will
-return an array of zeroes unless used as a proxy server.
+return an array of zeroes.
 .TP 5
 .B "-nframes \fInum\fP"
 Specifies the number of frame buffers to configure at startup.  By default
@@ -99,13 +93,7 @@ communication with a client program.
 .TP 5
 .B "-port \fInum\fP"
 Set the primary port to listen on for client connections.  The default
-is 5137 except when used as a proxy server in which case the default is
-5136.
-.TP 5
-.B "-proxy"
-Run as a proxy server by repeating client requests to each of the
-\fIserver\fR remote server arguments.  See the section on proxy usage
-below for details.
+is 5137.
 .TP 5
 .B "-verbose"
 If set, print information about all IIS packets headers recieved to the 
@@ -136,11 +124,7 @@ For example, to use the default pipes the path would be specified as simply
 Clients connect via a tcp/ip socket. The default port is \fI5137\fP, or a
 custom port may be specified using the \fI-port\fP command line switch.
 This permits connecting to the server over a remote network connection 
-anywhere on the Internet.   When used as a proxy server the default port
-number is 5136 so as to avoid a conflict with an XImtool running on the
-same machine, other connections are disabled unless otherwise overridden
-by a command line option following the \fI-proxy\fR flag to reset the
-connection.  A port number of 0 (zero) disables this connection.
+anywhere on the Internet.  A port number of 0 (zero) disables this connection.
 .TP 5
 .B "unix domain sockets"
 Like a tcp/ip socket, but limited to a single host system. Usually faster
@@ -167,67 +151,7 @@ describing the operation to be performed (select frame, load display, read
 cursor, etc), and an optional data packet containing e.g. pixels. It is
 beyond the scope of this document to describe fully the details of the
 protocol; interested users should contact \fIiraf@noao.edu\fP for further
-information or see the \fIA Reference Guide for the IRAF Client Display
-Library\fR for details.
-
-.SH "PROXY USAGE"
-
-The \fIvximtool\fR may also be used as a proxy server by enabling the
-\fI-proxy\fR command line flag.  In this mode the program acts as
-a relay for the IIS datastream packets, sending image data, frame requests,
-etc. to a list of other servers specified on the command line.  The effect
-of this is to allow a client to display to this program which then
-re-displays to each of the other named servers.  A maximum of 8 servers
-may be named, they may be either on the local host or a remote machine 
-and connections can be established using either fifos or sockets.  See
-below for details on how to specify the server connection.
-
-The current implementation has a few restrictions users should keep in mind:
-.IP
-Cursor and image readback are done by sending the request \fIonly\fR to
-the first server named on the command line.  This is done to avoid forcing
-a cursor mode on all servers which cannot be terminated when a response is
-received from only one server, and means that the first server named should
-be the one used to control interactive sessions.  The remaining servers
-however can still respond to cursor requests from other applications connected
-to that server on another channel.
-.IP
-All named servers must be running prior to starting the proxy server.  The
-connection to the remote servers is established when this task is first run
-and if no server is running that connection will be ignored.  The task will
-exit if no remote servers can be found for display.
-.IP
-Any connected server that shuts down while the proxy server is running is
-likely to cause the program to crash on the next display. 
-
-.SH "SPECIFYING THE REMOTE SERVER CONNECTION"
-
-The syntax for the server argument used in proxy mode is as follows:
-
-            \fI<domain> : <address>\fR
-
-where <domain> is one of \fBinet\fR (internet tcp/ip socket), \fBunix\fR
-(unix domain socket) or \fBfifo\fR (named pipe).  The form of the address
-depends upon the domain, as illustrated in the examples below.
-
-.TP 30
-inet:5137                   
-Connect to port 5137 on the local host.
-.TP 30
-inet:5137:foo.bar.edu       
-Client connection to port 5137 on internet host \fIfoo.bar.edu\fR.
-The dotted (numeric) form of address may also be used.
-.TP 30
-unix:/tmp/.IMT212           
-Unix domain socket with the given pathname. IPC method, local host only.
-.TP 30
-fifo:/dev/imt1i:/dev/imt1o  
-FIFO or named pipe with the given pathname.  IPC method, local host only.
-Two pathnames are required, one for input and one for output, since FIFOs
-are not bidirectional. 
-.LP
-The address field may contain up to two "%d" fields.  If present, the
-user's UID will be substituted (e.g. "unix:/tmp/.IMT%d").
+information.
 
 .SH "EXAMPLES"
 
@@ -247,30 +171,8 @@ user's UID will be substituted (e.g. "unix:/tmp/.IMT%d").
 4) Run the vximtool in the background, taking cursor input from a file:
 
     \f(CW% vximtool -i < cursor_file &\fR
-.TP 5
-5) Run as a proxy server, displaying to both a local and a remote XImtool, log output to stderr:
-
-        \fI...start all XImtool servers to be used\fP
-    \f(CW% vximtool -v -proxy unix:/tmp/.IMT%d inet:5137:pisces
-    Connected to server on unix:/tmp/.IMT359
-    Connected to server on inet:5137:pisces
-    Open to accept input on inet: port 5136\fR
-
-.LP
-To display to the proxy server the client should connect to the vximtool on
-\fIinet:5136\fP, the proxy in turn will relay data to the servers listed on
-the command line.  Note that in this last example any cursor requests from
-the client connected to the vximtool will be handled by the
-ximtool connected on a unix socket on the local machine (i.e. the first
-server argument).  The remote ximtool
-on the machine pisces could simultaneously be used by another client on
-that machine connected by some other means.  In this case it will only
-display images coming from the \fIvximtool\fR proxy, but could be used in 
-an interactive IRAF session running on pisces to examine the images.
 
 .SH SEE ALSO
 ximtool(1)
-.br
-\fIA Reference Guide for the IRAF Client Display Library (CDL)\fR
 .SH COPYRIGHT
 Copyright(c) 1986 Association of Universities for Research in Astronomy Inc.

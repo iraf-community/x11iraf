@@ -20,6 +20,7 @@ cat pixtab.obj			>> $file
 cat tcl.obj			>> $file
 cat warn.obj			>> $file
 
+cat global.res			>> $file
 if ($alt == 0) then
     cat main.res		>> $file
 else
@@ -39,7 +40,6 @@ cat pixtab.res			>> $file
 cat help.res			>> $file
 cat tcl.res			>> $file
 cat warn.res			>> $file
-cat global.res			>> $file
 cat resources.res		>> $file
 
 cat boot.tcl			>> $file

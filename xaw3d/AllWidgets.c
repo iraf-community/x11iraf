@@ -50,9 +50,7 @@ extern WidgetClass toggleWidgetClass;
 extern WidgetClass topLevelShellWidgetClass;
 extern WidgetClass transientShellWidgetClass;
 extern WidgetClass treeWidgetClass;
-#ifndef __DARWIN__
 extern WidgetClass vendorShellWidgetClass;
-#endif
 extern WidgetClass viewportWidgetClass;
 extern WidgetClass wmShellWidgetClass;
 
@@ -100,9 +98,7 @@ XmuWidgetNode XawWidgetArray[] = {
 { "topLevelShell", &topLevelShellWidgetClass },
 { "transientShell", &transientShellWidgetClass },
 { "tree", &treeWidgetClass },
-#ifndef __DARWIN__
 { "vendorShell", &vendorShellWidgetClass },
-#endif
 { "viewport", &viewportWidgetClass },
 { "wmShell", &wmShellWidgetClass },
 };

@@ -40,8 +40,6 @@ void XawInitializeWidgetSet ()
 
     if (firsttime) {
 	firsttime = 0;
-#ifndef __DARWIN__
 	XtInitializeWidgetClass (vendorShellWidgetClass);
-#endif
     }
 }

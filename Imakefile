@@ -9,7 +9,7 @@
 #define IHaveSubdirs
 #define PassCDebugFlags 'CDEBUGFLAGS=$(CDEBUGFLAGS)'
 
-RELEASE		= v1.3
+RELEASE		= v1.3.1
 
 LIBDIRS 	= obm xaw3d xpm cdl
 APPDIRS 	= xgterm ximtool xtapemon obmsh vximtool

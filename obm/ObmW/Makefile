@@ -2,7 +2,7 @@
 # $XConsortium: imake.c,v 1.89 94/08/12 00:45:51 gildea Exp $
 
 # -----------------------------------------------------------------------
-# Makefile generated from "Imake.tmpl" and </tmp/IIf.deaiiY>
+# Makefile generated from "Imake.tmpl" and </tmp/IIf.z8aWMN>
 # $XConsortium: Imake.tmpl,v 1.219 94/05/13 15:58:31 matt Exp $
 # $SunSoft: @(#)Imake.tmpl	1.1 01/13/97 16:16:22 $
 #

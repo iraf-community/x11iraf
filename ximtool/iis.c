@@ -160,7 +160,7 @@ register XimDataPtr xim;
 
 #ifdef __DARWIN__
 	/* On OS X we don't use fifos. */
-	strcpy (xim->input_fifo, "none");
+	xim->input_fifo = "none";
 	return (NULL);
 #endif
 
@@ -1347,7 +1347,7 @@ int	frame;
 			    mp->dy, mp->dny, mp->dy+mp->dny);
 		    }
 	            if ((sx >= mp->dx && sx <= (mp->dx + mp->dnx)) &&
-	                (sy >= mp->dy && sy <= (mp->dy + mp->dny))) {
+	                ( y >= mp->dy &&  y <= (mp->dy + mp->dny))) {
 		    	    if (map_debug) printf (" YES\n");
 			    return (mp);
 	            }

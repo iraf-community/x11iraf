@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+#ifdef NEED_STRDUP
+
 /*
  * STRDUP -- Return a pointer to a copy of the input string.
  */
@@ -17,3 +19,5 @@ char	*s;
 	memmove (str, s, nchars);
 	return (str);
 }
+
+#endif

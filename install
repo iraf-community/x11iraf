@@ -214,8 +214,8 @@ endif
 clear
 NEWLINE
 BOLD_ON
-echo "			X11IRAF V1.3 Installation"
-echo "			========================="
+echo "			X11IRAF V1.3.1 Installation"
+echo "			==========================="
 BOLD_OFF
 NEWLINE
 
@@ -496,7 +496,11 @@ if (-e app-defaults) then
     echo -n "   Installing app-defaults in $xapp ..."
     if ("$exec" == "yes") then
         foreach i (*)
-	    cp $i $xapp >& /dev/null
+	    if ($i == "XGterm" && $arch == "macosx") then
+		; # no-op
+	    else
+	        cp $i $xapp >& /dev/null
+	    endif
 	    if ($status == 1) then
 		DO_FAIL
 		ERRMSG "Cannot copy '$i' to $xapp"

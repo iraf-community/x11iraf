@@ -40,6 +40,8 @@ X11IRAFDIR = ../
     CDEBUGFLAGS = -g
          XAWLIB = LibXaw3d
       DEPXAWLIB = DepLibXaw3d
+         XPMLIB = LibXpm
+      DEPXPMLIB = DepLibXpm
      X11IRAFDIR = ../
 
    MAIN_DEFINES = -DUTMP $(TTYGROUPDEF) $(PUCCPTYDDEF) \
@@ -82,7 +84,7 @@ X11IRAFDIR = ../
 
 
      TERMCAPLIB = TermcapLibrary
-        OBMLIBS = -lobm -lXpm
+        OBMLIBS = LibObm LibXpm
         MATHLIB = -lm
 
 AllTarget($(PROGRAMS))

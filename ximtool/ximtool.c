@@ -259,10 +259,10 @@ char *argv[];
 		xim->invert++;
 
 	    } else if (strcmp (argv[i], "-fifo") == 0) {
-		if (strcmp ("none", argv[++i]) == 0) {
+		if (strcmp ("none", argv[i+1]) == 0) {
 		    xim->input_fifo = "none";
 		} else {
-                    xim->input_fifo = malloc (strlen(argv[i])+2);
+                    xim->input_fifo = malloc (strlen(argv[++i])+2);
                     xim->output_fifo = malloc (strlen(argv[i])+2);
 		    sprintf (xim->input_fifo, "%si", argv[i]);
 		    sprintf (xim->output_fifo, "%so", argv[i]);
@@ -494,70 +494,45 @@ xim_badVisual (depth, class)
 int	depth;
 int	class;
 {
-  fprintf (stderr, 
-	"\n---------------------------------------------------------------\n");
-  fprintf (stderr, 
-	"ERROR: Detected incorrect X visual:  depth=%d class=", depth);
+    fprintf (stderr, 
+	"\nERROR: Detected incorrect X visual:  depth=%d class=", depth);
         switch (class) {
-        case StaticGray:    fprintf (stderr, "StaticGray")  ; break;
-        case GrayScale:     fprintf (stderr, "GrayScale")   ; break;
-        case StaticColor:   fprintf (stderr, "StaticColor") ; break;
-        case PseudoColor:   fprintf (stderr, "PseudoColor") ; break;
-        case TrueColor:     fprintf (stderr, "TrueColor")   ; break;
-        case DirectColor:   fprintf (stderr, "DirectColor") ; break;
-        default: 	    fprintf (stderr, "DirectColor") ; break;
+        case StaticGray:    fprintf (stderr, "StaticGray\n")  ; break;
+        case GrayScale:     fprintf (stderr, "GrayScale\n")   ; break;
+        case StaticColor:   fprintf (stderr, "StaticColor\n") ; break;
+        case PseudoColor:   fprintf (stderr, "PseudoColor\n") ; break;
+        case TrueColor:     fprintf (stderr, "TrueColor\n")   ; break;
+        case DirectColor:   fprintf (stderr, "DirectColor\n") ; break;
+        default: 	    fprintf (stderr, "DirectColor\n") ; break;
         }
-  fprintf (stderr, 
-	"\n---------------------------------------------------------------\n");
 
-  fprintf (stderr,  "\n");
-  fprintf (stderr, 
-    "XImtool currently requires an 8-bit PseudoColor visual in order to\n");
-  fprintf (stderr, 
-    "operate properly.  Unfortunately the only workaround for this at\n");
-  fprintf (stderr, 
-    "present is to start an 8-bit server using commands such as\n\n");
-  fprintf (stderr, 
-    "    %% startx -- -bpp 8\t\t\t\t\t    # XFree86 V3.x\n");
-  fprintf (stderr, 
-    "    %% startx -- -depth 8\t\t\t\t    # XFree86 V4.x\n");
-  fprintf (stderr, 
-    "    %% Xsun :0 -dev /dev/fb defclass PseudoColor defdepth 8  # Sun\n");
-  fprintf (stderr, 
-    "    %% Xdec -vclass0 PseudoColor\t\t\t\t    # Digital Unix\n");
-  fprintf (stderr, "\n");
+    fprintf (stderr,  "\n");
+    fprintf (stderr, 
+	"XImtool currently requires an 8-bit PseudoColor visual in order\n");
+    fprintf (stderr, 
+	"to operate properly. Unfortunately the only workaround for this\n");
+    fprintf (stderr, 
+	"at present is to start an 8-bit server using commands such as\n\n");
+    fprintf (stderr, 
+        "    %% startx -- -bpp 8\t\t\t\t\t    # XFree86 V3.x\n");
+    fprintf (stderr, 
+        "    %% startx -- -depth 8\t\t\t\t    # XFree86 V4.x\n");
+    fprintf (stderr, 
+        "    %% Xsun :0 -dev /dev/fb defclass PseudoColor defdepth 8  # Sun\n");
+    fprintf (stderr, 
+        "    %% Xdec -vclass0 PseudoColor\t\t\t\t    # Digital Unix\n");
+    fprintf (stderr, 
+	"\nThe actual commands used will vary depending on the platform,\n");
+    fprintf (stderr, 
+	"window manager/desktop used, and in some cases video hardware.\n");
+    fprintf (stderr, 
+	"See the Xserver(1) and xinit(1) man page for details. Users should\n");
+    fprintf (stderr, 
+	"also contact IRAF site support (iraf@noao.edu) with any questions\n");
+    fprintf (stderr, 
+	"or problems.\n\n");
 
-  fprintf (stderr, 
-     "If you use a graphical login manager such as xdm or CDE on Solaris\n");
-  fprintf (stderr, 
-     "you'll need to change the default depth by adding the above flags to\n");
-  fprintf (stderr, 
-     "the X server config file. This would be e.g. /etc/X11/xdm/Xservers\n");
-  fprintf (stderr, 
-     "for a Linux system or /usr/dt/config/Xservers for Solaris CDE.\n");
-  fprintf (stderr, "\n");
-  fprintf (stderr, 
-     "The actual commands used will vary depending on the platform,\n");
-  fprintf (stderr, 
-     "window manager/desktop used, and in some cases video hardware.\n");
-  fprintf (stderr, 
-     "See the Xserver(1) and xinit(1) man page for details. Users should\n");
-  fprintf (stderr, 
-     "also contact IRAF site support (iraf@noao.edu) with any questions\n");
-  fprintf (stderr, 
-     "or problems.\n\n");
-  fprintf (stderr, 
-     "Additional information and workarounds may be found at:\n\n");
-  fprintf (stderr, 
-     "\thttp://hea-www.harvard.edu/RD/ds9/\n");
-  fprintf (stderr, 
-     "\thttp://sparky.rice.edu/~hartigan/vnc.html\n");
-  fprintf (stderr, 
-     "\thttp://tdc-www.harvard.edu/software/saoimage/saoimage.16bit.html\n");
-
-  fprintf (stderr, "\n");
-  fprintf (stderr, "\n");
-  exit (1);
+    exit (1);
 }
 
 

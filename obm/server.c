@@ -633,9 +633,42 @@ int argc;
 char **argv;
 {
 	register ServerObject obj = (ServerObject) object;
-	register ObmContext obm = obj->server.obm;
+	register ObmContext obm = obj->server.obm; 
+	XWMHints hints;  
+	register int i;
+	ObmObject child; 
+	Widget    w;
 
-	ObmActivate (obm);
+ 
+	/* Activate the interface. */
+        ObmActivate (obm);
+
+
+	/* Now set the WM hints for the toplevel shell and any subwindows
+	 * of the UI.  Certain ICCCM-compliant window managers make assumptions
+	 * about how the client windows will handle input focus if it's not
+	 * set explicitly, and often the UI is not given the focus.
+	 */
+	hints.flags = InputHint | StateHint;
+	hints.input = True;
+	hints.initial_state = NormalState;
+	hints.icon_pixmap = None;
+	hints.icon_window = None;
+	hints.icon_x = hints.icon_y = 0;
+	hints.icon_mask = None;
+	hints.window_group = None;
+ 
+	XSetWMHints(obm->display, XtWindow(obm->toplevel), &hints);
+ 
+	obj = (ServerObject) obmFindObject (obm, "toplevel");
+	for (i=0;  i < obj->core.nchildren;  i++) {
+	    child = obj->core.children[i];
+	    if (child->core.classrec->object_type == OtShell) {
+		w = widgetGetPointer (child);
+		XSetWMHints(obm->display, XtWindow(w), &hints);
+	    }
+	}
+ 
 	return (TCL_OK);
 }
 
