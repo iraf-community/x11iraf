@@ -31,11 +31,11 @@
 #undef min
 #define min(a,b) ((a) < (b) ? (a) : (b)) 
 
-extern char *getwd(), *getenv();
+extern char 	*getwd(), *getenv();
 
-static char **listFiles();
-static int fileCompare(), globExpression(), fileType();
-static void amapc(), sortGraymap(), loadstat(), strsort();
+static char 	**listFiles();
+static int 	fileCompare(), globExpression(), fileType();
+static void 	amapc(), sortGraymap(), loadstat(), strsort();
 
 static int debug = False;
 
@@ -60,9 +60,9 @@ register XimDataPtr xim;
 	flp->gray = 0;
 
 	/* Update the GUI with the initial state. */
-        sprintf (buf, "curdir %s", flp->curdir);
+        sprintf (buf, "curdir %s\0", flp->curdir);
         xim_message (xim, "loadOptions", buf);
-        sprintf (buf, "pattern %s", flp->pattern);
+        sprintf (buf, "pattern %s\0", flp->pattern);
         xim_message (xim, "loadOptions", buf);
 }
 
@@ -93,7 +93,7 @@ register XimDataPtr xim;
 char *fname;
 int frame;
 {
-	register int i, fbconfig = xim->fb_configno, new_config=-1;
+	register int i, new_config=-1;
 	register char *ip;
 	register fileLoadPtr flp = xim->flp;
 	register FrameBufPtr fb;
@@ -110,7 +110,7 @@ int frame;
 
         /* Make sure the file exists. */
 	if (access(fname, R_OK) != 0) {
-	    sprintf (buf, "warning %s", "Error: File not found.");
+	    sprintf (buf, "warning %s\0", "Error: File not found.");
 	    xim_message (xim, "loadOptions", buf);
 	    return (-1);
 	}
@@ -167,14 +167,15 @@ int frame;
 
         default:
             /* We don't know what this is so give up and notify the GUI. */
-	    sprintf (buf, "warning %s", "Error: Unknown raster file type.");
+	    sprintf (buf, "warning %s\0", "Error: Unknown raster file type.");
 	    xim_message (xim, "loadOptions", buf);
 	    return (-1);
         }
 
 	if (debug) {
-	    fprintf (stderr,"Load: pix=%d w=%d h=%d nc=%d pcm=%d z1=%g z2=%g\n",
-		pix, w, h, ncolors, has_private_cmap, z1, z2);
+	    fprintf (stderr,
+		"Load: pix=%d w=%d h=%d xnc=%d nc=%d pcm=%d z1=%g z2=%g\n",
+		    pix, w, h, xim->ncolors, ncolors, has_private_cmap, z1, z2);
 	    fflush (stderr);
 	}
 
@@ -212,16 +213,29 @@ int frame;
 	 * uration.  Change the fbconfig if needed.
 	 */
 	if (w > xim->width || h > xim->height) {
+
+	    register int width, height, tmin = 100000, edges;
+
 	    loadstat (xim, "Initializing frame buffer...");
 
 	    /* First look for a frame buffer at least as large as the image. */
 	    for (i=0; i < MAX_FBCONFIG; i++) {
-		if (w <= xim->fb_config[i].width && 
-		    h <= xim->fb_config[i].height) {
-			new_config = i + 1;
-			break;
-		}
+		width = xim->fb_config[i].width;
+		height = xim->fb_config[i].height;
+                if (width == w && height == h) {
+                    /* Get an exact match first. */
+                    new_config = i + 1;
+		    break;
+                } else if (width >= w && height >= h) {
+                    /* Look for match with smallest padding. */
+                    edges = width - w + height - h;
+                    if (edges < tmin) {
+                        tmin = edges;
+                        new_config = i + 1;
+                    }
+                }
 	    }
+
 	    if (debug)
 	        fprintf (stderr, "Load: new_config=%d w=%d h=%d\n", new_config,
 		    xim->fb_config[new_config-1].width,
@@ -239,11 +253,16 @@ int frame;
                 cf->nframes = xim->nframes;
                 cf->width   = w;
                 cf->height  = h;
-	    } else 
-	        cf = &xim->fb_config[new_config-1];
+	    } else {
+                cf = &xim->fb_config[new_config-1];
+                cf->nframes = (cf->nframes < frame ? frame : cf->nframes);
+                cf->nframes = (cf->nframes < xim->nframes ? xim->nframes :
+		    cf->nframes);
+		xim->fb_configno = new_config;
+            }
 
             /* Change the frame buffer configuration. */
-            sprintf (buf, "%d %d %d", cf->width, cf->height, 8);
+            sprintf (buf, "%d %d %d\0", cf->width, cf->height, 8);
             xim_message (xim, "frameSize", buf);
 
             /* Create the frame. */
@@ -254,16 +273,12 @@ int frame;
             xim->height = cf->height;
             GtSetLogRes (xim->gt, cf->width, cf->height);
 
-	    /* Fit the frame.
-	    if (w < 800 && h < 800)
-                xim_message (xim, "frameFit", "resize");
-	    else
-	     */
-                xim_message (xim, "frameFit", "init");
+	    /* Fit the frame.  */
+            xim_message (xim, "frameFit", "init");
 	}
 
 	/* Take the pixels and colormap and write them to the display. */
-	if (!pix || (xim_writeDisplay (xim,
+	if ((pix == NULL) || (xim_writeDisplay (xim,
 		frame, mapname, pix, w, h, r, g, b, ncolors) < 0))
 	    status = -1;
 
@@ -308,8 +323,6 @@ register XimDataPtr xim;
         register fileLoadPtr flp = xim->flp;
 	register char *ip, *op, *flist;
 	register int i;
-	char buf[SZ_LINE];
-	extern char **ListFiles();
 
 	if (flp->FileList)
 	    for (i=0;  i < flp->nfiles;  i++)
@@ -663,7 +676,7 @@ int	npix, a1, a2, b1, b2;
 
 	for (i=0; i < npix; i++) {
             pixval = (a[i] - aoff) * scalar;
-            b[i] = max(minout, min(maxout, pixval + boff));
+            b[i] = (char) max(minout, min(maxout, pixval + boff));
         }
 }   
 

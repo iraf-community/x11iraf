@@ -434,6 +434,7 @@ char *message;
 	    printf ("%s: %s\n", object, message);
 	    fflush (stdout);
 	}
+	    
 
         /* Note -- the following can execute appInitialize, which initializes
          * the server and creates a new Tcl, so no server context (such as
@@ -678,6 +679,7 @@ int nargs;			/* optional argument list */
 	}
 
 	/* Create the object. */
+	    
 	newobj = (ObmObject) (*(classrec->Create)) (obm,
 	    name, classrec, parent, args, nargs);
 	if (!newobj) {

@@ -94,8 +94,7 @@ static XawTextSelectType defaultSelectTypes[] = {
 };
 
 static caddr_t defaultSelectTypesPtr = (caddr_t)defaultSelectTypes;
-extern char *_XawDefaultTextTranslations1, *_XawDefaultTextTranslations2,
-  *_XawDefaultTextTranslations3;
+extern char _XawDefaultTextTranslations[];
 static Dimension defWidth = 100;
 static Dimension defHeight = DEFAULT_TEXT_HEIGHT;
 
@@ -260,12 +259,6 @@ XrmValuePtr	toVal;
 static void 
 ClassInitialize()
 {
-  int len1 = strlen (_XawDefaultTextTranslations1);
-  int len2 = strlen (_XawDefaultTextTranslations2);
-  int len3 = strlen (_XawDefaultTextTranslations3);
-  char *buf = XtMalloc ((unsigned)(len1 + len2 + len3 + 1));
-  char *cp = buf;
-
   if (!FMT8BIT)
     FMT8BIT = XrmPermStringToQuark("FMT8BIT");
 
@@ -277,11 +270,6 @@ ClassInitialize()
 
   textClassRec.core_class.num_actions = _XawTextActionsTableCount;
   
-  (void) strcpy (cp, _XawDefaultTextTranslations1); cp += len1;
-  (void) strcpy (cp, _XawDefaultTextTranslations2); cp += len2;
-  (void) strcpy (cp, _XawDefaultTextTranslations3);
-  textWidgetClass->core_class.tm_table = buf;
-
   XtAddConverter(XtRString, XtRScrollMode, CvtStringToScrollMode, 
 		 (XtConvertArgList)NULL, (Cardinal)0);
   XtAddConverter(XtRString, XtRWrapMode,   CvtStringToWrapMode,   
@@ -3314,7 +3302,7 @@ TextClassRec textClassRec = {
     /* accept_focus     */      NULL,
     /* version          */	XtVersion,
     /* callback_private */      NULL,
-    /* tm_table         */      NULL,    /* set in ClassInitialize */
+    /* tm_table         */      _XawDefaultTextTranslations,
     /* query_geometry   */	XtInheritQueryGeometry,
     /* display_accelerator*/	XtInheritDisplayAccelerator,
     /* extension	*/	NULL

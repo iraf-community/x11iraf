@@ -51,7 +51,7 @@
 #define	SZ_MSGBUF	16384		/* object message fragments	*/
 #define	SZ_ESCAPE	64		/* client escape sequence	*/
 #define	INC_MSGBUF	16384		/* increment if overflow	*/
-#define	MAX_TEXTCHARS	80		/* max chars in text line	*/
+#define	MAX_TEXTCHARS	132		/* max chars in text line	*/
 #define	SL_XOFFSET	0		/* x offset to status line	*/
 #define	SL_YOFFSET	5		/* y offset to status line	*/
 #define	MAX_QUOTA	512		/* limit for one proc. loop	*/
@@ -215,6 +215,7 @@ static	int gio_retcursor(), gio_queue_output(), gio_queue_request();
 static	int gio_hardreset(), gio_activate(), gio_enable(), gio_tekmode();
 static	int gio_processdata(), gio_ptyinput(), gio_escape(), gio_status();
 static	int gio_activate_cb(), gio_connect_cb();
+static	int gio_deactivate_cb();
 static	void gio_keyinput(), gio_resize();
 static	void pl_decodepts(), gio_retenq();
 
@@ -275,6 +276,8 @@ int	fd;			/* fd of pty for terminal i/o */
 	    gio_connect_cb, NULL);
 	ObmAddCallback (obm, OBMCB_activate|OBMCB_preserve,
 	    gio_activate_cb, NULL);
+	ObmAddCallback (obm, OBMCB_deactivate|OBMCB_preserve,
+	    gio_deactivate_cb, NULL);
 	ObmAddCallback (obm, OBMCB_clientOutput|OBMCB_preserve,
 	    gio_queue_output, NULL);
 	ObmAddCallback (obm, OBMCB_setGterm|OBMCB_preserve,
@@ -337,6 +340,14 @@ int state;
 {
 	register RequestPtr rp;
 
+	/* Cancel any buffered command output. */
+	wait_cursor = 0;
+	while (rp = request_head) {
+	    request_head = rp->next;
+	    free ((char *)rp);
+	}
+	request_head = request_tail = NULL;
+
 	switch (state) {
 	case 0:
 	    /* Deactivate.  If the application is currently waiting for
@@ -349,14 +360,6 @@ int state;
                 if (gw)
                     GtSetCursorType (gw, GtIdleCursor);
 	    }
-
-	    /* Cancel any buffered command output. */
-	    wait_cursor = 0;
-	    while (rp = request_head) {
-		request_head = rp->next;
-		free ((char *)rp);
-	    }
-	    request_head = request_tail = NULL;
 
 	    ObmDeactivate (obm, 1);
 	    gtermio_close_workstation();
@@ -395,8 +398,18 @@ int dummy;
 Widget w;
 int state;
 {
+	register RequestPtr rp;
+
 	if (!state)
 	    return;
+
+	/* Cancel any buffered command output. */
+	wait_cursor = 0;
+	while (rp = request_head) {
+	    request_head = rp->next;
+	    free ((char *)rp);
+	}
+	request_head = request_tail = NULL;
 
 	if (state)
 	    gtermio_open_workstation();
@@ -407,6 +420,20 @@ int state;
 	wm_delete_window = XInternAtom (XtDisplay(w),
 	    "WM_DELETE_WINDOW", False);
 	XSetWMProtocols (XtDisplay(w), XtWindow(w), &wm_delete_window, 1);
+}
+
+
+/* GIO_DEACTIVATE_CB -- Deactivate callback, called by the gterm widget when
+ * the user interface is deactivated.  In reality we're just a dummy routine
+ * to intercept a window close action in a GUI to keep from shutting down 
+ * completely.
+ */
+static
+gio_deactivate_cb (dummy, w, state)
+int dummy;
+Widget w;
+int state;
+{
 }
 
 
@@ -1142,9 +1169,10 @@ again:
 			len_msgbuf += INC_MSGBUF;
 			msgbuf = (char *) realloc (msgbuf, len_msgbuf);
 		    }
-		    /* Map CRLF into LF. */
-		    if (ch == '\n' && msg_op > 0 && msgbuf[msg_op-1] == '\r')
-			--msg_op;
+		    /* Map CRLF and LFLF into LF. */
+		    if ((ch == '\n' || ch == '\r') && msg_op > 0 && 
+			msgbuf[msg_op-1] == '\r')
+			    --msg_op;
 		    msgbuf[msg_op++] = ch;
 
 		} else {
@@ -1177,6 +1205,8 @@ again:
 		    }
 		    msgbuf[msg_op++] = ch - 040;
 		} else {
+printf ("WIMAGE: %d,%d at %d,%d  msg_op=%d  len_msgbuf=%d\n",
+wi_x1, wi_y1, wi_nx, wi_ny, msg_op, len_msgbuf);
 		    if (gw && wi_nx*wi_ny <= len_msgbuf)
 			GtWritePixels (gw, wi_raster, msgbuf, wi_bp,
 			    wi_x1, wi_y1, wi_nx, wi_ny);
@@ -1368,13 +1398,19 @@ flush_alpha:	    if (tx_len > 0) {
 		    if (tx_len > 0) {
 			tx_buf[tx_len] = '\0';
 			if (tx_len > 1) {
+
 			    if (ch == '\n') {
 				tx_buf[tx_len] = ch;
 				tx_buf[tx_len+1] = '\0';
 			    }
-			    ObmDeliverMsg (obm, "textout", tx_buf);
 			    tx_buf[tx_len] = '\0';
+			    if (tx_len) {
+			        char  txtbuf[2048];
+			        sprintf (txtbuf, "setValue {%s}\0", tx_buf);
+			        ObmDeliverMsg (obm, "textout", txtbuf);
+			    }
 			}
+/*			if (gw && tx_len == 1) {*/
 			if (gw) {
 			    GtEraseAlphaCursor (gw);
 			    GtDrawDialogText (gw, sl_x, sl_y, tx_buf);
@@ -2120,7 +2156,7 @@ action:
 			return (-1);
 		    if (gw && scanok) {
 			if (GtReadPixels (gw, raster, data,
-				x1, y1, nx, ny, nbits) == ERR)
+				nbits, x1, y1, nx, ny) == ERR)
 			    npix = 0;
 		    }
 		}
@@ -2132,7 +2168,9 @@ action:
 		op = obuf;
 		*op++ = '\033';
 		for (i=0, op=obuf;  i < npix;  i++) {
-		    *op++ = data[i] + 040;
+/*		    *op++ = data[i] + 040;*/
+		    *op++ = ((data[i] >> 4) & 017) + 040;
+		    *op++ = ((data[i]     ) & 017) + 040;
 		    if (op - obuf > 100) {
 			v_write (pty_fd, obuf, op-obuf);
 			op = obuf;
@@ -2234,7 +2272,7 @@ action:
 		op = obuf;
 		*op++ = '\033';
 		for (i=0, op=obuf;  i < ncolors;  i++) {
-		    v[0] = r[i];  v[1] = g[i];  v[2] = b[i];
+		    v[0] = (r[i] >> 8); v[1] = (g[i] >> 8); v[2] = (b[i] >> 8);
 		    for (j=0;  j < 3;  j++) {
 			*op++ = ((v[j] >> 4) & 017) + 040;
 			*op++ = ((v[j]     ) & 017) + 040;
@@ -2527,7 +2565,7 @@ int *value;
 {
 	register int ch;
 	register int v;
-	int	neg;
+	int	neg = 0;
 
 	if (scanok) {
 	    /* Skip to the next integer token. */

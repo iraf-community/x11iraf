@@ -816,9 +816,6 @@ int	Red[], Green[], Blue[];
 
 	/* Write the GIF file terminator */
 	fputc (';', fp);
-
-	/* And close the file */
-	fclose (fp);
 }
 
 

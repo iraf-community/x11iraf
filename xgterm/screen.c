@@ -45,8 +45,10 @@
 #include <sys/ptem.h>
 #endif
 
-extern Char *calloc(), *malloc(), *realloc();
-extern void free();
+#ifdef MINIX
+#include <termios.h>
+#endif
+
 
 ScrnBuf Allocate (nrow, ncol, addr)
 /*
@@ -54,6 +56,9 @@ ScrnBuf Allocate (nrow, ncol, addr)
    thereto
    each line is formed from a pair of char arrays.  The first (even) one is
    the actual character array and the second (odd) one is the attributes.
+>    each line is formed from four char arrays.  The first one is the actual
+>    character array, the second one is the attributes, the third is the
+>    foreground color, and the fourth is the background color.
  */
 register int nrow, ncol;
 Char **addr;
@@ -62,10 +67,10 @@ Char **addr;
 	register Char *tmp;
 	register int i;
 
-	if ((base = (ScrnBuf) calloc ((unsigned)(nrow *= 2), sizeof (char *))) == 0)
+	if ((base = (ScrnBuf) calloc ((unsigned)(nrow *= 4), sizeof (char *))) == 0)
 		SysError (ERROR_SCALLOC);
 
-	if ((tmp = calloc ((unsigned) (nrow * ncol), sizeof(char))) == 0)
+	if ((tmp = (Char *)calloc((unsigned) (nrow * ncol), sizeof(char))) == 0)
 		SysError (ERROR_SCALLOC2);
 
 	*addr = tmp;
@@ -95,7 +100,7 @@ Reallocate(sbuf, sbufaddr, nrow, ncol, oldrow, oldcol)
 	if (sbuf == NULL || *sbuf == NULL)
 		return 0;
 
-	oldrow *= 2;
+	oldrow *= 4;
 	oldbuf = *sbufaddr;
 
 	/*
@@ -110,11 +115,11 @@ Reallocate(sbuf, sbufaddr, nrow, ncol, oldrow, oldcol)
 	 * If the screen shrinks, remove lines off the top of the buffer
 	 * if resizeGravity resource says to do so.
 	 */
-	nrow *= 2;
+	nrow *= 4;
 	if (nrow < oldrow  &&  term->misc.resizeGravity == SouthWestGravity) {
 	    /* Remove lines off the top of the buffer if necessary. */
 	    move_up = oldrow-nrow 
-		        - 2*(term->screen.max_row - term->screen.cur_row);
+		        - 4*(term->screen.max_row - term->screen.cur_row);
 	    if (move_up < 0)
 		move_up = 0;
 	    /* Overlapping memmove here! */
@@ -131,14 +136,14 @@ Reallocate(sbuf, sbufaddr, nrow, ncol, oldrow, oldcol)
 	 *  create the new buffer space and copy old buffer contents there
 	 *  line by line.
 	 */
-	if ((tmp = calloc((unsigned) (nrow * ncol), sizeof(char))) == 0)
+	if ((tmp = (Char *)calloc((unsigned) (nrow * ncol), sizeof(char))) == 0)
 		SysError(ERROR_SREALLOC);
 	*sbufaddr = tmp;
 	minrows = (oldrow < nrow) ? oldrow : nrow;
 	mincols = (oldcol < ncol) ? oldcol : ncol;
 	if (nrow > oldrow  &&  term->misc.resizeGravity == SouthWestGravity) {
 	    /* move data down to bottom of expanded screen */
-	    move_down = Min(nrow-oldrow, 2*term->screen.savedlines);
+	    move_down = Min(nrow-oldrow, 4*term->screen.savedlines);
 	    tmp += ncol*move_down;
 	}
 	for (i = 0; i < minrows; i++, tmp += ncol) {
@@ -153,10 +158,10 @@ Reallocate(sbuf, sbufaddr, nrow, ncol, oldrow, oldcol)
         /* Now free the old buffer */
 	free(oldbuf);
 
-	return move_down ? move_down/2 : -move_up/2; /* convert to rows */
+	return move_down ? move_down/4 : -move_up/4; /* convert to rows */
 }
 
-ScreenWrite (screen, str, flags, length)
+ScreenWrite (screen, str, flags, cur_fg, cur_bg, length)
 /*
    Writes str into buf at row row and column col.  Characters are set to match
    flags.
@@ -164,9 +169,10 @@ ScreenWrite (screen, str, flags, length)
 TScreen *screen;
 char *str;
 register unsigned flags;
+register unsigned cur_fg, cur_bg;
 register int length;		/* length of string */
 {
-	register Char *attrs, *attrs0;
+	register Char *attrs, *attrs0, *fgs, *bgs;
 	register int avail  = screen->max_col - screen->cur_col + 1;
 	register Char *col;
 	register int wrappedbit;
@@ -176,14 +182,21 @@ register int length;		/* length of string */
 	if (length <= 0)
 		return;
 
-	col = screen->buf[avail = 2 * screen->cur_row] + screen->cur_col;
+	col = screen->buf[avail = 4 * screen->cur_row] + screen->cur_col;
 	attrs = attrs0 = screen->buf[avail + 1] + screen->cur_col;
+        fgs = screen->buf[avail + 2] + screen->cur_col;
+        bgs = screen->buf[avail + 3] + screen->cur_col;
+
 	wrappedbit = *attrs0&LINEWRAPPED;
 	flags &= ATTRIBUTES;
 	flags |= CHARDRAWN;
 	memmove( col, str, length);
 	while(length-- > 0)
+	{
 		*attrs++ = flags;
+		*fgs++ = cur_fg;
+		*bgs++ = cur_bg;
+	}
 	if (wrappedbit)
 	    *attrs0 |= LINEWRAPPED;
 }
@@ -200,16 +213,16 @@ int last;
 register int where, n, size;
 {
 	register int i;
-	char *save [2 * MAX_ROWS];
+	char *save [4 * MAX_ROWS];
 
 
 	/* save n lines at bottom */
-	memmove( (char *) save, (char *) &sb [2 * (last -= n - 1)], 
-		2 * sizeof (char *) * n);
+	memmove( (char *) save, (char *) &sb [4 * (last -= n - 1)], 
+		4 * sizeof (char *) * n);
 	
 	/* clear contents of old rows */
-	for (i = 2 * n - 1; i >= 0; i--)
-		memset ((char *) save [i], 0, size);
+	for (i = 4 * n - 1; i >= 0; i--)
+		bzero ((char *) save [i], size);
 
 	/*
 	 * WARNING, overlapping copy operation.  Move down lines (pointers).
@@ -220,11 +233,11 @@ register int where, n, size;
 	 *
 	 *   +--------|---------|----+
 	 */
-	memmove( (char *) &sb [2 * (where + n)], (char *) &sb [2 * where], 
-		2 * sizeof (char *) * (last - where));
+	memmove( (char *) &sb [4 * (where + n)], (char *) &sb [4 * where], 
+		4 * sizeof (char *) * (last - where));
 
 	/* reuse storage for new lines at where */
-	memmove( (char *) &sb[2 * where], (char *)save, 2 * sizeof(char *) * n);
+	memmove( (char *) &sb[4 * where], (char *)save, 4 * sizeof(char *) * n);
 }
 
 
@@ -240,22 +253,22 @@ register int n, last, size;
 int where;
 {
 	register int i;
-	char *save [2 * MAX_ROWS];
+	char *save [4 * MAX_ROWS];
 
 	/* save n lines at where */
-	memmove( (char *)save, (char *) &sb[2 * where], 2 * sizeof(char *) * n);
+	memmove( (char *)save, (char *) &sb[4 * where], 4 * sizeof(char *) * n);
 
 	/* clear contents of old rows */
-	for (i = 2 * n - 1 ; i >= 0 ; i--)
-		memset ((char *) save [i], 0, size);
+	for (i = 4 * n - 1 ; i >= 0 ; i--)
+		bzero ((char *) save [i], size);
 
 	/* move up lines */
-	memmove( (char *) &sb[2 * where], (char *) &sb[2 * (where + n)], 
-		2 * sizeof (char *) * ((last -= n - 1) - where));
+	memmove( (char *) &sb[4 * where], (char *) &sb[4 * (where + n)], 
+		4 * sizeof (char *) * ((last -= n - 1) - where));
 
 	/* reuse storage for new bottom lines */
-	memmove( (char *) &sb[2 * last], (char *)save, 
-		2 * sizeof(char *) * n);
+	memmove( (char *) &sb[4 * last], (char *)save, 
+		4 * sizeof(char *) * n);
 }
 
 
@@ -268,8 +281,8 @@ ScrnInsertChar (sb, row, col, n, size)
     register int col, n;
 {
 	register int i, j;
-	register Char *ptr = sb [2 * row];
-	register Char *attrs = sb [2 * row + 1];
+	register Char *ptr = sb [4 * row];
+	register Char *attrs = sb [4 * row + 1];
 	int wrappedbit = attrs[0]&LINEWRAPPED;
 
 	attrs[0] &= ~LINEWRAPPED; /* make sure the bit isn't moved */
@@ -296,15 +309,15 @@ ScrnDeleteChar (sb, row, col, n, size)
     register int row, size;
     register int n, col;
 {
-	register Char *ptr = sb[2 * row];
-	register Char *attrs = sb[2 * row + 1];
+	register Char *ptr = sb[4 * row];
+	register Char *attrs = sb[4 * row + 1];
 	register nbytes = (size - n - col);
 	int wrappedbit = attrs[0]&LINEWRAPPED;
 
 	memmove( ptr + col, ptr + col + n, nbytes);
 	memmove( attrs + col, attrs + col + n, nbytes);
-	memset (ptr + size - n, 0, n);
-	memset (attrs + size - n, 0, n);
+	bzero (ptr + size - n, n);
+	bzero (attrs + size - n, n);
 	if (wrappedbit)
 	    attrs[0] |= LINEWRAPPED;
 }
@@ -336,12 +349,15 @@ Boolean force;			/* ... leading/trailing spaces */
 	for (row = toprow; row <= maxrow; y += FontHeight(screen), row++) {
 	   register Char *chars;
 	   register Char *attrs;
+	   register Char *fgs, *bgs;
 	   register int col = leftcol;
 	   int maxcol = leftcol + ncols - 1;
 	   int lastind;
 	   int flags;
+	   int fg, bg;
 	   int x, n;
 	   GC gc;
+	   Pixel fg_pix, bg_pix;
 	   Boolean hilite;	
 
 	   if (row < screen->top_marg || row > screen->bot_marg)
@@ -352,8 +368,10 @@ Boolean force;			/* ... leading/trailing spaces */
 	   if (lastind < 0 || lastind > max)
 	   	continue;
 
-	   chars = screen->buf [2 * (lastind + topline)];
-	   attrs = screen->buf [2 * (lastind + topline) + 1];
+	   chars = screen->buf [4 * (lastind + topline)];
+	   attrs = screen->buf [4 * (lastind + topline) + 1];
+	   fgs = screen->buf [4 * (lastind + topline) + 2];
+	   bgs = screen->buf [4 * (lastind + topline) + 3];
 
 	   if (row < screen->startHRow || row > screen->endHRow ||
 	       (row == screen->startHRow && maxcol < screen->startHCol) ||
@@ -390,26 +408,49 @@ Boolean force;			/* ... leading/trailing spaces */
 	   if (col > maxcol) continue;
 
 	   flags = attrs[col];
+	   fg = fgs[col];
+	   bg = bgs[col];
+
+	   fg_pix = (flags & FG_COLOR) ? screen->colors[fg] : 
+					 screen->foreground;
+	   bg_pix = (flags & BG_COLOR) ? screen->colors[bg] : 
+					 term->core.background_pixel;
 
 	   if ( (!hilite && (flags & INVERSE) != 0) ||
-	        (hilite && (flags & INVERSE) == 0) )
+	        (hilite && (flags & INVERSE) == 0) ) {
 	       if (flags & BOLD) gc = screen->reverseboldGC;
 	       else gc = screen->reverseGC;
-	   else 
+
+	       if (term->misc.dynamicColors) {
+	           XSetForeground(screen->display, gc, bg_pix);
+	           XSetBackground(screen->display, gc, fg_pix);
+	       }
+
+	   } else {
 	       if (flags & BOLD) gc = screen->normalboldGC;
 	       else gc = screen->normalGC;
+
+	       if (term->misc.dynamicColors) {
+	           XSetForeground(screen->display, gc, fg_pix);
+	           XSetBackground(screen->display, gc, bg_pix);
+	       }
+	   }
 
 	   x = CursorX(screen, col);
 	   lastind = col;
 
 	   for (; col <= maxcol; col++) {
-		if (attrs[col] != flags) {
+		if (attrs[col] != flags ||
+		    (term->misc.dynamicColors &&
+		        ((flags & FG_COLOR && fgs[col] != fg) ||
+		         (flags & BG_COLOR && bgs[col] != bg)))) {
+
 		   XDrawImageString(screen->display, TextWindow(screen), 
-		        	gc, x, y, (char *) &chars[lastind], n = col - lastind);
+		       	gc, x, y, (char *) &chars[lastind], n = col - lastind);
 		   if((flags & BOLD) && screen->enbolden)
 		 	XDrawString(screen->display, TextWindow(screen), 
 			 gc, x + 1, y, (char *) &chars[lastind], n);
-		   if(flags & UNDERLINE) 
+		   if((flags & UNDERLINE) && screen->underline) 
 			XDrawLine(screen->display, TextWindow(screen), 
 			 gc, x, y+1, x+n*FontWidth(screen), y+1);
 
@@ -418,14 +459,32 @@ Boolean force;			/* ... leading/trailing spaces */
 		   lastind = col;
 
 		   flags = attrs[col];
+		   fg = fgs[col];
+		   bg = bgs[col];
 
-	   	   if ((!hilite && (flags & INVERSE) != 0) ||
-		       (hilite && (flags & INVERSE) == 0) )
-	       		if (flags & BOLD) gc = screen->reverseboldGC;
-	       		else gc = screen->reverseGC;
-	  	    else 
-	      		 if (flags & BOLD) gc = screen->normalboldGC;
-	      		 else gc = screen->normalGC;
+		   fg_pix = (flags & FG_COLOR) ? screen->colors[fg]
+					       : screen->foreground;
+		   bg_pix = (flags & BG_COLOR) ? screen->colors[bg]
+					       : term->core.background_pixel;
+
+		   if ( (!hilite && (flags & INVERSE) != 0) ||
+		       (hilite && (flags & INVERSE) == 0) ) {
+	       		   if (flags & BOLD) gc = screen->reverseboldGC;
+	       		   else gc = screen->reverseGC;
+
+		            if (term->misc.dynamicColors) {
+		                XSetForeground(screen->display, gc, bg_pix);
+		                XSetBackground(screen->display, gc, fg_pix);
+		            }
+		   } else {
+	      		    if (flags & BOLD) gc = screen->normalboldGC;
+	      		    else gc = screen->normalGC;
+
+		            if (term->misc.dynamicColors) {
+		                XSetForeground(screen->display, gc, fg_pix);
+		                XSetBackground(screen->display, gc, bg_pix);
+		            }
+		   }
 		}
 
 		if(chars[col] == 0)
@@ -434,18 +493,31 @@ Boolean force;			/* ... leading/trailing spaces */
 
 
 	   if ( (!hilite && (flags & INVERSE) != 0) ||
-	        (hilite && (flags & INVERSE) == 0) )
+	       (hilite && (flags & INVERSE) == 0) ) {
 	       if (flags & BOLD) gc = screen->reverseboldGC;
 	       else gc = screen->reverseGC;
-	   else 
+
+	       if (term->misc.dynamicColors) {
+	           XSetForeground(screen->display, gc, bg_pix);
+	           XSetBackground(screen->display, gc, fg_pix);
+	       }
+
+	   } else {
 	       if (flags & BOLD) gc = screen->normalboldGC;
 	       else gc = screen->normalGC;
+
+	       if (term->misc.dynamicColors) {
+	           XSetForeground(screen->display, gc, fg_pix);
+	           XSetBackground(screen->display, gc, bg_pix);
+	       }
+	   }
+
 	   XDrawImageString(screen->display, TextWindow(screen), gc, 
 	         x, y, (char *) &chars[lastind], n = col - lastind);
 	   if((flags & BOLD) && screen->enbolden)
 		XDrawString(screen->display, TextWindow(screen), gc,
 		x + 1, y, (char *) &chars[lastind], n);
-	   if(flags & UNDERLINE) 
+	   if((flags & UNDERLINE) && screen->underline) 
 		XDrawLine(screen->display, TextWindow(screen), gc, 
 		 x, y+1, x + n * FontWidth(screen), y+1);
 	}
@@ -459,10 +531,10 @@ ClearBufRows (screen, first, last)
 register TScreen *screen;
 register int first, last;
 {
-	first *= 2;
-	last = 2 * last + 1;
+	first *= 4;
+	last = 4 * last + 3;
 	while (first <= last)
-		memset (screen->buf [first++], 0, (screen->max_col + 1));
+		bzero (screen->buf [first++], (screen->max_col + 1));
 }
 
 /*
@@ -540,7 +612,7 @@ ScreenResize (screen, width, height, flags)
 					  rows + savelines, cols,
 					  screen->max_row + 1 + savelines,
 					  screen->max_col + 1);
-		screen->buf = &screen->allbuf[2 * savelines];
+		screen->buf = &screen->allbuf[4 * savelines];
 
 		screen->max_row += delta_rows;
 		screen->max_col = cols - 1;
@@ -577,8 +649,15 @@ ScreenResize (screen, width, height, flags)
 	} else if(FullHeight(screen) == height && FullWidth(screen) == width)
 	 	return(0);	/* nothing has changed at all */
 
-	if(screen->scrollWidget)
+	if (screen->scrollWidget) {
+	    if (term->misc.sb_right) {
+		ResizeScrollBar(screen->scrollWidget, width -
+			screen->scrollWidget->core.width -
+			screen->scrollWidget->core.border_width, 0, height -1);
+	    } else {
 		ResizeScrollBar(screen->scrollWidget, -1, -1, height);
+	    }
+	}
 	
 	screen->fullVwin.fullheight = height;
 	screen->fullVwin.fullwidth = width;
@@ -639,7 +718,7 @@ register int length;		/* length of string */
 	    length = avail;
 	if (length <= 0)
 		return;
-	attrs = screen->buf[2 * row + 1] + col;
+	attrs = screen->buf[4 * row + 1] + col;
 	value &= mask;	/* make sure we only change the bits allowed by mask*/
 	while(length-- > 0) {
 		*attrs &= ~mask;	/* clear the bits */
@@ -670,7 +749,7 @@ register int length;		/* length of string */
 	if (length <= 0)
 		return 0;
 	ret = length;
-	attrs = screen->buf[2 * row + 1] + col;
+	attrs = screen->buf[4 * row + 1] + col;
 	while(length-- > 0) {
 		*str++ = *attrs++;
 	}
@@ -682,7 +761,7 @@ ScrnBuf sb;
 register int row, col, len;
 {
 	register int	i;
-	register Char *ptr = sb [2 * row];
+	register Char *ptr = sb [4 * row];
 
 	for (i = col; i < len; i++)	{
 		if (ptr[i])

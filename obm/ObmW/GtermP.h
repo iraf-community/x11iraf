@@ -181,6 +181,7 @@ struct marker {
 	Pixmap fillPattern;
 	int imageText, textBorder;
 	int textColor, textBgColor;
+	int rotIndicator;					/* MF020 */
 	XFontStruct *font;
 
 	int npoints;				/* marker data */
@@ -253,6 +254,7 @@ struct marker {
 #define	Ga_ImageText		26
 #define	Ga_Font			27
 #define	Ga_Text			28
+#define	Ga_RotIndicator		29				/* MF020 */
 
 /* Bitflags for selected attributes. */
 #define	Gb_X			00001

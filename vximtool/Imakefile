@@ -9,20 +9,25 @@ X11IRAFDIR = ../
  EXTRA_INCLUDES = $(X11IRAF_INCLUDES)
         OBMLIBS =
         MATHLIB = -lm
+         CDLLIB = -lcdl
          XAWLIB =
 
            SRCS = vximtool.c
            OBJS = vximtool.o
 
-# Hack to compile under SunPRO V4 on Solaris
-#if defined (SunArchitecture) && HasSunC && OSMajorVersion >= 5
-        CCOPTIONS = -Xs
-  EXTRA_LDOPTIONS = -xildoff
-#endif
 
 AllTarget(vximtool)
 
-NormalProgramTarget(vximtool,$(OBJS),,${OBMLIBS} XawClientLibs,$(MATHLIB))
+vximtool: vximtool.o
+	$(RM) vximtool
+	$(CC) -o vximtool -DHAVE_CDL vximtool.o $(LDOPTIONS) $(CDLLIB) \
+	    $(MATHLIB) $(EXTRA_LIBRARIES)
+
+vximtool.o:
+	$(CC) -c $(CFLAGS) -DHAVE_CDL vximtool.c
+
+clean::
+	$(RM) vximtool vximtool.o
 
 #if InstallManuals
 install:: 

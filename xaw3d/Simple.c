@@ -137,16 +137,36 @@ static void Realize(w, valueMask, attributes)
     XSetWindowAttributes *attributes;
 {
     Pixmap border_pixmap;
+#ifndef USE_XMU_STIPPLE
+    Screen *screen = XtScreen((Widget)w);
+    Display *display = XtDisplay((Widget)w);
+    int pixmap_width = 2, pixmap_height = 2;
+    static unsigned char pixmap_bits[] = {
+        0x02, 0x01,
+    };
+#endif
 
     if (!XtIsSensitive(w)) {
 	/* change border to gray; have to remember the old one,
 	 * so XtDestroyWidget deletes the proper one */
 	if (((SimpleWidget)w)->simple.insensitive_border == None)
+#ifdef USE_XMU_STIPPLE
 	    ((SimpleWidget)w)->simple.insensitive_border =
 		XmuCreateStippledPixmap(XtScreen(w),
 					w->core.border_pixel, 
 					w->core.background_pixel,
 					w->core.depth);
+#else
+	    ((SimpleWidget)w)->simple.insensitive_border =
+                XCreatePixmapFromBitmapData (display,
+                            RootWindowOfScreen(screen),
+                            (char *)pixmap_bits,
+                            pixmap_width, pixmap_height,
+                            w->core.border_pixel,
+                            w->core.background_pixel,
+                            w->core.depth);
+
+#endif
         border_pixmap = w->core.border_pixmap;
 	attributes->border_pixmap =
 	  w->core.border_pixmap = ((SimpleWidget)w)->simple.insensitive_border;
@@ -157,8 +177,10 @@ static void Realize(w, valueMask, attributes)
 
     ConvertCursor(w);
 
+#ifdef USE_CWCURSOR
     if ((attributes->cursor = ((SimpleWidget)w)->simple.cursor) != None)
 	*valueMask |= CWCursor;
+#endif
 
     XtCreateWindow( w, (unsigned int)InputOutput, (Visual *)CopyFromParent,
 		    *valueMask, attributes );
@@ -242,21 +264,42 @@ static Boolean SetValues(current, request, new, args, num_args)
 static Boolean ChangeSensitive(w)
     register Widget w;
 {
+#ifndef USE_XMU_STIPPLE
+    Screen *screen = XtScreen((Widget)w);
+    Display *display = XtDisplay((Widget)w);
+    int pixmap_width = 2, pixmap_height = 2;
+    static unsigned char pixmap_bits[] = {
+        0x02, 0x01,
+    };
+#endif
+
+
     if (XtIsRealized(w)) {
-	if (XtIsSensitive(w))
+	if (XtIsSensitive(w)) {
 	    if (w->core.border_pixmap != XtUnspecifiedPixmap)
 		XSetWindowBorderPixmap( XtDisplay(w), XtWindow(w),
 				        w->core.border_pixmap );
 	    else
 		XSetWindowBorder( XtDisplay(w), XtWindow(w), 
 				  w->core.border_pixel );
-	else {
+	} else {
 	    if (((SimpleWidget)w)->simple.insensitive_border == None)
+#ifdef USE_XMU_STIPPLE
 		((SimpleWidget)w)->simple.insensitive_border =
 		    XmuCreateStippledPixmap(XtScreen(w),
 					    w->core.border_pixel, 
 					    w->core.background_pixel,
 					    w->core.depth);
+#else
+		((SimpleWidget)w)->simple.insensitive_border =
+		    XCreatePixmapFromBitmapData (display,
+                            RootWindowOfScreen(screen),
+                            (char *)pixmap_bits,
+                            pixmap_width, pixmap_height,
+                            w->core.border_pixel,
+                            w->core.background_pixel,
+                            w->core.depth);
+#endif
 	    XSetWindowBorderPixmap( XtDisplay(w), XtWindow(w),
 				    ((SimpleWidget)w)->
 				        simple.insensitive_border );

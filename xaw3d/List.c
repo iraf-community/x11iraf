@@ -171,6 +171,15 @@ Widget w;
 {
     XGCValues	values;
     ListWidget lw = (ListWidget) w;    
+#ifndef USE_XMU_STIPPLE
+    Screen *screen = XtScreen((Widget)w);
+    Display *display = XtDisplay((Widget)w);
+    int pixmap_width = 2, pixmap_height = 2;
+    static unsigned char pixmap_bits[] = {
+        0x02, 0x01,
+    };
+#endif
+
 
     values.foreground	= lw->list.foreground;
     values.font		= lw->list.font->fid;
@@ -181,10 +190,20 @@ Widget w;
     lw->list.revgc = XtGetGC(w, (unsigned) GCForeground | GCFont,
 				 &values);
 
+#ifdef USE_XMU_STIPPLE
     values.tile       = XmuCreateStippledPixmap(XtScreen(w), 
 						lw->list.foreground,
 						lw->core.background_pixel,
 						lw->core.depth);
+#else
+    values.tile       = XCreatePixmapFromBitmapData (display,
+                            RootWindowOfScreen(screen),
+                            (char *)pixmap_bits,
+                            pixmap_width, pixmap_height,
+                            lw->list.foreground,
+                            lw->core.background_pixel,
+                            lw->core.depth);
+#endif
     values.fill_style = FillTiled;
 
     lw->list.graygc = XtGetGC(w, (unsigned) GCFont | GCTile | GCFillStyle,
@@ -833,7 +852,11 @@ Cardinal *num_args;
 	(cl->list.font != rl->list.font) ) {
 	XGCValues values;
 	XGetGCValues(XtDisplay(current), cl->list.graygc, GCTile, &values);
+#ifdef USE_XMU_STIPPLE
 	XmuReleaseStippledPixmap(XtScreen(current), values.tile);
+#else
+        XFreePixmap(XtDisplay(current), values.tile);
+#endif
 	XtReleaseGC(current, cl->list.graygc);
 	XtReleaseGC(current, cl->list.revgc);
 	XtReleaseGC(current, cl->list.normgc);
@@ -890,7 +913,11 @@ static void Destroy(w)
     XGCValues values;
     
     XGetGCValues(XtDisplay(w), lw->list.graygc, GCTile, &values);
+#ifdef USE_XMU_STIPPLE
     XmuReleaseStippledPixmap(XtScreen(w), values.tile);
+#else
+    XFreePixmap(XtDisplay(w), values.tile);
+#endif
     XtReleaseGC(w, lw->list.graygc);
     XtReleaseGC(w, lw->list.revgc);
     XtReleaseGC(w, lw->list.normgc);

@@ -114,7 +114,7 @@ all:: libXpm.a
 #if InstallLibraries
 install:: libXpm.a
 	@(set -x; $(RM) X11irafLibDir/libXpm.a)
-	@(set -x; $(LN) ../xpm/libXpm.a X11irafLibDir/libXpm.a)
+	@(set -x; $(CP) -p libXpm.a X11irafLibDir/libXpm.a)
 #endif
 #endif
 
@@ -127,16 +127,16 @@ includes::
 	MakeDir(X11irafIncDir/X11)
 	@(set -x; for i in $(HEADERS); do \
 		$(RM) X11irafIncDir/$$i; \
-		$(LN) ../xpm/$$i X11irafIncDir/$$i; \
+		$(CP) -p $$i X11irafIncDir/$$i; \
 		$(RM) X11irafIncDir/X11/$$i; \
-		$(LN) ../../xpm/$$i X11irafIncDir/X11/$$i; \
+		$(CP) -p $$i X11irafIncDir/X11/$$i; \
 	done)
 
 #if InstallIncludes
 install::
 	@(set -x; for i in $(HEADERS); do \
 	    $(RM) X11irafIncDir/$$i; \
-            $(CP) $$i X11irafIncDir; \
+            $(CP) -p $$i X11irafIncDir; \
 	done)
 #endif
 

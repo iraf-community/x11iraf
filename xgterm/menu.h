@@ -35,6 +35,7 @@ extern void HandleQuit();
 extern void HandleScrollbar();
 extern void HandleJumpscroll();
 extern void HandleReverseVideo();
+extern void HandleColorText();
 extern void HandleAutoWrap();
 extern void HandleReverseWrap();
 extern void HandleAutoLineFeed();
@@ -64,65 +65,66 @@ extern void DoSecureKeyboard();
 /*
  * items in primary menu
  */
-#define mainMenu_securekbd 0
-#define mainMenu_allowsends 1
+#define mainMenu_securekbd 	0
+#define mainMenu_allowsends 	1
 #ifdef ALLOWLOGGING
-#define mainMenu_logging 2
+#define mainMenu_logging 	2
 #endif
-#define mainMenu_redraw 3
-#define mainMenu_line1 4
-#define mainMenu_suspend 5
-#define mainMenu_continue 6
-#define mainMenu_interrupt 7
-#define mainMenu_hangup 8
-#define mainMenu_terminate 9
-#define mainMenu_kill 10
-#define mainMenu_line2 11
-#define mainMenu_quit 12
+#define mainMenu_redraw 	3
+#define mainMenu_line1 		4
+#define mainMenu_suspend 	5
+#define mainMenu_continue 	6
+#define mainMenu_interrupt 	7
+#define mainMenu_hangup 	8
+#define mainMenu_terminate 	9
+#define mainMenu_kill 		10
+#define mainMenu_line2 		11
+#define mainMenu_quit 		12
 
 /*
  * items in vt100 mode menu
  */
-#define vtMenu_scrollbar 0
-#define vtMenu_jumpscroll 1
-#define vtMenu_reversevideo 2
-#define vtMenu_line1 3
-#define vtMenu_gioenable 4
-#define vtMenu_tekshow 5
-#define vtMenu_tekmode 6
-#define vtMenu_tekreset 7
-#define vtMenu_vthide 8
-#define vtMenu_line2 9
-#define vtMenu_autowrap 10
-#define vtMenu_reversewrap 11
-#define vtMenu_autolinefeed 12
-#define vtMenu_appcursor 13
-#define vtMenu_appkeypad 14
-#define vtMenu_scrollkey 15
-#define vtMenu_scrollttyoutput 16
-#define vtMenu_allow132 17
-#define vtMenu_cursesemul 18
-#define vtMenu_visualbell 19
-#define vtMenu_marginbell 20
-#define vtMenu_altscreen 21
-#define vtMenu_line3 22
-#define vtMenu_softreset 23
-#define vtMenu_hardreset 24
-#define vtMenu_clearsavedlines 25
+#define vtMenu_scrollbar 	0
+#define vtMenu_jumpscroll 	1
+#define vtMenu_reversevideo 	2
+#define vtMenu_colortext 	3
+#define vtMenu_line1 		4
+#define vtMenu_gioenable 	5
+#define vtMenu_tekshow 		6
+#define vtMenu_tekmode 		7
+#define vtMenu_tekreset 	8
+#define vtMenu_vthide 		9
+#define vtMenu_line2 		10
+#define vtMenu_autowrap 	11
+#define vtMenu_reversewrap 	12
+#define vtMenu_autolinefeed 	13
+#define vtMenu_appcursor 	14
+#define vtMenu_appkeypad 	15
+#define vtMenu_scrollkey 	16
+#define vtMenu_scrollttyoutput 	17
+#define vtMenu_allow132 	18
+#define vtMenu_cursesemul 	19
+#define vtMenu_visualbell 	20
+#define vtMenu_marginbell 	21
+#define vtMenu_altscreen 	22
+#define vtMenu_line3 		23
+#define vtMenu_softreset 	24
+#define vtMenu_hardreset 	25
+#define vtMenu_clearsavedlines 	26
 
 /*
  * items in vt100 font menu
  */
-#define fontMenu_fontdefault 0
-#define fontMenu_font1 1
-#define fontMenu_font2 2
-#define fontMenu_font3 3
-#define fontMenu_font4 4
-#define fontMenu_font5 5
-#define fontMenu_font6 6
-#define fontMenu_lastBuiltin fontMenu_font6
-#define fontMenu_fontescape 7
-#define fontMenu_fontsel 8
+#define fontMenu_fontdefault 	0
+#define fontMenu_font1 		1
+#define fontMenu_font2 		2
+#define fontMenu_font3 		3
+#define fontMenu_font4 		4
+#define fontMenu_font5 		5
+#define fontMenu_font6 		6
+#define fontMenu_lastBuiltin 	fontMenu_font6
+#define fontMenu_fontescape 	7
+#define fontMenu_fontsel 	8
 /* number of non-line items should match NMENUFONTS in ptyx.h */
 
 
@@ -130,10 +132,10 @@ extern void DoSecureKeyboard();
 /*
  * items in tek4014 mode menu
  */
-#define tekMenu_tekpage 0
-#define tekMenu_tekhide 1
-#define tekMenu_vtshow 2
-#define tekMenu_tekreset 3
+#define tekMenu_tekpage 	0
+#define tekMenu_tekhide 	1
+#define tekMenu_vtshow 		2
+#define tekMenu_tekreset 	3
 
 
 /*
@@ -193,6 +195,11 @@ extern void DoSecureKeyboard();
   update_menu_item (term->screen.vtMenu, \
 		    vtMenuEntries[vtMenu_reversevideo].widget, \
 		    (term->flags & REVERSE_VIDEO))
+
+#define update_colortext() \
+  update_menu_item (term->screen.vtMenu, \
+		    vtMenuEntries[vtMenu_colortext].widget, \
+		    term->misc.dynamicColors)
 
 #define update_autowrap() \
   update_menu_item (term->screen.vtMenu, \

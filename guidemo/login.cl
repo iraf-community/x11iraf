@@ -2,12 +2,12 @@
 
 # Identify login.cl version (checked in images.cl).
 if (defpar ("logver"))
-    logver = "IRAF V2.10EXPORT April 1992 revision 1"
+    logver = "IRAF V2.11 May 1997"
 
-set	home		= "/u3/x11apps/src/x11iraf/guidemo/"
-set	imdir		= "/d0/iraf/tody/"
+set	home		= "/u3/iraf/x11iraf.develop/guidemo/"
+set	imdir		= "tucana!/d0/iraf/fitz/"
 set	uparm		= "home$uparm/"
-set	userid		= "tody"
+set	userid		= "fitz"
 
 # Set the terminal type.
 if (envget("TERM") == "sun") {
@@ -29,12 +29,12 @@ if (envget("TERM") == "sun") {
 #set	clobber		= no
 #set	filewait	= yes
 #set	cmbuflen	= 512000
-#set	min_lenuserarea	= 24000
+#set	min_lenuserarea	= 64000
 #set	imtype		= "imh"
 
 # IMTOOL/XIMAGE stuff.  Set node to the name of your workstation to
-# enable remote image display.
-#set	node		= ""
+# enable remote image display.  The trailing "!" is required.
+#set	node		= "my_workstation!"
 
 # CL parameters you mighth want to change.
 #ehinit   = "nostandout eol noverify"

@@ -4,6 +4,11 @@
 #include <pwd.h>
 #include "eps.h"
 
+#ifdef __STDC__
+#include <stdlib.h>
+#include <string.h>
+#endif
+
 #ifdef SOLARIS
 #include <sys/systeminfo.h>
 #endif
@@ -122,6 +127,9 @@ eps_init()
 	/* Load the page information defaults. */
 	eps_setPage (ps, EPS_PORTRAIT, EPS_LETTER, 100, EPS_AUTOSCALE);
 
+	/* Initialize the annotation flags */
+	ps->page.flags |= (EPS_DOTITLE|EPS_DOBORDERS|EPS_DOCOLORBAR);
+
 	/* Initialize the pixel buffer array */
 	pixbuf = (uchar *) calloc (SZ_EPSBUF, sizeof (uchar));
 
@@ -183,6 +191,9 @@ int	pad;				/* bytes per line of padding */
 		eps_writeMonoRGB (fp, pix, npix, xdim, depth, pad);
 
 	    }
+
+	    /* Now that the image is out we restore the graphics context. */
+            fprintf (fp, "grestore\n" );
 
 	    /* Write the colorbar. */
 	    if (psim->annotate)
@@ -369,8 +380,11 @@ char	*label;				/* Label string */
 	if (!psim->label)
 	    psim->label = (char *) malloc (maxlen);
 
-	(void) strncpy (psim->label, label, maxlen-1);
-	psim->label[maxlen-1] = '\0';
+	if (psim->page.flags & EPS_DOTITLE) {
+	    (void) strncpy (psim->label, label, maxlen-1);
+	    psim->label[maxlen-1] = '\0';
+	} else
+	    psim->label[0] = '\0';
 }
 
 
@@ -965,12 +979,11 @@ FILE       *fp;
         eps_pageParams (psim, &llx, &lly, &icols, &irows, &scols, &srows,
             &turnflag);
 
-	/* Write the annotation prolog stufd. */
-        fprintf (fp, "grestore\n" );
-        fprintf (fp, "gsave\n" );
-
 	/* Main image title. */
-	if (psim->label != NULL) {
+	if (psim->label != NULL && (psim->page.flags & EPS_DOTITLE)) {
+	    /* Write the annotation prolog stufd. */
+            fprintf (fp, "gsave\n" );
+
             fprintf (fp, 
 	      "/labelfont /NewCenturySchlbk-Roman findfont 16 scalefont def\n");
 	    if (turnflag) {
@@ -985,110 +998,122 @@ FILE       *fp;
 	            llx + (scols/2) - 8.25*(strlen(psim->label)/2), 
 		    lly + srows + TITLE_OFFSET);
 	    }
+            fprintf (fp, "grestore\n");
 	}
 
 	/* A border for the image axes. */
-	fprintf (fp, "/imBorder {\n");
-	fprintf (fp, "   %-4d %-4d moveto	%% Outer axis\n", 
-	    (int)(llx - AXIS_OOFFSET), 
-	    (int)(lly - AXIS_OOFFSET));
-	fprintf (fp, "   0    %-4d rlineto\n", srows + (2 * AXIS_OOFFSET));
-	fprintf (fp, "   %-4d  0 rlineto\n", scols + (2 * AXIS_OOFFSET));
-	fprintf (fp, "   0  -%-4d rlineto\n", srows + (2 * AXIS_OOFFSET));
-	fprintf (fp, "   closepath\n");
-	fprintf (fp, "   %g setlinewidth\n", AXIS_OWIDTH);
-	fprintf (fp, "   stroke\n");
+	if (psim->page.flags & EPS_DOBORDERS) {
+            fprintf (fp, "gsave\n" );
+	    fprintf (fp, "/imBorder {\n");
+	    fprintf (fp, "   %-4d %-4d moveto	%% Outer axis\n", 
+	        (int)(llx - AXIS_OOFFSET), 
+	        (int)(lly - AXIS_OOFFSET));
+	    fprintf (fp, "   0    %-4d rlineto\n", srows + (2 * AXIS_OOFFSET));
+	    fprintf (fp, "   %-4d  0 rlineto\n", scols + (2 * AXIS_OOFFSET));
+	    fprintf (fp, "   0  -%-4d rlineto\n", srows + (2 * AXIS_OOFFSET));
+	    fprintf (fp, "   closepath\n");
+	    fprintf (fp, "   %g setlinewidth\n", AXIS_OWIDTH);
+	    fprintf (fp, "   stroke\n");
 
-	fprintf (fp, "   %-4d %-4d moveto	%% Inner axis\n", 
-	    (int)(llx - AXIS_IOFFSET), 
-	    (int)(lly - AXIS_IOFFSET));
-	fprintf (fp, "   0   %-4d rlineto\n", srows + (2 * AXIS_IOFFSET));
-	fprintf (fp, "   %-4d  0 rlineto\n", scols + (2 * AXIS_IOFFSET));
-	fprintf (fp, "   0   -%-4d rlineto\n", srows + (2 * AXIS_IOFFSET));
-	fprintf (fp, "   closepath\n");
-	fprintf (fp, "   %g setlinewidth\n", AXIS_IWIDTH);
-	fprintf (fp, "   stroke\n");
+	    fprintf (fp, "   %-4d %-4d moveto	%% Inner axis\n", 
+	        (int)(llx - AXIS_IOFFSET), 
+	        (int)(lly - AXIS_IOFFSET));
+	    fprintf (fp, "   0   %-4d rlineto\n", srows + (2 * AXIS_IOFFSET));
+	    fprintf (fp, "   %-4d  0 rlineto\n", scols + (2 * AXIS_IOFFSET));
+	    fprintf (fp, "   0   -%-4d rlineto\n", srows + (2 * AXIS_IOFFSET));
+	    fprintf (fp, "   closepath\n");
+	    fprintf (fp, "   %g setlinewidth\n", AXIS_IWIDTH);
+	    fprintf (fp, "   stroke\n");
 
-	fprintf (fp, "} def\n");
-	fprintf (fp, "imBorder\n");
+	    fprintf (fp, "} def\n");
+	    fprintf (fp, "imBorder\n");
 
-	/* Axis label font definitions. */
-	fprintf (fp, "/axlabelfont /Times-Roman findfont 8 scalefont def\n");
-	fprintf (fp, "/axlabel { moveto axlabelfont setfont %s show %s } def\n",
-	    (turnflag ? "90 rotate" : " "),
-	    (turnflag ? "-90 rotate" : " "));
+	    /* Axis label font definitions. */
+	    fprintf (fp,"/axlabelfont /Times-Roman findfont 8 scalefont def\n");
+	    fprintf (fp,
+		"/axlabel { moveto axlabelfont setfont %s show %s } def\n",
+	        (turnflag ? "90 rotate" : " "),
+	        (turnflag ? "-90 rotate" : " "));
 
-	/* Axis ticmark procedures. */
-	fprintf (fp, "/xMajorTicmark {\n");
-	fprintf (fp, "    moveto\n");
-	fprintf (fp, "    0 %d rlineto    ", MAJOR_TICK_SIZE);
-	fprintf (fp, "    0 %d rmoveto    ", 
+	    /* Axis ticmark procedures. */
+	    fprintf (fp, "/xMajorTicmark {\n");
+	    fprintf (fp, "    moveto\n");
+	    fprintf (fp, "    0 %d rlineto    ", MAJOR_TICK_SIZE);
+	    fprintf (fp, "    0 %d rmoveto    ", 
 	        srows + MAJOR_TICK_SIZE + (2 * AXIS_IOFFSET) );
-	fprintf (fp, "    0 -%d rlineto\n", MAJOR_TICK_SIZE);
-	fprintf (fp, "    %g setlinewidth\n    stroke\n", MAJOR_TICK_WIDTH);
-	fprintf (fp, "} def\n");
-	fprintf (fp, "/yMajorTicmark {\n");
-	fprintf (fp, "    moveto\n");
-	fprintf (fp, "    %d 0 rlineto    ", MAJOR_TICK_SIZE);
-	fprintf (fp, "    %d 0 rmoveto    ", 
+	    fprintf (fp, "    0 -%d rlineto\n", MAJOR_TICK_SIZE);
+	    fprintf (fp, "    %g setlinewidth\n    stroke\n", MAJOR_TICK_WIDTH);
+	    fprintf (fp, "} def\n");
+	    fprintf (fp, "/yMajorTicmark {\n");
+	    fprintf (fp, "    moveto\n");
+	    fprintf (fp, "    %d 0 rlineto    ", MAJOR_TICK_SIZE);
+	    fprintf (fp, "    %d 0 rmoveto    ", 
 	        scols + MAJOR_TICK_SIZE + (2 * AXIS_IOFFSET) );
-	fprintf (fp, "    -%d 0 rlineto\n", MAJOR_TICK_SIZE);
-	fprintf (fp, "    %g setlinewidth\n    stroke\n", MAJOR_TICK_WIDTH);
-	fprintf (fp, "} def\n");
-	fprintf (fp, "/xMinorTicmark {\n");
-	fprintf (fp, "    moveto\n");
-	fprintf (fp, "    0 %d rlineto    ", MINOR_TICK_SIZE);
-	fprintf (fp, "    0 %d rmoveto    ", 
+	    fprintf (fp, "    -%d 0 rlineto\n", MAJOR_TICK_SIZE);
+	    fprintf (fp, "    %g setlinewidth\n    stroke\n", MAJOR_TICK_WIDTH);
+	    fprintf (fp, "} def\n");
+	    fprintf (fp, "/xMinorTicmark {\n");
+	    fprintf (fp, "    moveto\n");
+	    fprintf (fp, "    0 %d rlineto    ", MINOR_TICK_SIZE);
+	    fprintf (fp, "    0 %d rmoveto    ", 
 	        srows + MAJOR_TICK_SIZE + (2*AXIS_IOFFSET) +
 	        (MAJOR_TICK_SIZE - MINOR_TICK_SIZE) );
-	fprintf (fp, "    0 -%d rlineto\n", MINOR_TICK_SIZE);
-	fprintf (fp, "    %g setlinewidth\n    stroke\n", MINOR_TICK_WIDTH);
-	fprintf (fp, "} def\n");
-	fprintf (fp, "/yMinorTicmark {\n");
-	fprintf (fp, "    moveto\n");
-	fprintf (fp, "    %d 0 rlineto    ", MINOR_TICK_SIZE);
-	fprintf (fp, "    %d 0 rmoveto    ", 
+	    fprintf (fp, "    0 -%d rlineto\n", MINOR_TICK_SIZE);
+	    fprintf (fp, "    %g setlinewidth\n    stroke\n", MINOR_TICK_WIDTH);
+	    fprintf (fp, "} def\n");
+	    fprintf (fp, "/yMinorTicmark {\n");
+	    fprintf (fp, "    moveto\n");
+	    fprintf (fp, "    %d 0 rlineto    ", MINOR_TICK_SIZE);
+	    fprintf (fp, "    %d 0 rmoveto    ", 
 	        scols + MAJOR_TICK_SIZE + (2*AXIS_IOFFSET) + 
 	        (MAJOR_TICK_SIZE - MINOR_TICK_SIZE) );
-	fprintf (fp, "    -%d 0 rlineto\n", MINOR_TICK_SIZE);
-	fprintf (fp, "    %g setlinewidth\n    stroke\n", MINOR_TICK_WIDTH);
-	fprintf (fp, "} def\n");
+	    fprintf (fp, "    -%d 0 rlineto\n", MINOR_TICK_SIZE);
+	    fprintf (fp, "    %g setlinewidth\n    stroke\n", MINOR_TICK_WIDTH);
+	    fprintf (fp, "} def\n");
 
-	/* The axis labeling.  */
-	if (turnflag)
-	    eps_landLabels (fp, psim, scols, srows, icols, irows, llx, lly);
-	else
-	    eps_portLabels (fp, psim, scols, srows, icols, irows, llx, lly);
+	    /* The axis labeling.  */
+	    if (turnflag)
+	        eps_landLabels (fp, psim, scols, srows, icols, irows, llx, lly);
+	    else
+	        eps_portLabels (fp, psim, scols, srows, icols, irows, llx, lly);
+            fprintf (fp, "grestore\n");
+	}
 
 	/* The colorbar.  */
-    	eps_doColorbar (fp, psim, scols, srows, llx, lly, turnflag);
+	if (psim->page.flags & EPS_DOCOLORBAR) {
+    	    eps_doColorbar (fp, psim, scols, srows, llx, lly, turnflag);
 
-	/* Print the transform information.  */
-        fprintf (fp, "grestore\n/Times-Roman findfont 8 scalefont setfont\n");
-	if (turnflag) {
-            cbar_size = MIN (512, MAX (256, srows + 2));
-            fprintf (fp, "%d %d moveto\n", 
-		(int)llx + scols + 26, 
-		(int)lly + (srows/2) - (cbar_size/2) - (cbar_size==256?5:1));
-	} else {
-            cbar_size = MIN (512, MAX (256, scols + 2));
-            fprintf (fp, "%d %d moveto\n", 
-		(int)llx + (scols/2) - (cbar_size/2) - (cbar_size==256?5:1), 
-		(int)(lly-29));
+	    /* Print the transform information.  */
+            fprintf (fp, "gsave\n");
+	    fprintf (fp, "/Times-Roman findfont 8 scalefont setfont\n");
+	    if (turnflag) {
+                cbar_size = MIN (512, MAX (256, srows + 2));
+                fprintf (fp, "%d %d moveto\n", 
+		    (int)llx + scols + 26, 
+		    (int)lly + (srows/2) - (cbar_size/2)-(cbar_size==256?5:1));
+	    } else {
+                cbar_size = MIN (512, MAX (256, scols + 2));
+                fprintf (fp, "%d %d moveto\n", 
+		    (int)llx + (scols/2) - (cbar_size/2)-(cbar_size==256?5:1),
+		    (int)(lly-29));
+	    }
+	    fprintf (fp, "(z1=%.2f z2=%.2f ztrans=%s Con=%.2f Brt=%.2f cmap=%s ncolors=%d) %s show %s\n",
+	        psim->z1, psim->z2,
+	        (psim->ztype==EPS_UNITARY ? "unitary": 
+		    (psim->ztype==EPS_LINEAR ? "linear" : "log")),
+	        psim->scale, psim->offset,
+	        psim->cmap.cmap_name,
+	        psim->cmap.max - psim->cmap.min + 1,
+	        (turnflag ? "90 rotate" : " "),
+	        (turnflag ? "-90 rotate" : " "));
+            fprintf (fp, "grestore\n");
 	}
-	fprintf (fp, "(z1=%.2f z2=%.2f ztrans=%s Con=%.2f Brt=%.2f cmap=%s ncolors=%d) %s show %s\n",
-	    psim->z1, psim->z2,
-	    (psim->ztype==EPS_UNITARY ? "unitary": 
-		(psim->ztype==EPS_LINEAR ? "linear" : "log")),
-	    psim->scale, psim->offset,
-	    psim->cmap.cmap_name,
-	    psim->cmap.max - psim->cmap.min + 1,
-	    (turnflag ? "90 rotate" : " "),
-	    (turnflag ? "-90 rotate" : " "));
 
 	/* Print the timestamp. */
-        fprintf (fp, "grestore\n/Times-Roman findfont 6 scalefont setfont\n");
+        fprintf (fp, "gsave\n");
+        fprintf (fp, "/Times-Roman findfont 6 scalefont setfont\n");
         fprintf (fp, "20 15 moveto\n(%s) show\n", make_label());
+	fprintf (fp, "grestore\n");
 
 	if (debug) { 
 	    fprintf (stderr, "colormap: min/max = %d/%d\n", 
@@ -1378,6 +1403,7 @@ int	turnflag;
 	/* Draw the colorbar. */
 	if (psim->colorClass == EPS_GRAYSCALE) {
             fprintf (fp, "/cbarstr %d string def\n", ncolors);
+            fprintf (fp, "gsave\n" );
 	    if (turnflag) {
                 fprintf (fp, "%d %d translate\n",
 		    (int)(llx + scols + 45), 
@@ -1423,6 +1449,7 @@ int	turnflag;
 		    fprintf (fp, "\n");
 	    }
      	    fprintf (fp, "\n");
+            fprintf (fp, "grestore\n");
 	} else {
 	    for (j=1, i=psim->cmap.min; i <= psim->cmap.max; i++, j++ )
 	        fprintf (fp, "%02x%02x%02x\n", 
@@ -1430,7 +1457,6 @@ int	turnflag;
 		if (j % 12 ==0)
 		    fprintf (fp, "\n");
 	}
-	fprintf (fp, "\n");
 }
 
 
@@ -1745,7 +1771,6 @@ eps_writeTrailer (fp)
 FILE	*fp;
 {
 	fprintf (fp, "\n");
-	fprintf (fp, "grestore\n");
 	fprintf (fp, "showpage\n");
 	fprintf (fp, "%%%%EndData\n");
 	fprintf (fp, "end\n");
@@ -1761,7 +1786,6 @@ static void
 eps_simpleTrailer (fp)
 FILE	*fp;
 {
-	fprintf (fp, "grestore\n");
 	fprintf (fp, "showpage\n");
 }
 

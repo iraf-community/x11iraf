@@ -57,6 +57,7 @@
 #include <ObmW/RowCol.h>
 #include <ObmW/Scrollbar.h>
 #include <ObmW/Slider2.h>
+#include <ObmW/Tabs.h>
 #include <ObmW/Toggle.h>
 
 #include <X11/xpm.h>
@@ -165,6 +166,7 @@ extern	void GtermClassInit(), MarkerClassInit(), HTMLClassInit();
 #define WtTextToggle		00000100000, 00000000000
 #define WtXfwfCommon		00000200000, 00000000000
 #define WtXfwfMenuBar		00000400000, 00000000000
+#define WtTabs			00001000000, 00000000000
 
 /* Object base classes. */
 typedef struct {
@@ -255,6 +257,8 @@ objClassRec UiObjects[] = {
 	{ "SmeLine",	OtNonShell, &smeLineObjectClass, WtSmeLine,
 			WidgetClassInit, NULL, NULL, NULL, NULL, NULL },
 	{ "StripChart",	OtNonShell, &stripChartWidgetClass, WtStripChart,
+			WidgetClassInit, NULL, NULL, NULL, NULL, NULL },
+	{ "Tabs",	OtNonShell, &tabsWidgetClass, WtTabs,
 			WidgetClassInit, NULL, NULL, NULL, NULL, NULL },
 	{ "Toggle",	OtNonShell, &toggleWidgetClass, WtToggle,
 			WidgetClassInit, NULL, NULL, NULL, NULL, NULL },

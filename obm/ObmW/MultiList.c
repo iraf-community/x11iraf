@@ -713,6 +713,14 @@ XfwfMultiListWidget mlw;
 {
 	XGCValues values;
 	unsigned int attribs;
+#ifndef USE_XMU_STIPPLE
+        Screen *screen = XtScreen((Widget)mlw);
+        Display *display = XtDisplay((Widget)mlw);
+        int pixmap_width = 2, pixmap_height = 2;
+        static unsigned char pixmap_bits[] = {
+            0x02, 0x01,
+        };
+#endif
 
 	attribs = GCForeground | GCBackground | GCFont;
 	values.foreground = MultiListFG(mlw);
@@ -735,8 +743,20 @@ XfwfMultiListWidget mlw;
 	values.foreground = MultiListFG(mlw);
 	values.background = MultiListBG(mlw);
 	values.fill_style = FillTiled;
-	values.tile = XmuCreateStippledPixmap(XtScreen(mlw),MultiListFG(mlw),
-					      MultiListBG(mlw),MultiListDepth(mlw));
+#ifdef USE_XMU_STIPPLE
+	values.tile = XmuCreateStippledPixmap(XtScreen(mlw),
+			MultiListFG(mlw),
+			MultiListBG(mlw),
+			MultiListDepth(mlw));
+#else
+    	values.tile = XCreatePixmapFromBitmapData (display,
+                            RootWindowOfScreen(screen),
+                            (char *)pixmap_bits,
+                            pixmap_width, pixmap_height,
+                            MultiListFG(mlw),
+                            MultiListBG(mlw),
+                            MultiListDepth(mlw));
+#endif
 	MultiListGrayGC(mlw) = XtGetGC((Widget)mlw,attribs,&values);
 } /* End CreateNewGCs */
 

@@ -382,8 +382,10 @@ char **argv;
 	 * name, class, and resources independently from those of the
 	 * application using the object manager.
 	 */
-	obm->display = XtOpenDisplay (obm->app_context, "",
+	obm->display = XtOpenDisplay (obm->app_context, (String)NULL,
 	    appname, appclass, NULL, 0, &sv_argc, sv_argv);
+	if (obm->display == (Display *)NULL)
+	    XtAppError (obm->app_context, "appInitialize: Can't open display.");
 
 	if (obm->debug > 1)
 	    XSynchronize (obm->display, True);
@@ -1759,6 +1761,8 @@ Cardinal *n;
                 * (Pixel*) ((unsigned long) w + res[i].resource_offset);
             (*n)++;
         }
+    if (res)
+        XtFree ((char *)res);					/* MF037 */
 }
 
 

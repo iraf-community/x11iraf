@@ -27,7 +27,7 @@ XCOMM - The following are for SunOS
     COMPAT_OBJS = strerror.o strtoul.o tclMtherr.o
 #else
 
-#if defined(SunArchitecture)
+#if defined(SunArchitecture) && !defined (i386Architecture)
 XCOMM - The following are for SunSoft/Solaris
 # Hack to compile under SunPRO V4 on Solaris
         CCOPTIONS = -Xs
@@ -38,10 +38,28 @@ XCOMM - The following are for SunSoft/Solaris
     COMPAT_OBJS = tclMtherr.o
 #else
 
+#if defined(SunArchitecture) && defined (i386Architecture)
+XCOMM - The following are for Solaris x86
+        CCOPTIONS =
+  EXTRA_LDOPTIONS =
+      GCC_FLAGS = 
+       AC_FLAGS = -DNO_GETWD=1 -DNO_WAIT3=1 -DHAVE_UNISTD_H=1 \
+		  -DNO_UNION_WAIT=1 -DNEED_MATHERR=1
+    COMPAT_OBJS = tclMtherr.o
+#else
+
+#if defined(i386BsdArchitecture)
+XCOMM - The following are for FreeBSD
+      GCC_FLAGS = -DNOSTDHDRS -DSYSV -DANSI -D_BSD_SOURCE -W \
+		  -fstrength-reduce -fpcc-struct-return
+       AC_FLAGS = -DHAVE_UNISTD_H=1
+    COMPAT_OBJS =
+#else
+
 #if defined(LinuxArchitecture)
 XCOMM - The following are for Linux
       GCC_FLAGS = -DNOSTDHDRS -DSYSV -DANSI -D_BSD_SOURCE -W \
-		  -Wunused -Wcomment -fstrength-reduce -fpcc-struct-return
+		  -fstrength-reduce -fpcc-struct-return
        AC_FLAGS = -DHAVE_UNISTD_H=1
     COMPAT_OBJS =
 #else
@@ -73,6 +91,8 @@ XCOMM - The following are for AIX on Rs/6000
       GCC_FLAGS = 
        AC_FLAGS =
     COMPAT_OBJS =
+#endif
+#endif
 #endif
 #endif
 #endif
@@ -150,7 +170,7 @@ includes::
 	MakeDir(X11irafIncDir/Tcl)
 	@(set -x; for i in $(HEADERS); do \
 		$(RM) X11irafIncDir/Tcl/$$i; \
-		$(LN) ObmDir/Tcl/$$i X11irafIncDir/Tcl/$$i; \
+		$(CP) -p ObmDir/Tcl/$$i X11irafIncDir/Tcl/$$i; \
 	done)
 
 #if InstallIncludes
@@ -159,8 +179,9 @@ install::
 		$(RM) X11irafIncDir/Tcl/$$i; \
 	done)
 	for i in $(HEADERS); do \
-	    (set -x; $(CP) $$i X11irafIncDir/Tcl/); \
+	    (set -x; $(CP) -p $$i X11irafIncDir/Tcl/); \
 	done
 #endif    
 
 DependTarget()
+

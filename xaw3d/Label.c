@@ -304,15 +304,35 @@ static void GetgrayGC(lw)
     LabelWidget lw;
 {
     XGCValues	values;
+#ifndef USE_XMU_STIPPLE
+    Screen *screen = XtScreen((Widget)lw);
+    Display *display = XtDisplay((Widget)lw);
+    int pixmap_width = 2, pixmap_height = 2;
+    static unsigned char pixmap_bits[] = {
+        0x02, 0x01,
+    };
+#endif
+
 
     values.foreground = lw->label.foreground;
     values.background = lw->core.background_pixel;
     values.font	      = lw->label.font->fid;
     values.fill_style = FillTiled;
+
+#ifdef USE_XMU_STIPPLE
     values.tile       = XmuCreateStippledPixmap(XtScreen((Widget)lw),
 						lw->label.foreground, 
 						lw->core.background_pixel,
 						lw->core.depth);
+#else
+    values.tile       = XCreatePixmapFromBitmapData (display,
+                            RootWindowOfScreen(screen), 
+                            (char *)pixmap_bits, 
+                            pixmap_width, pixmap_height, 
+                            lw->label.foreground, 
+                            lw->core.background_pixel, 
+                            lw->core.depth);
+#endif
     values.graphics_exposures = False;
 
     lw->label.stipple = values.tile;
@@ -632,7 +652,11 @@ static Boolean SetValues(current, request, new, args, num_args)
 
 	XtReleaseGC(new, curlw->label.normal_GC);
 	XtReleaseGC(new, curlw->label.gray_GC);
+#ifdef USE_XMU_STIPPLE
 	XmuReleaseStippledPixmap( XtScreen(current), curlw->label.stipple );
+#else
+        XFreePixmap( XtDisplay(current), curlw->label.stipple );
+#endif
 	GetnormalGC(newlw);
 	GetgrayGC(newlw);
 	redisplay = True;
@@ -658,7 +682,11 @@ static void Destroy(w)
     XtFree( lw->label.label );
     XtReleaseGC( w, lw->label.normal_GC );
     XtReleaseGC( w, lw->label.gray_GC);
+#ifdef USE_XMU_STIPPLE
     XmuReleaseStippledPixmap( XtScreen(w), lw->label.stipple );
+#else
+        XFreePixmap( XtDisplay(w), lw->label.stipple );
+#endif
 }
 
 

@@ -1542,8 +1542,10 @@ XSetWindowAttributes *attributes;
     PanedWidget pw = (PanedWidget) w;
     Widget * childP;
 
+#ifdef USE_CWCURSOR
     if ((attributes->cursor = (pw)->paned.cursor) != None)
 	*valueMask |= CWCursor;
+#endif
 
     (*SuperClass->core_class.realize) (w, valueMask, attributes);
 

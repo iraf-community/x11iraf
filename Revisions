@@ -1,6 +1,9 @@
-X11IRAF V1.0 Notes File
-Begun 6 Mar 1997
------------------------
+# X11IRAF V1.0 Notes File
+#
+# See also the x11iraf$obm/OBM.revs file for a detailed list of changes to OBM.
+#
+# Begun 6 Mar 1997
+# -----------------------
 
 X11IRAF.tmpl
 	Removed a /* from the comment causing aix to complain
@@ -214,3 +217,327 @@ vximtool/vximtool.c
 --------------------
 V1.1 Release  (9/10)
 --------------------
+
+ximtool/eps.c
+	Fixed the gsave/grestore pairing again.  Somehow the change got
+	lost and had to be redone, this slipped by earlier testing for
+	the V2.1 release.  (11/3)
+
+ximtool/ximtool.gui
+ximtool/ximtool-alt.gui
+ximtool/ximtool-mag.gui
+	Change the winWidth/winHeight initialization to query the imagewin
+	rather than use a fixed 512 size.  This is required to properly scale
+	the image when the window size was set with a geometry flag/resource
+	(11/20)
+
+vximtool/vximtool.c
+	Changed so that when the stdin is added to the select list only when
+	-i is not set explicitly, or when -background is used explicitly.
+
+ximtool/ximtool-alt
+ximtool/ximtool-mag
+	Moved the #!/bin/csh to line 1 so scripts may be executed from
+	Bourne shells  (3/15/98)
+
+ximtool/print.c
+ximtool/save.c
+ximtool/irafio.c
+	Fixed complaints about incompatible pointer types from GCC (3/31/98)
+
+ximtool/ximtool.c
+	Added error handling code to dump core after 5 errors received if
+	XGXERROR set to 'dumpcore', or exit on 'exit'.  (4/2/98)
+
+xaw3d   --> xaw3d-old
+xaw3d/Scrollbar*.[ch]
+xaw3d/ThreeD*.[ch]
+	Replaced Scrollbar widget with one from the Xaw3d V1.3 library which
+	gives a true 3D Motif-like scrollbar with arrows.
+
+xgterm  --> xgterm-old
+xgterm/   (all sources)
+	1) Diff-merged to bring XGterm up to X11R6 version
+	2) Numerous bug fixes to the dynamic colors code so it can properly
+	   be enabled/disabled via +/-dc flags or dynamicColors resource.
+	3) Made the right-side scrollbar a runtime +/-sbr option or
+	   scrollBarRight resource
+	4) Merged new 3D scrollbar and color resources into app-defaults file
+
+ximtool/ximtool.gui
+ximtool/ximtool-alt.gui
+ximtool/ximtool-mag.gui
+	Added new Scrollbar resources for the help and info panels to get
+	the 3-D effect. (4/28/98)
+
+ximtool/load.c
+	Fixed a bug in which loading e.g. frame 2 with certain frame buffers
+	would cause the image load to fail.  The imtoolrc file for some FBs
+	only define one frame by default, the code was not initializing any
+	more that specified even if it was load some other frame (5/7/98)
+
+ximtool/iis.c
+	Fixed a bug in which turning off the DISPLAY 'select' param could
+	erase frame 1.  (5/16/98)
+
+ximtool/zscale.c
+	Changed the comparison function for qsort to handle cases where the
+	range of data is <1.0 (6/1/98)
+
+obm/server.c
+	Fixed a bug affecting the use of "-display" when DISPLAY wasn't also
+	set in the environment.  The call to XtOpenDisplay at line 385 was
+	passing '""' as a argument for the display name instead of NULL and
+        so the routine wasn't parsing for the argument internally, and if
+	DISPLAY wasn't set in the environment as a backup this would result
+	in a NULL Display pointer being returned which would segvio on the
+        next line.  Added an error check for a NULL return from XtOpenDisplay.
+	(6/4/98)
+
+ximtool/raster.c
+obm/Tcl/tclExpr.c
+obm/Tcl/tclParse.c
+	Added a redefinition of isalnum() for linux systems to work around
+	an incompatibility of the definition of this macro between Slackware
+	and RedHat 4.2 systems. (6/4/98)
+
+xgterm/charproc.c
+	Increased TEXT_BUF_SIZE from 256 to 1024 to allow longer input lines,
+	e.g. when doing a cut-n-paste of compiler verbose output which expands
+	path names. (6/17/98)
+
+ximtool/iis.c
+	Fixed a bug in which resetting the FB and displaying to frame >1
+	would leave the server displaying frame 1.  (6/17/98)
+
+ximtool/ximtool.c
+	Fixed a typo in the pointer allocation for a -fifo opt (9/3/98)
+
+ximtool/iis.c
+vximtool/vximtool.c
+	Changed the read()/write() calls to new routines which loop until
+	all of the expected bytes have been read or written.  On inet socket
+	connections it's possible that the I/O would return a short count if
+	a kernel buffer filled up causing bad reads and eventually a crash.
+	This may also explain the occassional "bad header checksum" errors
+	that have been reported.  (9/26/98)
+
+xgterm/main.c
+	Moved a block of code to get a pty for IRIX 6.5 systems to avoid an
+	segvio when out of ptys.  The old code was left where it was for
+	earlier versions.  (12/2/98)
+
+ximtool/irafio.c
+	There was a duplicate close of the image header which caused a 
+	memory corruption on linux systems when loading an image on the
+	command line. (2/8/99)
+
+Imakefile
+*/Imakefile
+mkarch		+
+	Added support for  doing multiple architectures. (3/2/99)
+
+xaw3d/AsciiSink.c
+	Removed the 'black box' drawn on the right side of the screen
+	indicating there is more text off the screen.  (3/30/99)
+
+xgterm/gtermio.c
+	Fixed a bug in the arg ordering of the call to GtReadPixels() (4/22/99)
+
+xgterm/gtermio.c
+	The colormap readback required that the rgb arrays be right shifted
+	8 bit for the value to be interpreted correctly. (4/24/99)
+
+Imakefile
+ximtool/*.gui
+	Increased version number to V1.2, set expected release date 5/30/99.
+
+ximtool/iis.c
+ximtool/raster.c
+	Fixed a problem with initialize frames when adding new frames while
+	in tile mode.  Previously if there were 2 frames defined and you
+	displayed to frame 3 you would be dumped from tile mode silently,
+	the new code just changes the number of tile frames.  Also fixed 
+	was a bug where displaying to a new fbconfig was not reinitializing
+	the tile mode properly (e.g. in a 4-frame tile changing to a 2-frame
+	config would leave the task in 4-frame mode and improperly clear
+	the screen mapping).  (5/17/99)
+
+xgterm/misc.c
+	Modified the xerror() procedure to recognize XGXERROR as 'ignore'
+	which will cause the error to be ignored and not counted towards the
+	total which eventually causes the task to exit.  Also added an
+	XGMAXERROR environment variable which can be defined to set the
+	limit.  (8/24/99)
+
+xgterm/gtermio.c
+	1) Modified so any buffered output is flushed when activated.  This
+	is to keep any GUI client commands that may have been caused by
+	pushing buttons while the client program isn't running from being
+	read by the next cursor read.  For example after the GUI is done
+	it may not be unmapped and a 'Quit' key send a 'q' keystroke.  One
+	could hit the button several times causing numerous 'q' commands to
+ 	be buffered, the next interactive task would get the keystrokes
+	and probably quit itself, causing confusion for the user.
+	2) Also posted a dummy gio_deactivate_cb() procedure.  This appears
+	to be necessary to catch a window-close event such as can be done
+	from the window manager menubar or 'X' button.  (8/24/99)
+
+ximtool/raster.c
+	Modified the frame buffer config open procedure to set defaults for
+	commonly used sizes such as 1K, 2K, etc.  Also modified to search for
+	the imtoolrc file in additional directories such as /opt/local/lib,
+	/iraf/iraf/dev, and if not found will now print out a warning
+	message. (9/8/99)
+
+ximtool/print.c
+ximtool/ximtool*.gui
+	Made the title/colorbar/borders are optional. (11/9/99)
+
+ximtool/iis.c
+	Added a SO_REUSEADDR option to the inet socket (11/99)
+
+ximtool/ximtool*.gui
+	Added new keystrke commands Ctrl-<arrow> and Ctrl-Alt-<arrow> to
+	move the frame one or a hald panner width in the given direction.
+	This is useful for panning full window frames around large mosaic
+	images (12/99)
+
+ximtool/save.c
+ximtool/tiffio.c	+
+ximtool/ximtool*.gui
+	Added a TIFF output format option for the save command.  This is a
+	very basic TIFF file, input cannot be supported without supporting
+	the full tiff library.  (2/00)
+
+xaw3d/Imakefile
+xaw3d/Text.c                                                            MF039
+xaw3d/TextTr.c
+    Modified the code to make _XawDefaultTextTranslations a static array
+    rather than one allocated and never freed.   Required changes to the
+    array declaration in TextTr.c, and textClassRec definition and 
+    ClassInitialize() procedure.  (3/2/00)
+
+cdl/imd.c
+        Fixed a bug in the drawing of markers where the start coord for
+        the subraster is (1,1).  When writing out the subraster the
+        routine was incorrectly deciding that the frame buffer did not
+        need to be readback to edit the subraster.  (3/14/00)
+
+ximtool/ximtool.gui
+	Deleted a debug print statement (3/15/00)
+
+xaw3d/Label.c
+xaw3d/List.c
+xaw3d/Panner.c
+xaw3d/Scrollbar.c
+xaw3d/SmeBSB.c
+obm/ObmW/Gcs.c
+obm/ObmW/Tabs.c
+obm/ObmW/MultiList.c
+	Added an #ifdef USE_XMU_STIPPLE around code calling the
+	XmuCreateStippledPixemap() routine.  This procedure maintains a cache
+	of the pixmaps which would be corrupted at somepoint resulting in
+	BadGC and BadPixmap errors, causing xgterm stability problems. (3/28/00)
+
+xaw3d/Paned.c
+xaw3d/Simple.c
+xaw3d/SimpleMenu.c
+obm/ObmW/Frame.c
+	Added and #ifdef USW_CWCURSOR around code which adds the CW_Cursor
+	XCreateWindow attribute in widget creation.  This was causing various
+	BadCursor bugs in the X lib which would cascade and result in xgterm
+	stability problems.  (3/28/00)
+
+cdl/cdl.c                           **** INTERFACE CHANGE ****
+        Modified the behavior of cdl_getFrame() to do a sampling cursor
+        read to get the frame buffer from the server.  If the value returned
+        is zero (as from SAOimage) the current value of the frame number in
+        the CDL is returned.  (3/29/00)
+
+cdl/cdl.[ch]                        **** INTERFACE CHANGE ****
+cdl/imd.c                           **** INTERFACE CHANGE ****
+cdl/comm.c                          **** INTERFACE CHANGE ****
+cdl/cdl_f77.[ch]                    **** INTERFACE CHANGE ****
+cdl/cdl_spp.c                       **** INTERFACE CHANGE ****
+cdl/examples/tvmark.c               **** INTERFACE CHANGE ****
+cdl/test/cdltest.c                  **** INTERFACE CHANGE ****
+cdl/test/imdtest.c                  **** INTERFACE CHANGE ****
+        Modified the cdl_readCursor() routine to have a new 'wcs' argument
+        to return the WCS of the cursor read.  This is to allow applications
+        to get the frame number of the read from the wcs (i.e. wcs is
+        coded as "frame * 100 + wcs".   (3/29/00)
+
+xaw3d/Text.h
+	Removed include of <X11/Xaw/AsciiSrc.h>.  Comments indicate this is
+	only required for R3 compatability but due to changes the the Xaw
+	text widget in XFree86 V4 the include file changes were causing
+	compile problems.  (4/5/00)
+
+xgterm/screen.c
+xgterm/scrollbar.c
+	Removed declarations for calloc/malloc/realloc since they were
+	conflicting <stdlib.h> and causing build problems on Solaris 8.
+	Used explicit cast of pointer when needed in code instead.  (4/5/00)
+
+X11IRAF.tmpl
+obm/ObmW/Imakefile
+	Modified CCOPTIONS for Solaris 8 and HPUX build of new Tab widgets.
+	(4/5/00)
+
+ximtool/ximtool.gui
+ximtool/ximtool-mag.gui
+ximtool/ximtool-alt.gui
+	Updated translation tables with Ctrl-M and Ctrl-P keystrokes to
+	toggle magnifier/panner markers.  (4/7/00)
+
+xgterm/misc.c
+	Changed the default behavior of the xerror() handler to ignore any
+	BadCursor events.  A new action value, 'catchall', can be defined
+	to bypass this and count all error actions toward the final
+	shutdown. (4/7/00)
+
+cdl.h
+        Fixed a typo in the prototype declaration for cdl_readCursor (4/14/00)
+
+xgterm/misc.c
+	Fixed a bug in the way BadCursor errors were being ignored.  (4/14/00)
+
+xgterm/gtermio.c
+	Forgot to merge in a change mapping LFLF to LF the same way CRLF is
+	currently mapped.  On Alpha systems there is an apparent bug in the
+	stdgraph kernel causing this to extra char to be inserted and
+	confusing the interpretation of the GUI message.  Hacked around this
+	for now by mapping LFLF to a single LF but it needs to be investigated
+	further.  (4/14/00)
+
+X11IRAF.tmpl
+	Added a special-case XTOOLONLYLIB flag so binaries built on lyra
+	will use the patched Xt library needed to work around the  "Attempt
+	to manage a child widget when parent is not Composite" message
+	during shutdown.  (4/14/00)
+	
+cdl/mkpkg		+
+	Added a mkpkg file to build the library.  Requested by Ken Mighell
+	for use in one of his packages.  (4/17/00)
+
+mkarch
+obm/Tcl/tclInt.h
+obm/ObmW/HTML-PSformat.c
+	Added a workaround for our old use of the varargs macros which was
+	causing problems under LinuxPPC.  Also changed arch name from
+	mklinux to linuxppc.  (4/18/00)
+
+ximtool/ximtool-mag.c
+	Increased the size of some command-line arg buffers.  This was done
+	for the ximtool.c code earlier but never propogated.  (4/26/00)
+
+xgterm/Imakefile
+	Removed the '-lcurses' termlib for HP systems.  Under HP-UX 10.10
+	there is a bug in the curses library select() routine which could
+	cause the xgterm to hang.  (5/1/00)
+
+------------------------
+V1.2 Release  (5/1/2000)
+------------------------
+

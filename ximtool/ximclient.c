@@ -938,6 +938,11 @@ char **argv;
  *	printcmd	command
  *	printfile	filename
  *
+ *	dotitle		true|false
+ *	doborders	true|false
+ *	docolorbars	true|false
+ *	title		string
+ *
  *	corners		llx lly urx ury
  */
 static int 
@@ -998,6 +1003,34 @@ char **argv;
 		sprintf (buf, "%s %s", option, value ? "True" : "False");
 		xim_message (xim, "printOptions", buf);
 
+	} else if (strcmp (option, "dotitle") == 0) {		/* TITLE */
+		psflags = value ? psflags | EPS_DOTITLE :
+				  psflags & ~EPS_DOTITLE ;
+		psim->page.flags = psflags;
+		sprintf (buf, "%s %s", option, value ? "True" : "False");
+		xim_message (xim, "printOptions", buf);
+
+	} else if (strcmp (option, "doborders") == 0) {		/* BORDERS */
+		psflags = value ? psflags | EPS_DOBORDERS :
+				  psflags & ~EPS_DOBORDERS ;
+		psim->page.flags = psflags;
+		sprintf (buf, "%s %s", option, value ? "True" : "False");
+		xim_message (xim, "printOptions", buf);
+
+	} else if (strcmp (option, "docolorbar") == 0) {	/* COLORBAR */
+		psflags = value ? psflags | EPS_DOCOLORBAR :
+				  psflags & ~EPS_DOCOLORBAR ;
+		psim->page.flags = psflags;
+		sprintf (buf, "%s %s", option, value ? "True" : "False");
+		xim_message (xim, "printOptions", buf);
+
+	} else if (strcmp (option, "title") == 0) {      	/* TITLE STR */
+	    if (strcmp ("imtitle", strval) != 0) {
+	        strcpy (psim->label, strval);
+                sprintf (buf, "title %s", strval);
+                xim_message (xim, "printOptions", buf);
+	    }
+
 	} else if (strcmp (option, "annotate") == 0) {		/* ANNOTATE */
 	    if (value) {
 		if (!psim->label)
@@ -1015,7 +1048,7 @@ char **argv;
 	    sprintf (buf, "%s %s", option, value ? "True" : "False");
 	    xim_message (xim, "printOptions", buf);
 
-	} else if (strcmp (option, "compress") == 0) {		 /* COMPRESS */
+	} else if (strcmp (option, "compress") == 0) {	      /* COMPRESS    */
 	    if (value)
 		psim->compression = RLECompression;
 	    else
@@ -1041,7 +1074,7 @@ char **argv;
 	    sprintf (buf, "%s %s", option, strval);
 	    xim_message (xim, "printOptions", buf);
 
-	} else if (strcmp (option, "imscale") == 0) {	      /* IMAGE SCALE */
+	} else if (strcmp (option, "imscale") == 0) {	       /* IMAGE SCALE */
 	    if (value >= 10) {
 	        if ((int)(psim->page.scale*100.0) != value)
 	            psim->page.scale = (float) value / 100.0;

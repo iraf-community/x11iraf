@@ -1,30 +1,48 @@
-XCOMM  Imakefile for the X11IRAF Source Tree
-XCOMM
-XCOMM  Mike Fitzpatrick, National Optical Astronomy Observatories, IRAF project.
-XCOMM  Aug 9 1996
+##
+##  Imakefile for the X11IRAF Source Tree
+##
+##  Mike Fitzpatrick, National Optical Astronomy Observatories, IRAF project.
+##  Aug 9 1996
 
 #include <X11IRAF.tmpl>
 
 #define IHaveSubdirs
 #define PassCDebugFlags 'CDEBUGFLAGS=$(CDEBUGFLAGS)'
 
-LIBDIRS 	= obm xaw3d xpm
+RELEASE		= v1.2
+
+LIBDIRS 	= obm xaw3d xpm cdl
 APPDIRS 	= xgterm ximtool xtapemon obmsh vximtool
 SUBDIRS 	= $(LIBDIRS) $(APPDIRS)
 
+all:: World
+
 World::
-	@echo "Building the X11IRAF V1.1 software tree"
+	@echo "Building the X11IRAF $(RELEASE) software tree"
 	@echo "" ; date ; echo ""
+	@echo ""
 	MakeDir (include)
-	MakeDir (lib)
-	MakeDir (bin)
 	MakeDir (app-defaults)
+	$(MAKE) $(MFLAGS) arch      X11IRAFDIR=$$PWD
+	$(MAKE) $(MFLAGS) Makefile  X11IRAFDIR=$$PWD
 	$(MAKE) $(MFLAGS) Makefiles X11IRAFDIR=$$PWD
-	$(MAKE) $(MFLAGS) clean	    X11IRAFDIR=$$PWD
 	$(MAKE) $(MFLAGS) includes  X11IRAFDIR=$$PWD
 	$(MAKE) $(MFLAGS) depend    X11IRAFDIR=$$PWD
 	$(MAKE) $(MFLAGS) libs      X11IRAFDIR=$$PWD
 	$(MAKE) $(MFLAGS) apps	    X11IRAFDIR=$$PWD
+	$(MAKE) $(MFLAGS) install   X11IRAFDIR=$$PWD
+	@echo "" ; date ; echo ""
+	@echo "Done."
+
+update::
+	@echo "Updating the X11IRAF $(RELEASE) software tree"
+	@echo "" ; date ; echo ""
+	@echo ""
+	$(MAKE) $(MFLAGS) arch      X11IRAFDIR=$$PWD
+	$(MAKE) $(MFLAGS) Makefile  X11IRAFDIR=$$PWD
+	$(MAKE) $(MFLAGS) Makefiles X11IRAFDIR=$$PWD
+	$(MAKE) $(MFLAGS) libs      X11IRAFDIR=$$PWD
+	$(MAKE) $(MFLAGS) apps      X11IRAFDIR=$$PWD
 	$(MAKE) $(MFLAGS) install   X11IRAFDIR=$$PWD
 	@echo "" ; date ; echo ""
 	@echo "Done."
@@ -45,17 +63,74 @@ apps::
 	$(MAKE) $(MFLAGS) 'CDEBUGFLAGS=$(CDEBUGFLAGS)' all); \
 	done
 
+dirs::
+	@echo "Creating Directories...."
+	$(MAKE) $(MFLAGS) arch
+
+
+# Architecture branches.
+alpha:
+	@(./mkarch alpha)
+arch::
+	@(./mkarch -current)
+generic:
+	@(./mkarch generic)
+freebsd:
+	@(./mkarch freebsd)
+hp700:
+	@(./mkarch hp700)
+irix:
+	@(./mkarch irix)
+linux:
+	@(./mkarch linux)
+linuxppc:
+	@(./mkarch linuxppc)
+mklinux:
+	@(./mkarch mklinux)
+redhat:
+	@(./mkarch redhat)
+rs6000:
+	@(./mkarch rs6000)
+showarch::
+	@(./mkarch -show)
+sparc:
+	@(./mkarch sparc)
+ssun:
+	@(./mkarch ssun)
+sunos:
+	@(./mkarch sunos)
+suse:
+	@(./mkarch suse)
+ultrix:
+	@(./mkarch ultrix)
+unknown:
+	@(./mkarch unknown)
+
+
+BTARFILE   = x11iraf-$(RELEASE)-bin.`./mkarch -arch`.tar
+DISTFILES = bin.`./mkarch -arch`/[a-z]* \
+	    lib.`./mkarch -arch`/libcdl.a \
+	    include/cdl* app-defaults man \
+	    README.install
+
 bindist::
+	(./mkarch -current -noclean)
 	(cd ximtool ; make alt-install)
-	@tar -cf bin.tar bin app-defaults man
+	@(echo "Making tar file....$(BTARFILE)" ; \
+	     tar -chf $(BTARFILE) $(DISTFILES) )
+	@(echo "Compressing files...." ; \
+	    cat $(BTARFILE) | compress > $(BTARFILE).Z ; gzip $(BTARFILE) )
+	@(echo "Done.")
+
 
 archive::
 	$(MAKE) $(MFLAGS) pristine
-	@tar -cvf - . | gzip > ../x11iraf.tar.gz
+	@tar -cf - . | gzip > ../x11iraf-$(RELEASE).tar.gz
 
 pristine::
-	$(MAKE) $(MFLAGS) clean	    X11IRAFDIR=$$PWD
-	$(RM) -rf bin bin.tar* include lib app-defaults man spool* Makefile\
+	$(MAKE) $(MFLAGS) generic
+	$(RM) -rf bin.[a-fh-z]* lib.[a-fh-z]* \
+	  bin.tar* include app-defaults man spool* Makefile\
 	  Makefile.bak */Makefile */Makefile.bak */*/Makefile */*/Makefile.bak
 
 MakeSubdirs($(SUBDIRS))

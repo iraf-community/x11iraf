@@ -529,6 +529,8 @@ int nprinters = 0;
 Printer printer_list[MAX_PRINTERS] = {
     {	"default", "lpr" },	     /* should do more interesting examples */
     {	"clp",     "lpr -Pclp" },
+    {	"clp2",    "lpr -Pclp2" },
+    {	"clp2t",   "lpr -Pclp2t" },
     {	"lw1",     "lpr -Plw1" },
     {	"lw2",     "lpr -Plw2" },
     {	"lw3",     "lpr -Plw3" },

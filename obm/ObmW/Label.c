@@ -339,5 +339,7 @@ WidgetClass class;
 	}
 	XSetClipMask(XtDisplay(self), ((XfwfLabelWidget)self)->xfwfLabel.gc, None);
 	XSetClipMask(XtDisplay(self), ((XfwfLabelWidget)self)->xfwfLabel.rv_gc, None);
+
+	XDestroyRegion (reg);					/* MF038 */
     }
 }

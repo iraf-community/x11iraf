@@ -579,6 +579,7 @@ Boolean is_left;
  *      Returns: none.
  */
 
+
 static void
 CreateGCs(w)
 Widget w;
@@ -586,6 +587,15 @@ Widget w;
     SmeBSBObject entry = (SmeBSBObject) w;    
     XGCValues values;
     XtGCMask mask;
+#ifndef USE_XMU_STIPPLE
+    Screen *screen = XtScreenOfObject((Widget)w);
+    Display *display = XtDisplayOfObject((Widget)w);
+    int pixmap_width = 2, pixmap_height = 2;
+    static unsigned char pixmap_bits[] = {
+        0x02, 0x01,
+    };
+#endif
+
     
     values.foreground = XtParent(w)->core.background_pixel;
     values.background = entry->sme_bsb.foreground;
@@ -599,10 +609,20 @@ Widget w;
     entry->sme_bsb.norm_gc = XtGetGC(w, mask, &values);
     
     values.fill_style = FillTiled;
+#ifdef USE_XMU_STIPPLE
     values.tile   = XmuCreateStippledPixmap(XtScreenOfObject(w), 
 					    entry->sme_bsb.foreground,
 					    XtParent(w)->core.background_pixel,
 					    XtParent(w)->core.depth);
+#else
+    values.tile       = XCreatePixmapFromBitmapData (display,
+                            RootWindowOfScreen(screen),
+                            (char *)pixmap_bits,
+                            pixmap_width, pixmap_height,
+                            entry->sme_bsb.foreground,
+                            XtParent(w)->core.background_pixel,
+                            XtParent(w)->core.depth);
+#endif
     values.graphics_exposures = FALSE;
     mask |= GCTile | GCFillStyle;
     entry->sme_bsb.norm_gray_gc = XtGetGC(w, mask, &values);

@@ -1392,9 +1392,9 @@ again:
 	*op++ = '{';
 	*op++ = ' ';
 
-	for (i=0;  i < npts;  i++) {
+	for (i=0;  i < ngot;  i++) {				/* MF001 */
 	    sprintf (op, "{%d %d} ", (int)pv[i].x, (int)pv[i].y);
-	    while (op)
+	    while (*op)						/* MF002 */
 		op++;
 
 	    if (op - buf + SZ_NUMBER > buflen) {
@@ -1432,7 +1432,9 @@ again:
  * passed in the "points" variable as a string of the form { {x y} {x y} ...}.
  * If FIRST and NPTS are not specified first is assumed to be zero (the first
  * point) and NPTS is the length of the points array.  Coordinates are 
- * specified in raster zero pixel coordinates.
+ * specified in raster zero pixel coordinates.  In the case of 'poly' type
+ * markers the procedure will close the polygon by adding a copy of the first
+ * point to the list.
  */
 static int
 markerSetVertices (msg, tcl, argc, argv)
@@ -1746,7 +1748,7 @@ again:
 		    sprintf (op, "{%0.5f %0.5f} ", vv[i].x, vv[i].y);
 		else
 		    sprintf (op, "{%0.2f %0.2f} ", vv[i].x, vv[i].y);
-		while (op)
+		while (*op)					/* MF003 */
 		    op++;
 
 		if (op - buf + SZ_NUMBER > buflen) {

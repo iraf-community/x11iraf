@@ -9,8 +9,12 @@ X11IRAFDIR = ../../
 
 # Hack to compile under SunPRO V4 on Solaris
 #if defined (SunArchitecture) && HasSunC && OSMajorVersion >= 5
+#if OSMinorVersion <= 5
+#if !defined (i386Architecture)
         CCOPTIONS = -Xs
   EXTRA_LDOPTIONS = -xildoff
+#endif
+#endif
 #endif
 
 HEADERS = \
@@ -20,7 +24,8 @@ HEADERS = \
 	HTMLamp.h Icon.h IconP.h Label.h LabelP.h Layout.h LayoutP.h \
 	MenuBar.h MenuBarP.h MultiList.h MultiListP.h RadioGrp.h RadioGrpP.h \
 	RowCol.h RowColP.h Scrollbar.h ScrollbarP.h Slider2.h Slider2P.h \
-	TabString.h Toggle.h ToggleP.h done.h inkstore.h laygram.h scroll.h
+	TabString.h Toggle.h ToggleP.h done.h inkstore.h laygram.h scroll.h \
+	Tabs.h TabsP.h Gcs.h
 
 SRCS = \
 	Arrow.c Board.c Button.c Common.c DrawIString.c DrawString.c \
@@ -28,7 +33,8 @@ SRCS = \
 	HTMLformat.c HTMLimages.c HTMLjot.c HTMLlists.c HTMLparse.c \
 	HTMLwidgets.c Icon.c Label.c Layout.c MenuBar.c MultiList.c \
 	RadioGrp.c RowCol.c Scrollbar.c Slider2.c Tablist2Tabs.c TextWidth.c \
-	Toggle.c cvtLong.c icon.c laygram.c laylex.c scroll.c strnchr.c
+	Toggle.c cvtLong.c icon.c laygram.c laylex.c scroll.c strnchr.c \
+	Tabs.c Gcs.c
 
 OBJS = \
 	Arrow.o Board.o Button.o Common.o DrawIString.o DrawString.o \
@@ -36,7 +42,8 @@ OBJS = \
 	HTMLformat.o HTMLimages.o HTMLjot.o HTMLlists.o HTMLparse.o \
 	HTMLwidgets.o Icon.o Label.o Layout.o MenuBar.o MultiList.o \
 	RadioGrp.o RowCol.o Scrollbar.o Slider2.o Tablist2Tabs.o TextWidth.o \
-	Toggle.o cvtLong.o icon.o laygram.o laylex.o scroll.o strnchr.o
+	Toggle.o cvtLong.o icon.o laygram.o laylex.o scroll.o strnchr.o \
+	Tabs.o Gcs.o
 
 #ifdef LexCmd
 LEX=LexCmd
@@ -55,8 +62,24 @@ LintLibraryTarget(ar,$(SRCS))
 # Turn off compiler warnings for the HTML and FWF widgets.
     FWFCFLAGS = $(CFLAGS) -c -w
 
-HTML.o:
+HTML.o: HTML.c
 	$(CC) $(FWFCFLAGS) HTML.c
+HTML-PSformat.o: HTML-PSformat.c
+	$(CC) $(FWFCFLAGS) HTML-PSformat.c
+HTMLformat.o: HTMLformat.c
+	$(CC) $(FWFCFLAGS) HTMLformat.c
+HTMLimages.o: HTMLimages.c
+	$(CC) $(FWFCFLAGS) HTMLimages.c
+HTMLjot.o: HTMLjot.c
+	$(CC) $(FWFCFLAGS) HTMLjot.c
+HTMLlists.o: HTMLlists.c
+	$(CC) $(FWFCFLAGS) HTMLlists.c
+HTMLparse.o: HTMLparse.c
+	$(CC) $(FWFCFLAGS) HTMLparse.c
+HTMLwidgets.o: HTMLwidgets.c
+	$(CC) $(FWFCFLAGS) HTMLwidgets.c
+
+
 Arrow.o:
 	$(CC) $(FWFCFLAGS) Arrow.c
 Board.o:
@@ -108,6 +131,40 @@ laygram.c laygram.h : laygram.y
 	sed 's/yy/LayYY/g' y.tab.h > laygram.h
 	rm y.tab.c y.tab.h
 
+# Hack to compile under systems which don't have strict ANSI compilers.
+#if defined (SunArchitecture) && HasSunC && OSMajorVersion >= 5
+#if !defined (i386Architecture)
+Tabs.o:
+	$(CC) -Xc $(EXTRA_INCLUDES) -c Tabs.c
+#endif
+#else
+#if defined (SunArchitecture) && OSMajorVersion == 4
+Tabs.o:
+	acc -w $(EXTRA_INCLUDES) -c Tabs.c
+Gcs.o:
+	acc -w $(EXTRA_INCLUDES) -c Gcs.c
+#else
+#if defined (HPArchitecture)
+Tabs.o:
+	c89 -w $(CFLAGS) $(EXTRA_INCLUDES) -c Tabs.c
+Gcs.o:
+	c89 -w $(CFLAGS) $(EXTRA_INCLUDES) -c Gcs.c
+#else
+#if defined (AlphaArchitecture) && OSMajorVersion >= 4
+Tabs.o:
+	$(CC) -std $(CFLAGS) $(EXTRA_INCLUDES) -c Tabs.c
+#endif
+#endif
+#endif
+#endif
+
+
+# Hack to compile under SunPRO V4 on Solaris
+#if defined (SunArchitecture) && HasSunC && OSMajorVersion >= 5
+laygram.o:
+	$(CC) $(EXTRA_INCLUDES) -c laygram.c
+#endif
+
 clean::
 	-rm -f laygram.c laygram.h
    
@@ -119,11 +176,11 @@ laylex.c: laylex.l
 clean::
 	-rm -f laylex.c
 
-includes::
+includes:: laygram.h
 	MakeDir(X11irafIncDir/ObmW)
 	@(set -x; for i in $(HEADERS); do \
 		$(RM) X11irafIncDir/ObmW/$$i; \
-		$(LN) ObmDir/ObmW/$$i X11irafIncDir/ObmW/$$i; \
+		$(CP) -p $$i X11irafIncDir/ObmW/$$i; \
 	done)
 
 #if InstallIncludes
@@ -132,7 +189,7 @@ install::
 		$(RM) X11irafIncDir/ObmW/$$i; \
 	done)
 	for i in $(HEADERS); do \
-	    (set -x; $(CP) $$i X11irafIncDir/ObmW); \
+	    (set -x; $(CP) -p $$i X11irafIncDir/ObmW); \
 	done
 #endif    
 

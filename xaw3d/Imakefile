@@ -67,8 +67,6 @@ HEADERS = \
 	GripP.h \
 	Label.h \
 	LabelP.h \
-	Layout.h \
-	LayoutP.h \
 	List.h \
 	ListP.h \
 	MenuButton.h \
@@ -128,7 +126,6 @@ SRCS = \
 	Form.c \
 	Grip.c \
 	Label.c \
-	Layout.c \
 	List.c \
 	MenuButton.c \
 	Paned.c \
@@ -155,9 +152,7 @@ SRCS = \
 	Vendor.c \
 	Viewport.c \
 	XawInit.c \
-	sharedlib.c \
-	laygram.c \
-	laylex.c
+	sharedlib.c 
 
 #if SharedDataSeparation
 UNSHAREDOBJS = AllWidgets.o sharedlib.o
@@ -174,7 +169,6 @@ OBJS = \
 	Form.o \
 	Grip.o \
 	Label.o \
-	Layout.o \
 	List.o \
 	MenuButton.o \
 	Paned.o \
@@ -200,9 +194,7 @@ OBJS = \
 	Tree.o \
 	Vendor.o \
 	Viewport.o \
-	XawInit.o \
-	laygram.o \
-	laylex.o
+	XawInit.o 
 
 #ifdef LexCmd
 LEX=LexCmd
@@ -215,6 +207,11 @@ all:: libXaw3d.a
 
 LinkFileList(linklibs,libXaw3d.a,X11irafLibDir,Xaw3dDir)
 
+#if defined (SunArchitecture) && OSMajorVersion < 5
+TextTr.o:
+        acc $(EXTRA_INCLUDES) -c TextTr.c
+#endif
+
 libXaw3d.a: $(OBJS)
 	$(RM) $@
 	$(AR) $@ $(OBJS)
@@ -226,21 +223,21 @@ includes::
 	MakeDir(X11irafIncDir/X11/Xaw3d)
 	@(set -x; for i in $(HEADERS); do \
 	    $(RM) X11irafIncDir/X11/Xaw3d/$$i; \
-	    $(LN) ../../../xaw3d/$$i X11irafIncDir/X11/Xaw3d/$$i; \
+	    $(CP) -p $$i X11irafIncDir/X11/Xaw3d/$$i; \
 	done)
 
 #if InstallIncludes
 install::
 	@(set -x; for i in $(HEADERS); do \
 	    $(RM) X11irafIncDir/X11/Xaw3d/$$i; \
-	    $(CP) $$i X11irafIncDir/X11/Xaw3d; \
+	    $(CP) -p $$i X11irafIncDir/X11/Xaw3d; \
 	done)
 #endif  
 
 #if InstallLibraries
 install::
 	@(set -x; $(RM) X11irafLibDir/libXaw3d.a)
-	@(set -x; $(LN) ../xaw3d/libXaw3d.a X11irafLibDir/libXaw3d.a)
+	@(set -x; $(CP) -p libXaw3d.a X11irafLibDir/libXaw3d.a)
 #endif
 
 depend:: laygram.c laylex.c
@@ -254,6 +251,12 @@ laygram.c : laygram.y
 	sed 's/yy/LayYY/g' y.tab.c > laygram.c
 	sed 's/yy/LayYY/g' y.tab.h > laygram.h
 	$(RM) y.tab.c y.tab.h
+
+# Hack to compile under SunPRO V4 on Solaris
+#if defined (SunArchitecture) && HasSunC && OSMajorVersion >= 5
+laygram.o:
+        $(CC) $(EXTRA_INCLUDES) -c laygram.c
+#endif
 
 laylex.c: laylex.l
 	$(LEX) laylex.l

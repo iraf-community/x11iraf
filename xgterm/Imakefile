@@ -23,6 +23,17 @@ X11IRAFDIR = ../
          PTYLIB = -lpucc
 #endif
 
+/* Hack to build on NOAO HP systems where the Xmu and Xaw libs had to be added
+ * specially to the system they don't come with the default X11 development
+ * system.  This also avoids the binary requiring the shared lib version on
+ * systems which may not have it.
+ */
+#if defined(HPArchitecture) && OSMajorVersion >= 10 
+         XMULIB = /usr/lib/X11R6/libXmu.a
+         XAWLIB = /usr/lib/X11R6/libXaw.a
+#endif
+
+
  OSMAJORVERSION = OSMajorVersion
  OSMINORVERSION = OSMinorVersion
 
@@ -59,7 +70,7 @@ X11IRAFDIR = ../
 
 #ifndef TermcapLibrary
 #if SystemV && !defined(MacIIArchitecture)
-#if defined(CrayArchitecture) || defined(HPArchitecture) || defined(RsArchitecture)
+#if defined(CrayArchitecture) || defined(RsArchitecture)
 #define TermcapLibrary -lcurses		/* special cases of System V */
 #else
 #define TermcapLibrary -ltermlib	/* usually in here */
@@ -68,6 +79,7 @@ X11IRAFDIR = ../
 #define TermcapLibrary -ltermcap	/* bsd puts it here */
 #endif
 #endif
+
 
      TERMCAPLIB = TermcapLibrary
         OBMLIBS = -lobm -lXpm
@@ -85,11 +97,6 @@ SetUIDProgramTarget(xgterm,$(OBJS1),$(DEPLIBS1),$(OBMLIBS) XawClientLibs,$(TERMC
 NormalProgramTarget(xgterm,$(OBJS1),$(DEPLIBS1),$(OBMLIBS) XawClientLibs,$(TERMCAPLIB) $(PTYLIB) $(MATHLIB))
 #endif
 
-# Hack to compile under SunPRO V4 on Solaris
-#if defined (SunArchitecture) && HasSunC && OSMajorVersion >= 5
-        CCOPTIONS = -Xs
-  EXTRA_LDOPTIONS = -xildoff
-#endif
 
 #if InstallBinaries
 #if InstallXgtermSetUID && defined(SunArchitecture) && HasSharedLibraries

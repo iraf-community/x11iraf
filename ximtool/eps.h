@@ -39,6 +39,9 @@
 #define EPS_AUTOSCALE		0x01	/* Auto scale to fit on page */
 #define	EPS_AUTOROTATE		0x02	/* Auto rotate to fit on page */
 #define EPS_MAXASPECT		0x04	/* Increase scale to max aspect */
+#define EPS_DOTITLE		0x10	/* Do title string */
+#define EPS_DOBORDERS		0x20	/* Do image borders */
+#define EPS_DOCOLORBAR		0x40	/* Do colorbar */
 
 /* Transformation parameters. */
 #define EPS_UNITARY       0

@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <errno.h>
 #include <X11/Intrinsic.h>
 #include <X11/StringDefs.h>
+#include <X11/Xmu/Error.h>
 #include <Obm.h>
 
 #define XIMTOOL_MAIN
@@ -18,8 +20,8 @@
 #ifdef AUX
 void *memmove(a,b,n) void *a; const void *b; size_t n; { bcopy(b,a,n); }
 #else
-#if defined(sun) && !defined(SYSV)
-void *memmove(a,b,n) void *a, *b; int n; { bcopy(b,a,n); }
+#if defined(sun) && !defined(SVR4)
+void *memmove(a,b,n) void *a; void *b; size_t n; { bcopy(b,a,n); }
 #endif
 #endif
 
@@ -47,6 +49,7 @@ char *argv[];
 	XtPointer obm;
 	char **sv_argv, *init_file = NULL, *str;
 	int sv_argc, ncolors, base;
+	int 	xerror(), xioerror();
 
 
 	/* Process the command line arguments.  Scan the arglist first to see
@@ -56,7 +59,7 @@ char *argv[];
 	if (argc > 1) {
 	    if (strcmp (argv[1], "-help") == 0) {
       	        Usage ();
-      	        exit (-1);
+      	        exit (1);
 
     	    } else if (strcmp (argv[1], "-defgui") == 0) {
 	        register int i;
@@ -78,44 +81,44 @@ char *argv[];
 	    if (strcmp (argv[i], "-cmapName") == 0) {
 		str = argv[++i];
 		strcpy (argv[i-1], "-xrm\0");
-		argv[i] = (char *) malloc (30);
+		argv[i] = (char *) malloc (256);
 		sprintf (argv[i], "XImtool*cmapName:%s\0", str);
 
 	    } else if (strcmp (argv[i], "-maxColors") == 0) {
 		ncolors = atoi (argv[++i]);
 		ncolors = max (32, min (201, ncolors));
 		strcpy (argv[i-1], "-xrm\0");
-		argv[i] = (char *) malloc (30);
+		argv[i] = (char *) malloc (256);
 		sprintf (argv[i], "XImtool*maxColors:%d\0", ncolors);
 
 	    } else if (strcmp (argv[i], "-basePixel") == 0) {
 		base = atoi (argv[++i]);
 		strcpy (argv[i-1], "-xrm\0");
-		argv[i] = (char *) malloc (30);
+		argv[i] = (char *) malloc (256);
 		sprintf (argv[i], "XImtool*basePixel:%d", base);
 
 	    } else if (strcmp (argv[i], "-cmapInitialize") == 0) {
 		str = argv[++i];
 		strcpy (argv[i-1], "-xrm\0");
-		argv[i] = (char *) malloc (30);
+		argv[i] = (char *) malloc (256);
 		sprintf (argv[i], "XImtool*cmapInitialize:%s", str);
 
 	    } else if (strcmp (argv[i], "-displayPanner") == 0) {
 		str = argv[++i];
 		strcpy (argv[i-1], "-xrm\0");
-		argv[i] = (char *) malloc (30);
+		argv[i] = (char *) malloc (256);
 		sprintf (argv[i], "XImtool*displayPanner:%s", str);
 
 	    } else if (strcmp (argv[i], "-displayCoords") == 0) {
 		str = argv[++i];
 		strcpy (argv[i-1], "-xrm\0");
-		argv[i] = (char *) malloc (30);
+		argv[i] = (char *) malloc (256);
 		sprintf (argv[i], "XImtool*displayCoords:%s", str);
 
 	    } else if (strcmp (argv[i], "-printConfig") == 0) {
 		str = argv[++i];
 		strcpy (argv[i-1], "-xrm\0");
-		argv[i] = (char *) malloc (40);
+		argv[i] = (char *) malloc (256);
 		sprintf (argv[i], "XImtool*printConfig:%s", str);
 	    }
 	}
@@ -167,7 +170,7 @@ char *argv[];
 		    if (access (init_file, R_OK) < 0) {
 			fprintf (stderr, "%s: File does not exist: '%s'\n", 
 			    argv[0], init_file);
-			exit (-1);
+			exit (1);
 		    }
 		}
 
@@ -200,14 +203,14 @@ char *argv[];
 		xim->def_nframes = min (MAX_FRAMES, atoi (argv[i]));
 
 	    } else if (strcmp (argv[i], "-tile") == 0) {
-		xim->tileFrames++;
+                xim->tileFrames++;
 
 	    } else if (strcmp (argv[i], "-invert") == 0) {
 		xim->invert++;
 
 	    } else if (strcmp (argv[i], "-fifo") == 0) {
-                xim->input_fifo = malloc (strlen (argv[++i]+2));
-                xim->output_fifo = malloc (strlen (argv[i]+2));
+                xim->input_fifo = malloc (strlen(argv[++i])+2);
+                xim->output_fifo = malloc (strlen(argv[i])+2);
 		sprintf (xim->input_fifo, "%si", argv[i]);
 		sprintf (xim->output_fifo, "%so", argv[i]);
 
@@ -257,7 +260,7 @@ char *argv[];
 	    } else {
 		fprintf (stderr, "Unrecognized flag '%s'\n", argv[i]);
       	        Usage();
-      	        exit (-1);
+      	        exit (1);
 	    }
 	}
 
@@ -309,6 +312,9 @@ char *argv[];
 	/* Load a file at startup if it was defined. */
 	if ( init_file != NULL )
 	    xim_loadFile (xim, init_file, 1);
+
+        XSetErrorHandler(xerror);
+        XSetIOErrorHandler(xioerror);
 
 	/* EXECUTE */
 	XtAppMainLoop (app_context);
@@ -410,3 +416,90 @@ char 	*st;
   	fprintf (stderr,"%s ",st);
   	cpos = cpos + strlen(st) + 1;
 }
+
+
+
+#define ERROR_XERROR    83      /* xerror: XError event */
+#define ERROR_XIOERROR  84      /* xioerror: X I/O error */
+
+/* XERROR -- Handle an XLIB server error.  A standard X error message is
+ * printed and then the program either dumps core, exits, or ignores the error,
+ * depending upon the value of the environment variable XGXERROR, if defined.
+*/
+/*ARGSUSED*/
+xerror (display, event)
+Display *display;
+register XErrorEvent *event;
+{
+        static char *envvar = "XGXERROR";
+        static int nerrs = 0;
+        extern char *getenv();
+        char fname[128];
+        char *action;
+        int pid;
+
+        fprintf (stderr, "ximtool: warning, error event received:\n");
+        (void) XmuPrintDefaultErrorMessage (display, event, stderr);
+        if (nerrs++ > 50)
+            exit (ERROR_XERROR);
+
+        if (action = getenv (envvar)) {
+            if (strcmp (action, "dumpcore") == 0) {
+                if ((pid = fork()) >= 0) {
+                    if (pid) {
+                        fprintf (stderr, "dumping core... ");
+                        fflush (stderr);
+                        sprintf (fname, "core.%d", pid);
+                        wait(NULL); rename ("core", fname);
+                        fprintf (stderr, "core file core.%d written\n", pid);
+                       fflush (stderr);
+                    } else
+                        kill (getpid(), 6);
+                } else
+                    fprintf (stderr, "fork failed, no core dump produced\n");
+           } else if (strcmp (action, "exit") == 0) {
+                fprintf (stderr, "program terminated\n");
+                exit (ERROR_XERROR);
+            } else
+                fprintf (stderr, "%s: unknown action %s\n", envvar, action);
+        }
+
+        return (0);
+}
+
+
+/*ARGSUSED*/
+xioerror(dpy)
+Display *dpy;
+{
+	char *SysErrorMsg();
+
+        (void) fprintf (stderr,
+            "ximtool: fatal IO error %d (%s) or KillClient on X server \"%s\"\r\n",
+            errno, SysErrorMsg (errno),
+            DisplayString (dpy));
+
+        exit (ERROR_XIOERROR);
+}
+
+void xt_error(message)
+    String message;
+{
+    (void) fprintf (stderr, "ximtool Xt error: %s\n", message);
+    exit (1);
+}
+
+
+char *SysErrorMsg (n)
+    int n;
+{
+#ifndef __FreeBSD__
+#ifndef _BSD_SOURCE
+    extern char *sys_errlist[];
+#endif
+#endif
+    extern int sys_nerr;
+
+    return((n >= 0 && n < sys_nerr) ? (char *)sys_errlist[n] : "unknown error");
+}
+

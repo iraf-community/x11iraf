@@ -41,14 +41,26 @@
  *		permission of John Bradley.
  */
 
-#include <varargs.h>
 
 #include <string.h>
 #include <stdio.h>
+#include <varargs.h>
 #include <ctype.h>
 #include <math.h>
 #include <malloc.h>
 #include "HTMLP.h"
+
+/* Workaround for our old varargs handling on LinuxPPC systems. */
+#if defined(linux) && defined(__powerpc__)
+#undef va_start
+#undef va_alist
+#undef va_dcl
+
+#define va_start(AP) __va_start_common (AP, 1)
+#define va_alist __va_1st_arg
+#define va_dcl register int va_alist; ...
+#endif
+
 
 /* Fix thanks to robm. */
 /* We don't have this on our system at NOAO...

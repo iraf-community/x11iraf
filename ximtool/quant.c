@@ -123,8 +123,8 @@ int	newcolors;			/* requested number of colors       */
 	register int	i, col, limitcol, index = 0;
 	byte	 *pix = image;
 	pixel    **pixels;
-	pixval   maxval = 255, newmaxval, mapmaxval;
-	int	 rows, cols, maprows, mapcols, row;
+	pixval   maxval = 255, newmaxval;
+	int	 rows, cols, row;
 	int	 colors;
 	int	 floyd = 0, usehash;
 	colorhist_vector chv, colormap;

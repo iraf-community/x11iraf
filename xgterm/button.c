@@ -165,6 +165,65 @@ XEvent* event;
 }
 
 
+void
+DiredButton(w, event, params, num_params)
+Widget w;
+XEvent *event;                  /* must be XButtonEvent */
+String *params;                 /* selections */
+Cardinal *num_params;
+{       /* ^XM-G<line+' '><col+' '> */
+        register TScreen *screen = &term->screen;
+        int pty = screen->respond;
+        char Line[ 6 ];
+        register unsigned line, col;
+
+    if (event->type != ButtonPress && event->type != ButtonRelease)
+        return;
+    strcpy( Line, "\030\033G  " );
+
+        line = ( event->xbutton.y - screen->border ) / FontHeight( screen );
+	if (term->misc.sb_right)
+            col = (event->xbutton.x - screen->border) / FontWidth(screen);
+	else
+            col = (event->xbutton.x - screen->border - screen->scrollbar) / 
+		FontWidth(screen);
+        Line[3] = ' ' + col;
+        Line[4] = ' ' + line;
+        v_write(pty, Line, 5 );
+}
+
+void
+ViButton(w, event, params, num_params)
+Widget w;
+XEvent *event;                  /* must be XButtonEvent */
+String *params;                 /* selections */
+Cardinal *num_params;
+{       /* ^XM-G<line+' '><col+' '> */
+        register TScreen *screen = &term->screen;
+        int pty = screen->respond;
+        char Line[ 6 ];
+        register int line, col;
+
+    if (event->type != ButtonPress && event->type != ButtonRelease)
+        return;
+
+        line = screen->cur_row -
+                (( event->xbutton.y - screen->border ) / FontHeight( screen));
+/* fprintf( stderr, "xtdb line=%d\n", line ); */
+        if ( ! line ) return;
+        Line[ 1 ] = 0;
+        Line[ 0 ] = 27;
+        v_write(pty, Line, 1 );
+
+        Line[ 0 ] = 'p' & 0x1f;
+
+        if ( line < 0 )
+        {       line = -line;
+                Line[ 0 ] = 'n' & 0x1f;
+        }
+        while ( --line >= 0 ) v_write(pty, Line, 1 );
+}
+
 /*ARGSUSED*/
 void HandleSelectExtend(w, event, params, num_params)
 Widget w;
@@ -734,7 +793,10 @@ PointToRowCol(y, x, r, c)
 		row = firstValidRow;
 	else if(row > lastValidRow)
 		row = lastValidRow;
-	col = (x - screen->border - screen->scrollbar) / FontWidth(screen);
+	if (term->misc.sb_right)
+            col = (x - screen->border) / FontWidth(screen);
+	else
+            col = (x - screen->border - screen->scrollbar) / FontWidth(screen);
 	if(col < 0)
 		col = 0;
 	else if(col > screen->max_col+1) {
@@ -753,7 +815,7 @@ LastTextCol(row)
 	register Char *ch;
 
 	for ( i = screen->max_col,
-	        ch = screen->buf[2 * (row + screen->topline) + 1] + i ;
+	        ch = screen->buf[4 * (row + screen->topline) + 1] + i ;
 	      i >= 0 && !(*ch & CHARDRAWN) ;
 	      ch--, i--)
 	    ;
@@ -892,7 +954,7 @@ ComputeSelect(startRow, startCol, endRow, endCol, extend)
 				startSCol = 0;
 				startSRow++;
 			} else {
-				ptr = screen->buf[2*(startSRow+screen->topline)]
+				ptr = screen->buf[4*(startSRow+screen->topline)]
 				 + startSCol;
 				class = charClass[*ptr];
 				do {
@@ -907,7 +969,7 @@ ComputeSelect(startRow, startCol, endRow, endCol, extend)
 				endSRow++;
 			} else {
 				length = LastTextCol(endSRow);
-				ptr = screen->buf[2*(endSRow+screen->topline)]
+				ptr = screen->buf[4*(endSRow+screen->topline)]
 				 + endSCol;
 				class = charClass[*ptr];
 				do {
@@ -1334,7 +1396,7 @@ SaveText(screen, row, scol, ecol, lp, eol)
     int *eol;
 {
 	register int i = 0;
-	register Char *ch = screen->buf[2 * (row + screen->topline)];
+	register Char *ch = screen->buf[4 * (row + screen->topline)];
 	Char attr;
 	register int c;
 
@@ -1382,8 +1444,10 @@ EditorButton(event)
 
 	row = (event->y - screen->border) 
 	 / FontHeight(screen);
-	col = (event->x - screen->border - screen->scrollbar)
-	 / FontWidth(screen);
+	if (term->misc.sb_right)
+            col = (event->x - screen->border) / FontWidth(screen);
+	else
+            col = (event->x - screen->border - screen->scrollbar) / FontWidth(screen);
 	(void) strcpy(line, "\033[M");
 	if (screen->send_mouse_pos == 1) {
 		line[3] = ' ' + button;

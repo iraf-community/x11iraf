@@ -195,12 +195,31 @@ static void reset_shadow_gc (pw)	/* used when resources change */
 	XmuDistinguishablePixels (XtDisplay (pw), pw->core.colormap,
 				    pixels, 2))
     {
+#ifndef USE_XMU_STIPPLE
+        Screen *screen = XtScreen((Widget)pw);
+        Display *display = XtDisplay((Widget)pw);
+        int pixmap_width = 2, pixmap_height = 2;
+        static unsigned char pixmap_bits[] = {
+            0x02, 0x01,
+        };
+#endif
+
 	valuemask = GCTile | GCFillStyle;
 	values.fill_style = FillTiled;
+#ifdef USE_XMU_STIPPLE
 	values.tile = XmuCreateStippledPixmap(XtScreen((Widget)pw),
 					      pw->panner.foreground,
 					      pw->core.background_pixel,
 					      pw->core.depth);
+#else
+        values.tile   = XCreatePixmapFromBitmapData (display,
+                            RootWindowOfScreen(screen),
+                            (char *)pixmap_bits,
+                            pixmap_width, pixmap_height,
+                            pw->panner.foreground,
+                            pw->core.background_pixel,
+                            pw->core.depth);
+#endif
     }
     else
     {

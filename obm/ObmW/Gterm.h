@@ -220,6 +220,7 @@
 #define	GmTextBorder		"textBorder"
 #define	GmImageText		"imageText"
 #define	GmFont			"font"
+#define	GmRotIndicator		"rotIndicator"			/* MF020 */
 
 #define	GmEvNotify		00001		/* marker callback events */
 #define	GmEvMoveResize		00002

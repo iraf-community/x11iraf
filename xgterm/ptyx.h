@@ -33,6 +33,7 @@
 #include <X11/Xfuncs.h>
 #include <X11/Xosdefs.h>
 
+
 /* Extra Xlib definitions */
 #define AllButtonsUp(detail, ignore)  (\
 		((ignore) == Button1) ? \
@@ -64,35 +65,35 @@
 ** allow for mobility of the pty master/slave directories
 */
 #ifndef PTYDEV
-#ifdef hpux
+#if defined(hpux) || defined(__hpux)
 #define	PTYDEV		"/dev/ptym/ptyxx"
-#else	/* !hpux */
+#else	/* !__hpux */
 #define	PTYDEV		"/dev/ptyxx"
-#endif	/* !hpux */
+#endif	/* !__hpux */
 #endif	/* !PTYDEV */
 
 #ifndef TTYDEV
-#ifdef hpux
+#if defined(hpux) || defined(__hpux)
 #define TTYDEV		"/dev/pty/ttyxx"
-#else	/* !hpux */
+#else	/* !__hpux */
 #define	TTYDEV		"/dev/ttyxx"
-#endif	/* !hpux */
+#endif	/* !__hpux */
 #endif	/* !TTYDEV */
 
 #ifndef PTYCHAR1
-#ifdef hpux
+#if defined(hpux) || defined(__hpux)
 #define PTYCHAR1	"zyxwvutsrqp"
-#else	/* !hpux */
+#else	/* !__hpux */
 #define	PTYCHAR1	"pqrstuvwxyzPQRSTUVWXYZ"
-#endif	/* !hpux */
+#endif	/* !__hpux */
 #endif	/* !PTYCHAR1 */
 
 #ifndef PTYCHAR2
-#ifdef hpux
+#if defined(hpux) || defined(__hpux)
 #define	PTYCHAR2	"fedcba9876543210"
-#else	/* !hpux */
+#else	/* !__hpux */
 #define	PTYCHAR2	"0123456789abcdef"
-#endif	/* !hpux */
+#endif	/* !__hpux */
 #endif	/* !PTYCHAR2 */
 
 /* Until the translation manager comes along, I have to do my own translation of
@@ -159,6 +160,27 @@ typedef struct {
 	char		gsets[4];
 } SavedCursor;
 
+#define TEK_FONT_LARGE 0
+#define TEK_FONT_2 1
+#define TEK_FONT_3 2
+#define TEK_FONT_SMALL 3
+#define TEKNUMFONTS 4
+
+/* Actually there are 5 types of lines, but four are non-solid lines */
+#define TEKNUMLINES     4
+
+typedef struct {
+        int     x;
+        int     y;
+        int     fontsize;
+        int     linetype;
+} Tmodes;
+
+typedef struct {
+        int Twidth;
+        int Theight;
+} T_fontsize;
+
 typedef struct {
 	short *bits;
 	int x;
@@ -168,7 +190,62 @@ typedef struct {
 } BitmapBits;
 
 #define	SAVELINES		256     /* default # lines to save      */
-#define SCROLLLINES 1			/* default # lines to scroll    */
+#define SCROLLLINES 		1	/* default # lines to scroll    */
+
+/***====================================================================***/
+
+#define TEXT_FG         0
+#define TEXT_BG         1
+#define TEXT_CURSOR     2
+#define MOUSE_FG        3
+#define MOUSE_BG        4
+#define TEK_FG          5
+#define TEK_BG          6
+#define NCOLORS         7
+
+#define COLOR_DEFINED(s,w)      ((s)->which&(1<<(w)))
+#define COLOR_VALUE(s,w)        ((s)->colors[w])
+#define SET_COLOR_VALUE(s,w,v)  (((s)->colors[w]=(v)),((s)->which|=(1<<(w))))
+
+#define COLOR_NAME(s,w)         ((s)->names[w])
+#define SET_COLOR_NAME(s,w,v)   (((s)->names[w]=(v)),((s)->which|=(1<<(w))))
+
+#define UNDEFINE_COLOR(s,w)     ((s)->which&=(~((w)<<1)))
+#define OPPOSITE_COLOR(n)       (((n)==TEXT_FG?TEXT_BG:\
+                                 ((n)==TEXT_BG?TEXT_FG:\
+                                 ((n)==MOUSE_FG?MOUSE_BG:\
+                                 ((n)==MOUSE_BG?MOUSE_FG:\
+                                 ((n)==TEK_FG?TEK_BG:\
+                                 ((n)==TEXT_BG?TEK_FG:(n))))))))
+
+typedef struct {
+        unsigned        which;
+        Pixel           colors[NCOLORS];
+        char            *names[NCOLORS];
+} ScrnColors;
+
+/***====================================================================***/
+
+#define MAXCOLORS 18
+#define COLOR_0         0
+#define COLOR_1         1
+#define COLOR_2         2
+#define COLOR_3         3
+#define COLOR_4         4
+#define COLOR_5         5
+#define COLOR_6         6
+#define COLOR_7         7
+#define COLOR_8         8
+#define COLOR_9         9
+#define COLOR_10        10
+#define COLOR_11        11
+#define COLOR_12        12
+#define COLOR_13        13
+#define COLOR_14        14
+#define COLOR_15        15
+#define COLOR_BD        16
+#define COLOR_UL        17
+
 
 typedef struct {
 	Display		*display;	/* X display for screen		*/
@@ -188,6 +265,7 @@ typedef struct {
 	Pixel		cursorcolor;	/* Cursor color			*/
 	Pixel		mousecolor;	/* Mouse color			*/
 	Pixel		mousecolorback;	/* Mouse color background	*/
+        Pixel           colors[MAXCOLORS]; /* ANSI color emulation      */
 	int		border;		/* inner border			*/
 	Cursor		arrow;		/* arrow cursor			*/
 	unsigned short	send_mouse_pos;	/* user wants mouse transition  */
@@ -286,6 +364,7 @@ typedef struct {
 	int		refresh_amt;	/* amount to refresh		*/
 	Boolean		jumpscroll;	/* whether we should jumpscroll */
 	Boolean         always_highlight; /* whether to highlight cursor */
+        Boolean         underline;      /* whether to underline text */
 
 	int		multiClickTime;	 /* time between multiclick selects */
 	int		bellSuppressTime; /* msecs after Bell before another allowed */
@@ -310,6 +389,9 @@ typedef struct {
 	Widget		mainMenu, vtMenu, tekMenu, fontMenu;
 	char*		menu_font_names[NMENUFONTS];
 	int		menu_font_number;
+#ifdef I18N
+        XIC             xic;
+#endif
 } TScreen;
 
 /* meaning of bits in screen.select flag */
@@ -343,6 +425,14 @@ typedef struct _Misc {
     Boolean titeInhibit;
     Boolean appcursorDefault;
     Boolean appkeypadDefault;
+#ifdef I18N
+    char *input_method;
+    char *preedit_type;
+    Boolean open_im;
+    Boolean shared_ic;
+#endif
+    Boolean dynamicColors;		/* use colors		*/
+    Boolean sb_right;			/* scrollbar on right 	*/
 } Misc;
 
 typedef struct {int foo;} XgtermClassPart;
@@ -368,6 +458,8 @@ typedef struct _XgtermWidgetRec {
     TKeyboard	keyboard;	/* terminal keyboard		*/
     TScreen	screen;		/* terminal screen		*/
     unsigned	flags;		/* mode flags			*/
+    unsigned    cur_foreground; /* current foreground color     */
+    unsigned    cur_background; /* current background color     */
     unsigned	initflags;	/* initial mode flags		*/
     Tabs	tabs;		/* tabstops of the terminal	*/
     Misc	misc;		/* miscellaneous parameters	*/
@@ -384,7 +476,7 @@ typedef struct _XgtermWidgetRec {
  * term->flags and screen->save_modes.  This need only fit in an unsigned.
  */
 
-#define	ATTRIBUTES	0x07	/* mask: user-visible attributes */
+#define	ATTRIBUTES	0x67	/* mask: user-visible attributes */
 /* global flags and character flags (visible character attributes) */
 #define INVERSE		0x01	/* invert the characters to be output */
 #define UNDERLINE	0x02	/* true if underlining */
@@ -401,6 +493,10 @@ typedef struct _XgtermWidgetRec {
 #define CHARDRAWN	0x10    /* a character has been drawn here on the
 				   screen.  Used to distinguish blanks from
 				   empty parts of the screen when selecting */
+/* global flags */
+#define BG_COLOR        0x20  /* true if background set */
+#define FG_COLOR        0x40  /* true if foreground set */
+
 /* global flags */
 #define WRAPAROUND	0x400	/* true if auto wraparound mode */
 #define	REVERSEWRAP	0x800	/* true if reverse wraparound mode */
@@ -422,8 +518,10 @@ typedef struct _XgtermWidgetRec {
 #define FontWidth(screen)	(screen->fullVwin.f_width)
 #define FontHeight(screen)	(screen->fullVwin.f_height)
 
-#define CursorX(screen,col) ((col) * FontWidth(screen) + screen->border \
-			+ screen->scrollbar)
+#define CursorX(screen,col) (term->misc.sb_right ? \
+				(col) * FontWidth(screen) + screen->border : \
+				(col) * FontWidth(screen) + screen->border \
+                        		+ screen->scrollbar)
 #define CursorY(screen,row) ((((row) - screen->topline) * FontHeight(screen)) \
 			+ screen->border)
 

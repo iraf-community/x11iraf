@@ -203,12 +203,14 @@ int len;
     if ( (((Position) width + x) > max_x) && (ctx->text.margin.right != 0) ) {
 	x = ctx->core.width - ctx->text.margin.right;
 	width = ctx->text.margin.right;
+/*
 	XFillRectangle(XtDisplay((Widget) ctx), XtWindow( (Widget) ctx),
 		       sink->ascii_sink.normgc, (int) x,
 		       (int) y - sink->text_sink.font->ascent, 
 		       (unsigned int) width,
 		       (unsigned int) (sink->text_sink.font->ascent +
 				       sink->text_sink.font->descent));
+*/
 	return(0);
     }
     return(width);

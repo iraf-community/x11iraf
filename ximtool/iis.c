@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -61,7 +62,7 @@ struct	iism70 {
 extern int errno;
 static void set_fbconfig();
 static int decode_frameno();
-static int bswap2();
+static int bswap2(), iis_read(), iis_write();
 static CtranPtr wcs_update();
 
 static IoChanPtr open_fifo(), open_inet(), open_unix();
@@ -220,6 +221,7 @@ register XimDataPtr xim;
 	register int s = 0;
 	register IoChanPtr chan;
 	struct sockaddr_in sockaddr;
+	int	reuse = 1;
 
 	/* Setting the port to zero disables inet socket support. */
 	if (xim->port <= 0)
@@ -232,6 +234,9 @@ register XimDataPtr xim;
 	sockaddr.sin_family = AF_INET;
 	sockaddr.sin_port = htons((short)xim->port);
 	sockaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+        if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse,
+	    sizeof(reuse)) < 0)
+                goto err;
 	if (bind (s, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) < 0)
 	    goto err;
 
@@ -407,7 +412,7 @@ XtInputId *id_addr;
 	register short *p;
 	int	datain = *fd_addr;
 	int	dataout = chan->dataout;
-	int	ndatabytes, nbytes, n, ntrys=0;
+	int	ndatabytes, nbytes, n, newframe, ntrys=0;
 	struct	iism70 iis;
 	char	buf[SZ_FIFOBUF];
 	static	int errmsg=0, bswap=0;
@@ -419,11 +424,13 @@ XtInputId *id_addr;
 	    iis_debug = (getenv("DEBUG_IIS") != (char *)NULL);
 
 	/* Get the IIS header. */
-	if ((n = read (datain, (char *)&iis, sizeof(iis))) < sizeof(iis)) {
+	if ((n = iis_read (datain, (char *)&iis, sizeof(iis))) < sizeof(iis)) {
+	    if (n != 0) 
+	        fprintf (stderr, 
+	            "ximtool: command input read error, n=%d of %d, errno=%d\n",
+	                n, sizeof(iis), errno);
 	    if (n <= 0)
 		xim_disconnectClient (chan);
-	    else
-		fprintf (stderr, "imtool: command input read error\n");
 	    return;
 	} else if (bswap)
 	    bswap2 ((char *)&iis, (char *)&iis, sizeof(iis));
@@ -438,7 +445,7 @@ XtInputId *id_addr;
 
 	    if (ntrys++) {
 		if (!errmsg++) {
-		    fprintf (stderr, "imtool: bad data header checksum\n");
+		    fprintf (stderr, "ximtool: bad data header checksum\n");
 		    if (bswap)
 			bswap2 ((char *)&iis, (char *)&iis, sizeof(iis));
 		    fprintf (stderr, "noswap:");
@@ -482,11 +489,13 @@ XtInputId *id_addr;
 	case FEEDBACK:
 	    /* The feedback unit is used only to clear a frame.
 	     */
-	    xim_setReferenceFrame (chan, decode_frameno (iis.z & 07777));
-	    xim_eraseFrame (xim, chan->reference_frame);
+	    newframe =  decode_frameno (iis.z & 07777);
+	    xim_setReferenceFrame (chan, newframe);
+	    if (newframe == chan->reference_frame)
+	        xim_eraseFrame (xim, chan->reference_frame);
 	    if (iis_debug)
   		fprintf (stderr, "erase frame %d - ref = %d\n", 
-		    decode_frameno(iis.z & 07777), chan->reference_frame);
+		    newframe, chan->reference_frame);
 	    break;
 
 	case LUT:
@@ -501,7 +510,7 @@ XtInputId *id_addr;
 		int	frame, z, n;
 		short	x[14];
 
-		if (read (datain, (char *)x, ndatabytes) == ndatabytes) {
+		if (iis_read (datain, (char *)x, ndatabytes) == ndatabytes) {
 		    if (bswap)
 			bswap2 ((char *)x, (char *)x, ndatabytes);
 
@@ -512,13 +521,13 @@ XtInputId *id_addr;
 
 		    frame = max (1, n + 1);
 		    if (frame > xim->nframes) {
-			if (frame < MAX_FRAMES) {
+			if (frame <= MAX_FRAMES) {
 			    set_fbconfig (chan, xim->fb_configno, frame);
 	    		    if (iis_debug)
                                 fprintf (stderr, "set_fbconfig (%d, %d)\n",
                                     xim->fb_configno, frame);
 			} else {
-			    fprintf (stderr, "imtool warning: ");
+			    fprintf (stderr, "ximtool warning: ");
 			    fprintf (stderr, 
 				"attempt to display nonexistent frame %d\n",
 				frame);
@@ -545,6 +554,7 @@ XtInputId *id_addr;
 		long    starttime;
 
 		/* Get the frame to be read from. */
+		
 		xim_setReferenceFrame (chan, decode_frameno (iis.z & 07777));
 
 		nbytes = ndatabytes;
@@ -569,7 +579,7 @@ XtInputId *id_addr;
 		starttime = time(0);
 		for (nleft=nbytes, ip=iobuf;  nleft > 0;  nleft -= n) {
 		    n = (nleft < SZ_FIFOBUF) ? nleft : SZ_FIFOBUF;
-		    if ((n = write (dataout, ip, n)) <= 0) {
+		    if ((n = iis_write (dataout, ip, n)) <= 0) {
 			if (n < 0 || (time(0) - starttime > IO_TIMEOUT)) {
 			    fprintf (stderr, "IMTOOL: timeout on write\n");
 			    break;
@@ -602,7 +612,7 @@ XtInputId *id_addr;
 		starttime = time(0);
 		for (nleft=nbytes, op=iobuf;  nleft > 0;  nleft -= n) {
 		    n = (nleft < SZ_FIFOBUF) ? nleft : SZ_FIFOBUF;
-		    if ((n = read (datain, op, n)) <= 0) {
+		    if ((n = iis_read (datain, op, n)) <= 0) {
 			if (n < 0 || (time(0) - starttime > IO_TIMEOUT))
 			    break;
 		    } else
@@ -649,7 +659,7 @@ XtInputId *id_addr;
 		else
 		    text = chan->rf_p->wcsbuf;
 
-		write (dataout, text, SZ_WCSBUF);
+		iis_write (dataout, text, SZ_WCSBUF);
 		if (iis_debug) {
                     fprintf (stderr, "query wcs:\n");
                     write (2, text, SZ_WCSBUF);
@@ -680,7 +690,7 @@ XtInputId *id_addr;
 
 		/* Read in and set up the WCS. */
 		xim_setReferenceFrame (chan, frame);
-		if (read (datain, buf, ndatabytes) == ndatabytes)
+		if (iis_read (datain, buf, ndatabytes) == ndatabytes)
 		    strncpy (chan->rf_p->wcsbuf, buf, SZ_WCSBUF);
 
 		if (iis_debug) {
@@ -777,7 +787,7 @@ XtInputId *id_addr;
 	if (!(iis.tid & IIS_READ))
 	    for (nbytes = ndatabytes;  nbytes > 0;  nbytes -= n) {
 		n = (nbytes < SZ_FIFOBUF) ? nbytes : SZ_FIFOBUF;
-		if ((n = read (datain, buf, n)) <= 0)
+		if ((n = iis_read (datain, buf, n)) <= 0)
 		    break;
 	    }
 }
@@ -917,17 +927,33 @@ int frame;
 	    xim_initialize (xim, config,
 		max (xim->fb_config[config-1].nframes, frame), 1);
 
+	    /* Reinitialize the tile framing if enabled. */
+            if (xim->tileFrames)
+                xim_tileFrames (xim, xim->tileFramesList);
+
 	} else if (frame > xim->nframes) {
 	    /* Add additional frames.  */
 	    for (i=1;  i <= frame;  i++) {
 		fb = &xim->frames[i-1];
-		if (fb->frameno != i)
+		if (fb->frameno != i) {
 		    xim_initFrame (xim, i, frame,
 			&xim->fb_config[config-1], xim->memModel);
+
+		    /* If we're in tile mode, add the frame to the tile list
+		     * and if needed resize the tile frames.  
+		     */
+		    if (xim->tileFrames) {
+			xim->tileFramesList |= (1 << (i-1));
+			xim->nTileFrames++;
+			xim_tileFrames (xim, xim->tileFramesList);
+		    }
+		}
 	    }
 	}
 
 	xim_setReferenceFrame (chan, frame);
+	if (frame != xim->display_frame)
+	    xim_setDisplayFrame (xim, frame);
 }
 
 
@@ -1037,7 +1063,7 @@ char	*strval;		/* optional string value */
 	}
 
 	/* Send it to the client program and terminate cursor mode. */
-	write (dataout, curval, sizeof(curval));
+	iis_write (dataout, curval, sizeof(curval));
 	xim_cursorMode (xim, 0);
 	xim->cursor_chan = NULL;
 }
@@ -1154,7 +1180,7 @@ FrameBufPtr fr;
 		&ct->z1, &ct->z2, &ct->zt) < 7) {
 
 		if (fr->wcsbuf[0])
-		    fprintf (stderr, "imtool: error decoding WCS\n");
+		    fprintf (stderr, "ximtool: error decoding WCS\n");
 
 		strncpy (ct->imtitle, "[NO WCS]\n", SZ_IMTITLE);
 		ct->a  = ct->d  = 1;
@@ -1185,4 +1211,58 @@ FrameBufPtr fr;
 
 	strcpy (ct->format, format);
 	return (ct);
+}
+
+
+/* IIS_READN -- Read exactly "n" bytes from a descriptor. 
+ */
+
+static int                                   
+iis_read (fd, vptr, nbytes)
+int 	fd; 
+void 	*vptr; 
+int 	nbytes;
+{
+        char    *ptr = vptr;
+        int 	nread = 0, nleft = nbytes, nb = 0;
+
+        while (nleft > 0) {
+            if ( (nb = read(fd, ptr, nleft)) < 0) {
+                if (errno == EINTR)
+                    nb = 0;          	/* and call read() again */
+                else
+                    return(-1);
+            } else if (nb == 0)
+                break;                  /* EOF */
+            nleft -= nb;
+            ptr   += nb;
+            nread += nb;
+        }
+        return (nread);              	/* return no. of bytes read */
+}
+
+
+/* IIS_WRITEN -- Write exactly "n" bytes to a descriptor. 
+ */
+static int                                   
+iis_write (fd, vptr, nbytes)
+int 	fd; 
+void 	*vptr; 
+int 	nbytes;
+{
+        char 	*ptr = vptr;
+        int     nwritten = 0,  nleft = nbytes, nb = 0;
+
+        while (nleft > 0) {
+            if ( (nb = write(fd, ptr, nleft)) <= 0) {
+                if (errno == EINTR)
+                    nb = 0;           	/* and call write() again */
+                else
+                    return(-1);         /* error */
+            }
+            nleft    -= nb;
+            ptr      += nb;
+            nwritten += nb;
+        }
+        return (nwritten);
 }

@@ -9,6 +9,13 @@
 #include "ximtool.h"
 #include "iis.h"
 
+/*  Slackware/RedHat4.2 compatibility hack. */
+#if defined(linux) && defined(isalnum)
+#undef isalnum
+#define isalnum(c) (isalpha(c)||isdigit(c))
+#endif
+
+
 /*
  * RASTER.C -- Raster pixel (frame buffer) routines.  These are the routines
  * which create and manipulate the frame buffers and the graphics pipeline
@@ -206,6 +213,16 @@ int hardreset;
 	    for (i=1;  i <= nframes;  i++)
 		xim_initFrame (xim, i, nframes, cf, xim->memModel);
 
+            /* Reinitialize the tile framing. */
+            if (xim->tileFrames) {
+                xim->tileFramesList = 0;
+                xim->nTileFrames = 0;
+                for (i=0;  i < nframes;  i++) {
+                    xim->tileFramesList |= (1 << i);
+                    xim->nTileFrames++;
+                }
+            }
+
 	    xim->width = cf->width;
 	    xim->height = cf->height;
 	    GtSetLogRes (gt, cf->width, cf->height);
@@ -230,7 +247,11 @@ int hardreset;
 	 */
 	xim_iiscolormap (gt, m_red,m_green,m_blue, &first, &ngray, &rgb_len);
 	GtWriteColormap (gt, 0, first, rgb_len, m_red, m_green, m_blue);
-	xim->ncolors = ngray;
+	if ((xim->ncolors = ngray) < 0) {
+	    fprintf (stderr, "ERROR: No colormap cells available.\n");
+	    exit (1);
+	}
+
 
 	/* Initialize the color tables. */
 	max_cmaps = nbuiltin_cmaps ? nbuiltin_cmaps : MAX_COLORMAPS;
@@ -739,8 +760,9 @@ int frame;
 {
 	FrameBufPtr fb = &xim->frames[frame-1];
 	Widget gt = xim->gt;
+	int    Z = 0;
 
-	GtSetPixels (gt, fb->raster, GtPixel, 0,0,0,0, CMS_BACKGROUND, 0);
+	GtSetPixels (gt, fb->raster, GtPixel, Z,Z,Z,Z, CMS_BACKGROUND, 0);
 }
 
 
@@ -1151,6 +1173,10 @@ Boolean absolute;	/* ignore xscale/yscale */
 	    xscale = (int)(xscale+0.5);
 	if (yreplicate = (abs(yscale - (int)(yscale+0.5)) < TOL))
 	    yscale = (int)(yscale+0.5);
+
+	/* Sanity check, return is we're getting too small. */
+	if (xscale < TOL || yscale < TOL)
+	    return;
 
 	/* Map the destination rect back into the source with the given
 	 * zoom factor and center, clipping the source rect at the source
@@ -2037,6 +2063,14 @@ register XimDataPtr xim;
 	register FILE	*fp = NULL;
 	int	config, nframes, width, height, i;
 	char	lbuf[SZ_LINE+1], *fname;
+	static char *fb_paths[] = {
+		"/usr/local/lib/imtoolrc",
+		"/opt/local/lib/imtoolrc",
+		"/iraf/iraf/dev/imtoolrc",
+		"/local/lib/imtoolrc",
+		"/usr/iraf/dev/imtoolrc",
+		"/usr/local/iraf/dev/imtoolrc",
+		NULL};
 
 	/* Initialize the config table. */
 	xim->fb_configno = 1;
@@ -2045,6 +2079,17 @@ register XimDataPtr xim;
 	    xim->fb_config[i].width = DEF_FRAME_WIDTH;
 	    xim->fb_config[i].height = DEF_FRAME_HEIGHT;
 	}
+
+	/* Now add in some defaults for commonly used sizes based on the
+ 	 * standard IRAF imtoolrc file, we'll avoid any instrument specific
+	 * configurations.
+	 */
+	xim->fb_config[0].width = xim->fb_config[0].height =  512;
+	xim->fb_config[1].width = xim->fb_config[1].height =  800;
+	xim->fb_config[2].width = xim->fb_config[2].height = 1024;
+	xim->fb_config[3].width = xim->fb_config[3].height = 1600;
+	xim->fb_config[4].width = xim->fb_config[4].height = 2048;
+	xim->fb_config[5].width = xim->fb_config[5].height = 4096;
 
 	/* Attempt to open the config file. */
 	if ((fname=getenv(FBCONFIG_ENV1)) || (fname=getenv(FBCONFIG_ENV2)))
@@ -2055,8 +2100,13 @@ register XimDataPtr xim;
 	}
 	if (!fp)
 	    fp = fopen (fname = xim->imtoolrc, "r");
-	if (!fp)
+ 	for (i=0; !fp && fb_paths[i]; i++)
+	    fp = fopen (fname = fb_paths[i], "r");
+	if (!fp) {
+	    fprintf (stderr, 
+		"Warning: No frame buffer configuration file found.\n");
 	    return;
+	}
 
 	/* Scan the frame buffer configuration file.
 	 */

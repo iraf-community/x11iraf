@@ -111,7 +111,9 @@ register TScreen *screen;
 		XClearArea (
 		    screen->display,
 		    TextWindow(screen),
-		    (int) screen->border + screen->scrollbar,
+		    (term->misc.sb_right ? 
+			(int) screen->border :
+			(int) screen->border + screen->scrollbar),
 		    (int) refreshtop * FontHeight(screen) + screen->border,
 		    (unsigned) Width(screen),
 		    (unsigned) refreshheight * FontHeight(screen),
@@ -231,7 +233,9 @@ register int amount;
 		XClearArea (
 		   screen->display,
 		   TextWindow(screen),
-		   (int) screen->border + screen->scrollbar,
+		   (term->misc.sb_right ?
+		       (int) screen->border :
+		       (int) screen->border + screen->scrollbar),
 		   (int) refreshtop * FontHeight(screen) + screen->border,
 		   (unsigned) Width(screen),
 		   (unsigned) refreshheight * FontHeight(screen),
@@ -311,7 +315,9 @@ register int amount;
 		XClearArea (
 		    screen->display,
 		    TextWindow(screen),
-		    (int) screen->border + screen->scrollbar,
+		    (term->misc.sb_right ?
+		        (int) screen->border :
+		        (int) screen->border + screen->scrollbar),
 		    (int) refreshtop * FontHeight(screen) + screen->border,
 		    (unsigned) Width(screen),
 		    (unsigned) refreshheight * FontHeight(screen),
@@ -372,7 +378,9 @@ register int n;
 		XClearArea (
 		    screen->display,
 		    TextWindow(screen),
-		    (int) screen->border + screen->scrollbar,
+		    (term->misc.sb_right ?
+		        (int) screen->border :
+		        (int) screen->border + screen->scrollbar),
 		    (int) refreshtop * FontHeight(screen) + screen->border,
 		    (unsigned) Width(screen),
 		    (unsigned) refreshheight * FontHeight(screen),
@@ -449,7 +457,9 @@ register int n;
 		XClearArea (
 		    screen->display,
 		    TextWindow(screen),
-		    (int) screen->border + screen->scrollbar,
+                    (term->misc.sb_right ?
+                        (int) screen->border :
+                        (int) screen->border + screen->scrollbar),
 		    (int) refreshtop * FontHeight(screen) + screen->border,
 		    (unsigned) Width(screen),
 		    (unsigned) refreshheight * FontHeight(screen),
@@ -534,7 +544,9 @@ DeleteChar (screen, n)
 		XFillRectangle
 		    (screen->display, TextWindow(screen),
 		     screen->reverseGC,
-		     screen->border + screen->scrollbar
+                    (term->misc.sb_right ?
+                        (int) screen->border :
+                        (int) screen->border + screen->scrollbar)
 		       + Width(screen) - n*FontWidth(screen),
 		     CursorY (screen, screen->cur_row), n * FontWidth(screen),
 		     FontHeight(screen));
@@ -563,9 +575,11 @@ register TScreen *screen;
 			height = screen->max_row;
 		if((height -= top) > 0)
 			XClearArea(screen->display, TextWindow(screen),
-			 screen->border + screen->scrollbar, top *
-			 FontHeight(screen) + screen->border,
-			 Width(screen), height * FontHeight(screen), FALSE);
+                            (term->misc.sb_right ?
+                                (int) screen->border :
+                                (int) screen->border + screen->scrollbar),
+			     top * FontHeight(screen) + screen->border,
+			     Width(screen), height * FontHeight(screen), FALSE);
 
 		if(screen->cur_row - screen->topline <= screen->max_row)
 			ClearLeft(screen);
@@ -587,10 +601,12 @@ register TScreen *screen;
 			FlushScroll(screen);
 		if(++top <= screen->max_row)
 			XClearArea(screen->display, TextWindow(screen),
-			 screen->border + screen->scrollbar, top *
-			 FontHeight(screen) + screen->border,
-			 Width(screen), (screen->max_row - top + 1) *
-			 FontHeight(screen), FALSE);
+                            (term->misc.sb_right ?
+                                (int) screen->border :
+                                (int) screen->border + screen->scrollbar),
+			    top * FontHeight(screen) + screen->border,
+			    Width(screen), (screen->max_row - top + 1) *
+			        FontHeight(screen), FALSE);
 	}
 	ClearBufRows(screen, screen->cur_row + 1, screen->max_row);
 }
@@ -616,12 +632,16 @@ register TScreen *screen;
 		 FontHeight(screen));
 	    }
 	}
-	memset(screen->buf [2 * screen->cur_row] + screen->cur_col, 0,
+	memset(screen->buf [4 * screen->cur_row] + screen->cur_col, 0,
 	       (screen->max_col - screen->cur_col + 1));
-	memset(screen->buf [2 * screen->cur_row + 1] + screen->cur_col, 0,
+	memset(screen->buf [4 * screen->cur_row + 1] + screen->cur_col, 0,
+	       (screen->max_col - screen->cur_col + 1));
+	memset(screen->buf [4 * screen->cur_row + 2] + screen->cur_col, 0,
+	       (screen->max_col - screen->cur_col + 1));
+	memset(screen->buf [4 * screen->cur_row + 3] + screen->cur_col, 0,
 	       (screen->max_col - screen->cur_col + 1));
 	/* with the right part cleared, we can't be wrapping */
-	screen->buf [2 * screen->cur_row + 1] [0] &= ~LINEWRAPPED;
+	screen->buf [4 * screen->cur_row + 1] [0] &= ~LINEWRAPPED;
 }
 
 /*
@@ -641,22 +661,26 @@ ClearLeft (screen)
 		if(screen->scroll_amt)
 			FlushScroll(screen);
 		XFillRectangle (screen->display, TextWindow(screen),
-		     screen->reverseGC,
-		     screen->border + screen->scrollbar,
-		      CursorY (screen, screen->cur_row),
-		     (screen->cur_col + 1) * FontWidth(screen),
-		     FontHeight(screen));
+		    screen->reverseGC,
+                    (term->misc.sb_right ?
+                        (int) screen->border :
+                        (int) screen->border + screen->scrollbar),
+		    CursorY (screen, screen->cur_row),
+		    (screen->cur_col + 1) * FontWidth(screen),
+		    FontHeight(screen));
 	    }
 	}
 	
-	for ( i=0, cp=screen->buf[2 * screen->cur_row];
+	for ( i=0, cp=screen->buf[4 * screen->cur_row];
 	      i < screen->cur_col + 1;
 	      i++, cp++)
 	    *cp = ' ';
-	for ( i=0, cp=screen->buf[2 * screen->cur_row + 1];
+	for ( i=0, cp=screen->buf[4 * screen->cur_row + 1];
 	      i < screen->cur_col + 1;
 	      i++, cp++)
 	    *cp = CHARDRAWN;
+        bzero (screen->buf [4 * screen->cur_row + 2], (screen->cur_col + 1));
+        bzero (screen->buf [4 * screen->cur_row + 3], (screen->cur_col + 1));
 }
 
 /* 
@@ -673,14 +697,18 @@ register TScreen *screen;
 		if(screen->scroll_amt)
 			FlushScroll(screen);
 		XFillRectangle (screen->display, TextWindow(screen), 
-		     screen->reverseGC,
-		     screen->border + screen->scrollbar,
-		      CursorY (screen, screen->cur_row),
-		     Width(screen), FontHeight(screen));
+		    screen->reverseGC,
+                    (term->misc.sb_right ?
+                        (int) screen->border :
+                        (int) screen->border + screen->scrollbar),
+		    CursorY (screen, screen->cur_row),
+		    Width(screen), FontHeight(screen));
 	    }
 	}
-	memset (screen->buf [2 * screen->cur_row], 0, (screen->max_col + 1));
-	memset (screen->buf [2 * screen->cur_row + 1], 0, (screen->max_col + 1));
+	memset(screen->buf [4 * screen->cur_row], 0, (screen->max_col + 1));
+	memset(screen->buf [4 * screen->cur_row + 1], 0, (screen->max_col + 1));
+	memset(screen->buf [4 * screen->cur_row + 2], 0, (screen->max_col + 1));
+	memset(screen->buf [4 * screen->cur_row + 3], 0, (screen->max_col + 1));
 }
 
 ClearScreen(screen)
@@ -698,10 +726,12 @@ register TScreen *screen;
 			XClearWindow(screen->display, TextWindow(screen));
 		else
 			XClearArea(screen->display, TextWindow(screen),
-			 screen->border + screen->scrollbar, 
-			 top * FontHeight(screen) + screen->border,	
-		 	 Width(screen), (screen->max_row - top + 1) *
-			 FontHeight(screen), FALSE);
+                            (term->misc.sb_right ?
+                                  (int) screen->border :
+                                  (int) screen->border + screen->scrollbar),
+			     top * FontHeight(screen) + screen->border,	
+		 	     Width(screen), (screen->max_row - top + 1) *
+			     FontHeight(screen), FALSE);
 	}
 	ClearBufRows (screen, 0, screen->max_row);
 }
@@ -803,8 +833,12 @@ vertical_copy_area(screen, firstline, nlines, amount)
     int amount;			/* number of lines to move up (neg=down) */
 {
     if(nlines > 0) {
-	int src_x = screen->border + screen->scrollbar;
-	int src_y = firstline * FontHeight(screen) + screen->border;
+	int src_x, src_y;
+
+	src_x = (term->misc.sb_right ?
+                        (int) screen->border :
+                        (int) screen->border + screen->scrollbar);
+	src_y = firstline * FontHeight(screen) + screen->border;
 
 	copy_area(screen, src_x, src_y,
 		  (unsigned)Width(screen), nlines*FontHeight(screen),
@@ -887,15 +921,24 @@ handle_translated_exposure (screen, rect_x, rect_y, rect_width, rect_height)
 	toprow = (rect_y - screen->border) / FontHeight(screen);
 	if(toprow < 0)
 		toprow = 0;
-	leftcol = (rect_x - screen->border - screen->scrollbar)
-	    / FontWidth(screen);
+	if (term->misc.sb_right) 
+	    leftcol = (rect_x - screen->border) /
+	        FontWidth(screen);
+	else
+	    leftcol = (rect_x - screen->border - screen->scrollbar) /
+	        FontWidth(screen);
+
+
 	if(leftcol < 0)
 		leftcol = 0;
 	nrows = (rect_y + rect_height - 1 - screen->border) / 
 		FontHeight(screen) - toprow + 1;
-	ncols =
-	 (rect_x + rect_width - 1 - screen->border - screen->scrollbar) /
-			FontWidth(screen) - leftcol + 1;
+	if (term->misc.sb_right) 
+	    ncols = (rect_x + rect_width - 1 - screen->border) /
+		    FontWidth(screen) - leftcol + 1;
+	else 
+	    ncols = (rect_x + rect_width - 1 - screen->border - 
+		screen->scrollbar) / FontWidth(screen) - leftcol + 1;
 	toprow -= screen->scrolls;
 	if (toprow < 0) {
 		nrows += toprow;
@@ -980,5 +1023,89 @@ recolor_cursor (cursor, fg, bg)
 		  colordefs, 2);
     XRecolorCursor (dpy, cursor, colordefs, colordefs+1);
     return;
+}
+
+
+
+void
+GetColors(term,pColors)
+        XgtermWidget term;
+        ScrnColors *pColors;
+{
+        register TScreen *screen = &term->screen;
+        GC tmpGC;
+        unsigned long tmp;
+
+
+        pColors->which= 0;
+        SET_COLOR_VALUE(pColors,TEXT_FG,        screen->foreground);
+        SET_COLOR_VALUE(pColors,TEXT_BG,        term->core.background_pixel);
+        SET_COLOR_VALUE(pColors,TEXT_CURSOR,    screen->cursorcolor);
+        SET_COLOR_VALUE(pColors,MOUSE_FG,       screen->mousecolor);
+        SET_COLOR_VALUE(pColors,MOUSE_BG,       screen->mousecolorback);
+}
+
+
+ChangeColors(term,pNew)
+        XgtermWidget term;
+        ScrnColors *pNew;
+{
+        register TScreen *screen = &term->screen;
+        GC tmpGC;
+        unsigned long tmp;
+        Bool    newCursor=      TRUE;
+
+
+        if (COLOR_DEFINED(pNew,TEXT_BG)) {
+            term->core.background_pixel=        COLOR_VALUE(pNew,TEXT_BG);
+        }
+
+        if (COLOR_DEFINED(pNew,TEXT_CURSOR)) {
+            screen->cursorcolor=        COLOR_VALUE(pNew,TEXT_CURSOR);
+        }
+        else if ((screen->cursorcolor == screen->foreground)&&
+                 (COLOR_DEFINED(pNew,TEXT_FG))) {
+            screen->cursorcolor=        COLOR_VALUE(pNew,TEXT_FG);
+        }
+        else newCursor= FALSE;
+
+        if (COLOR_DEFINED(pNew,TEXT_FG)) {
+            Pixel       fg=     COLOR_VALUE(pNew,TEXT_FG);
+            screen->foreground= fg;
+            XSetForeground(screen->display,screen->normalGC,fg);
+            XSetBackground(screen->display,screen->reverseGC,fg);
+            XSetForeground(screen->display,screen->normalboldGC,fg);
+            XSetBackground(screen->display,screen->reverseboldGC,fg);
+        }
+
+        if (COLOR_DEFINED(pNew,TEXT_BG)) {
+            Pixel       bg=     COLOR_VALUE(pNew,TEXT_BG);
+            term->core.background_pixel=        bg;
+            XSetBackground(screen->display,screen->normalGC,bg);
+            XSetForeground(screen->display,screen->reverseGC,bg);
+            XSetBackground(screen->display,screen->normalboldGC,bg);
+            XSetForeground(screen->display,screen->reverseboldGC,bg);
+            XSetWindowBackground(screen->display, TextWindow(screen),
+                                                  term->core.background_pixel);
+        }
+
+        if (COLOR_DEFINED(pNew,MOUSE_FG)||(COLOR_DEFINED(pNew,MOUSE_BG))) {
+            if (COLOR_DEFINED(pNew,MOUSE_FG))
+                screen->mousecolor=     COLOR_VALUE(pNew,MOUSE_FG);
+            if (COLOR_DEFINED(pNew,MOUSE_BG))
+                screen->mousecolorback= COLOR_VALUE(pNew,MOUSE_BG);
+
+            recolor_cursor (screen->pointer_cursor,
+                screen->mousecolor, screen->mousecolorback);
+            recolor_cursor (screen->arrow,
+                screen->mousecolor, screen->mousecolorback);
+            XDefineCursor(screen->display, TextWindow(screen),
+                                           screen->pointer_cursor);
+        }
+
+        set_cursor_gcs(screen);
+        XClearWindow(screen->display, TextWindow(screen));
+        ScrnRefresh (screen, 0, 0, screen->max_row + 1,
+         screen->max_col + 1, False);
 }
 

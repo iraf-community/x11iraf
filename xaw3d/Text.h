@@ -269,9 +269,10 @@ _XFUNCPROTOEND
 
 /*
  * For R3 compatability only. 
- */
 
 #include <X11/Xaw/AsciiSrc.h>
+ */
+
 #include <X11/Xaw/AsciiSink.h>
 
 #endif /* _XawText_h */

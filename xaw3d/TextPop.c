@@ -62,7 +62,9 @@ SOFTWARE.
 
 extern int errno, sys_nerr;
 #ifndef __FreeBSD__
+#ifndef _BSD_SOURCE
 extern char* sys_errlist[];
+#endif
 #endif
 
 #define INSERT_FILE ("Enter Filename:")
@@ -242,7 +244,7 @@ XtPointer call_data;		/* unused */
     else
       (void) sprintf( msg, "*** Error: %s ***",
 	      (errno > 0 && errno < sys_nerr) ?
-	      sys_errlist[errno] : "Can't open file" );
+	      (char *)sys_errlist[errno] : "Can't open file" );
   
 
   (void)SetResourceByName(ctx->text.file_insert, 

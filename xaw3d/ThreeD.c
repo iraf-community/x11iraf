@@ -124,17 +124,41 @@ WidgetClass threeDWidgetClass = (WidgetClass) &threeDClassRec;
  *
  ****************************************************************/
 
+#define mbshadowpm_size 3
+static char mbshadowpm_bits[] = {0x05, 0x03, 0x06};
 
-#define shadowpm_width 8
-#define shadowpm_height 8
-static unsigned char shadowpm_bits[] = {
-    0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55};
+#define mtshadowpm_size 3
+static char mtshadowpm_bits[] = {0x02, 0x04, 0x01};
 
-static unsigned char mtshadowpm_bits[] = {
-    0x92, 0x24, 0x49, 0x92, 0x24, 0x49, 0x92, 0x24};
+#define shadowpm_size 2
+static char shadowpm_bits[] = {0x02, 0x01};
 
-static unsigned char mbshadowpm_bits[] = {
-    0x6d, 0xdb, 0xb6, 0x6d, 0xdb, 0xb6, 0x6d, 0xdb};
+#ifdef USEGRAY
+#include <stdio.h>
+unsigned long grayPixel(dpy, scn)
+Display *dpy;
+Screen	*scn;
+    {
+    static XColor Gray = 
+    {
+	/* pixel */            0, 
+	/* red, green, blue */ 0,0,0, 
+        /* flags */            0,
+        /* pad */              0
+    };
+    if (!Gray.pixel)
+	{
+	XColor exact;
+	(void) XAllocNamedColor(dpy, DefaultColormapOfScreen (scn), 
+				"gray", &Gray,&exact);  /* Blindflug */
+	}
+    return Gray.pixel;
+    }
+#define setPixel(p,dpy,scn) grayPixel(dpy,scn)
+#else
+#define setPixel(p,dpy,scn) (p)
+#endif
+
 
 /* ARGSUSED */
 static void AllocTopShadowGC (w)
@@ -183,9 +207,10 @@ static void AllocTopShadowPixmap (new)
     ThreeDWidget	tdw = (ThreeDWidget) new;
     Display		*dpy = XtDisplay (new);
     Screen		*scn = XtScreen (new);
-    unsigned long	top_fg_pixel, top_bg_pixel;
-    char		*pm_data;
+    unsigned long	top_fg_pixel = 0, top_bg_pixel = 0;
+    char		*pm_data = NULL;
     Boolean		create_pixmap = FALSE;
+    unsigned int        pm_size;
 
     /*
      * I know, we're going to create two pixmaps for each and every
@@ -196,32 +221,43 @@ static void AllocTopShadowPixmap (new)
     if (DefaultDepthOfScreen (scn) == 1) {
 	top_fg_pixel = BlackPixelOfScreen (scn);
 	top_bg_pixel = WhitePixelOfScreen (scn);
-	pm_data = (char *) mtshadowpm_bits;
+	pm_data = mtshadowpm_bits;
+        pm_size = mtshadowpm_size;
 	create_pixmap = TRUE;
     } else if (tdw->threeD.be_nice_to_cmap) {
 	if (tdw->core.background_pixel == WhitePixelOfScreen (scn)) {
-	    top_fg_pixel = WhitePixelOfScreen (scn);
+	    top_fg_pixel = setPixel( WhitePixelOfScreen (scn), dpy, scn);
 	    top_bg_pixel = BlackPixelOfScreen (scn);
 	} else if (tdw->core.background_pixel == BlackPixelOfScreen (scn)) {
 	    top_fg_pixel = BlackPixelOfScreen (scn);
-	    top_bg_pixel = WhitePixelOfScreen (scn);
+	    top_bg_pixel = setPixel( WhitePixelOfScreen (scn), dpy, scn);
 	} else {
 	    top_fg_pixel = tdw->core.background_pixel;
 	    top_bg_pixel = WhitePixelOfScreen (scn);
 	}
+#ifndef USEGRAY
 	if (tdw->core.background_pixel == WhitePixelOfScreen (scn) ||
-	    tdw->core.background_pixel == BlackPixelOfScreen (scn))
-	    pm_data = (char *) mtshadowpm_bits;
-	else
-	    pm_data = (char *) shadowpm_bits;
+	    tdw->core.background_pixel == BlackPixelOfScreen (scn)) {
+	    pm_data = mtshadowpm_bits;
+       	    pm_size = mtshadowpm_size;
+       } else 
+#endif
+       {
+       	    pm_data = shadowpm_bits;
+            pm_size = shadowpm_size;
+       }
+	
 	create_pixmap = TRUE;
+    } else {
+	pm_size = 0; /* keep gcc happy */
     }
+
     if (create_pixmap)
 	tdw->threeD.top_shadow_pxmap = XCreatePixmapFromBitmapData (dpy,
 			RootWindowOfScreen (scn),
 			pm_data,
-			shadowpm_width,
-			shadowpm_height,
+			pm_size,
+			pm_size,
 			top_fg_pixel,
 			top_bg_pixel,
 			DefaultDepthOfScreen (scn));
@@ -234,39 +270,50 @@ static void AllocBotShadowPixmap (new)
     ThreeDWidget	tdw = (ThreeDWidget) new;
     Display		*dpy = XtDisplay (new);
     Screen		*scn = XtScreen (new);
-    unsigned long	bot_fg_pixel, bot_bg_pixel;
-    char		*pm_data;
+    unsigned long	bot_fg_pixel = 0, bot_bg_pixel = 0;
+    char		*pm_data = NULL;
     Boolean		create_pixmap = FALSE;
+    unsigned int        pm_size;
 
     if (DefaultDepthOfScreen (scn) == 1) {
 	bot_fg_pixel = BlackPixelOfScreen (scn);
 	bot_bg_pixel = WhitePixelOfScreen (scn);
-	pm_data = (char *) mbshadowpm_bits;
+	pm_data = mbshadowpm_bits;
+        pm_size = mbshadowpm_size;
 	create_pixmap = TRUE;
     } else if (tdw->threeD.be_nice_to_cmap) {
 	if (tdw->core.background_pixel == WhitePixelOfScreen (scn)) {
 	    bot_fg_pixel = WhitePixelOfScreen (scn);
-	    bot_bg_pixel = BlackPixelOfScreen (scn);
+	    bot_bg_pixel = setPixel( BlackPixelOfScreen (scn), dpy, scn);
 	} else if (tdw->core.background_pixel == BlackPixelOfScreen (scn)) {
-	    bot_fg_pixel = BlackPixelOfScreen (scn);
-	    bot_bg_pixel = WhitePixelOfScreen (scn);
+	    bot_fg_pixel = setPixel( BlackPixelOfScreen (scn), dpy, scn);
+	    bot_bg_pixel = BlackPixelOfScreen (scn);
 	} else {
 	    bot_fg_pixel = tdw->core.background_pixel;
 	    bot_bg_pixel = BlackPixelOfScreen (scn);
 	}
+#ifndef USEGRAY
 	if (tdw->core.background_pixel == WhitePixelOfScreen (scn) ||
-	    tdw->core.background_pixel == BlackPixelOfScreen (scn))
-	    pm_data = (char *) mbshadowpm_bits;
-	else
-	    pm_data = (char *) shadowpm_bits;
+	    tdw->core.background_pixel == BlackPixelOfScreen (scn)) {
+	    pm_data = mbshadowpm_bits;
+	    pm_size = mbshadowpm_size;
+	} else 
+#endif
+        {
+	    pm_data = shadowpm_bits;
+	    pm_size = shadowpm_size;
+        }
 	create_pixmap = TRUE;
+    } else {
+	pm_size = 0; /* keep gcc happy */
     }
+
     if (create_pixmap)
 	tdw->threeD.bot_shadow_pxmap = XCreatePixmapFromBitmapData (dpy,
 			RootWindowOfScreen (scn),
 			pm_data,
-			shadowpm_width,
-			shadowpm_height,
+			pm_size,
+			pm_size,
 			bot_fg_pixel,
 			bot_bg_pixel,
 			DefaultDepthOfScreen (scn));

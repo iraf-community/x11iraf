@@ -189,8 +189,12 @@ static char defaultTranslations[] =
 <Btn3Up>:	extend-end(PRIMARY, CUT_BUFFER0) \n\
 <Key>f:		scroll(1)\n\
 <Key>b:		scroll(-1)\n\
+<Key>Prior:     scroll(-1)\n\
+<Key>Next:      scroll(1)\n\
 <Key>u:		scroll(-0.5)\n\
 <Key>d:		scroll(0.5)\n\
+<Key>Up:        scroll(-0.5)\n\
+<Key>Down:      scroll(0.5)\n\
 <Key>j:		scroll(1ch)\n\
 <Key>k:		scroll(-1ch)\n\
 <Motion>:       track-motion()\n\
@@ -212,8 +216,12 @@ static char defaultTranslations[] =
 <Btn3Up>:	extend-end(PRIMARY, CUT_BUFFER0) \n\
 <Key>f:		scroll(1)\n\
 <Key>b:		scroll(-1)\n\
+<Key>Prior:     scroll(-1)\n\
+<Key>Next:      scroll(1)\n\
 <Key>u:		scroll(-0.5)\n\
 <Key>d:		scroll(0.5)\n\
+<Key>Up:        scroll(-0.5)\n\
+<Key>Down:      scroll(0.5)\n\
 <Key>j:		scroll(1ch)\n\
 <Key>k:		scroll(-1ch)\n\
 <Motion>:       track-motion()\n\
@@ -685,7 +693,8 @@ HTMLClassRec htmlClassRec = {
 
 WidgetClass htmlWidgetClass = (WidgetClass)&htmlClassRec;
 
-static Cursor in_anchor_cursor = (Cursor)NULL;
+/*static Cursor in_anchor_cursor = (Cursor)NULL;*/		/* MF021 */
+Cursor in_anchor_cursor = (Cursor)NULL;
 
 
 /*
@@ -782,8 +791,8 @@ ScrollWidgets(hw)
 static void
 setScrollBar(sb, topPosition, totalLength, currentLength)
 	Widget sb;
-	Position topPosition;
-	Dimension totalLength, currentLength;
+        int topPosition;                                        /* MF026 */
+	int totalLength, currentLength;				/* MF026 */
 {
 	float top   = (float)topPosition  /(float)(totalLength);
 	float shown = (float)currentLength/(float)(totalLength);
@@ -1036,7 +1045,7 @@ ScrollMove(w, client_data, call_data)
 	float scrollDir = (int)call_data < 0 ? -0.3 : 0.3;
 	HTMLWidget hw = (HTMLWidget)client_data;
 	int value;
-	Dimension totalLength, currentLength;
+ 	int totalLength, currentLength; 			/* MF026 */
 
 	if (w == hw->html.vbar)
 	{
@@ -1413,7 +1422,7 @@ fprintf (stderr, "computed ss to be %d\n", ss);
 		setScrollBar(hw->html.vbar, 
 			     hw->html.scroll_y,
 			     hw->html.doc_height, 
-			     hw->html.view_height);
+			     (int)hw->html.view_height);
 #endif /* MOTIF */
 
 #ifdef DEBUG
@@ -1526,7 +1535,7 @@ fprintf (stderr, "real slider size %d\n", ss);
 		setScrollBar(hw->html.hbar, 	
 			     hw->html.scroll_x,
 			     hw->html.doc_width, 
-			     hw->html.view_width);
+			     (int)hw->html.view_width);
 #endif /* MOTIF */
 	}
 
@@ -1853,8 +1862,8 @@ Initialize(
 
         new->html.cached_tracked_ele = NULL;
 
-        /* Initialize cursor used when pointer is inside anchor. */
-        if (in_anchor_cursor == (Cursor)NULL)
+        /* Initialize cursor used when pointer is inside anchor.
+        if (in_anchor_cursor == (Cursor)NULL) */
           in_anchor_cursor = XCreateFontCursor (XtDisplay (new), XC_hand2);
 
         return;
@@ -3593,7 +3602,7 @@ Scroll (w, event, params, num_params)
 	ScrollToPos(hw->html.hbar, hw, 0);
 	setScrollBar(hw->html.vbar, newy, 
 		     hw->html.doc_height,
-		     hw->html.view_height);
+		     (int)hw->html.view_height);
 #endif
 }
 
@@ -4741,7 +4750,7 @@ HTMLGotoId(Widget w, int element_id)
 	ScrollToPos(hw->html.hbar, hw, 0);
 	setScrollBar(hw->html.vbar, newy, 
 		     hw->html.doc_height,
-		     hw->html.view_height);
+		     (int)hw->html.view_height);
 #endif
 }
 
@@ -4820,13 +4829,13 @@ HTMLAnchorToId(Widget w, char *name)
 	start = hw->html.formatted_elements;
 	while (start != NULL)
 	{
-		if ((start->anchorName)&&
-		    (strcmp(start->anchorName, name) == 0))
-		{
-			eptr = start;
-			break;
-		}
-		start = start->next;
+	    if ((start->anchorName)&&				/* MF023 */
+	      ((strcmp(start->anchorName, name) == 0) ||
+	      (*name == '#' && strcmp(start->anchorName, &(name[1])) == 0)) ) {
+	    	 eptr = start;
+	    	 break;
+	    }
+	    start = start->next;
 	}
 
 	if (eptr == NULL)
@@ -5151,6 +5160,7 @@ HTMLRetestAnchors(Widget w, visitTestProc testFunc, XtPointer client_data)
 {
 	HTMLWidget hw = (HTMLWidget)w;
 	struct ele_rec *start;
+	int	stat = 0;
 
 	if (testFunc == NULL)
 	{
@@ -5173,7 +5183,7 @@ HTMLRetestAnchors(Widget w, visitTestProc testFunc, XtPointer client_data)
 
 		if (testFunc != NULL)
 		{
-			if ((*testFunc)(hw, client_data, start->anchorHRef))
+			if ((stat=(*testFunc)(hw, client_data, start->anchorHRef)))
 			{
 			    start->fg = hw->html.visitedAnchor_fg;
 			    start->underline_number =
@@ -5202,8 +5212,9 @@ HTMLRetestAnchors(Widget w, visitTestProc testFunc, XtPointer client_data)
 		/*
 		 * Since the element may have changed, redraw it
 		 */
-		switch(start->type)
-		{
+		if (stat) {
+		    switch(start->type)
+		    {
 			case E_TEXT:
 				TextRefresh(hw, start,
 				     0, (start->edata_len - 2));
@@ -5217,6 +5228,7 @@ HTMLRetestAnchors(Widget w, visitTestProc testFunc, XtPointer client_data)
 			case E_LINEFEED:
 				LinefeedRefresh(hw, start);
 				break;
+		    }
 		}
 
 		start = start->next;
@@ -5802,9 +5814,8 @@ HTMLSearchText (Widget w, char *pattern, ElementRef *m_start, ElementRef *m_end,
 	 * If bad parameters are passed, just fail the search
 	 */
 	if ((pattern == NULL)||(*pattern == '\0')||
-		(m_start == NULL)||(m_end == NULL))
-	{
-		return(-1);
+	    (m_start == NULL)||(m_end == NULL)) {
+	    return(-1);
 	}
 
 	/*
@@ -5813,22 +5824,18 @@ HTMLSearchText (Widget w, char *pattern, ElementRef *m_start, ElementRef *m_end,
 	 *
 	 * remember to free this before returning
 	 */
-	if (caseless)
-	{
-		match = (char *)malloc(strlen(pattern) + 1);
-		tptr = pattern;
-		mptr = match;
-		while (*tptr != '\0')
-		{
-			*mptr = (char)TOLOWER((int)*tptr);
-			mptr++;
-			tptr++;
-		}
-		*mptr = '\0';
-	}
-	else
-	{
-		match = pattern;
+	if (caseless) {
+	    match = (char *)malloc(strlen(pattern) + 1);
+	    tptr = pattern;
+	    mptr = match;
+	    while (*tptr != '\0') {
+	        *mptr = (char)TOLOWER((int)*tptr);
+	        mptr++;
+	        tptr++;
+	    }
+	    *mptr = '\0';
+	} else {
+	    match = pattern;
 	}
 
 	/*
@@ -5847,425 +5854,324 @@ HTMLSearchText (Widget w, char *pattern, ElementRef *m_start, ElementRef *m_end,
 	/*
 	 * Find the user specified start position.
 	 */
-	if (start->id > 0)
-	{
-		found = 0;
-		eptr = hw->html.formatted_elements;
+	if (start->id > 0) {
+	    found = 0;
+	    eptr = hw->html.formatted_elements;
 
-		while (eptr != NULL)
-		{
-			if (eptr->ele_id == start->id)
-			{
-				s_eptr = eptr;
-				found = 1;
-				break;
-			}
-			eptr = eptr->next;
-		}
-		/*
-		 * Bad start position, fail them out.
-		 */
-		if (!found)
-		{
-			if (caseless)
-			{
-				free(match);
-			}
-			return(-1);
-		}
-		/*
-		 * Sanify the start position
-		 */
-		s_pos = start->pos;
-		if (s_pos >= s_eptr->edata_len - 1)
-		{
-			s_pos = s_eptr->edata_len - 2;
-		}
-		if (s_pos < 0)
-		{
-			s_pos = 0;
-		}
-	}
-	else
-	{
-		/*
-		 * Default search starts at end for backward, and
-		 * beginning for forwards.
-		 */
-		if (backward)
-		{
-			s_eptr = hw->html.formatted_elements;
-			while (s_eptr->next != NULL)
-			{
-				s_eptr = s_eptr->next;
-			}
-			s_pos = s_eptr->edata_len - 2;
-		}
-		else
-		{
-			s_eptr = hw->html.formatted_elements;
-			s_pos = 0;
-		}
+	    while (eptr != NULL) {
+/*	        if (eptr->ele_id > start->id) {*/	  	  /* MF031 */
+	        if ((!backward && eptr->ele_id > start->id) ||
+		    ( backward && eptr->ele_id == start->id)) {
+	                s_eptr = eptr;
+	                found = 1;
+	                break;
+	        }
+	        eptr = eptr->next;
+	    }
+	    /*
+	     * Bad start position, fail them out.
+	     */
+	    if (!found) {
+	        if (caseless) {
+	            free(match);
+	        }
+	        return(-1);
+	    }
+	    /*
+	     * Sanify the start position
+	     */
+	    s_pos = start->pos;
+	    if (s_pos >= s_eptr->edata_len - 1) {
+	        s_pos = s_eptr->edata_len - 2;
+	    }
+	    if (s_pos < 0) {
+	        s_pos = 0;
+	    }
+
+	} else {
+	    /*
+	     * Default search starts at end for backward, and
+	     * beginning for forwards.
+	     */
+	    if (backward) {
+	        s_eptr = hw->html.formatted_elements;
+	        while (s_eptr->next != NULL) {
+	            s_eptr = s_eptr->next;
+	        }
+	        s_pos = s_eptr->edata_len - 2;
+	    } else {
+	        s_eptr = hw->html.formatted_elements;
+	        s_pos = 0;
+	    }
 	}
 
-	if (backward)
-	{
-		char *mend;
+	if (backward) {
+	    char *mend;
 
-		/*
-		 * Save the end of match here for easy end to start searching
-		 */
-		mend = match;
-		while (*mend != '\0')
-		{
-			mend++;
-		}
-		if (mend > match)
-		{
-			mend--;
-		}
-		found = 0;
-		equal = 0;
-		mptr = mend;
+	    /*
+	     * Save the end of match here for easy end to start searching
+	     */
+	    mend = match;
+	    while (*mend != '\0') {
+	        mend++;
+	    }
+	    if (mend > match) {
+	        mend--;
+	    }
+	    found = 0;
+	    equal = 0;
+	    mptr = mend;
 
-		if (s_eptr != NULL)
-		{
-			eptr = s_eptr;
-		}
-		else
-		{
-			eptr = hw->html.formatted_elements;
-			while (eptr->next != NULL)
-			{
-				eptr = eptr->next;
-			}
-		}
+	    if (s_eptr != NULL) {
+	        eptr = s_eptr;
+	    } else {
+	        eptr = hw->html.formatted_elements;
+	        while (eptr->next != NULL) {
+	            eptr = eptr->next;
+	        }
+	    }
 
-		while (eptr != NULL)
-		{
-			/*
-			 * Skip the special internal text
-			 */
-			if (eptr->internal == True)
-			{
-				eptr = eptr->prev;
-				continue;
-			}
+	    while (eptr != NULL) {
+	        /*
+	         * Skip the special internal text
+	         */
+	        if (eptr->internal == True) {
+	            eptr = eptr->prev;
+	            continue;
+	        }
 
-			if (eptr->type == E_TEXT)
-			{
-			    tptr = (char *)(eptr->edata + eptr->edata_len - 2);
-			    if (eptr == s_eptr)
-			    {
-				tptr = (char *)(eptr->edata + s_pos);
-			    }
-			    while (tptr >= eptr->edata)
-			    {
-				if (equal)
-				{
-					if (caseless)
-					{
-						cval =(char)TOLOWER((int)*tptr);
-					}
-					else
-					{
-						cval = *tptr;
-					}
-					while ((mptr >= match)&&
-						(tptr >= eptr->edata)&&
-						(cval == *mptr))
-					{
-						tptr--;
-						mptr--;
-					    if (tptr >= eptr->edata)
-					    {
-						if (caseless)
-						{
-						cval =(char)TOLOWER((int)*tptr);
-						}
-						else
-						{
-							cval = *tptr;
-						}
-					    }
-					}
-					if (mptr < match)
-					{
-						found = 1;
-						start->id = eptr->ele_id;
-						start->pos = (int)
-						    (tptr - eptr->edata + 1);
-						break;
-					}
-					else if (tptr < eptr->edata)
-					{
-						break;
-					}
-					else
-					{
-						equal = 0;
-					}
-				}
-				else
-				{
-					mptr = mend;
-					if (caseless)
-					{
-						cval =(char)TOLOWER((int)*tptr);
-					}
-					else
-					{
-						cval = *tptr;
-					}
-					while ((tptr >= eptr->edata)&&
-						(cval != *mptr))
-					{
-						tptr--;
-					    if (tptr >= eptr->edata)
-					    {
-						if (caseless)
-						{
-						cval =(char)TOLOWER((int)*tptr);
-						}
-						else
-						{
-							cval = *tptr;
-						}
-					    }
-					}
-					if ((tptr >= eptr->edata)&&
-						(cval == *mptr))
-					{
-						equal = 1;
-						end->id = eptr->ele_id;
-						end->pos = (int)
-						    (tptr - eptr->edata + 1);
-					}
-				}
-			    }
-			}
-			/*
-			 * Linefeeds match to single space characters.
-			 */
-			else if (eptr->type == E_LINEFEED)
-			{
-				if (equal)
-				{
-					if (*mptr == ' ')
-					{
-						mptr--;
-						if (mptr < match)
-						{
-							found = 1;
-							start->id =eptr->ele_id;
-							start->pos = 0;
-						}
-					}
-					else
-					{
-						equal = 0;
-					}
-				}
-				else
-				{
-					mptr = mend;
-					if (*mptr == ' ')
-					{
-						equal = 1;
-						end->id = eptr->ele_id;
-						end->pos = 0;
-						mptr--;
-						if (mptr < match)
-						{
-							found = 1;
-							start->id =eptr->ele_id;
-							start->pos = 0;
-						}
-					}
-				}
-			}
-			if (found)
-			{
-				break;
-			}
-			eptr = eptr->prev;
-		}
+	        if (eptr->type == E_TEXT) {
+	            tptr = (char *)(eptr->edata + eptr->edata_len - 2);
+	            if (eptr == s_eptr) {
+	                tptr = (char *)(eptr->edata + s_pos);
+	            }
+	            while (tptr >= eptr->edata) {
+	            if (equal) {
+	                if (caseless) {
+	                    cval =(char)TOLOWER((int)*tptr);
+	                } else {
+	                    cval = *tptr;
+	                }
+	                while ((mptr >= match)&&
+	                    (tptr >= eptr->edata)&&
+	                    (cval == *mptr))
+	                {
+	                    tptr--;
+	                    mptr--;
+	                    if (tptr >= eptr->edata) {
+	                        if (caseless) {
+	                            cval =(char)TOLOWER((int)*tptr);
+	                        } else {
+	                            cval = *tptr;
+	                        }
+	                    }
+	                }
+	                if (mptr < match) {
+	                    found = 1;
+	                    start->id = eptr->ele_id;
+	                    start->pos = (int)
+	                        (tptr - eptr->edata + 1);
+	                    break;
+	                } else if (tptr < eptr->edata) {
+	                    break;
+	                } else {
+	                    equal = 0;
+	                }
+	            } else {
+	                mptr = mend;
+	                if (caseless) {
+	                    cval =(char)TOLOWER((int)*tptr);
+	                } else {
+	                    cval = *tptr;
+	                }
+	                while ((tptr >= eptr->edata)&&
+	                    (cval != *mptr))
+	                {
+	                    tptr--;
+	                    if (tptr >= eptr->edata) {
+	                        if (caseless) {
+	                            cval =(char)TOLOWER((int)*tptr);
+	                        } else {
+	                            cval = *tptr;
+	                        }
+	                    }
+	                }
+	                if ((tptr >= eptr->edata)&&
+	                    (cval == *mptr))
+	                {
+	                    equal = 1;
+	                    end->id = eptr->ele_id;
+	                    end->pos = (int)
+	                        (tptr - eptr->edata + 1);
+	                }
+	            }
+	            }
+	        }
+	        /*
+	         * Linefeeds match to single space characters.
+	         */
+	        else if (eptr->type == E_LINEFEED) {
+	            if (equal) {
+	                if (*mptr == ' ') {
+	                    mptr--;
+	                    if (mptr < match) {
+	                        found = 1;
+	                        start->id =eptr->ele_id;
+	                        start->pos = 0;
+	                    }
+	                } else {
+	                    equal = 0;
+	                }
+	            } else {
+	                mptr = mend;
+	                if (*mptr == ' ') {
+	                    equal = 1;
+	                    end->id = eptr->ele_id;
+	                    end->pos = 0;
+	                    mptr--;
+	                    if (mptr < match) {
+	                        found = 1;
+	                        start->id =eptr->ele_id;
+	                        start->pos = 0;
+	                    }
+	                }
+	            }
+	        }
+	        if (found) {
+	            break;
+	        }
+	        eptr = eptr->prev;
+	    }
 	}
 	else /* forward */
 	{
-		found = 0;
-		equal = 0;
-		mptr = match;
+	    found = 0;
+	    equal = 0;
+	    mptr = match;
 
-		if (s_eptr != NULL)
-		{
-			eptr = s_eptr;
-		}
-		else
-		{
-			eptr = hw->html.formatted_elements;
-		}
+	    if (s_eptr != NULL) {
+	        eptr = s_eptr;
+	    } else {
+	        eptr = hw->html.formatted_elements;
+	    }
 
-		while (eptr != NULL)
-		{
-			/*
-			 * Skip the special internal text
-			 */
-			if (eptr->internal == True)
-			{
-				eptr = eptr->next;
-				continue;
-			}
+	    while (eptr != NULL) {
+	        /*
+	         * Skip the special internal text
+	         */
+	        if (eptr->internal == True) {
+	            eptr = eptr->next;
+	            continue;
+	        }
 
-			if (eptr->type == E_TEXT)
-			{
-			    tptr = eptr->edata;
-			    if (eptr == s_eptr)
-			    {
-				tptr = (char *)(tptr + s_pos);
-			    }
-			    while (*tptr != '\0')
-			    {
-				if (equal)
-				{
-					if (caseless)
-					{
-						cval =(char)TOLOWER((int)*tptr);
-					}
-					else
-					{
-						cval = *tptr;
-					}
-					while ((*mptr != '\0')&&
-						(cval == *mptr))
-					{
-						tptr++;
-						mptr++;
-						if (caseless)
-						{
-						cval =(char)TOLOWER((int)*tptr);
-						}
-						else
-						{
-							cval = *tptr;
-						}
-					}
-					if (*mptr == '\0')
-					{
-						found = 1;
-						end->id = eptr->ele_id;
-						end->pos = (int)
-							(tptr - eptr->edata);
-						break;
-					}
-					else if (*tptr == '\0')
-					{
-						break;
-					}
-					else
-					{
-						equal = 0;
-					}
-				}
-				else
-				{
-					mptr = match;
-					if (caseless)
-					{
-						cval =(char)TOLOWER((int)*tptr);
-					}
-					else
-					{
-						cval = *tptr;
-					}
-					while ((*tptr != '\0')&&
-						(cval != *mptr))
-					{
-						tptr++;
-						if (caseless)
-						{
-						cval =(char)TOLOWER((int)*tptr);
-						}
-						else
-						{
-							cval = *tptr;
-						}
-					}
-					if (cval == *mptr)
-					{
-						equal = 1;
-						start->id = eptr->ele_id;
-						start->pos = (int)
-							(tptr - eptr->edata);
-					}
-				}
-			    }
-			}
-			else if (eptr->type == E_LINEFEED)
-			{
-				if (equal)
-				{
-					if (*mptr == ' ')
-					{
-						mptr++;
-						if (*mptr == '\0')
-						{
-							found = 1;
-							end->id = eptr->ele_id;
-							end->pos = 0;
-						}
-					}
-					else
-					{
-						equal = 0;
-					}
-				}
-				else
-				{
-					mptr = match;
-					if (*mptr == ' ')
-					{
-						equal = 1;
-						start->id = eptr->ele_id;
-						start->pos = 0;
-						mptr++;
-						if (*mptr == '\0')
-						{
-							found = 1;
-							end->id = eptr->ele_id;
-							end->pos = 0;
-						}
-					}
-				}
-			}
-			if (found)
-			{
-				break;
-			}
-			eptr = eptr->next;
-		}
+	        if (eptr->type == E_TEXT) {
+	            tptr = eptr->edata;
+	            if (eptr == s_eptr) {
+	                tptr = (char *)(tptr + s_pos);
+	            }
+	            while (*tptr != '\0') {
+	            if (equal) {
+	                if (caseless) {
+	                    cval =(char)TOLOWER((int)*tptr);
+	                } else {
+	                    cval = *tptr;
+	                }
+	                while ((*mptr != '\0')&&
+	                    (cval == *mptr))
+	                {
+	                    tptr++;
+	                    mptr++;
+	                    if (caseless) {
+	                        cval =(char)TOLOWER((int)*tptr);
+	                    } else {
+	                        cval = *tptr;
+	                    }
+	                }
+	                if (*mptr == '\0') {
+	                    found = 1;
+	                    end->id = eptr->ele_id;
+	                    end->pos = (int)
+	                        (tptr - eptr->edata);
+	                    break;
+	                } else if (*tptr == '\0') {
+	                    break;
+	                } else {
+	                    equal = 0;
+	                }
+	            } else {
+	                mptr = match;
+	                if (caseless) {
+	                    cval =(char)TOLOWER((int)*tptr);
+	                } else {
+	                    cval = *tptr;
+	                }
+	                while ((*tptr != '\0')&&
+	                    (cval != *mptr))
+	                {
+	                    tptr++;
+	                    if (caseless) {
+	                        cval =(char)TOLOWER((int)*tptr);
+	                    } else {
+	                        cval = *tptr;
+	                    }
+	                }
+	                if (cval == *mptr) {
+	                    equal = 1;
+	                    start->id = eptr->ele_id;
+	                    start->pos = (int)
+	                        (tptr - eptr->edata);
+	                }
+	            }
+	            }
+	        }
+	        else if (eptr->type == E_LINEFEED) {
+	            if (equal) {
+	                if (*mptr == ' ') {
+	                    mptr++;
+	                    if (*mptr == '\0') {
+	                        found = 1;
+	                        end->id = eptr->ele_id;
+	                        end->pos = 0;
+	                    }
+	                } else {
+	                    equal = 0;
+	                }
+	            } else {
+	                mptr = match;
+	                if (*mptr == ' ') {
+	                    equal = 1;
+	                    start->id = eptr->ele_id;
+	                    start->pos = 0;
+	                    mptr++;
+	                    if (*mptr == '\0') {
+	                        found = 1;
+	                        end->id = eptr->ele_id;
+	                        end->pos = 0;
+	                    }
+	                }
+	            }
+	        }
+	        if (found) {
+	            break;
+	        }
+	        eptr = eptr->next;
+	    }
 	}
 
-	if (found)
-	{
-		m_start->id = start->id;
-		m_start->pos = start->pos;
-		m_end->id = end->id;
-		m_end->pos = end->pos;
+	if (found) {
+	    m_start->id = start->id;
+	    m_start->pos = start->pos;
+	    m_end->id = end->id;
+	    m_end->pos = end->pos;
 	}
 
-	if (caseless)
-	{
-		free(match);
+	if (caseless) {
+	    free(match);
 	}
 
-	if (found)
-	{
-		return(1);
-	}
-	else
-	{
-		return(-1);
+	if (found) {
+	    return(1);
+	} else {
+	    return(-1);
 	}
 }
-

@@ -34,7 +34,9 @@ extern Char *Tbuffer;
 extern Char *Tpushb;
 extern Char *Tpushback;
 extern Char *bptr;
+#ifdef ALLOWLOGGING
 extern char log_def_name[];
+#endif
 extern char *ptydev;
 extern char *ttydev;
 extern char *xgterm_name;

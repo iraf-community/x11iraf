@@ -1,3 +1,4 @@
+#!/bin/csh -f
 #
 # XIMTOOL-ALT --  Script wrapper to start XImtool using the alternate GUI.
 # The GUI file is contained is this script which is created when the system
@@ -13,7 +14,6 @@
 #	    -showPanelBar <bool>	show panelbar on startup
 #
 #----------------------------------------------------------------------------
-#!/bin/csh -f
 
 # Configurable parameters
 set	XIMTOOL		= ximtool	# Path to default ximtool binary

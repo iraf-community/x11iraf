@@ -7,7 +7,6 @@
 
 #include <Library.tmpl>
 
-
 /* CONFIGURE: You may edit the symbol definitions below as you see fit,
  * e.g. change the definition of "InstallLibraries" and "InstallIncludes"
  * to "YES" if you want to have the libraries and include files installed,
@@ -77,6 +76,9 @@
 #ifndef XpmDir
 #define XpmDir 		$(X11IRAFDIR)/xpm
 #endif
+#ifndef CDLDir
+#define CDLDir 		$(X11IRAFDIR)/cdl
+#endif
 
 /* Libraries: */
 #ifndef LibObm
@@ -88,6 +90,9 @@
 #ifndef LibXaw3d
 #define LibXaw3d 	-lXaw3d
 #endif
+#ifndef LibCDL
+#define LibCDL 		-lcdl
+#endif
 
 /* Dependency libraries: */
 #ifndef DepLibObm
@@ -98,6 +103,9 @@
 #endif
 #ifndef DepLibXaw3d
 #define DepLibXaw3d 	$(XAW3DDIR)/libXaw3d.a
+#endif
+#ifndef DepLibCDL
+#define DepLibCDL 	$(CDLDIR)/libcdl.a
 #endif
 
 
@@ -113,6 +121,7 @@
            OBMDIR = ObmDir
            XPMDIR = XpmDir
          XAW3DDIR = Xaw3dDir
+           CDLDIR = CDLDir
     
         DEPLIBOBM = DepLibObm
            LIBOBM = LibObm
@@ -120,7 +129,67 @@
            LIBXPM = LibXpm
       DEPLIBXAW3D = DepLibXaw3d
          LIBXAW3D = LibXaw3d
+           LIBCDL = LibCDL
     
   X11IRAF_LDFLAGS = -L$(X11IRAFDIR)/lib -L../lib
  X11IRAF_INCLUDES = -I$(X11IRAFDIR)/include -I../include
+
+
+/******************************************************************************/
+/******************** Architecture specific definitions. **********************/
+/******************************************************************************/
+
+/* Redefine $(CP) to preserve the filedate so we don't recompile unnecessarily
+ * after a 'make install'.
+ */
+        CP = cp -p
+
+
+/* For Solaris x86 check to see whether the SUNPro compilers are actually
+ * installed, if not assume we have GCC available and use it instead.
+ */
+#if defined(i386Architecture) && defined(SunArchitecture)
+            CC:sh = if test /opt/SUNWspro/bin/cc ; \
+                    then \
+                        echo gcc ; \
+                    fi
+#if CC == gcc
+#define UseGCC YES
+        CCOPTIONS = 
+  EXTRA_LDOPTIONS = 
+#endif
+#endif
+
+/* Hack to compile under SunPRO V4 on Sun Solaris */
+#if !defined(UseGCC)
+#if defined (SunArchitecture) && HasSunC && OSMajorVersion >= 5
+#if OSMinorVersion <= 5
+        CCOPTIONS = -Xs
+  EXTRA_LDOPTIONS = -xildoff
+#else
+        CCOPTIONS = 
+  EXTRA_LDOPTIONS = -xildoff
+#endif
+#endif
+#endif
+
+/* Set needed flags for the HP. */
+#if defined (HPArchitecture)
+        CCOPTIONS = -DHPUX
+#endif
+
+/* Set needed flags for the DECStations. */
+#if defined (UltrixArchitecture)
+        CCOPTIONS = -DULTRIX
+#endif
+
+/* Set needed flags for the Alpha. */
+#if defined (OSF1Architecture) && OSMajorVersion >= 4
+        CCOPTIONS = -DOSF1
+#endif
+
+/* Hack needed so binaries built on NOAO Alpha use patched Xt library */
+#if defined (OSF1Architecture) && OSMajorVersion >= 4
+XTOOLONLYLIB =  -no_so -lXt -so_archive
+#endif
 

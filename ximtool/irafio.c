@@ -33,7 +33,7 @@
 #define	IM_V1PIXOFF	22		/* offset of the pixels */
 #define	IM_V1PIXFILE	103		/* name of pixel storage file */
 
-/* Image header parmeters. */
+/* Image header parmeters.  */
 #define SZ_V2PIXFILE    255
 #define SZ_V2HDR        513
 
@@ -56,10 +56,6 @@
 #define	TY_USHORT	11
 #define	TY_UCHAR	12
 
-
-/* MONO returns total intensity of r,g,b components */
-#define MONO(rd,gn,bl) (((rd)*11 + (gn)*16 + (bl)*5) >> 5)  /*.33R+ .5G+ .17B*/
-
 #ifndef AIXV3
 #ifndef OSF1
 typedef unsigned char uchar;
@@ -76,16 +72,16 @@ typedef unsigned char uchar;
 
 #endif
 
-static char *irafReadPixels();
-static void strpak(), flip(), bswap2(), bswap4();
-static int is_swapped_machine();
-char *index();
+char 		*index();
+static char 	*irafReadPixels();
+static void 	strpak(), flip(), bswap2(), bswap4();
+static int 	is_swapped_machine();
 
 
-/* ----------------
- * Public routines.
- * ----------------*/
-
+/* +------------------+
+ * | Public routines. |
+ * +------------------+
+ */
  
 
 /* loadIRAF - Load a IRAF file.
@@ -99,12 +95,11 @@ uchar   *r, *g, *b;                     /* colormap             */
 int     *ncolors;                       /* number of colors     */
 float   *z1, *z2;                       /* zscale values        */
 {
-	FILE 	*hdr, *pf;
+	FILE 	*hdr;
 	int 	i, len, px, py, version, swapped;
 	int  	ptype, offset;
 	char 	temp[SZ_V1PIXFILE], *ip;
 	char 	path[SZ_V1PIXFILE];
-
 
         /* Get the format version. */
         version = isIRAF (fname);
@@ -117,7 +112,7 @@ float   *z1, *z2;                       /* zscale values        */
             char        pixfile_v1[SZ_V1PIXFILE];
 
             /* Read in the image header. */
-            fread (header_v1, sizeof (char), SZ_V1HDR, hdr);
+            fread ((char *)header_v1, sizeof (char), SZ_V1HDR, hdr);
 
             /* Get the interesting stuff. */
             px = header_v1[IM_V1PHYSLEN];
@@ -135,10 +130,6 @@ float   *z1, *z2;                       /* zscale values        */
                 return "Cannot access pixel file";
             }
 
-            /* Open the pixel file and seek to the beginning of the data. */
-            if ((pf = fopen (pixfile_v1, "r")) == NULL)
-                return "Cannot open pixel file.";
-
 	    /* Now read the data and return a pointer to the scaled pixels. */
 	    irafReadPixels (pixfile_v1, 0, offset, ptype, image,
 		*nx, *ny, px, py, z1, z2);
@@ -147,24 +138,26 @@ float   *z1, *z2;                       /* zscale values        */
             char        header_v2[SZ_V2HDR];
             char        pixfile_v2[SZ_V2PIXFILE];
 
-            /* Read in the image header. */
-            fread (header_v2, sizeof (char), SZ_V2HDR, hdr);
+            /* Read in the image header.   */
+            fread ((char *)header_v2, sizeof (char), SZ_V2HDR, hdr);
 
-            /* Get the interesting stuff. */
-            bcopy ((char *)&header_v2[IM_V2SWAPPED], &swapped, sizeof(int));
-            if (!swapped &&  is_swapped_machine() ||
-                 swapped && !is_swapped_machine()) {
-                     bswap4 (&header_v2[IM_V2PHYSLEN], 1, &px, 1, sizeof(int));
-                     bswap4 (&header_v2[IM_V2PHYSLEN+sizeof(int)], 1, &py, 1,
-                         sizeof(int));
-                     bswap4 (&header_v2[IM_V2LEN], 1, nx, 1, sizeof(int));
-                     bswap4 (&header_v2[IM_V2LEN+sizeof(int)], 1, ny, 1,
-                         sizeof(int));
-                     bswap4 (&header_v2[IM_V2PIXTYPE], 1, &ptype, 1,
-                         sizeof(int));
-                     bswap4 (&header_v2[IM_V2PIXOFF], 1, &offset, 1,
-                         sizeof(int));
-		     swapped = 1;
+            /* Get the interesting stuff.  */
+            if (is_swapped_machine())
+                bswap4 (&header_v2[IM_V2SWAPPED], 1, &swapped, 1, sizeof(int));
+	    else
+                bcopy ((char *)&header_v2[IM_V2SWAPPED], &swapped, sizeof(int));
+
+            if (is_swapped_machine()) {
+                bswap4 (&header_v2[IM_V2PHYSLEN], 1, &px, 1, sizeof(int));
+                bswap4 (&header_v2[IM_V2PHYSLEN+sizeof(int)], 1, &py, 1,
+                    sizeof(int));
+                bswap4 (&header_v2[IM_V2LEN], 1, nx, 1, sizeof(int));
+                bswap4 (&header_v2[IM_V2LEN+sizeof(int)], 1, ny, 1,
+                    sizeof(int));
+                bswap4 (&header_v2[IM_V2PIXTYPE], 1, &ptype, 1,
+                    sizeof(int));
+                bswap4 (&header_v2[IM_V2PIXOFF], 1, &offset, 1,
+                    sizeof(int));
             } else {
                 bcopy ((char *)&header_v2[IM_V2PHYSLEN], &px, sizeof(int));
                 bcopy ((char *)&header_v2[IM_V2PHYSLEN+sizeof(int)], &py,
@@ -174,7 +167,6 @@ float   *z1, *z2;                       /* zscale values        */
                     sizeof(int));
                 bcopy ((char *)&header_v2[IM_V2PIXTYPE], &ptype, sizeof(int));
                 bcopy ((char *)&header_v2[IM_V2PIXOFF], &offset, sizeof(int));
-		swapped = 0;
             }
             offset = (offset - 1) * sizeof(short);
 
@@ -186,23 +178,19 @@ float   *z1, *z2;                       /* zscale values        */
                 return "Cannot access pixel file";
             }
 
-            /* Open the pixel file and seek to the beginning of the data. */
-            if ((pf = fopen (pixfile_v2, "r")) == NULL)
-                return "Cannot open pixel file.";
-
-	    /* Now read the data and return a pointer to the scaled pixels. */
-	    irafReadPixels (pixfile_v2, swapped, offset, ptype, image,
-		*nx, *ny, px, py, z1, z2);
+	    /* Now read the data and return a pointer to the scaled pixels.
+	     */
+	    irafReadPixels (pixfile_v2, 
+		(swapped != is_swapped_machine()), 
+		offset, ptype, image, *nx, *ny, px, py, z1, z2);
         }         
-
-	fclose (hdr); 			/* we're done with the header */
 
 	/* Set the (grayscale) colormap. */
 	for (i=0; i<256; i++)
 	    r[i] = g[i] = b[i] = i;
 	*ncolors = 256;
 
-	fclose (hdr);
+	fclose (hdr); 			/* we're done with the header */
 	return NULL;
 }
 
@@ -218,7 +206,7 @@ char	*fname;				/* input filename */
 	char magic[24];
 
         if (fp = fopen (fname, "r")) {
-            fread (magic, sizeof (char), 12, fp);
+            fread ((char *)magic, sizeof (char), 12, fp);
             fclose (fp);
 
             /* See if this is a valid OIF header file. */
@@ -322,7 +310,7 @@ float   *z1, *z2;
 	    uspix = (unsigned short *) malloc (npix * sizeof (unsigned short));
 	    usline = (unsigned short *) malloc (px * sizeof (unsigned short));
 	    for (i=0; i<ny; i++) {
-                fread (usline, sizeof (unsigned short), px, fd);
+                fread ((char *)usline, sizeof (unsigned short), px, fd);
 		for (j=0; j<nx; j++)
 		    uspix[i*nx+j] = usline[j];
 	    }
@@ -347,7 +335,7 @@ float   *z1, *z2;
 	    spix = (short *) malloc (npix * sizeof (short));
 	    sline = (short *) malloc (px * sizeof (short));
 	    for (i=0; i<ny; i++) {
-                fread (sline, sizeof (short), px, fd);
+                fread ((char *)sline, sizeof (short), px, fd);
 		for (j=0; j<nx; j++)
 		    spix[i*nx+j] = sline[j];
 	    }
@@ -373,7 +361,7 @@ float   *z1, *z2;
 	    ipix = (int *) malloc (npix * sizeof (int));
 	    iline = (int *) malloc (px * sizeof (int));
 	    for (i=0; i<ny; i++) {
-                fread (iline, sizeof (int), px, fd);
+                fread ((char *)iline, sizeof (int), px, fd);
 		for (j=0; j<nx; j++)
 		    ipix[i*nx+j] = iline[j];
 	    }
@@ -398,7 +386,7 @@ float   *z1, *z2;
 	    fpix = (float *) malloc (npix * sizeof (float));
 	    fline = (float *) malloc (px * sizeof (float));
 	    for (i=0; i<ny; i++) {
-                fread (fline, sizeof (float), px, fd);
+                fread ((char *)fline, sizeof (float), px, fd);
 		for (j=0; j<nx; j++)
 		    fpix[i*nx+j] = fline[j];
 	    }
@@ -424,7 +412,7 @@ float   *z1, *z2;
 	    dpix = (double *) malloc (npix * sizeof (double));
 	    dline = (double *) malloc (px * sizeof (double));
 	    for (i=0; i<ny; i++) {
-                fread (dline, sizeof (double), px, fd);
+                fread ((char *)dline, sizeof (double), px, fd);
 		for (j=0; j<nx; j++)
 		    dpix[i*nx+j] = dline[j];
 	    }

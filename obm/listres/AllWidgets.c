@@ -12,7 +12,6 @@ extern WidgetClass asciiSinkObjectClass;
 extern WidgetClass asciiSrcObjectClass;
 extern WidgetClass asciiTextWidgetClass;
 extern WidgetClass boxWidgetClass;
-extern WidgetClass clockWidgetClass;
 extern WidgetClass commandWidgetClass;
 extern WidgetClass compositeWidgetClass;
 extern WidgetClass constraintWidgetClass;
@@ -24,8 +23,6 @@ extern WidgetClass htmlWidgetClass;
 extern WidgetClass labelWidgetClass;
 extern WidgetClass layoutWidgetClass;
 extern WidgetClass listWidgetClass;
-extern WidgetClass logoWidgetClass;
-extern WidgetClass mailboxWidgetClass;
 extern WidgetClass menuButtonWidgetClass;
 extern WidgetClass objectClass;
 extern WidgetClass overrideShellWidgetClass;
@@ -71,6 +68,7 @@ extern WidgetClass xfwfRowColWidgetClass;
 extern WidgetClass xfwfScrollbarWidgetClass;
 extern WidgetClass xfwfSlider2WidgetClass;
 extern WidgetClass xfwfToggleWidgetClass;
+extern WidgetClass tabsWidgetClass;
 
 XmuWidgetNode XawWidgetArray[] = {
 { "applicationShell", &applicationShellWidgetClass },
@@ -79,7 +77,6 @@ XmuWidgetNode XawWidgetArray[] = {
 { "asciiSrc", &asciiSrcObjectClass },
 { "asciiText", &asciiTextWidgetClass },
 { "box", &boxWidgetClass },
-{ "clock", &clockWidgetClass },
 { "command", &commandWidgetClass },
 { "composite", &compositeWidgetClass },
 { "constraint", &constraintWidgetClass },
@@ -89,8 +86,6 @@ XmuWidgetNode XawWidgetArray[] = {
 { "grip", &gripWidgetClass },
 { "label", &labelWidgetClass },
 { "list", &listWidgetClass },
-{ "logo", &logoWidgetClass },
-{ "mailbox", &mailboxWidgetClass },
 { "menuButton", &menuButtonWidgetClass },
 { "object", &objectClass },
 { "overrideShell", &overrideShellWidgetClass },
@@ -136,6 +131,7 @@ XmuWidgetNode XawWidgetArray[] = {
 { "textToggle", &xfwfToggleWidgetClass },
 { "scrollbar2", &xfwfScrollbarWidgetClass },
 { "slider2d", &xfwfSlider2WidgetClass },
+{ "tabs", &tabsWidgetClass },
 };
 
 int XawWidgetCount = XtNumber(XawWidgetArray);

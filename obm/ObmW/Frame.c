@@ -327,7 +327,9 @@ WidgetClass class;
 }
 /*ARGSUSED*/static void realize(self,mask,attributes)Widget self;XtValueMask * mask;XSetWindowAttributes * attributes;
 {
+#ifdef USE_CWCURSOR
     *mask |= CWCursor;
+#endif
     attributes->cursor = ((XfwfFrameWidget)self)->xfwfFrame.cursor;
     xfwfCommonClassRec.core_class.realize(self, mask, attributes);
 

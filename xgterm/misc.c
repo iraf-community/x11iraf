@@ -64,50 +64,50 @@ extern XtAppContext app_con;
 
 xevents()
 {
-	XEvent event;
-	XtInputMask input_mask;
-	register TScreen *screen = &term->screen;
+        XEvent event;
+        XtInputMask input_mask;
+        register TScreen *screen = &term->screen;
 
-	if(screen->scroll_amt)
-		FlushScroll(screen);
-	/*
-	 * process timeouts, relying on the fact that XtAppProcessEvent
-	 * will process the timeout and return without blockng on the 
-	 * XEvent queue.  Other sources i.e. the pty are handled elsewhere 
-	 * with select().
-	 */
-	while ((input_mask = XtAppPending(app_con)) & XtIMTimer)
-		XtAppProcessEvent(app_con, XtIMTimer);
-	/*
-	 * If there's no XEvents, don't wait around...
-	 */
-	if ((input_mask & XtIMXEvent) != XtIMXEvent)
-		return;
-	do {
-		if (waitingForTrackInfo)
-			return;
-		XtAppNextEvent (app_con, &event);
-		/*
-		 * Hack to get around problems with the toolkit throwing away
-		 * eventing during the exclusive grab of the menu popup.  By
-		 * looking at the event ourselves we make sure that we can
-		 * do the right thing.
-		 */
-		if (event.type == EnterNotify &&
-		    (event.xcrossing.window == XtWindow(XtParent(term))))
-		  DoSpecialEnterNotify (&event.xcrossing);
-		else if (event.type == LeaveNotify &&
-		    (event.xcrossing.window == XtWindow(XtParent(term))))
-		  DoSpecialLeaveNotify (&event.xcrossing);
+        if(screen->scroll_amt)
+                FlushScroll(screen);
+        /*
+         * process timeouts, relying on the fact that XtAppProcessEvent
+         * will process the timeout and return without blockng on the
+         * XEvent queue.  Other sources i.e. the pty are handled elsewhere
+         * with select().
+         */
+        while ((input_mask = XtAppPending(app_con)) & XtIMTimer)
+                XtAppProcessEvent(app_con, XtIMTimer);
+        /*
+         * If there's no XEvents, don't wait around...
+         */
+        if ((input_mask & XtIMXEvent) != XtIMXEvent)
+                return;
+        do {
+                if (waitingForTrackInfo)
+                        return;
+                XtAppNextEvent (app_con, &event);
+                /*
+                 * Hack to get around problems with the toolkit throwing away
+                * eventing during the exclusive grab of the menu popup.  By
+                 * looking at the event ourselves we make sure that we can
+                 * do the right thing.
+                 */
+                if (event.type == EnterNotify &&
+                    (event.xcrossing.window == XtWindow(XtParent(term))))
+                  DoSpecialEnterNotify (&event.xcrossing);
+                else if (event.type == LeaveNotify &&
+                    (event.xcrossing.window == XtWindow(XtParent(term))))
+                  DoSpecialLeaveNotify (&event.xcrossing);
 
-		if (!event.xany.send_event ||
-		    screen->allowSendEvents ||
-		    ((event.xany.type != KeyPress) &&
-		     (event.xany.type != KeyRelease) &&
-		     (event.xany.type != ButtonPress) &&
-		     (event.xany.type != ButtonRelease)))
-		    XtDispatchEvent(&event);
-	} while ((input_mask = XtAppPending(app_con)) & XtIMXEvent);
+                if (!event.xany.send_event ||
+                    screen->allowSendEvents ||
+                    ((event.xany.type != KeyPress) &&
+                     (event.xany.type != KeyRelease) &&
+                     (event.xany.type != ButtonPress) &&
+                     (event.xany.type != ButtonRelease)))
+                    XtDispatchEvent(&event);
+        } while ((input_mask = XtAppPending(app_con)) & XtIMXEvent);
 }
 
 
@@ -214,8 +214,8 @@ caddr_t eventdata;
     /* This code is necessary as xevent does not see all events anymore. */
     XEvent *ev = (XEvent *) event;
     if (ev->type == EnterNotify &&
-	    (ev->xcrossing.window == XtWindow(XtParent(term))))
-	DoSpecialEnterNotify (&ev->xcrossing);
+            (ev->xcrossing.window == XtWindow(XtParent(term))))
+        DoSpecialEnterNotify (&ev->xcrossing);
 }
 
 
@@ -243,8 +243,8 @@ caddr_t eventdata;
     /* This code is necessary as xevent does not see all events anymore. */
     XEvent *ev = (XEvent *) event;
     if (ev->type == LeaveNotify &&
-	    (ev->xcrossing.window == XtWindow(XtParent(term))))
-	DoSpecialLeaveNotify (&ev->xcrossing);
+            (ev->xcrossing.window == XtWindow(XtParent(term))))
+        DoSpecialLeaveNotify (&ev->xcrossing);
 }
 
 
@@ -279,6 +279,10 @@ selectwindow(screen, flag)
 register TScreen *screen;
 register int flag;
 {
+#ifdef I18N
+        if (screen->xic)
+            XSetICFocus(screen->xic);
+#endif
 	if(screen->cursor_state &&
 	   (screen->cursor_col != screen->cur_col ||
 	    screen->cursor_row != screen->cur_row))
@@ -295,6 +299,10 @@ register int flag;
 {
 	if (screen->always_highlight) return;
 
+#ifdef I18N
+        if (screen->xic)
+            XUnsetICFocus(screen->xic);
+#endif
 	screen->select &= ~flag;
 	if(screen->cursor_state &&
 	   (screen->cursor_col != screen->cur_col ||
@@ -675,6 +683,16 @@ int (*func)();
 	 case 2:	/* new title only */
 		Changetitle(buf);
 		break;
+        case 10:       case 11:        case 12:
+        case 13:       case 14:        case 15:
+        case 16:
+               {
+                   extern Boolean ChangeColorsRequest();
+                   if (term->misc.dynamicColors)
+                       ChangeColorsRequest(term,mode-10,buf);
+               }
+               break;
+
 
 #ifdef ALLOWLOGGING
 	 case 46:	/* new log file */
@@ -730,6 +748,187 @@ register char *name;
     ChangeGroup( XtNtitle, (XtArgVal)name );
 }
 
+/***====================================================================***/
+
+ScrnColors      *pOldColors= NULL;
+
+Boolean
+GetOldColors(pTerm)
+XgtermWidget     pTerm;
+{
+int     i;
+    if (pOldColors==NULL) {
+        pOldColors=     (ScrnColors *)XtMalloc(sizeof(ScrnColors));
+        if (pOldColors==NULL) {
+            fprintf(stderr,"allocation failure in GetOldColors\n");
+            return(FALSE);
+        }
+        pOldColors->which=      0;
+        for (i=0;i<NCOLORS;i++) {
+            pOldColors->colors[i]=      0;
+            pOldColors->names[i]=       NULL;
+        }
+        GetColors(pTerm,pOldColors);
+    }
+    return(TRUE);
+}
+
+Boolean
+UpdateOldColors(pTerm,pNew)
+XgtermWidget     pTerm;
+ScrnColors      *pNew;
+{
+int     i;
+
+    /* if we were going to free old colors, this would be the place to
+     * do it.   I've decided not to (for now), because it seems likely
+     * that we'd have a small set of colors we use over and over, and that
+     * we could save some overhead this way.   The only case in which this
+     * (clearly) fails is if someone is trying a boatload of colors, in
+     * which case they can restart xterm
+     */
+    for (i=0;i<NCOLORS;i++) {
+        if (COLOR_DEFINED(pNew,i)) {
+            if (pOldColors->names[i]!=NULL) {
+                XtFree(pOldColors->names[i]);
+                pOldColors->names[i]= NULL;
+            }
+            if (pNew->names[i]) {
+                pOldColors->names[i]= pNew->names[i];
+            }
+            pOldColors->colors[i]=      pNew->colors[i];
+        }
+    }
+    return(TRUE);
+}
+
+void
+ReverseOldColors()
+{
+register ScrnColors     *pOld= pOldColors;
+Pixel    tmpPix;
+char    *tmpName;
+
+    if (pOld) {
+        /* change text cursor, if necesary */
+        if (pOld->colors[TEXT_CURSOR]==pOld->colors[TEXT_FG]) {
+            pOld->colors[TEXT_CURSOR]=  pOld->colors[TEXT_BG];
+            if (pOld->names[TEXT_CURSOR]) {
+                XtFree(pOldColors->names[TEXT_CURSOR]);
+                pOld->names[TEXT_CURSOR]= NULL;
+            }
+            if (pOld->names[TEXT_BG]) {
+                tmpName= XtMalloc(strlen(pOld->names[TEXT_BG])+1);
+                if (tmpName) {
+                    strcpy(tmpName,pOld->names[TEXT_BG]);
+                    pOld->names[TEXT_CURSOR]= tmpName;
+                }
+            }
+        }
+
+        /* swap text FG and BG */
+        tmpPix=         pOld->colors[TEXT_FG];
+        tmpName=        pOld->names[TEXT_FG];
+        pOld->colors[TEXT_FG]=  pOld->colors[TEXT_BG];
+        pOld->names[TEXT_FG]=   pOld->names[TEXT_BG];
+        pOld->colors[TEXT_BG]=  tmpPix;
+        pOld->names[TEXT_BG]=   tmpName;
+
+        /* swap mouse FG and BG */
+        tmpPix=         pOld->colors[MOUSE_FG];
+        tmpName=        pOld->names[MOUSE_FG];
+        pOld->colors[MOUSE_FG]= pOld->colors[MOUSE_BG];
+        pOld->names[MOUSE_FG]=  pOld->names[MOUSE_BG];
+        pOld->colors[MOUSE_BG]= tmpPix;
+        pOld->names[MOUSE_BG]=  tmpName;
+
+        /* swap Tek FG and BG */
+        tmpPix=         pOld->colors[TEK_FG];
+        tmpName=        pOld->names[TEK_FG];
+        pOld->colors[TEK_FG]=   pOld->colors[TEK_BG];
+        pOld->names[TEK_FG]=    pOld->names[TEK_BG];
+        pOld->colors[TEK_BG]=   tmpPix;
+        pOld->names[TEK_BG]=    tmpName;
+    }
+    return;
+}
+
+Boolean
+AllocateColor(pTerm,pNew,ndx,name)
+XgtermWidget     pTerm;
+ScrnColors      *pNew;
+int              ndx;
+char            *name;
+{
+XColor                   def;
+register TScreen        *screen=        &pTerm->screen;
+Colormap                 cmap=          pTerm->core.colormap;
+char                    *newName;
+
+    if ((XParseColor(screen->display,cmap,name,&def))&&
+        (XAllocColor(screen->display,cmap,&def))) {
+        SET_COLOR_VALUE(pNew,ndx,def.pixel);
+        newName= XtMalloc(strlen(name)+1);
+        if (newName) {
+            strcpy(newName,name);
+            SET_COLOR_NAME(pNew,ndx,newName);
+        }
+        return(TRUE);
+    }
+    return(FALSE);
+}
+
+Boolean
+ChangeColorsRequest(pTerm,start,names)
+XgtermWidget     pTerm;
+int              start;
+register char   *names;
+{
+char            *thisName;
+ScrnColors      newColors;
+int             i,ndx;
+
+    if ((pOldColors==NULL)&&(!GetOldColors(pTerm))) {
+        return(FALSE);
+    }
+    newColors.which=    0;
+    for (i=0;i<NCOLORS;i++) {
+        newColors.names[i]=     NULL;
+    }
+    for (i=start;i<NCOLORS;i++) {
+        if (term->misc.re_verse)        ndx=    OPPOSITE_COLOR(i);
+        else                            ndx=    i;
+        if ((names==NULL)||(names[0]=='\0')) {
+            newColors.names[ndx]=       NULL;
+        }
+        else {
+            if (names[0]==';')
+                 thisName=      NULL;
+            else thisName=      names;
+            names=      index(names,';');
+            if (names!=NULL) {
+                *names= '\0';
+                names++;
+            }
+            if ((!pOldColors->names[ndx])||
+                (thisName&&(strcmp(thisName,pOldColors->names[ndx])))) {
+                AllocateColor(pTerm,&newColors,ndx,thisName);
+            }
+        }
+    }
+
+    if (newColors.which==0)
+        return(TRUE);
+
+    ChangeColors(pTerm,&newColors);
+    UpdateOldColors(pTerm,&newColors);
+    return(TRUE);
+}
+
+/***====================================================================***/
+
+
+
 #ifndef DEBUG
 /* ARGSUSED */
 #endif
@@ -750,12 +949,19 @@ int a;
 char *SysErrorMsg (n)
     int n;
 {
+#if __STDC__
+    return strerror(n);
+#else
+
 #ifndef __FreeBSD__
+#ifndef _BSD_SOURCE
     extern char *sys_errlist[];
+#endif
 #endif
     extern int sys_nerr;
 
-    return ((n >= 0 && n < sys_nerr) ? sys_errlist[n] : "unknown error");
+    return((n >= 0 && n < sys_nerr) ? (char *)sys_errlist[n] : "unknown error");
+#endif /* __STDC__ */
 }
 
 
@@ -859,18 +1065,47 @@ Display *display;
 register XErrorEvent *event;
 {
 	static char *envvar = "XGXERROR";
-	static int nerrs = 0;
+	static char *env_maxerrs = "XGMAXERROR";
+	static int nerrs = 0, maxerrs = -1;
 	extern char *getenv();
 	char fname[128];
-	char *action;
+	char *action = NULL, *err = NULL;
 	int pid;
 
-	fprintf (stderr, "%s: warning, error event received:\n", xgterm_name);
-	(void) XmuPrintDefaultErrorMessage (display, event, stderr);
-	if (nerrs++ > 50)
-	    Exit (ERROR_XERROR);
+	/* Get the max number of allowable errors before we exit, defaults
+	 * to 50.  This is handy either for debugging to trap errors right
+  	 * away, or to increase the max value to run longer.
+	 */
+	if (maxerrs < 0) 
+	    maxerrs = ((err = getenv (env_maxerrs)) ? atoi(err) : 50);
 
-	if (action = getenv (envvar)) {
+	/* If we define XGXERROR to be 'ignore' don't print out the standard
+	 * error message, and don't count it.
+	 */
+	     
+	action = getenv (envvar);
+	if (!action || (action && strcmp (action, "ignore") != 0)) {
+
+	    /* The default action is to ignore BadCursor messages but we
+	     * define a 'catchall' action to let us bypass this.  Otherwise,
+	     * print the standard X error message and count it towards the
+	     * final shutdown.
+	     */
+
+            if (event->error_code == BadCursor ||
+		(action && strcmp (action, "catchall") != 0)) {
+                    return (0);
+	    } else {
+	        fprintf (stderr, 
+	            "%s: warning, error event received:\n", xgterm_name);
+	        (void) XmuPrintDefaultErrorMessage (display, event, stderr);
+
+	        if (nerrs++ > maxerrs)
+	            Exit (ERROR_XERROR);
+	    }
+	}
+
+	if (action) {
 	    if (strcmp (action, "dumpcore") == 0) {
 		if ((pid = fork()) >= 0) {
 		    if (pid) {
@@ -887,7 +1122,7 @@ register XErrorEvent *event;
 	    } else if (strcmp (action, "exit") == 0) {
 		fprintf (stderr, "program terminated\n");
 		Exit (ERROR_XERROR);
-	    } else
+	    } else if (strcmp (action, "ignore") != 0)
 		fprintf (stderr, "%s: unknown action %s\n", envvar, action);
 	}
 

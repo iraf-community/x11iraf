@@ -24,6 +24,7 @@
 
 #define NCARDS 		36
 #define BLOCKSIZE 	2880
+#define EPSILON 	1.192e-7
 
 /* MONO returns total intensity of r,g,b components */
 #define MONO(rd,gn,bl) (((rd)*11 + (gn)*16 + (bl)*5) >> 5)  /*.33R+ .5G+ .17B*/
@@ -681,8 +682,9 @@ float 	*z1, *z2;
 	}
 
 	/* allocate a buffer to store the image */
-	if (fs->bscale != 1.0 && fs->bzero != 0.0)
-	    voidbuff = (char * )malloc(nelem * f_max(fs->size,4));
+	if (fabs((double)fs->bscale-1.0) > EPSILON || 
+	    fabs((double)fs->bzero) > EPSILON)
+	        voidbuff = (char * )malloc(nelem * f_max(fs->size,4));
 	else
 	    voidbuff = (char * )malloc(nelem * fs->size);
 	if (voidbuff == NULL) 
@@ -743,7 +745,9 @@ float 	*z1, *z2;
 
 	/* compute the optimal zscale values */
 	zscale (voidbuff, fs->axes[0], fs->axes[1], fs->bitpix,
-	    z1, z2, 0.25, 600, 120);
+	    z1, z2, 0.25, 1000, 
+	    (int)((float)fs->axes[1] / 
+		sqrt((float)(fs->axes[0] * fs->axes[1]) / 1000.0)));
 
 	/* convert short int to uchar */
 	if (fs->bitpix == 16) {

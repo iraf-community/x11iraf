@@ -59,7 +59,7 @@ float	contrast;		/* adj. to slope of transfer function	*/
 int	opt_size;		/* desired number of pixels in sample	*/
 int	len_stdline;		/* optimal number of pixels per line	*/
 {
-	register int i, npix, minpix, ngoodpix, center_pixel, ngrow;
+	register int npix, minpix, ngoodpix, center_pixel, ngrow;
 	float	zmin, zmax, median;
 	float	zstart, zslope;
 	float 	*sample, *left;
@@ -502,6 +502,6 @@ int	ngrow;			/* number of pixels of growing		*/
 int floatCompare (i,j)
 float 	*i, *j;
 {
-	return ((int) (*i - *j + 0.5));
+	/* return ((int) (*i - *j + 0.5)); */
+        return ((*i <= *j) ? -1 : 1);
 }
- 

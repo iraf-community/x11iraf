@@ -130,6 +130,43 @@ struct callbackType callbackTypes[] = {
     {	CtstopCallback,		"stop" },
 };
 
+
+
+enum scaleType {						/* MF016 */
+    atom, pixel_size, point_size,				/*  /|\  */
+    resolution, resolution_x, resolution_y, average_width,	/* / | \ */
+    scaledX, scaledY, unscaled, scaledXoverY, uncomputed,	/*   |   */
+};								/*   |   */
+								/*   |   */
+typedef struct _fontProp {					/*   |   */
+    char       *name;						/*   |   */
+    Atom        atom;						/*   |   */
+    enum scaleType type;					/*   |   */
+    char found;							/*   |   */
+} fontProp;							/*   |   */
+								/*   |   */
+static fontProp fontNamePropTable[] = {				/*   |   */
+        { "FOUNDRY", 0, atom, 0},				/*   |   */
+        { "FAMILY_NAME", 0, atom, 0},				/*   |   */
+        { "WEIGHT_NAME", 0, atom, 0},				/*   |   */
+        { "SLANT", 0, atom, 0},					/*   |   */
+        { "SETWIDTH_NAME", 0, atom, 0},				/*   |   */
+        { "ADD_STYLE_NAME", 0, atom, 0},			/*   |   */
+        { "PIXEL_SIZE", 0, pixel_size, 0},			/*   |   */
+        { "POINT_SIZE", 0, point_size, 0},			/*   |   */
+        { "RESOLUTION_X", 0, resolution_x, 0},			/*   |   */
+        { "RESOLUTION_Y", 0, resolution_y, 0},			/*   |   */
+        { "SPACING", 0, atom, 0},				/*   |   */
+        { "AVERAGE_WIDTH", 0, average_width, 0},		/*   |   */
+        { "CHARSET_REGISTRY", 0, atom, 0},			/*   |   */
+        { "CHARSET_ENCODING", 0, atom, 0},			/*   |   */
+};								/*   |   */
+								/*   |   */
+#define NUMITEMS(arr) ((int) (sizeof(arr) / sizeof(arr[0])))	/* \ | / */
+								/*  \|/  */
+static char *widgetGetFontName(); 				/* MF016 */
+
+
 static	void do_text();
 static	void do_userproc();
 static	void do_popup();
@@ -379,6 +416,7 @@ int nargs;
 	    obmClass (classrec, WtSmeBSB) ||
 	    obmClass (classrec, WtCommand) ||
 	    obmClass (classrec, WtMenuButton) ||
+	    obmClass (classrec, WtTabs) ||
 	    obmClass (classrec, WtToggle) ||
 	    obmClass (classrec, WtArrow)) {
 
@@ -1920,6 +1958,24 @@ char **argv;
 	    XtSetArg (args[0], rp->name, &value);
 	    XtGetValues (wp->w, args, 1);
 	    result = XtName (value);
+
+	} else if (strcmp (rp->type, XtRFontStruct) == 0) {	/* MF016 */
+	    caddr_t value;  Arg args[1];
+  	    XFontStruct *font_struct;
+  	    ObmContext obm = wp->obm;
+  	    char *name = NULL;
+
+	    XtSetArg (args[0], rp->name, &value);
+	    XtGetValues (wp->w, args, 1);
+	    sprintf (result, "0x%x", value);
+
+  	    font_struct = (XFontStruct *) value;
+  	    name = widgetGetFontName (obm->display, font_struct);
+
+  	    if (font_struct == NULL || name == NULL)
+	        name = XtNewString("-*-*-*-R-*-*-*-120-*-*-*-*-ISO8859-1");
+	    strcpy (result, name);
+	    free ((char *)name);
 
 	} else {
 	    caddr_t value;  Arg args[1];
@@ -3503,4 +3559,61 @@ unsigned int state;
 
 	*op = '\0';
 	return (op);
+}
+
+
+
+/* widgetGetFontName -- Encode the font name in a string in XLFD format.
+ */
+
+#define	SZ_FONT_NAME		128
+
+static char *
+widgetGetFontName (display, fs)					/* MF016 */
+Display *display;
+XFontStruct *fs;
+{
+        register int i;
+        unsigned long val;
+	char *name = (char *) malloc (SZ_FONT_NAME), *str, *lp;
+
+	name[0] = '\0';
+        if (fs) {
+            for (i=0; i < NUMITEMS(fontNamePropTable); i++) {
+                fontNamePropTable[i].atom = 
+                    XInternAtom(display, fontNamePropTable[i].name, 0);
+                if (XGetFontProperty (fs, fontNamePropTable[i].atom, &val)) {
+                    switch (fontNamePropTable[i].type) {
+                    case atom:
+                        str = XGetAtomName (display, (Atom)val);
+			for (lp=str; *lp; lp++)
+			    if (isupper(*lp))
+				*lp = tolower(*lp);
+                        strcat (name, str);
+			XFree (str);
+                        break;
+
+                    case pixel_size:
+                    case point_size:
+                    case resolution:
+                    case resolution_x:
+                    case resolution_y:
+                    case average_width:
+                    case scaledX:
+                    case scaledY:
+                    case unscaled:
+                    case scaledXoverY:
+                    case uncomputed:
+                        sprintf(name, "%s%d", name, val);
+                        break;
+                    }
+                } else
+                    strcat(name, "*");
+
+                if (i != (NUMITEMS(fontNamePropTable)-1))
+                    strcat(name, "-");
+            }
+	}
+
+	return (name);
 }

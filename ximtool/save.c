@@ -79,7 +79,7 @@ int x0, y0, nx, ny;		/* region of display to be saved */
 {
 	register int i, j;
 	register fileSavePtr fsp = xim->fsp;
-        int pixtype, w, h, ncols, colortype;
+        int w, h, ncols;
         char text[SZ_LINE], fname[SZ_FNAME];
         unsigned char r[256], g[256], b[256];
         unsigned char *pixels = NULL;
@@ -87,6 +87,7 @@ int x0, y0, nx, ny;		/* region of display to be saved */
 	static int debug=0;
 	extern int errno;
 	FILE *fp;
+	char *mktemp();
 
 	/* Generate output file name. */
         sprintf (fname, template, fsp->seqno++);
@@ -153,7 +154,7 @@ int x0, y0, nx, ny;		/* region of display to be saved */
 		    last = op + 1;
 	    *last = '\0';
 	    strcat (tmpfile, "ximsXXXXXX");
-	    if (mktemp(tmpfile) == NULL)
+	    if (mktemp(tmpfile) == (char *)NULL)
 		goto done;
 
 	    if (!(fp = fopen (tmpfile, "w"))) {
@@ -207,7 +208,6 @@ int ncolors;
 	    else
 	        status = writeSunRas (fp, pixels, 8, w,h, r,g,b, ncolors, 2);
 
-	    fclose (fp);
 	    break;
 
         case XIM_FITS:
@@ -215,7 +215,6 @@ int ncolors;
 	     */
 	    savestat (xim, "Generating FITS file...");
 	    status = writeFITS (fp, pixels, w, h, r, g, b, ncolors);
-	    fclose (fp);
 	    break;
 
         case XIM_GIF:
@@ -224,10 +223,16 @@ int ncolors;
 	    savestat (xim, "Generating GIF file...");
 	    gray = (xim->fsp->colorType == XIM_GRAYSCALE);
 	    status = writeGIF (fp, pixels, w, h, r, g, b, ncolors, gray);
-	    fclose (fp);
 	    break;
 
         case XIM_TIFF:
+	    /* Write a TIFF file.
+	     */
+            savestat (xim, "Generating TIFF file...");
+            gray = (xim->fsp->colorType == XIM_GRAYSCALE);
+            status = writeTIFF (fp, pixels, w, h, ncolors, gray, r, g, b);
+	    break;
+
         case XIM_JPEG:
         case XIM_PNM:
         case XIM_X11:
@@ -301,7 +306,7 @@ int fileformat;
 int filesize;
 int w, h, d;
 {
-	register char *ip, *op;
+	register char *ip;
 	char *fmt, *fname, text[SZ_LINE];
 
 	for (ip=fname=fullname;  *ip;  ip++)

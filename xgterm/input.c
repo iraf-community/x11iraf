@@ -89,18 +89,34 @@ Input (keyboard, screen, event, eightbit)
     Bool eightbit;
 {
 
+#ifdef I18N
+#define STRBUFSIZE 500
+#else
 #define STRBUFSIZE 100
+#endif
 
 	char strbuf[STRBUFSIZE];
 	register char *string;
 	register int key = FALSE;
 	int	pty	= screen->respond;
 	int	nbytes;
-	KeySym  keysym;
+	KeySym  keysym = 0;
 	ANSI	reply;
+#ifdef I18N
+        Status  status_return;
+#endif
 
+#ifdef I18N
+        if (screen->xic)
+            nbytes = XmbLookupString (screen->xic, event, strbuf, STRBUFSIZE,
+                                      &keysym, &status_return);
+        else
+            nbytes = XLookupString (event, strbuf, STRBUFSIZE,
+                                    &keysym, &compose_status);
+#else
 	nbytes = XLookupString (event, strbuf, STRBUFSIZE,
 				&keysym, &compose_status);
+#endif
 
 	string = &strbuf[0];
 	reply.a_pintro = 0;

@@ -57,7 +57,7 @@ static void do_securekbd(), do_allowsends(), do_visualbell(),
     do_softreset(), do_hardreset(), do_clearsavedlines(),
     do_vthide(), do_vtshow(), do_vtmode(), do_vtfont(),
     do_gioenable(), do_tekshow(), do_tekmode(), do_tekpage(),
-    do_tekreset(), do_tekcopy(), do_tekhide();
+    do_tekreset(), do_tekcopy(), do_tekhide(), do_colortext();
 
 
 /*
@@ -84,29 +84,30 @@ MenuEntry vtMenuEntries[] = {
     { "scrollbar",	do_scrollbar, NULL },		/*  0 */
     { "jumpscroll",	do_jumpscroll, NULL },		/*  1 */
     { "reversevideo",	do_reversevideo, NULL },	/*  2 */
-    { "line1",		NULL, NULL },			/*  3 */
-    { "gioenable",	do_gioenable, NULL },		/*  4 */
-    { "tekshow",	do_tekshow, NULL },		/*  5 */
-    { "tekmode",	do_tekmode, NULL },		/*  6 */
-    { "tekreset",       do_tekreset, NULL },            /*  7 */
-    { "vthide",		do_vthide, NULL },		/*  8 */
-    { "line2",		NULL, NULL },			/*  9 */
-    { "autowrap",	do_autowrap, NULL },		/* 10 */
-    { "reversewrap",	do_reversewrap, NULL },		/* 11 */
-    { "autolinefeed",	do_autolinefeed, NULL },	/* 12 */
-    { "appcursor",	do_appcursor, NULL },		/* 13 */
-    { "appkeypad",	do_appkeypad, NULL },		/* 14 */
-    { "scrollkey",	do_scrollkey, NULL },		/* 15 */
-    { "scrollttyoutput",do_scrollttyoutput, NULL },	/* 16 */
-    { "allow132",	do_allow132, NULL },		/* 17 */
-    { "cursesemul",	do_cursesemul, NULL },		/* 18 */
-    { "visualbell",	do_visualbell, NULL },		/* 29 */
-    { "marginbell",	do_marginbell, NULL },		/* 20 */
-    { "altscreen",	do_altscreen, NULL },		/* 21 */
-    { "line3",		NULL, NULL },			/* 22 */
-    { "softreset",	do_softreset, NULL },		/* 23 */
-    { "hardreset",	do_hardreset, NULL },		/* 24 */
-    { "clearsavedlines",do_clearsavedlines, NULL }};	/* 25 */
+    { "colortext",	do_colortext, NULL },		/*  3 */
+    { "line1",		NULL, NULL },			/*  4 */
+    { "gioenable",	do_gioenable, NULL },		/*  5 */
+    { "tekshow",	do_tekshow, NULL },		/*  6 */
+    { "tekmode",	do_tekmode, NULL },		/*  7 */
+    { "tekreset",       do_tekreset, NULL },            /*  8 */
+    { "vthide",		do_vthide, NULL },		/*  9 */
+    { "line2",		NULL, NULL },			/* 10 */
+    { "autowrap",	do_autowrap, NULL },		/* 11 */
+    { "reversewrap",	do_reversewrap, NULL },		/* 12 */
+    { "autolinefeed",	do_autolinefeed, NULL },	/* 13 */
+    { "appcursor",	do_appcursor, NULL },		/* 14 */
+    { "appkeypad",	do_appkeypad, NULL },		/* 15 */
+    { "scrollkey",	do_scrollkey, NULL },		/* 16 */
+    { "scrollttyoutput",do_scrollttyoutput, NULL },	/* 17 */
+    { "allow132",	do_allow132, NULL },		/* 18 */
+    { "cursesemul",	do_cursesemul, NULL },		/* 19 */
+    { "visualbell",	do_visualbell, NULL },		/* 20 */
+    { "marginbell",	do_marginbell, NULL },		/* 21 */
+    { "altscreen",	do_altscreen, NULL },		/* 22 */
+    { "line3",		NULL, NULL },			/* 23 */
+    { "softreset",	do_softreset, NULL },		/* 24 */
+    { "hardreset",	do_hardreset, NULL },		/* 25 */
+    { "clearsavedlines",do_clearsavedlines, NULL }};	/* 26 */
 
 MenuEntry fontMenuEntries[] = {
     { "fontdefault",	do_vtfont, NULL },		/*  0 */
@@ -191,6 +192,7 @@ static Bool domenu (w, event, params, param_count)
 	    update_scrollbar();
 	    update_jumpscroll();
 	    update_reversevideo();
+	    update_colortext();
 	    update_autowrap();
 	    update_reversewrap();
 	    update_autolinefeed();
@@ -341,6 +343,10 @@ static Widget create_menu (w, toplevelw, name, entries, nentries)
 
     m = XtCreatePopupShell (name, simpleMenuWidgetClass, toplevelw, NULL, 0);
 
+    /* The following produces a double line to separate the menu title from
+     * it's items.  It's not in the R6 xterm code but I left it here because
+     * it's a nice effect.
+     */
     nargs = 0;
     XtSetArg (args[nargs], XtNheight, 2);
 	nargs++;
@@ -594,6 +600,16 @@ static void do_reversevideo (gw, closure, data)
     term->flags ^= REVERSE_VIDEO;
     ReverseVideo (term);
     /* update_reversevideo done in ReverseVideo */
+}
+
+
+static void do_colortext (gw, closure, data)
+    Widget gw;
+    caddr_t closure, data;
+{
+    term->misc.dynamicColors = !term->misc.dynamicColors;
+    update_colortext ();
+    Redraw ();
 }
 
 
@@ -855,7 +871,7 @@ static void handle_vtshow (gw, allowswitch)
 
     if (!screen->Vshow) {		/* not showing, turn on */
 	set_vt_visibility (TRUE);
-    } else if (gt_activated() || allowswitch) {
+    } else if (gt_activated() || allowswitch) {  /* is showing, turn off */
 	set_vt_visibility (FALSE);
 	end_vt_mode ();
     } else 

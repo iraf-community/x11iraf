@@ -351,7 +351,9 @@ XSetWindowAttributes * attrs;
     SimpleMenuWidget smw = (SimpleMenuWidget) w;
 
     attrs->cursor = smw->simple_menu.cursor;
+#ifdef USE_CWCURSOR
     *mask |= CWCursor;
+#endif
     if ((smw->simple_menu.backing_store == Always) ||
 	(smw->simple_menu.backing_store == NotUseful) ||
 	(smw->simple_menu.backing_store == WhenMapped) ) {

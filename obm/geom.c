@@ -47,7 +47,9 @@ get_geometry (display, screen, window, origin)
     if (!XGetWindowAttributes (dpy = display, window, &win_attributes))
 	return (NULL);
     vistemplate.visualid = XVisualIDFromVisual(win_attributes.visual);
+    /*								 	MF036
     vinfo = XGetVisualInfo (dpy, VisualIDMask, &vistemplate, &junk);
+    */
 
     (void) XTranslateCoordinates (dpy, window, win_attributes.root, 
 	-win_attributes.border_width,

@@ -1,19 +1,21 @@
 /* Copyright(c) 1986 Association of Universities for Research in Astronomy Inc.
  */
  
-#ifdef AIXV3
-#include <sys/select.h>
-#endif
-#include <sys/time.h>
+#include <sys/times.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <sys/un.h> 
-#include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+
+#ifdef	HAVE_CDL 	/* If we have the CDL we can build a proxy server. */
+#include "cdl.h"
+#endif
+
 
 /*
  *  VXIMTOOL.C -- Virtual image display server.  This is a server process much
@@ -23,7 +25,6 @@
  *  supported.   A log is kept to the stderr of all datastream requests.  The
  *  process is terminated with an EOF on the stdin.
  *
- *  Used to debug server i/o - NOT USED IN THE ONLINE PROGRAMS.
  *
  *  To build:  cc vximtool.c -o vximtool
  *             cc vximtool.c -o vximtool -lsocket # For Solaris systems
@@ -36,9 +37,11 @@
  *
  *  Options     
  * 
- *   vximtool [-background] [-config <num>] [-fifo <pipe>] [-fifo_only] [-help]
- *       [-i] [-imtoolrc <file>] [-inet_only | -port_only] [-noraster]
- *       [-nframes <num>] [-port <num>] [-verbose] [-unix <name>] [-unix_only]
+ *    vximtool [-background] [-config <num>] [-fifo <pipe>] [-fifo_only] [-help]
+ *        [-i] [-imtoolrc <file>] [-inet_only | -port_only] [-noraster] 
+ *        [-nframes <num>] [-port <num>] [-proxy] [-verbose] [-unix <name>] 
+ *        [-unix_only] 
+ *
  *
  *  Minimal match for command line options may be used.  In interactive mode,
  *  cursor value strings may be typed in on the server stdin in response to
@@ -50,7 +53,9 @@
 /* Default values, size limiting values.
  */
 #define	MAX_FBCONFIG		128	/* max possible frame buf sizes	*/
-#define	MAX_FRAMES		16	/* max number of frames		*/
+#ifndef	HAVE_CDL
+#define	MAX_FRAMES		4	/* max number of frames		*/
+#endif
 #define	MAX_CLIENTS		8	/* max display server clients	*/
 #define	DEF_NFRAMES		1	/* save memory; only one frame	*/
 #define	DEF_FRAME_WIDTH		512	/* 512 square frame		*/
@@ -65,6 +70,7 @@
 
 /* Magic numbers. */
 #define DEF_PORT	5137	        /* default tcp/ip socket  	*/
+#define DEF_PROXY_PORT	5136	        /* default proxy socket  	*/
 #define	I_DEVNAME	"/dev/imt1o"    /* pseudo device names    	*/
 #define	O_DEVNAME	"/dev/imt1i"    /* our IN is client's OUT 	*/
 #define	DEF_UNIXADDR	"/tmp/.IMT%d"   /* default unix socket    	*/
@@ -224,11 +230,16 @@ VXimData server_data = {
 
 #define	SELWIDTH	32
 
-extern	int	errno;
-static	int	verbose = 0;
-static	int	background = 0;
-static	int	interactive = 0;
+#ifdef HAVE_CDL
+static 	int	proxy = 0;
+static  int	nclients = 0;
+CDLPtr	cdl[MAX_CLIENTS];
+#endif
 static	int	keep_raster = 1;
+extern	int	errno;
+static	int	background = 0;
+static	int	verbose = 0;
+static	int	interactive = 0;
 static	float	cursor_x = 1.0, cursor_y = 1.0;
 static	fd_set	fds, allset;
 
@@ -247,7 +258,7 @@ static IoChanPtr get_iochan(register VXimDataPtr vxim);
 static void 	 vx_iisio(IoChanPtr chan, int *fd_addr, int source);
 static void 	 set_fbconfig(IoChanPtr chan, int config, int frame);
 static int	 decode_frameno(register int z);
-static int	 bswap2(char *a, char *b, int nbytes);
+static void	 bswap2(char *a, char *b, int nbytes);
 static void 	 vx_retCursorVal(register int dataout, float sx, float sy,
 		     int wcs, int key, char *strval);
 static CtranPtr  wcs_update(register VXimDataPtr vxim, FrameBufPtr fr);
@@ -259,6 +270,11 @@ static void 	 vx_eraseFrame(register VXimDataPtr vxim, int frame);
 static void 	 get_fbconfig(register VXimDataPtr vxim);
 static void 	 Usage(void);
 static void 	 printoption(char *st);
+#ifdef	HAVE_CDL
+static void 	 vx_flip(char *buffer, int nx, int ny);
+#endif
+static int 	 iis_read (int fd, void *vptr, int nbytes);
+static int 	 iis_write (int fd, void *vptr, int nbytes);
 
 #else
 
@@ -266,7 +282,11 @@ static void 	 vx_iisclose(), vx_connectClient(), vx_disconnectClient();
 static void	 vx_iisio(), set_fbconfig(), vx_retCursorVal();
 static void 	 vx_initialize(), vx_initFrame(), vx_eraseFrame();
 static void 	 get_fbconfig(), Usage(), printoption();
-static int 	 vx_iisopen(), decode_frameno(), bswap2();
+#ifdef	HAVE_CDL
+static void 	 vx_flip();
+#endif
+static int 	 vx_iisopen(), decode_frameno(), iis_read(), iis_write();
+static void	 bswap2();
 static IoChanPtr open_fifo(), open_inet(), open_unix(), get_iochan();
 static CtranPtr  wcs_update();
 
@@ -302,6 +322,19 @@ char	**argv;
 
 	/* Process the command line arguments. */
 	for (i=1; i < argc; i++) {
+
+#ifdef	HAVE_CDL
+            /* Anything without a '-' is a client device to add to the proxy
+             * list.  Format of the arg must be a valid IMTDEV string.
+             */
+            if (proxy && argv[i][0] != '-') {
+		if ((cdl[nclients++] = cdl_open (argv[i])) == (CDLPtr) NULL)
+		    nclients--;
+		else if (verbose)
+		    printf ("Connected to server on %s\n", argv[i]);
+		continue;
+ 	    }
+#endif
 	    if (strncmp (argv[i], "-background", 2) == 0) {
                 background = 1;
 	    } else if (strncmp (argv[i], "-config", 2) == 0) {
@@ -328,12 +361,19 @@ char	**argv;
 		keep_raster = 0;
 	    } else if (strncmp (argv[i], "-nframes", 3) == 0) {
 		i++;
-                vxim->def_nframes = min (4, atoi (argv[i]));
+                vxim->def_nframes = min (MAX_FRAMES, atoi (argv[i]));
 	    } else if (strncmp (argv[i], "-port_only", 6) == 0) {
                 vxim->input_fifo = "";
                 vxim->unixaddr = "none";
 	    } else if (strncmp (argv[i], "-port", 5) == 0) {
                 vxim->port = atoi (argv[++i]);
+#ifdef	HAVE_CDL
+	    } else if (strncmp (argv[i], "-proxy", 5) == 0) {
+                proxy = 1;
+                vxim->port = DEF_PROXY_PORT;	/* re-assign port	      */
+                vxim->input_fifo = "";		/* shut off other connections */
+                vxim->unixaddr = "none";
+#endif
 	    } else if (strncmp (argv[i], "-verbose", 2) == 0) {
                 verbose = 1;
 	    } else if (strncmp (argv[i], "-unix_only", 6) == 0) {
@@ -344,18 +384,31 @@ char	**argv;
 	    }
 	}
 
+#ifdef	HAVE_CDL
+	/* If we're acting as a proxy server, but can't connect to anything,
+	 * exit.  In this case it is required that the servers be running
+	 * before starting the proxy program so we have a connection waiting.
+	 */
+	if (!nclients && proxy) {
+	    fprintf (stderr, "Error: No servers available for display.\007\n");
+	    exit (-1);
+	}
+#endif
+
         /* Initialize the frame buffers */
         vx_initialize (vxim, vxim->def_config, vxim->def_nframes, 1);
 
         /* Listen for a client connection and initialize the fdset. */
-	if (! (nopen = vx_iisopen (vxim)))
+	if (!(nopen = vx_iisopen (vxim))) {
+	    fprintf (stderr, "Error: Cannot open client communications.\007\n");
 	    exit (-1);
+	}
 	FD_ZERO (&allset);
  	for (i=0; i < nopen; i++) {
             chan = &vxim->chan[i];
  	    FD_SET (chan->datain, &allset); 
 	}
- 	if (!background)
+ 	if (!background || interactive)
 	    FD_SET (fileno(stdin), &allset); 
 
 	/* Sit in a loop waiting on input, processing the events. */
@@ -394,7 +447,7 @@ char	**argv;
 		}
 
 		/* Check the stdin for an EOF so we can quit gracefully. */
- 		if (!background) {
+ 	        if (!background) {
 		    if (FD_ISSET(fileno(stdin), &fds)) {
 		        if ((n = read (fileno(stdin), buf, SZ_FNAME)) <= 0) {
         		    /* Shut it down. */
@@ -405,7 +458,7 @@ char	**argv;
 		}
 
 	    } else if (n < 0) {
-		fprintf (stderr, "select error\n");
+		fprintf (stderr, "Error: select error\007\n");
 		exit (-1);
 	    }
 	}
@@ -480,17 +533,23 @@ register VXimDataPtr vxim;
 		if (chan->dataout >= 0)
 		    close (chan->dataout);
 		chan->type = 0;
+	        if (verbose)
+	            fprintf (stderr, "vximtool: closing fifo connection\n");
 		break;
 
 	    case IO_INET:
 		close (chan->datain);
 		chan->type = 0;
+	        if (verbose)
+	            fprintf (stderr, "vximtool: closing inet socket\n");
 		break;
 
 	    case IO_UNIX:
 		close (chan->datain);
 		unlink (chan->path);
 		chan->type = 0;
+	        if (verbose)
+	            fprintf (stderr, "vximtool: closing unix socket\n");
 		break;
 	    }
 	}
@@ -575,7 +634,7 @@ done:
 		close (dataout);
 	} else if (verbose) {
 	    fprintf (stderr,
-		"Open to accept input on fifo: %s\n", vxim->input_fifo);
+		"vximtool: Open to accept input on fifo: %s\n", vxim->input_fifo);
 	}
 
 	return (chan);
@@ -618,7 +677,7 @@ register VXimDataPtr vxim;
 	    goto err;
 
 	/* Allocate and fill in i/o channel descriptor. */
-	if (chan = get_iochan(vxim)) {
+	if ((chan = get_iochan(vxim))) {
 	    chan->vxim = (void *) vxim;
 	    chan->type = IO_INET;
 	    chan->port = vxim->port;
@@ -630,7 +689,8 @@ register VXimDataPtr vxim;
 	    chan->rf_p = &vxim->frames[0];
 	    if (verbose)
 	        fprintf (stderr,
-		    "Open to accept input on inet: port %d\n", vxim->port);
+		    "vximtool: Open to accept input on inet: port %d\n", 
+		    vxim->port);
 	    return (chan);
 	}
 err:
@@ -684,7 +744,7 @@ register VXimDataPtr vxim;
 	    goto err;
 
 	/* Allocate and fill in i/o channel descriptor. */
-	if (chan = get_iochan(vxim)) {
+	if ((chan = get_iochan(vxim))) {
 	    chan->vxim = (void *) vxim;
 	    chan->type = IO_UNIX;
 	    chan->datain = s;
@@ -696,7 +756,7 @@ register VXimDataPtr vxim;
 	    strncpy (chan->path, path, SZ_FNAME);
 	    if (verbose)
 	        fprintf (stderr,
-		    "Open to accept input on unix: %s\n", path);
+		    "vximtool: Open to accept input on unix: %s\n", path);
 	    return (chan);
 	}
 err:
@@ -793,7 +853,6 @@ get_iochan (vxim)
 register VXimDataPtr vxim;
 #endif
 {
-	register IoChanPtr chan;
 	register int i;
 
 	for (i=0;  i < MAX_CLIENTS;  i++)
@@ -832,11 +891,11 @@ int source;
 
 
 	/* Get the IIS header. */
-	if ((n = read (datain, (char *)&iis, sizeof(iis))) < sizeof(iis)) {
+	if ((n = iis_read (datain, (char *)&iis, sizeof(iis))) < sizeof(iis)) {
 	    if (n <= 0)
 		vx_disconnectClient (chan);
 	    else
-		fprintf (stderr, "imtool: command input read error\n");
+		fprintf (stderr, "vximtool: command input read error\n");
 	    return;
 	} else if (bswap)
 	    bswap2 ((char *)&iis, (char *)&iis, sizeof(iis));
@@ -851,7 +910,7 @@ int source;
 
 	    if (ntrys++) {
 		if (!errmsg++) {
-		    fprintf (stderr, "imtool: bad data header checksum\n");
+		    fprintf (stderr, "vximtool: bad data header checksum\n");
 		    if (bswap)
 			bswap2 ((char *)&iis, (char *)&iis, sizeof(iis));
 		    fprintf (stderr, "noswap:");
@@ -899,6 +958,12 @@ int source;
 	     */
 	    chan->reference_frame = decode_frameno (iis.z & 07777);
 	    vx_eraseFrame (vxim, chan->reference_frame);
+#ifdef	HAVE_CDL
+	    if (proxy) {
+	        for (i=0; i < nclients; i++)
+	    	    cdl_clearFrame (cdl[i]);
+	    }
+#endif
 	    if (verbose)
   	        fprintf (stderr, "erase frame %d - ref = %d\n", 
 		    decode_frameno(iis.z & 07777), chan->reference_frame);
@@ -916,7 +981,7 @@ int source;
 		int	frame, z, n;
 		short	x[14];
 
-		if (read (datain, (char *)x, ndatabytes) == ndatabytes) {
+		if (iis_read (datain, (char *)x, ndatabytes) == ndatabytes) {
 		    if (bswap)
 			bswap2 ((char *)x, (char *)x, ndatabytes);
 
@@ -928,6 +993,14 @@ int source;
 		    frame = max (1, n + 1);
 		    if (frame > vxim->nframes) {
 			if (frame < MAX_FRAMES) {
+#ifdef	HAVE_CDL
+	    		    if (proxy) {
+	    		        for (i=0; i < nclients; i++) {
+	    			    cdl_setFBConfig (cdl[i], vxim->fb_configno);
+	    			    cdl_setFrame (cdl[i], frame);
+	    		        }
+	    		    }
+#endif
 			    set_fbconfig (chan, vxim->fb_configno, frame);
 	    		    if (verbose)
                                 fprintf (stderr, "set_fbconfig (%d, %d)\n",
@@ -982,13 +1055,26 @@ int source;
  		        bcopy(&fb->framebuf[(y * vxim->width)+x], iobuf, nbytes);
 		    else
  		        bzero (iobuf, nbytes);
+#ifdef	HAVE_CDL
+		    if (proxy) {
+		 	unsigned char *pix = (unsigned char *)malloc(SZ_IOBUF);
+			cdl_readSubRaster (cdl[0], x,
+			    (vxim->height-y-max(1, nbytes/vxim->width)),
+			    min(vxim->width, nbytes), max(1, nbytes/vxim->width),
+			    &pix);
+ 		        bcopy(pix, iobuf, nbytes);
+			vx_flip ((char *)iobuf, min(vxim->width, nbytes), 
+			    max(1, nbytes/vxim->width));
+ 		        free ((char *)pix);
+		    }
+#endif
 		}
 
 		/* Return the data from the frame buffer. */
 		starttime = time(0);
 		for (nleft=nbytes, ip=iobuf;  nleft > 0;  nleft -= n) {
 		    n = (nleft < SZ_FIFOBUF) ? nleft : SZ_FIFOBUF;
-		    if ((n = write (dataout, ip, n)) <= 0) {
+		    if ((n = iis_write (dataout, ip, n)) <= 0) {
 			if (n < 0 || (time(0) - starttime > IO_TIMEOUT)) {
 			    fprintf (stderr, "IMTOOL: timeout on write\n");
 			    break;
@@ -1023,7 +1109,7 @@ int source;
 		starttime = time(0);
 		for (nleft=nbytes, op=iobuf;  nleft > 0;  nleft -= n) {
 		    n = (nleft < SZ_FIFOBUF) ? nleft : SZ_FIFOBUF;
-		    if ((n = read (datain, op, n)) <= 0) {
+		    if ((n = iis_read (datain, op, n)) <= 0) {
 			if (n < 0 || (time(0) - starttime > IO_TIMEOUT))
 			    break;
 		    } else
@@ -1042,6 +1128,18 @@ int source;
 			    nbytes, x, y);
 		    if (keep_raster)
  		        bcopy(iobuf, &fb->framebuf[(y * vxim->width)+x], nbytes);
+#ifdef	HAVE_CDL
+		    if (proxy) {
+			vx_flip ((char *)iobuf, min(vxim->width, nbytes), 
+			    max(1, nbytes/vxim->width));
+			for (i=0; i < nclients; i++) 
+			    cdl_writeSubRaster (cdl[i], x, 
+			        (vxim->height-y-max(1, nbytes/vxim->width)),
+				min(vxim->width, nbytes), 
+				max(1, nbytes/vxim->width),
+				iobuf);
+		    }
+#endif
 		}
 
 		return;
@@ -1070,7 +1168,7 @@ int source;
 		else
 		    text = chan->rf_p->wcsbuf;
 
-		write (dataout, text, SZ_WCSBUF);
+		iis_write (dataout, text, SZ_WCSBUF);
 
 		if (verbose) {
                     fprintf (stderr, "query wcs:\n");
@@ -1088,21 +1186,32 @@ int source;
 
 		/* See if we need to change the frame buffer configuration,
 		 * or allocate a new frame.
-	
-		if (fb_config == 1) {
-		    if (vxim->fb_config[0].width != vxim->width || 
-		        vxim->fb_config[0].height != vxim->height)
-		            set_fbconfig (chan, fb_config, frame);
-		} else 
-		*/
-		if (fb_config != vxim->fb_configno)
-		        set_fbconfig (chan, fb_config, frame);
-		else if (frame > vxim->nframes && frame < MAX_FRAMES)
+		 */
+		if (fb_config != vxim->fb_configno) {
+#ifdef	HAVE_CDL
+		    if (proxy) {
+			for (i=0; i < nclients; i++) {
+	    		    cdl_setFBConfig (cdl[i], fb_config);
+	    		    cdl_setFrame (cdl[i], frame);
+			}
+		    }
+#endif
+		    set_fbconfig (chan, fb_config, frame);
+		} else if (frame > vxim->nframes && frame < MAX_FRAMES) {
+#ifdef	HAVE_CDL
+		    if (proxy) {
+			for (i=0; i < nclients; i++) {
+	    		    cdl_setFBConfig (cdl[i], vxim->fb_configno);
+	    		    cdl_setFrame (cdl[i], frame);
+			}
+		    }
+#endif
 		    set_fbconfig (chan, vxim->fb_configno, frame);
+		}
 
 		/* Read in and set up the WCS. */
 		chan->reference_frame = frame;
-		if (read (datain, buf, ndatabytes) == ndatabytes)
+		if (iis_read (datain, buf, ndatabytes) == ndatabytes)
 		    strncpy (chan->rf_p->wcsbuf, buf, SZ_WCSBUF);
 
 		if (verbose) {
@@ -1115,6 +1224,14 @@ int source;
 		chan->rf_p->ctran.valid = 0;
 
 		ct = wcs_update (vxim, chan->rf_p);
+#ifdef	HAVE_CDL
+		if (proxy) {
+		    for (i=0; i < nclients; i++)
+			cdl_setWCS (cdl[i], " ", ct->imtitle, 
+			    ct->a, ct->b, ct->c, ct->d, 
+			    ct->tx, ct->ty, ct->z1, ct->z2, ct->zt);
+		}
+#endif
 	    }
 	    return;
 
@@ -1132,6 +1249,8 @@ int source;
 		 * read all we do is initiate a cursor read; completion occurs
 		 * when the user hits a key or button.
 		 */
+		float sx, sy;
+
 		if (verbose)
 		    fprintf (stderr, "read cursor position\n");
 		if (iis.tid & IMC_SAMPLE) {
@@ -1140,17 +1259,60 @@ int source;
 		     * ascii buffer.
 		     */
 		    int   wcs = iis.z;
-		    float sx, sy;
 
 		    sx = cursor_x;
         	    sy = cursor_y;
-		    vx_retCursorVal (chan->dataout, sx, sy, wcs, 0, "");
+#ifdef	HAVE_CDL
+		    if (proxy) {
+			char	key = ' ';
+			char	curval[SZ_IMCURVAL], keystr[20];
+
+			cdl_readCursor (cdl[0], 1, &sx, &sy, &key);
+
+        		/* Encode the cursor value. */
+        		if (key == EOF)
+        		    sprintf (curval, "EOF\n");
+        		else {
+        		    if (isprint (key) && !isspace(key)) {
+           		        keystr[0] = key;
+                		keystr[1] = '\0';
+            		    } else
+                		sprintf (keystr, "\\%03o", key);
+
+            		    sprintf (curval, "%10.3f %10.3f %d %s %s\n",
+                	        sx, sy, 1, keystr, "");
+			}
+			iis_write (dataout, curval, sizeof(curval));
+		    } else
+#endif
+		        vx_retCursorVal (chan->dataout, sx, sy, wcs, 0, "");
 
 		} else {
 		    /* Initiate a user triggered cursor read. */
-		    int frame = chan->reference_frame;
 		    char key = 'q';
-		    vx_retCursorVal (chan->dataout, 1., 1., 101, key, "");
+#ifdef	HAVE_CDL
+		    if (proxy) {
+			char	curval[SZ_IMCURVAL], keystr[20];
+
+			cdl_readCursor (cdl[0], 0, &sx, &sy, &key);
+
+        		/* Encode the cursor value. */
+        		if (key == EOF)
+        		    sprintf (curval, "EOF\n");
+        		else {
+        		    if (isprint (key) && !isspace(key)) {
+           		        keystr[0] = key;
+                		keystr[1] = '\0';
+            		    } else
+                		sprintf (keystr, "\\%03o", key);
+
+            		    sprintf (curval, "%10.3f %10.3f %d %s %s\n\0",
+                	        sx, sy, 1, keystr, "");
+			}
+			iis_write (chan->dataout, curval, sizeof(curval));
+		    } else
+#endif
+		        vx_retCursorVal (chan->dataout, 1., 1., 101, key, "");
 		}
 
 	    } else {
@@ -1174,6 +1336,10 @@ int source;
 
         	cursor_x = sx;
         	cursor_y = sy;
+#ifdef	HAVE_CDL
+		if (proxy)
+		    cdl_setCursor (cdl[0], sx, sy, wcs);
+#endif
 	    }
 	    return;
 
@@ -1187,7 +1353,7 @@ int source;
 	if (!(iis.tid & IIS_READ))
 	    for (nbytes = ndatabytes;  nbytes > 0;  nbytes -= n) {
 		n = (nbytes < SZ_FIFOBUF) ? nbytes : SZ_FIFOBUF;
-		if ((n = read (datain, buf, n)) <= 0)
+		if ((n = iis_read (datain, buf, n)) <= 0)
 		    break;
 	    }
 }
@@ -1263,7 +1429,7 @@ register int	z;
  */
 #ifdef ANSI_FUNC
 
-static int
+static void
 bswap2 (
     char *a,
     char *b,		/* input array			*/
@@ -1271,7 +1437,7 @@ bswap2 (
 )
 #else
 
-static int
+static void
 bswap2 (a, b, nbytes)
 char 	*a, *b;		/* input array			*/
 int	nbytes;		/* number of bytes to swap	*/
@@ -1393,7 +1559,7 @@ FrameBufPtr fr;
 		&ct->z1, &ct->z2, &ct->zt) < 7) {
 
 		if (fr->wcsbuf[0])
-		    fprintf (stderr, "imtool: error decoding WCS\n");
+		    fprintf (stderr, "vximtool: error decoding WCS\n");
 
 		strncpy (ct->imtitle, "[NO WCS]\n", SZ_IMTITLE);
 		ct->a  = ct->d  = 1;
@@ -1615,6 +1781,7 @@ Usage ()
 {
         fprintf (stderr, "Usage:\n\n");
         printoption ("    vximtool");
+        printoption ("[-background]");             /* run in background  */
         printoption ("[-config <num>]");           /* initial config     */
         printoption ("[-fifo <pipe>]");            /* fifo pipe          */
         printoption ("[-fifo_only]");              /* use fifo only      */
@@ -1625,6 +1792,7 @@ Usage ()
         printoption ("[-noraster]");          	   /* don't save pix     */
         printoption ("[-nframes <num>]");          /* # of frames        */
         printoption ("[-port <num>]");             /* inet port          */
+        printoption ("[-proxy]");             	   /* run a proxy server */
         printoption ("[-verbose]");           	   /* verbose output     */
         printoption ("[-unix <name>]");            /* unix socket        */
         printoption ("[-unix_only]");              /* use unix only      */
@@ -1652,4 +1820,105 @@ char    *st;
         }
         fprintf (stderr,"%s ",st);
         cpos = cpos + strlen(st) + 1;
+}
+
+
+#ifdef	HAVE_CDL
+/* VX_FLIP -- Reverse order of lines in raster.
+ */
+
+#ifdef ANSI_FUNC
+
+static void
+vx_flip (char *buffer, int nx, int ny)
+#else
+
+static void
+vx_flip (buffer, nx, ny)
+char   *buffer;
+int     nx;
+int     ny;
+#endif
+{
+        register int    i, j, v;
+        register char  *buff1, *buff2;
+
+        for (i = 0; i < ny / 2; i++) {
+            buff1 = &buffer[i*nx];
+            buff2 = &buffer[(ny-1-i)*nx];
+            for (j = 0; j < nx; j++) {
+                v = *buff1;
+                *(buff1++) = *buff2;
+                *(buff2++) = v;
+            }
+        }
+}
+#endif
+
+
+/* IIS_READ -- Read exactly "n" bytes from a descriptor. 
+ */
+
+#ifdef ANSI_FUNC
+static int                                   
+iis_read (int fd, void *vptr, int nbytes)
+
+#else
+static int                                   
+iis_read (fd, vptr, nbytes)
+int 	fd; 
+void 	*vptr; 
+int 	nbytes;
+#endif
+{
+        char    *ptr = vptr;
+        int 	nread = 0, nleft = nbytes, nb = 0;
+
+        while (nleft > 0) {
+            if ( (nb = read(fd, ptr, nleft)) < 0) {
+                if (errno == EINTR)
+                    nb = 0;          	/* and call read() again */
+                else
+                    return(-1);
+            } else if (nb == 0)
+                break;                  /* EOF */
+            nleft -= nb;
+            ptr   += nb;
+            nread += nb;
+        }
+        return (nread);              	/* return no. of bytes read */
+}
+
+
+/* IIS_WRITE -- Write exactly "n" bytes to a descriptor. 
+ */
+#ifdef ANSI_FUNC
+static int                                   
+iis_write (int fd, void *vptr, int nbytes)
+
+#else
+
+static int                                   
+iis_write (fd, vptr, nbytes)
+int 	fd; 
+void 	*vptr; 
+int 	nbytes;
+#endif
+
+{
+        char 	*ptr = vptr;
+        int     nwritten = 0,  nleft = nbytes, nb = 0;
+
+        while (nleft > 0) {
+            if ( (nb = write(fd, ptr, nleft)) <= 0) {
+                if (errno == EINTR)
+                    nb = 0;           	/* and call write() again */
+                else
+                    return(-1);         /* error */
+            }
+            nleft    -= nb;
+            ptr      += nb;
+            nwritten += nb;
+        }
+        return (nwritten);
 }

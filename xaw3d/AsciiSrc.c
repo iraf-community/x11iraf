@@ -93,7 +93,9 @@ static String MyStrncpy(), StorePiecesInString();
 static Boolean SetValues(), WriteToFile();
 extern int errno, sys_nerr;
 #ifndef __FreeBSD__
+#ifndef _BSD_SOURCE
 extern char* sys_errlist[];
+#endif
 #endif
 
 #define superclass		(&textSrcClassRec)
@@ -999,7 +1001,7 @@ Boolean newString;
 	    
 	    params[0] = src->ascii_src.string;
 	    if (errno <= sys_nerr)
-		params[1] = sys_errlist[errno];
+		params[1] = (char *)sys_errlist[errno];
 	    else {
 		(void) sprintf(msg, "errno=%.4d", errno);
 		params[1] = msg;

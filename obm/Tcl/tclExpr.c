@@ -61,6 +61,13 @@ int errno;
 #define ERANGE 34
 #endif
 
+/*  Slackware/RedHat4.2 compatibility hack. */
+#if defined(linux) && defined(isalnum)
+#undef isalnum
+#define isalnum(c) (isalpha(c)||isdigit(c))
+#endif
+
+
 /*
  * The data structure below is used to describe an expression value,
  * which can be either an integer (the usual case), a double-precision

@@ -93,7 +93,7 @@ The default is \fIrectangle\fP.
 De-iconify the Gterm graphics window when activated.  The default is False.
 .TP 5
 \fIdialogBgColor\fP
-Dialog box (i.e. status line) background color.  Dialog text is text which
+Dialog box (i.e. the status line) background color.  Dialog text is text which
 is drawn into the dialog area at the bottom of the gterm window, it is 
 transient and is not a permanent part of the graphics being drawn.  Dialog
 text is normally used to interact with the user or to display messages
@@ -114,7 +114,7 @@ the widget.
 Height of the Gterm window.  The default is 480.
 .TP 5
 \fIidleCursor\fP
-Cursor to use when not in graphics mode.
+Cursor to use when not in graphics mode.  The default is a plus sign.
 .TP 5
 \fImarkerHighlightColor\fP
 Highlight color for the active marker.  When the pointer moves into a marker
@@ -126,7 +126,7 @@ Highlight width for the active marker. The default is 2.
 .TP 5
 \fImaxColors\fP
 The maximum number of colors to use in the private global colormap, the
-default is 216.  Out of this number 10 colors (the \fIcolor0\fP theu 
+default is 216.  Out of this number 10 colors (the \fIcolor0\fP thru 
 \fIcolor9\fP values) are reserved by the widget as static colors, the 
 remainder may be allocated for images.
 .TP 5
@@ -146,7 +146,7 @@ Width of the Gterm window.  The default is 640.
 \fBCore -> Gterm\fP
 .SS "Resources"
 .PP
-When crating a Gterm widget instance, the following resources are retrieved
+When creating a Gterm widget instance, the following resources are retrieved
 from the arguments list or from the resource database:
 
 .TS
@@ -498,7 +498,7 @@ escape sequence "[?38h".
 Enter message mode.  In message mode input text is accumulated in a buffer
 and eventually passed to the object manager, which delivers the message to
 the referenced object.  Messages are used to download the user interface to
-be executed by the object manager, and during execution messages are used
+be executed by the object manager.  During execution, messages are used
 to set the values of user interface parameters to allow the UI to track
 the state of the client application.
 
@@ -836,7 +836,8 @@ be changed dynamically at runtime using write colormap code to write the
 desired range of color values.
 
 Applications should not assume that there are 10 static colors and 200 or 
-so allocatable colors.  The graphcap entry for the logical device in use 
+so allocatable colors.  The IRAF graphcap entry for the logical device in use,
+and resources set for the widget,
 defines these parameters for the device.  Alternatively, the read colormap 
 code may be used to dynamically determine how many colors the server has
 preallocated when the application starts up.
@@ -970,10 +971,10 @@ xterm(1), resize(1), X(1), pty(4), tty(4)
 Many of the same bugs affecting \fIxterm\fP also apply here.
 
 \fIXgterm\fP is not normally installed with setuid permissions.  On some
-Linux systems where the /dev/tty and /dev/pty devices have root ownership
-and permission 600 this can cause problems.  Workarounds are to either
-install \fIXGterm\fP with setuid permissions or modify the /dev/tty and
-/dev/pty devices to have permission 666.
+Linux systems, for example, where the /dev/tty and /dev/pty devices have
+root ownership and permission 600 this can cause problems.  Workarounds
+are to either install \fIXGterm\fP with setuid permissions or modify the
+/dev/tty and /dev/pty devices to have permission 666.
 
 .SH COPYRIGHT
 Copyright(c) 1986 Association of Universities for Research in Astronomy Inc.

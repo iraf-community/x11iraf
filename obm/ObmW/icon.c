@@ -213,6 +213,8 @@ static void build_colortable(self, table, size, n)
 		* (Pixel*) ((unsigned long) self + res[i].resource_offset);
 	    (*n)++;
 	}
+    if (res)
+        XtFree ((char *)res);					/* MF037 */
 }
 
 

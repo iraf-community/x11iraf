@@ -21,6 +21,8 @@
 #define	DefaultMarkerTextFont	3
 #define	ZOOM_TOL		0.0001
 
+#define	CacheXImage		1				/* MF004 */
+
 static Dimension defXDim = DEF_WIDTH;
 static Dimension defYDim = DEF_HEIGHT;
 
@@ -42,16 +44,16 @@ static char defaultGtermTranslations[] =
 /* Default translations when pointer is over a marker. */
 static char defaultMarkerTranslations[] =
 "\
-	       !Shift <Btn1Motion>:	m_rotateResize()             \n\
-		      <Btn1Motion>:	m_moveResize()               \n\
-		 !Shift <Btn1Down>:     m_raise()  m_markpos()       \n\
-			<Btn1Down>:     m_raise()  m_markposAdd()    \n\
-			  <Btn1Up>:     m_redraw() m_destroyNull()   \n\
-			<Btn2Down>:	m_lower()                    \n\
-		    <Key>BackSpace:	m_deleteDestroy()            \n\
-		       <Key>Delete:	m_deleteDestroy()            \n\
-			<KeyPress>:     m_input()                    \n\
-			  <Motion>:	track-cursor()               \n\
+	       !Shift <Btn1Motion>: 	m_rotateResize()  	     \n\
+		      <Btn1Motion>: 	m_moveResize()               \n\
+		 !Shift <Btn1Down>: 	m_raise()  m_markpos()       \n\
+			<Btn1Down>: 	m_raise()  m_markposAdd()    \n\
+			  <Btn1Up>: 	m_redraw() m_destroyNull()   \n\
+			<Btn2Down>: 	m_lower()                    \n\
+		    <Key>BackSpace: 	m_deleteDestroy()            \n\
+		       <Key>Delete: 	m_deleteDestroy()            \n\
+			<KeyPress>: 	m_input()                    \n\
+			  <Motion>: 	track-cursor()               \n\
 ";
 
 static XtResource resources[] = {
@@ -354,7 +356,12 @@ static XPoint *mapVector();
 static Colormap get_colormap();
 static Cursor get_cursor();
 static void init_iomap(), invalidate_cmap();
+static void gm_rotate_indicator();				/* MF020 */
 static Pixel get_pixel(), *get_cmap_in(), *get_cmap_out();
+
+static void NewCachedXImage();					/* MF004 */
+static void DestroyCachedXImage();				/* MF004 */
+static XImage *GetCachedXImage();				/* MF004 */
 
 extern double atof();
 
@@ -462,16 +469,19 @@ Initialize (request, new)
     w->gterm.cmapLastUpdate = 0;
     w->gterm.cmapLastShadow = 0;
     w->gterm.in_window = 0;
+    w->gterm.n_wmWindows = 0;					/* MF012 */
 
     /* Get clear pixmap GC. */
     gc = XCreateGC (display, w->gterm.root, 0, NULL);
     XSetBackground (display, gc, w->gterm.color0);
     XSetForeground (display, gc, w->gterm.color0);
     w->gterm.clearGC = gc;
+    XSetGraphicsExposures (display, gc, 0);			/* MF029 */
 
     /* Get expose GC. */
     gc = XCreateGC (display, w->gterm.root, 0, NULL);
     w->gterm.exposeGC = gc;
+    XSetGraphicsExposures (display, gc, 0);			/* MF029 */
 
     /* Get graphics drawing GC. */
     gc = XCreateGC (display, w->gterm.root, 0, NULL);
@@ -501,6 +511,7 @@ Initialize (request, new)
     XQueryColor (display, w->core.colormap, &fg_color);
     w->gterm.idle_cursor = get_cursor (w, w->gterm.idleCursor);
     XRecolorCursor (display, w->gterm.idle_cursor, &fg_color, &bg_color);
+								/* MF030 */
 
     bg_color.pixel = w->gterm.busyCursorBgColor;
     XQueryColor (display, w->core.colormap, &bg_color);
@@ -508,6 +519,7 @@ Initialize (request, new)
     XQueryColor (display, w->core.colormap, &fg_color);
     w->gterm.busy_cursor = get_cursor (w, w->gterm.busyCursor);
     XRecolorCursor (display, w->gterm.busy_cursor, &fg_color, &bg_color);
+								/* MF030 */
 
     bg_color.pixel = w->gterm.color0;
     XQueryColor (display, w->core.colormap, &bg_color);
@@ -525,8 +537,8 @@ Initialize (request, new)
 	fg_color.pixel = w->gterm.ginmodeCursorFgColor;
 	XQueryColor (display, w->core.colormap, &fg_color);
 	w->gterm.ginmode_cursor = get_cursor (w, w->gterm.ginmodeCursor);
-	XRecolorCursor (display,
-	    w->gterm.ginmode_cursor, &fg_color, &bg_color);
+ 	XRecolorCursor (display,
+	    w->gterm.ginmode_cursor, &fg_color, &bg_color);	/* MF030 */
 	w->gterm.ginmodeColors[0] = bg_color;
 	w->gterm.ginmodeColors[1] = fg_color;
     } else
@@ -609,11 +621,6 @@ Realize (gw, valueMask, attrs)
     XSetWindowAttributes *attrs;
 {
     GtermWidget w = (GtermWidget) gw;
-    /* MJF
-    XVisualInfo rvinfo, *vinfo = (XVisualInfo *) NULL;
-    Visual	*ourVisual = (Visual *) NULL;
-    int		i, nvis;
-    */
 
     /* Set default window size. */
     XtMakeResizeRequest (gw, w->core.width, w->core.height,
@@ -623,19 +630,6 @@ Realize (gw, valueMask, attrs)
      * default visual.
      */
 
-    /* Create graphics window.  We first look for an 8-Bit PseudoColor
-     * visual to use, otherwise we fail.  (MJF  8/22/97)
-    vinfo = XGetVisualInfo (w->gterm.display, 0L, &rvinfo, &nvis);
-    for (i=0; i < nvis; i++)
-	if (vinfo[i].depth == 8 && vinfo[i].class == PseudoColor)
-	    ourVisual = vinfo[i].visual;
-    if (ourVisual)
-        XtCreateWindow (gw, InputOutput, ourVisual, *valueMask, attrs);
-    else {
-        fprintf (stderr, "No 8-bit PseudoColor visual found.\n");
-        exit(1);
-    }
-    */
     XtCreateWindow (gw, InputOutput, (Visual *)CopyFromParent,
 	*valueMask, attrs);
 
@@ -662,7 +656,7 @@ Destroy (gw)
     Display *display = w->gterm.display;
 
     /* Get rid of any raster stuff. */
-    GtRasterInit (gw);
+    GtRasterInit (w);						/* MF008 */
     XtFree ((char *)w->gterm.rasters);
     XtFree ((char *)w->gterm.mappings);
 
@@ -1696,7 +1690,7 @@ GtSetCursorPos (w, x, y)
      */
     do {
 	GtSetRaster (w, raster);
-	if (ntrans++) {
+	if (ntrans++ || raster == 0) {				/* MF041 */
 	    /* After the first transformation we have raster coordinates,
 	     * so set the logical resolution to the raster dimensions.
 	     */
@@ -1956,6 +1950,9 @@ blink_cursor (w, id)
     XtAppContext app_context;
     XColor bg, fg;
     int interval;
+
+    if (w->gterm.cursor_type != GtGinmodeCursor) 		/* MF032 */
+	return;
 
     bg = w->gterm.ginmodeColors[1];
     fg = w->gterm.ginmodeColors[0];
@@ -3121,6 +3118,7 @@ GtReadPixels (w, raster, pixels, nbits, x1, y1, nx, ny)
     Raster rp;
     uchar *lp;
 
+
     rp = &w->gterm.rasters[raster];
     if (rp->type == 0)
 	return (ERR);
@@ -3164,8 +3162,9 @@ GtReadPixels (w, raster, pixels, nbits, x1, y1, nx, ny)
      * client pixels in the process.
      */
     for (i=0;  i < ny;  i++) {
-	for (n=nx, ip=lp;  --n >= 0;  )
+	for (n=nx, ip=lp;  --n >= 0;  ) {
 	    *op++ = cmap[*ip++];
+	}
 	lp += bytes_per_line;
     }
 
@@ -3198,6 +3197,7 @@ GtSetPixels (w, raster, ct, x1, y1, nx, ny, color, rop)
     /* Get pixel coordinates. */
     if (ct != GtPixel) {
 	struct mapping sv_mp, p_mp;
+	initialize_mapping (&sv_mp);				/* MF035 */
 	save_mapping (&sv_mp, 0, 0,
 	    0, GtPixel, 0,0,0,0,
 	    raster, ct, x1,y1,nx,ny);
@@ -3354,6 +3354,7 @@ GtExtractPixmap (w, src, ctype, x, y, width, height)
     /* Get pixel coordinates. */
     if (ctype != GtPixel) {
 	struct mapping sv_mp, p_mp;
+	initialize_mapping (&sv_mp);				/* MF035 */
 	save_mapping (&sv_mp, 0, 0,
 	    0, GtPixel, 0,0,0,0,
 	    src, ctype, x,y,width,height);
@@ -3379,16 +3380,17 @@ GtExtractPixmap (w, src, ctype, x, y, width, height)
 	    cache = w->gterm.cacheRasters;
 	    w->gterm.cacheRasters = "always";
 
-	    if (GtCreateRaster (w, i, GtServer, nx, ny) == ERR) {
-		w->gterm.cacheRasters = cache;
-		return ((Pixmap)NULL);
+	    if (GtCreateRaster (w, i, GtServer, nx, ny, 	/* MF006 */
+		RasterDepth) == ERR) {
+		    w->gterm.cacheRasters = cache;
+		    return ((Pixmap)NULL);
 	    } else if (rp->type != PixmapRaster)
 		goto err;
 
 	    if (GtCopyRaster (w, 0,
 		src,0, x1,y1,nx,ny, i,0, 0,0,nx,ny) == ERR) {
 err:
-		GtDestroyRaster (i);
+		GtDestroyRaster (w, i);				/* MF005 */
 		w->gterm.cacheRasters = cache;
 		return ((Pixmap)NULL);
 	    }
@@ -3434,6 +3436,7 @@ GtInsertPixmap (w, pixmap, dst, ctype, x, y, width, height)
     /* Get pixel coordinates. */
     if (ctype != GtPixel) {
 	struct mapping sv_mp, p_mp;
+	initialize_mapping (&sv_mp);				/* MF035 */
 	save_mapping (&sv_mp, 0, 0,
 	    0, GtPixel, 0,0,0,0,
 	    dst, ctype, x,y,width,height);
@@ -3453,8 +3456,9 @@ GtInsertPixmap (w, pixmap, dst, ctype, x, y, width, height)
 
     /* Create the destination raster if none exists. */
     if (!w->gterm.rasters[dst].type)
-	if (GtCreateRaster (w, dst, GtDefault, nx, ny) == ERR)
-	    return (ERR);
+	if (GtCreateRaster (w, dst, GtDefault, nx, ny,		/* MF006 */
+	    RasterDepth) == ERR)
+	        return (ERR);
     
     /* Find an empty raster slot and use it to build a fake source raster
      * using the supplied pixmap.
@@ -3556,9 +3560,11 @@ GtWriteColormap (w, map, first, nelem, r, g, b)
 	    r++;  g++;  b++;
 	}
 
-	memmove (&cm->r[first], r, nelem * sizeof (ushort));
-	memmove (&cm->g[first], g, nelem * sizeof (ushort));
-	memmove (&cm->b[first], b, nelem * sizeof (ushort));
+        if (nelem >= 0) {
+	    memmove (&cm->r[first], r, nelem * sizeof (ushort));
+	    memmove (&cm->g[first], g, nelem * sizeof (ushort));
+	    memmove (&cm->b[first], b, nelem * sizeof (ushort));
+        }
 
 	return (OK);
     }
@@ -3784,7 +3790,7 @@ GtReadColormap (w, map, first, nelem, r, g, b)
 		cp = &w->gterm.color[first+i];
 		r[i] = cp->red;
 		g[i] = cp->green;
-		b[i] = cp->blue;
+		b[i] = (ushort)cp->blue;
 	    } else
 		break;
 
@@ -4399,6 +4405,7 @@ GtSelectRaster (w, dras, dt, dx, dy, rt, rx, ry, rmap)
     /* Get display raster pixel coordinates. */
     if (dt != GtPixel) {
 	struct mapping sv_mp, p_mp;
+	initialize_mapping (&sv_mp);				/* MF035 */
 	save_mapping (&sv_mp, 0, 0,
 	    0,  0, 0,0,0,0,
 	    0, dt, dx,dy,0,0);
@@ -4505,13 +4512,14 @@ GtCopyRaster (w, rop, src,st,sx,sy,snx,sny, dst,dt,dx,dy,dnx,dny)
     int dt;			/* coordinate type for destination raster */
     int dx,dy,dnx,dny;		/* destination raster */
 {
-    Mapping sv_mp, p_mp;
+    struct mapping sv_mp, p_mp;				/* MF007 */
     int status;
 
     if (!XtIsRealized ((Widget)w))
 	return (OK);
 
     /* Construct a temporary mapping describing the desired raster copy. */
+    initialize_mapping (&sv_mp);				/* MF035 */
     save_mapping (&sv_mp, w->gterm.maxMappings, 0,
 	src,st,sx,sy,snx,sny, dst,dt,dx,dy,dnx,dny);
     initialize_mapping (&p_mp);
@@ -4560,6 +4568,7 @@ GtSetMapping (w, mapping, rop, src,st,sx,sy,snx,sny, dst,dt,dx,dy,dnx,dny)
     int o_dnx, o_dny, o_xflip=0, o_yflip=0;
     int *o_xymap, *o_xmap, *o_ymap;
     int *n_xymap, *n_xmap, *n_ymap;
+    int dummy_rop;						/* MF011 */
     XRectangle rl[MAX_REGIONS];
     int nrect, buflen, refresh;
 
@@ -4623,7 +4632,7 @@ GtSetMapping (w, mapping, rop, src,st,sx,sy,snx,sny, dst,dt,dx,dy,dnx,dny)
      * coordinates from here on.
      */
     get_pixel_mapping (w, mp, &new_mp, 1);
-    load_mapping (&new_mp, &mapping, &rop,
+    load_mapping (&new_mp, &mapping, &dummy_rop,		/* MF011 */
 	&src,&st,&sx,&sy,&snx,&sny, &dst,&dt,&dx,&dy,&dnx,&dny);
     update_mapping (w, n_mp = &new_mp);
     update_mapping (w, o_mp = &pix_mp);
@@ -4919,6 +4928,10 @@ GtRefreshMapping (w, mapping)
 		update_mapping (w, mp = &p_mp);
 	    } else
 		update_mapping (w, mp);
+
+	    if (CacheXImage)					/* MF004 */
+	        DestroyCachedXImage();				/* MF004 */
+
 	    refresh_destination (w, mp,
 		mp->dx, mp->dy, abs(mp->dnx), abs(mp->dny));
 	    if (mp == &p_mp)
@@ -5263,6 +5276,10 @@ get_colormap (w)
 	XSetCloseDownMode (d, RetainPermanent);
 	XCloseDisplay (d);
 	w->gterm.cmapInitialize = False;
+
+	/* Free the XVisualInfo struct. */
+	if (vi)
+	    XFree ((void *)vi);					/* MF040 */
     }
 
     /* Save default color assignments for static colors. */
@@ -5646,6 +5663,9 @@ refresh_source (w, mp, x1, y1, nx, ny)
     dnx = dx2 - dx1 + 1;
     dny = dy2 - dy1 + 1;
 
+    if (CacheXImage)						/* MF004 */
+        DestroyCachedXImage();					/* MF004 */
+
     /* Perform the refresh operation. */
     return (refresh_destination (w, mp, dx1, dy1, dnx, dny));
 }
@@ -5675,6 +5695,7 @@ refresh_destination (w, mp, x1, y1, nx, ny)
     struct mapping *np, p_mp;
     XImage *xin, *xout;
     int status = OK;
+    Pixmap pixmap;						/* MF004 */
 
     Region clip_region, mask_region;
     uchar *old_xin_lp, *old_xout_lp;
@@ -5806,14 +5827,28 @@ refresh_destination (w, mp, x1, y1, nx, ny)
 	/* Source is a pixmap but we need a local copy as either the
 	 * destination is not a pixmap, or we need to do some scaling.
 	 */
-	xin = XGetImage (display,
-	    (src || !w->gterm.pixmap) ? sr->r.pixmap : w->gterm.pixmap,
-	    0, 0, sr->width, sr->height, 0xff, ZPixmap);
-	if (xin == NULL) {
-	    status = ERR;
-	    goto done;
-	}
-	delxin++;
+	if (CacheXImage) {					/* MF004 */
+            pixmap = (src || !w->gterm.pixmap) ? sr->r.pixmap : w->gterm.pixmap;
+            xin = GetCachedXImage (w, pixmap, sr->width, sr->height);
+            if (xin == NULL) {
+                xin = XGetImage (display, pixmap,
+                    0, 0, sr->width, sr->height, 0xff, ZPixmap);
+                if (xin == NULL) {
+                    status = ERR;
+                    goto done;
+                } else
+                    NewCachedXImage (w, xin, pixmap, sr->width, sr->height);
+            }
+	} else {						/* MF004 */
+	    xin = XGetImage (display,
+	        (src || !w->gterm.pixmap) ? sr->r.pixmap : w->gterm.pixmap,
+	        0, 0, sr->width, sr->height, 0xff, ZPixmap);
+	    if (xin == NULL) {
+	        status = ERR;
+	        goto done;
+	    }
+   	    delxin++;
+	}							/* MF004 */
 
     } else {
 	/* Source is an ximage. */
@@ -7794,6 +7829,7 @@ gm_refocus (w)
     XMotionEvent event;
     int nparams = 0;
 
+    event.type = MotionNotify;					/* MF009 */
     event.x = w->gterm.last_x;
     event.y = w->gterm.last_y;
     HandleTrackCursor ((Widget)w, &event, NULL, &nparams);
@@ -8553,7 +8589,7 @@ GmSetAttribute (gm, attribute, value, type)
 	if (gm_getint (value, type)) {
 	    if (!(gm->flags & Gm_Visible)) {
 		gm->flags |= Gm_Visible;
-		GmRedraw (gm, GXcopy, erase=False);
+ 		GmRedraw (gm, GXcopy, erase=False); 
 	    }
 	} else if (gm->flags & Gm_Visible) {
 	    GmMarkpos (gm);
@@ -8630,8 +8666,8 @@ GmSetAttribute (gm, attribute, value, type)
 	    gm->height = n;
 	break;
 
-    case Ga_Rotangle:
-	gm->rotangle = gm_getfloat (value, type);
+    case Ga_Rotangle:						/* MF022 */
+ 	gm->rotangle = gm_getfloat (value, type) * (M_PI / (double) 180.0);
 	break;
 
     case Ga_HighlightColor:
@@ -8721,6 +8757,9 @@ GmSetAttribute (gm, attribute, value, type)
 	default:
 	    return (ERR);
 	}
+	break;
+    case Ga_RotIndicator:					/* MF020 */
+	gm->rotIndicator = gm_getint (value, type);
 	break;
 
     default:
@@ -8849,8 +8888,8 @@ GmGetAttribute (gm, attribute, value, type)
 	if (gm_putint (gm->height, value, type) == ERR)
 	    return (ERR);
 	break;
-    case Ga_Rotangle:
-	if (gm_putfloat (gm->rotangle, value, type) == ERR)
+    case Ga_Rotangle:						/* MF022 */
+	if (gm_putfloat(((double)180.0/M_PI)*(gm->rotangle),value,type) == ERR)
 	    return (ERR);
 	break;
 
@@ -8973,6 +9012,11 @@ GmGetAttribute (gm, attribute, value, type)
 	    return (ERR);
 	}
 	break;
+    case Ga_RotIndicator:					/* MF020 */
+	if (gm_putint (gm->rotIndicator, value, type) == ERR)
+	    return (ERR);
+	break;
+
 
     default:
 	return (ERR);
@@ -8990,7 +9034,7 @@ GmSetVertices (gm, points, first, npts)
     int first;			/* first point to be set */
     int npts;			/* number of points to set */
 {
-    register DPoint *ip;
+    register DPoint *ip, *pp;
     register XPoint *op;
     register int i;
     int erase;
@@ -8999,7 +9043,7 @@ GmSetVertices (gm, points, first, npts)
      * Small vectors are stored directly in the marker descriptor in the
      * point_data array.
      */
-    if (first + npts > gm->npoints) {
+    if (first + npts != gm->npoints) {				/* MF013 */
 	if (gm->npoints > GM_MAXVERTICES) {
 	    if ((gm->points = (XPoint *) XtRealloc ((char *)gm->points,
 		    first + npts)) == (XPoint *)NULL)
@@ -9021,6 +9065,32 @@ GmSetVertices (gm, points, first, npts)
 	op->x = (int) ip->x + 0.5;
 	op->y = (int) ip->y + 0.5;
 	ip++, op++;
+    }
+
+    /* If we're defining the vertices of a 'poly' marker update the
+     * pgon[] array with the new set of points.  Polygons are initialized
+     * with a unit rectangle and since vertices can't be set as an attribute
+     * the must be set with a setVertices call so we need to update the
+     * structure here.
+     */
+    if (gm->type == Gm_Polygon) {				/* MF018 */
+
+        if (gm->pgon)						/* MF018 */
+            XtFree ((char *)gm->pgon);
+        gm->pgon = (DPoint *) XtCalloc (first+npts+1, sizeof(DPoint));
+
+        /* Copy the point data to the polygon array. */
+        op = &gm->points[0];
+        pp = &gm->pgon[0];
+        for (i=0; i< gm->npoints; i++, pp++, op++) {
+            pp->x = (double)op->x - gm->x;
+            pp->y = (double)op->y - gm->y;
+        }
+        gm->points[first+npts] = gm->points[0];   /* Close the polygon.       */
+
+        gm->npoints = gm->pgon_npts = first + npts + 1;
+        gm->rotangle = 0.0;             	  /* reset rotation angle     */
+        gm->flags |= Gm_Modified; 		  /* marker has been modified */
     }
 
     /* Redraw the marker if autoredraw is enabled. */
@@ -9049,6 +9119,10 @@ GmGetVertices (gm, points, first, maxpts)
 	return (0);
     top = min (first + maxpts, gm->npoints);
     nout = top - first;
+
+    /* In the case of a poly object don't return the closing segment. */
+    if (gm->type == Gm_Polygon) 				/* MF027 */
+        --nout;
 
     if (points) {
 	ip = &gm->points[first];
@@ -9479,6 +9553,8 @@ gm_getattribute (attribute)
 	return (Ga_Font);
     else if (strcmp (attribute, GmText) == 0)
 	return (Ga_Text);
+    else if (strcmp (attribute, GmRotIndicator) == 0)		/* MF020 */
+	return (Ga_RotIndicator);
     else
 	return (ERR);
 }
@@ -9606,10 +9682,12 @@ gm_constraint (gm, new_gm, what)
 	sprintf (argv[argc++]=op, "%d", gm->height);	   op += SZ_NUMBER;
 	sprintf (argv[argc++]=op, "%d", new_gm->height);   op += SZ_NUMBER;
     }
-    if (what & Gb_Rotangle) {
+    if (what & Gb_Rotangle) {					/* MF022 */
+	double	rot = (gm->rotangle * ((double)180.0 / M_PI));
+	double	new_rot = (new_gm->rotangle * ((double)180.0 / M_PI));
 	strcpy (argv[argc++]=op, "rotangle");		   op += SZ_NUMBER;
-	sprintf (argv[argc++]=op, "%g", gm->rotangle);	   op += SZ_NUMBER;
-	sprintf (argv[argc++]=op, "%g", new_gm->rotangle); op += SZ_NUMBER;
+	sprintf (argv[argc++]=op, "%g", rot);	   	   op += SZ_NUMBER;
+	sprintf (argv[argc++]=op, "%g", new_rot); 	   op += SZ_NUMBER;
     }
 
     /* Call any constraint callbacks.  The argv value strings are modified
@@ -9634,6 +9712,9 @@ gm_constraint (gm, new_gm, what)
     }
     if (what & Gb_Rotangle) {
 	new_gm->rotangle = atof (ip);		ip += SZ_NUMBER*3;
+
+	/* Convert back to radians.... */
+	new_gm->rotangle *= (M_PI / (double)180.0);		/* MF022 */
     }
 }
 
@@ -9772,7 +9853,7 @@ M_set (widget, event, params, nparams)
 
     for (i=0;  i < *nparams;  i += 2)
 	GmSetAttribute (gm,
-	    (XtArgVal)params[i], (XtArgVal)params[i+1], XtRString);
+	    params[i], (XtArgVal)params[i+1], XtRString); 	/* MF010 */
 }
 
 
@@ -10664,10 +10745,13 @@ gm_rect_resize (gm, x, y)
     register Marker gm;
     int x, y;
 {
-    double cos_rotangle = cos (-(gm->rotangle));
-    double sin_rotangle = sin (-(gm->rotangle));
+/*  double cos_rotangle = cos (-(gm->rotangle));
+    double sin_rotangle = sin (-(gm->rotangle)); */
+    double cos_rotangle = cos ((gm->rotangle));			/* MF019 */
+    double sin_rotangle = sin ((gm->rotangle));			/* MF019 */
     struct marker new_gm;
     int rx, ry;
+    int ox = x, oy = y;
 
     /* Translate to the marker reference frame. */
     x = x - gm->x;
@@ -10712,11 +10796,22 @@ gm_rect_rotate (gm, x, y)
     if (x == gm->x && y == gm->y)
 	gm->rotangle = 0;
     else {
+
+    /*  V1.1  These eqns have the effect of allowing a marker to be grabbed by
+     *  any corner but doing so resets the rotation angle the first time the
+     *  marker is rotated.
+
 	theta = atan2 ((double)(y - gm->y), (double)(x - gm->x));
 	alpha = atan2 ((double)gm->height, (double)gm->width);
-	new_gm.rotangle = gm_niceAngle (theta + alpha);
+ 	new_gm.rotangle = gm_niceAngle (theta + alpha);
+     */
+
+	theta = atan2 ((double)(gm->y - y), (double)(x - gm->x)); /* MF019 */
+	new_gm.rotangle = gm_niceAngle (theta);			  /* MF019 */
 	gm_constraint (gm, &new_gm, Gb_Rotangle);
-	gm->rotangle = new_gm.rotangle;
+	gm_rotate_indicator (gm, GXxor);			  /* MF020 */
+	gm->rotangle =  new_gm.rotangle;
+	gm_rotate_indicator (gm, GXxor);			  /* MF020 */
 	gm_rect_updatePolygon (gm);
 	gm_setCurRect (gm);
     }
@@ -10730,8 +10825,10 @@ gm_rect_updatePolygon (gm)
     register XPoint *p = gm->points;
     double cos_rotangle, sin_rotangle;
 
-    cos_rotangle = cos (gm->rotangle);
-    sin_rotangle = sin (gm->rotangle);
+/*  cos_rotangle = cos (gm->rotangle);
+    sin_rotangle = sin (gm->rotangle);*/
+    cos_rotangle = cos (-gm->rotangle);				/* MF019 */
+    sin_rotangle = sin (-gm->rotangle);				/* MF019 */
     x = gm->width;
     y = gm->height;
 
@@ -10844,8 +10941,10 @@ gm_boxx_resize (gm, x, y)
     register Marker gm;
     int x, y;
 {
-    double cos_rotangle = cos (-(gm->rotangle));
-    double sin_rotangle = sin (-(gm->rotangle));
+/*  double cos_rotangle = cos (-(gm->rotangle));
+    double sin_rotangle = sin (-(gm->rotangle)); */
+    double cos_rotangle = cos ((gm->rotangle));			/* MF019 */
+    double sin_rotangle = sin ((gm->rotangle));			/* MF019 */
     struct marker new_gm;
     int rx, ry;
 
@@ -10879,11 +10978,17 @@ gm_boxx_rotate (gm, x, y)
     if (x == gm->x && y == gm->y)
 	gm->rotangle = 0;
     else {
+    /* V1.1
 	theta = atan2 ((double)(y - gm->y), (double)(x - gm->x));
 	alpha = atan2 ((double)gm->height, (double)gm->width);
 	new_gm.rotangle = gm_niceAngle (theta + alpha);
+     */
+	theta = atan2 ((double)(gm->y - y), (double)(x - gm->x)); /* MF019 */
+	new_gm.rotangle = gm_niceAngle (theta);			  /* MF019 */
 	gm_constraint (gm, &new_gm, Gb_Rotangle);
+	gm_rotate_indicator (gm, GXxor);			  /* MF020 */
 	gm->rotangle = new_gm.rotangle;
+	gm_rotate_indicator (gm, GXxor);			  /* MF020 */
 	gm_boxx_updatePolygon (gm);
 	gm_setCurRect (gm);
     }
@@ -10896,9 +11001,13 @@ gm_boxx_updatePolygon (gm)
     register x, y;
     register XPoint *p = gm->points;
     double cos_rotangle, sin_rotangle;
+	
+    double alpha = atan2 ((double)gm->height, (double)gm->width);
 
-    cos_rotangle = cos (gm->rotangle);
-    sin_rotangle = sin (gm->rotangle);
+/*  cos_rotangle = cos (gm->rotangle);
+    sin_rotangle = sin (gm->rotangle); */
+    cos_rotangle = cos (-gm->rotangle);				/* MF019 */
+    sin_rotangle = sin (-gm->rotangle);				/* MF019 */
     x = gm->width;
     y = gm->height;
 
@@ -10954,7 +11063,7 @@ gm_circ_init (gm, interactive)
     if (gm->points && gm->npoints > GM_MAXVERTICES)
 	XtFree ((char *)gm->points);
     gm->points = gm->point_data;
-    gm->npoints = GM_NPTSCIRCLE + 1;
+    gm->npoints = GM_NPTSCIRCLE;				/* MF015 */
 
     gm->select   = gm_circ_select;
     gm->markpos  = gm_markpos;
@@ -11030,7 +11139,8 @@ gm_circ_updatePolygon (gm)
     register int npts, i, j;
     double theta, x, y;
 
-    npts = (gm->npoints - 1) / 4;
+    /*npts = (gm->npoints - 1) / 4;*/
+    npts = gm->npoints / 4;					/* MF028 */
 
     for (i=0;  i < npts;  i++) {
 	theta = PI_2 / npts * i;
@@ -11054,7 +11164,7 @@ gm_circ_updatePolygon (gm)
 	p[npts*3+j].y = y + gm->y;
     }
 
-    p[gm->npoints-1] = p[0];
+    /*p[gm->npoints-1] = p[0];*/				/* MF015 */
 }
 
 
@@ -11089,7 +11199,8 @@ gm_elip_init (gm, interactive)
     if (gm->points && gm->npoints > GM_MAXVERTICES)
 	XtFree ((char *)gm->points);
     gm->points = gm->point_data;
-    gm->npoints = GM_NPTSCIRCLE + 1;
+/*    gm->npoints = GM_NPTSCIRCLE + 1;*/
+    gm->npoints = GM_NPTSCIRCLE;				/* MF015 */
 
     gm->select   = gm_elip_select;
     gm->markpos  = gm_markpos;
@@ -11148,7 +11259,8 @@ gm_elip_resize (gm, x, y)
     int x, y;
 {
     struct marker new_gm;
-    double theta = -(gm->rotangle);
+/*  double theta = -(gm->rotangle);*/
+    double theta = (gm->rotangle);				/* MF019 */
     int rx, ry;
 
     /* Translate to the marker reference frame. */
@@ -11182,10 +11294,13 @@ gm_elip_rotate (gm, x, y)
     if (x == gm->x && y == gm->y)
 	gm->rotangle = 0;
     else {
-	theta = atan2 ((double)(y - gm->y), (double)(x - gm->x));
+/*	theta = atan2 ((double)(y - gm->y), (double)(x - gm->x));*/
+	theta = atan2 ((double)(gm->y - y), (double)(x - gm->x)); /* MF019 */
 	new_gm.rotangle = gm_niceAngle (theta);
 	gm_constraint (gm, &new_gm, Gb_Rotangle);
+	gm_rotate_indicator (gm, GXxor);			  /* MF020 */
 	gm->rotangle = new_gm.rotangle;
+	gm_rotate_indicator (gm, GXxor);			  /* MF020 */
 	gm_elip_updatePolygon (gm);
 	gm_setCurRect (gm);
     }
@@ -11200,9 +11315,11 @@ gm_elip_updatePolygon (gm)
     double cos_rotangle, sin_rotangle;
     double theta, x, y;
 
-    npts = (gm->npoints - 1) / 4;
-    cos_rotangle = cos (gm->rotangle);
-    sin_rotangle = sin (gm->rotangle);
+    npts = (gm->npoints - 1) / 4 + 1;				/* MF017 */
+/*  cos_rotangle = cos (gm->rotangle);
+    sin_rotangle = sin (gm->rotangle); */
+    cos_rotangle = cos (-gm->rotangle);				/* MF019 */
+    sin_rotangle = sin (-gm->rotangle);				/* MF019 */
 
     for (i=0;  i < npts;  i++) {
 	theta = PI_2 / npts * i;
@@ -11226,7 +11343,7 @@ gm_elip_updatePolygon (gm)
 	p[npts*3+j].y = x * sin_rotangle + y * cos_rotangle + gm->y + 0.5;
     }
 
-    p[gm->npoints-1] = p[0];
+    /*p[gm->npoints-1] = p[0];*/				/* MF015 */
 }
 
 
@@ -11355,8 +11472,10 @@ gm_pgon_addPt (gm, x, y)
 {
     register DPoint *pv;
     register GtermWidget w = gm->w;
-    double cos_rotangle = cos (-(gm->rotangle));
-    double sin_rotangle = sin (-(gm->rotangle));
+/*  double cos_rotangle = cos (-(gm->rotangle));
+    double sin_rotangle = sin (-(gm->rotangle)); */
+    double cos_rotangle = cos ((gm->rotangle));			/* MF019 */
+    double sin_rotangle = sin ((gm->rotangle));			/* MF019 */
     int vertex, nbytes;
     double rx, ry;
 
@@ -11450,8 +11569,10 @@ gm_pgon_movePt (gm, x, y)
 {
     register DPoint *p;
     register GtermWidget w = gm->w;
-    double cos_rotangle = cos (-(gm->rotangle));
-    double sin_rotangle = sin (-(gm->rotangle));
+/*  double cos_rotangle = cos (-(gm->rotangle));
+    double sin_rotangle = sin (-(gm->rotangle)); */
+    double cos_rotangle = cos ((gm->rotangle));			/* MF019 */
+    double sin_rotangle = sin ((gm->rotangle));			/* MF019 */
     double rx, ry;
     int vertex;
 
@@ -11570,7 +11691,8 @@ gm_pgon_rotate (gm, x, y)
     register GtermWidget w = gm->w;
     double cos_rotangle = cos (-(gm->rotangle));
     double sin_rotangle = sin (-(gm->rotangle));
-    double scale, alpha, beta, rx, ry;
+    double alpha, beta, rx, ry;
+    double theta = atan2 ((double)(gm->y - y), (double)(x - gm->x));/* MF019 */
     struct marker new_gm;
     int vertex;
 
@@ -11597,12 +11719,17 @@ gm_pgon_rotate (gm, x, y)
 	return;
 
     p = &gm->pgon[vertex];
-    alpha = atan2 (p->y, p->x);
-    beta  = atan2 (ry, rx);
+    alpha = atan2 (p->y, p->x);	/* angle btw origin & selected vertex */
+    beta  = atan2 (ry, rx);	/* angle btw origin & cursor position */
 
     new_gm.rotangle = gm_niceAngle (gm->rotangle + (beta - alpha));
+
+    new_gm.rotangle = gm_niceAngle (theta);			/* MF019 */
+
     gm_constraint (gm, &new_gm, Gb_Rotangle);
+    gm_rotate_indicator (gm, GXxor);			  	/* MF020 */
     gm->rotangle = new_gm.rotangle;
+    gm_rotate_indicator (gm, GXxor);			  	/* MF020 */
 
     gm_pgon_updatePolygon (gm);
     gm_setCurRect (gm);
@@ -11619,8 +11746,10 @@ gm_pgon_updatePolygon (gm)
     int width, height, xp, xn, yp, yn;
 
     npts = gm->npoints;
-    cos_rotangle = cos (gm->rotangle);
-    sin_rotangle = sin (gm->rotangle);
+/*  cos_rotangle = cos (gm->rotangle);
+    sin_rotangle = sin (gm->rotangle); */
+    cos_rotangle = cos (-gm->rotangle);				/* MF019 */
+    sin_rotangle = sin (-gm->rotangle);				/* MF019 */
     xp = xn = yp = yn = 0;
 
     for (i=0;  i < npts;  i++, ip++, op++) {
@@ -11670,8 +11799,9 @@ gm_select (gm, x, y, what)
     int ncrossings, x0, y0;
     XPoint *q;
     int n;
+    int use_old_method = 0;
 
-    /* Determine if the point is near a vertex. */
+    /* Determine if the point is near a vertex.  */
     for (p = gm->points, n = gm->npoints - 1;  --n >= 0;  p++)
 	if (abs (x - p->x) < v_dist && abs (y - p->y) < v_dist) {
 	    if (what) {
@@ -11687,7 +11817,8 @@ gm_select (gm, x, y, what)
      * nearly the same as the length of the line segment.
      */
     p = gm->points;
-    ptop = p + gm->npoints;
+
+    ptop = p + (gm->npoints - 1);  				/* MF014 */
     x0 = p->x;  y0 = p->y;
     d1 = sqrt ((double)(SQR(x - x0) + SQR(y - y0)));
 
@@ -11695,7 +11826,7 @@ gm_select (gm, x, y, what)
 	seglen = sqrt ((double)(SQR(p->x - x0) + SQR(p->y - y0)));
 	d2 = sqrt ((double)(SQR(x - p->x) + SQR(y - p->y)));
 
-	if (d1 + d2 - seglen < e_dist) {
+	if (abs(d1 + d2 - seglen) < e_dist) {			/* MF028 */
 	    if (what) {
 		what->type = Ge_Edge;
 		what->vertex = (p - 1) - gm->points;
@@ -11714,36 +11845,57 @@ gm_select (gm, x, y, what)
     case Gm_Line:
     case Gm_Polyline:
 	return (0);
+	break;
+    case Gm_Circle:
+        d1 = sqrt ((double)(SQR(x - gm->x) + SQR(y - gm->y)));
+	if (d1 < gm->width) {
+	    if (what) what->type = Ge_Marker;
+	    return (1);
+	} else
+	    return (0);
+	break;
     }
 
-    for (p = gm->points, ncrossings=0;  p < ptop;  p++) {
-	/* Scan forward until we find a line segment that crosses Y.
-	 */
-	if (p->y > y) {
-	    for (p++;  p < ptop && p->y >= y;  p++)
-		;
-	    --p;
-	} else if (p->y < y) {
-	    for (p++;  p < ptop && p->y <= y;  p++)
-		;
-	    --p;
-	}
+    if (use_old_method) {
+        for (p = gm->points, ncrossings=0;  p < ptop;  p++) {
+	    /* Scan forward until we find a line segment that crosses Y.
+	     */
+	    if (p->y > y) {
+	        for (p++;  p < ptop && p->y >= y;  p++)
+		    ;
+	        --p;
+	    } else if (p->y < y) {
+	        for (p++;  p < ptop && p->y <= y;  p++)
+		    ;
+	        --p;
+	    }
 
-	/* The line segment p[0]:p[1] crosses the Y plane.  If this lies
-	 * entirely to the left of the X plane we can ignore it.  If any
-	 * portion of the line segment lies to the right of X we compute
-	 * the point where the line intersects the Y plane.  If this point
-	 * is to the right of the X plane we have a crossing.
-	 */
-	q = p + 1;
-	if (q < ptop && p->x > x || q->x > x) {
-            if (q->y == p->y)
-                 frac = (double) 0.0;
-            else
-                 frac = (double)(y - p->y) / (double)(q->y - p->y);
-	    if ((frac * (q->x - p->x) + p->x) >= x)
-		ncrossings++;
-	}
+	    /* The line segment p[0]:p[1] crosses the Y plane.  If this lies
+	     * entirely to the left of the X plane we can ignore it.  If any
+	     * portion of the line segment lies to the right of X we compute
+	     * the point where the line intersects the Y plane.  If this point
+	     * is to the right of the X plane we have a crossing.
+	     */
+	    q = p + 1;
+	    if (q < ptop && p->x > x || q->x > x) {
+                if (q->y == p->y)
+                     frac = (double) 0.0;
+                else
+                     frac = (double)(y - p->y) / (double)(q->y - p->y);
+	        if ((frac * (q->x - p->x) + p->x) >= x)
+		    ncrossings++;
+	    }
+        }
+
+    } else {
+        float xp[64], yp[64];
+        int i;
+
+        for (i=0, p=gm->points, ncrossings=0;  p <= ptop;  p++, i++) {
+	    xp[i] = (float) p->x;
+	    yp[i] = (float) p->y;
+        }
+        ncrossings = point_in_poly (gm->npoints, xp, yp, (float)x, (float)y);
     }
 
     if (ncrossings & 1) {
@@ -11754,6 +11906,24 @@ gm_select (gm, x, y, what)
 
     return (0);
 }
+
+point_in_poly (npol, xp, yp, x, y)
+int 	npol;
+float 	*xp, *yp, x, y;
+{
+      int i, j, c = 0;
+
+      for (i = 0, j = npol-1; i < npol; j = i++) {
+        if ((((yp[i] <= y) && (y < yp[j])) ||
+             ((yp[j] <= y) && (y < yp[i]))) &&
+            (x < (xp[j] - xp[i]) * (y - yp[i]) / (yp[j] - yp[i]) + xp[i]))
+
+          c = !c;
+      }
+      return c;
+}
+
+
 
 
 /* gm_markpos -- Mark the current position of a marker.
@@ -11862,6 +12032,46 @@ gm_redraw (gm, function)
 }
 
 
+/* gm_rotate_indicator -- Draw a line indicating the rotation angle.
+ */
+static void
+gm_rotate_indicator (gm, function)				/* MF020 */
+Marker gm;
+int    function;
+{
+    GtermWidget w = gm->w;
+    Display *display = w->gterm.display;
+    Window window = w->gterm.window;
+    GC gc = (function == GXxor) ? w->gterm.gm_rubberGC : w->gterm.gm_drawGC;
+
+    if (!gm->rotIndicator)
+	return ;
+
+    if (function == GXxor) {
+        if (gm->type == Gm_Polygon ||
+            gm->type == Gm_Ellipse ||
+            gm->type == Gm_Box ||
+            gm->type == Gm_Rectangle) {
+    		int	x, y, x2, y2;
+    		double  ar, cos_rotangle, sin_rotangle;
+    		double  alpha = atan2 ((double)gm->height,(double)gm->width);
+
+	        cos_rotangle = cos ((double)(-gm->rotangle - alpha));
+    	        sin_rotangle = sin ((double)(-gm->rotangle - alpha));
+		ar = (double) gm->height / (double) gm->width;
+    	        x = (int) (ar * (gm->width / 2));
+	        y = (int) (ar * (gm->height / 2));
+    	        x2 = x * cos_rotangle - y * sin_rotangle + gm->x;
+    	        y2 = x * sin_rotangle + y * cos_rotangle + gm->y;
+
+  	        XDrawLine (display, window, gc, gm->x, gm->y, x2, y2); 
+        }
+    } else {
+	; 	/* no-op at present */
+    }
+}
+
+
 /* gm_setCurRect -- Compute a bounding rectangle which completely encloses
  * a marker (assumes that the marker is expressed as list of points).
  */
@@ -11910,3 +12120,57 @@ gm_niceAngle (alpha)
 
     return (beta);
 }
+
+
+static XImage *cached_ximage =	NULL;			/* MF004 BEGIN */
+
+/* GetCachedXImage -- 
+ */
+static XImage *
+GetCachedXImage (w, pixmap, width, height)
+     GtermWidget w;
+     Pixmap pixmap;
+     int width;
+     int height;
+{
+    if ((cached_ximage != NULL)) {
+        if ((pixmap == w->gterm.pixmap) &&
+            (width  == w->core.width)   &&
+            (height == w->core.height)) {
+                return (cached_ximage);
+        }
+    }
+    return(NULL);
+}
+
+
+/* DestroyCachedXImage --
+ */
+static void 
+DestroyCachedXImage ()
+{
+    if (cached_ximage != NULL) {
+        XDestroyImage (cached_ximage);
+      cached_ximage = NULL;
+    }
+}
+
+
+/* NewCachedXImage --
+ */
+static void 
+NewCachedXImage (w, xin, pixmap, width, height)
+     GtermWidget w;
+     XImage *xin;
+     Pixmap pixmap;
+     int width;
+     int height;
+{
+    if ((pixmap ==  w->gterm.pixmap) &&
+        (width  ==  w->core.width)   &&
+        (height ==  w->core.height)) {
+            DestroyCachedXImage();
+            cached_ximage = xin;
+    }
+}							/* MF004 END   */
+

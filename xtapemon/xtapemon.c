@@ -454,7 +454,7 @@ XtInputId *id;
 	    ival = atoi (value);
 	    sprintf (obuf, " %d.%02d Mb (%02d%%)",
 		ival / 1000, ((ival % 1000) + 5) / 10,
-		(ival * 100) / tapesize);
+		(ival / tapesize) * 100);
 	    setText (tapeusedText, obuf);
 
 	} else if (strcmp (word, "blksize") == 0) {
@@ -553,8 +553,8 @@ portSetup (first_port)
 int	first_port;
 {
 	struct sockaddr_in sockaddr;
-	int	s, port, i;
-	int	bound;
+	int bound, reuse=1;
+	int s, port, i;
 
 	if ((s = socket (AF_INET, SOCK_STREAM, 0)) < 0) {
 	    status1 ("socket creation fails, errno=%d", errno);
@@ -571,6 +571,13 @@ int	first_port;
 	    sockaddr.sin_family = AF_INET;
 	    sockaddr.sin_port = htons((short)port);
 	    sockaddr.sin_addr.s_addr = INADDR_ANY;
+
+	    if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse,
+		    sizeof(reuse)) < 0) {
+		close (s);
+		return (ERR);
+	    }
+
 	    if (bind (s, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) >= 0) {
 		server_port = port;
 		bound++;

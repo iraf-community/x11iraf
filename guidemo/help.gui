@@ -296,5 +296,6 @@ proc hlpHome args {
     send helpText gotoId 0
     send helpForward set sensitive False
     send helpBack set sensitive False
+    send helpText retestAnchors
 }; send helpHome addCallback hlpHome
 

@@ -32,6 +32,13 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclParse.c,v 1.37 93/10/14
 
 #include "tclInt.h"
 
+/*  Slackware/RedHat4.2 compatibility hack. */
+#if defined(linux) && defined(isalnum)
+#undef isalnum
+#define isalnum(c) (isalpha(c)||isdigit(c))
+#endif
+
+
 /*
  * The following table assigns a type to each character.  Only types
  * meaningful to Tcl parsing are represented here.  The table indexes

@@ -96,7 +96,7 @@ int	colorstyle;			/* return color (0) or grayscale (1) */
 	register FILE *fp;
 	register int i, j;
 	int linesize, lsize, csize, isize, w, h, d, nc, ct;
-	unsigned char *image, *line, *pic8, p;
+	unsigned char *image, *line, p;
 	struct rasterfile sunhdr;
 
 	/* Read in the Sun Rasterfile picture. */

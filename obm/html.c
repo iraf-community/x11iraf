@@ -417,7 +417,7 @@ char **argv;
 /* idToPosition -- Return the position of an HTML element given its
  * element id.
  *
- *  Usage:	bool = positionToId id [x y]
+ *  Usage:	idToPosition id x y
  *
  * If there is no element with the given element id false is returned and
  * the coordinates x,y are undefined.
@@ -450,12 +450,12 @@ char **argv;
 	else {
 	    if (s_x) {
 		sprintf (buf, "%d", x);
-		if ((Tcl_SetVar (obm->tcl, buf, s_x, 0)) == NULL)
+		if ((Tcl_SetVar (obm->tcl, s_x, buf, 0)) == NULL) /* MF024 */
 		    return (TCL_ERROR);
 	    }
 	    if (s_y) {
 		sprintf (buf, "%d", y);
-		if ((Tcl_SetVar (obm->tcl, buf, s_y, 0)) == NULL)
+		if ((Tcl_SetVar (obm->tcl, s_y, buf, 0)) == NULL) /* MF024 */
 		    return (TCL_ERROR);
 	    }
 	    Tcl_SetResult (obm->tcl, TRUESTR, TCL_STATIC);
@@ -500,12 +500,12 @@ char **argv;
 	else {
 	    if (s_x) {
 		sprintf (buf, "%d", x);
-		if ((Tcl_SetVar (obm->tcl, buf, s_x, 0)) == NULL)
+		if ((Tcl_SetVar (obm->tcl, s_x, buf, 0)) == NULL) /* MF024 */
 		    return (TCL_ERROR);
 	    }
 	    if (s_y) {
 		sprintf (buf, "%d", y);
-		if ((Tcl_SetVar (obm->tcl, buf, s_y, 0)) == NULL)
+		if ((Tcl_SetVar (obm->tcl, s_y, buf, 0)) == NULL) /* MF024 */
 		    return (TCL_ERROR);
 	    }
 	    Tcl_SetResult (obm->tcl, TRUESTR, TCL_STATIC);
@@ -616,7 +616,7 @@ char **argv;
 		return (TCL_ERROR);
 	    }
 
-	    if ((Tcl_SetVar (obm->tcl, lbuf, a_list, 0)) == NULL) {
+	    if ((Tcl_SetVar (obm->tcl, a_list, lbuf, 0)) == NULL) { /* MF024 */
 		free ((char *)list);
 		XtFree (lbuf);
 		return (TCL_ERROR);
@@ -671,7 +671,7 @@ char **argv;
 		return (TCL_ERROR);
 	    }
 
-	    if ((Tcl_SetVar (obm->tcl, lbuf, a_list, 0)) == NULL) {
+	    if ((Tcl_SetVar (obm->tcl, a_list, lbuf, 0)) == NULL) { /* MF024 */
 		free ((char *)list);
 		XtFree (lbuf);
 		return (TCL_ERROR);
@@ -753,7 +753,7 @@ char **argv;
 	    *op++ = '}';
 	    *op++ = '\0';
 
-	    if ((Tcl_SetVar (obm->tcl, lbuf, a_list, 0)) == NULL) {
+	    if ((Tcl_SetVar (obm->tcl, a_list, lbuf, 0)) == NULL) { /* MF024 */
 		free ((char *)list);
 		XtFree (lbuf);
 		return (TCL_ERROR);
@@ -855,17 +855,19 @@ char **argv;
 	HTMLObject obj = (HTMLObject) gcd->object[gcd->level];
 	register WidgetPrivate wp = &obj->widget;
 	ElementRef start, end;
-	char *ip;
+	char *ip = (char *)NULL;
 
 	if (argc < 3)
 	    return (TCL_ERROR);
 
-	start.id  = strtol (argv[1], &ip, 0);
+	ip = (char *)NULL;
+	start.id  = strtol (&argv[1][1], &ip, 0);
 	start.pos = strtol (ip, &ip, 0);
 	if (ip == argv[1])
 	    return (TCL_ERROR);
 
-	end.id  = strtol (argv[2], &ip, 0);
+	ip = (char *)NULL;
+	end.id  = strtol (&argv[2][1], &ip, 0);
 	end.pos = strtol (ip, &ip, 0);
 	if (ip == argv[2])
 	    return (TCL_ERROR);
@@ -937,7 +939,9 @@ char **argv;
  * of the matched region and the function returns a true (nonzero) value.
  * False is returned if the search fails.  An element ref is a structure of
  * the form {element_id offset} specifying the element id within the document,
- * and the character offset within that element.
+ * and the character offset within that element.  The search will automatically
+ * wrap around the page if not found initially.
+ *
  */
 static int 
 htmlSearchText (msg, tcl, argc, argv)
@@ -951,9 +955,10 @@ char **argv;
 	register WidgetPrivate wp = &obj->widget;
 	ObmContext obm = obj->widget.obm;
 	char *pattern, *a_start, *a_end;
-	int backward, caseless;
-	ElementRef start, end;
-	int status;
+	int backward = 0, caseless = 1;
+	static ElementRef start, end;
+  	static char patstr[64];
+	int status, again = 1;
 
 	if (argc < 4)
 	    return (TCL_ERROR);
@@ -968,20 +973,37 @@ char **argv;
 	if (argc > 5)
 	    caseless = (strcmp (argv[5], "caseless") == 0);
 
+	/* See whether the pattern has changed and we need to reset the
+	 * start and end element refs.
+	 */
+	if (strcmp (pattern, patstr) != 0) {
+retry: 	    start.id = start.pos = 0;
+	    end.id = end.pos = 0;
+	    strcpy (patstr, "");
+	    again = 0;
+	}
+
+	/* Do the search. */
 	status = HTMLSearchText (wp->w, pattern,
 	    &start, &end, backward, caseless);
 
 	if (status == 1) {
 	    char buf[SZ_LINE];
 	    sprintf (buf, "{%d %d}", start.id, start.pos);
-	    if ((Tcl_SetVar (obm->tcl, buf, a_start, 0)) == NULL)
+	    if ((Tcl_SetVar (obm->tcl, a_start, buf, 0)) == NULL) /* MF024 */
 		return (TCL_ERROR);
 	    sprintf (buf, "{%d %d}", end.id, end.pos);
-	    if ((Tcl_SetVar (obm->tcl, buf, a_end, 0)) == NULL)
+	    if ((Tcl_SetVar (obm->tcl, a_end, buf, 0)) == NULL)   /* MF024 */
 		return (TCL_ERROR);
 	    Tcl_SetResult (wp->obm->tcl, TRUESTR, TCL_STATIC);
-	} else
+	} else {
+	    if (again == 1)
+		goto retry;
 	    Tcl_SetResult (wp->obm->tcl, FALSESTR, TCL_STATIC);
+	}
+
+	/* Save the pattern string so we can reset later if it changes. */
+	strcpy (patstr, pattern);
 
 	return (TCL_OK);
 }

@@ -1,5 +1,5 @@
 .\" @(#)ximtool.1 1.1 10-Dec-96 MJF
-.TH XIMTOOL 1 "10 Dec 1996" "X11IRAF Project"
+.TH XIMTOOL-MAG 1 "10 Dec 1996" "X11IRAF Project"
 .SH NAME
 ximtool-mag \- interactive image display program for the X Window System with experimental GUI
 .SH SYNOPSIS
@@ -311,14 +311,14 @@ pixmap is only the size of the display window, so memory usage is reasonable
 even if the frame buffer is very large.
 .sp -0.5
 .TP 18
-.B "*basePixel"
+.B "basePixel"
 .sp -0.5
 .TP 18
-.B "*maxColors"
+.B "maxColors"
 These two resources determine the region of colormap space used to
 render image pixels.
 .TP 18
-.B "*cmapInitialize"
+.B "cmapInitialize"
 Initialize the ximtool colormap at startup.  This is sometimes necessary to
 clear a previous ximtool colormap allowing a new basePixel and maxColors to
 take effect.
@@ -592,7 +592,7 @@ Where to place the coords box.
 .B "*maxContrast"
 Maximum contrast value.
 
-
+.sp
 .SH DESCRIPTION
 .LP
 As a display server, XImtool is started as a separate process from client
@@ -647,7 +647,7 @@ Backward frame
 .sp -0.5
 .TP 12
 .B "Ctrl-c"
-Center frame?
+Center frame
 .sp -0.5
 .TP 12
 .B "Ctrl-f"
@@ -655,19 +655,27 @@ Forward frame
 .sp -0.5
 .TP 12
 .B "Ctrl-i"
-Invert?
+Invert
+.sp -0.5
+.B "Ctrl-m"
+Toggle magnifier
 .sp -0.5
 .TP 12
-.B "Ctrl-m"
-Match LUTs
-.sp -0.5
 .TP 12
 .B "Ctrl-n"
 Normalize
 .sp -0.5
 .TP 12
+.B "Ctrl-p"
+Toggle panner
+.sp -0.5
+.TP 12
 .B "Ctrl-r"
 Register
+.sp -0.5
+.TP 12
+.B "Ctrl-s"
+Match LUT scaling
 .sp -0.5
 .TP 12
 .B "Ctrl-t"
@@ -746,12 +754,20 @@ Zoom in
 Zoom out
 
 .TP 12
-.B "Ctrl-[hjkl]  or  Ctrl-[arrow_key]"
+.B "Ctrl-[hjkl]  or  <arrow_key>"
 Move cursor one pixel in each direction
 .sp -0.5
 .TP 12
-.B "Ctrl-Shift-[hjkl]  or  Ctrl-Shift-[arrow_key]"
+.B "Ctrl-Shift-[hjkl]  or  Shift-<arrow_key>"
 Move cursor ten pixels in each direction
+.sp -0.5
+.TP 12
+.B "Ctrl-<arrow_key>"
+Move panner one full width in each direction
+.sp -0.5
+.TP 12
+.B "Ctrl-Alt-<arrow_key>"
+Move panner one half width in each direction
 .sp -0.5
 .TP 12
 .B "Alt-1 thru Alt-4"
@@ -1411,6 +1427,23 @@ input from a pipe, the two fields must be separated by a tab character.
 Normally the command
 will be a simple \fIlpr -Pfoo\fP or some such, but can also include converters
 or previewers. At most 128 printer commands may be used.
+
+.SS "ANNOTATION OPTIONS"
+
+.TP 5
+.B "Annotate"
+Selects whether Postscript image is to be annotated.
+.B "Title"
+Annotate with a title on the top of the image.
+.B "Borders"
+Annotate with borders surrounding the image giving image coordinates.
+.B "Colorbar"
+Annotate with colorbar at the bottom of the image
+.B "Title String"
+Title string to use when \fItitle\fR is selected.  The special value
+\fIimtitle\fR will force the title to be the currently displayed image title,
+otherwise it will be this user-selected field.
+
 
 .SH "INFO PANEL"
 

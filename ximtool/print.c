@@ -51,6 +51,7 @@ int x0,y0, nx,ny;				/* region of source raster */
 	char text[SZ_LINE];
 	int w, h, ncolors;
 	FILE *fp;
+	char *mktemp();
 
 	/* Get the display pixels and colormap.  The routine allocates a 
 	 * pointer to the pixels we'll need to free when we're done.
@@ -61,9 +62,8 @@ int x0,y0, nx,ny;				/* region of source raster */
 	    return (-1);
 
 	/* Set up some of the EPS options and load the colormap. */
-	if (psim->label)
-	    eps_setLabel (psim, fb->ctran.imtitle);
-	/* eps_setCmap (psim, r, g, b, 256); */
+ 	if (psim->label && (psim->page.flags & EPS_DOTITLE))
+ 	    eps_setLabel (psim, fb->ctran.imtitle);
         eps_setCmap (psim, r, g, b, ncolors);
 	eps_setTransform (psim, fb->ctran.z1, fb->ctran.z2, fb->ctran.zt,
 	    fb->offset, fb->scale, cm->name);
@@ -112,7 +112,7 @@ int x0,y0, nx,ny;				/* region of source raster */
 			last = op + 1;
 		*last = '\0';
 		strcat (tmpfile, "ximpXXXXXX");
-		if (mktemp(tmpfile) == NULL)
+		if (mktemp(tmpfile) == (char *)NULL)
 		    return (-1);
 
 		if (!(fp = fopen (tmpfile, "w"))) {
@@ -139,7 +139,7 @@ int x0,y0, nx,ny;				/* region of source raster */
 	} else {
 	    /* Print to a printer device. */
 	    strcpy (tmpfile, "/tmp/ximpXXXXXX");
-	    if (mktemp(tmpfile) == NULL)
+	    if (mktemp(tmpfile) == (char *)NULL)
 		return (-1);
 
 	    if (!(fp = fopen (tmpfile, "w")))
@@ -208,11 +208,15 @@ register XimDataPtr xim;
 	/* Read the printer configuration file. */
         xim_initPrinterList (xim);
 
+	/* Initialize options. */
         xim_message (xim, "printOptions", "papersize letter");
         xim_message (xim, "printOptions", "orientation portrait");
         xim_message (xim, "printOptions", "colortype gray");
         xim_message (xim, "printOptions", "autoscale True");
         xim_message (xim, "printOptions", "annotate True");
+        xim_message (xim, "printOptions", "dotitle True");
+        xim_message (xim, "printOptions", "docolorbar True");
+        xim_message (xim, "printOptions", "doborders True");
 
         /* Allocate the printer configuration struct. */
         xim->pcp = pcp = (PrintCfgPtr) malloc (sizeof (PrintCfg));
@@ -241,8 +245,8 @@ register XimDataPtr xim;
 {
 	register int i;
 	register FILE *fp;
-	char buf[SZ_LINE], plist[MAX_PRINTERS*20];
-	char c, *ip, *pn, *pc, *pl;
+	char 	 buf[SZ_LINE], plist[MAX_PRINTERS*20];
+	char  	 *ip, *pn, *pc, *pl;
 
 	if (access (xim->printConfig, R_OK) == 0) {
 	    if (!(fp = fopen (xim->printConfig, "r")))
@@ -319,7 +323,6 @@ char *printer;
 {
 	register int i;
         register PrintCfgPtr pcp = xim->pcp;
-	char buf[SZ_LINE];
 
 	/* Scan down the printer list until we find the requested device. */
 	for (i=0; strcmp(printer_list[i].printerName, printer) != 0; i++)

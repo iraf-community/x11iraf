@@ -74,6 +74,9 @@ SOFTWARE.
 #include <ObmW/Gterm.h>
 #include <X11/StringDefs.h>
 #include <X11/Shell.h>
+#ifdef I18N
+#include <X11/Xlocale.h>
+#endif
 
 #include <X11/Xos.h>
 #include <X11/cursorfont.h>
@@ -142,7 +145,7 @@ static Bool IsPts = False;
 #define USE_HANDSHAKE
 #endif
 
-#if defined(SYSV) && !defined(SVR4) && !defined(AUX)
+#if defined(SYSV) && !defined(SVR4) && !defined(AUX) && !defined(ISC22) && !defined(ISC30)
 /* older SYSV systems cannot ignore SIGHUP.
    Shell hangs, or you get extra shells, or something like that */
 #define USE_SYSV_SIGHUP
@@ -163,6 +166,7 @@ void *memmove(a,b,n) void *a, *b; int n; { bcopy(b,a,n); }
 #if defined(sony) && defined(bsd43) && !defined(KANJI)
 #define KANJI
 #endif
+
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 
@@ -178,12 +182,16 @@ void *memmove(a,b,n) void *a, *b; int n; { bcopy(b,a,n); }
 #else /* USE_TERMIOS */
 #ifdef SYSV
 #include <sys/termio.h>
+#ifdef SCO /* broken TIOCSWINSZ ioctl so disable it */
+#undef TIOCSWINSZ
+#endif
 #endif /* SYSV */
 #endif /* USE_TERMIOS else */
 
-#ifdef SVR4
+#if defined(SVR4) || defined(__linux__)
 #undef TIOCSLTC				/* defined, but not useable */
 #endif
+#define USE_TERMCAP_ENVVARS     /* every one uses this except SYSV maybe */
 
 #if defined(sgi) && OSMAJORVERSION >= 5
 #undef TIOCLSET				/* defined, but not useable */
@@ -202,6 +210,9 @@ void *memmove(a,b,n) void *a, *b; int n; { bcopy(b,a,n); }
 #define USE_SYSV_SIGNALS
 #define	USE_SYSV_PGRP
 #define USE_SYSV_ENVVARS		/* COLUMNS/LINES vs. TERMCAP */
+#ifndef SCO
+#undef USE_TERMCAP_ENVVARS      /* SCO wants both TERMCAP and TERMINFO env */
+#endif
 /*
  * now get system-specific includes
  */
@@ -227,12 +238,12 @@ void *memmove(a,b,n) void *a, *b; int n; { bcopy(b,a,n); }
 #include <sgtty.h>
 #include <sys/resource.h>
 #endif
-#ifdef hpux
+#if defined(hpux) || defined (__hpux)
 #define HAS_BSD_GROUPS
 #define USE_SYSV_UTMP
 #define HAS_UTMP_UT_HOST
 #include <sys/ptyio.h>
-#endif /* hpux */
+#endif /* __hpux */
 #ifdef sgi
 #include <sys/sysmacros.h>
 #endif /* sgi */
@@ -243,7 +254,8 @@ void *memmove(a,b,n) void *a, *b; int n; { bcopy(b,a,n); }
 #define USE_SYSV_UTMP
 #define HAS_UTMP_UT_HOST
 #endif
-#else /* } !SYSV { */			/* BSD systems */
+#else /* } !SYSV { */			/* BSD systems 	*/
+#ifndef linux
 #include <sgtty.h>
 #include <sys/resource.h>
 #define HAS_UTMP_UT_HOST
@@ -252,10 +264,11 @@ void *memmove(a,b,n) void *a, *b; int n; { bcopy(b,a,n); }
 #define USE_SYSV_UTMP
 #define setpgrp setpgid
 #endif
+#endif	/* !linux */
 #endif	/* } !SYSV */
 
 #ifdef _POSIX_SOURCE
-#define USE_POSIX_WAIT
+#define USE_POSIXSYSV_WAIT
 #endif
 #ifdef SVR4
 #define USE_POSIX_WAIT
@@ -274,9 +287,9 @@ extern Time_t time ();
 #define Time_t time_t
 #endif
 
-#ifdef hpux
+#if defined(hpux) || defined(__hpux) 
 #include <sys/utsname.h>
-#endif /* hpux */
+#endif /* __hpux */
 
 #if defined(apollo) && OSMAJORVERSION == 10 && OSMINORVERSION < 4
 #define ttyslot() 1
@@ -319,17 +332,25 @@ int	Ptyfd;
 #endif
 
 #ifndef LASTLOG_FILENAME
+#ifdef _PATH_LASTLOG
+#define LASTLOG_FILENAME _PATH_LASTLOG
+#else
 #define LASTLOG_FILENAME "/usr/adm/lastlog"  /* only on BSD systems */
+#endif
 #endif
 
 #ifndef WTMP_FILENAME
 #ifdef WTMP_FILE
 #define WTMP_FILENAME WTMP_FILE
 #else
-#ifdef SYSV
+#if defined(_PATH_WTMP)		/* R6 update	*/
+#define WTMP_FILENAME _PATH_WTMP
+#else
+#if defined(SYSV)
 #define WTMP_FILENAME "/etc/wtmp"
 #else
 #define WTMP_FILENAME "/usr/adm/wtmp"
+#endif
 #endif
 #endif
 #endif
@@ -342,7 +363,7 @@ int	Ptyfd;
 
 #ifdef SIGTSTP
 #include <sys/wait.h>
-#ifdef hpux
+#if defined(hpux) || defined(__hpux)
 #include <sys/bsdtty.h>
 #endif
 #endif
@@ -361,7 +382,7 @@ SIGNAL_T Exit();
 #include <unistd.h>
 #else
 extern long lseek();
-#ifdef USG
+#if defined(USG) || defined(SCO324)
 extern unsigned sleep();
 #else
 extern void sleep();
@@ -494,6 +515,7 @@ extern void utmpname();
 #endif
 #endif /* !SVR4 */
 
+/*#ifndef SYSV386		/* could remove paragraph unconditionally? */
 #ifdef X_NOT_STDC_ENV		/* could remove paragraph unconditionally? */
 extern struct passwd *getpwent();
 extern struct passwd *getpwuid();
@@ -602,74 +624,78 @@ static char *fallback_resources[] = {
    pass over the remaining options after XrmParseCommand is let loose. */
 
 static XrmOptionDescRec optionDescList[] = {
-{"-geometry",	"*vt100.geometry",XrmoptionSepArg,	(caddr_t) NULL},
-{"-132",	"*c132",	XrmoptionNoArg,		(caddr_t) "on"},
-{"+132",	"*c132",	XrmoptionNoArg,		(caddr_t) "off"},
-{"-ah",		"*alwaysHighlight", XrmoptionNoArg,	(caddr_t) "on"},
-{"+ah",		"*alwaysHighlight", XrmoptionNoArg,	(caddr_t) "off"},
-{"-b",		"*internalBorder",XrmoptionSepArg,	(caddr_t) NULL},
-{"-cb",		"*cutToBeginningOfLine", XrmoptionNoArg, (caddr_t) "off"},
-{"+cb",		"*cutToBeginningOfLine", XrmoptionNoArg, (caddr_t) "on"},
-{"-cc",		"*charClass",	XrmoptionSepArg,	(caddr_t) NULL},
-{"-cn",		"*cutNewline",	XrmoptionNoArg,		(caddr_t) "off"},
-{"+cn",		"*cutNewline",	XrmoptionNoArg,		(caddr_t) "on"},
-{"-cr",		"*cursorColor",	XrmoptionSepArg,	(caddr_t) NULL},
-{"-cu",		"*curses",	XrmoptionNoArg,		(caddr_t) "on"},
-{"+cu",		"*curses",	XrmoptionNoArg,		(caddr_t) "off"},
-{"-e",		NULL,		XrmoptionSkipLine,	(caddr_t) NULL},
-{"-fb",		"*boldFont",	XrmoptionSepArg,	(caddr_t) NULL},
-{"-j",		"*jumpScroll",	XrmoptionNoArg,		(caddr_t) "on"},
-{"+j",		"*jumpScroll",	XrmoptionNoArg,		(caddr_t) "off"},
+{"-geometry", "*vt100.geometry",       XrmoptionSepArg,	    (caddr_t) NULL},
+{"-132",      "*c132",	               XrmoptionNoArg,	    (caddr_t) "on"},
+{"+132",      "*c132",	               XrmoptionNoArg,	    (caddr_t) "off"},
+{"-ah",	      "*alwaysHighlight",      XrmoptionNoArg,	    (caddr_t) "on"},
+{"+ah",	      "*alwaysHighlight",      XrmoptionNoArg,	    (caddr_t) "off"},
+{"-aw",	      "*autoWrap",	       XrmoptionNoArg,	    (caddr_t) "on"},
+{"+aw",	      "*autoWrap",	       XrmoptionNoArg,	    (caddr_t) "off"},
+{"-b",	      "*internalBorder",       XrmoptionSepArg,	    (caddr_t) NULL},
+{"-cb",	      "*cutToBeginningOfLine", XrmoptionNoArg,      (caddr_t) "off"},
+{"+cb",	      "*cutToBeginningOfLine", XrmoptionNoArg,      (caddr_t) "on"},
+{"-cc",	      "*charClass",	       XrmoptionSepArg,	    (caddr_t) NULL},
+{"-cn",	      "*cutNewline",	       XrmoptionNoArg,	    (caddr_t) "off"},
+{"+cn",	      "*cutNewline",	       XrmoptionNoArg,	    (caddr_t) "on"},
+{"-cr",	      "*cursorColor",	       XrmoptionSepArg,	    (caddr_t) NULL},
+{"-cu",	      "*curses",	       XrmoptionNoArg,	    (caddr_t) "on"},
+{"+cu",	      "*curses",	       XrmoptionNoArg,	    (caddr_t) "off"},
+{"-dc",       "*dynamicColors",        XrmoptionNoArg,      (caddr_t) "on"},
+{"+dc",       "*dynamicColors",        XrmoptionNoArg,      (caddr_t) "off"},
+{"-e",	      NULL,	  	       XrmoptionSkipLine,   (caddr_t) NULL},
+{"-fb",	      "*boldFont",	       XrmoptionSepArg,	    (caddr_t) NULL},
+{"-im",	      "*useInsertMode",        XrmoptionNoArg,	    (caddr_t) "on"},
+{"+im",	      "*useInsertMode",        XrmoptionNoArg,	    (caddr_t) "off"},
+{"-j",	      "*jumpScroll",	       XrmoptionNoArg,	    (caddr_t) "on"},
+{"+j",	      "*jumpScroll",	       XrmoptionNoArg,	    (caddr_t) "off"},
 /* parse logging options anyway for compatibility */
-{"-l",		"*logging",	XrmoptionNoArg,		(caddr_t) "on"},
-{"+l",		"*logging",	XrmoptionNoArg,		(caddr_t) "off"},
-{"-lf",		"*logFile",	XrmoptionSepArg,	(caddr_t) NULL},
-{"-ls",		"*loginShell",	XrmoptionNoArg,		(caddr_t) "on"},
-{"+ls",		"*loginShell",	XrmoptionNoArg,		(caddr_t) "off"},
-{"-mb",		"*marginBell",	XrmoptionNoArg,		(caddr_t) "on"},
-{"+mb",		"*marginBell",	XrmoptionNoArg,		(caddr_t) "off"},
-{"-mc",		"*multiClickTime", XrmoptionSepArg,	(caddr_t) NULL},
-{"-ms",		"*pointerColor",XrmoptionSepArg,	(caddr_t) NULL},
-{"-nb",		"*nMarginBell",	XrmoptionSepArg,	(caddr_t) NULL},
-{"-rw",		"*reverseWrap",	XrmoptionNoArg,		(caddr_t) "on"},
-{"+rw",		"*reverseWrap",	XrmoptionNoArg,		(caddr_t) "off"},
-{"-aw",		"*autoWrap",	XrmoptionNoArg,		(caddr_t) "on"},
-{"+aw",		"*autoWrap",	XrmoptionNoArg,		(caddr_t) "off"},
-{"-s",		"*multiScroll",	XrmoptionNoArg,		(caddr_t) "on"},
-{"+s",		"*multiScroll",	XrmoptionNoArg,		(caddr_t) "off"},
-{"-sb",		"*scrollBar",	XrmoptionNoArg,		(caddr_t) "on"},
-{"+sb",		"*scrollBar",	XrmoptionNoArg,		(caddr_t) "off"},
-{"-sf",		"*sunFunctionKeys", XrmoptionNoArg,	(caddr_t) "on"},
-{"+sf",		"*sunFunctionKeys", XrmoptionNoArg,	(caddr_t) "off"},
-{"-si",		"*scrollTtyOutput",	XrmoptionNoArg,		(caddr_t) "off"},
-{"+si",		"*scrollTtyOutput",	XrmoptionNoArg,		(caddr_t) "on"},
-{"-sk",		"*scrollKey",	XrmoptionNoArg,		(caddr_t) "on"},
-{"+sk",		"*scrollKey",	XrmoptionNoArg,		(caddr_t) "off"},
-{"-sl",		"*saveLines",	XrmoptionSepArg,	(caddr_t) NULL},
-{"-t",          "*tekStartup",  XrmoptionNoArg,         (caddr_t) "on"},
-{"+t",          "*tekStartup",  XrmoptionNoArg,         (caddr_t) "off"},
-{"-tm",		"*ttyModes",	XrmoptionSepArg,	(caddr_t) NULL},
-{"-tn",		"*termName",	XrmoptionSepArg,	(caddr_t) NULL},
-{"-ut",		"*utmpInhibit",	XrmoptionNoArg,		(caddr_t) "on"},
-{"+ut",		"*utmpInhibit",	XrmoptionNoArg,		(caddr_t) "off"},
-{"-im",		"*useInsertMode", XrmoptionNoArg,	(caddr_t) "on"},
-{"+im",		"*useInsertMode", XrmoptionNoArg,	(caddr_t) "off"},
-{"-vb",		"*visualBell",	XrmoptionNoArg,		(caddr_t) "on"},
-{"+vb",		"*visualBell",	XrmoptionNoArg,		(caddr_t) "off"},
-{"-wf",		"*waitForMap",	XrmoptionNoArg,		(caddr_t) "on"},
-{"+wf",		"*waitForMap",	XrmoptionNoArg,		(caddr_t) "off"},
+{"-l",	      "*logging",	       XrmoptionNoArg,	    (caddr_t) "on"},
+{"+l",	      "*logging",	       XrmoptionNoArg,	    (caddr_t) "off"},
+{"-lf",	      "*logFile",	       XrmoptionSepArg,	    (caddr_t) NULL},
+{"-ls",	      "*loginShell",	       XrmoptionNoArg,	    (caddr_t) "on"},
+{"+ls",	      "*loginShell",	       XrmoptionNoArg,	    (caddr_t) "off"},
+{"-mb",	      "*marginBell",	       XrmoptionNoArg,	    (caddr_t) "on"},
+{"+mb",	      "*marginBell",	       XrmoptionNoArg,	    (caddr_t) "off"},
+{"-mc",	      "*multiClickTime",       XrmoptionSepArg,	    (caddr_t) NULL},
+{"-ms",	      "*pointerColor",         XrmoptionSepArg,	    (caddr_t) NULL},
+{"-nb",	      "*nMarginBell",	       XrmoptionSepArg,	    (caddr_t) NULL},
+{"-rw",	      "*reverseWrap",	       XrmoptionNoArg,	    (caddr_t) "on"},
+{"+rw",	      "*reverseWrap",	       XrmoptionNoArg,	    (caddr_t) "off"},
+{"-s",	      "*multiScroll",	       XrmoptionNoArg,	    (caddr_t) "on"},
+{"+s",	      "*multiScroll",	       XrmoptionNoArg,	    (caddr_t) "off"},
+{"-sb",	      "*scrollBar",	       XrmoptionNoArg,	    (caddr_t) "on"},
+{"+sb",	      "*scrollBar",	       XrmoptionNoArg,	    (caddr_t) "off"},
+{"-sbr",      "*scrollBarRight",       XrmoptionNoArg,      (caddr_t) "on"},
+{"+sbr",      "*scrollBarRight",       XrmoptionNoArg,      (caddr_t) "off"},
+{"-sf",	      "*sunFunctionKeys",      XrmoptionNoArg,	    (caddr_t) "on"},
+{"+sf",	      "*sunFunctionKeys",      XrmoptionNoArg,	    (caddr_t) "off"},
+{"-si",	      "*scrollTtyOutput",      XrmoptionNoArg,	    (caddr_t) "off"},
+{"+si",	      "*scrollTtyOutput",      XrmoptionNoArg,	    (caddr_t) "on"},
+{"-sk",	      "*scrollKey",	       XrmoptionNoArg,	    (caddr_t) "on"},
+{"+sk",	      "*scrollKey",	       XrmoptionNoArg,	    (caddr_t) "off"},
+{"-sl",	      "*saveLines",	       XrmoptionSepArg,	    (caddr_t) NULL},
+{"-t",        "*tekStartup",           XrmoptionNoArg,      (caddr_t) "on"},
+{"+t",        "*tekStartup",           XrmoptionNoArg,      (caddr_t) "off"},
+{"-tm",	      "*ttyModes",	       XrmoptionSepArg,	    (caddr_t) NULL},
+{"-tn",	      "*termName",	       XrmoptionSepArg,	    (caddr_t) NULL},
+{"-ut",	      "*utmpInhibit",	       XrmoptionNoArg,	    (caddr_t) "on"},
+{"+ut",	      "*utmpInhibit",	       XrmoptionNoArg,	    (caddr_t) "off"},
+{"-vb",	      "*visualBell",	       XrmoptionNoArg,	    (caddr_t) "on"},
+{"+vb",	      "*visualBell",	       XrmoptionNoArg,	    (caddr_t) "off"},
+{"-wf",	      "*waitForMap",	       XrmoptionNoArg,	    (caddr_t) "on"},
+{"+wf",	      "*waitForMap",	       XrmoptionNoArg,	    (caddr_t) "off"},
 /* bogus old compatibility stuff for which there are
    standard XtAppInitialize options now */
-{"-G",          "*tekGeometry", XrmoptionSepArg,        (caddr_t) NULL},
-{"%",           "*tekGeometry", XrmoptionStickyArg,     (caddr_t) NULL},
-{"#",		".iconGeometry",XrmoptionStickyArg,	(caddr_t) NULL},
-{"-T",		"*title",	XrmoptionSepArg,	(caddr_t) NULL},
-{"-n",		"*iconName",	XrmoptionSepArg,	(caddr_t) NULL},
-{"-r",		"*reverseVideo",XrmoptionNoArg,		(caddr_t) "on"},
-{"+r",		"*reverseVideo",XrmoptionNoArg,		(caddr_t) "off"},
-{"-rv",		"*reverseVideo",XrmoptionNoArg,		(caddr_t) "on"},
-{"+rv",		"*reverseVideo",XrmoptionNoArg,		(caddr_t) "off"},
-{"-w",		".borderWidth", XrmoptionSepArg,	(caddr_t) NULL},
+{"-G",        "*tekGeometry",          XrmoptionSepArg,     (caddr_t) NULL},
+{"%",         "*tekGeometry",          XrmoptionStickyArg,  (caddr_t) NULL},
+{"#",	      ".iconGeometry",         XrmoptionStickyArg,  (caddr_t) NULL},
+{"-T",	      "*title",	               XrmoptionSepArg,	    (caddr_t) NULL},
+{"-n",	      "*iconName",	       XrmoptionSepArg,	    (caddr_t) NULL},
+{"-r",	      "*reverseVideo",         XrmoptionNoArg,	    (caddr_t) "on"},
+{"+r",	      "*reverseVideo",         XrmoptionNoArg,	    (caddr_t) "off"},
+{"-rv",	      "*reverseVideo",         XrmoptionNoArg,	    (caddr_t) "on"},
+{"+rv",	      "*reverseVideo",         XrmoptionNoArg,	    (caddr_t) "off"},
+{"-w",	      ".borderWidth",          XrmoptionSepArg,	    (caddr_t) NULL},
 };
 
 static struct _options {
@@ -698,6 +724,8 @@ static struct _options {
 { "-/+cn",                 "turn on/off cut newline inhibit" },
 { "-cr color",             "text cursor color" },
 { "-/+cu",                 "turn on/off curses emulation" },
+{ "-/+dc",                 "turn off/on dynamic color selection" },
+{ "-/+sbr",                 "turn off/on rightside scrollbar option" },
 { "-fb fontname",          "bold text font" },
 { "-/+im",		   "use insert mode for TERMCAP" },
 { "-/+j",                  "turn on/off jump scroll" },
@@ -886,6 +914,10 @@ char **argv;
 	char *base_name();
 	int xerror(), xioerror();
 
+#ifdef I18N
+        setlocale(LC_ALL, NULL);
+#endif
+
 	ProgramName = argv[0];
 
 	ttydev = (char *) malloc (strlen (TTYDEV) + 1);
@@ -926,7 +958,9 @@ char **argv;
 
 #ifdef USE_TERMIOS
 	d_tio.c_cc[VSUSP] = CSUSP;
+#ifdef VDSUSP				/* R6 update	*/
 	d_tio.c_cc[VDSUSP] = CDSUSP;
+#endif
 	d_tio.c_cc[VREPRINT] = CNUL;
 	d_tio.c_cc[VDISCARD] = CNUL;
 	d_tio.c_cc[VWERASE] = CNUL;
@@ -1022,6 +1056,22 @@ char **argv;
 #endif	/* USE_SYSV_TERMIO */
 
 	/* Init the Toolkit. */
+        {
+#ifdef HAS_POSIX_SAVED_IDS
+            uid_t euid = geteuid();
+            gid_t egid = getegid();
+            uid_t ruid = getuid();
+            gid_t rgid = getgid();
+
+            if (setegid(ruid) == -1)
+                (void) fprintf(stderr, "setegid(%d): %s\n",
+                               rgid, strerror(errno));
+
+            if (seteuid(ruid) == -1)
+                (void) fprintf(stderr, "seteuid(%d): %s\n",
+                               ruid, strerror(errno));
+#endif
+
 	XtSetErrorHandler(xt_error);
 	toplevel = XtAppInitialize (&app_con, "XGterm", 
 				    optionDescList, XtNumber(optionDescList), 
@@ -1030,6 +1080,18 @@ char **argv;
 	XtGetApplicationResources(toplevel, (XtPointer) &resource,
 				  application_resources,
 				  XtNumber(application_resources), NULL, 0);
+
+#ifdef HAS_POSIX_SAVED_IDS
+            if (seteuid(euid) == -1)
+                (void) fprintf(stderr, "seteuid(%d): %s\n",
+                               euid, strerror(errno));
+
+            if (setegid(egid) == -1)
+                (void) fprintf(stderr, "setegid(%d): %s\n",
+                               egid, strerror(errno));
+#endif
+	}
+
 
 	waiting_for_initial_map = resource.wait_for_map;
 
@@ -1210,7 +1272,7 @@ char **argv;
 		unsigned char *old_bufend;
 
 		old_bufend = (unsigned char *) _bufend(stderr);
-#ifdef hpux
+#if defined(hpux) || defined(__hpux)
 		stderr->__fileH = (i >> 8);
 		stderr->__fileL = i;
 #else
@@ -1313,9 +1375,8 @@ char **argv;
 #endif	/* DEBUG */
 	XSetErrorHandler(xerror);
 	XSetIOErrorHandler(xioerror);
-	for( ; ; ) {
-		VTRun();
-	}
+	for( ; ; )
+	    VTRun();
 }
 
 char *base_name(name)
@@ -1364,6 +1425,21 @@ get_pty (pty)
         if (pty_search(pty) == 0)
 	    return 0;
 #endif /* SYSV && SYSV386 */
+
+/* Need to move this block of code up a bit on IRIX 6.5 systems to avoid
+ * a segvio when running out of ptys.
+ */
+#if defined(sgi) && OSMAJORVERSION >= 6 && OSMINORVERSION >= 5
+	{
+	    char    *tty_name;
+
+	    tty_name = _getpty (pty, O_RDWR, 0622, 0);
+	    if (tty_name == 0)
+		return 1;
+	    strcpy (ttydev, tty_name);
+	    return 0;
+	}
+#endif
 #ifdef ATT
 	if ((*pty = open ("/dev/ptmx", O_RDWR)) < 0) {
 	    return 1;
@@ -1383,7 +1459,9 @@ get_pty (pty)
 	strcpy(ttydev, ttyname(*pty));
 	return 0;
 #endif
-#if defined(sgi) && OSMAJORVERSION >= 4
+
+/* Original code for systems below IRIX 6.5 */
+#if defined(sgi) && OSMAJORVERSION >= 4 && (OSMAJORVERSION <= 6 && OSMINORVERSION < 5)
 	{
 	    char    *tty_name;
 
@@ -2118,6 +2196,7 @@ spawn ()
 
 #ifdef USE_TTY_GROUP
 	{ 
+#include <grp.h>		/* R6 update	*/
 		struct group *ttygrp;
 		if (ttygrp = getgrnam("tty")) {
 			/* change ownership of tty to real uid, "tty" gid */
@@ -2210,8 +2289,10 @@ spawn ()
 		    if (ioctl (tty, TCSETA, &tio) == -1)
 			    HsSysError(cp_pipe[1], ERROR_TIOCSETP);
 #ifdef TIOCSLTC
+#ifndef hpux
 		    if (ioctl (tty, TIOCSLTC, &ltc) == -1)
 			    HsSysError(cp_pipe[1], ERROR_TIOCSETC);
+#endif
 #endif	/* TIOCSLTC */
 #ifdef TIOCLSET
 		    if (ioctl (tty, TIOCLSET, (char *)&lmode) == -1)
@@ -2255,8 +2336,10 @@ spawn ()
 
 		    if (ioctl (tty, TIOCSETP, (char *)&sg) == -1)
 			    HsSysError (cp_pipe[1], ERROR_TIOCSETP);
+#ifndef hpux
 		    if (ioctl (tty, TIOCSETC, (char *)&tc) == -1)
 			    HsSysError (cp_pipe[1], ERROR_TIOCSETC);
+#endif
 		    if (ioctl (tty, TIOCSETD, (char *)&discipline) == -1)
 			    HsSysError (cp_pipe[1], ERROR_TIOCSETD);
 		    if (ioctl (tty, TIOCSLTC, (char *)&ltc) == -1)
@@ -2424,11 +2507,13 @@ spawn ()
 #ifdef HAS_UTMP_UT_HOST
 		(void) strncpy(buf, DisplayString(screen->display),
 			       sizeof(buf));
+#ifndef linux 			/* R6 update	*/
 	        {
 		    char *disfin = strrchr(buf, ':');
 		    if (disfin)
 			*disfin = '\0';
 		}
+#endif				/* R6 update	*/
 		(void) strncpy(utmp.ut_host, buf, sizeof(utmp.ut_host));
 #endif
 		(void) strncpy(utmp.ut_name, pw->pw_name, 
@@ -2495,6 +2580,16 @@ spawn ()
 				    status = close(i);
 				}
 #endif /* WTMP */
+#ifdef MNX_LASTLOG
+                                if (term->misc.login_shell &&
+                                (i = open(_U_LASTLOG, O_WRONLY)) >= 0) {
+                                    lseek(i, (long)(screen->uid *
+                                        sizeof (struct utmp)), 0);
+                                    write(i, (char *)&utmp,
+                                        sizeof (struct utmp));
+                                    close(i);
+                                }
+#endif /* MNX_LASTLOG */
 #ifdef LASTLOG
 				if (term->misc.login_shell &&
 				(i = open(etc_lastlog, O_WRONLY)) >= 0) {
@@ -3017,7 +3112,7 @@ static SIGNAL_T reapchild (n)
 
 #ifdef USE_SYSV_SIGNALS
     /* cannot re-enable signal before waiting for child
-       because then SVR4 loops.  Sigh.  HP-UX 9.01 too. */
+       because then SVR4 loops.  Sigh.  HP-UX 9.01 too.  */
     (void) signal(SIGCHLD, reapchild);
 #endif
 
