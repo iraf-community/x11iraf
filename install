@@ -220,8 +220,8 @@ endif
 clear
 NEWLINE
 BOLD_ON
-echo "			X11IRAF V1.3.2 Installation"
-echo "			==========================="
+echo "			X11IRAF V2.0 Installation"
+echo "			========================="
 BOLD_OFF
 NEWLINE
 

@@ -80,6 +80,11 @@
 #define L_SHADOW           5
 
 
+#define MOD_FAST	   1		/* SubRaster display model	*/
+#define MOD_NORMAL	   2	
+#define DEF_MODEL	   MOD_FAST
+
+
 /* Local type definitions. */
 typedef	struct CDL 	*CDLPtr;
 typedef	struct Marker 	*MarkerPtr;

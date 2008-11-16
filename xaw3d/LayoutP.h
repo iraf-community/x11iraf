@@ -26,8 +26,17 @@
 #ifndef _XawLayoutP_h
 #define _XawLayoutP_h
 
-#include <X11/Xaw3d/Layout.h>
+#if defined(LAYOUT)
+# include "Layout.h"
+#else
+# include <X11/Xaw3d/Layout.h>
+#endif
+
 #include <X11/ConstrainP.h>
+
+#ifdef MOTIF
+# include "Xm/ManagerP.h"
+#endif
 
 #define GlueEqual(a,b)	((a).order == (b).order && (a).value == (b).value)
 
@@ -157,9 +166,10 @@ typedef struct _SubInfo {
     int	    naturalBw;
 } SubInfoRec, *SubInfoPtr;
 
-#define New(t) (t *) XtCalloc(1,sizeof (t))
+/* #define New(t) (t *) malloc(sizeof (t)) */
+#define New(t)      (t *) XtCalloc(1,sizeof (t))
 #define Dispose(p)  XtFree((char *) p)
-#define Some(t,n)   (t*) XtCalloc(1,sizeof(t) * n)
+#define Some(t,n)   (t*) XtMalloc(sizeof(t) * n)
 #define More(p,t,n) ((p)? (t *) XtRealloc((char *) p, sizeof(t)*n):Some(t,n)
 
 /*********************************************************************
@@ -179,12 +189,18 @@ typedef struct _LayoutClassRec {
     CoreClassPart       core_class;
     CompositeClassPart  composite_class;
     ConstraintClassPart constraint_class;
+#ifdef MOTIF
+    XmManagerClassPart  manager_class;
+#endif
     LayoutClassPart     layout_class;
 } LayoutClassRec;
 
 extern LayoutClassRec layoutClassRec;
 
 typedef struct _LayoutConstraintsRec {
+#ifdef MOTIF
+    XmManagerConstraintPart  manager;
+#endif
     SubInfoRec	layout;
 } LayoutConstraintsRec, *LayoutConstraints;
 
@@ -208,6 +224,9 @@ typedef struct _LayoutRec {
     CorePart       core;
     CompositePart  composite;
     ConstraintPart constraint;
+#ifdef MOTIF
+    XmManagerPart  manager;
+#endif    
     LayoutPart     layout;
 } LayoutRec;
 #endif

@@ -30,10 +30,12 @@ X11IRAFDIR = ../
 
            SRCS = eps.c iis.c load.c print.c raster.c save.c \
 		  rasio.c fitsio.c ximclient.c ximtool.c quant.c util.c \
-		  zscale.c gifio.c tiffio.c irafio.c ism.c ism_wcspix.c
+		  zscale.c gifio.c tiffio.c irafio.c ism.c ism_wcspix.c \
+		  logo.c
            OBJS = eps.o iis.o load.o print.o raster.o save.o \
 		  rasio.o fitsio.o ximclient.o ximtool.o quant.o util.o \
-		  zscale.o gifio.o tiffio.o irafio.o ism.o ism_wcspix.o
+		  zscale.o gifio.o tiffio.o irafio.o ism.o ism_wcspix.o \
+		  logo.o
        ISM_DIRS = clients
        ISM_DONE = clients/DONE
 
@@ -48,7 +50,7 @@ all::
 NormalProgramTarget(ximtool,$(OBJS),${DEPOBM},${OBMLIBS} XawClientLibs, $(MATHLIB))
 
 ximtool-alt::
-	cat ximtool-old.csh ximtool.gui > ximtool-alt
+	cat ximtool-alt.csh ximtool.gui > ximtool-alt
 	chmod 755 ximtool-alt
 
 ximtool-old::

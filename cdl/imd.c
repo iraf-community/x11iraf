@@ -88,6 +88,8 @@ char	buf[SZ_LINE];			/* temp buffer	*/
 
 static int imd_writeLine(IMDPtr imd, uchar *pix, int nbytes, int x, int y);
 static int imd_readLine(IMDPtr imd, uchar *pix, int nbytes, int x, int y);
+static int imd_writeRawBuf(IMDPtr imd, uchar *pix, int nbytes, int x, int y, int nx, int ny);
+static int imd_readRawBuf(IMDPtr imd, uchar *pix, int nbytes, int x, int y, int nx, int ny);
 static IMDPtr imd_initialize(int fdin, int fdout, int domain);
 static int imd_parseImtdev(char *imtdev, char *unixaddr, unsigned short *host_port, unsigned long *host_addr, char *ififo, char *ofifo);
 static int imd_loadImtoolrc(IMDPtr imd);
@@ -98,6 +100,8 @@ static int imd_wcsVersion (IMDPtr imd);
 #else
 
 static  IMDPtr  imd_initialize();
+static  int 	imd_writeLine(), imd_readLine();
+static  int     imd_writeRawBuf(), imd_readRawBuf();
 static  int     imd_parseImtdev(), imd_loadImtoolrc(), imd_getstr();
 static  int     imd_writeLine(), imd_readLine(), imd_wcsVersion();
 static  void    imd_minmax();
@@ -163,11 +167,12 @@ char 	*imtdev;		/* connection type 	*/
 #endif
 {
 	IMDPtr	imd;
-	int	domain, fd, fdin, fdout, free_imtdev=0;
+	int	domain, fd, fdin, fdout, free_imtdev=0, model;
 	unsigned short host_port;
 	unsigned long  host_addr;
 	char 	unixaddr[SZ_NAME];
 	char 	input_fifo[SZ_NAME], output_fifo[SZ_NAME];
+
 
 	if (imtdev == NULL) {
 	    struct  sockaddr_un sockaddr;
@@ -197,10 +202,12 @@ char 	*imtdev;		/* connection type 	*/
 		strcpy (imtdev, sockaddr.sun_path);
                 fdin = fdout = fd;
 	    }
+	    model = DEF_MODEL;
 
 	} else {
 retry: 	    domain =  imd_parseImtdev (imtdev, unixaddr, &host_port, &host_addr,
-		input_fifo, output_fifo);
+		input_fifo, output_fifo, &model);
+
 	    switch (domain) {
 	    case FIFO:
                /* Open the fifos. */
@@ -282,7 +289,7 @@ retry: 	    domain =  imd_parseImtdev (imtdev, unixaddr, &host_port, &host_addr,
 	}
 
 	/* Allocate and initialize imd structure.  */
-	imd = imd_initialize (fdin, fdout, domain);
+	imd = imd_initialize (fdin, fdout, domain, model);
 
 
 	if (imd_debug)
@@ -1344,8 +1351,13 @@ uchar	*pix;			/* image pixels (output)*/
 	}
 
 	/* Figure out how many reads we'll need. */
-	lines_per_block = min (nny, (int)(SZ_BLOCK / fbwidth));
-	nbytes = fbwidth * lines_per_block;
+	if (imd->model == MOD_NORMAL) {
+	    lines_per_block = min (nny, (int)(SZ_BLOCK / fbwidth));
+	    nbytes = fbwidth * lines_per_block;
+	} else {
+	    lines_per_block = min (nny, (int)(SZ_BLOCK / nx));
+	    nbytes = nx * lines_per_block;
+	}
 	nblocks = (int) (nny / lines_per_block);
 	block = (uchar *) calloc (nbytes, sizeof (uchar));
 
@@ -1464,8 +1476,13 @@ uchar	*pix;			/* subraster pixels 	*/
                 nx*ny, lx, ly, fbwidth, fbheight);
 
         /* Figure out how many reads we'll need. */
-        lines_per_block = min (nny, (int)(SZ_BLOCK / fbwidth));
-        nbytes = fbwidth * lines_per_block;
+	if (imd->model == MOD_NORMAL) {
+            lines_per_block = min (nny, (int)(SZ_BLOCK / fbwidth));
+            nbytes = fbwidth * lines_per_block;
+	} else {
+            lines_per_block = min (nny, (int)(SZ_BLOCK / nx));
+            nbytes = nx * lines_per_block;
+	}
         nblocks = (int) (nny / lines_per_block);
         block = (uchar *) calloc (nbytes, sizeof (uchar));
 
@@ -1480,25 +1497,45 @@ uchar	*pix;			/* subraster pixels 	*/
         nl = nny;
         y = ly - lines_per_block + 1;
         for (i=0; i < nblocks; i++, y -= lines_per_block) {
-            /* Read a block of data containing the subraster but only if 
-	     * we need to.
-	     */
-	    if (nnx != fbwidth)
-                if (imd_readLine(imd, block, nbytes, 0, y))
+
+	    if (imd->model == MOD_NORMAL) {
+
+                /* Read a block of data containing the subraster but only if 
+	         * we need to.
+	         */
+	        if (nnx != fbwidth)
+                    if (imd_readLine(imd, block, nbytes, 0, y))
+                        return (ERR);
+
+                /* Copy the subraster pixels to the block just read. */
+                bp = block + (lines_per_block - 1) * fbwidth;
+                for (j=0; j < lines_per_block && nl; j++) {
+                    bcopy (ip, bp+lx, nnx);
+                    bp -= fbwidth;
+                    ip += nx;
+                    nl--;
+                }
+
+                /* Write the edited block back to the server. */
+                if (imd_writeLine(imd, block, nbytes, 0, y))
                     return (ERR);
 
-            /* Copy the subraster pixels to the block just read. */
-            bp = block + (lines_per_block - 1) * fbwidth;
-            for (j=0; j < lines_per_block && nl; j++) {
-                bcopy (ip, bp+lx, nnx);
-                bp -= fbwidth;
-                ip += nx;
-                nl--;
-            }
+	    } else {
+                /* Copy the subraster pixels to the block just read. */
+                bp = block + (lines_per_block - 1) * nx;
+                for (j=0; j < lines_per_block && nl; j++) {
+                    bcopy (ip, bp, nnx);
+                    bp -= nx;
+                    ip += nx;
+                    nl--;
+                }
 
-            /* Write the edited block back to the server. */
-            if (imd_writeLine(imd, block, nbytes, 0, y))
-                return (ERR);
+                /* Write the edited block back to the server. */
+		nbytes = lines_per_block * ny;
+                if (imd_writeRawBuf(imd, block, nbytes, lx, y,
+		    nx, lines_per_block))
+                        return (ERR);
+	    }
         }
 
         /* Take care of the remaining pixels. */
@@ -1507,21 +1544,39 @@ uchar	*pix;			/* subraster pixels 	*/
 
             /* Read the last block. */
 	    y += lines_per_block - nl;
-	    if (nnx != fbwidth)
-                if (imd_readLine(imd, block, nbytes, 0, y))
+
+
+	    if (imd->model == MOD_NORMAL) {
+	        if (nnx != fbwidth)
+                    if (imd_readLine(imd, block, nbytes, 0, y))
+                        return (ERR);
+
+                /* Copy the subraster pixels to the block just read. */
+                bp = block + (nl - 1) * fbwidth;
+                for (j=0; j < nl; j++) {
+                    bcopy (ip, bp+lx, nnx);
+                    bp -= fbwidth;
+                    ip += nx;
+                }
+
+                /* Write the edited block back to the server. */
+                if (imd_writeLine(imd, block, nbytes, 0, y))
                     return (ERR);
 
-            /* Copy the subraster pixels to the block just read. */
-            bp = block + (nl - 1) * fbwidth;
-            for (j=0; j < nl; j++) {
-                bcopy (ip, bp+lx, nnx);
-                bp -= fbwidth;
-                ip += nx;
-            }
+	    } else {
+                /* Copy the subraster pixels to the block just read. */
+                bp = block + (nl - 1) * nx;
+                for (j=0; j < nl; j++) {
+                    bcopy (ip, bp, nnx);
+                    bp -= nx;
+                    ip += nx;
+                }
 
-            /* Write the edited block back to the server. */
-            if (imd_writeLine(imd, block, nbytes, 0, y))
-                return (ERR);
+                /* Write the edited block back to the server. */
+		nbytes = nl * ny;
+                if (imd_writeRawBuf(imd, block, nbytes, lx, y, nx, nl))
+                    return (ERR);
+	    }
         }
 
         free ((char *)block);
@@ -1595,6 +1650,54 @@ int	x, y;				/* coords for start	*/
 }
 
 
+/* IMD_WRITERAWBUF --  Send the command to write a block of pixels to the
+ * server.  This is a low-level routine called to either write a single
+ * line of data, or when the number of bytes exceeds the frame buffer width
+ * it can be used to send a complete "block" in the image display.
+ */
+
+static int
+imd_writeRawBuf (imd, pix, nbytes, x, y, nx, ny)
+IMDPtr	imd;				/* package pointer	*/
+uchar	*pix;				/* pixel array		*/
+int	nbytes;				/* npix to write	*/
+int	x, y;				/* coords for start	*/
+int	nx, ny;				/* dimensions of buf 	*/
+{
+	register short sx=x, sy=y;
+
+	if (imd_debug > 1)
+	    printf ("[imd_writeRawBuf] %d bytes at [%d,%d][%d,%d]\n", 
+		nbytes, x, y, nx, ny);
+
+	return (com_writeSubraster(imd->dataout, sx, sy, pix, nx, ny));
+}
+
+
+/* IMD_READRAWBUF --  Send the command to write a block of pixels to the
+ * server.  This is a low-level routine called to either write a single
+ * line of data, or when the number of bytes exceeds the frame buffer width
+ * it can be used to send a complete "block" in the image display.
+ */
+
+static int
+imd_readRawBuf (imd, pix, nbytes, x, y, nx, ny)
+IMDPtr	imd;				/* package pointer	*/
+uchar	*pix;				/* pixel array		*/
+int	nbytes;				/* npix to read		*/
+int	x, y;				/* coords for start	*/
+int	nx, ny;				/* dimensions of buf 	*/
+{
+	register short sx=x, sy=y;
+
+	if (imd_debug > 1)
+	    printf ("[imd_readRawBuf] %d bytes at [%d,%d][%d,%d]\n", 
+		nbytes, x, y, nx, ny);
+
+	return (com_readSubraster(imd->dataout, sx, sy, pix, nx, ny));
+}
+
+
 /* IMD_INITIALIZE -- Allocate and initialize the imd package structure.
  */
 
@@ -1604,14 +1707,16 @@ static IMDPtr
 imd_initialize (
     int fdin,
     int fdout,				/* device descriptors  	*/
-    int domain				/* connection type	*/
+    int domain,				/* connection type	*/
+    int model				/* subraster model	*/
 )
 #else
 
 static IMDPtr
-imd_initialize (fdin, fdout, domain)
+imd_initialize (fdin, fdout, domain, model)
 int	fdin, fdout;			/* device descriptors  	*/
 int	domain;				/* connection type	*/
+int 	model;				/* subraster model	*/
 #endif
 {
 	IMDPtr	imd;
@@ -1656,6 +1761,19 @@ int	domain;				/* connection type	*/
 	/* Get the server IIS version number. */
 	imd->iis_version = imd_wcsVersion (imd);
 
+printf ("init:  model = %d\n", model);
+	if (imd->iis_version > 10) {
+	    /* Server supports fast subraster writes.
+	    */
+	    if (model == MOD_NORMAL)
+                imd->model     = MOD_FAST;
+	} else {
+	    if (model == MOD_FAST)
+                imd->model     = MOD_NORMAL;
+	}
+printf ("\n\niis_version=%d  model=%d -> %d\n", imd->iis_version, model,
+imd->model);
+
         /* Load the frame buffer configuration file. */
         imd_loadImtoolrc (imd);
 
@@ -1672,32 +1790,54 @@ int	domain;				/* connection type	*/
 
 static int 
 imd_parseImtdev (
-    char *imtdev,			/* device string     */
-    char *unixaddr,			/* unix socket path  */
-    unsigned short *host_port,		/* inet port number  */
-    unsigned long *host_addr,		/* inet host address */
-    char *ififo,			/* fifo paths	     */
-    char *ofifo
+    char *imtdev,			/* device string     		*/
+    char *unixaddr,			/* unix socket path  		*/
+    unsigned short *host_port,		/* inet port number  		*/
+    unsigned long *host_addr,		/* inet host address 		*/
+    char *ififo,			/* fifo paths	     		*/
+    char *ofifo,
+    int  *model				/* subraster display model 	*/
 )
 #else
 
 static int
-imd_parseImtdev (imtdev, unixaddr, host_port, host_addr, ififo, ofifo)
-char		*imtdev;		/* device string     */
-char		*unixaddr;		/* unix socket path  */
-unsigned short	*host_port;		/* inet port number  */
-unsigned long	*host_addr;		/* inet host address */
-char		*ififo, *ofifo;		/* fifo paths	     */
+imd_parseImtdev (imtdev, unixaddr, host_port, host_addr, ififo, ofifo, model)
+char		*imtdev;		/* device string     		*/
+char		*unixaddr;		/* unix socket path  		*/
+unsigned short	*host_port;		/* inet port number  		*/
+unsigned long	*host_addr;		/* inet host address 		*/
+char		*ififo, *ofifo;		/* fifo paths	     		*/
+int  	        *model;			/* subraster display model 	*/
 #endif
 {
-	char	*ip;
+	char	*ip, *dp;
 	char	osfn[SZ_LINE*2];
+
 
 	if (imtdev == NULL)
 	    return ERR;
 	else {
+            /* Extract any subraster display model option from the IMTDEV
+	    ** string.  This will be the word "fast:" or "normal:" prefixed
+	    ** to the device string.  A missing option will use the default
+	    ** model, either way we'll update the device string before parsing
+	    ** for the connection.
+	    */
+	    if (strncmp (imtdev, "fast:", 5) == 0) {
+		*model = MOD_FAST;
+	        dp = &imtdev[5];
+	    } else if (strncmp (imtdev, "normal:", 5) == 0) {
+		*model = MOD_NORMAL;
+	        dp = &imtdev[7];
+	    } else {
+		*model = DEF_MODEL;
+	        dp = imtdev;
+	    }
+printf ("parse:  model = %d   (def=%d)\n", *model, DEF_MODEL);
+
+
             /* Expand any %d fields in the network address to the UID. */
-            sprintf (osfn, (char *)imtdev, getuid(), getuid());
+            sprintf (osfn, (char *)dp, getuid(), getuid());
  
 	    if (strncmp (osfn, "fifo:", 5) == 0) {
                 /* FIFO (named pipe) connection.  */
@@ -1757,6 +1897,8 @@ char		*ififo, *ofifo;		/* fifo paths	     */
 		return UNIX;
 	    }
 	}
+
+
 	return (ERR);
 }
 

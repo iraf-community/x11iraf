@@ -58,9 +58,9 @@ set Resources(pixel_table) { \
     *pixtabFrame*MultiList.columnSpacing:	2
     *pixtabFrame*MultiList.maxSelectable:	1
     *pixtabFrame*MultiList.highlightForeground:	red
-    *pixtabFrame*MultiList.highlightBackground:	gray77
-    *pixtabFrame*MultiList.background:		gray77
-    *pixtabFrame*TextToggle.background:		gray77
+    *pixtabFrame*MultiList.highlightBackground:	#c4c4c4
+    *pixtabFrame*MultiList.background:		#c4c4c4
+    *pixtabFrame*TextToggle.background:		#c4c4c4
 
     *pixtabFrame*Label.width:			00
     !*pixtabFrame*Label.resize:			False

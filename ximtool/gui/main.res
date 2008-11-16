@@ -32,7 +32,7 @@ set Resources(ximtool) { \
 
     *ximtool.title:				XIMTOOL_VERSION
 
-    *display.borderWidth:			0
+    *display.borderWidth:			2
     *display.layout: horizontal	{ \
 	-0 \
 	vertical { \
@@ -44,15 +44,18 @@ set Resources(ximtool) { \
 	    vertical { \
 	        horizontal { \
 	            imageFrame < +inf -inf * +inf -inf > \
+		    -2 \
 	            vcutFrame  < * +inf -inf > \
 	        } \
+		-3 \
 	        horizontal { \
 	            hcutFrame  < +inf -inf * > 1 \
-		    vertical { 4 plotOpts -4 } \
+		    vertical { 4 horizontal { -4 plotOpts}  -4 } \
 	        } \
+		-3 \
 	        horizontal { \
 	            cbarFrame  < +inf -inf * > \
-	            hcut 2 vcut  \
+	            focusSlider 2 hcut 2 vcut 15 \
 	        } \
 	    } \
 	} \
@@ -62,18 +65,19 @@ set Resources(ximtool) { \
     *hcut.font:					*lucida-bold-r*10*
     *vcut.label:				V
     *vcut.font:					*lucida-bold-r*10*
+    *focusSlider.location:			0 0 100 15
 
     *hcutFrame.frameType:                       sunken
     *hcutFrame.frameWidth:                      1
-    *hcutFrame.innerOffset:                     0
-    *hcutFrame.outerOffset:                     0
-    *hcutPlot.color0:                           gray77
-    *hcutPlot.color1:                           black
-    *hcutPlot.color0:                           darkslategray
-    *hcutPlot.color1:                           ivory2
+    *hcutFrame.innerOffset:             	1
+    *hcutFrame.outerOffset:             	1
+    //*hcutPlot.color0:                           #c4c4c4
+    //*hcutPlot.color1:                           #000000
+    *hcutPlot.color0:                           #000000
+    *hcutPlot.color1:                           #ffffff
     *hcutPlot.crosshairCursorColor:		red
     *hcutPlot.width:                            512
-    *hcutPlot.height:                           5
+    *hcutPlot.height:                           6
     *hcutPlot.borderWidth:			0
     *hcutPlot.alphaFont1:			6x10
     *hcutPlot.alphaFont2:			6x10
@@ -108,7 +112,7 @@ set Resources(ximtool) { \
 	  Ctrl <Key>\<:	call(cpSetBlinkRate,BRdecrease)	\n\
 	  Ctrl <Key>\>:	call(cpSetBlinkRate,BRincrease)	\n\
 	  !Alt	<Key>b:	call(toggleBlink)	     	\n\
-	  !Alt	<Key>c:	call(controlPanel)		\n\
+	  !Alt	<Key>c:	call(displayPanel)		\n\
 	  !Alt	<Key>h:	call(Help)		 	\n\
 	  !Alt	<Key>i:	call(infoPanel)		      	\n\
       !Ctrl Alt <Key>f: call(fitFrame)		 	\n\
@@ -126,14 +130,14 @@ set Resources(ximtool) { \
 
     *vcutFrame.frameType:                       sunken
     *vcutFrame.frameWidth:                      1
-    *vcutFrame.innerOffset:                     0
-    *vcutFrame.outerOffset:                     0
-    *vcutPlot.color0:                           gray77
-    *vcutPlot.color1:                           black
-    *vcutPlot.color0:                           darkslategray
-    *vcutPlot.color1:                           ivory2
+    *vcutFrame.innerOffset:             	0
+    *vcutFrame.outerOffset:             	0
+    //*vcutPlot.color0:                           #c4c4c4
+    //*vcutPlot.color1:                           black
+    *vcutPlot.color0:                           #000000
+    *vcutPlot.color1:                           #ffffff
     *vcutPlot.crosshairCursorColor:		red
-    *vcutPlot.width:                            5
+    *vcutPlot.width:                            6
     *vcutPlot.height:                           512
     *vcutPlot.borderWidth:			0
     *vcutPlot.alphaFont1:			6x10
@@ -169,7 +173,7 @@ set Resources(ximtool) { \
 	  Ctrl <Key>\<:	call(cpSetBlinkRate,BRdecrease)	\n\
 	  Ctrl <Key>\>:	call(cpSetBlinkRate,BRincrease)	\n\
 	  !Alt	<Key>b:	call(toggleBlink)	     	\n\
-	  !Alt	<Key>c:	call(controlPanel)		\n\
+	  !Alt	<Key>c:	call(displayPanel)		\n\
 	  !Alt	<Key>h:	call(Help)		 	\n\
 	  !Alt	<Key>i:	call(infoPanel)		      	\n\
       !Ctrl Alt <Key>f: call(fitFrame)		 	\n\
@@ -233,8 +237,8 @@ set Resources(ximtool) { \
 
 
     *menuGroup.label:				
-    *menuGroup.height:				40
-    *menuGroup.width:				518
+    *menuGroup.height:				38
+    *menuGroup.width:				512
     *menuGroup.frameType:			raised
     *menuGroup.frameWidth:			2
     *menubar.layout: horizontal	{ \
@@ -257,7 +261,7 @@ set Resources(ximtool) { \
     *menubar*SimpleMenu.background:		SteelBlue
     *SmeBSB.vertSpace:				10
 
-    *menubar.width:				518
+    *menubar.width:				512
     *menubar*borderWidth:			0
     *menubar*Command.internalWidth:		0
     *menubar*Command.borderWidth:		0
@@ -286,7 +290,7 @@ set Resources(ximtool) { \
 	frameButton < +inf -inf * > 1 < -1 > \
 	nextButton  < +inf -inf * > 1 < -1 > \
     }
-    *toolbar.width:				518
+    *toolbar.width:				512
     *toolbar.height:				25
     *toolbar*borderWidth:			0
     *toolbar*Command.internalWidth:		3
@@ -383,13 +387,13 @@ set Resources(ximtool) { \
     *imageFrame.frameWidth:			1
     *imageFrame.outerOffset:			0
     *imageFrame.innerOffset:			0
-    *imageFrame.width:                          518
-    *imageFrame.height:                         518
+    *imageFrame.width:                          512
+    *imageFrame.height:                         512
     *cbarFrame.frameType:			sunken
     *cbarFrame.frameWidth:			1
     *cbarFrame.outerOffset:			0
     *cbarFrame.innerOffset:			0
-    *cbarFrame.width:                           518
+    *cbarFrame.width:                           512
     *imagewin.warpCursor:			true
     *imagewin.raiseWindow:			true
     *imagewin.deiconifyWindow:			true
@@ -400,11 +404,8 @@ set Resources(ximtool) { \
     *imagewin.copyOnResize:			false
     *imagewin.width:				512
     *imagewin.height:				512
-    *imagewin.color8:				#7c8498
-    *imagewin.color9:				SteelBlue
     *imagewin.maxMappings:			64
     *imagewin.borderWidth:			0
-
 
     *imagewin.translations:	\
 	 None<Key>Left:	call(move_cursor,-1,0)		\n\
@@ -470,14 +471,16 @@ set Resources(ximtool) { \
 	 !Ctrl	<Key>0:	call(centroid,$x,$y,peak) 	\n\
       !Ctrl Alt <Key>0:	call(centroid,$x,$y,min) 	\n\
 	  !Alt	<Key>b:	call(toggleBlink)	     	\n\
-	  !Alt	<Key>c:	call(controlPanel)		\n\
+	  !Alt	<Key>c:	call(displayPanel)		\n\
+    !Ctrl Shift <Key>c:	call(displayPanel)		\n\
+      !Ctrl Alt <Key>f: call(fitFrame)		 	\n\
 	  !Alt	<Key>h:	call(Help)		 	\n\
 	  !Alt	<Key>i:	call(infoPanel)		      	\n\
-      !Ctrl Alt <Key>f: call(fitFrame)		 	\n\
 	  !Alt	<Key>l:	call(loadPanel)		      	\n\
 	  !Alt	<Key>p:	call(printPanel)	       	\n\
 	  !Alt	<Key>s:	call(savePanel)		      	\n\
 	  !Alt	<Key>t:	call(tclPanel)		     	\n\
+    !Ctrl Shift <Key>t:	call(tclPanel)		     	\n\
       !Shift<Btn1Down>: call(setDynamicMagnifier,1)	\n\
         !Shift<Btn1Up>: call(setDynamicMagnifier,0)	\n\
 	   !<Btn1Down>:	call(makeMarker,$name,$x,$y) m_create()	\n\
@@ -487,6 +490,7 @@ set Resources(ximtool) { \
  	     !<Btn2Up>:	crosshair(off)			\n\
 	   !<Btn2Down>:	call(zoom,$x,$y)		\n\
 	   !<Btn3Down>:	call(windowColormap,$x,$y)	\n\
+	     !<Btn3Up>:	call(updateColormap,$x,$y)	\n\
 	 !<Btn3Motion>:	call(windowColormap,$x,$y)	\n\
       !Ctrl <Btn1Down>:	call(makeRuler,$name,$x,$y) 	\n\
     !Ctrl <Btn1Motion>:	track-cursor() call(wcsUpdate,$x,$y) call(magnifierMapImage,$x,$y) call(resizeRuler,$x,$y,0) 	\n\

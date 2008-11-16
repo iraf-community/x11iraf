@@ -1,24 +1,28 @@
-/* $XConsortium: SimpleMenu.c,v 1.41 92/09/10 16:25:07 converse Exp $ */
+/* $XConsortium: SimpleMenu.c,v 1.44 94/04/17 20:12:45 kaleb Exp $ */
 
 /*
- * Copyright 1989 Massachusetts Institute of Technology
- *
- * Permission to use, copy, modify, distribute, and sell this software and its
- * documentation for any purpose is hereby granted without fee, provided that
- * the above copyright notice appear in all copies and that both that
- * copyright notice and this permission notice appear in supporting
- * documentation, and that the name of M.I.T. not be used in advertising or
- * publicity pertaining to distribution of the software without specific,
- * written prior permission.  M.I.T. makes no representations about the
- * suitability of this software for any purpose.  It is provided "as is"
- * without express or implied warranty.
- *
- * M.I.T. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING ALL
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL M.I.T.
- * BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
- * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN 
- * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+Copyright (c) 1989, 1994  X Consortium
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of the X Consortium shall not be
+used in advertising or otherwise to promote the sale, use or other dealings
+in this Software without prior written authorization from the X Consortium.
  */
 
 /*
@@ -89,10 +93,10 @@ static XtResource resources[] = {
 #undef offset
 
 static char defaultTranslations[] =
-    "<EnterWindow>:     highlight()             \n\
-     <LeaveWindow>:     unhighlight()           \n\
-     <BtnMotion>:       highlight()             \n\
-     <BtnUp>:           MenuPopdown() notify() unhighlight()"; 
+    ":<EnterWindow>:     highlight()             \n\
+     :<LeaveWindow>:     unhighlight()           \n\
+     :<BtnMotion>:       highlight()             \n\
+     :<BtnUp>:           MenuPopdown() notify() unhighlight()"; 
 
 /*
  * Semi Public function definitions. 
@@ -351,9 +355,7 @@ XSetWindowAttributes * attrs;
     SimpleMenuWidget smw = (SimpleMenuWidget) w;
 
     attrs->cursor = smw->simple_menu.cursor;
-#ifdef USE_CWCURSOR
     *mask |= CWCursor;
-#endif
     if ((smw->simple_menu.backing_store == Always) ||
 	(smw->simple_menu.backing_store == NotUseful) ||
 	(smw->simple_menu.backing_store == WhenMapped) ) {
@@ -474,7 +476,7 @@ Widget w;
 ArgList arglist;
 Cardinal *num_args;
 {
-    register Cardinal i;
+    Cardinal i;
     Dimension width, height;
     
     width = w->core.width;
@@ -747,8 +749,8 @@ Cardinal * num_params;
     SmeObject entry = smw->simple_menu.entry_set;
     SmeObjectClass class;
     
-    if ( (entry == NULL) || !XtIsSensitive((Widget) entry) ) return;
-
+    if ( (entry == NULL) || !XtIsSensitive((Widget) entry ) ) return;
+    
     class = (SmeObjectClass) entry->object.widget_class;
     (class->sme_class.notify)( (Widget) entry );
 }
@@ -836,8 +838,8 @@ CreateLabel(w)
 Widget w;
 {
     SimpleMenuWidget smw = (SimpleMenuWidget) w;
-    register Widget * child, * next_child;
-    register int i;
+    Widget * child, * next_child;
+    int i;
     Arg args[2];
 
     if ( (smw->simple_menu.label_string == NULL) ||
@@ -967,7 +969,7 @@ Dimension *width_ret, *height_ret;
 static void
 AddPositionAction(app_con, data)
 XtAppContext app_con;
-caddr_t data;
+XPointer data;
 {
     static XtActionsRec pos_action[] = {
         { "XawPositionSimpleMenu", PositionMenuAction },
@@ -988,7 +990,7 @@ FindMenu(widget, name)
 Widget widget;
 String name;
 {
-    register Widget w, menu;
+    Widget w, menu;
     
     for ( w = widget ; w != NULL ; w = XtParent(w) )
 	if ( (menu = XtNameToWidget(w, name)) != NULL )
@@ -1021,7 +1023,7 @@ XPoint * location;
 	if (XQueryPointer(XtDisplay(w), XtWindow(w), &junk1, &junk2, 
 			  &root_x, &root_y, &junkX, &junkY, &junkM) == FALSE) {
 	    char error_buf[BUFSIZ];
-	    (void) sprintf(error_buf, "%s %s", "Xaw - SimpleMenuWidget:",
+	    (void) sprintf(error_buf, "%s %s", "Xaw Simple Menu Widget:",
 		    "Could not find location of mouse pointer");
 	    XtAppWarning(XtWidgetToApplicationContext(w), error_buf);
 	    return;
@@ -1231,7 +1233,7 @@ GetEventEntry(w, event)
 Widget w;
 XEvent * event;
 {
-    Position x_loc, y_loc;
+    Position x_loc = 0, y_loc = 0;
     SimpleMenuWidget smw = (SimpleMenuWidget) w;
     SmeObject * entry;
     
@@ -1273,4 +1275,3 @@ XEvent * event;
     
     return(NULL);
 }
-

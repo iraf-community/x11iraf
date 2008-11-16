@@ -1,34 +1,38 @@
 /*
- * $XConsortium: Panner.c,v 1.45 92/03/03 13:52:26 converse Exp $
+ * $XConsortium: Panner.c,v 1.52 95/01/10 14:31:26 kaleb Exp $
  *
- * Copyright 1989 Massachusetts Institute of Technology
- *
- * Permission to use, copy, modify, distribute, and sell this software and its
- * documentation for any purpose is hereby granted without fee, provided that
- * the above copyright notice appear in all copies and that both that
- * copyright notice and this permission notice appear in supporting
- * documentation, and that the name of M.I.T. not be used in advertising or
- * publicity pertaining to distribution of the software without specific,
- * written prior permission.  M.I.T. makes no representations about the
- * suitability of this software for any purpose.  It is provided "as is"
- * without express or implied warranty.
- *
- * M.I.T. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING ALL
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL M.I.T.
- * BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
- * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN 
- * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+Copyright (c) 1989, 1994  X Consortium
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of the X Consortium shall not be
+used in advertising or otherwise to promote the sale, use or other dealings
+in this Software without prior written authorization from the X Consortium.
  *
  * Author:  Jim Fulton, MIT X Consortium
  */
 
-#include <X11/IntrinsicP.h>		/* for toolkit routines */
+#include <X11/IntrinsicP.h>
 #include <X11/StringDefs.h>		/* for XtN and XtC defines */
 #include <X11/Xmu/CharSet.h>		/* for XmuCompareISOLatin1() */
 #include <X11/Xaw3d/XawInit.h>		/* for XawInitializeWidgetSet */
 #include <X11/Xaw3d/PannerP.h>		/* us */
-
+#include <X11/Xos.h>
 #include <X11/Xmu/Misc.h>		/* for Min */
 #include <X11/Xmu/Drawing.h>
 #include <ctype.h>			/* for isascii() etc. */
@@ -36,7 +40,7 @@
 
 extern Bool XmuDistinguishablePixels(); /* not defined in any Xmu headers */
 
-#if defined(ISC) && defined(SYSV) && defined(SYSV386) && __STDC__
+#if defined(ISC) && __STDC__ && !defined(ISC30)
 extern double atof(char *);
 #endif
 
@@ -45,15 +49,21 @@ static char defaultTranslations[] =
    <Btn1Motion>:  move() \n\
    <Btn1Up>:      notify() stop() \n\
    <Btn2Down>:    abort() \n\
-   <Key>KP_Enter: set(rubberband,toggle) \n\
+   :<Key>KP_Enter: set(rubberband,toggle) \n\
    <Key>space:    page(+1p,+1p) \n\
    <Key>Delete:   page(-1p,-1p) \n\
-   <Key>BackSpace:  page(-1p,-1p) \n\
+   :<Key>KP_Delete: page(-1p,-1p) \n\
+   <Key>BackSpace: page(-1p,-1p) \n\
    <Key>Left:     page(-.5p,+0) \n\
+   :<Key>KP_Left:  page(-.5p,+0) \n\
    <Key>Right:    page(+.5p,+0) \n\
+   :<Key>KP_Right: page(+.5p,+0) \n\
    <Key>Up:       page(+0,-.5p) \n\
+   :<Key>KP_Up:    page(+0,-.5p) \n\
    <Key>Down:     page(+0,+.5p) \n\
-   <Key>Home:     page(0,0) ";
+   :<Key>KP_Down:  page(+0,+.5p) \n\
+   <Key>Home:     page(0,0) \n\
+   :<Key>KP_Home:  page(0,0)";
 
 
 static void ActionStart(), ActionStop(), ActionAbort(), ActionMove();
@@ -195,31 +205,12 @@ static void reset_shadow_gc (pw)	/* used when resources change */
 	XmuDistinguishablePixels (XtDisplay (pw), pw->core.colormap,
 				    pixels, 2))
     {
-#ifndef USE_XMU_STIPPLE
-        Screen *screen = XtScreen((Widget)pw);
-        Display *display = XtDisplay((Widget)pw);
-        int pixmap_width = 2, pixmap_height = 2;
-        static unsigned char pixmap_bits[] = {
-            0x02, 0x01,
-        };
-#endif
-
 	valuemask = GCTile | GCFillStyle;
 	values.fill_style = FillTiled;
-#ifdef USE_XMU_STIPPLE
 	values.tile = XmuCreateStippledPixmap(XtScreen((Widget)pw),
 					      pw->panner.foreground,
 					      pw->core.background_pixel,
 					      pw->core.depth);
-#else
-        values.tile   = XCreatePixmapFromBitmapData (display,
-                            RootWindowOfScreen(screen),
-                            (char *)pixmap_bits,
-                            pixmap_width, pixmap_height,
-                            pw->panner.foreground,
-                            pw->core.background_pixel,
-                            pw->core.depth);
-#endif
     }
     else
     {
@@ -277,7 +268,7 @@ static void reset_xor_gc (pw)		/* used when resources change */
 
 
 static void check_knob (pw, knob)
-    register PannerWidget pw;
+    PannerWidget pw;
     Boolean knob;
 {
     Position pad = pw->panner.internal_border * 2;
@@ -309,14 +300,14 @@ static void check_knob (pw, knob)
 
 
 static void move_shadow (pw)
-    register PannerWidget pw;
+    PannerWidget pw;
 {
     if (pw->panner.shadow_thickness > 0) {
 	int lw = pw->panner.shadow_thickness + pw->panner.line_width * 2;
 	int pad = pw->panner.internal_border;
 
 	if ((int)pw->panner.knob_height > lw && (int)pw->panner.knob_width > lw) {
-	    register XRectangle *r = pw->panner.shadow_rects;
+	    XRectangle *r = pw->panner.shadow_rects;
 	    r->x = (short) (pw->panner.knob_x + pad + pw->panner.knob_width);
 	    r->y = (short) (pw->panner.knob_y + pad + lw);
 	    r->width = pw->panner.shadow_thickness;
@@ -428,7 +419,7 @@ static Boolean get_event_xy (pw, event, x, y)
 }
 
 static int parse_page_string (s, pagesize, canvassize, relative)
-    register char *s;
+    char *s;
     int pagesize, canvassize;
     Boolean *relative;
 {
@@ -506,6 +497,7 @@ static int parse_page_string (s, pagesize, canvassize, relative)
  *****************************************************************************/
 
 
+/*ARGSUSED*/
 static void Initialize (greq, gnew, args, num_args)
     Widget greq, gnew;
     ArgList args;
@@ -963,4 +955,3 @@ static void ActionSet (gw, event, params, num_params)
 	XtSetValues (gw, args, (Cardinal) 1);
     }
 }
-

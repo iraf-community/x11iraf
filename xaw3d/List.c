@@ -1,34 +1,35 @@
-/* $XConsortium: List.c,v 1.35 91/10/16 21:35:06 eswu Exp $ */
+/* $XConsortium: List.c,v 1.39 94/04/17 20:12:15 kaleb Exp $ */
 
 /*
- * Copyright 1989 Massachusetts Institute of Technology
- *
- * Permission to use, copy, modify, distribute, and sell this software and its
- * documentation for any purpose is hereby granted without fee, provided that
- * the above copyright notice appear in all copies and that both that
- * copyright notice and this permission notice appear in supporting
- * documentation, and that the name of M.I.T. not be used in advertising or
- * publicity pertaining to distribution of the software without specific,
- * written prior permission.  M.I.T. makes no representations about the
- * suitability of this software for any purpose.  It is provided "as is"
- * without express or implied warranty.
- *
- * M.I.T. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING ALL
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL M.I.T.
- * BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
- * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN 
- * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- *
- */
+Copyright (c) 1989, 1994  X Consortium
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of the X Consortium shall not be
+used in advertising or otherwise to promote the sale, use or other dealings
+in this Software without prior written authorization from the X Consortium.
+*/
 
 /*
  * List.c - List widget
  *
- * This is the List widget, it is useful to display a list, without the
- * overhead of having a widget for each item in the list.  It allows 
- * the user to select an item in a list and notifies the application through
- * a callback function.
+ * This is a List widget.  It allows the user to select an item in a list and
+ * notifies the application through a callback function.
  *
  *	Created: 	8/13/88
  *	By:		Chris D. Peterson
@@ -46,6 +47,16 @@
 #include <X11/Xaw3d/XawInit.h>
 #include <X11/Xaw3d/ListP.h>
 
+/* These added so widget knows whether its height, width are user selected.
+I also added the freedoms member of the list widget part. */
+
+#define HeightLock  1
+#define WidthLock   2
+#define LongestLock 4
+
+#define HeightFree( w )  !(((ListWidget)(w))->list.freedoms & HeightLock )
+#define WidthFree( w )   !(((ListWidget)(w))->list.freedoms & WidthLock )
+#define LongestFree( w ) !(((ListWidget)(w))->list.freedoms & LongestLock )
 
 /* 
  * Default Translation table.
@@ -72,6 +83,8 @@ static XtResource resources[] = {
        offset(simple.cursor), XtRString, "left_ptr"},
     {XtNfont,  XtCFont, XtRFontStruct, sizeof(XFontStruct *),
 	offset(list.font),XtRString, XtDefaultFont},
+    {XtNfontSet,  XtCFontSet, XtRFontSet, sizeof(XFontSet ),
+	offset(list.fontset),XtRString, XtDefaultFontSet},
     {XtNlist, XtCList, XtRPointer, sizeof(char **),
        offset(list.list), XtRString, NULL},
     {XtNdefaultColumns, XtCColumns, XtRInt,  sizeof(int),
@@ -87,7 +100,7 @@ static XtResource resources[] = {
     {XtNverticalList, XtCBoolean, XtRBoolean,  sizeof(Boolean),
 	offset(list.vertical_cols), XtRImmediate, (XtPointer) False},
     {XtNinternalWidth, XtCWidth, XtRDimension,  sizeof(Dimension),
-	offset(list.internal_width), XtRImmediate, (XtPointer)4},
+	offset(list.internal_width), XtRImmediate, (XtPointer)2},
     {XtNinternalHeight, XtCHeight, XtRDimension, sizeof(Dimension),
 	offset(list.internal_height), XtRImmediate, (XtPointer)2},
     {XtNcolumnSpacing, XtCSpacing, XtRDimension,  sizeof(Dimension),
@@ -155,7 +168,7 @@ ListClassRec listClassRec = {
 /* List class fields initialization */
   {
     /* not used			*/	0
-  }
+  },
 };
 
 WidgetClass listWidgetClass = (WidgetClass)&listClassRec;
@@ -171,86 +184,111 @@ Widget w;
 {
     XGCValues	values;
     ListWidget lw = (ListWidget) w;    
-#ifndef USE_XMU_STIPPLE
-    Screen *screen = XtScreen((Widget)w);
-    Display *display = XtDisplay((Widget)w);
-    int pixmap_width = 2, pixmap_height = 2;
-    static unsigned char pixmap_bits[] = {
-        0x02, 0x01,
-    };
-#endif
-
 
     values.foreground	= lw->list.foreground;
     values.font		= lw->list.font->fid;
-    lw->list.normgc = XtGetGC(w, (unsigned) GCForeground | GCFont,
+
+    if ( lw->simple.international == True )
+        lw->list.normgc = XtAllocateGC( w, 0, (unsigned) GCForeground,
+				 &values, GCFont, 0 );
+    else
+        lw->list.normgc = XtGetGC( w, (unsigned) GCForeground | GCFont,
 				 &values);
 
     values.foreground	= lw->core.background_pixel;
-    lw->list.revgc = XtGetGC(w, (unsigned) GCForeground | GCFont,
+
+    if ( lw->simple.international == True )
+        lw->list.revgc = XtAllocateGC( w, 0, (unsigned) GCForeground,
+				 &values, GCFont, 0 );
+    else
+        lw->list.revgc = XtGetGC( w, (unsigned) GCForeground | GCFont,
 				 &values);
 
-#ifdef USE_XMU_STIPPLE
     values.tile       = XmuCreateStippledPixmap(XtScreen(w), 
 						lw->list.foreground,
 						lw->core.background_pixel,
 						lw->core.depth);
-#else
-    values.tile       = XCreatePixmapFromBitmapData (display,
-                            RootWindowOfScreen(screen),
-                            (char *)pixmap_bits,
-                            pixmap_width, pixmap_height,
-                            lw->list.foreground,
-                            lw->core.background_pixel,
-                            lw->core.depth);
-#endif
     values.fill_style = FillTiled;
 
-    lw->list.graygc = XtGetGC(w, (unsigned) GCFont | GCTile | GCFillStyle,
+    if ( lw->simple.international == True )
+        lw->list.graygc = XtAllocateGC( w, 0, (unsigned) GCTile | GCFillStyle,
+			      &values, GCFont, 0 );
+    else
+        lw->list.graygc = XtGetGC( w, (unsigned) GCFont | GCTile | GCFillStyle,
 			      &values);
 }
 
-/*	Function Name: ResetList
- *	Description: Resets the new list when important things change.
- *	Arguments: w - the widget.
- *                 changex, changey - allow the height or width to change?
- *	Returns: none.
- */
 
-static void
-ResetList(w, changex, changey)
+/* CalculatedValues()
+ *
+ * does routine checks/computations that must be done after data changes
+ * but won't hurt if accidently called
+ *
+ * These calculations were needed in SetValues.  They were in ResetList.
+ * ResetList called ChangeSize, which made an XtGeometryRequest.  You
+ * MAY NOT change your geometry from within a SetValues. (Xt man,
+ * sect. 9.7.2)  So, I factored these changes out. */
+
+static void CalculatedValues( w )
 Widget w;
-Boolean changex, changey;
 {
-    ListWidget lw = (ListWidget) w;
-    Dimension width = w->core.width;
-    Dimension height = w->core.height;
-    register int i, len;
+    int i, len;
 
-/*
- * If list is NULL then the list will just be the name of the widget.
- */
+    ListWidget lw = (ListWidget) w;
+
+    /* If list is NULL then the list will just be the name of the widget. */
 
     if (lw->list.list == NULL) {
       lw->list.list = &(lw->core.name);
       lw->list.nitems = 1;
     }
 
-    if (lw->list.nitems == 0)	    /* Get number of items. */
+    /* Get number of items. */
+
+    if (lw->list.nitems == 0)
         for ( ; lw->list.list[lw->list.nitems] != NULL ; lw->list.nitems++);
 
-    if (lw->list.longest == 0) /* Get column width. */
-        for ( i = 0 ; i < lw->list.nitems; i++) {
-	    len = XTextWidth(lw->list.font, lw->list.list[i],
-			     strlen(lw->list.list[i]));
-	    if (len > lw->list.longest)
-	        lw->list.longest = len;
-	}
+    /* Get column width. */
+
+    if ( LongestFree( lw ) )  {
+
+        lw->list.longest = 0; /* so it will accumulate real longest below */
+
+        for ( i = 0 ; i < lw->list.nitems; i++)  {
+            if ( lw->simple.international == True )
+	        len = XmbTextEscapement(lw->list.fontset, lw->list.list[i],
+			 			    strlen(lw->list.list[i]));
+            else
+                len = XTextWidth(lw->list.font, lw->list.list[i],
+			 			    strlen(lw->list.list[i]));
+            if (len > lw->list.longest)
+                lw->list.longest = len;
+        }
+    }
 
     lw->list.col_width = lw->list.longest + lw->list.column_space;
+}
 
-    if (Layout(w, changex, changey, &width, &height))
-      ChangeSize(w, width, height);
+/*	Function Name: ResetList
+ *	Description: Resets the new list when important things change.
+ *	Arguments: w - the widget.
+ *                 changex, changey - allow the height or width to change?
+ *
+ *	Returns: TRUE if width or height have been changed
+ */
+
+static void
+ResetList( w, changex, changey )
+Widget w;
+Boolean changex, changey;
+{
+    Dimension width = w->core.width;
+    Dimension height = w->core.height;
+
+    CalculatedValues( w );
+
+    if( Layout( w, changex, changey, &width, &height ) )
+      ChangeSize( w, width, height );
 }
 
 /*	Function Name: ChangeSize.
@@ -269,9 +307,10 @@ Dimension width, height;
     request.request_mode = CWWidth | CWHeight;
     request.width = width;
     request.height = height;
-    
+
     switch ( XtMakeGeometryRequest(w, &request, &reply) ) {
     case XtGeometryYes:
+        break;
     case XtGeometryNo:
         break;
     case XtGeometryAlmost:
@@ -285,14 +324,7 @@ Dimension width, height;
 	    break;
 	case XtGeometryAlmost:
 	    request = reply;
-	    if (Layout(w, FALSE, FALSE,
-		       &(request.width), &(request.height))) {
-	      char buf[BUFSIZ];
-	      (void) sprintf(buf, "List Widget: %s %s",
-		      "Size Changed when it shouldn't have",
-		      "when computing layout");
-	      XtAppWarning(XtWidgetToApplicationContext(w), buf);
-	    }
+	    Layout(w, FALSE, FALSE, &(request.width), &(request.height));
 	    request.request_mode = CWWidth | CWHeight;
 	    XtMakeGeometryRequest(w, &request, &reply);
 	    break;
@@ -329,14 +361,25 @@ Cardinal *num_args;
  * Initialize all private resources.
  */
 
+    /* record for posterity if we are free */
+    lw->list.freedoms = (lw->core.width != 0) * WidthLock +
+                        (lw->core.height != 0) * HeightLock +
+                        (lw->list.longest != 0) * LongestLock;
+
     GetGCs(new);
 
-    /* Set row height. */
-    lw->list.row_height = lw->list.font->max_bounds.ascent
+    /* Set row height. based on font or fontset */
+
+    if (lw->simple.international == True )
+        lw->list.row_height =
+                     XExtentsOfFontSet(lw->list.fontset)->max_ink_extent.height
+                        + lw->list.row_space;
+    else
+        lw->list.row_height = lw->list.font->max_bounds.ascent
 			+ lw->list.font->max_bounds.descent
 			+ lw->list.row_space;
 
-    ResetList(new, (new->core.width == 0), (new->core.height == 0));
+    ResetList( new, WidthFree( lw ), HeightFree( lw ) );
 
     lw->list.highlight = lw->list.is_highlighted = NO_HIGHLIGHT;
 
@@ -428,7 +471,7 @@ Widget w;
 int ul, lr, item;
 {
     ListWidget lw = (ListWidget) w;
-    register int mod_item;
+    int mod_item;
     int things;
     
     if (item < ul || item > lr) 
@@ -444,41 +487,87 @@ int ul, lr, item;
     return(FALSE);
 }
 
-/*	Function Name: HighlightBackground
- *	Description: paints the color of the background for the given item.
- *	Arguments: w - the widget.
- *                 x, y - ul corner of the area item occupies.
- *                 item - the item we are dealing with.
- *                 gc - the gc that is used to paint this rectangle
- *	Returns: 
- */
+
+/* HighlightBackground()
+ *
+ * Paints the color of the background for the given item.  It performs
+ * clipping to the interior of internal_width/height by hand, as its a
+ * simple calculation and probably much faster than using Xlib and a clip mask.
+ *
+ *  x, y - ul corner of the area item occupies.
+ *  gc - the gc to use to paint this rectangle */
 
 static void
-HighlightBackground(w, x, y, item, gc)
+HighlightBackground( w, x, y, gc )
 Widget w;
-int x, y, item;
+int x, y;
 GC gc;
 {
     ListWidget lw = (ListWidget) w;
-    int hl_x, hl_y, width, height;
 
-    hl_x = x - lw->list.column_space/2;
-    width = XTextWidth(lw->list.font, lw->list.list[item],
-			 strlen(lw->list.list[item])) + lw->list.column_space;
-    hl_y = y - lw->list.row_space/2;
-    height = lw->list.row_height + lw->list.row_space;
+    /* easy to clip the rectangle by hand and probably alot faster than Xlib */
 
-    XFillRectangle(XtDisplay(w), XtWindow(w), gc, hl_x, hl_y, width, height);
+    Dimension width               = lw->list.col_width;
+    Dimension height              = lw->list.row_height;
+    Dimension frame_limited_width = w->core.width - lw->list.internal_width - x;
+    Dimension frame_limited_height= w->core.height- lw->list.internal_height- y;
+
+    /* Clip the rectangle width and height to the edge of the drawable area */
+
+    if  ( width > frame_limited_width )
+        width = frame_limited_width;
+    if  ( height> frame_limited_height)
+        height = frame_limited_height;
+
+    /* Clip the rectangle x and y to the edge of the drawable area */
+
+    if ( x < lw->list.internal_width ) {
+        width = width - ( lw->list.internal_width - x );
+        x = lw->list.internal_width;
+    }
+    if ( y < lw->list.internal_height) {
+        height = height - ( lw->list.internal_height - x );
+        y = lw->list.internal_height;
+    }
+    XFillRectangle( XtDisplay( w ), XtWindow( w ), gc, x, y,
+		    width, height );
 }
 
-/*	Function Name: PaintItemName
- *	Description: paints the name of the item in the appropriate location.
- *	Arguments: w - the list widget.
- *                 item - the item to draw.
- *	Returns: none.
+
+/* ClipToShadowInteriorAndLongest()
  *
- *      NOTE: no action taken on an unrealized widget.
- */
+ * Converts the passed gc so that any drawing done with that GC will not
+ * write in the empty margin (specified by internal_width/height) (which also
+ * prevents erasing the shadow.  It also clips against the value longest.
+ * If the user doesn't set longest, this has no effect (as longest is the
+ * maximum of all item lengths).  If the user does specify, say, 80 pixel
+ * columns, though, this prevents items from overwriting other items. */
+
+static void ClipToShadowInteriorAndLongest(lw, gc_p, x)
+    ListWidget lw; 
+    GC* gc_p;
+    Dimension x;
+{
+    XRectangle rect;
+
+    rect.x = x;
+    rect.y = lw->list.internal_height;
+    rect.height = lw->core.height - lw->list.internal_height * 2;
+    rect.width = lw->core.width - lw->list.internal_width - x;
+    if ( rect.width > lw->list.longest )
+        rect.width = lw->list.longest;
+
+    XSetClipRectangles( XtDisplay((Widget)lw),*gc_p,0,0,&rect,1,YXBanded );
+}
+
+
+/*  PaintItemName()
+ *
+ *  paints the name of the item in the appropriate location.
+ *  w - the list widget.
+ *  item - the item to draw.
+ *
+ *  NOTE: no action taken on an unrealized widget. */
 
 static void
 PaintItemName(w, item)
@@ -489,9 +578,10 @@ int item;
     GC gc;
     int x, y, str_y;
     ListWidget lw = (ListWidget) w;
+    XFontSetExtents *ext  = XExtentsOfFontSet(lw->list.fontset);
 
     if (!XtIsRealized(w)) return; /* Just in case... */
-   
+
     if (lw->list.vertical_cols) {
 	x = lw->list.col_width * (item / lw->list.nrows)
 	  + lw->list.internal_width;
@@ -505,26 +595,29 @@ int item;
 	  + lw->list.internal_height;
     }
 
-    str_y = y + lw->list.font->max_bounds.ascent;
+    if ( lw->simple.international == True )
+        str_y = y + abs(ext->max_ink_extent.y); 
+    else
+        str_y = y + lw->list.font->max_bounds.ascent;
 
     if (item == lw->list.is_highlighted) {
         if (item == lw->list.highlight) {
             gc = lw->list.revgc;
-	    HighlightBackground(w, x, y, item, lw->list.normgc);
+	    HighlightBackground(w, x, y, lw->list.normgc);
 	}
         else {
 	    if (XtIsSensitive(w)) 
 	        gc = lw->list.normgc;
 	    else
 	        gc = lw->list.graygc;
-	    HighlightBackground(w, x, y, item, lw->list.revgc);
+	    HighlightBackground(w, x, y, lw->list.revgc);
 	    lw->list.is_highlighted = NO_HIGHLIGHT;
         }
     }
     else {
         if (item == lw->list.highlight) {
             gc = lw->list.revgc;
-	    HighlightBackground(w, x, y, item, lw->list.normgc);
+	    HighlightBackground(w, x, y, lw->list.normgc);
 	    lw->list.is_highlighted = item;
 	}
 	else {
@@ -535,17 +628,35 @@ int item;
 	}
     }
 
+    /* List's overall width contains the same number of inter-column
+    column_space's as columns.  There should thus be a half
+    column_width margin on each side of each column.
+    The row case is symmetric. */
+
+    x     += lw->list.column_space / 2;
+    str_y += lw->list.row_space    / 2;
+
     str =  lw->list.list[item];	/* draw it */
-    XDrawString(XtDisplay(w), XtWindow(w), gc, x, str_y, str, strlen(str));
+
+    ClipToShadowInteriorAndLongest( lw, &gc, x );
+
+    if ( lw->simple.international == True )
+        XmbDrawString( XtDisplay( w ), XtWindow( w ), lw->list.fontset,
+		  gc, x, str_y, str, strlen( str ) );
+    else
+        XDrawString( XtDisplay( w ), XtWindow( w ),
+		  gc, x, str_y, str, strlen( str ) );
+
+    XSetClipMask( XtDisplay( w ), gc, None );
 }
+
     
-/*	Function Name: Redisplay
- *	Description: Repaints the widget window on expose events.
- *	Arguments: w - the list widget.
- *                 event - the expose event for this repaint.
- *                 junk - NOT USED.
- *	Returns: 
- */
+/* Redisplay()
+ *
+ * Repaints the widget window on expose events.
+ * w - the list widget.
+ * event - the expose event for this repaint.
+ * junk - not used, unless three-d patch enabled. */
 
 /* ARGSUSED */
 static void 
@@ -571,14 +682,14 @@ Region junk;
 	PaintItemName(w, item);
 }
 
-/*	Function Name: PreferredGeom
- *	Description: This tells the parent what size we would like to be
- *                   given certain constraints.
- *	Arguments: w - the widget.
- *                 intended - what the parent intends to do with us.
- *                 requested - what we want to happen.
- *	Returns: none.
- */
+
+/* PreferredGeom()
+ *
+ * This tells the parent what size we would like to be
+ * given certain constraints.
+ * w - the widget.
+ * intended - what the parent intends to do with us.
+ * requested - what we want to happen. */
 
 static XtGeometryResult 
 PreferredGeom(w, intended, requested)
@@ -622,12 +733,10 @@ XtWidgetGeometry *intended, *requested;
     return(XtGeometryYes);
 }
 
-/*	Function Name: Resize
- *	Description: resizes the widget, by changing the number of rows and
- *                   columns.
- *	Arguments: w - the widget.
- *	Returns: none.
- */
+
+/* Resize()
+ *
+ * resizes the widget, by changing the number of rows and columns. */
 
 static void
 Resize(w)
@@ -643,17 +752,18 @@ Resize(w)
 	   "List Widget: Size changed when it shouldn't have when resising.");
 }
 
-/*	Function Name: Layout
- *	Description: lays out the item in the list.
- *	Arguments: w - the widget.
- *                 xfree, yfree - TRUE if we are free to resize the widget in
- *                                this direction.
- *                 width, height - the is the current width and height that 
- *                                 we are going to layout the list widget to,
- *                                 depending on xfree and yfree of course.
+
+/* Layout()
+ *
+ * lays out the item in the list.
+ * w - the widget.
+ * xfree, yfree - TRUE if we are free to resize the widget in
+ *                this direction.
+ * width, height- the is the current width and height that we are going
+ *                we are going to layout the list widget to,
+ *                depending on xfree and yfree of course.
  *                               
- *	Returns: TRUE if width or height have been changed.
- */
+ * RETURNS: TRUE if width or height have been changed. */
 
 static Boolean
 Layout(w, xfree, yfree, width, height)
@@ -675,7 +785,12 @@ Dimension *width, *height;
 	/* 12/3 = 4 and 10/3 = 4, but 9/3 = 3 */
 	lw->list.nrows = ( ( lw->list.nitems - 1) / lw->list.ncols) + 1 ;
 	if (xfree) {		/* If allowed resize width. */
-	    *width = lw->list.ncols * lw->list.col_width 
+
+            /* this counts the same number
+            of inter-column column_space 's as columns.  There should thus be a
+            half column_space margin on each side of each column...*/
+
+	    *width = lw->list.ncols * lw->list.col_width
 	           + 2 * lw->list.internal_width;
 	    change = TRUE;
 	}
@@ -736,16 +851,12 @@ Dimension *width, *height;
     return(change);
 }
 
-/*	Function Name: Notify
- *	Description: Notifies the user that a button has been pressed, and
- *                   calles the callback, if the XtNpasteBuffer resource
- *                   is true then the name of the item is also put in the
- *                   X cut buffer ( buf (0) ).
- *	Arguments: w - the widget that the notify occured in.
- *                 event - event that caused this notification.
- *                 params, num_params - not used.
- *	Returns: none.
- */
+
+/* Notify() - ACTION
+ *
+ * Notifies the user that a button has been pressed, and
+ * calls the callback; if the XtNpasteBuffer resource is true
+ * then the name of the item is also put in CUT_BUFFER0.	*/
 
 /* ARGSUSED */
 static void
@@ -787,13 +898,10 @@ Cardinal *num_params;
     XtCallCallbacks( w, XtNcallback, (XtPointer) &ret_value);
 }
 
-/*	Function Name: Unset
- *	Description: unhighlights the current element.
- *	Arguments: w - the widget that the event occured in.
- *                 event - not used.
- *                 params, num_params - not used.
- *	Returns: none.
- */
+
+/* Unset() - ACTION
+ *
+ * unhighlights the current element. */
 
 /* ARGSUSED */
 static void
@@ -806,13 +914,10 @@ Cardinal *num_params;
   XawListUnhighlight(w);
 }
 
-/*	Function Name: Set
- *	Description: Highlights the current element.
- *	Arguments: w - the widget that the event occured in.
- *                 event - event that caused this notification.
- *                 params, num_params - not used.
- *	Returns: none.
- */
+
+/* Set() - ACTION
+ *
+ * Highlights the current element. */
 
 /* ARGSUSED */
 static void
@@ -846,17 +951,33 @@ Cardinal *num_args;
     ListWidget rl = (ListWidget) request;
     ListWidget nl = (ListWidget) new;
     Boolean redraw = FALSE;
+    XFontSetExtents *ext = XExtentsOfFontSet(nl->list.fontset);
 
-    if ((cl->list.foreground != rl->list.foreground) ||
-	(cl->core.background_pixel != rl->core.background_pixel) ||
-	(cl->list.font != rl->list.font) ) {
+    /* If the request height/width is different, lock it.  Unless its 0. If */
+    /* neither new nor 0, leave it as it was.  Not in R5. */
+    if ( nl->core.width != cl->core.width )
+        nl->list.freedoms |= WidthLock;
+    if ( nl->core.width == 0 )
+        nl->list.freedoms &= ~WidthLock;
+
+    if ( nl->core.height != cl->core.height )
+        nl->list.freedoms |= HeightLock;
+    if ( nl->core.height == 0 )
+        nl->list.freedoms &= ~HeightLock;
+
+    if ( nl->list.longest != cl->list.longest )
+        nl->list.freedoms |= LongestLock;
+    if ( nl->list.longest == 0 )
+        nl->list.freedoms &= ~LongestLock;
+
+    /* _DONT_ check for fontset here - it's not in GC.*/
+
+    if (  (cl->list.foreground       != nl->list.foreground)       ||
+	  (cl->core.background_pixel != nl->core.background_pixel) ||
+	  (cl->list.font             != nl->list.font)                ) {
 	XGCValues values;
 	XGetGCValues(XtDisplay(current), cl->list.graygc, GCTile, &values);
-#ifdef USE_XMU_STIPPLE
 	XmuReleaseStippledPixmap(XtScreen(current), values.tile);
-#else
-        XFreePixmap(XtDisplay(current), values.tile);
-#endif
 	XtReleaseGC(current, cl->list.graygc);
 	XtReleaseGC(current, cl->list.revgc);
 	XtReleaseGC(current, cl->list.normgc);
@@ -864,38 +985,59 @@ Cardinal *num_args;
         redraw = TRUE;
     }
 
-    /* Reset row height. */
-
-    if ((cl->list.row_space != rl->list.row_space) ||
-	(cl->list.font != rl->list.font)) 
+    if ( ( cl->list.font != nl->list.font ) &&
+				( cl->simple.international == False ) )
         nl->list.row_height = nl->list.font->max_bounds.ascent
 	                    + nl->list.font->max_bounds.descent
 			    + nl->list.row_space;
-    
-    if ((cl->core.width != rl->core.width)                     ||
-	(cl->core.height != rl->core.height)                   ||
-	(cl->list.internal_width != rl->list.internal_width)   ||
-	(cl->list.internal_height != rl->list.internal_height) ||
-	(cl->list.column_space != rl->list.column_space)       ||
-	(cl->list.row_space != rl->list.row_space)             ||
-	(cl->list.default_cols != rl->list.default_cols)       ||
-	(  (cl->list.force_cols != rl->list.force_cols) &&
-	   (rl->list.force_cols != rl->list.ncols) )           ||
-	(cl->list.vertical_cols != rl->list.vertical_cols)     ||
-	(cl->list.longest != rl->list.longest)                 ||
-	(cl->list.nitems != rl->list.nitems)                   ||
-	(cl->list.font != rl->list.font)                       ||
-	(cl->list.list != rl->list.list)                        ) {
 
-      ResetList(new, TRUE, TRUE);
-      redraw = TRUE;
+    else if ( ( cl->list.fontset != nl->list.fontset ) &&
+				( cl->simple.international == True ) )
+        nl->list.row_height = ext->max_ink_extent.height + nl->list.row_space;
+
+    /* ...If the above two font(set) change checkers above both failed, check
+    if row_space was altered.  If one of the above passed, row_height will
+    already have been re-calculated. */
+
+    else if ( cl->list.row_space != nl->list.row_space ) {
+
+        if (cl->simple.international == True )
+            nl->list.row_height = ext->max_ink_extent.height + nl->list.row_space;
+        else
+            nl->list.row_height = nl->list.font->max_bounds.ascent
+	                        + nl->list.font->max_bounds.descent
+			        + nl->list.row_space;
     }
 
-    if (cl->list.list != rl->list.list)
+    if ((cl->core.width           != nl->core.width)           ||
+	(cl->core.height          != nl->core.height)          ||
+	(cl->list.internal_width  != nl->list.internal_width)  ||
+	(cl->list.internal_height != nl->list.internal_height) ||
+	(cl->list.column_space    != nl->list.column_space)    ||
+	(cl->list.row_space       != nl->list.row_space)       ||
+	(cl->list.default_cols    != nl->list.default_cols)    ||
+	(  (cl->list.force_cols   != nl->list.force_cols) &&
+	   (rl->list.force_cols   != nl->list.ncols) )         ||
+	(cl->list.vertical_cols   != nl->list.vertical_cols)   ||
+	(cl->list.longest         != nl->list.longest)         ||
+	(cl->list.nitems          != nl->list.nitems)          ||
+	(cl->list.font            != nl->list.font)            ||
+   /* Equiv. fontsets might have different values, but the same fonts, so the
+   next comparison is sloppy but not dangerous.  */
+	(cl->list.fontset         != nl->list.fontset)         ||
+	(cl->list.list            != nl->list.list)          )   {
+
+        CalculatedValues( new );
+        Layout( new, WidthFree( nl ), HeightFree( nl ),
+			 &nl->core.width, &nl->core.height );
+        redraw = TRUE;
+    }
+
+    if (cl->list.list != nl->list.list)
 	nl->list.is_highlighted = nl->list.highlight = NO_HIGHLIGHT;
 
-    if ((cl->core.sensitive != rl->core.sensitive) ||
-	(cl->core.ancestor_sensitive != rl->core.ancestor_sensitive)) {
+    if ((cl->core.sensitive != nl->core.sensitive) ||
+	(cl->core.ancestor_sensitive != nl->core.ancestor_sensitive)) {
         nl->list.highlight = NO_HIGHLIGHT;
 	redraw = TRUE;
     }
@@ -913,11 +1055,7 @@ static void Destroy(w)
     XGCValues values;
     
     XGetGCValues(XtDisplay(w), lw->list.graygc, GCTile, &values);
-#ifdef USE_XMU_STIPPLE
     XmuReleaseStippledPixmap(XtScreen(w), values.tile);
-#else
-    XFreePixmap(XtDisplay(w), values.tile);
-#endif
     XtReleaseGC(w, lw->list.graygc);
     XtReleaseGC(w, lw->list.revgc);
     XtReleaseGC(w, lw->list.normgc);
@@ -956,18 +1094,36 @@ Boolean resize_it;
 #endif
 {
     ListWidget lw = (ListWidget) w;
+    Dimension new_width = w->core.width;
+    Dimension new_height = w->core.height;
 
     lw->list.list = list;
 
-    if (nitems <= 0) nitems = 0;
+    if ( nitems <= 0 ) nitems = 0;
     lw->list.nitems = nitems;
-    if (longest <= 0) longest = 0;
+    if ( longest <= 0 ) longest = 0;
+
+    /* If the user passes 0 meaning "calculate it", it must be free */
+    if ( longest != 0 )
+        lw->list.freedoms |= LongestLock;
+    else /* the user's word is god. */
+        lw->list.freedoms &= ~LongestLock;
+
+    if ( resize_it )
+        lw->list.freedoms &= ~WidthLock & ~HeightLock;
+    /* else - still resize if its not locked */
+
     lw->list.longest = longest;
 
-    ResetList(w, resize_it, resize_it);
+    CalculatedValues( w );
+
+    if( Layout( w, WidthFree( w ), HeightFree( w ),
+		&new_width, &new_height ) )
+        ChangeSize( w, new_width, new_height );
+
     lw->list.is_highlighted = lw->list.highlight = NO_HIGHLIGHT;
-    if ( XtIsRealized(w) )
-      Redisplay(w, (XEvent *)NULL, (Region)NULL);
+    if ( XtIsRealized( w ) )
+      Redisplay( w, (XEvent *)NULL, (Region)NULL );
 }
 
 /*	Function Name: XawListUnhighlight
@@ -1034,7 +1190,8 @@ Widget w;
     ListWidget lw = ( ListWidget ) w;
     XawListReturnStruct * ret_val;
 
-    ret_val = (XawListReturnStruct *) XtMalloc (sizeof (XawListReturnStruct));
+    ret_val = (XawListReturnStruct *) 
+	          XtMalloc (sizeof (XawListReturnStruct));/* SPARE MALLOC OK */
     
     ret_val->list_index = lw->list.highlight;
     if (ret_val->list_index == XAW_LIST_NONE)

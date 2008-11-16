@@ -73,6 +73,7 @@
 
 /* Magic numbers. */
 #define DEF_PORT	5137	        /* default tcp/ip socket  	*/
+#define DEF_NPORTS	1	        /* default no. sockets to open 	*/
 #define DEF_PROXY_PORT	5136	        /* default proxy socket  	*/
 #define	I_DEVNAME	"/dev/imt1o"    /* pseudo device names    	*/
 #define	O_DEVNAME	"/dev/imt1i"    /* our IN is client's OUT 	*/
@@ -202,6 +203,7 @@ typedef struct {
 	char *output_fifo;		   /* client's input               */
 	char *unixaddr;			   /* format for unix socket path  */
 	int  port;			   /* port for INET socket         */
+	int  nports;			   /* nports to open		   */
 
 	/* Internal state. */
 	int display_frame;		   /* currently displayed frame    */
@@ -227,6 +229,7 @@ VXimData server_data = {
 	I_DEVNAME,			    /* output_fifo	 	   */
 	DEF_UNIXADDR,			    /* unixaddr	 		   */
 	DEF_PORT,			    /* port		 	   */
+	DEF_NPORTS,			    /* nports		 	   */
 	1,				    /* display_frame 		   */
 	1,				    /* fb_configno	 	   */
 	2,				    /* nframes	 		   */
@@ -386,8 +389,9 @@ char	**argv;
 	    } else if (strncmp (argv[i], "-noraster", 3) == 0) {
 		keep_raster = 0;
 	    } else if (strncmp (argv[i], "-nframes", 3) == 0) {
-		i++;
-                vxim->def_nframes = min (MAX_FRAMES, atoi (argv[i]));
+                vxim->def_nframes = min (MAX_FRAMES, atoi (argv[++i]));
+	    } else if (strncmp (argv[i], "-nports", 3) == 0) {
+		vxim->nports = atoi (argv[++i]);
 	    } else if (strncmp (argv[i], "-port_only", 6) == 0) {
                 vxim->input_fifo = "";
                 vxim->unixaddr = "none";
@@ -509,16 +513,20 @@ vx_iisopen (vxim)
 register VXimDataPtr vxim;
 #endif
 {
-	int nopen = 0;
+    int i, port, last_port = (vxim->port + vxim->nports - 1);
+    int nopen = 0;
 
-	if (open_fifo (vxim))
-	    nopen++;
-	if (open_inet (vxim))
-	    nopen++;
-	if (open_unix (vxim))
-	    nopen++;
+    if (open_unix (vxim))
+        nopen++;
+    if (open_fifo (vxim))
+        nopen++;
 
-	return (nopen);
+    for (port=vxim->port; port > 0 && port <= last_port; port++) {
+        if (open_inet (vxim, port))
+            nopen++;
+    }
+
+    return (nopen);
 }
 
 
@@ -601,6 +609,13 @@ register VXimDataPtr vxim;
 	int datain, dataout;
 	int keepalive;
 
+
+#if defined(__DARWIN__) || defined (__CYGWIN__)
+        /* On OS X and Cygwin we don't use fifos. */
+        xim->input_fifo = "none";
+        return (NULL);
+#endif
+
 	/* Setting the input fifo to "none" or the null string disables
 	 * fifo support.
 	 */
@@ -660,7 +675,8 @@ done:
 		close (dataout);
 	} else if (verbose) {
 	    fprintf (stderr,
-		"vximtool: Open to accept input on fifo: %s\n", vxim->input_fifo);
+		"vximtool: Open to accept input on fifo: %s\n", 
+		    vxim->input_fifo);
 	}
 
 	return (chan);
@@ -673,12 +689,13 @@ done:
 #ifdef ANSI_FUNC
 
 static IoChanPtr 
-open_inet (register VXimDataPtr vxim)
+open_inet (register VXimDataPtr vxim, int port)
 #else
 
 static IoChanPtr
-open_inet (vxim)
+open_inet (vxim, port)
 register VXimDataPtr vxim;
+int      port;
 #endif
 {
 	register int s = 0;
@@ -686,7 +703,7 @@ register VXimDataPtr vxim;
 	struct sockaddr_in sockaddr;
 
 	/* Setting the port to zero disables inet socket support. */
-	if (vxim->port <= 0)
+	if (port <= 0)
 	    return (NULL);
 
 	if ((s = socket (AF_INET, SOCK_STREAM, 0)) < 0)
@@ -694,7 +711,7 @@ register VXimDataPtr vxim;
 
 	memset ((void *)&sockaddr, 0, sizeof(sockaddr));
 	sockaddr.sin_family = AF_INET;
-	sockaddr.sin_port = htons((short)vxim->port);
+	sockaddr.sin_port = htons((short)port);
 	sockaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	if (bind (s, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) < 0)
 	    goto err;
@@ -706,7 +723,7 @@ register VXimDataPtr vxim;
 	if ((chan = get_iochan(vxim))) {
 	    chan->vxim = (void *) vxim;
 	    chan->type = IO_INET;
-	    chan->port = vxim->port;
+	    chan->port = port;
 	    chan->datain = s;
 	    chan->dataout = s;
 	    chan->listen_fd = s;
@@ -715,13 +732,12 @@ register VXimDataPtr vxim;
 	    chan->rf_p = &vxim->frames[0];
 	    if (verbose)
 	        fprintf (stderr,
-		    "vximtool: Open to accept input on inet: port %d\n", 
-		    vxim->port);
+		    "vximtool: Open to accept input on inet: port %d\n", port);
 	    return (chan);
 	}
 err:
 	fprintf (stderr, "vximtool: cannot open socket on port %d, errno=%d\n",
-	    vxim->port, errno);
+	    port, errno);
 	if (s)
 	    close (s);
 	return (NULL);
@@ -1895,6 +1911,7 @@ Usage ()
         printoption ("[-noraster]");          	   /* don't save pix     */
         printoption ("[-nframes <num>]");          /* # of frames        */
         printoption ("[-port <num>]");             /* inet port          */
+        printoption ("[-nports <num>]");           /* No. inet ports     */
         printoption ("[-proxy]");             	   /* run a proxy server */
         printoption ("[-verbose]");           	   /* verbose output     */
         printoption ("[-unix <name>]");            /* unix socket        */

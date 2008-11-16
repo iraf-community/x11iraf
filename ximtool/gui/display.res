@@ -244,7 +244,7 @@ set Resources(display_panel) { \
     *prevFrame.label:				Previous Frame
     *fitFrame.label:				Fit Frame
     *aspect.label:				Aspect
-    *clearFrame.label:				Clear	Frame
+    *clearFrame.label:				Clear Frame
     *flipX.label:				Flip X
     *flipY.label:				Flip Y
     *flipXY.label:				Flip XY

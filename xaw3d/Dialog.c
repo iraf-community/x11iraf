@@ -1,8 +1,32 @@
-/* $XConsortium: Dialog.c,v 1.46 91/10/16 21:33:56 eswu Exp $ */
+/* $XConsortium: Dialog.c,v 1.48 94/04/17 20:12:02 kaleb Exp $ */
 
 /***********************************************************
-Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts,
-and the Massachusetts Institute of Technology, Cambridge, Massachusetts.
+
+Copyright (c) 1987, 1988, 1994  X Consortium
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of the X Consortium shall not be
+used in advertising or otherwise to promote the sale, use or other dealings
+in this Software without prior written authorization from the X Consortium.
+
+
+Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
@@ -10,7 +34,7 @@ Permission to use, copy, modify, and distribute this software and its
 documentation for any purpose and without fee is hereby granted, 
 provided that the above copyright notice appear in all copies and that
 both that copyright notice and this permission notice appear in 
-supporting documentation, and that the names of Digital or MIT not be
+supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
 software without specific, written prior permission.  
 
@@ -29,9 +53,8 @@ SOFTWARE.
    than just directly making your own form. */
 
 
-#include <X11/Xlib.h>
-#include <X11/Xos.h>
 #include <X11/IntrinsicP.h>
+#include <X11/Xos.h>
 #include <X11/StringDefs.h>
 #include <X11/Xmu/Misc.h>
 
@@ -237,9 +260,9 @@ Cardinal *in_num_args;
 		XtSetArg( args[1], XtNborderWidth, 0);
 		XtSetArg( args[2], XtNleft, XtChainLeft);
 		XtSetArg( args[3], XtNright, XtChainLeft);
-		w->dialog.iconW = 
-		    XtCreateWidget ( "icon", labelWidgetClass,
-				     new, args, FOUR );
+		w->dialog.iconW =
+		    XtCreateWidget( "icon", labelWidgetClass,
+				    new, args, FOUR );
 		((DialogConstraints)w->dialog.labelW->core.constraints)->
 		    form.horiz_base = w->dialog.iconW;
 		XtManageChild(w->dialog.iconW);
@@ -313,7 +336,7 @@ Cardinal * num_args;
   Arg a[1];
   String s;
   DialogWidget src = (DialogWidget) w;
-  register int i;
+  int i;
   
   for (i=0; i < *num_args; i++)
     if (streq(args[i].name, XtNvalue)) {
@@ -352,8 +375,8 @@ Widget w;
     XtSetArg(arglist[num_args], XtNleft, XtChainLeft);            num_args++;
     XtSetArg(arglist[num_args], XtNright, XtChainRight);          num_args++;
 
-    dw->dialog.valueW = XtCreateWidget ("value", asciiTextWidgetClass,
-					w, arglist, num_args);
+    dw->dialog.valueW = XtCreateWidget("value", asciiTextWidgetClass,
+				     w, arglist, num_args);
 
     /* if the value widget is being added after buttons,
      * then the buttons need new layout constraints.
@@ -423,4 +446,3 @@ Widget w;
     XtGetValues( ((DialogWidget)w)->dialog.valueW, args, ONE);
     return(value);
 }
-

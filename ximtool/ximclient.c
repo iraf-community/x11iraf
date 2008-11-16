@@ -79,7 +79,8 @@ typedef struct {
 
 
 static int initialize(), Reset(), Quit();
-static int setColormap(), windowColormap(), zoom(), pan(), getSource();
+static int setColormap(), updateColormap(), windowColormap();
+static int zoom(), pan(), getSource();
 static int setFrame(), getFrame(), getRaster(), nextFrame(), prevFrame();
 static int fitFrame(), matchFrames(), registerFrames(), retCursorVal();
 static int encodewcs(), flip(), clearFrame(), setOption(), setOffset();
@@ -146,6 +147,8 @@ XimDataPtr xim;
 	    "setOffset", setOffset, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
 	    "windowColormap", windowColormap, (ClientData)xc, NULL);
+	Tcl_CreateCommand (tcl,
+	    "updateColormap", updateColormap, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
 	    "zoom", zoom, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
@@ -664,6 +667,7 @@ char **argv;
  *	tileByRow	true|false
  *	tileTopDown	true|false
  *	tileGeom	type|geom  [frames]
+ *	cmfocus		size
  */
 char *h_orient[] = {
     "1x1","2x1","3x1","2x2", "3x2","3x2","4x2","4x2", "3x3","5x2","4x3","4x3"
@@ -694,7 +698,7 @@ char **argv;
 
 	    if (strcmp (option, "tileGeom") != 0) {
 	        ch = strval[0];
-	        if (isdigit (ch))
+		if (isdigit (ch))
 		    value = atoi (strval);
 	        else if (ch == 'T' || ch == 't')
 		    value = 1;
@@ -723,6 +727,13 @@ char **argv;
 		xim_setRop (xim, fb, xim->rop);
 		sprintf (buf, "%s", value ? "True" : "False");
 		xim_message (xim, "antialias", buf);
+	    }
+
+	} else if (strcmp (option, "cmfocus") == 0) {
+	    if (xim->cm_focus != value) {
+		int box_size = value;
+		xim->cm_focus = box_size;
+		GtSetColormapFocus (box_size);
 	    }
 
 	} else if (strcmp (option, "tileFrames") == 0) {
@@ -838,6 +849,7 @@ char **argv;
 	ColorMapPtr cm;
 	int i;
 
+
 	if (argc == 2) {
 	    if (isdigit (*argv[1]))
 		i = atoi(argv[1]);
@@ -857,7 +869,9 @@ char **argv;
 		}
 
 		fb->colormap = i;
+	    	GtSetColormapFocus (-1);	/* force full update	*/
 		GtLoadColormap (xim->gt, cm->mapno, fb->offset, fb->scale);
+	    	GtSetColormapFocus (xim->cm_focus);
 		xim_enhancement (xim, fb);
 	    }
 	}
@@ -887,6 +901,36 @@ char **argv;
 	    fb->offset = atof(argv[1]);
 	    fb->scale = (argc > 2) ? (float)atof(argv[2]) : fb->scale;
 	    GtLoadColormap (xim->gt, cm->mapno, fb->offset, fb->scale);
+	    xim_enhancement (xim, fb);
+	}
+
+	return (TCL_OK);
+}
+
+
+/* updateColormap -- Update the colormap for the entire display frame.
+ *
+ * Usage:	updateColormap <offset> <scale>
+ */
+static int 
+updateColormap (xc, tcl, argc, argv)
+register XimClientPtr xc;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+	register XimDataPtr xim = xc->xim;
+	register FrameBufPtr fb = xim->df_p;
+	register ColorMapPtr cm;
+	char buf[SZ_LINE];
+
+	if (argc > 1) {
+	    cm = &colormaps[fb->colormap-1];
+	    fb->offset = atof(argv[1]);
+	    fb->scale = (argc > 2) ? (float)atof(argv[2]) : fb->scale;
+	    GtSetColormapFocus (-1);	/* force full update	*/
+	    GtLoadColormap (xim->gt, cm->mapno, fb->offset, fb->scale);
+	    GtSetColormapFocus (xim->cm_focus);
 	    xim_enhancement (xim, fb);
 	}
 
@@ -2353,6 +2397,7 @@ char **argv;
 	unsigned short g[MAX_COLORS];
 	unsigned short b[MAX_COLORS];
 	char buf[SZ_LINE];
+
 
 	if (argc > 1) {
 	    cm = &colormaps[fb->colormap-1];

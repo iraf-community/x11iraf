@@ -48,7 +48,7 @@ set Resources(ximtool) { \
 	        } \
 	        horizontal { \
 	            cbarFrame  < +inf -inf * > \
-	            hcut 2 vcut  \
+	            focusSlider 2 hcut 2 vcut 15 \
 	        } \
 	    } \
 	} \
@@ -58,18 +58,19 @@ set Resources(ximtool) { \
     *hcut.font:					*lucida-bold-r*10*
     *vcut.label:				V
     *vcut.font:					*lucida-bold-r*10*
+    *focusSlider.location:			0 0 100 15
 
     *hcutFrame.frameType:                       sunken
     *hcutFrame.frameWidth:                      1
     *hcutFrame.innerOffset:                     0
     *hcutFrame.outerOffset:                     0
-    *hcutPlot.color0:                           gray77
+    *hcutPlot.color0:                           #c4c4c4
     *hcutPlot.color1:                           black
     *hcutPlot.color0:                           darkslategray
-    *hcutPlot.color1:                           ivory2
+    *hcutPlot.color1:                           #eeeee0
     *hcutPlot.crosshairCursorColor:		red
     *hcutPlot.width:                            512
-    *hcutPlot.height:                           5
+    *hcutPlot.height:                           6
     *hcutPlot.borderWidth:			0
     *hcutPlot.alphaFont1:			6x10
     *hcutPlot.alphaFont2:			6x10
@@ -124,12 +125,12 @@ set Resources(ximtool) { \
     *vcutFrame.frameWidth:                      1
     *vcutFrame.innerOffset:                     0
     *vcutFrame.outerOffset:                     0
-    *vcutPlot.color0:                           gray77
+    *vcutPlot.color0:                           #c4c4c4
     *vcutPlot.color1:                           black
     *vcutPlot.color0:                           darkslategray
-    *vcutPlot.color1:                           ivory2
+    *vcutPlot.color1:                           #eeeee0
     *vcutPlot.crosshairCursorColor:		red
-    *vcutPlot.width:                            5
+    *vcutPlot.width:                            6
     *vcutPlot.height:                           512
     *vcutPlot.borderWidth:			0
     *vcutPlot.alphaFont1:			6x10
@@ -304,8 +305,6 @@ set Resources(ximtool) { \
     *imagewin.copyOnResize:			false
     *imagewin.width:				512
     *imagewin.height:				512
-    *imagewin.color8:				#7c8498
-    *imagewin.color9:				steelblue
     *imagewin.maxMappings:			64
     *imagewin.borderWidth:			0
 
@@ -388,8 +387,9 @@ set Resources(ximtool) { \
             !<Btn2Up>: crosshair(off)                        	\n\
           !<Btn2Down>: call(zoom,$x,$y)                      	\n\
           !<Btn3Down>: call(windowColormap,$x,$y)            	\n\
+            !<Btn3Up>: call(updateColormap,$x,$y)            	\n\
         !<Btn3Motion>: call(windowColormap,$x,$y)            	\n\
-      !Ctrl <Btn1Down>: call(makeRuler,$name,$x,$y)     	\n\
+     !Ctrl <Btn1Down>: call(makeRuler,$name,$x,$y)     		\n\
     !Ctrl <Btn1Motion>: track-cursor() call(wcsUpdate,$x,$y) call(magnifierMapImage,$x,$y) call(resizeRuler,$x,$y,0)      			\n\
         !Ctrl <Btn1Up>: call(deleteRuler,$x,$y)         	\n\
         <EnterWindow>: enter-window()                        	\n\

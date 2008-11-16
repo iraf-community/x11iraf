@@ -42,7 +42,7 @@ set Resources(warning) { \
     *warnText.label:				generic warning text
     *warnText.width:				270
     *warnText.height:				60
-    *warnText.background:			gray77
+    *warnText.background:			#c4c4c4
 }
 
 

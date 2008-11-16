@@ -1,7 +1,30 @@
 /*
- * $XConsortium: Tree.c,v 1.43 91/10/16 21:40:18 eswu Exp $
+ * $XConsortium: Tree.c,v 1.45 94/04/17 20:13:20 kaleb Exp $
  *
- * Copyright 1990 Massachusetts Institute of Technology
+
+Copyright (c) 1990, 1994  X Consortium
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of the X Consortium shall not be
+used in advertising or otherwise to promote the sale, use or other dealings
+in this Software without prior written authorization from the X Consortium.
+
  * Copyright 1989 Prentice Hall
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -9,9 +32,9 @@
  * copyright notice appear in all copies and that both the copyright notice
  * and this permission notice appear in supporting documentation.
  * 
- * M.I.T., Prentice Hall and the authors disclaim all warranties with regard
+ * Prentice Hall and the authors disclaim all warranties with regard
  * to this software, including all implied warranties of merchantability and
- * fitness.  In no event shall M.I.T., Prentice Hall or the authors be liable
+ * fitness.  In no event shall Prentice Hall or the authors be liable
  * for any special, indirect or cosequential damages or any damages whatsoever
  * resulting from loss of use, data or profits, whether in an action of
  * contract, negligence or other tortious action, arising out of or in
@@ -27,12 +50,8 @@
  * as well as to support vertical trees.
  */
 
-#include <X11/Intrinsic.h>
 #include <X11/IntrinsicP.h>
 #include <X11/StringDefs.h>
-#include <X11/CoreP.h>
-#include <X11/CompositeP.h>
-#include <X11/ConstrainP.h>
 #include <X11/Xaw3d/XawInit.h>
 #include <X11/Xaw3d/Cardinals.h>
 #include <X11/Xaw3d/TreeP.h>
@@ -167,8 +186,8 @@ static void initialize_dimensions (listp, sizep, n)
     int *sizep;
     int n;
 {
-    register int i;
-    register Dimension *l;
+    int i;
+    Dimension *l;
 
     if (!*listp) {
 	*listp = (Dimension *) XtCalloc ((unsigned int) n,
@@ -303,6 +322,7 @@ static void ClassInitialize ()
 }
 
 
+/*ARGSUSED*/
 static void Initialize (grequest, gnew, args, num_args)
     Widget grequest, gnew;
     ArgList args;
@@ -563,7 +583,7 @@ static void Redisplay (gw, event, region)
 	Window w = XtWindow (tw);
 
 	for (i = 0; i < tw->composite.num_children; i++) {
-	    register Widget child = tw->composite.children[i];
+	    Widget child = tw->composite.children[i];
 	    TreeConstraints tc = TREE_CONSTRAINT(child);
 
 	    /*
@@ -590,7 +610,7 @@ static void Redisplay (gw, event, region)
 		}
 
 		for (j = 0; j < tc->tree.n_children; j++) {
-		    register Widget k = tc->tree.children[j];
+		    Widget k = tc->tree.children[j];
 		    GC gc = (tc->tree.gc ? tc->tree.gc : tw->tree.gc);
 
 		    switch (tw->tree.gravity) {
@@ -648,7 +668,7 @@ static XtGeometryResult QueryGeometry (w, intended, preferred)
     Widget w;
     XtWidgetGeometry *intended, *preferred;
 {
-    register TreeWidget tw = (TreeWidget) w;
+    TreeWidget tw = (TreeWidget) w;
 
     preferred->request_mode = (CWWidth | CWHeight);
     preferred->width = tw->tree.maxwidth;
@@ -684,7 +704,7 @@ static void compute_bounding_box_subtree (tree, w, depth)
     int depth;
 {
     TreeConstraints tc = TREE_CONSTRAINT(w);  /* info attached to all kids */
-    register int i;
+    int i;
     Bool horiz = IsHorizontal (tree);
     Dimension newwidth, newheight;
     Dimension bw2 = w->core.border_width * 2;
@@ -800,7 +820,7 @@ static void arrange_subtree (tree, w, depth, x, y)
 {
     TreeConstraints tc = TREE_CONSTRAINT(w);  /* info attached to all kids */
     TreeConstraints firstcc, lastcc;
-    register int i;
+    int i;
     int newx, newy;
     Bool horiz = IsHorizontal (tree);
     Widget child = NULL;

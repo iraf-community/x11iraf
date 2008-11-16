@@ -580,28 +580,10 @@ static void CreateGC (w)
     XGCValues gcValues;
     XtGCMask mask;
     unsigned int depth = 1;
-#ifndef USE_XMU_STIPPLE
-    Screen *screen = XtScreen((Widget)w);
-    Display *display = XtDisplay((Widget)w);
-    int pixmap_width = 2, pixmap_height = 2;
-    static unsigned char pixmap_bits[] = {
-        0x02, 0x01,
-    };
-#endif
 
     if (sbw->scrollbar.thumb == XtUnspecifiedPixmap) {
-#ifdef USE_XMU_STIPPLE
         sbw->scrollbar.thumb = XmuCreateStippledPixmap (XtScreen(w), 
 					(Pixel) 1, (Pixel) 0, depth);
-#else
-        sbw->scrollbar.thumb = XCreatePixmapFromBitmapData (display,
-                            RootWindowOfScreen(screen),
-                            (char *)pixmap_bits,
-                            pixmap_width, pixmap_height,
-                            (Pixel) 1,
-                            (Pixel) 0,
-                            depth);
-#endif
     } else if (sbw->scrollbar.thumb != None) {
 	Window root;
 	int x, y;

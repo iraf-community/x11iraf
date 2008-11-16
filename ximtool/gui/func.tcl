@@ -55,6 +55,85 @@ proc setCtrBoxSize { x y delta args } \
 }
 
 
+# Box size is half-width of the marker size.  Value is the slider value.
+set focusBoxSize	$winWidth			
+set focusValue	       100.0
+set fid			 0
+set ftid		 0
+set moving		 0
+
+proc setFocusBoxSize { sz args } \
+{
+    global focusBoxSize fid ftid focusValue moving
+    global winWidth winHeight
+
+
+    if { $moving == 0 } {
+        return done
+    }
+
+    if { $winWidth < $winHeight } {
+	set max [expr $winWidth / 2 - 64]
+    } else {
+	set max [expr $winHeight / 2 - 64]
+    }
+    set focusBoxSize [expr 64 + ($sz * $max) - 1]
+    #send client setOption cmfocus [expr ($focusBoxSize / 2)]
+    send client setOption cmfocus $focusBoxSize
+
+    # Destroy any existing markers.
+    catch { 
+        if {$ftid != 0} {
+            send fm$fid destroy 
+            set ftid 0
+	}
+    }
+
+    # create a transient marker indicating the centering box and post a
+    # callback to delete it in about a second.
+    incr fid
+    send imagewin createMarker fm$fid \
+	type            box \
+	createMode      noninteractive \
+	lineColor       green \
+	lineWidth       4 \
+	x               [expr $winWidth / 2] \
+	y               [expr $winHeight / 2] \
+	width           $focusBoxSize \
+	height          $focusBoxSize \
+	activated       True \
+	visible         True \
+	sensitive       False
+
+    set ftid [ postTimedCallback fbxDestroy 500]
+    set moving  0
+}
+
+proc fbxDestroy args \
+{
+    global fid ftid moving
+    catch { 
+        if {$ftid != 0} {
+            send fm$fid destroy 
+            set ftid 0
+        }
+    }
+}
+
+proc setFocusSize { widget cbtype x y } \
+{
+    global focusValue ftid moving
+
+    # Only update once we've stopped the movement.
+    if { $x == $focusValue && $moving == 1 } {
+	set ftid [ postWorkProc setFocusBoxSize $x ]
+    } else {
+        set moving  1
+    }
+    set focusValue $x
+} ; send focusSlider addCallback setFocusSize scroll
+
+
 # Compute a centroid offset for the current position to peak-up on the
 # feature.
 

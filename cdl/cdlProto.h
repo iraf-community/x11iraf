@@ -53,6 +53,8 @@ int     imd_clearFrame(), imd_setWCS(), imd_getWCS();
 
 int com_writeData(int fd, short x, short y, uchar *pix, int nbytes);
 int com_readData(int fdin, int fdout, short x, short y, uchar *pix, int *npix);
+int com_writeSubraster(int fd, short x, short y, uchar *pix, int nx, int ny);
+int com_readSubraster(int fdin, int fdout, short x, short y, uchar *pix, int *nx, int *ny);
 int com_readCursor(int fdin, int fdout, int sample, float *x, float *y, int *wcs, char *key);
 int com_setCursor(int fd, int x, int y, int wcs);
 int com_setFBConfig(int fd, int configno);
@@ -70,6 +72,7 @@ int	com_writeData(), com_readData(), com_setFBConfig();
 int	com_readCursor(), com_setCursor(), com_setFrame();
 int	com_writeWCS(), com_readWCS(), com_eraseFrame();
 int 	com_setDebug(), com_wcsVersion();
+int	com_writeSubraster(), com_readSubraster();
 
 #endif
 

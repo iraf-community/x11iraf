@@ -46,6 +46,7 @@ typedef struct {
 struct IMD {
     int     datain, dataout;        	/* connection file descriptors  */
     int     domain;                 	/* connection type              */
+    int     model;                 	/* subraster display model	*/
 
     short   frame;                  	/* display frame number         */
     short   fbconfig;               	/* frame buffer config number   */

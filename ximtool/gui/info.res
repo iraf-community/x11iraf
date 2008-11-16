@@ -12,7 +12,7 @@ set Resources(info_panel) { \
     *infoLayout*Text*scrollVertical:		whenNeeded
     *infoLayout*Text*scrollHorizontal:		whenNeeded
     *infoLayout*Text*displayCaret:		False
-    *infoLayout*Scrollbar.background:		gray77
+    *infoLayout*Scrollbar.background:		#c4c4c4
     *infoLayout*Scrollbar.width:		17
     *infoLayout*Scrollbar.height:		17
 

@@ -16,6 +16,9 @@
 #endif
 
 
+#define	DBG_RASTER	0
+
+
 /*
  * RASTER.C -- Raster pixel (frame buffer) routines.  These are the routines
  * which create and manipulate the frame buffers and the graphics pipeline
@@ -139,7 +142,7 @@ int hardreset;
 	 * GUI during startup.
 	 */
 	if (!gt) {
-	    fprintf (stderr, "no gterm-image widget!!\n");
+	    fprintf (stderr, "xim_initialize:  no gterm-image widget!!\n");
 	    exit (1);
 	}
 
@@ -169,7 +172,11 @@ int hardreset;
 	    }
 
 	    /* Initialize the frame buffers. */
+	    if (DBG_RASTER)
+		fprintf (stderr, "xim_initialize: Raster init.....\n");
 	    GtRasterInit (gt);
+	    if (DBG_RASTER)
+		fprintf (stderr, "xim_initialize: Raster init.....DONE\n");
 	    for (i=1;  i <= MAX_FRAMES;  i++)
 		xim->frames[i].frameno = 0;
 
@@ -203,7 +210,13 @@ int hardreset;
 	    xim->rop = xim->antialias ?
 		xim_getAntialias (xim, xim->antialiasType) : 0x00;
 	    xim->fb_configno = config = max(1, min(MAX_FBCONFIG, config));
+	    if (DBG_RASTER)
+		fprintf (stderr,
+		    "xim_initialize: ........................SETNFRAME\n");
 	    set_nframes (xim, nframes);
+	    if (DBG_RASTER)
+		fprintf (stderr,
+		    "xim_initialize: ........................SETNFRAME DONE\n");
 
 	    /* Initialize the tile framing options. */
 	    xim->tileByRows = 1;
@@ -215,8 +228,15 @@ int hardreset;
 	    xim_message (xim, "frameSize", buf);
 
 	    /* Create the frames. */
-	    for (i=1;  i <= nframes;  i++)
+	    for (i=1;  i <= nframes;  i++) {
+		if (DBG_RASTER)
+		    fprintf (stderr,
+			"xim_initialize: ...............INITFRAME %d\n",i);
 		xim_initFrame (xim, i, nframes, cf, xim->memModel);
+		if (DBG_RASTER)
+		    fprintf (stderr,
+			"xim_initialize: ...............INITFRAME %d DONE\n",i);
+	    }
 
             /* Reinitialize the tile framing. */
             if (xim->tileFrames) {
@@ -245,12 +265,22 @@ int hardreset;
 	    }
 	}
 
+	if (DBG_RASTER)
+	    fprintf (stderr,
+		"xim_initialize: ........................CMAP SETUP\n");
 	/* Set up the colormap to emulate the IIS/imtool colormap.  Set
 	 * xim->ncolors to the length of the grayscale region of the colormap
 	 * returned by iiscolormap so that our other colormaps will have the
 	 * same size.
 	 */
+	if (DBG_RASTER)
+	    fprintf (stderr,
+		"xim_initialize: xim->ncolors = %d\n", xim->ncolors);
 	xim_iiscolormap (gt, m_red,m_green,m_blue, &first, &ngray, &rgb_len);
+	if (DBG_RASTER)
+	    fprintf (stderr,
+		"xim_initialize: writeColormap:  first=%d ngray=%d len=%d\n",
+		first, ngray, rgb_len);
 	GtWriteColormap (gt, 0, first, rgb_len, m_red, m_green, m_blue);
 	if ((xim->ncolors = ngray) < 0) {
 	    fprintf (stderr, "ERROR: No colormap cells available.\n");
@@ -258,8 +288,13 @@ int hardreset;
 	}
 
 
-	/* Initialize the color tables. */
+	/* Initialize the color tables.
+	*/
 	max_cmaps = nbuiltin_cmaps ? nbuiltin_cmaps : MAX_COLORMAPS;
+	if (DBG_RASTER)
+	    fprintf (stderr,
+		"xim_initialize: init colortables:  xim->ncolors = %d\n",
+		xim->ncolors);
 	for (ncolormaps=0;  ncolormaps < max_cmaps;  ncolormaps++) {
 	    cm = &colormaps[ncolormaps];
 	    if (!cm->name[0])
@@ -270,6 +305,8 @@ int hardreset;
 	    GtWriteColormap (gt, cm->mapno, first, xim->ncolors,
 		m_red, m_green, m_blue);
 	}
+	if (DBG_RASTER)
+	    fprintf (stderr, "xim_initialize: init colortables:  DONE\n");
 
 	/* The first time this is called count the number of builtin cmaps. */
 	if (nbuiltin_cmaps == 0)
@@ -350,11 +387,16 @@ int hardreset;
 	xim_enhancement (xim, fb);
 
 	/* Set options. */
+/*	xim_message (xim, "cmfocus", xim->cm_focus ? "True" : "False");*/
 	xim_message (xim, "autoscale", xim->autoscale ? "True" : "False");
 	xim_message (xim, "antialias", xim->antialias ? "True" : "False");
 	xim_message (xim, "tileFrames", xim->tileFrames ? "True" : "False");
 
 	xim_message (xim, "initialize", "done");
+
+	if (DBG_RASTER)
+	    fprintf (stderr,
+		"xim_initialize: ................................RETURNING\n");
 }
 
 
@@ -404,6 +446,7 @@ Widget w;
 	int i, active, frame, mapping, zoomtype;
 	float xscale, yscale, scale;
 	char buf[SZ_LINE];
+
 
 	/* This case is true during startup. */
 	if (xim->nframes <= 0)
@@ -462,9 +505,10 @@ Widget w;
 		    GtDisableMapping (w, fb->zoommap, 0);
 		}
 	    } else {
-		if (active)
+		if (active) {
 		    GtEnableMapping (w, fb->dispmap, 0);
-		else
+		    GtSetDisplayRaster (w, xim->display_frame);
+		} else
 		    GtDisableMapping (w, fb->dispmap, 0);
 	    }
 
@@ -479,13 +523,14 @@ Widget w;
 	 * defined on any visible frame should be refreshed, since a
 	 * redraw clears the display window.
 	 */
-	for (frame=1;  frame <= xim->nframes;  frame++)
+	for (frame=1;  frame <= xim->nframes;  frame++) {
 	    if (xim_onScreen (xim, frame)) {
 		int junk, width, height, depth;
 		fb = &xim->frames[frame-1];
 		GtQueryRaster (w, fb->raster, &junk, &width, &height, &depth);
 		GtRefreshPixels (w, fb->raster, GtPixel, 0, 0, width, height);
 	    }
+	}
 
 	/* Highlight the current frame. */
 	xim_highlightFrame (xim, xim->display_frame);
@@ -612,6 +657,8 @@ int frame;
 		GtEnableMapping (gt, fb->zoommap, 0);
 		GtRefreshMapping (gt, fb->zoommap);
 	    }
+	    GtSetDisplayRaster (gt, frameno);
+
 
 	    /* Highlight the new frame if in tileFrames mode. */
 	    xim_highlightFrame (xim, frameno);
@@ -624,7 +671,9 @@ int frame;
 		abs (fb->offset - old_fb->offset) > 0.001 ||
 		abs (fb->scale - old_fb->scale) > 0.001) {
 
+	    	GtSetColormapFocus (-1);	/* force full update	*/
 		GtLoadColormap (gt, fb->colormap, fb->offset, fb->scale);
+	    	GtSetColormapFocus (xim->cm_focus);
 	    }
 
 	    xim_msgi (xim, "frame", frameno);
@@ -664,20 +713,38 @@ char *memModel;
 	/* Create the frame buffer. */
 	fb->frameno = frame;
 	fb->raster = GtNextRaster (gt);
+
+	if (DBG_RASTER) {
+	    fprintf (stderr, 
+  		"xim_initFrame: Creating CLIENT raster for frame=%d raster=%d (%dx%dx%d)\n",
+  		frame, fb->raster, 
+  		config->width, config->height, DEF_FRAME_DEPTH);
+	    fprintf (stderr, 
+  		"xim_initFrame: Creating memModel=%s frame=%d raster=%d  (%d x %d)\n", 
+  		memModel, frame, fb->raster, config->width, config->height);
+	}
+
 	if (GtCreateRaster (gt, fb->raster, GtClient,
 		config->width, config->height, DEF_FRAME_DEPTH) < 0) {
-	    fprintf (stderr, "cannot create %dx%d frame buffer #%d\n",
-		config->width, config->height, frame);
+
+	    	    fprintf (stderr, "cannot create %dx%d frame buffer #%d\n",
+			config->width, config->height, frame);
 	    return;
 	}
 
 	/* Get region of screen to be written into. */
 	xim_getScreen (xim, frame, &sx, &sy, &width, &height, &depth);
 
+	if (DBG_RASTER)
+	    fprintf (stderr,
+		"xim_initFrame: [%d of %d] screen size -- %d x %d x %d\n",
+		frame, nframes, width, height, depth);
+
 	/* Set up the graphics pipeline to the screen.  The "memory model"
 	 * determines memory is used, trading off memory usage against speed
 	 * for operations like zoom/pan and blink.
 	 */
+
 	if (strcmp (memModel, "fast") == 0) {
 	    /* Use both client and server memory to achieve the best
 	     * possible performance.  The frame buffer raster (type ximage)
@@ -689,6 +756,7 @@ fast:	    fb->zoomras = GtNextRaster (gt);
 	    if (GtCreateRaster (gt,
 		    fb->zoomras, GtServer, width, height, depth) < 0)
 		goto nice;
+
 	    xim_setMapping (xim, fb, frame, fb->zoommap = GtNextMapping(gt),
 		fb->raster, fb->zoomras, xim->autoscale ? M_ASPECT : M_UNITARY);
 	    xim_setMapping (xim, fb, frame, fb->dispmap = GtNextMapping(gt),
@@ -700,10 +768,15 @@ fast:	    fb->zoomras = GtNextRaster (gt);
 	     * model except that the zoom raster is an ximage rather than
 	     * server pixmap raster.
 	     */
-nice:	    fb->zoomras = GtNextRaster (gt);
+nice: 	    fb->zoomras = GtNextRaster (gt);
+	    if (DBG_RASTER)
+		fprintf (stderr,
+		    "xim_initFrame: creating 'nice' model (0x%x)\n", 
+		    fb->zoomras);
 	    if (GtCreateRaster (gt,
 		    fb->zoomras, GtClient, width, height, depth) < 0)
 		goto small;
+
 	    xim_setMapping (xim, fb, frame, fb->zoommap = GtNextMapping(gt),
 		fb->raster, fb->zoomras, xim->autoscale ? M_ASPECT : M_UNITARY);
 	    xim_setMapping (xim, fb, frame, fb->dispmap = GtNextMapping(gt),
@@ -714,16 +787,24 @@ nice:	    fb->zoomras = GtNextRaster (gt);
 	     * Only the frame buffer raster is used, the zoom/pan mapping
 	     * maps directly to the screen and is also used as the screen
 	     * mapping.
+	     *
+	     * FIXME:  On TrueColor visuals we can have an issue here where
+	     * the display pixmap is 24-bits and various things (e.g. pixel
+	     * readback) are expecting 8-bits.
 	     */
 small:	    fb->zoomras = 0;
+	    if (DBG_RASTER)
+		fprintf (stderr,
+		    "xim_initFrame: creating 'small' model (0x%x)\n", 
+		    fb->zoomras);
+
 	    xim_setMapping (xim, fb, frame, fb->zoommap = GtNextMapping(gt),
 		fb->raster, fb->zoomras, xim->autoscale ? M_ASPECT : M_UNITARY);
 	    fb->dispmap = fb->zoommap;
 
 	} else {
 	    fprintf (stderr,
-		"unrecognized memory model `%s', default to `fast'\n",
-		memModel);
+		"unrecognized memModel `%s', default to `fast'\n", memModel);
 	    goto fast;
 	}
 
@@ -734,9 +815,10 @@ small:	    fb->zoomras = 0;
 	xim_enhancement (xim, fb);
 
 	/* Disable frame display initially if not mapped to screen. */
-	if (xim_onScreen (xim, frame))
+	if (xim_onScreen (xim, frame)) {
 	    GtEnableMapping (gt, fb->dispmap, 0);
-	else
+	    GtSetDisplayRaster (gt, frame);
+	} else
 	    GtDisableMapping (gt, fb->dispmap, 0);
 
 	set_nframes (xim, max (xim->nframes, frame));
@@ -813,6 +895,7 @@ int frame_list;
 	char buf[SZ_LINE];
 	int mapping;
 
+
 	/* Get list of frames to be tiled. */
 	xim->tileFramesList = frame_list;
 	for (i=0, xim->nTileFrames = 0;  i < xim->nframes;  i++)
@@ -827,6 +910,7 @@ int frame_list;
 
 	xim->tileFrames = (frame_list != 0);
 	GtClearScreen (w);
+	initialize_shadow_pixmap (w, 0);
 	xim_resize (xim, w);
 
 	/* Entering tile frame mode.
@@ -1295,6 +1379,7 @@ Boolean absolute;	/* ignore xscale/yscale */
 	float xscale, yscale;
 	char buf[256];
 
+
 	/* Get dimensions of source and destination rasters. */
 	if (GtQueryRaster (gt, src,
 		&src_type, &src_width, &src_height, &src_depth) == 0)
@@ -1332,9 +1417,10 @@ Boolean absolute;	/* ignore xscale/yscale */
 	if (yreplicate = (abs(yscale - (int)(yscale+0.5)) < TOL))
 	    yscale = (int)(yscale+0.5);
 
-	/* Sanity check, return is we're getting too small. */
+	/* Sanity check, return if we're getting too small. */
 	if (xscale < TOL || yscale < TOL)
 	    return;
+
 
 	/* Map the destination rect back into the source with the given
 	 * zoom factor and center, clipping the source rect at the source
@@ -1396,8 +1482,7 @@ src_recenter:
 	snx = sx2 - sx1 + 1;
 	sny = sy2 - sy1 + 1;
 
-/*printf ("           :  sx (%3d,%3d)  sy (%3d,%3d)  sn (%3d,%3d)\n",
-sx1,sx2, sy1,sy2, snx,sny); */
+
 	/* Map the zoomed, possibly centered, and clipped source rect back
 	 * to the destination.
 	 */
@@ -1457,8 +1542,6 @@ sx1,sx2, sy1,sy2, snx,sny); */
 	dnx = dx2 - dx1 + 1;
 	dny = dy2 - dy1 + 1;
 
-/*printf ("           :  dx (%3d,%3d)  dy (%3d,%3d)  dn (%3d,%3d)\n",
-dx1,dx2, dy1,dy2, dnx,dny); */
 	/* Attempt to integerize things if integer scaling is selected.  This
 	 * can leave a blank pixel or two at the edge depending upon the
 	 * window size and scaling.
@@ -1492,7 +1575,10 @@ dx1,dx2, dy1,dy2, dnx,dny); */
 	    }
 	}
 
+
+
 	/* Set the mapping. */
+        initialize_shadow_pixmap (gt, dst);
 	GtSetMapping (gt, mapping, xim->rop,
 	    src, GtPixel, sx1, sy1, snx, sny,
 	    dst, GtPixel, dst_x + dx1, dst_y + dy1,
@@ -1742,6 +1828,7 @@ int *ncolors;				/* size of colortable (output) */
 	if (GtQueryRaster (gt, raster, &junk, &width, &height, &depth) == 0)
 	    goto error;
 
+
 	if (nx <= 0 || ny <= 0) {
 	    x0 = y0 = 0;
 	    nx = width;
@@ -1761,20 +1848,6 @@ int *ncolors;				/* size of colortable (output) */
 	if (GtReadPixels (gt, raster, pixels, 8, x0, y0, nx, ny) < 0)
 	    goto error;
 
-	/*
-	 * Get the RGB color associated with each pixel.  To determine this
-	 * we must consider both the Gterm widget colormap and iomap.  The
-	 * iomap maps client pixels to Gterm widget pixels, and the colormap
-	 * maps Gterm widget pixels to RGB values.  GtReadPixels returns
-	 * client pixels, so to get the RGB value associated with each client
-	 * pixel we must run the client pixel through the iomap to get the
-	 * Gterm widget pixel, and then use this to look up the RGB value in
-	 * the widget's colormap.  When reading the display (raster=0) we
-	 * get the colormap corresponding to the image as currently windowed,
-	 * hence the output image will be rendered as in the current display.
-	 * Note: the Gterm widget maps are 16 bits, while we return an 8 bit
-	 * RGB colormap to our caller.
-	 */
 
 	/* Get Gterm widget colormap. */
 	if (!(cmap = (ushort *) malloc (3 * MAX_COLORS * sizeof(ushort))))
@@ -1784,55 +1857,92 @@ int *ncolors;				/* size of colortable (output) */
 	gs = rs + MAX_COLORS;
 	bs = gs + MAX_COLORS;
 
-	nc = GtReadColormap (gt, raster, 0, MAX_COLORS, rs,gs,bs);
-	if (nc <= 0)
-	    goto error;
+	if (depth == 8) {
+	    nc = GtReadColormap (gt, raster, 0, MAX_COLORS, rs,gs,bs);
+	    if (nc <= 0)
+	        goto error;
 
-	/* Get iomap. */
-	if (!(iomap = (ushort *) malloc (MAX_COLORS * sizeof(ushort))))
-	    goto error;
-	GtReadIomap (gt, iomap, 0, MAX_COLORS);
 
-	if (debug) {
-	    register short pmin = MAX_COLORS, pmax = 0, i, j;
-            fprintf (stderr, "iomap\n");
-	    for (i=0; i < MAX_COLORS; ) {
-                for (j=0; j < 8 && i < MAX_COLORS; j++) {
-		    pmin = (iomap[i] < pmin ? iomap[i] : pmin);
-		    pmax = (iomap[i] > pmax ? iomap[i] : pmax);
-                    fprintf (stderr, "%3d(%3d) ", i, iomap[i++]);
-		} 
-                fprintf (stderr, "\n");
+	    /* Get the RGB color associated with each pixel.  To determine
+	    ** this we must consider both the Gterm widget colormap and iomap.
+	    ** The iomap maps client pixels to Gterm widget pixels, and the 
+	    ** colormap maps Gterm widget pixels to RGB values.  GtReadPixels
+	    ** returns client pixels, so to get the RGB value associated with
+	    ** each client pixel we must run the client pixel through the iomap
+	    ** to get the Gterm widget pixel, and then use this to look up the
+	    ** RGB value in the widget's colormap.  When reading the display
+	    ** (raster=0) we get the colormap corresponding to the image as
+	    ** currently windowed, hence the output image will be rendered as
+	    ** in the current display. Note: the Gterm widget maps are 16 bits,
+	    ** while we return an 8 bit RGB colormap to our caller.
+	    */
+	    /* Get iomap. */
+	    if (!(iomap = (ushort *) malloc (MAX_COLORS * sizeof(ushort))))
+	        goto error;
+	    GtReadIomap (gt, iomap, 0, MAX_COLORS);
 
+	    if (debug) {
+	        register short pmin = MAX_COLORS, pmax = 0, i, j;
+                fprintf (stderr, "iomap\n");
+	        for (i=0; i < MAX_COLORS; ) {
+                    for (j=0; j < 8 && i < MAX_COLORS; j++) {
+		        pmin = (iomap[i] < pmin ? iomap[i] : pmin);
+		        pmax = (iomap[i] > pmax ? iomap[i] : pmax);
+                        fprintf (stderr, "%3d(%3d) ", i, iomap[i++]);
+		    } 
+                    fprintf (stderr, "\n");
+
+	        }
+	        fprintf (stderr, "iomap min = %d max = %d\n", pmin, pmax);
+                fprintf (stderr, "Gterm Colormap\n");
+                for (i=0; i < MAX_COLORS; ) {
+                    for (j=1; j < 4 && i < MAX_COLORS; j++)
+                        fprintf (stderr, "    %3d(%3d,%3d,%3d)",i,
+			    (rs[i]>>8),(gs[i]>>8),(bs[i++]>>8));
+                    fprintf (stderr, "\n");
+                }
+	        fflush (stderr);
 	    }
-	    fprintf (stderr, "iomap min = %d max = %d\n", pmin, pmax);
-            fprintf (stderr, "Gterm Colormap\n");
-            for (i=0; i < MAX_COLORS; ) {
-                for (j=1; j < 4 && i < MAX_COLORS; j++)
-                    fprintf (stderr, "    %3d(%3d,%3d,%3d)",i,
-			(rs[i]>>8),(gs[i]>>8),(bs[i++]>>8));
-                fprintf (stderr, "\n");
-            }
-	    fflush (stderr);
-	}
 
-	/* Output the colormap. */
-	for (i=0;  i < nc;  i++) {
-	    j = iomap[i];
-	    r[i] = (rs[j] >> 8);
-	    g[i] = (gs[j] >> 8);
-	    b[i] = (bs[j] >> 8);
-	}
-	for (i=nc;  i < MAX_COLORS;  i++) {
-	    j = iomap[i];
-	    r[i] = (rs[j] >> 8);
-	    g[i] = (gs[j] >> 8);
-	    b[i] = (bs[j] >> 8);
+	    /* Output the colormap. */
+	    for (i=0;  i < nc;  i++) {
+	        j = iomap[i];
+	        r[i] = (rs[j] >> 8);
+	        g[i] = (gs[j] >> 8);
+	        b[i] = (bs[j] >> 8);
+	    }
+	    for (i=nc;  i < MAX_COLORS;  i++) {
+	        j = iomap[i];
+	        r[i] = (rs[j] >> 8);
+	        g[i] = (gs[j] >> 8);
+	        b[i] = (bs[j] >> 8);
+	    }
+
+	} else {
+	    unsigned long lut[MAX_COLORS];
+	    int   start = 10;			/* static colors offset  */
+
+	    GtReadLUT (gt, lut, 0, MAX_COLORS);
+
+	    nc = 216;
+	    for (i=0; i < nc; i++) {
+	        r[i] = (lut[i] >> 16) & 0xff;
+	        g[i] = (lut[i] >>  8) & 0xff;
+	        b[i] = (lut[i]      ) & 0xff;
+	    }
 	}
 
 	*w = nx;
 	*h = ny;
 	*ncolors = nc;			/* includes static colors */
+
+	if (debug) {
+	    fprintf (stderr,
+		"xim_readDisplay:  w=%d  h=%d  d=%d\n", width, height, depth);
+	    for (i=0; i < nc; i++)
+  	        fprintf (stderr, "xim_readDisplay[%3d]:  %3d %3d %3d\n",
+		i, r[i], g[i], b[i]);
+	}
 
 	free ((char *) cmap);
 	free ((char *) iomap);
@@ -1876,6 +1986,10 @@ int ncolors;
 	int debug=0, autoscale=xim->autoscale;
 	unsigned char *gtpix;
 	ColorMapPtr cm;
+
+
+	if (DBG_RASTER)
+	    fprintf (stderr, "raster writeDisplay: .......................");
 
 	/* If frame=0 use the current display frame. */
 	if (frame < 1) frame = xim->display_frame;
@@ -2063,8 +2177,13 @@ int ncolors;
 		bs[i] = (b[i] << 8);
 	    }
 
+	    if (DBG_RASTER)
+		fprintf (stderr,"raster writeDisplay: writing colormap.......");
 	    GtWriteColormap (gt, cm->mapno,
 		FIRST_COLOR, min(ncolors,xim->ncolors), rs, gs, bs);
+	    if (DBG_RASTER)
+		fprintf (stderr,
+		    "raster writeDisplay: writing colormap.......DONE");
 
 	    fb->offset = 0.5;
 	    fb->scale = (xim->invert ? -1.0 : 1.0);
@@ -2074,12 +2193,18 @@ int ncolors;
 
 	/* Display the frame. */
 	GtEnableMapping (gt, fb->dispmap, 1);
+	GtSetDisplayRaster (gt, xim->display_frame);
 	xim_setDisplayFrame (xim, frame);
 
+	GtSetColormapFocus (-1);	/* force full update	*/
 	GtLoadColormap (gt, cm->mapno, fb->offset, fb->scale);
+	GtSetColormapFocus (xim->cm_focus);
 	xim_enhancement (xim, fb);
 
 	GtWriteIomap (gt, sv_iomap, 0, MAX_COLORS);
+
+	if (DBG_RASTER)
+	    fprintf (stderr, "raster writeDisplay: ......................DONE");
 	return (0);
 }
 
@@ -2187,7 +2312,7 @@ XimDataPtr xim;
 }
 
 
-/* XIM_ENHANCEMENT -- Caleld when the "enhancement" UI parameter needs to
+/* XIM_ENHANCEMENT -- Called when the "enhancement" UI parameter needs to
  * be updated for a frame.
  */
 xim_enhancement (xim, fb)
@@ -2199,6 +2324,13 @@ register FrameBufPtr fb;
 	sprintf (buf, "%d \"%s\" %0.3f %0.3f", fb->frameno,
 	    colormaps[fb->colormap-1].name, fb->offset, fb->scale);
 	xim_message (xim, "enhancement", buf);
+
+
+	/* Force an update of the colorbar.  On TrueColor visuals this
+	** is required since the colormap doesn't automatically update 
+	** the display.
+	*/
+	set_colorbar (xim, xim->cb);
 }
 
 
@@ -2378,6 +2510,11 @@ int nelem;
 	int v, vsat, step;
 	int knot[7];
 	float frac;
+
+	
+	if (DBG_RASTER)
+	    fprintf (stderr,
+		"xim_setColormap: name='%s'  nelem=%d\n", function, nelem);
 
 	vsat = MAX_COLORS - 1;
 	step = MAX_COLORS / 6;
@@ -2809,6 +2946,14 @@ Widget w;
 	unsigned short m_blue[MAX_COLORS];
 	unsigned char *data;
 
+
+	if (!w)
+	    return;
+
+	if (DBG_RASTER)
+	    fprintf (stderr, "SETTING COLORBAR PIXELS...... init = %d\n",
+		initialized);
+
 	if (GtQueryRaster (w, 0, &rtype, &width, &height, &depth) == 0)
 	    return;
 
@@ -2825,12 +2970,16 @@ Widget w;
 
 	    xim_setColormap ("Grayscale", NULL, m_red, m_green, m_blue, ngray);
 	    GtWriteColormap (w, 0, first, ngray, m_red, m_green, m_blue);
+
 	    xim->ncolors = ngray;
 	    initialized++;
 	}
 
 	GtWritePixels (w, 0, data, 8, 0, 0, width, height);
 	XtFree ((char *)data);
+
+	if (DBG_RASTER)
+	    fprintf (stderr, "SETTING COLORBAR PIXELS...... DONE\n");
 }
 
 

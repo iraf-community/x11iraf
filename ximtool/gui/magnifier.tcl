@@ -457,6 +457,7 @@ proc magnifierMapImage {x y} \
     if [send imagewin activeMapping $magnifier_mapping] {
 	send imagewin raiseMapping $magnifier_mapping
     }
+
     # initialize the magnifier zoom factor, if necessary
     if { !$mag_w || !$mag_h } {
 	setMagnifierZoom 4

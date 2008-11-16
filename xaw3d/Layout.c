@@ -29,10 +29,42 @@
 #include <X11/Xmu/Misc.h>
 #include <X11/Xmu/Converters.h>
 
-#include <X11/Xaw3d/LayoutP.h>
+#ifdef MOTIF
+# include <Xm/XmP.h>
+#endif
+
+#if defined(LAYOUT)
+# include "LayoutP.h"
+#else
+# include <X11/Xaw3d/LayoutP.h>
+#endif
 
 #include <ctype.h>
 #include <stdio.h>
+
+#undef DEBUG
+#ifdef DEBUG
+static char *DBUG_currentproc, *DBUG_lastproc;
+static int DBUG_level = 0;
+# define DBUG_ENTER(s)        \
+    {DBUG_lastproc=DBUG_currentproc;DBUG_currentproc=s;\
+    fprintf(stderr,"begin: (%d) %s\n",++DBUG_level,s);}
+# define DBUG_VOID_RETURN \
+    {fprintf(stderr,"end:   (%d) %s\n",DBUG_level--,DBUG_currentproc); \
+    DBUG_currentproc=DBUG_lastproc;return;}
+# define DBUG_RETURN(f,v) \
+    {fprintf(stderr,"return (%d) %s (",DBUG_level--,DBUG_currentproc); \
+    fprintf(stderr,(f),(v)); \
+    fprintf(stderr,")\n"); DBUG_currentproc=DBUG_lastproc;return (v);}
+# define DBUG_PRINT(f,s)        \
+    {fprintf(stderr,"       (%d) %s:",DBUG_level, DBUG_currentproc); \
+    fprintf(stderr,f,s);fprintf(stderr,"\n");}
+#else
+# define DBUG_ENTER(s) 
+# define DBUG_VOID_RETURN return
+# define DBUG_PRINT(f,s)
+# define DBUG_RETURN(f,v) return(v)
+#endif
 
 /*****************************************************************************
  *
@@ -59,6 +91,9 @@ static void ChangeManaged();
 static void InsertChild();
 static XtGeometryResult QueryGeometry ();
 static void GetDesiredSize ();
+#ifdef MOTIF
+static void Redisplay ();
+#endif
 
 static void LayoutLayout ();
 static void LayoutGetNaturalSize ();
@@ -67,7 +102,11 @@ static void LayoutFreeLayout ();
 extern void LayYYsetsource(), LayYYsetdest();
 extern int LayYYparse();
 
+#ifdef MOTIF
+#define SuperClass ((ConstraintWidgetClass)&xmManagerClassRec)
+#else
 #define SuperClass ((ConstraintWidgetClass)&constraintClassRec)
+#endif
 
 LayoutClassRec layoutClassRec = {
    {
@@ -92,7 +131,11 @@ LayoutClassRec layoutClassRec = {
     /* visible_interest   */   FALSE,
     /* destroy            */   NULL,
     /* resize             */   Resize,
+#ifdef MOTIF
+    /* expose             */   Redisplay,
+#else
     /* expose             */   NULL,
+#endif
     /* set_values         */   SetValues,
     /* set_values_hook    */   NULL,
     /* set_values_almost  */   XtInheritSetValuesAlmost,
@@ -100,7 +143,11 @@ LayoutClassRec layoutClassRec = {
     /* accept_focus       */   NULL,
     /* version            */   XtVersion,
     /* callback_private   */   NULL,
+#ifdef MOTIF
+    /* tm_table           */   XtInheritTranslations,
+#else
     /* tm_table           */   NULL,
+#endif
     /* query_geometry	  */   QueryGeometry,
     /* display_accelerator*/   XtInheritDisplayAccelerator,
     /* extension          */   NULL
@@ -120,6 +167,21 @@ LayoutClassRec layoutClassRec = {
     /* destroy            */   NULL,
     /* set_values         */   NULL,
     /* extension          */   NULL
+   },
+#ifdef MOTIF
+   {
+    /* manager class */
+    XtInheritTranslations,                /* translations           */
+    NULL,                                 /* syn resources          */
+    0,                                    /* num syn_resources      */
+    NULL,                                 /* get_cont_resources     */
+    0,                                    /* num_get_cont_resources */
+    XmInheritParentProcess,               /* parent_process       */
+    NULL,                                 /* extension              */
+   },
+#endif
+   { /* layout_class fields */     
+    0
    }
 };
 
@@ -152,14 +214,12 @@ CvtStringToLayout (dpy, args, num_args, from, to, converter_data)
     XtPointer	*converter_data;
 {
     static BoxPtr tmp;
+    
     LayYYsetsource ((char *) from->addr);
     if (!to->addr) to->addr = (XtPointer)&tmp;
     LayYYsetdest ((BoxPtr *) to->addr);
     to->size = sizeof (BoxPtr *);
-    if (LayYYparse () == 0)
-	return TRUE;
-    else
-	return FALSE;
+    return  LayYYparse() ? FALSE : TRUE;
 }
 
 /*ARGSUSED*/
@@ -181,6 +241,24 @@ ClassInitialize()
 		    (XtConvertArgList)NULL, (Cardinal)0, XtCacheNone, 
  		    DisposeLayout );
 }
+
+#ifdef MOTIF
+static void Redisplay ( gw, event, region ) 
+Widget gw;
+XEvent *event;
+Region region;
+{
+   /*
+    * If the Layout widget is visible, redraw gadgets.
+    */
+ 
+    if ( XtIsRealized ( gw ) && gw->core.visible ) 
+    {
+        _XmRedisplayGadgets ( gw, event, region );
+    }
+    /* ChangeManaged(gw);*/
+}
+#endif
 
 /*ARGSUSED*/
 static XtGeometryResult GeometryManager(child, request, reply)
@@ -235,9 +313,15 @@ static void ChangeManaged(gw)
     LayoutWidget	w = (LayoutWidget) gw;
     Widget		*children;
 
+    DBUG_ENTER("changeManaged");
+
     ForAllChildren (w, children)
 	GetDesiredSize (*children);
     LayoutLayout ((LayoutWidget) w, TRUE);
+#ifdef MOTIF
+    _XmNavigChangeManaged ( gw );        
+#endif
+    DBUG_VOID_RETURN;
 }
 
 static void
@@ -429,6 +513,9 @@ LookupVariable (child, quark)
 {
     BoxPtr	parent, box;
 
+    DBUG_ENTER("LookupVariable");
+    DBUG_PRINT("name = <%s>",XrmQuarkToString(quark));
+    DBUG_PRINT("child = %p",child);
     while ((parent = child->parent))
     {
 	for (box = parent->u.box.firstChild; 
@@ -436,11 +523,11 @@ LookupVariable (child, quark)
 	     box = box->nextSibling)
 	{
 	    if (box->type == VariableBox && box->u.variable.quark == quark)
-		return box->u.variable.expr;
+		DBUG_RETURN("%p", box->u.variable.expr);
 	}
 	child = parent;
     }
-    return 0;
+    DBUG_RETURN("failure -> %d",0);
 }
 		
 static double
@@ -453,7 +540,8 @@ Evaluate (l, box, expr, natural)
     double	left, right, down;
     Widget	widget;
     SubInfoPtr	info;
-    
+
+    DBUG_PRINT("Evaluate %d", expr->type);
     switch (expr->type) {
     case Constant:
 	return expr->u.constant;
@@ -496,17 +584,25 @@ Evaluate (l, box, expr, natural)
 	    return 0;
 	info = SubInfo (widget);
 	return info->naturalSize[LayoutVertical];
-    case Variable:
-	expr = LookupVariable (box, expr->u.variable);
-	if (!expr)
-	{
+    case Variable: 
+        {
+	/* in the original code there was no nexpr, 
+	   expr was overwritten by LookupVariable and 
+	   the expression "expr->u.variable" to obtain the
+	   variable name for the errormessage cause a segmentation
+	   violation */
+	ExprPtr    nexpr;
+	nexpr = LookupVariable (box, expr->u.variable);
+	if (!nexpr)
+	    {
 	    char    buf[256];
 	    (void) sprintf (buf, "Layout: undefined variable %s\n",
-		     XrmQuarkToString (expr->u.variable));
+			    XrmQuarkToString (expr->u.variable));
 	    XtError (buf);
 	    return 0.0;
+	    }
+	return Evaluate (l, box, nexpr, natural);
 	}
-	return Evaluate (l, box, expr, natural);
     }
     return 0.0;
 }
@@ -562,7 +658,9 @@ ComputeNaturalSizes (l, box, dir)
     SubInfoPtr	info;
     int		minStretchOrder, minShrinkOrder;
     LayoutDirection thisDir;
-    
+
+    DBUG_ENTER("ComputeNaturalSizes");
+    DBUG_PRINT("box->type=%d",box->type);
     switch (box->type) {
     case WidgetBox:
 	w = box->u.widget.widget = QuarkToWidget (l, box->u.widget.quark);
@@ -600,10 +698,6 @@ ComputeNaturalSizes (l, box, dir)
 	box->params.stretch[!thisDir].order = 100000;
 	for (child = box->u.box.firstChild; child; child = child->nextSibling) 
 	{
-            /* 02Jan95 DCT - omit VariableBox here. */
-            if (child->type == VariableBox)
-                continue;
-
 	    ComputeNaturalSizes (l, child, thisDir);
 	    /*
 	     * along box axis:
@@ -659,10 +753,6 @@ ComputeNaturalSizes (l, box, dir)
 	    largestMinSize = 0;
 	    for (child = box->u.box.firstChild; child; child = child->nextSibling) 
 	    {
-                /* 02Jan95 DCT - omit VariableBox here. */
-                if (child->type == VariableBox)
-                    continue;
-
 		if (child->params.shrink[!thisDir].order <= 0)
 		{
 		    minSize = child->natural[!thisDir] -
@@ -678,12 +768,11 @@ ComputeNaturalSizes (l, box, dir)
 	    else
 		box->params.shrink[!thisDir].order = 0;
 	}
-    /* 24Jan97 MJF - VariableBox is excluded above. 
-	break;
+        break;
     case VariableBox:
-	break;
-     */
+        break;
     }
+    DBUG_VOID_RETURN;
 }
 
 /* given the boxs geometry, set the geometry of the pieces */
@@ -719,7 +808,7 @@ ComputeSizes (box)
     shrink = box->params.shrink[dir];
     
     /* pick the correct adjustment parameters based on the change direction */
-    
+
     totalChange[0] = size - box->natural[dir];
 
     shrinking = totalChange[0] < 0;
@@ -741,10 +830,6 @@ ComputeSizes (box)
 		 child; 
 		 child = child->nextSibling) 
 	    {
-                /* 02Jan95 DCT - omit VariableBox here. */
-                if (child->type == VariableBox)
-                    continue;
-
 		switch (child->params.shrink[dir].order) {
 		case 0:
 		    remainingGlue += child->params.shrink[dir].value;
@@ -772,7 +857,7 @@ ComputeSizes (box)
     }
     else
 	totalGlue[0] = stretch;
-	
+
     /* adjust each box */
     totalSizes = 0;
     remainingGlue = totalGlue[0].value + totalGlue[1].value;
@@ -780,8 +865,8 @@ ComputeSizes (box)
     happy = True;
     for (child = box->u.box.firstChild; child; child = child->nextSibling) 
     {
-	/* never add glue or stretch to a VariableBox! */
-	if (child->type == VariableBox) continue;
+        /* never add glue or stretch to a VariableBox! */
+        if (child->type == VariableBox) continue;
 
 	if (shrinking)
 	    glue = &child->params.shrink[dir];
@@ -853,14 +938,11 @@ SetSizes (box, x, y)
     case BoxBox:
 	for (child = box->u.box.firstChild; child; child = child->nextSibling) 
 	{
-            /* 18Mar94 DCT - omit VariableBox here. */
-            if (child->type != VariableBox) {
-	        SetSizes (child, x, y);
-	        if (box->u.box.dir == LayoutHorizontal)
-		    x += child->size[LayoutHorizontal];
-	        else
-		    y += child->size[LayoutVertical];
-	    }
+	    SetSizes (child, x, y);
+	    if (box->u.box.dir == LayoutHorizontal)
+		x += child->size[LayoutHorizontal];
+	    else
+		y += child->size[LayoutVertical];
 	}
 	break;
     case GlueBox:
@@ -888,7 +970,7 @@ LayoutFreeLayout (box)
 	break;
     case WidgetBox:
     case VariableBox:
-    default:
+    default: 
 	break;
     }
     DisposeExpr (box->params.stretch[LayoutHorizontal].expr);
@@ -906,6 +988,7 @@ LayoutGetNaturalSize (l, widthp, heightp)
 {
     BoxPtr		box;
 
+    DBUG_ENTER("LayoutGetNaturalSize");
     box = l->layout.layout;
     if (box) 
     {
@@ -918,6 +1001,7 @@ LayoutGetNaturalSize (l, widthp, heightp)
 	*widthp = 0;
 	*heightp = 0;
     }
+    DBUG_VOID_RETURN;
 }
 
 static void
@@ -929,6 +1013,7 @@ LayoutLayout (l, attemptResize)
     Dimension		width, height;
     Dimension		prefered_width, prefered_height;
 
+    DBUG_ENTER("LayoutLayout");
     box = l->layout.layout;
     if (!box)
 	return;
@@ -955,11 +1040,10 @@ LayoutLayout (l, attemptResize)
     }
     if (l->layout.debug)
     {
-        printf ("------------------- %s layout ------------------\n", 
-	    l->core.name);
 	PrintBox (box, 0);
 	fflush (stdout);
     }
     SetSizes (box, 0, 0);
+    DBUG_VOID_RETURN;
 }
 

@@ -16,23 +16,16 @@ static char *yysourcebase, *yysource;
 
 #ifndef FLEX_SCANNER
 #define input() (*yysource++)
-
-/* 18Mar94 DCT - The following doesn't work as the lex code assumes that (c) is
- * evaluated.
- *
- *      #define unput(c)    (--yysource)
- */
-#define unput(c)    (--yysource, (c))
-
+#define unput(c)    (--yysource)
 #else
 #include <string.h>
-static void my_yyinput(char* buf, int* result, int max_size);
-#define YY_INPUT(buf, res, max) my_yyinput(buf, &(res), max);
+static void my_yyinput(char *buf, int *result, int max_size);
+#define YY_INPUT(buf, res, max) my_yyinput(buf, &(res), max)
 #endif
 
-#ifdef __STDC__
+
 static int count ();
-#endif
+
 %}
 %%
 vertical		return VERTICAL;
@@ -57,13 +50,21 @@ inff*			{ yylval.ival = count(yytext, 'f'); return INFINITY; }
 width			return WIDTH;
 height			return HEIGHT;
 \\[a-zA-Z_][a-zA-Z0-9_]* { 
-			 /* yytext[yyleng] = '\0'; */
+#ifdef FLEX_SCANNER
+			    yytext[yyleng] = '\0';
+#else
+			    yytext[yyleng-1] = '\0';
+#endif
 			    yylval.qval = XrmStringToQuark (yytext+1);
  			    return NAME;
 			}
 
 [a-zA-Z_][a-zA-Z0-9_]*	{ 
-			 /* yytext[yyleng] = '\0'; */
+#ifdef FLEX_SCANNER
+			    yytext[yyleng] = '\0';
+#else
+			    yytext[yyleng-1] = '\0';
+#endif
 			    yylval.qval = XrmStringToQuark (yytext);
  			    return NAME;
 			}

@@ -319,15 +319,45 @@ send blinkPanel  "set bitmap panel"
 
 
 # WINDOW the current frame.
+set old_cm_x	0
+set old_cm_y	0
+
 proc windowColormap {x y} \
 {
-    global winWidth winHeight maxContrast
+    global winWidth winHeight maxContrast old_cm_x old_cm_y
+
+    # For efficiency we won't compute the sqrt of the distance but instead
+    # just compare the square.  Use a threshold of 6 pixels so when we
+    # narrow in on the ROI we refine the colormap more precisely.
+
+    set diff  [expr (($old_cm_x - $x) * ($old_cm_x - $x)) + \
+                   (($old_cm_y - $y) * ($old_cm_y - $y))]
+
+    # Keep the old position.
+    set old_cm_x $x
+    set old_cm_y $y
+    if {$diff > 36} {
+       return
+    }
 
     send client windowColormap \
 	[expr "double($x) / $winWidth"] \
 	[expr "(double($y) - $winHeight / 2.0) / $winHeight * \
 	    $maxContrast * 2.0"]
 }
+
+proc updateColormap {x y} \
+{
+    global winWidth winHeight maxContrast old_cm_x old_cm_y
+
+    set old_cm_x $x
+    set old_cm_y $y
+    send client updateColormap \
+	[expr "double($x) / $winWidth"] \
+	[expr "(double($y) - $winHeight / 2.0) / $winHeight * \
+	    $maxContrast * 2.0"]
+}
+
 
 
 # WINDOW the current frame, but only one color at a time.
@@ -929,7 +959,7 @@ proc normalize args \
     #set xcen [expr $frameWidth / 2]
     #set ycen [expr $frameHeight / 2]
     #send client zoom 1 1 $xcen $ycen
-    send client windowColormap 0.5 1.0
+    send client updateColormap 0.5 1.0
 }
 
 
@@ -954,6 +984,7 @@ createMenu fileMenu fileButton {
 			    send client Reset
 			    #resetView initialize done done
 			}					  }
+    {	"Debug Panel"	f.exec { tclPanel 1			} }
     {	"Quit"		f.exec { Quit				} }
 }
 
@@ -1121,3 +1152,4 @@ proc curtrack_destroy args \
 	set ct_warn 0
     }
 }
+

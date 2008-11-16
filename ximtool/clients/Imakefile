@@ -17,7 +17,7 @@ ism_wcspix.e: $(WC_SRCS) $(LIB_SRCS)
 SubdirLibraryRule($(WC_SRCS) $(LIB_SRCS))
 
 clean::	
-	$(RM) *.[aeo]
+	@(rmbin -v .)
 	touch DONE
 
 includes::

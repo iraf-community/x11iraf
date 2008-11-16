@@ -1,8 +1,32 @@
-/* $XConsortium: Text.h,v 1.41 91/07/22 19:05:20 converse Exp $ */
+/* $XConsortium: Text.h,v 1.45 94/04/17 20:13:05 kaleb Exp $ */
 
 /***********************************************************
-Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts,
-and the Massachusetts Institute of Technology, Cambridge, Massachusetts.
+
+Copyright (c) 1987, 1988, 1994  X Consortium
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of the X Consortium shall not be
+used in advertising or otherwise to promote the sale, use or other dealings
+in this Software without prior written authorization from the X Consortium.
+
+
+Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
@@ -10,7 +34,7 @@ Permission to use, copy, modify, and distribute this software and its
 documentation for any purpose and without fee is hereby granted, 
 provided that the above copyright notice appear in all copies and that
 both that copyright notice and this permission notice appear in 
-supporting documentation, and that the names of Digital or MIT not be
+supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
 software without specific, written prior permission.  
 
@@ -27,7 +51,7 @@ SOFTWARE.
 #ifndef _XawText_h
 #define _XawText_h
 
-#include <X11/Xfuncproto.h>
+#include <X11/Xaw3d/Simple.h>
 
 /*
  Text widget
@@ -81,8 +105,8 @@ typedef struct {
     unsigned long format;
     } XawTextBlock, *XawTextBlockPtr; 
 
-#include <X11/Xaw/TextSink.h>
-#include <X11/Xaw/TextSrc.h>
+#include <X11/Xaw3d/TextSink.h>
+#include <X11/Xaw3d/TextSrc.h>
 
 #define XtEtextScrollNever "never"
 #define XtEtextScrollWhenNeeded "whenneeded"
@@ -135,6 +159,8 @@ typedef struct {
 #define XawPositionError	2
 
 extern unsigned long FMT8BIT;
+extern unsigned long XawFmt8Bit;
+extern unsigned long XawFmtWide;
 
 /* Class record constants */
 
@@ -144,6 +170,12 @@ typedef struct _TextClassRec *TextWidgetClass;
 typedef struct _TextRec      *TextWidget;
 
 _XFUNCPROTOBEGIN
+
+extern XrmQuark _XawTextFormat(
+#if NeedFunctionPrototypes
+    TextWidget		/* tw */
+#endif
+);
 
 extern void XawTextDisplay(
 #if NeedFunctionPrototypes
@@ -269,10 +301,10 @@ _XFUNCPROTOEND
 
 /*
  * For R3 compatability only. 
-
-#include <X11/Xaw/AsciiSrc.h>
  */
 
-#include <X11/Xaw/AsciiSink.h>
+#include <X11/Xaw3d/AsciiSrc.h>
+#include <X11/Xaw3d/AsciiSink.h>
 
 #endif /* _XawText_h */
+/* DON'T ADD STUFF AFTER THIS #endif */

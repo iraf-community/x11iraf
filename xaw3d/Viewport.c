@@ -1,8 +1,32 @@
-/* $XConsortium: Viewport.c,v 1.69 91/10/16 21:40:27 eswu Exp $ */
+/* $XConsortium: Viewport.c,v 1.71 94/04/17 20:13:26 kaleb Exp $ */
 
 /***********************************************************
-Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts,
-and the Massachusetts Institute of Technology, Cambridge, Massachusetts.
+
+Copyright (c) 1987, 1988, 1994  X Consortium
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of the X Consortium shall not be
+used in advertising or otherwise to promote the sale, use or other dealings
+in this Software without prior written authorization from the X Consortium.
+
+
+Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
@@ -10,7 +34,7 @@ Permission to use, copy, modify, and distribute this software and its
 documentation for any purpose and without fee is hereby granted, 
 provided that the above copyright notice appear in all copies and that
 both that copyright notice and this permission notice appear in 
-supporting documentation, and that the names of Digital or MIT not be
+supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
 software without specific, written prior permission.  
 
@@ -261,8 +285,8 @@ static void Realize(widget, value_mask, attributes)
     XSetWindowAttributes *attributes;
 {
     ViewportWidget w = (ViewportWidget)widget;
-    register Widget child = w->viewport.child;
-    register Widget clip = w->viewport.clip;
+    Widget child = w->viewport.child;
+    Widget clip = w->viewport.clip;
 
     *value_mask |= CWBitGravity;
     attributes->bit_gravity = NorthWestGravity;
@@ -306,9 +330,9 @@ static void ChangeManaged(widget)
     Widget widget;
 {
     ViewportWidget w = (ViewportWidget)widget;
-    register int num_children = w->composite.num_children;
-    register Widget child, *childP;
-    register int i;
+    int num_children = w->composite.num_children;
+    Widget child, *childP;
+    int i;
 
     child = (Widget)NULL;
     for (childP=w->composite.children, i=0; i < num_children; childP++, i++) {
@@ -382,8 +406,8 @@ static void SetBar(w, top, length, total)
 static void RedrawThumbs(w)
   ViewportWidget w;
 {
-    register Widget child = w->viewport.child;
-    register Widget clip = w->viewport.clip;
+    Widget child = w->viewport.child;
+    Widget clip = w->viewport.clip;
 
     if (w->viewport.horiz_bar != (Widget)NULL)
 	SetBar( w->viewport.horiz_bar, -(child->core.x),
@@ -403,8 +427,8 @@ static void SendReport (w, changed)
     XawPannerReport rep;
 
     if (w->viewport.report_callbacks) {
-	register Widget child = w->viewport.child;
-	register Widget clip = w->viewport.clip;
+	Widget child = w->viewport.child;
+	Widget clip = w->viewport.clip;
 
 	rep.changed = changed;
 	rep.slider_x = -child->core.x;	/* child is canvas */
@@ -423,8 +447,8 @@ static void MoveChild(w, x, y)
     ViewportWidget w;
     Position x, y;
 {
-    register Widget child = w->viewport.child;
-    register Widget clip = w->viewport.clip;
+    Widget child = w->viewport.child;
+    Widget clip = w->viewport.clip;
 
     /* make sure we never move past right/bottom borders */
     if (-x + (int)clip->core.width > (int)child->core.width)
@@ -450,8 +474,8 @@ static void ComputeLayout(widget, query, destroy_scrollbars)
     Boolean destroy_scrollbars;	/* destroy un-needed scrollbars? */
 {
     ViewportWidget w = (ViewportWidget)widget;
-    register Widget child = w->viewport.child;
-    register Widget clip = w->viewport.clip;
+    Widget child = w->viewport.child;
+    Widget clip = w->viewport.clip;
     ViewportConstraints constraints
 	= (ViewportConstraints)clip->core.constraints;
     Boolean needshoriz, needsvert;
@@ -580,7 +604,7 @@ static void ComputeLayout(widget, query, destroy_scrollbars)
 		    (Dimension)clip_height, (Dimension)0 );
 	
     if (w->viewport.horiz_bar != (Widget)NULL) {
-	register Widget bar = w->viewport.horiz_bar;
+	Widget bar = w->viewport.horiz_bar;
 	if (!needshoriz) {
 	    constraints->form.vert_base = (Widget)NULL;
 	    if (destroy_scrollbars) {
@@ -589,7 +613,7 @@ static void ComputeLayout(widget, query, destroy_scrollbars)
 	    }
 	}
 	else {
-	    register int bw = bar->core.border_width;
+	    int bw = bar->core.border_width;
 	    XtResizeWidget( bar, (Dimension) clip_width, bar->core.height, (Dimension) bw );
 	    XtMoveWidget( bar,
 			  (Position)((needsvert && !w->viewport.useright)
@@ -603,7 +627,7 @@ static void ComputeLayout(widget, query, destroy_scrollbars)
     }
 
     if (w->viewport.vert_bar != (Widget)NULL) {
-	register Widget bar = w->viewport.vert_bar;
+	Widget bar = w->viewport.vert_bar;
 	if (!needsvert) {
 	    constraints->form.horiz_base = (Widget)NULL;
 	    if (destroy_scrollbars) {
@@ -612,7 +636,7 @@ static void ComputeLayout(widget, query, destroy_scrollbars)
 	    }
 	}
 	else {
-	    register int bw = bar->core.border_width;
+	    int bw = bar->core.border_width;
 	    XtResizeWidget( bar, bar->core.width, (Dimension)clip_height, (Dimension)bw );
 	    XtMoveWidget( bar,
 			  (Position)(w->viewport.useright
@@ -655,7 +679,7 @@ XtWidgetGeometry * intended;
 int *clip_width, *clip_height;
 {
     ViewportWidget w = (ViewportWidget)widget;
-    register Widget child = w->viewport.child;
+    Widget child = w->viewport.child;
     XtWidgetGeometry preferred;
 
 /*
@@ -746,7 +770,7 @@ static void ScrollUpDownProc(widget, closure, call_data)
     XtPointer call_data;
 {
     ViewportWidget w = (ViewportWidget)closure;
-    register Widget child = w->viewport.child;
+    Widget child = w->viewport.child;
     int pix = (int)call_data;
     Position x, y;
 
@@ -765,7 +789,7 @@ static void ThumbProc(widget, closure, call_data)
     XtPointer call_data;
 {
     ViewportWidget w = (ViewportWidget)closure;
-    register Widget child = w->viewport.child;
+    Widget child = w->viewport.child;
     float *percent = (float *) call_data;
     Position x, y;
 
@@ -1008,7 +1032,7 @@ XawViewportSetLocation (gw, xoff, yoff)
 #endif
 {
     ViewportWidget w = (ViewportWidget) gw;
-    register Widget child = w->viewport.child;
+    Widget child = w->viewport.child;
     Position x, y;
 
     if (xoff > 1.0)			/* scroll to right */

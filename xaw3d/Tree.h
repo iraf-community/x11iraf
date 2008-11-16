@@ -1,7 +1,30 @@
 /*
- * $XConsortium: Tree.h,v 1.11 91/05/04 18:59:13 rws Exp $
+ * $XConsortium: Tree.h,v 1.13 94/04/17 20:13:22 kaleb Exp $
  *
- * Copyright 1990 Massachusetts Institute of Technology
+
+Copyright (c) 1990, 1994  X Consortium
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of the X Consortium shall not be
+used in advertising or otherwise to promote the sale, use or other dealings
+in this Software without prior written authorization from the X Consortium.
+
  * Copyright 1989 Prentice Hall
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -9,9 +32,9 @@
  * copyright notice appear in all copies and that both the copyright notice
  * and this permission notice appear in supporting documentation.
  * 
- * M.I.T., Prentice Hall and the authors disclaim all warranties with regard
+ * Prentice Hall and the authors disclaim all warranties with regard
  * to this software, including all implied warranties of merchantability and
- * fitness.  In no event shall M.I.T., Prentice Hall or the authors be liable
+ * fitness.  In no event shall Prentice Hall or the authors be liable
  * for any special, indirect or cosequential damages or any damages whatsoever
  * resulting from loss of use, data or profits, whether in an action of
  * contract, negligence or other tortious action, arising out of or in
@@ -32,7 +55,6 @@
 #define _XawTree_h
 
 #include <X11/Xmu/Converters.h>
-#include <X11/Xfuncproto.h>
 
 /******************************************************************************
  * 

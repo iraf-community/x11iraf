@@ -1242,6 +1242,7 @@ char	xc[ARB], yc[ARB]			#o formatted coord strings
 
 pointer	img, co, wp
 char	xfmt[LEN_WCSNAME], yfmt[LEN_WCSNAME]
+int	ctype
 
 int	sk_stati()
 bool	streq()
@@ -1250,6 +1251,9 @@ begin
 	img = C_DATA(cp)			# initialize ptrs
 	co  = IMG_CO(img)
 	wp  = IMG_WP(img)
+
+
+        ctype = sk_stati (co, S_CTYPE)
 
 	# Convert coords to the requested format.
 	if (FORMATS(wp,line) == FMT_DEFAULT) {
@@ -1264,8 +1268,12 @@ begin
 	                streq(WCSNAME(wp,line),"galactic") ||
 	                streq(WCSNAME(wp,line),"supergalactic"))
 	                    call strcpy ("%h", xfmt, LEN_WCSNAME)
-	            else
-	                call strcpy ("%.2H", xfmt, LEN_WCSNAME)
+	            else {
+	    		if (sk_stati(co, S_CTYPE) == CTYPE_EQUATORIAL)
+	                    call strcpy ("%.2H", xfmt, LEN_WCSNAME)
+	                else
+	                    call strcpy ("%.2h", xfmt, LEN_WCSNAME)
+	            }
 	            call strcpy ("%.1h", yfmt, LEN_WCSNAME)
 	        } else {
 	            call strcpy ("%10.2f", xfmt, LEN_WCSNAME)

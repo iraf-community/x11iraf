@@ -43,8 +43,6 @@ switch ($UNAME)
 	else
             if (-f /etc/redhat-release) then
                 set mach = "redhat"
-            else if (-f /etc/SuSE-release) then
-                set mach = "suse"
             else
                 set mach = "linux"
             endif
@@ -62,23 +60,15 @@ switch ($UNAME)
     case freebsd: 
 	set mach = "freebsd"
 	breaksw
-    case hp-ux:   
-	set mach = "hp700"
+    case cygwin:    
+	set mach = "cygwin"
 	breaksw
-    case irix:    
-	set mach = "irix"
+    case sunos:    
+	set mach = "sunos"
 	breaksw
-    case irix64:  
-	set mach = "irix"
-	breaksw
-    case aix:  	  
-	set mach = "rs6000"
-	breaksw
-    case osf1:    
-	set mach = "alpha"
-	breaksw
-    case ultrix:    
-	set mach = "ultrix"
+
+    case generic:    
+	set mach = "generic"
 	breaksw
     default:	  
 	set mach = "unknown"
@@ -91,16 +81,20 @@ set cur_arch = `ls -l bin | sed -e 's+^.*bin\.++'`
 if ("$1" == "-show") then
     echo "System is currently configured for $cur_arch."
     exit 0
+
 else if ("$1" == "-arch") then
     echo $cur_arch
     exit 0
+
 else if ("$1" == "-current") then
     set new_arch = $mach
     echo "Configuring X11IRAF for $new_arch..."
+
 else if ("$1" == "-noclean") then
     set new_arch = $mach
     set clean = 0
     echo "Configuring X11IRAF for $new_arch..."
+
 else if ($#argv > 1) then
     # Get the list of directories to be changed.
     shift
@@ -117,7 +111,7 @@ endif
 
 # See if we're already there...
 if ($cur_arch == $new_arch) then
-    echo "System is already configured for '$mach'."
+    echo "System is already configured for '$new_arch'."
     exit 0
 #else if ($new_arch != $mach) then
 #    echo "Cannot configure for '$new_arch' on a '$mach' system."

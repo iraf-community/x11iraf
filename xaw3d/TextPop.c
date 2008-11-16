@@ -1,28 +1,35 @@
-/* $XConsortium: TextPop.c,v 1.22 91/07/25 18:10:22 rws Exp $ */
+/* -XT
+ * $XConsortium: TextPop.c,v 1.31 94/04/17 20:13:10 kaleb Exp $
+ *  J. P. Terlouw, Kapteyn Astronomical Institute, Groningen The Netherlands,   
+ *  February 2001:  modified for use with non-default visuals. 
+ */
 
-/***********************************************************
-Copyright 1989 by the Massachusetts Institute of Technology,
-Cambridge, Massachusetts.
+/*
 
-                        All Rights Reserved
+Copyright (c) 1989, 1994  X Consortium
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
-provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
-supporting documentation, and that the names of Digital or MIT not be
-used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
-ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
-DIGITAL BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR
-ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
-WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
-ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
-SOFTWARE.
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
 
-******************************************************************/
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of the X Consortium shall not be
+used in advertising or otherwise to promote the sale, use or other dealings
+in this Software without prior written authorization from the X Consortium.
+
+*/
 
 /************************************************************
  *
@@ -48,6 +55,7 @@ SOFTWARE.
 #include <X11/IntrinsicP.h>
 #include <X11/StringDefs.h>
 #include <X11/Shell.h> 
+#include <X11/ShellP.h> 
 
 #include <X11/Xaw3d/TextP.h>
 #include <X11/Xaw3d/AsciiText.h>
@@ -56,13 +64,13 @@ SOFTWARE.
 #include <X11/Xaw3d/Form.h>
 #include <X11/Xaw3d/Toggle.h>
 #include <X11/Xmu/CharSet.h>
+#include "XawI18n.h"
 #include <stdio.h>
 #include <X11/Xos.h>		/* for O_RDONLY */
 #include <errno.h>
 
+#ifdef X_NOT_STDC_ENV
 extern int errno;
-#if !defined(__APPLE__) || (__APPLE_CC__ < 1151)
-extern int sys_nerr;
 #endif
 
 #define INSERT_FILE ("Enter Filename:")
@@ -84,6 +92,8 @@ static Widget CreateDialog(), GetShell();
 static void SetWMProtocolTranslations();
 static Boolean DoSearch(), SetResourceByName(), Replace();
 static String GetString();
+
+static String GetStringRaw();
 
 static void AddInsertFileChildren();
 static Boolean InsertFileNamed();
@@ -240,9 +250,8 @@ XtPointer call_data;		/* unused */
       return;
     }
     else
-      (void) sprintf( msg, "*** Error: %s ***",
-	      (errno > 0) ?  (char *)strerror(errno) : "Can't open file" );
-  
+      (void) sprintf( msg, "*** Error: %s ***", strerror(errno));
+
   (void)SetResourceByName(ctx->text.file_insert, 
 			  LABEL_NAME, XtNlabel, (XtArgVal) msg);
   XBell(XtDisplay(w), 0);
@@ -255,42 +264,58 @@ XtPointer call_data;		/* unused */
  *	Returns: TRUE if the insert was sucessful, FALSE otherwise.
  */
 
+
 static Boolean
 InsertFileNamed(tw, str)
 Widget tw;
 char *str;
 {
-  int fid;
+  FILE *file;
   XawTextBlock text;
-  char buf[BUFSIZ];
-  XawTextPosition start_pos, pos;
+  XawTextPosition pos;
 
   if ( (str == NULL) || (strlen(str) == 0) || 
-       ((fid = open(str, O_RDONLY)) <= 0))
+       ((file = fopen(str, "r")) == NULL))
     return(FALSE);
 
-  start_pos = pos = XawTextGetInsertionPoint(tw);
-  text.firstPos = 0;
-  text.format = FMT8BIT;
+  pos = XawTextGetInsertionPoint(tw);
 
-  while ((text.length = read(fid, buf, BUFSIZ)) > 0) {
-    text.ptr = buf;
-    if (XawTextReplace(tw, pos, pos, &text) != XawEditDone) {
-      /*
-       * If the replace failed then remove what we have 
-       * replaced so far, and return an error.
-       */
-      text.length = 0;
-      (void) XawTextReplace(tw, start_pos, pos, &text);
-      (void) close(fid);
-      return(FALSE);
-    }
-    pos += text.length;
+  fseek(file, 0L, 2);
+
+
+  text.firstPos = 0;
+  text.length = (ftell(file))/sizeof(unsigned char);
+  text.ptr = XtMalloc((text.length + 1) * sizeof(unsigned char));
+  text.format = XawFmt8Bit;
+
+  fseek(file, 0L, 0);
+  if (fread(text.ptr, sizeof(unsigned char), text.length, file) != text.length)
+      XtErrorMsg("readError", "insertFileNamed", "XawError",
+                 "fread returned error.", NULL, NULL);
+
+ /* DELETE if (text.format == XawFmtWide) {
+     wchar_t* _XawTextMBToWC();
+     wchar_t* wstr;
+     wstr = _XawTextMBToWC(XtDisplay(tw), text.ptr, &(text.length));
+     wstr[text.length] = NULL;
+     XtFree(text.ptr);
+     text.ptr = (char *)wstr;
+  } else {
+     (text.ptr)[text.length] = '\0';
+  }*/
+
+  if (XawTextReplace(tw, pos, pos, &text) != XawEditDone) {
+     XtFree(text.ptr);
+     fclose(file);
+     return(FALSE);
   }
-  (void) close(fid);
+  pos += text.length;
+  XtFree(text.ptr);
+  fclose(file);
   XawTextSetInsertionPoint(tw, pos);
   return(TRUE);
 }
+
 
 /*	Function Name: AddInsertFileChildren
  *	Description: Adds all children to the InsertFile dialog widget.
@@ -509,10 +534,16 @@ Cardinal * num_params;
     XtAppWarning(XtWidgetToApplicationContext(w), buf);
     return;
   }
-  else if (*num_params == 1) 
-    ptr = "";
-  else 
-    ptr = params[1];
+
+  if (*num_params == 2 )
+      ptr = params[1];
+  else
+      if (_XawTextFormat(ctx) == XawFmtWide) {
+          /*This just does the equivalent of ptr = ""L, a waste because params[1] isnt W aligned.*/
+          ptr = (char *)XtMalloc(sizeof(wchar_t));
+          *((wchar_t*)ptr) = (wchar_t)0;
+      } else
+          ptr = "";
 
   switch(params[0][0]) {
   case 'b':			/* Left. */
@@ -630,7 +661,7 @@ char * ptr;
   XtSetArg(args[num_args], XtNfromVert, search->label2); num_args++;
   XtSetArg(args[num_args], XtNleft, XtChainLeft); num_args++;
   XtSetArg(args[num_args], XtNright, XtChainLeft); num_args++;
-  XtSetArg(args[num_args], XtNradioData, (caddr_t) XawsdLeft + R_OFFSET);
+  XtSetArg(args[num_args], XtNradioData, (XPointer) XawsdLeft + R_OFFSET);
   num_args++;
   search->left_toggle = XtCreateManagedWidget("backwards", toggleWidgetClass,
 					      form, args, num_args);
@@ -642,7 +673,7 @@ char * ptr;
   XtSetArg(args[num_args], XtNleft, XtChainLeft); num_args++;
   XtSetArg(args[num_args], XtNright, XtChainLeft); num_args++;
   XtSetArg(args[num_args], XtNradioGroup, search->left_toggle); num_args++;
-  XtSetArg(args[num_args], XtNradioData, (caddr_t) XawsdRight + R_OFFSET);
+  XtSetArg(args[num_args], XtNradioData, (XPointer) XawsdRight + R_OFFSET);
   num_args++;
   search->right_toggle = XtCreateManagedWidget("forwards", toggleWidgetClass,
 					       form, args, num_args);
@@ -784,18 +815,26 @@ struct SearchAndReplace * search;
   XawTextScanDirection dir;
   XawTextBlock text;
 
-  text.ptr = GetString(search->search_text);
-  text.length = strlen(text.ptr);
+  TextWidget ctx = (TextWidget)tw;
+
+  text.ptr = GetStringRaw(search->search_text);
+  if ((text.format = _XawTextFormat(ctx)) == XawFmtWide)
+      text.length = wcslen((wchar_t*)text.ptr);
+  else
+      text.length = strlen(text.ptr);
   text.firstPos = 0;
-  text.format = FMT8BIT;
   
-  dir = (XawTextScanDirection)(int) ((caddr_t)XawToggleGetCurrent(search->left_toggle) -
+  dir = (XawTextScanDirection)(int) ((XPointer)XawToggleGetCurrent(search->left_toggle) -
 				R_OFFSET);
   
   pos = XawTextSearch( tw, dir, &text);
-  
+
+
+   /* The Raw string in find.ptr may be WC I can't use here, so I re - call 
+   GetString to get a tame version. */
+
   if (pos == XawTextSearchError) 
-    (void) sprintf( msg, "Could not find string '%s'.", text.ptr);
+    (void) sprintf( msg, "Could not find string ``%s''.", GetString( search->search_text ) );
   else {
     if (dir == XawsdRight)
       XawTextSetInsertionPoint( tw, pos + text.length);
@@ -908,20 +947,26 @@ Boolean once_only, show_current;
   XawTextBlock find, replace;
   Widget tw = XtParent(search->search_popup);
   int count = 0;
-  
-  find.ptr = GetString( search->search_text);
-  find.length = strlen(find.ptr);
+
+  TextWidget ctx = (TextWidget)tw;
+
+  find.ptr = GetStringRaw( search->search_text);
+  if ((find.format = _XawTextFormat(ctx)) == XawFmtWide)
+      find.length = wcslen((wchar_t*)find.ptr);
+  else
+      find.length = strlen(find.ptr);
   find.firstPos = 0;
-  find.format = FMT8BIT;
 
-  replace.ptr = GetString(search->rep_text);
-  replace.length = strlen(replace.ptr);
+  replace.ptr = GetStringRaw(search->rep_text);
   replace.firstPos = 0;
-  replace.format = FMT8BIT;
+  if ((replace.format = _XawTextFormat(ctx)) == XawFmtWide)
+      replace.length = wcslen((wchar_t*)replace.ptr);
+  else
+      replace.length = strlen(replace.ptr);
     
-  dir = (XawTextScanDirection)(int) ((caddr_t)XawToggleGetCurrent(search->left_toggle) -
+  dir = (XawTextScanDirection)(int) ((XPointer)XawToggleGetCurrent(search->left_toggle) -
 				R_OFFSET);
-
+  /* CONSTCOND */
   while (TRUE) {
     if (count != 0) {
       new_pos = XawTextSearch( tw, dir, &find);
@@ -930,8 +975,11 @@ Boolean once_only, show_current;
 	if (count == 0) {
 	  char msg[BUFSIZ];
 
-	  (void) sprintf( msg, "%s %s %s", "*** Error: Could not find string '",
-		  find.ptr, "'. ***");
+             /* The Raw string in find.ptr may be WC I can't use here, 
+		so I call GetString to get a tame version.*/
+
+	  (void) sprintf( msg, "%s %s %s", "*** Error: Could not find string ``",
+		  GetString( search->search_text ), "''. ***");
 	  SetSearchLabels(search, msg, "", TRUE);
 	  return(FALSE);
 	}
@@ -1138,10 +1186,13 @@ XtArgVal value;
   XtSetValues( w, args, ONE );
 }
 
-/*	Function Name: GetString
+/*	Function Name: GetString{Raw}
  *	Description:   Gets the value for the string in the popup.
  *	Arguments:     text - the text widget whose string we will get.
- *	Returns:       the string.
+ * 
+ *	GetString returns the string as a MB.
+ *	GetStringRaw returns the exact buffer contents suitable for a search.
+ *
  */
 
 static String
@@ -1154,6 +1205,19 @@ Widget text;
   XtSetArg( args[0], XtNstring, &string );
   XtGetValues( text, args, ONE );
   return(string);
+}
+
+static String
+GetStringRaw(tw)
+Widget tw;
+{
+  TextWidget ctx = (TextWidget)tw;
+  XawTextPosition last;
+  char *_XawTextGetText();
+
+  last = XawTextSourceScan(ctx->text.source, 0, XawstAll, XawsdRight,
+			     ctx->text.mult, TRUE);
+  return (_XawTextGetText(ctx, 0, last));
 }
 
 /*	Function Name: CenterWidgetOnPoint.
@@ -1174,7 +1238,7 @@ XEvent *event;
   Arg args[3];
   Cardinal num_args;
   Dimension width, height, b_width;
-  Position x, y, max_x, max_y;
+  Position x = 0, y = 0, max_x, max_y;
   
   if (event != NULL) {
     switch (event->type) {
@@ -1240,14 +1304,18 @@ String ptr, name;
 void (*func)();
 {
   Widget popup, form;
-  Arg args[5];
+  Arg args[8];
   Cardinal num_args;
+  ShellWidget parsh=GetShell(parent);
 
   num_args = 0;
   XtSetArg(args[num_args], XtNiconName, name); num_args++;
   XtSetArg(args[num_args], XtNgeometry, NULL); num_args++;
   XtSetArg(args[num_args], XtNallowShellResize, TRUE); num_args++;
   XtSetArg(args[num_args], XtNtransientFor, GetShell(parent)); num_args++;
+  XtSetArg(args[num_args], XtNvisual, parsh->shell.visual); num_args++;
+  XtSetArg(args[num_args], XtNcolormap, parsh->core.colormap); num_args++;
+  XtSetArg(args[num_args], XtNborderPixmap, parsh->core.border_pixmap); num_args++;
   popup = XtCreatePopupShell(name, transientShellWidgetClass, 
 			     parent, args, num_args);
   

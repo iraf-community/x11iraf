@@ -87,7 +87,7 @@ set Resources(tile_panel) { \
     *geomFrame.innerOffset:			4
     *tileGeometry.width:			220
     *tileGeometry.height;			37
-    *tileGeometry.background:			gray77
+    *tileGeometry.background:			#c4c4c4
     *tileGeometry.font:				7x13bold
     *tileGeometry.label:			Tile Geometry:  1 x 2
 
@@ -115,7 +115,7 @@ set Resources(tile_panel) { \
     *nrdecrease.direction:			left
     *nrincrease.direction:			right
     *nrowLab.label:				Tile Rows:
-    *nrtext.background:				gray68
+    *nrtext.background:				#adadad
     *nrtext.justify:				center
     *nrtext.font:				7x13bold
     *nrtext.label:				1
@@ -124,7 +124,7 @@ set Resources(tile_panel) { \
     *ncdecrease.direction:			left
     *ncincrease.direction:			right
     *ncolLab.label:				Tile Columns:
-    *nctext.background:				gray68
+    *nctext.background:				#adadad
     *nctext.justify:				center
     *nctext.font:				7x13bold
     *nctext.label:				2

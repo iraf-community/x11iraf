@@ -73,7 +73,7 @@ set Resources(hdr_panel) { \
 !   *hdrText*scrollHorizontal:			Always
 !   *hdrText*editType:				edit
 !   *hdrText*font:				7x13
-!   *hdrText*background:			gray77
+!   *hdrText*background:			#c4c4c4
 !   *hdrText*displayCaret:			False
 !   *hdrText*bottomMargin:			10
 !   *hdrText*Scrollbar.width:			15
@@ -119,7 +119,7 @@ set Resources(hdr_panel) { \
     *hdrIGText.height:				130
 !   *hdrIGText*background:			black
 !   *hdrIGText*foreground:			yellow2
-    *hdrIGText*background:			gray68
+    *hdrIGText*background:			#adadad
     *hdrIGText*foreground:			black
     *hdrWcsGroup*hdrIGText*scrollVertical:	never
     *hdrWcsGroup*hdrIGText*scrollHorizontal:	never
@@ -129,10 +129,10 @@ set Resources(hdr_panel) { \
     *hdrKeywGroup.innerOffset:			5
     *hdrKGFrame.frameType:			sunken
     *hdrKGFrame.frameWidth:			1
-    *hdrKGText*background:			gray77
+    *hdrKGText*background:			#c4c4c4
     *hdrKGText*bottomMargin:			10
 
-    *hdrIGText*background:			gray77
+    *hdrIGText*background:			#c4c4c4
     *hdrIGFrame.frameWidth:			0
 }
 

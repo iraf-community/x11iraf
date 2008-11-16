@@ -91,7 +91,7 @@ set Resources(help_panel) { \
 	5 \
     }
     *helpInfo1.label:		XIMTOOL_VERSION
-    *helpInfo2.label:		iraf@noao.edu     (520) 318-8160
+    *helpInfo2.label:		For help or questions:   http://iraf.net
     *helpInfo3.label: \
 	NOAO is operated by AURA under cooperative agreement with the NSF
 

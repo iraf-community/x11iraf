@@ -109,6 +109,7 @@ proc setPanner {state} \
 	    translations	$pannerWinTranslations \
 	    visible		true \
 	    sensitive		true \
+	    autoRedraw		true \
 	    activated		true
 
 	# Update the panner window position variables so that it comes up

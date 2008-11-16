@@ -102,35 +102,35 @@ proc wcspix_msg { argc argv } \
 
 
     switch $cmd {
-    startup	{ wcspix_startup				}
-    shutdown	{ wcspix_shutdown				}
-    disable	{ wcspix_disable				}
-    capable	{ wcspix_capable				}
+    startup	{ wcspix_startup					}
+    shutdown	{ wcspix_shutdown					}
+    disable	{ wcspix_disable					}
+    capable	{ wcspix_capable					}
 
-    cache	{ wcspix_cache   [lrange $arg 1 end]		}
-    uncache	{ wcspix_uncache [lrange $arg 1 end]		}
-    wcstran	{ wcspix_wcstran [lrange $arg 1 end]		}
-    wcslist	{ wcspix_wcslist [lrange $arg 1 end] 		}
+    cache	{ wcspix_cache   [lrange $arg 1 end]			}
+    uncache	{ wcspix_uncache [lrange $arg 1 end]			}
+    wcstran	{ wcspix_wcstran [lrange $arg 1 end]			}
+    wcslist	{ wcspix_wcslist [lrange $arg 1 end] 			}
 
     imghdr	{ send hdrText \
 			setText [format "<pre>%s\n%s</pre>" \
 			[string trimright [send hdrText getText simple] "\n"]\
 			[lindex $arg 1] ]
 		}
-    wcshdr	{ send hdrKGText append [lindex $arg 1]		}
+    wcshdr	{ send hdrKGText append [lindex $arg 1]			}
 
     wcsinfo	{ send hdrIGText append [lindex $arg 1]		
 		  send hdrText   gotoId 0
 		  send hdrKGText set insertPosition 0
 		}
 
-    compass	{ wcspix_compass [lrange $arg 1 end] 		}
-    orient	{ wcspix_orient  [lrange $arg 1 end] 		}
-    wcstype	{ wcspix_wcstype [lindex $arg 1] [lindex $arg 2]}
+    compass	{ wcspix_compass [lrange $arg 1 end] ; drawCompass 	}
+    orient	{ wcspix_orient  [lrange $arg 1 end] 			}
+    wcstype	{ wcspix_wcstype [lindex $arg 1] [lindex $arg 2]	}
     wcsfmt	{ set num [lindex $arg 2]
-		  send fmtWcs$num set label [lindex $arg 1] 	}
+		  send fmtWcs$num set label [lindex $arg 1] 		}
 
-    wcspix_cmd	{ send wcsIsmCmd set string [lindex $arg 1]	}
+    wcspix_cmd	{ send wcsIsmCmd set string [lindex $arg 1]		}
 
     pixtab	{ set tab  [lindex [lindex $arg 1] 0]
 		  set col  [lindex [lindex $arg 1] 1]

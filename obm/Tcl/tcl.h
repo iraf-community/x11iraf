@@ -467,10 +467,12 @@ EXTERN int		Tcl_AsyncInvoke _ANSI_ARGS_((Tcl_Interp *interp,
 			    int code));
 EXTERN void		Tcl_AppendElement _ANSI_ARGS_((Tcl_Interp *interp,
 			    char *string));
+#ifdef ELLIPSES
 #ifdef USE_STDARG
 EXTERN void		Tcl_AppendResult _ANSI_ARGS_((Tcl_Interp *interp, ...));
 #else
 EXTERN void		Tcl_AppendResult _ANSI_ARGS_(VARARGS);
+#endif
 #endif
 EXTERN int		Tcl_AppInit _ANSI_ARGS_((Tcl_Interp *interp));
 EXTERN void		Tcl_AddErrorInfo _ANSI_ARGS_((Tcl_Interp *interp,
@@ -586,10 +588,12 @@ EXTERN int		Tcl_ScanElement _ANSI_ARGS_((char *string,
 			    int *flagPtr));
 EXTERN int		Tcl_SetCommandInfo _ANSI_ARGS_((Tcl_Interp *interp,
 			    char *cmdName, Tcl_CmdInfo *infoPtr));
+#ifdef ELLIPSES
 #ifdef USE_STDARG
 EXTERN void		Tcl_SetErrorCode _ANSI_ARGS_((Tcl_Interp *interp, ...));
 #else
 EXTERN void		Tcl_SetErrorCode _ANSI_ARGS_(VARARGS);
+#endif
 #endif
 EXTERN int		Tcl_SetRecursionLimit _ANSI_ARGS_((Tcl_Interp *interp,
 			    int depth));
@@ -626,10 +630,12 @@ EXTERN void		Tcl_UntraceVar _ANSI_ARGS_((Tcl_Interp *interp,
 EXTERN void		Tcl_UntraceVar2 _ANSI_ARGS_((Tcl_Interp *interp,
 			    char *part1, char *part2, int flags,
 			    Tcl_VarTraceProc *proc, ClientData clientData));
+#ifdef ELLIPSES
 #ifdef USE_STDARG
 EXTERN int		Tcl_VarEval _ANSI_ARGS_((Tcl_Interp *iPtr, ...));
 #else
 EXTERN int		Tcl_VarEval _ANSI_ARGS_(VARARGS);
+#endif
 #endif
 EXTERN ClientData	Tcl_VarTraceInfo _ANSI_ARGS_((Tcl_Interp *interp,
 			    char *varName, int flags,

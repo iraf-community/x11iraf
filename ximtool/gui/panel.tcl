@@ -28,6 +28,7 @@ send contrastLabel	set bitmap contrast
 send brightnessLabel	set bitmap brightness
 send contrastSlider	resizeThumb 0.1 1.0
 send brightnessSlider	resizeThumb 0.1 1.0
+send focusSlider	"resizeThumb 0.1 1.0 ; moveThumb 1.0"
 
 
 # panel -- Toggle control panel display.
@@ -141,27 +142,28 @@ proc panelDismiss args \
 
 proc panelTabToggle { panel args } \
 {
-    global tabTop panel_up
+    global tabTop panel_up TabToWidget
 
     if {$tabTop == $panel && $panel_up} {
 	send panelShell unmap
-	send $widget set state 0
+	send $TabToWidget($panel) set state 0
 	set panel_up 0
-	return
-    }
 
-    # Special cases for each panel.
-    if {$panel == "load_panel"} {
-        send client setLoadOption rescan
-    }
+    } else {
+        # Special cases for each panel.
+        if {$panel == "load_panel"} {
+            send client setLoadOption rescan
+        }
 
-    send panelTabs setTop $panel
-    set tabTop $panel
+        send panelTabs setTop $panel
+        set tabTop $panel
 
-    # Now fire it up if it's not already open.
-    if {$panel_up == 0} {
-	send panelShell map
-	set panel_up 1
+        # Now fire it up if it's not already open.
+        if {$panel_up == 0} {
+	    send panelShell map
+	    set panel_up 1
+        }
+
     }
 }
 
@@ -496,7 +498,7 @@ proc cpInvert args \
 {
     global enhancement frame
     set contrast [lindex $enhancement($frame) 2]
-    send client windowColormap [lindex $enhancement($frame) 1] \
+    send client updateColormap [lindex $enhancement($frame) 1] \
 	[expr -1.0 * $contrast]
 }
 

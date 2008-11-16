@@ -1,8 +1,32 @@
-/* $XConsortium: Form.c,v 1.49 91/10/16 21:34:30 eswu Exp $ */
+/* $XConsortium: Form.c,v 1.52 94/04/17 20:12:06 kaleb Exp $ */
 
 /***********************************************************
-Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts,
-and the Massachusetts Institute of Technology, Cambridge, Massachusetts.
+
+Copyright (c) 1987, 1988, 1994  X Consortium
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of the X Consortium shall not be
+used in advertising or otherwise to promote the sale, use or other dealings
+in this Software without prior written authorization from the X Consortium.
+
+
+Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
@@ -10,7 +34,7 @@ Permission to use, copy, modify, and distribute this software and its
 documentation for any purpose and without fee is hereby granted, 
 provided that the above copyright notice appear in all copies and that
 both that copyright notice and this permission notice appear in 
-supporting documentation, and that the names of Digital or MIT not be
+supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
 software without specific, written prior permission.  
 
@@ -26,10 +50,8 @@ SOFTWARE.
 
 #include <X11/IntrinsicP.h>
 #include <X11/StringDefs.h>
-
 #include <X11/Xmu/Converters.h>
 #include <X11/Xmu/CharSet.h>
-
 #include <X11/Xaw3d/XawInit.h>
 #include <X11/Xaw3d/FormP.h>
 
@@ -146,12 +168,6 @@ WidgetClass formWidgetClass = (WidgetClass)&formClassRec;
 static XrmQuark	XtQChainLeft, XtQChainRight, XtQChainTop,
 		XtQChainBottom, XtQRubber;
 
-#define	done(address, type) \
-	{ toVal->size = sizeof(type); \
-	  toVal->addr = (caddr_t) address; \
-	  return; \
-	}
-
 /* ARGSUSED */
 static void _CvtStringToEdgeType(args, num_args, fromVal, toVal)
     XrmValuePtr args;		/* unused */
@@ -159,35 +175,29 @@ static void _CvtStringToEdgeType(args, num_args, fromVal, toVal)
     XrmValuePtr fromVal;
     XrmValuePtr toVal;
 {
-    static XtEdgeType edgeType;
-    XrmQuark q;
-    char lowerName[1000];
+  static XtEdgeType edgeType;
+  XrmQuark q;
+  char lowerName[40];
 
+  if (strlen ((char*) fromVal->addr) < sizeof lowerName) {
     XmuCopyISOLatin1Lowered (lowerName, (char*)fromVal->addr);
     q = XrmStringToQuark(lowerName);
-    if (q == XtQChainLeft) {
-	edgeType = XtChainLeft;
-	done(&edgeType, XtEdgeType);
+    if (q == XtQChainLeft)        edgeType = XtChainLeft;
+    else if (q == XtQChainRight)  edgeType = XtChainRight;
+    else if (q == XtQChainTop)    edgeType = XtChainTop;
+    else if (q == XtQChainBottom) edgeType = XtChainBottom;
+    else if (q == XtQRubber)      edgeType = XtRubber;
+    else {
+      toVal->size = 0;
+      toVal->addr = NULL;
+      return;
     }
-    if (q == XtQChainRight) {
-	edgeType = XtChainRight;
-	done(&edgeType, XtEdgeType);
-    }
-    if (q == XtQChainTop) {
-	edgeType = XtChainTop;
-	done(&edgeType, XtEdgeType);
-    }
-    if (q == XtQChainBottom) {
-	edgeType = XtChainBottom;
-	done(&edgeType, XtEdgeType);
-    }
-    if (q == XtQRubber) {
-	edgeType = XtRubber;
-	done(&edgeType, XtEdgeType);
-    }
-    XtStringConversionWarning(fromVal->addr, "edgeType");
-    toVal->addr = NULL;
-    toVal->size = 0;
+    toVal->size = sizeof edgeType;
+    toVal->addr = (XPointer) &edgeType;
+    return;
+  }
+  toVal->addr = NULL;
+  toVal->size = 0;
 }
 
 static void ClassInitialize()
@@ -213,8 +223,8 @@ static void ClassInitialize()
 static void ClassPartInitialize(class)
     WidgetClass class;
 {
-    register FormWidgetClass c = (FormWidgetClass)class;
-    register FormWidgetClass super = (FormWidgetClass) 
+    FormWidgetClass c = (FormWidgetClass)class;
+    FormWidgetClass super = (FormWidgetClass) 
 	c->core_class.superclass;
 
     if (c->form_class.layout == XtInheritLayout)
@@ -329,8 +339,8 @@ static Boolean Layout(fw, width, height, force_relayout)
     maxx = maxy = 1;
     for (childP = children; childP - children < num_children; childP++) {
 	if (XtIsManaged(*childP)) {
-	    register FormConstraints form;
-	    register Position x, y;
+	    FormConstraints form;
+	    Position x, y;
 
 	    form = (FormConstraints)(*childP)->core.constraints;
 
@@ -466,7 +476,7 @@ static void LayoutChild(w)
 
 
 static Position TransformCoord(loc, old, new, type)
-    register Position loc;
+    Position loc;
     Dimension old, new;
     XtEdgeType type;
 {
@@ -692,8 +702,8 @@ static Boolean ConstraintSetValues(current, request, new, args, num_args)
     ArgList args;
     Cardinal *num_args;
 {
-  register FormConstraints cfc = (FormConstraints) current->core.constraints;
-  register FormConstraints nfc = (FormConstraints) new->core.constraints;
+  FormConstraints cfc = (FormConstraints) current->core.constraints;
+  FormConstraints nfc = (FormConstraints) new->core.constraints;
   
   if (cfc->form.top          != nfc->form.top         ||
       cfc->form.bottom       != nfc->form.bottom      ||
@@ -806,16 +816,16 @@ Widget w;
 Boolean doit;
 #endif
 {
-    register Widget *childP;
-    register FormWidget fw = (FormWidget)w;
-    register int num_children = fw->composite.num_children;
-    register WidgetList children = fw->composite.children;
+    Widget *childP;
+    FormWidget fw = (FormWidget)w;
+    int num_children = fw->composite.num_children;
+    WidgetList children = fw->composite.children;
 
     if ( ((fw->form.no_refigure = !doit) == TRUE) || !XtIsRealized(w) )
 	return;
 
     for (childP = children; childP - children < num_children; childP++) {
-	register Widget w = *childP;
+	Widget w = *childP;
 	if (XtIsManaged(w)) {
 	    FormConstraints form = (FormConstraints)w->core.constraints;
 
@@ -836,4 +846,3 @@ Boolean doit;
 	}
     }
 }
-

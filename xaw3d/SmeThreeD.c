@@ -1,5 +1,7 @@
-/*
+/* -XT
 * $KK: SmeThreeD.c,v 0.3 92/11/04 xx:xx:xx keithley Exp $
+*  J. P. Terlouw, Kapteyn Astronomical Institute, Groningen The Netherlands,   
+*  February 2001:  modified for use with non-default visuals. 
 */
 
 /***********************************************************
@@ -134,25 +136,52 @@ WidgetClass smeThreeDObjectClass = (WidgetClass) &smeThreeDClassRec;
 
 #define shadowpm_width 8
 #define shadowpm_height 8
-static unsigned char shadowpm_bits[] = {
+static char shadowpm_bits[] = {
     0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55};
 
-static unsigned char mtshadowpm_bits[] = {
+static char mtshadowpm_bits[] = {
     0x92, 0x24, 0x49, 0x92, 0x24, 0x49, 0x92, 0x24};
 
-static unsigned char mbshadowpm_bits[] = {
+static char mbshadowpm_bits[] = {
     0x6d, 0xdb, 0xb6, 0x6d, 0xdb, 0xb6, 0x6d, 0xdb};
+
+/* ARGSUSED */
+static unsigned long WittePixel (w)
+    Widget w;
+{
+   static XColor kleur;
+   if (!kleur.flags) {
+      kleur.flags = DoRed | DoGreen | DoBlue;
+      kleur.red = kleur.green = kleur.blue = 65535;
+      (void)XAllocColor(XtDisplay(w), w->core.colormap, &kleur);
+   }
+   return kleur.pixel;
+}
+
+/* ARGSUSED */
+static unsigned long ZwartePixel (w)
+    Widget w;
+{
+   static XColor kleur;
+   if (!kleur.flags) {
+      kleur.flags = DoRed | DoGreen | DoBlue;
+      kleur.red = kleur.green = kleur.blue = 0;
+      (void)XAllocColor(XtDisplay(w), w->core.colormap, &kleur);
+   }
+   return kleur.pixel;
+}
 
 /* ARGSUSED */
 static void AllocTopShadowGC (w)
     Widget w;
 {
     SmeThreeDObject	tdo = (SmeThreeDObject) w;
+    Widget              parent = XtParent(w);
     Screen		*scn = XtScreenOfObject (w);
     XtGCMask		valuemask;
     XGCValues		myXGCV;
 
-    if (tdo->sme_threeD.be_nice_to_cmap || DefaultDepthOfScreen (scn) == 1) {
+    if (tdo->sme_threeD.be_nice_to_cmap || parent->core.depth == 1) {
 	valuemask = GCTile | GCFillStyle;
 	myXGCV.tile = tdo->sme_threeD.top_shadow_pxmap;
 	myXGCV.fill_style = FillTiled;
@@ -168,11 +197,12 @@ static void AllocBotShadowGC (w)
     Widget w;
 {
     SmeThreeDObject	tdo = (SmeThreeDObject) w;
+    Widget              parent = XtParent(w);
     Screen		*scn = XtScreenOfObject (w);
     XtGCMask		valuemask;
     XGCValues		myXGCV;
 
-    if (tdo->sme_threeD.be_nice_to_cmap || DefaultDepthOfScreen (scn) == 1) {
+    if (tdo->sme_threeD.be_nice_to_cmap || parent->core.depth == 1) {
 	valuemask = GCTile | GCFillStyle;
 	myXGCV.tile = tdo->sme_threeD.bot_shadow_pxmap;
 	myXGCV.fill_style = FillTiled;
@@ -205,7 +235,7 @@ static void AllocTopShadowPixmap (new)
     Widget		parent = XtParent (new);
     Display		*dpy = XtDisplayOfObject (new);
     Screen		*scn = XtScreenOfObject (new);
-    unsigned long	top_fg_pixel, top_bg_pixel;
+    unsigned long	top_fg_pixel = 0, top_bg_pixel = 0;
     char		*pm_data;
     Boolean		create_pixmap = FALSE;
 
@@ -215,27 +245,27 @@ static void AllocTopShadowPixmap (new)
      * pixmap cacheing.
      */
 
-    if (DefaultDepthOfScreen (scn) == 1) {
-	top_fg_pixel = BlackPixelOfScreen (scn);
-	top_bg_pixel = WhitePixelOfScreen (scn);
-	pm_data = (char *) mtshadowpm_bits;
+    if (parent->core.depth == 1) {
+	top_fg_pixel = ZwartePixel(parent);
+	top_bg_pixel = WittePixel(parent);
+	pm_data = mtshadowpm_bits;
 	create_pixmap = TRUE;
     } else if (tdo->sme_threeD.be_nice_to_cmap) {
-	if (parent->core.background_pixel == WhitePixelOfScreen (scn)) {
-	    top_fg_pixel = WhitePixelOfScreen (scn);
-	    top_bg_pixel = BlackPixelOfScreen (scn);
-	} else if (parent->core.background_pixel == BlackPixelOfScreen (scn)) {
-	    top_fg_pixel = BlackPixelOfScreen (scn);
-	    top_bg_pixel = WhitePixelOfScreen (scn);
+	if (parent->core.background_pixel == WittePixel(parent)) {
+	    top_fg_pixel = WittePixel(parent);
+	    top_bg_pixel = ZwartePixel(parent);
+	} else if (parent->core.background_pixel == ZwartePixel(parent)) {
+	    top_fg_pixel = ZwartePixel(parent);
+	    top_bg_pixel = WittePixel(parent);
 	} else {
 	    top_fg_pixel = parent->core.background_pixel;
-	    top_bg_pixel = WhitePixelOfScreen (scn);
+	    top_bg_pixel = WittePixel(parent);
 	}
-	if (parent->core.background_pixel == WhitePixelOfScreen (scn) ||
-	    parent->core.background_pixel == BlackPixelOfScreen (scn))
-	    pm_data = (char *) mtshadowpm_bits;
+	if (parent->core.background_pixel == WittePixel(parent) ||
+	    parent->core.background_pixel == ZwartePixel(parent))
+	    pm_data = mtshadowpm_bits;
 	else
-	    pm_data = (char *) shadowpm_bits;
+	    pm_data = shadowpm_bits;
 	create_pixmap = TRUE;
     }
     if (create_pixmap)
@@ -246,7 +276,7 @@ static void AllocTopShadowPixmap (new)
 			shadowpm_height,
 			top_fg_pixel,
 			top_bg_pixel,
-			DefaultDepthOfScreen (scn));
+			XtParent(new)->core.depth);
 }
 
 /* ARGSUSED */
@@ -257,31 +287,31 @@ static void AllocBotShadowPixmap (new)
     Widget		parent = XtParent (new);
     Display		*dpy = XtDisplayOfObject (new);
     Screen		*scn = XtScreenOfObject (new);
-    unsigned long	bot_fg_pixel, bot_bg_pixel;
+    unsigned long	bot_fg_pixel = 0, bot_bg_pixel = 0;
     char		*pm_data;
     Boolean		create_pixmap = FALSE;
 
-    if (DefaultDepthOfScreen (scn) == 1) {
-	bot_fg_pixel = BlackPixelOfScreen (scn);
-	bot_bg_pixel = WhitePixelOfScreen (scn);
-	pm_data = (char *) mbshadowpm_bits;
+    if (parent->core.depth == 1) {
+	bot_fg_pixel = ZwartePixel(parent);
+	bot_bg_pixel = WittePixel(parent);
+	pm_data = mbshadowpm_bits;
 	create_pixmap = TRUE;
     } else if (tdo->sme_threeD.be_nice_to_cmap) {
-	if (parent->core.background_pixel == WhitePixelOfScreen (scn)) {
-	    bot_fg_pixel = WhitePixelOfScreen (scn);
-	    bot_bg_pixel = BlackPixelOfScreen (scn);
-	} else if (parent->core.background_pixel == BlackPixelOfScreen (scn)) {
-	    bot_fg_pixel = BlackPixelOfScreen (scn);
-	    bot_bg_pixel = WhitePixelOfScreen (scn);
+	if (parent->core.background_pixel == WittePixel(parent)) {
+	    bot_fg_pixel = WittePixel(parent);
+	    bot_bg_pixel = ZwartePixel(parent);
+	} else if (parent->core.background_pixel == ZwartePixel(parent)) {
+	    bot_fg_pixel = ZwartePixel(parent);
+	    bot_bg_pixel = WittePixel(parent);
 	} else {
 	    bot_fg_pixel = parent->core.background_pixel;
-	    bot_bg_pixel = BlackPixelOfScreen (scn);
+	    bot_bg_pixel = ZwartePixel(parent);
 	}
-	if (parent->core.background_pixel == WhitePixelOfScreen (scn) ||
-	    parent->core.background_pixel == BlackPixelOfScreen (scn))
-	    pm_data = (char *) mbshadowpm_bits;
+	if (parent->core.background_pixel == WittePixel(parent) ||
+	    parent->core.background_pixel == ZwartePixel(parent))
+	    pm_data = mbshadowpm_bits;
 	else
-	    pm_data = (char *) shadowpm_bits;
+	    pm_data = shadowpm_bits;
 	create_pixmap = TRUE;
     }
     if (create_pixmap)
@@ -292,7 +322,7 @@ static void AllocBotShadowPixmap (new)
 			shadowpm_height,
 			bot_fg_pixel,
 			bot_bg_pixel,
-			DefaultDepthOfScreen (scn));
+			XtParent(new)->core.depth);
 }
 
 /* ARGSUSED */
@@ -307,11 +337,11 @@ void XawSme3dComputeTopShadowRGB (new, xcol_out)
 	double contrast;
 	Display *dpy = XtDisplayOfObject (new);
 	Screen *scn = XtScreenOfObject (new);
-	Colormap cmap = DefaultColormapOfScreen (scn);
+	Colormap cmap = w->core.colormap;
 
 	get_c.pixel = w->core.background_pixel;
-	if (get_c.pixel == WhitePixelOfScreen (scn) ||
-	    get_c.pixel == BlackPixelOfScreen (scn)) {
+	if (get_c.pixel == WittePixel(w) ||
+	    get_c.pixel == ZwartePixel(w)) {
 	    contrast = (100 - tdo->sme_threeD.top_shadow_contrast) / 100.0;
 	    xcol_out->red   = contrast * 65535.0;
 	    xcol_out->green = contrast * 65535.0;
@@ -335,9 +365,10 @@ static void AllocTopShadowPixel (new)
 {
     XColor set_c;
     SmeThreeDObject tdo = (SmeThreeDObject) new;
+    Widget parent = XtParent(new);
     Display *dpy = XtDisplayOfObject (new);
     Screen *scn = XtScreenOfObject (new);
-    Colormap cmap = DefaultColormapOfScreen (scn);
+    Colormap cmap = parent->core.colormap;
 
     XawSme3dComputeTopShadowRGB (new, &set_c);
     (void) XAllocColor (dpy, cmap, &set_c);
@@ -357,11 +388,11 @@ void XawSme3dComputeBottomShadowRGB (new, xcol_out)
 	double contrast;
 	Display *dpy = XtDisplayOfObject (new);
 	Screen *scn = XtScreenOfObject (new);
-	Colormap cmap = DefaultColormapOfScreen (scn);
+	Colormap cmap = w->core.colormap;
 
 	get_c.pixel = w->core.background_pixel;
-	if (get_c.pixel == WhitePixelOfScreen (scn) ||
-	    get_c.pixel == BlackPixelOfScreen (scn)) {
+	if (get_c.pixel == WittePixel(w) ||
+	    get_c.pixel == ZwartePixel(w)) {
 	    contrast = tdo->sme_threeD.bot_shadow_contrast / 100.0;
 	    xcol_out->red   = contrast * 65535.0;
 	    xcol_out->green = contrast * 65535.0;
@@ -383,9 +414,10 @@ static void AllocBotShadowPixel (new)
 {
     XColor set_c;
     SmeThreeDObject tdo = (SmeThreeDObject) new;
+    Widget parent = XtParent(new);
     Display *dpy = XtDisplayOfObject (new);
     Screen *scn = XtScreenOfObject (new);
-    Colormap cmap = DefaultColormapOfScreen (scn);
+    Colormap cmap = parent->core.colormap;
 
     XawSme3dComputeBottomShadowRGB (new, &set_c);
     (void) XAllocColor (dpy, cmap, &set_c);
@@ -413,8 +445,9 @@ static void Initialize (request, new, args, num_args)
 {
     SmeThreeDObject 	w = (SmeThreeDObject) new;
     Screen		*scr = XtScreenOfObject (new);
+    Widget            parent = XtParent(new);
 
-    if (w->sme_threeD.be_nice_to_cmap || DefaultDepthOfScreen (scr) == 1) {
+    if (w->sme_threeD.be_nice_to_cmap || parent->core.depth == 1) {
 	AllocTopShadowPixmap (new);
 	AllocBotShadowPixmap (new);
     } else {

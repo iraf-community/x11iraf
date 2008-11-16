@@ -128,9 +128,9 @@ int x0, y0, nx, ny;		/* region of display to be saved */
 		fclose (fp);
 		stat (fname, &fs);
 
-		savetext (xim, fsp->seqno, fname, fileformat, fs.st_size,
+		savetext (xim, fsp->seqno, fname, fileformat, (int)fs.st_size,
 		    w, h, 8);
-		sprintf (text, "Wrote %d bytes to %s", fs.st_size, fname);
+		sprintf (text, "Wrote %d bytes to %s", (int)fs.st_size, fname);
 		savestat (xim, text);
 
 	    } else {
@@ -292,9 +292,10 @@ char *old, *new;
 	    sprintf (text, "Could not write file %s", new);
 	    savestat (xim, text);
 	} else {
-	    savetext (xim, fsp->seqno, new, fsp->format, fs.st_size,
+	    stat (new, &fs);
+	    savetext (xim, fsp->seqno, new, fsp->format, (int)fs.st_size,
 		fsp->w, fsp->h, fsp->d);
-	    sprintf (text, "Wrote %d bytes to %s", fs.st_size, new);
+	    sprintf (text, "Wrote %d bytes to %s", (int)fs.st_size, new);
 	    savestat (xim, text);
 	}
 }

@@ -74,6 +74,7 @@
 #define XtNcolor9			"color9"
 
 #define XtNcmapName			"cmapName"
+#define XtNuseGlobalCmap                "useGlobalCmap"
 #define XtNcmapInitialize		"cmapInitialize"
 #define XtNcopyOnResize			"copyOnResize"
 #define XtNbasePixel			"basePixel"
@@ -126,6 +127,64 @@
 #define XtNmarkerPgonLineColor		"markerPgonLineColor"
 #define XtNmarkerPgonKnotColor		"markerPgonKnotColor"
 #define XtNmarkerPgonKnotSize		"markerPgonKnotSize"
+
+
+/* Deep Frame Definitions */
+#define XtNdialogBgColorStr             "dialogBgColorStr"
+#define XtNdialogFgColorStr             "dialogFgColorStr"
+#define XtNidleCursorBgColorStr         "idleCursorBgColorStr"
+#define XtNidleCursorFgColorStr         "idleCursorFgColorStr"
+#define XtNbusyCursorBgColorStr         "busyCursorBgColorStr"
+#define XtNbusyCursorFgColorStr         "busyCursorFgColorStr"
+#define XtNginmodeCursorBgColorStr      "ginmodeCursorBgColorStr"
+#define XtNginmodeCursorFgColorStr      "ginmodeCursorFgColorStr"
+#define XtNcrosshairCursorColorStr      "crosshairCursorColorStr"
+
+#define XtNcolor0Str                    "color0Str"
+#define XtNcolor1Str                    "color1Str"
+#define XtNcolor2Str                    "color2Str"
+#define XtNcolor3Str                    "color3Str"
+#define XtNcolor4Str                    "color4Str"
+#define XtNcolor5Str                    "color5Str"
+#define XtNcolor6Str                    "color6Str"
+#define XtNcolor7Str                    "color7Str"
+#define XtNcolor8Str                    "color8Str"
+#define XtNcolor9Str                    "color9Str"
+
+#define XtNmarkerFillColorStr           "markerFillColorStr"
+#define XtNmarkerFillBgColorStr         "markerFillBgColorStr"
+
+#define XtNmarkerHighlightColorStr      "markerHighlightColorStr"
+#define XtNmarkerCursorFgColorStr       "markerCursorFgColorStr"
+#define XtNmarkerCursorBgColorStr       "markerCursorBgColorStr"
+
+#define XtNmarkerLineLineColorStr       "markerLineLineColorStr"
+#define XtNmarkerLineKnotColorStr       "markerLineKnotColorStr"
+
+#define XtNmarkerTextLineColorStr       "markerTextLineColorStr"
+#define XtNmarkerTextColorStr           "markerTextColorStr"
+#define XtNmarkerTextBgColorStr         "markerTextBgColorStr"
+
+#define XtNmarkerRectLineColorStr       "markerRectLineColorStr"
+#define XtNmarkerRectKnotColorStr       "markerRectKnotColorStr"
+
+#define XtNmarkerBoxLineColorStr        "markerBoxLineColorStr"
+#define XtNmarkerBoxKnotColorStr        "markerBoxKnotColorStr"
+
+#define XtNmarkerCircleLineColorStr     "markerCircleLineColorStr"
+#define XtNmarkerCircleKnotColorStr     "markerCircleKnotColorStr"
+
+#define XtNmarkerEllipseLineColorStr    "markerEllipseLineColorStr"
+#define XtNmarkerEllipseKnotColorStr    "markerEllipseKnotColorStr"
+
+#define XtNmarkerPgonLineColorStr       "markerPgonLineColorStr"
+#define XtNmarkerPgonKnotColorStr       "markerPgonKnotColorStr"
+
+#define XtNmarkerPointLineColorStr      "markerPointLineColorStr"
+#define XtNmarkerPointKnotColorStr      "markerPointKnotColorStr"
+/* Deep Frame Definitions */
+
+
 
 /*
  * Gterm widget flags.

@@ -20,7 +20,7 @@ set	XIMTOOL		= ximtool	# Path to default ximtool binary
 unset 	noclobber
 onintr	cleanup
 
-set	SKIP		= 99		# offset to GUI file
+set	SKIP		= 79		# offset to GUI file
 
 # Dump the GUI from this script file.
 tail +$SKIP $0 > /tmp/_gui.$$

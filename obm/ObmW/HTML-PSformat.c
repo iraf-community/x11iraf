@@ -48,6 +48,9 @@
 #include <math.h>
 #include "HTMLP.h"
 
+#ifdef _GNU_SOURCE
+#define USE_STDARG
+#endif
 #if defined(__APPLE__) || (__APPLE_CC__ > 1151) || defined(USE_STDARG)
 #include <stdarg.h>
 #else

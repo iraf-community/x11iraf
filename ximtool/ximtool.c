@@ -187,11 +187,15 @@ char *argv[];
 	 * shut down more gracefully and informatively than the BadMatch
 	 * error from X that awaits us.
 	 */
+
+#ifdef PSEUDOCOLOR_ONLY
 	screen = XtScreen (toplevel);
     	visual = DefaultVisualOfScreen(screen);
     	depth = DefaultDepthOfScreen(screen);
     	if (depth != 8 || visual->class != PseudoColor)
 	    xim_badVisual (depth, visual->class);
+#endif
+
 
 
 	/* Initialize the object manager. */
@@ -270,6 +274,9 @@ char *argv[];
 
 	    } else if (strcmp (argv[i], "-port") == 0) {
 		xim->port = atoi (argv[++i]);
+
+	    } else if (strcmp (argv[i], "-nports") == 0) {
+		xim->nports = atoi (argv[++i]);
 
 	    } else if (strcmp (argv[i], "-unix") == 0) {
 		xim->unixaddr = argv[++i];
@@ -358,6 +365,9 @@ char *argv[];
 	xim_iisOpen (xim);
 	xim_ismOpen (xim);
 
+	/* Display a pretty logo. */
+	xim_displayLogo (xim);
+
 	/* Initialize the hardcopy option and printer configuration. */
 	xim_initPrinterOps (xim);
 
@@ -378,6 +388,7 @@ char *argv[];
 
         XSetErrorHandler(xerror);
         XSetIOErrorHandler(xioerror);
+
 
 /*	signal (SIGINT, (SIGFUNC)xim_onsig);*/
 
@@ -581,6 +592,7 @@ register XErrorEvent *event;
             } else
                 fprintf (stderr, "%s: unknown action %s\n", envvar, action);
         }
+	fflush (stderr);
 
         return (0);
 }

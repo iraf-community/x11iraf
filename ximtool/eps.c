@@ -13,52 +13,53 @@
 #include <sys/systeminfo.h>
 #endif
 
+
 /* 
- * EPS.C -- EPS hardcopy routines.  This code takes an input structure
- * containing the pixels, colormap, and output specifications and creates
- * and Encapsulated PostScript file.
- *
- *     #include "eps.h"			# flags, macro defs, etc.
- *
- *	     psim = eps_init ()
- *                 eps_print (psim, fp, &data, xdim, ydim, depth, pad)
- *	           eps_close (psim)
- *
- *               eps_setPage (psim, orient, paper_size, scale, flags)
- *	         eps_setCmap (psim, &r, &g, &b, ncolors)
- *           eps_setCompress (psim, ctype)
- *          eps_setColorType (psim, otype)
- *	        eps_setLabel (psim, &label)
- *	    eps_setTransform (psim, z1, z2, ztype, offset, slope, cmap_name)
- *            eps_setCorners (psim, llx, lly, urx, ury)
- *
- *	    eps_getImageSize (psim, xdim, ydim, &width, &height)
- *	     eps_getImagePos (psim, xdim, ydim, &llx, &llx)
- *
- *     # Read-only Macro functions:	  Result type
- *     ----------------------------	  -----------
- * 		 Orientation (psim)	  EPS_PORTRAIT | EPS_LANDSCAPE
- * 		       Scale (psim)	  float scale value
- * 		    MaxScale (psim)	  float maxaspect scale value
- * 		 DoAutoScale (psim)	  bool
- * 		DoAutoRotate (psim)	  bool
- * 		 DoMaxAspect (psim)	  bool
- * 		    PageType (psim)	  EPS_LETTER | EPS_LEGAL | ...
- *		    PageXdim (psim)	  page pixel width
- *		    PageYdim (psim)	  page pixel height
- *		   PageWidth (psim)	  page size in inches
- *		  PageHeight (psim)	  page size in inches
- *  
- * The first three routines are all that's required to output an array of
- * pixels to an open file descriptor.  The default output produced is a
- * grayscale EPS file, centered in a portrait orientation (unless a rotation
- * is required to make it fit on the page) and auto scaled to fit on a normal
- * 8.5"x11" page.
- *
- * The remaining routines can be used to set various options, new colormaps
- * labels, etc.  They are not required unless you need to override one or
- * more of the output defaults.
- */
+**  EPS.C -- EPS hardcopy routines.  This code takes an input structure
+**  containing the pixels, colormap, and output specifications and creates
+**  and Encapsulated PostScript file.
+**
+**     #include "eps.h"			# flags, macro defs, etc.
+**
+**	     psim = eps_init ()
+**                 eps_print (psim, fp, &data, xdim, ydim, depth, pad)
+**	           eps_close (psim)
+**
+**               eps_setPage (psim, orient, paper_size, scale, flags)
+**	         eps_setCmap (psim, &r, &g, &b, ncolors)
+**           eps_setCompress (psim, ctype)
+**          eps_setColorType (psim, otype)
+**	        eps_setLabel (psim, &label)
+**	    eps_setTransform (psim, z1, z2, ztype, offset, slope, cmap_name)
+**            eps_setCorners (psim, llx, lly, urx, ury)
+**
+**	    eps_getImageSize (psim, xdim, ydim, &width, &height)
+**	     eps_getImagePos (psim, xdim, ydim, &llx, &llx)
+**
+**     # Read-only Macro functions:	  Result type
+**     ----------------------------	  -----------
+** 		 Orientation (psim)	  EPS_PORTRAIT | EPS_LANDSCAPE
+** 		       Scale (psim)	  float scale value
+** 		    MaxScale (psim)	  float maxaspect scale value
+** 		 DoAutoScale (psim)	  bool
+** 		DoAutoRotate (psim)	  bool
+** 		 DoMaxAspect (psim)	  bool
+** 		    PageType (psim)	  EPS_LETTER | EPS_LEGAL | ...
+**		    PageXdim (psim)	  page pixel width
+**		    PageYdim (psim)	  page pixel height
+**		   PageWidth (psim)	  page size in inches
+**		  PageHeight (psim)	  page size in inches
+**  
+**  The first three routines are all that's required to output an array of
+**  pixels to an open file descriptor.  The default output produced is a
+**  grayscale EPS file, centered in a portrait orientation (unless a rotation
+**  is required to make it fit on the page) and auto scaled to fit on a normal
+**  8.5"x11" page.
+**
+**  The remaining routines can be used to set various options, new colormaps
+**  labels, etc.  They are not required unless you need to override one or
+**  more of the output defaults.
+*/
 
 #define	MAX_LENLABEL		256
 #define	SZ_EPSBUF		8193
@@ -75,10 +76,13 @@ static int	pixnum 	= 0, lpix = 0;
 static uchar   *pixbuf;
 
 
-/* Public procedures. */
+/* Public procedures. 
+*/
 void	eps_setPage(), eps_setTransform(), eps_setCorners();
 
-/* Private procedures. */
+
+/* Private procedures. 
+*/
 static void eps_simpleHeader(), eps_colorHeader();
 static void eps_pageParams(), eps_simpleTrailer();
 static void eps_writeCmap(), eps_writeTrailer();
@@ -94,15 +98,16 @@ static char *make_label();
 static int 	debug = 0;
 
 
-/* EPS_INIT -- Allocate and return an initialized pointer to a structure
- * containing the default output setup.
- */
+/*  EPS_INIT -- Allocate and return an initialized pointer to a structure
+**  containing the default output setup.
+*/
 PSImage *
 eps_init()
 {
 	register int i, n;
 	register PSImage *ps;
 	register uchar *op;
+
 
         /* Allocate the structure. */
 	ps = (PSImage *) calloc ((unsigned)1, sizeof (PSImage));
@@ -138,20 +143,21 @@ eps_init()
 
 
 /* EPS_PRINT -- Dump the given array of pixels to the output file as an EPS
- * format file.  The data array may contain 8-bit, 24-bit RGB triplets, or
- * 32-bit RGBA pixels.  
- */
+** format file.  The data array may contain 8-bit, 24-bit RGB triplets, or
+** 32-bit RGBA pixels.  
+*/
 void
 eps_print (psim, fp, data, xdim, ydim, depth, pad)
-PSImage *psim;				/* EPS image structure */
-FILE	*fp;				/* output file descriptor */
-uchar   *data;				/* array of image pixels */
-int	xdim, ydim;			/* image dimensions */
+PSImage *psim;				/* EPS image structure 		     */
+FILE	*fp;				/* output file descriptor 	     */
+uchar   *data;				/* array of image pixels 	     */
+int	xdim, ydim;			/* image dimensions 		     */
 int	depth;				/* bits / pixel, must be 8,24, or 32 */
-int	pad;				/* bytes per line of padding */
+int	pad;				/* bytes per line of padding 	     */
 {
 	int npix = xdim * ydim;
         uchar *pix = data;
+
 
 	psim->cols = xdim;		/* save it for the headers */
 	psim->rows = ydim;
@@ -245,7 +251,7 @@ int	pad;				/* bytes per line of padding */
 
 
 /* EPS_CLOSE -- Close down the EPS output structure.
- */
+*/
 void
 eps_close (psim)
 PSImage *psim;				/* EPS image structure */
@@ -258,17 +264,18 @@ PSImage *psim;				/* EPS image structure */
 
 
 /* EPS_SETPAGE -- Inialize the page setup with a different size, orientation,
- * or scale options.
- */
+** or scale options.
+*/
 void
 eps_setPage (psim, orientation, paper_size, scale, flags)
-PSImage *psim;				/* EPS image structure */
-int	orientation;			/* page orientation flag */
-int	paper_size;			/* paper size flag */
-int	scale;				/* image scale percentage */
-int	flags;				/* option flags */
+PSImage *psim;				/* EPS image structure 		     */
+int	orientation;			/* page orientation flag 	     */
+int	paper_size;			/* paper size flag 		     */
+int	scale;				/* image scale percentage 	     */
+int	flags;				/* option flags 		     */
 {
 	int NPageTypes = sizeof (PageInfo) / sizeof (PSPageInfo);
+
 
 	/* Set the orientation of the output */
 	if (orientation == EPS_PORTRAIT)
@@ -303,12 +310,12 @@ int	flags;				/* option flags */
 
 
 /* EPS_SETCMAP -- Define a given colormap to be used on output.
- */
+*/
 void
 eps_setCmap (psim, r, g, b, ncolors)
-PSImage *psim;				/* EPS image structure */
-uchar *r, *g, *b;			/* color components */
-int ncolors;				/* number of colors in colormap */
+PSImage *psim;				/* EPS image structure 		     */
+uchar *r, *g, *b;			/* color components 		     */
+int ncolors;				/* number of colors in colormap      */
 {
 	register int i = 0;
 
@@ -326,11 +333,11 @@ int ncolors;				/* number of colors in colormap */
 
 
 /* EPS_SETCOMPRESS -- Define the type of output compression to use.
- */
+*/
 void
 eps_setCompress (psim, compress)
-PSImage *psim;				/* EPS image structure */
-int	compress;			/* compression type flag */
+PSImage *psim;				/* EPS image structure 		     */
+int	compress;			/* compression type flag 	     */
 {
 	/* Set the compression type to use. */
 	switch (compress) {
@@ -347,13 +354,13 @@ int	compress;			/* compression type flag */
 
 
 /* EPS_SETCOLORTYPE -- Set the type of output image to be written, e.g. even
- * though we have an RGB or pseudocolor image we may wish to coerce it to 
- * a grayscale on output.
- */
+** though we have an RGB or pseudocolor image we may wish to coerce it to 
+** a grayscale on output.
+*/
 void
 eps_setColorType (psim, color_class)
-PSImage *psim;				/* EPS image structure */
-int	color_class;			/* output color class */
+PSImage *psim;				/* EPS image structure 		     */
+int	color_class;			/* output color class 		     */
 {
 	/* Set the compression type to use. */
 	switch (color_class) {
@@ -369,11 +376,11 @@ int	color_class;			/* output color class */
 
 
 /* EPS_SETLABEL -- Set the output label to be used in annotation.
- */
+*/
 void
 eps_setLabel (psim, label)
-register PSImage *psim;			/* EPS image structure */
-char	*label;				/* Label string */
+register PSImage *psim;			/* EPS image structure 		     */
+char	*label;				/* Label string 		     */
 {
 	register int maxlen = MAX_LENLABEL;
 
@@ -389,17 +396,17 @@ char	*label;				/* Label string */
 
 
 /* EPS_SETTRANSFORM -- Set the color transformation parameters, i.e. the
- * z1/z2 values that map the image pixel values being displayed to the number
- * of colors we have available.  This is used in the annotation when labeling
- * the colorbar.
- */
+** z1/z2 values that map the image pixel values being displayed to the number
+** of colors we have available.  This is used in the annotation when labeling
+** the colorbar.
+*/
 void
 eps_setTransform (psim, z1, z2, ztype, offset, scale, cmap_name)
-PSImage *psim;                          /* EPS image structure  	*/
-float	z1, z2;				/* zscale values 		*/
-int	ztype;				/* Transformation type  	*/
-float	offset, scale;			/* brightness/contrast values 	*/
-char	*cmap_name;			/* colormap name		*/
+PSImage *psim;                          /* EPS image structure  	     */
+float	z1, z2;				/* zscale values 		     */
+int	ztype;				/* Transformation type  	     */
+float	offset, scale;			/* brightness/contrast values 	     */
+char	*cmap_name;			/* colormap name		     */
 {
         psim->z1 = z1;
         psim->z2 = z2;
@@ -421,11 +428,11 @@ char	*cmap_name;			/* colormap name		*/
 
 
 /* EPS_SETCORNERS -- Set the image corner values.
- */
+*/
 void
 eps_setCorners (psim, llx, lly, urx, ury)
-PSImage *psim;                          /* EPS image structure  	*/
-int	llx, lly, urx, ury;		/* image corners		*/
+PSImage *psim;                          /* EPS image structure  	     */
+int	llx, lly, urx, ury;		/* image corners		     */
 {
 	psim->llx = llx;
 	psim->lly = lly;
@@ -435,16 +442,17 @@ int	llx, lly, urx, ury;		/* image corners		*/
 
 
 /* EPS_GETIMAGESIZE -- Given the current page parameters and image dimensions,
- * compute the size of the image (in inches) on the page.
- */       
+** compute the size of the image (in inches) on the page.
+*/       
 void
 eps_getImageSize (psim, xdim, ydim, width, height)
-PSImagePtr psim;			/* EPS image struct */
-int	xdim, ydim;			/* image dimensions */
-float	*width, *height;		/* width x height of image on page */
+PSImagePtr psim;			/* EPS image struct 		     */
+int	xdim, ydim;			/* image dimensions 		     */
+float	*width, *height;		/* width x height of image on page   */
 {
         int icols, irows, scols, srows, turnflag;
 	float	llx, lly;
+
 
         /* Get the common page parameters. */
         eps_pageParams (psim, &llx, &lly, &icols, &irows, &scols, &srows,
@@ -456,16 +464,17 @@ float	*width, *height;		/* width x height of image on page */
 
 
 /* EPS_GETIMAGEPOS -- Given the current page parameters and image dimensions,
- * compute the position of the image (in pixels) on the page.
- */	        
+** compute the position of the image (in pixels) on the page.
+*/	        
 void
 eps_getImagePos (psim, xdim, ydim, llx, lly)
-PSImagePtr psim;			/* EPS image struct */
-int	xdim, ydim;			/* image dimensions */
-int	*llx, *lly;			/* LL coords for centered image */
+PSImagePtr psim;			/* EPS image struct 		     */
+int	xdim, ydim;			/* image dimensions 		     */
+int	*llx, *lly;			/* LL coords for centered image      */
 {
         int icols, irows, scols, srows, turnflag;
 	float	lx, ly;
+
 
         /* Get the common page parameters. */
         eps_pageParams (psim, &lx, &ly, &icols, &irows, &scols, &srows,
@@ -482,17 +491,18 @@ int	*llx, *lly;			/* LL coords for centered image */
 
 
 /* EPS_PAGEPARAMS -- Compute the EPS page parameters.
- */
+*/
 static void 
 eps_pageParams (psim, llx, lly, icols, irows, scols, srows, turnflag)
-PSImagePtr psim;			/* EPS image struct */
-float	*llx, *lly;			/* LL coords for centered image */
-int	*icols, *irows;			/* final image rows/cols */
-int	*scols, *srows;			/* scaled rows/cols */
-int	*turnflag;			/* turn the image? */
+PSImagePtr psim;			/* EPS image struct 		     */
+float	*llx, *lly;			/* LL coords for centered image      */
+int	*icols, *irows;			/* final image rows/cols 	     */
+int	*scols, *srows;			/* scaled rows/cols 		     */
+int	*turnflag;			/* turn the image? 		     */
 {
         int devpix, pwidth, pheight, cols=0, rows=0;
         float pixfac, scale = Scale(psim), margin;
+
 
         /* See if we need to rotate the image to fit on the page. */
 	margin = (psim->annotate ? 0.9 : 0.95);
@@ -623,7 +633,7 @@ int	*turnflag;			/* turn the image? */
 
 
 /* EPS_WRITEPIX -- Write the pixels or color indices directly.
- */
+*/
 static void
 eps_writePix (fp, pix, cmap, npix, xdim, pad)
 FILE    *fp;
@@ -634,6 +644,7 @@ int     xdim;
 int     pad;
 {
         register int i, min, max;
+
 
 	min = *pix;
 	max = *pix;
@@ -665,7 +676,7 @@ int     pad;
 
 
 /* EPS_WRITEMONO -- Write a pseudocolor image and convert to grayscale.
- */
+*/
 static void
 eps_writeMono (fp, pix, cmap, npix, xdim, pad)
 FILE	*fp;
@@ -711,7 +722,7 @@ int	pad;
 
 
 /* EPS_WRITEMONORGB --  Write RGB data converted to grayscale.
- */
+*/
 static void
 eps_writeMonoRGB (fp, pix, npix, xdim, depth, pad)
 FILE    *fp;
@@ -723,6 +734,7 @@ int     pad;
 {
         register int i;
 	register uchar pval;
+
 
         while (npix > 0) {
             /* Write the pixels. */
@@ -757,8 +769,8 @@ int     pad;
 
 
 /* EPS_WRITERGB -- Write the pixels in RGB format, skipping a possible alpha
- * channel.
- */
+** channel.
+*/
 static void
 eps_writeRGB (fp, pix, cmap, npix, xdim, depth, pad)
 FILE    *fp;
@@ -771,6 +783,7 @@ int     pad;
 {
         register int i, j, min, max;
 	register uchar val;
+
 
         min = *pix;
         max = *pix;
@@ -822,7 +835,7 @@ int     pad;
 
 
 /* EPS_WRITECMAP -- Output Postscript colormap.
- */
+*/
 static void
 eps_writeCmap (cmap, fp)
 PSCmap 	*cmap;
@@ -843,7 +856,7 @@ FILE	*fp;
 
 
 /* EPS_SIMPLEHEADER -- Output simple Postscript header.
- */
+*/
 static char *EPSSimpleRLEProlog[]= {
         "/rlestr1 1 string def\n",  
         "/readrlestring {                      		/* s -- nr */\n",
@@ -889,6 +902,7 @@ FILE	   *fp;
         int 	icols=0, irows=0, scols=0, srows=0, turnflag=0;
         float 	llx = 0.0, lly = 0.0;
         time_t  timer;
+
 
         /* Get the common page parameters. */
         eps_pageParams (psim, &llx, &lly, &icols, &irows, &scols, &srows,
@@ -958,8 +972,8 @@ FILE	   *fp;
 
 
 /* EPS_ANNOTATE --  Annotate the main image window with axis labels,
- * colorbars, and the title string.
- */
+** colorbars, and the title string.
+*/
 
 static void
 eps_annotate (psim, fp)
@@ -1124,8 +1138,9 @@ FILE       *fp;
 
 
 /* EPS_PORTRAITLABELS -- Write out the labeling procedures for a portrait
- * mode image.
- */
+** mode image.
+*/
+
 static void 
 eps_portLabels (fp, psim, scols, srows, icols, irows, llx, lly)
 FILE	*fp;
@@ -1138,7 +1153,9 @@ float	llx, lly;
 	float 	xpos, xstep, ypos, ystep;
         float   Mval, xval=0.0, yval=0.0, tic, mtic, Mtic;
 
-	/* X Axis labeling and ticmarks. */
+
+	/* X Axis labeling and ticmarks. 
+	*/
 	nlabels = (scols > 256 ? 5 : 3);
         fprintf (fp, "/axLabelX {\n");
 	if (psim->urx > psim->llx) {
@@ -1221,8 +1238,8 @@ float	llx, lly;
 
 
 /* EPS_LANDSCAPELABELS -- Write out the labeling procedures for a landscape
- * mode image.
- */
+** mode image.
+*/
 static void 
 eps_landLabels (fp, psim, scols, srows, icols, irows, llx, lly)
 FILE	*fp;
@@ -1234,6 +1251,7 @@ float	llx, lly;
 	float	xpos, xstep, ypos, ystep;
 	int	start, end, range, nlabels;
         float   Mval, xval=0.0, yval=0.0, tic, mtic, Mtic;
+
 
 	/* X Axis labeling and ticmarks. */
 	nlabels = (srows > 256 ? 5 : 3);
@@ -1317,7 +1335,7 @@ float	llx, lly;
 
 
 /* EPS_DOCOLORBAR --  Annotate the image with a colorbar.
- */
+*/
 
 static void 
 eps_doColorbar (fp, psim, scols, srows, llx, lly, turnflag)
@@ -1329,6 +1347,7 @@ int	turnflag;
 {
 	register int i, j, cbar_size;
         int     ncolors, nlabels, pos, step, cmel, cmstep, val;
+
 
 	/* Colorbar label font definitions. */
 	fprintf (fp, "/cblabelfont /Times-Roman findfont 10 scalefont def\n");
@@ -1461,8 +1480,8 @@ int	turnflag;
 
 
 /* EPS_COLORHEADER - Write the pseudocolor header prolog and compute EPS page
- * parameters. 
- */
+** parameters. 
+*/
 static char *EPSColorProlog[]=
     {
       "%%BeginProlog",
@@ -1709,6 +1728,7 @@ FILE	   *fp;
 	float   llx = 0.0, lly = 0.0;
  	time_t  timer;
 
+
 	/* Get the common page parameters. */
 	eps_pageParams (psim, &llx, &lly, &icols, &irows, &scols, &srows,
 	    &turnflag);
@@ -1765,7 +1785,7 @@ FILE	   *fp;
 
 
 /* EPS_WRITETRAILER -- Output Postscript trailer blurb.
- */
+*/
 static void
 eps_writeTrailer (fp)
 FILE	*fp;
@@ -1781,7 +1801,7 @@ FILE	*fp;
 
 
 /* EPS_SIMPLETRAILER -- Output Postscript trailer blurb.
- */
+*/
 static void
 eps_simpleTrailer (fp)
 FILE	*fp;
@@ -1802,10 +1822,10 @@ FILE	*fp;
 
 
 /* Utility Routines.
- */
+*/
 
 /* TICSTEP --  calculate nice intervals for the ticmarks.
- */
+*/
 static float
 ticstep (range,nsteps)
 float	range;
@@ -1814,6 +1834,7 @@ int	nsteps;
 	double df, t2, t5, p1, p2, p3;
 	float ticstep;
 	int logtic;
+
 
         df = range / (float)(nsteps + 1);
         t2 = 0.301029996;
@@ -1848,7 +1869,7 @@ int	nsteps;
 
 
 /* MAKE_LABEL -- Generate the label for the output printer page.
- */
+*/
 static char *
 make_label()
 {
@@ -1857,6 +1878,11 @@ make_label()
         char    username[32];
         struct  passwd *pw;
         long    clock;
+
+
+	bzero (buf, 128);
+	bzero (hostname, 32);
+	bzero (username, 32);
 
 #ifdef SOLARIS
         sysinfo (SI_HOSTNAME, hostname, 32);

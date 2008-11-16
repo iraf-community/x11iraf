@@ -1,24 +1,28 @@
-/* $XConsortium: SmeBSB.c,v 1.17 91/10/16 21:39:58 eswu Exp $ */
+/* $XConsortium: SmeBSB.c,v 1.19 94/04/17 20:12:49 kaleb Exp $ */
 
 /*
- * Copyright 1989 Massachusetts Institute of Technology
- *
- * Permission to use, copy, modify, distribute, and sell this software and its
- * documentation for any purpose is hereby granted without fee, provided that
- * the above copyright notice appear in all copies and that both that
- * copyright notice and this permission notice appear in supporting
- * documentation, and that the name of M.I.T. not be used in advertising or
- * publicity pertaining to distribution of the software without specific,
- * written prior permission.  M.I.T. makes no representations about the
- * suitability of this software for any purpose.  It is provided "as is"
- * without express or implied warranty.
- *
- * M.I.T. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING ALL
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL M.I.T.
- * BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
- * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN 
- * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+Copyright (c) 1989, 1994  X Consortium
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of the X Consortium shall not be
+used in advertising or otherwise to promote the sale, use or other dealings
+in this Software without prior written authorization from the X Consortium.
  */
 
 /*
@@ -34,6 +38,13 @@
 #include <X11/IntrinsicP.h>
 #include <X11/StringDefs.h>
 #include <X11/Xos.h>
+
+/* needed for abs() */
+#ifdef X_NOT_STDC_ENV
+extern int abs();
+#else
+#include <stdlib.h>
+#endif
 
 #include <X11/Xmu/Drawing.h>
 
@@ -67,6 +78,8 @@ static XtResource resources[] = {
      offset(foreground), XtRString, XtDefaultForeground},
   {XtNfont,  XtCFont, XtRFontStruct, sizeof(XFontStruct *),
      offset(font), XtRString, XtDefaultFont},
+  {XtNfontSet,  XtCFontSet, XtRFontSet, sizeof(XFontSet ),
+     offset(fontset),XtRString, XtDefaultFontSet},
 };   
 #undef offset
 
@@ -225,13 +238,22 @@ Region region;
     GC gc;
     SmeBSBObject entry = (SmeBSBObject) w;
     Dimension s = entry->sme_threeD.shadow_width;
-    int	font_ascent, font_descent, y_loc;
+    int	font_ascent = 0, font_descent = 0, y_loc;
+
+    int	fontset_ascent = 0, fontset_descent = 0;
+    XFontSetExtents *ext = XExtentsOfFontSet(entry->sme_bsb.fontset);
 
     entry->sme_bsb.set_values_area_cleared = FALSE;    
-    font_ascent = entry->sme_bsb.font->max_bounds.ascent;
-    font_descent = entry->sme_bsb.font->max_bounds.descent;
-
+    if ( entry->sme.international == True ) {
+        fontset_ascent = abs(ext->max_ink_extent.y);
+        fontset_descent = ext->max_ink_extent.height - fontset_ascent;
+    }
+    else { /*else, compute size from font like R5*/
+        font_ascent = entry->sme_bsb.font->max_bounds.ascent;
+        font_descent = entry->sme_bsb.font->max_bounds.descent;
+    }
     y_loc = entry->rectangle.y;
+
 
     if (XtIsSensitive(w) && XtIsSensitive( XtParent(w) ) ) {
 	if ( w == XawSimpleMenuGetActiveEntry(XtParent(w)) ) {
@@ -256,27 +278,52 @@ Region region;
 	    int width, t_width;
 
 	case XtJustifyCenter:
-	    t_width = XTextWidth(entry->sme_bsb.font, label, len);
-	    width = entry->rectangle.width - (entry->sme_bsb.left_margin +
+            if ( entry->sme.international == True ) {
+	        t_width = XmbTextEscapement(entry->sme_bsb.fontset,label,len);
+                width = entry->rectangle.width - (entry->sme_bsb.left_margin +
 					      entry->sme_bsb.right_margin);
+            }
+            else {
+	        t_width = XTextWidth(entry->sme_bsb.font, label, len);
+	        width = entry->rectangle.width - (entry->sme_bsb.left_margin +
+					      entry->sme_bsb.right_margin);
+            }
 	    x_loc += (width - t_width)/2;
 	    break;
 	case XtJustifyRight:
-	    t_width = XTextWidth(entry->sme_bsb.font, label, len);
-	    x_loc = entry->rectangle.width - (entry->sme_bsb.right_margin +
-					      t_width);
+            if ( entry->sme.international == True ) {
+                t_width = XmbTextEscapement(entry->sme_bsb.fontset,label,len);
+                x_loc = entry->rectangle.width - ( entry->sme_bsb.right_margin
+						 + t_width );
+            }
+            else {
+	        t_width = XTextWidth(entry->sme_bsb.font, label, len);
+	        x_loc = entry->rectangle.width - ( entry->sme_bsb.right_margin
+						 + t_width );
+            }
 	    break;
 	case XtJustifyLeft:
 	default:
 	    break;
 	}
 
+
 	/* this will center the text in the gadget top-to-bottom */
-	y_loc += ((int)entry->rectangle.height - 
+
+        if ( entry->sme.international==True ) {
+            y_loc += ((int)entry->rectangle.height - 
+		  (fontset_ascent + fontset_descent)) / 2 + fontset_ascent;
+
+            XmbDrawString(XtDisplayOfObject(w), XtWindowOfObject(w),
+                entry->sme_bsb.fontset, gc, x_loc + s, y_loc, label, len);
+        }
+        else {
+            y_loc += ((int)entry->rectangle.height - 
 		  (font_ascent + font_descent)) / 2 + font_ascent;
 	
-	XDrawString(XtDisplayOfObject(w), XtWindowOfObject(w), gc,
+            XDrawString(XtDisplayOfObject(w), XtWindowOfObject(w), gc,
 		    x_loc + s, y_loc, label, len);
+        }
     }
 
     DrawBitmaps(w, gc);
@@ -325,12 +372,18 @@ Cardinal *num_args;
 	ret_val = TRUE;
     }
 
-    if ( (old_entry->sme_bsb.font != entry->sme_bsb.font) ||
-	 (old_entry->sme_bsb.foreground != entry->sme_bsb.foreground) ) {
+    if (  (	(old_entry->sme_bsb.font != entry->sme_bsb.font) &&
+	(old_entry->sme.international == False )	          ) ||
+	(old_entry->sme_bsb.foreground != entry->sme_bsb.foreground) ) {
 	DestroyGCs(current);
 	CreateGCs(new);
 	ret_val = TRUE;
     }
+
+    if ( ( old_entry->sme_bsb.fontset != entry->sme_bsb.fontset) &&
+				(old_entry->sme.international == True ) )
+        /* DONT changes the GCs, because the fontset is not in them. */
+        ret_val = TRUE;
 
     if (ret_val) {
 	GetDefaultSize(new, 
@@ -438,21 +491,37 @@ Dimension * width, * height;
 {
     SmeBSBObject entry = (SmeBSBObject) w;
 
-    if (entry->sme_bsb.label == NULL) 
-	*width = 0;
-    else
-	*width = XTextWidth(entry->sme_bsb.font, entry->sme_bsb.label,
+    if ( entry->sme.international == True ) {
+        XFontSetExtents *ext = XExtentsOfFontSet(entry->sme_bsb.fontset);
+        if (entry->sme_bsb.label == NULL) 
+	    *width = 0;
+        else
+	    *width = XmbTextEscapement(entry->sme_bsb.fontset, entry->sme_bsb.label,
+			    strlen(entry->sme_bsb.label));
+        *width += entry->sme_bsb.left_margin + entry->sme_bsb.right_margin;
+        *width += (2 * entry->sme_threeD.shadow_width);
+        *height = ext->max_ink_extent.height;
+        *height = ((int)*height * ( ONE_HUNDRED + 
+			        entry->sme_bsb.vert_space )) / ONE_HUNDRED;
+        *height += (2 * entry->sme_threeD.shadow_width);
+    }
+    else {
+        if (entry->sme_bsb.label == NULL) 
+	    *width = 0;
+        else
+	    *width = XTextWidth(entry->sme_bsb.font, entry->sme_bsb.label,
 			    strlen(entry->sme_bsb.label));
 
-    *width += entry->sme_bsb.left_margin + entry->sme_bsb.right_margin;
-    *width += (2 * entry->sme_threeD.shadow_width);
+        *width += entry->sme_bsb.left_margin + entry->sme_bsb.right_margin;
+        *width += (2 * entry->sme_threeD.shadow_width);
     
-    *height = (entry->sme_bsb.font->max_bounds.ascent +
+        *height = (entry->sme_bsb.font->max_bounds.ascent +
 	       entry->sme_bsb.font->max_bounds.descent);
 
-    *height = ((int)*height * ( ONE_HUNDRED + 
+        *height = ((int)*height * ( ONE_HUNDRED + 
 			        entry->sme_bsb.vert_space )) / ONE_HUNDRED;
-    *height += (2 * entry->sme_threeD.shadow_width);
+        *height += (2 * entry->sme_threeD.shadow_width);
+    }
 }
 
 /*      Function Name: DrawBitmaps
@@ -482,7 +551,7 @@ GC gc;
 		(int)(entry->sme_bsb.left_margin -
 		      entry->sme_bsb.left_bitmap_width) / 2;
 
-    y_loc = entry->rectangle.y + entry->sme_threeD.shadow_width +
+    y_loc = entry->rectangle.y +
 		(int)(entry->rectangle.height -
 		      entry->sme_bsb.left_bitmap_height) / 2;
 
@@ -502,7 +571,7 @@ GC gc;
 		(int)(entry->sme_bsb.right_margin +
 		      entry->sme_bsb.right_bitmap_width) / 2;
 
-    y_loc = entry->rectangle.y + entry->sme_threeD.shadow_width +
+    y_loc = entry->rectangle.y +
 		(int)(entry->rectangle.height -
 		      entry->sme_bsb.right_bitmap_height) / 2;
 
@@ -538,13 +607,13 @@ Boolean is_left;
 	    if (!XGetGeometry(XtDisplayOfObject(w), 
 			      entry->sme_bsb.left_bitmap, &root, 
 			      &x, &y, &width, &height, &bw, &depth)) {
-		(void) sprintf(buf, "SmeBSB Object: %s %s \"%s\".", "Could not",
+		(void) sprintf(buf, "Xaw SmeBSB Object: %s %s \"%s\".", "Could not",
 			"get Left Bitmap geometry information for menu entry ",
 			XtName(w));
 		XtAppError(XtWidgetToApplicationContext(w), buf);
 	    }
 	    if (depth != 1) {
-		(void) sprintf(buf, "SmeBSB Object: %s \"%s\"%s.", 
+		(void) sprintf(buf, "Xaw SmeBSB Object: %s \"%s\"%s.", 
 			"Left Bitmap of entry ", 
 			XtName(w), " is not one bit deep.");
 		XtAppError(XtWidgetToApplicationContext(w), buf);
@@ -557,13 +626,13 @@ Boolean is_left;
 	if (!XGetGeometry(XtDisplayOfObject(w),
 			  entry->sme_bsb.right_bitmap, &root,
 			  &x, &y, &width, &height, &bw, &depth)) {
-	    (void) sprintf(buf, "SmeBSB Object: %s %s \"%s\".", "Could not",
+	    (void) sprintf(buf, "Xaw SmeBSB Object: %s %s \"%s\".", "Could not",
 		    "get Right Bitmap geometry information for menu entry ",
 		    XtName(w));
 	    XtAppError(XtWidgetToApplicationContext(w), buf);
 	}
 	if (depth != 1) {
-	    (void) sprintf(buf, "SmeBSB Object: %s \"%s\"%s.", 
+	    (void) sprintf(buf, "Xaw SmeBSB Object: %s \"%s\"%s.", 
 		    "Right Bitmap of entry ", XtName(w),
 		    " is not one bit deep.");
 	    XtAppError(XtWidgetToApplicationContext(w), buf);
@@ -579,54 +648,44 @@ Boolean is_left;
  *      Returns: none.
  */
 
-
 static void
 CreateGCs(w)
 Widget w;
 {
     SmeBSBObject entry = (SmeBSBObject) w;    
     XGCValues values;
-    XtGCMask mask;
-#ifndef USE_XMU_STIPPLE
-    Screen *screen = XtScreenOfObject((Widget)w);
-    Display *display = XtDisplayOfObject((Widget)w);
-    int pixmap_width = 2, pixmap_height = 2;
-    static unsigned char pixmap_bits[] = {
-        0x02, 0x01,
-    };
-#endif
-
+    XtGCMask mask, mask_i18n;
     
     values.foreground = XtParent(w)->core.background_pixel;
     values.background = entry->sme_bsb.foreground;
     values.font = entry->sme_bsb.font->fid;
     values.graphics_exposures = FALSE;
-    mask        = GCForeground | GCBackground | GCFont | GCGraphicsExposures;
-    entry->sme_bsb.rev_gc = XtGetGC(w, mask, &values);
+    mask      = GCForeground | GCBackground | GCGraphicsExposures | GCFont;
+    mask_i18n = GCForeground | GCBackground | GCGraphicsExposures;
+    if ( entry->sme.international == True )
+        entry->sme_bsb.rev_gc = XtAllocateGC(w, 0, mask_i18n, &values, GCFont, 0 );
+    else
+        entry->sme_bsb.rev_gc = XtGetGC(w, mask, &values);
     
     values.foreground = entry->sme_bsb.foreground;
     values.background = XtParent(w)->core.background_pixel;
-    entry->sme_bsb.norm_gc = XtGetGC(w, mask, &values);
-    
+    if ( entry->sme.international == True )
+        entry->sme_bsb.norm_gc = XtAllocateGC(w, 0, mask_i18n, &values, GCFont, 0 );
+    else
+        entry->sme_bsb.norm_gc = XtGetGC(w, mask, &values);
+
     values.fill_style = FillTiled;
-#ifdef USE_XMU_STIPPLE
     values.tile   = XmuCreateStippledPixmap(XtScreenOfObject(w), 
 					    entry->sme_bsb.foreground,
 					    XtParent(w)->core.background_pixel,
 					    XtParent(w)->core.depth);
-#else
-    values.tile       = XCreatePixmapFromBitmapData (display,
-                            RootWindowOfScreen(screen),
-                            (char *)pixmap_bits,
-                            pixmap_width, pixmap_height,
-                            entry->sme_bsb.foreground,
-                            XtParent(w)->core.background_pixel,
-                            XtParent(w)->core.depth);
-#endif
     values.graphics_exposures = FALSE;
     mask |= GCTile | GCFillStyle;
-    entry->sme_bsb.norm_gray_gc = XtGetGC(w, mask, &values);
-    
+    if ( entry->sme.international == True )
+        entry->sme_bsb.norm_gray_gc = XtAllocateGC(w, 0, mask_i18n, &values, GCFont, 0 );
+    else
+        entry->sme_bsb.norm_gray_gc = XtGetGC(w, mask, &values);
+
     values.foreground ^= values.background;
     values.background = 0;
     values.function = GXxor;
@@ -667,4 +726,3 @@ void _XawSmeBSBApolloHack ()
     FlipColors();
 }
 #endif /* apollo */
-

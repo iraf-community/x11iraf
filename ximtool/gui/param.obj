@@ -13,6 +13,7 @@ set Objects(parameters) { \
 	ximtool		Parameter	frameFit\
 	ximtool		Parameter	enhancement\
 	ximtool		Parameter	colortables\
+	ximtool		Parameter	cmfocus\
 	ximtool		Parameter	autoscale\
 	ximtool		Parameter	antialias\
 	ximtool		Parameter	tileFrames\

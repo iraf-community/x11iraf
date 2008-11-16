@@ -223,7 +223,7 @@ set Resources(print_panel) { \
     *titleButton.label:				\ Title
     *bordersButton.label:			\ Borders
     *colorbarButton.label:			\ Colorbar
-    *titleLabel.label:				Title	String
+    *titleLabel.label:				Title String
     *titleString*string:			imtitle
     *titleString*height:			23
     *titleString*Text*editType:			edit

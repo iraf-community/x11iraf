@@ -1,8 +1,32 @@
-/* $XConsortium: Box.c,v 1.47 91/10/16 22:19:07 eswu Exp $ */
+/* $XConsortium: Box.c,v 1.49 94/04/17 20:11:54 kaleb Exp $ */
 
 /***********************************************************
-Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts,
-and the Massachusetts Institute of Technology, Cambridge, Massachusetts.
+
+Copyright (c) 1987, 1988, 1994  X Consortium
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of the X Consortium shall not be
+used in advertising or otherwise to promote the sale, use or other dealings
+in this Software without prior written authorization from the X Consortium.
+
+
+Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
@@ -10,7 +34,7 @@ Permission to use, copy, modify, and distribute this software and its
 documentation for any purpose and without fee is hereby granted, 
 provided that the above copyright notice appear in all copies and that
 both that copyright notice and this permission notice appear in 
-supporting documentation, and that the names of Digital or MIT not be
+supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
 software without specific, written prior permission.  
 
@@ -30,13 +54,11 @@ SOFTWARE.
  * 
  */
 
-#include <X11/IntrinsicP.h>
-#include <X11/StringDefs.h>
-
-#include <X11/Xmu/Misc.h>
-
-#include <X11/Xaw3d/XawInit.h>
-#include <X11/Xaw3d/BoxP.h>
+#include	<X11/IntrinsicP.h>
+#include	<X11/StringDefs.h>
+#include	<X11/Xmu/Misc.h>
+#include	<X11/Xaw3d/XawInit.h>
+#include	<X11/Xaw3d/BoxP.h>
 
 /****************************************************************
  *
@@ -147,12 +169,19 @@ static void DoLayout(bbw, width, height, reply_width, reply_height, position)
     Dimension lw, lh;	/* Width and height needed for current line 	*/
     Dimension bw, bh;	/* Width and height needed for current widget 	*/
     Dimension h_space;  /* Local copy of bbw->box.h_space 		*/
-    register Widget widget;	/* Current widget 			*/
+    Widget widget;	/* Current widget	 			*/
     int num_mapped_children = 0;
  
     /* Box width and height */
     h_space = bbw->box.h_space;
-    w = h_space;
+
+    w = 0;
+    for (i = 0; i < bbw->composite.num_children; i++) {
+	if ( bbw->composite.children[i]->core.width > w )
+            w = bbw->composite.children[i]->core.width;
+    }
+    w += h_space;
+    if ( w > width ) width = w;
     h = bbw->box.v_space;
    
     /* Line width and height */
@@ -184,7 +213,7 @@ static void DoLayout(bbw, width, height, reply_width, reply_height, position)
 		    return;
 		}
 	    }
-	    if (position && (lw != widget->core.x || h != widget->core.y)) {
+	    if (position && (lw != (Dimension)widget->core.x || h != (Dimension)widget->core.y)) {
 		/* It would be nice to use window gravity, but there isn't
 		 * sufficient fine-grain control to nicely handle all
 		 * situations (e.g. when only the height changes --
@@ -210,7 +239,7 @@ static void DoLayout(bbw, width, height, reply_width, reply_height, position)
     if (!vbox && width && lw > width && lh < height) {
 	/* reduce width if too wide and height not filled */
 	Dimension sw = lw, sh = lh;
-	Dimension width_needed;
+	Dimension width_needed = 0;
 	XtOrientation orientation = bbw->box.orientation;
 	bbw->box.orientation = XtorientVertical;
 	while (sh < height && sw > width) {
@@ -225,13 +254,17 @@ static void DoLayout(bbw, width, height, reply_width, reply_height, position)
 	}
 	bbw->box.orientation = orientation;
     }
-
+   if ( vbox && ( ( width < w ) || ( width < lw ) ) ) {
+        AssignMax(w, lw);
+        DoLayout( bbw, w, height, reply_width, reply_height, position );
+        return;
+    }
     if (position && XtIsRealized((Widget)bbw)) {
 	if (bbw->composite.num_children == num_mapped_children)
 	    XMapSubwindows( XtDisplay((Widget)bbw), XtWindow((Widget)bbw) );
 	else {
 	    int i = bbw->composite.num_children;
-	    register Widget *childP = bbw->composite.children;
+	    Widget *childP = bbw->composite.children;
 	    for (; i > 0; childP++, i--)
 		if (XtIsRealized(*childP) && XtIsManaged(*childP) &&
 		    (*childP)->core.mapped_when_managed)
@@ -445,6 +478,11 @@ static Boolean TryNewLayout(bbw)
 		    (void)PreferredSize((Widget)bbw, &constraints, &reply);
 		    proposed_width = preferred_width;
 		}
+		break;
+
+	    case XtGeometryDone: /* ??? */
+	    default:
+		break;
 	}
 	iterations++;
     } while (iterations < 10);
@@ -561,7 +599,7 @@ static void Initialize(request, new, args, num_args)
 } /* Initialize */
 
 static void Realize(w, valueMask, attributes)
-    register Widget w;
+    Widget w;
     Mask *valueMask;
     XSetWindowAttributes *attributes;
 {
@@ -582,4 +620,3 @@ static Boolean SetValues(current, request, new, args, num_args)
 
     return False;
 }
-

@@ -72,8 +72,8 @@ extern WidgetClass tabsWidgetClass;
 extern WidgetClass listtreeWidgetClass;
 extern WidgetClass separatorWidgetClass;
 extern WidgetClass tableWidgetClass;
-extern WidgetClass scrolledTableWidgetClass;
 /*
+extern WidgetClass scrolledTableWidgetClass;
 */
 
 XmuWidgetNode XawWidgetArray[] = {
@@ -142,8 +142,8 @@ XmuWidgetNode XawWidgetArray[] = {
 { "tabs", &tabsWidgetClass },
 { "separator", &separatorWidgetClass },
 { "table", &tableWidgetClass },
-{ "scrolledtable", &scrolledTableWidgetClass },
 /*
+{ "scrolledtable", &scrolledTableWidgetClass },
 */
 };
 

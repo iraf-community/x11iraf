@@ -9,7 +9,7 @@
 #define IHaveSubdirs
 #define PassCDebugFlags 'CDEBUGFLAGS=$(CDEBUGFLAGS)'
 
-RELEASE		= v1.5DEV
+RELEASE		= v2.0BETA2
 
 LIBDIRS 	= obm xaw3d xpm cdl
 APPDIRS 	= xgterm ximtool xtapemon obmsh vximtool
@@ -87,6 +87,8 @@ arch::
 	@(./mkarch -current)
 generic:
 	@(./mkarch generic)
+cygwin:
+	@(./mkarch cygwin)
 freebsd:
 	@(./mkarch freebsd)
 hp700:
@@ -123,29 +125,36 @@ unknown:
 	@(./mkarch unknown)
 
 
-BTARFILE   = x11iraf-$(RELEASE)-bin.`./mkarch -arch`.tar
+BTARFILE  = ../x11iraf-$(RELEASE)-bin.`./mkarch -arch`.tar
+
 DISTFILES = bin.`./mkarch -arch`/[a-z]* \
 	    lib.`./mkarch -arch`/libcdl.a \
-	    include/cdl* app-defaults man mkarch README.install install
+	    Notes-V2.0.txt \
+	    Revisions.v20 \
+	    include/cdl* \
+	    app-defaults \
+	    man \
+	    mkarch \
+	    README.install \
+	    install
 
 bindist::
 	(./mkarch -current -noclean)
-	@(echo "Making tar file....$(BTARFILE)" ; \
-	     tar -chf $(BTARFILE) $(DISTFILES) )
-	@(echo "Compressing files...." ; \
-	    cat $(BTARFILE) | compress > $(BTARFILE).Z ; gzip $(BTARFILE) )
+	@(echo "Making tar file....$(BTARFILE)" )
+	@(tar -cf $(BTARFILE) $(DISTFILES) )
+	@(echo "Compressing files...." ; gzip $(BTARFILE) )
 	@(echo "Done.")
 
 
 archive::
 	$(MAKE) $(MFLAGS) pristine
-	@tar -cf - . | gzip > ../x11iraf-$(RELEASE)-src.tar.gz
+	@(tar -cf - . | gzip > ../x11iraf-$(RELEASE)-src.tar.gz)
 
 pristine::
 	$(MAKE) $(MFLAGS) clean
 	$(MAKE) $(MFLAGS) generic
 	$(RM) -rf bin.[a-fh-z]* lib.[a-fh-z]* \
-	  bin.tar* include app-defaults man spool* Makefile\
+	  bin.tar* include app-defaults man *spool* Makefile makefile\
 	  Makefile.bak */Makefile */Makefile.bak */*/Makefile */*/Makefile.bak
 
 MakeSubdirs($(SUBDIRS))

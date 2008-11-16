@@ -12,8 +12,10 @@
  *  without affecting the tasks which use it as long as the basic steps re-
  *  quired for image display are the same.
  *  
- *            com_writeData  (fdout, x, y, pix, nx, ny)
- *             com_readData  (fdin, x, y, &pix, &nx, &ny)
+ *            com_writeData  (fdout, x, y, pix, nbytes)
+ *             com_readData  (fdin, x, y, &pix, &bytes)
+ *       com_writeSubraster  (fdout, x, y, pix, nx, ny)
+ *        com_readSubraster  (fdin, x, y, &pix, &nx, &ny)
  *           com_readCursor  (fdin, fdout, sample, &x, &y, &wcs, &key)
  *            com_setCursor  (fdout, x, y, wcs)
  *          com_setFBConfig  (fdout, configno)
@@ -171,6 +173,105 @@ int	*npix;				/* number of bytes read		*/
 	}
         return (OK);
 }
+
+
+/*  COM_WRITESUBRASTER --  Write a block of data to the display.  This does not
+ *  display the entire image, it just writes an array of pixels to the server.
+ */
+
+#ifdef ANSI_FUNC
+
+int 
+com_writeSubraster (
+    int fd,				/* connection file descriptor  	*/
+    short x,
+    short y,				/* corner of array		*/
+    uchar *pix,				/* pixel array			*/
+    int nx, int ny			/* number of bytes write at pos	*/
+)
+#else
+
+int
+com_writeSubraster (fd, x, y, pix, nx, ny)
+int	fd;				/* connection file descriptor  	*/
+short	x, y;				/* corner of array		*/
+uchar 	*pix;				/* pixel array			*/
+int	nx, ny;				/* number of bytes write at pos */
+#endif
+{
+	int	status = 0;
+	int	nbytes = (nx * ny);
+
+    	/*  Send the IIS command for a data write. */
+	if (com_whdr (fd, IIS_WRITE | PACKED, MEMORY, -nbytes, x, y,
+	    1<<(frame-1), nx)) {
+		if (com_debug >= 2)
+		    printf ("com_writeData: error return from header write.\n");
+	        return (ERR);
+	}
+
+        /* Send the pixels. */
+        status =  com_write (fd, (char *)pix, nbytes);
+        if (status && com_debug >= 2)
+	    printf ("com_writeData: error return from data write.\n");
+        return (status);
+}
+
+
+/*  COM_READSUBRASTER --  Read a block of data at a given location from the
+ *  display.
+ */
+
+#ifdef ANSI_FUNC
+
+int 
+com_readSubraster (
+    int fdin,
+    int fdout,				/* connection file descriptors 	*/
+    short x,
+    short y,				/* corner of readout		*/
+    uchar *pix,				/* output pixel array		*/
+    int nx, ny				/* number of bytes read		*/
+)
+#else
+
+int
+com_readSubraster (fdin, fdout, x, y, pix, nx, ny)
+int	fdin, fdout;			/* connection file descriptors 	*/
+short	x, y;				/* corner of readout		*/
+uchar 	*pix;				/* output pixel array		*/
+int	nx, ny;				/* number of bytes read		*/
+#endif
+{
+	int status = 0, nb = 0, n, npix = (nx * ny);
+
+    	/*  Send the IIS command for a data read. */
+	n = npix;
+	if (com_whdr (fdout, IIS_READ | PACKED, MEMORY, -npix, x, y,
+	    1<<(frame-1), nx)) {
+		if (com_debug >= 2)
+		    printf ("com_readData: error return from header read.\n");
+	        return (ERR);
+	}
+
+        /* Get the pixels. */
+	if (pix == NULL)
+	    pix = (uchar *) malloc ((unsigned) npix);
+
+	/*  
+	*/
+	while (nb < npix) {
+            status =  com_read (fdin, (char *)pix+nb, n, &n);
+            if (status && com_debug >= 2) {
+	        printf ("com_readData: error return from data read.\n");
+		return (ERR);
+	    }
+	    nb += n;
+	    n = npix - nb;
+	}
+        return (OK);
+}
+
 
 
 /*  COM_READCURSOR --  Read the current cursor position.  If sample is set the

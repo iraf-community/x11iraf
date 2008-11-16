@@ -1033,7 +1033,7 @@ int source;
 
 		    frame = max (1, n + 1);
 		    if (frame > vxim->nframes) {
-			if (frame < MAX_FRAMES) {
+			if (frame <= MAX_FRAMES) {
 #ifdef	HAVE_CDL
 	    		    if (proxy) {
 	    		        for (i=0; i < nclients; i++) {
@@ -1413,6 +1413,8 @@ int source;
 	default:
 	    /* Ignore unsupported command input.
 	     */
+	    fprintf (stderr, "unsupported input: subunit=%03o\n", 
+		iis.subunit & 077);
 	    break;
 	}
 

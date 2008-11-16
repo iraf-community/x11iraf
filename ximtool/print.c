@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <ctype.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -8,24 +9,25 @@
 
 #include "ximtool.h"
 
+
 /*
- * PRINT.C -- Printer interface.
- *
- *		      xim_print (xim, x0,y0, nx,ny)
- *
- *		    ximp_rename (xim, old, new)		# print alert action
- *		    ximp_cancel (xim, fname)		# print alert action
- *
- *	     xim_initPrinterOps (xim)
- *	    xim_initPrinterList (xim)
- *	     xim_getPrinterInfo (xim, printer)
- *
- * xim_print prints the indicated region of the display frame (raster 0).
- * If nx or ny is zero the full display frame is printed.  The output device
- * or file and all print options are maintained in the printer context within
- * the XIM descriptor.  The xim_initPrinter routines should be called at
- * startup to initialize the print options and load the list of local printers.
- */
+**  PRINT.C -- Printer interface.
+**
+**		      xim_print (xim, x0,y0, nx,ny)
+**
+**		    ximp_rename (xim, old, new)		# print alert action
+**		    ximp_cancel (xim, fname)		# print alert action
+**
+**	     xim_initPrinterOps (xim)
+**	    xim_initPrinterList (xim)
+**	     xim_getPrinterInfo (xim, printer)
+**
+**  xim_print prints the indicated region of the display frame (raster 0).
+**  If nx or ny is zero the full display frame is printed.  The output device
+**  or file and all print options are maintained in the printer context within
+**  the XIM descriptor.  The xim_initPrinter routines should be called at
+**  startup to initialize the print options and load the list of local printers.
+*/
 
 void 	xim_initPrinterOps();
 int 	xim_getPrinterInfo();
@@ -34,9 +36,10 @@ static void printstat();
 static void xim_initPrinterList();
 
 
-/* XIM_PRINT -- Print the indicated region of the current display frame to
- * the printer device or to a file.
- */
+/*  XIM_PRINT -- Print the indicated region of the current display frame to
+**  the printer device or to a file.
+*/
+
 xim_print (xim, x0,y0, nx,ny)
 register XimDataPtr xim;
 int x0,y0, nx,ny;				/* region of source raster */
@@ -47,12 +50,18 @@ int x0,y0, nx,ny;				/* region of source raster */
 	register ColorMapPtr cm = &colormaps[fb->colormap-1];
 	unsigned char r[256], g[256], b[256];
 	unsigned char *pixels = NULL;
-	static char tmpfile[32];
-	char fname[SZ_FNAME];
-	char text[SZ_LINE];
+	static char tmpfile[SZ_FNAME];
+	static char fname[SZ_FNAME];
+	static char text[SZ_LINE];
 	int w, h, ncolors;
 	FILE *fp;
 	char *mktemp();
+
+
+	bzero (text, SZ_LINE);
+	bzero (fname, SZ_FNAME);
+	bzero (tmpfile, SZ_FNAME);
+
 
 	/* Get the display pixels and colormap.  The routine allocates a 
 	 * pointer to the pixels we'll need to free when we're done.
@@ -73,13 +82,17 @@ int x0,y0, nx,ny;				/* region of source raster */
         /* Now call the main routine to output the EPS file.
 	 */
 	if (pcp->diskfile) {
+
 	    /* Print to a file.  If we are not clobbering an existing file
 	     * and we can open the output file write to it directly and be
 	     * done with it.  If there is any problem we we to a temporary
 	     * file and issue an alert with actions to be taken if the user
 	     * decides to proceed or cancel the operation.
 	     */
-	    sprintf (fname, pcp->printFile, pcp->seqno++);
+	    if (strchr (pcp->printFile, (int)'%'))
+	        sprintf (fname, pcp->printFile, pcp->seqno++);
+	    else
+	        strcpy (fname, pcp->printFile);
 
 	    if (access (fname, F_OK) < 0) {
 		if (fp = fopen (fname, "w")) {
@@ -87,10 +100,12 @@ int x0,y0, nx,ny;				/* region of source raster */
 
 		    printstat (xim, "Generating postscript output...");
 		    eps_print (psim, fp, pixels, w, h, 8, 0);
-		    fstat (fileno(fp), &fs);
-		    sprintf (text, "Wrote %d bytes to %s", fs.st_size, fname);
-		    printstat (xim, text);
 		    fclose (fp);
+
+		    stat (fname, &fs);
+		    sprintf (text, "Wrote %d bytes to '%s'",
+			(int)fs.st_size, fname);
+		    printstat (xim, text);
 
 		} else {
 		    sprintf (text, "Could not open file %s", fname);
@@ -107,10 +122,17 @@ int x0,y0, nx,ny;				/* region of source raster */
 		char tmpfile[SZ_FNAME];
 		char *ip, *op, *last;
 
-		/* Write to a temporary file in the same directory as fname. */
-		for (ip=fname, op=tmpfile, last=tmpfile;  *op = *ip++;  op++)
+
+		bzero (tmpfile, SZ_FNAME);
+		bzero (ok_action, SZ_LINE);
+		bzero (cancel_action, SZ_LINE);
+
+		/* Write to a temporary file in the same directory as fname. 
+		*/
+		for (ip=fname, op=tmpfile, last=tmpfile;  *op = *ip++;  op++) {
 		    if (*op == '/')
 			last = op + 1;
+		}
 		*last = '\0';
 		strcat (tmpfile, "ximpXXXXXX");
 		if (mktemp(tmpfile) == (char *)NULL)
@@ -162,9 +184,13 @@ int x0,y0, nx,ny;				/* region of source raster */
 	return (0);
 }
 
-/* The following implement the ok and cancel actions posted by the alert in
- * xim_print above.
- */
+pbob () { int i = 0; }
+
+
+/*  The following implement the ok and cancel actions posted by the alert in
+**  xim_print above.
+*/
+
 void
 ximp_rename (xim, old, new)
 register XimDataPtr xim;
@@ -173,7 +199,9 @@ char *old, *new;
 	char text[SZ_LINE];
 	struct stat fs;
 
+	bzero (text, SZ_LINE);
 	unlink (new);
+
 	if (rename(old,new) != 0 || stat(new,&fs) != 0) {
 	    sprintf (text, "Could not write file %s", new);
 	    printstat (xim, text);
@@ -194,7 +222,7 @@ char *fname;
 
 
 /* XIM_INITPRINTEROPS -- Initialize the printer operations.
- */
+*/
 void
 xim_initPrinterOps (xim)
 register XimDataPtr xim;
@@ -202,6 +230,7 @@ register XimDataPtr xim;
         register PrintCfgPtr pcp;
 	char buf[SZ_LINE];
 	PSImagePtr eps_init();
+
 
 	/* Open a pointer to the EPS structure. */
         xim->psim = eps_init();
@@ -227,6 +256,7 @@ register XimDataPtr xim;
         pcp->diskfile = 0;
         strcpy (pcp->printFile, "frame%d.eps");
 
+	bzero (buf, SZ_LINE);
         sprintf (buf, "printerName %s", printer_list[0].printerName);
         xim_message (xim, "printOptions", buf);
 
@@ -237,9 +267,10 @@ register XimDataPtr xim;
 
 
 /* XIM_INITPRINTERLIST -- Read the printer configuration file and initialize
- * the structure with the list of printers and commands.  Send the printer
- * list to the GUI, maintain the command list internally.
- */
+** the structure with the list of printers and commands.  Send the printer
+** list to the GUI, maintain the command list internally.
+*/
+
 static void
 xim_initPrinterList (xim)
 register XimDataPtr xim;
@@ -248,6 +279,10 @@ register XimDataPtr xim;
 	register FILE *fp;
 	char 	 buf[SZ_LINE], plist[MAX_PRINTERS*20];
 	char  	 *ip, *pn, *pc, *pl;
+
+
+	bzero (buf, SZ_LINE);
+	bzero (plist, MAX_PRINTERS*20);
 
 	if (access (xim->printConfig, R_OK) == 0) {
 	    if (!(fp = fopen (xim->printConfig, "r")))
@@ -283,6 +318,7 @@ register XimDataPtr xim;
 		*pc++ = '\0';
 
 		nprinters++;
+		bzero (buf, SZ_LINE);
 	    }
 	    fclose (fp);
 
@@ -315,8 +351,9 @@ register XimDataPtr xim;
 
 
 /* XIM_GETPRINTERINFO -- For a given printer name search the printer list
- * array and update the GUI with the selected printer name and command.
- */
+** array and update the GUI with the selected printer name and command.
+*/
+
 int
 xim_getPrinterInfo (xim, printer)
 register XimDataPtr xim;
@@ -335,13 +372,16 @@ char *printer;
 
 
 /* PRINTSTAT -- Internal routine for print status messages.
- */
+*/
+
 static void
 printstat (xim, message)
 register XimDataPtr xim;
 char *message;
 {
 	char text[SZ_LINE];
+
+	bzero (text, SZ_LINE);
 	sprintf (text, "status {%s}", message);
         xim_message (xim, "printOptions", text);
 }

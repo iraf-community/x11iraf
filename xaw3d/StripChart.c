@@ -1,8 +1,32 @@
-/* $XConsortium: StripChart.c,v 1.21 91/10/16 21:40:06 eswu Exp $ */
+/* $XConsortium: StripChart.c,v 1.25 94/04/17 20:12:56 kaleb Exp $ */
 
 /***********************************************************
-Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts,
-and the Massachusetts Institute of Technology, Cambridge, Massachusetts.
+
+Copyright (c) 1987, 1988, 1994  X Consortium
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of the X Consortium shall not be
+used in advertising or otherwise to promote the sale, use or other dealings
+in this Software without prior written authorization from the X Consortium.
+
+
+Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
@@ -10,7 +34,7 @@ Permission to use, copy, modify, and distribute this software and its
 documentation for any purpose and without fee is hereby granted, 
 provided that the above copyright notice appear in all copies and that
 both that copyright notice and this permission notice appear in 
-supporting documentation, and that the names of Digital or MIT not be
+supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
 software without specific, written prior permission.  
 
@@ -58,7 +82,7 @@ static XtResource resources[] = {
 
 #undef offset
 
-static void Initialize(), Destroy(), Redisplay(), MoveChart(), Resize();
+static void Initialize(), Destroy(), Redisplay(), MoveChart(), SetPoints();
 static Boolean SetValues();
 static int repaint_window();
 
@@ -84,7 +108,7 @@ StripChartClassRec stripChartClassRec = {
     /* compress_enterleave	*/	TRUE,
     /* visible_interest		*/	FALSE,
     /* destroy			*/	Destroy,
-    /* resize			*/	Resize,
+    /* resize			*/	SetPoints,
     /* expose			*/	Redisplay,
     /* set_values		*/	SetValues,
     /* set_values_hook		*/	NULL,
@@ -98,7 +122,7 @@ StripChartClassRec stripChartClassRec = {
     /* display_accelerator	*/	XtInheritDisplayAccelerator,
     /* extension		*/	NULL
     },
-    { /* Simple fields */
+    { /* Simple class fields */
     /* change_sensitive		*/	XtInheritChangeSensitive
     },
     { /* ThreeD fields */
@@ -182,19 +206,19 @@ static void Initialize (greq, gnew, args, num_args)
     w->strip_chart.interval = 0;
     w->strip_chart.max_value = 0.0;
     w->strip_chart.points = NULL;
-    Resize((Widget)w);
+    SetPoints((Widget)w);
 }
  
 static void Destroy (gw)
      Widget gw;
 {
-    StripChartWidget w = (StripChartWidget)gw;
+     StripChartWidget w = (StripChartWidget)gw;
 
-    if (w->strip_chart.update > 0)
-	XtRemoveTimeOut (w->strip_chart.interval_id);
-    if (w->strip_chart.points)
-	XtFree((char *) w->strip_chart.points);
-    DestroyGC(w, (unsigned int) ALL_GCS);
+     if (w->strip_chart.update > 0)
+         XtRemoveTimeOut (w->strip_chart.interval_id);
+     if (w->strip_chart.points)
+	 XtFree((char *) w->strip_chart.points);
+     DestroyGC(w, (unsigned int) ALL_GCS);
 }
 
 /*
@@ -209,19 +233,26 @@ static void Redisplay(gw, event, region)
      XEvent *event;
      Region region;
 {
-	
+
     StripChartWidget w = (StripChartWidget)gw;
     StripChartWidgetClass swclass = (StripChartWidgetClass) XtClass (gw);
-    Dimension s = w->threeD.shadow_width;
+    Dimension x, width, s = w->threeD.shadow_width;
 
     (*swclass->threeD_class.shadowdraw) (gw, event, region, FALSE);
 
-    if (event->type == GraphicsExpose)
-	(void) repaint_window (gw, (Dimension) event->xgraphicsexpose.x,
-			       event->xgraphicsexpose.width - 2 * s);
-    else
-	(void) repaint_window (gw, (Dimension) event->xexpose.x,
-			       event->xexpose.width - 2 * s);
+    if (event->type == GraphicsExpose) {
+	x = event->xgraphicsexpose.x;
+	width = event->xgraphicsexpose.width;
+    } else {
+	x = event->xexpose.x;
+	width = event->xexpose.width;
+    }
+    if (x > s) x -= s; /* respect shadow width, but don't become negative */
+    else x = 0;
+    if (x + width > w->core.width - 2 * s) /* ditto for right boundary */
+	width = w->core.width - 2 * s - x;
+
+    (void) repaint_window (gw, x, width);
 }
 
 /* ARGSUSED */
@@ -230,69 +261,68 @@ draw_it(client_data, id)
 XtPointer client_data;
 XtIntervalId *id;		/* unused */
 {
-    StripChartWidget w = (StripChartWidget)client_data;
-    StripChartWidgetClass swclass = (StripChartWidgetClass) XtClass ((Widget) w);
-    Dimension s = w->threeD.shadow_width;
-    double value;
+   StripChartWidget w = (StripChartWidget)client_data;
+   StripChartWidgetClass swclass = (StripChartWidgetClass) XtClass ((Widget) w);
+   Dimension s = w->threeD.shadow_width;
+   double value;
    
-    if (w->strip_chart.update > 0)
-	w->strip_chart.interval_id =
-	    XtAppAddTimeOut(XtWidgetToApplicationContext( (Widget) w),
-		            (unsigned long) w->strip_chart.update * MS_PER_SEC,
-			    draw_it, client_data);
+   if (w->strip_chart.update > 0)
+       w->strip_chart.interval_id =
+       XtAppAddTimeOut(XtWidgetToApplicationContext( (Widget) w),
+		       (unsigned long) w->strip_chart.update * MS_PER_SEC,
+		       draw_it, client_data);
 
-    if (w->strip_chart.interval >= (int)( w->core.width - 2 * s))
-	MoveChart( (StripChartWidget) w, TRUE);
+   if (w->strip_chart.interval >= (int)( w->core.width - 2 * s))
+       MoveChart( (StripChartWidget) w, TRUE);
 
-    /* Get the value, stash the point and draw corresponding line. */
+   /* Get the value, stash the point and draw corresponding line. */
 
-    if (w->strip_chart.get_value == NULL)
-	return;
+   if (w->strip_chart.get_value == NULL)
+       return;
 
-    XtCallCallbacks( (Widget)w, XtNgetValue, (XtPointer)&value );
+   XtCallCallbacks( (Widget)w, XtNgetValue, (XtPointer)&value );
 
    /* 
     * Keep w->strip_chart.max_value up to date, and if this data 
     * point is off the graph, change the scale to make it fit. 
     */
    
-    if (value > w->strip_chart.max_value) {
-	w->strip_chart.max_value = value;
-	if (w->strip_chart.max_value > w->strip_chart.scale) {
-	    XClearWindow(XtDisplay ((Widget) w), XtWindow ((Widget) w));
-	    w->strip_chart.interval = 
-	    repaint_window((Widget)w, 0, w->core.width - 2 * s);
-	    (*swclass->threeD_class.shadowdraw) ((Widget) w, 
-						 (XEvent *)0, (Region)0, 
-						 FALSE);
-	}
-    }
+   if (value > w->strip_chart.max_value) {
+       w->strip_chart.max_value = value;
+       if (XtIsRealized((Widget)w) && 
+	   w->strip_chart.max_value > w->strip_chart.scale) {
+	   XClearWindow(XtDisplay ((Widget) w), XtWindow ((Widget) w));
+	   w->strip_chart.interval = repaint_window((Widget)w, 0, (int) w->core.width - 2 * s);
+	   (*swclass->threeD_class.shadowdraw) ((Widget) w, 
+						(XEvent *)0, (Region)0, 
+						FALSE);
+       }
+   }
 
-    w->strip_chart.valuedata[w->strip_chart.interval] = value;
-    if (XtIsRealized((Widget) w)) {
-       int y = (int) (( (int)w->core.height - 2 * s)
-		      - (int)(( (int)w->core.height - 2 * (int)s) * value)
-                      / w->strip_chart.scale);
+   w->strip_chart.valuedata[w->strip_chart.interval] = value;
+   if (XtIsRealized((Widget)w)) {
+       int y = (int) (( w->core.height - 2 * s)
+		      - (int)(( w->core.height - 2 * s) * value) / w->strip_chart.scale);
 
-	XFillRectangle( XtDisplay((Widget) w), XtWindow((Widget) w), 
-			w->strip_chart.fgGC, w->strip_chart.interval + s, 
-			y + s, (unsigned int) 1, 
-			(w->core.height - 2 * s) - y);
+	XFillRectangle(XtDisplay((Widget) w), XtWindow((Widget) w), w->strip_chart.fgGC,
+		       w->strip_chart.interval + s, 
+		       y + s, (unsigned int) 1, 
+		       (w->core.height - 2 * s) - y);
        /*
 	* Fill in the graph lines we just painted over.
 	*/
 
-	if (w->strip_chart.points != NULL) {
-	    w->strip_chart.points[0].x = w->strip_chart.interval + s;
-	    XDrawPoints(XtDisplay(w), XtWindow(w), w->strip_chart.hiGC,
+       if (w->strip_chart.points != NULL) {
+	   w->strip_chart.points[0].x = w->strip_chart.interval + s;
+	   XDrawPoints(XtDisplay(w), XtWindow(w), w->strip_chart.hiGC,
 		       w->strip_chart.points, w->strip_chart.scale,
 		       CoordModePrevious);
-	}
+       }
 
-	XFlush(XtDisplay(w));		    /* Flush output buffers */
-    }
-    w->strip_chart.interval++;		    /* Next point */
-}
+       XFlush(XtDisplay(w));		    /* Flush output buffers */
+   }
+   w->strip_chart.interval++;		    /* Next point */
+} /* draw_it */
 
 /* Blts data according to current size, then redraws the stripChart window.
  * Next represents the number of valid points in data.  Returns the (possibly)
@@ -307,13 +337,13 @@ XtIntervalId *id;		/* unused */
 static int 
 repaint_window(gw, left, width)
 Widget gw;
-Dimension left, width;
+int left, width;
 {
     StripChartWidget w = (StripChartWidget) gw;
     Dimension s = w->threeD.shadow_width;
     StripChartWidgetClass swclass = (StripChartWidgetClass) XtClass ((Widget) w);
-    register int i, j;
-    register int next = w->strip_chart.interval;
+    int i, j;
+    int next = w->strip_chart.interval;
     int scale = w->strip_chart.scale;
     int scalewidth = 0;
 
@@ -330,7 +360,7 @@ Dimension left, width;
       width = next;				/* check this */
       scalewidth = w->core.width - 2 * s;
 
-      Resize(gw);
+      SetPoints(gw);
 
       if (XtIsRealized (gw)) {
 	XClearWindow (XtDisplay (gw), XtWindow (gw));
@@ -346,27 +376,27 @@ Dimension left, width;
 	width += left - 1;
 	if (!scalewidth) scalewidth = width;
 
-	if ((int)next < (int)(++width - s)) width = next + s;
+	if (next < (++width - s)) width = next + s;
 
 	/* Draw data point lines. */
-	for (i = left; i < (int)width; i++) {
-	    int y = (int) (( (int)w->core.height - 2 * s)
-		   - (int)(( (int)w->core.height - 2 * (int)s) *
-		   w->strip_chart.valuedata[i]) / w->strip_chart.scale);
+	for (i = left; i < width; i++) {
+	    int y = (int) (( w->core.height - 2 * s) -
+			   (int)(( w->core.height - 2 * s) * w->strip_chart.valuedata[i]) / 
+			   w->strip_chart.scale);
 
 	    XFillRectangle(dpy, win, w->strip_chart.fgGC, 
-		   i + s, y + s, (unsigned int) 1,
-		   (unsigned int) (w->core.height - 2 * s - y ));
+			   i + s, y + s, (unsigned int) 1,
+			   (unsigned int) (w->core.height - 2 * s - y ));
 	}
 
 	/* Draw graph reference lines */
 	for (i = 1; i < w->strip_chart.scale; i++) {
-            j = i * (((int)w->core.height - 2 * (int)s) / w->strip_chart.scale);
+            j = i * ((w->core.height - 2 * s) / w->strip_chart.scale);
 	    XDrawLine(dpy, win, w->strip_chart.hiGC, 
 		left + s, j + s, scalewidth + s, j + s);
 	}
     }
-    return( next);
+    return(next);
 }
 
 /*	Function Name: MoveChart
@@ -384,20 +414,21 @@ Boolean blit;
     Dimension s = w->threeD.shadow_width;
     double old_max;
     int left, i, j;
-    register int next = w->strip_chart.interval;
+    int next = w->strip_chart.interval;
 
     if (!XtIsRealized((Widget) w)) return;
 
+    if (w->strip_chart.jump_val < 0) w->strip_chart.jump_val = DEFAULT_JUMP;
     if (w->strip_chart.jump_val == DEFAULT_JUMP)
-        j = ((int)w->core.width - 2 * (int)s) / 2; /* Half the window width. */
+        j = ( w->core.width - 2 * s) / 2; /* Half the window width. */
     else {
-        j = ((int)w->core.width - 2 * (int)s) - w->strip_chart.jump_val;
+        j = ( w->core.width - 2 * s) - w->strip_chart.jump_val;
 	if (j < 0) j = 0;
     }
 
-    (void) memmove ((char *)(w->strip_chart.valuedata),
-	(char *)(w->strip_chart.valuedata + next - j ),
-	j * sizeof(double));
+    (void) memmove((char *)(w->strip_chart.valuedata), 
+		   (char *)(w->strip_chart.valuedata + next - j),
+		   j * sizeof(double));
     next = w->strip_chart.interval = j;
 	
     /*
@@ -421,23 +452,26 @@ Boolean blit;
     }
 
     XCopyArea(XtDisplay((Widget)w), XtWindow((Widget)w), XtWindow((Widget)w),
-	      w->strip_chart.hiGC, (int) (w->strip_chart.jump_val + s), s,
+	      w->strip_chart.hiGC, 
+	      (int) ((w->strip_chart.jump_val == DEFAULT_JUMP) ?
+		     (j + s) : (w->strip_chart.jump_val + s)), s,
 	      (unsigned int) j, (unsigned int) ( w->core.height - 2 * s),
 	      s, s);
 
     XClearArea(XtDisplay((Widget)w), XtWindow((Widget)w), 
 	       (int) j + s, s, 
-	       (unsigned int) w->strip_chart.jump_val,
+	       (unsigned int) ((w->strip_chart.jump_val == DEFAULT_JUMP) ?
+			       j : w->strip_chart.jump_val),
                (unsigned int) ( w->core.height - 2 * s),
 	       FALSE);
 
     /* Draw graph reference lines */
     left = j;
-    for (i = 1; i < (int)w->strip_chart.scale; i++) {
-	j = i * (((int)w->core.height - 2 * (int)s) / w->strip_chart.scale);
+    for (i = 1; i < w->strip_chart.scale; i++) {
+	j = i * ((w->core.height - 2 * s) / w->strip_chart.scale);
 	XDrawLine(XtDisplay((Widget) w), XtWindow( (Widget) w),
 	    w->strip_chart.hiGC, 
-	    left, j + s, ((int)w->core.width - s), j + s);
+	    left, j + s, ((int)w->core.width - s - 1), j + s);
     }
     return;
 }
@@ -482,20 +516,20 @@ static Boolean SetValues (current, request, new, args, num_args)
     return( ret_val );
 }
 
-/*	Function Name: Resize
+/*	Function Name: SetPoints
  *	Description: Sets up the polypoint that will be used to draw in
  *                   the graph lines.
  *	Arguments: w - the StripChart widget.
  *	Returns: none.
  */
 
-#define HEIGHT ( (unsigned int) w->core.height )
+#define HEIGHT ( (unsigned int) w->core.height)
 
 static void
-Resize(gw)
-Widget gw;
+SetPoints(widget)
+Widget widget;
 {
-    StripChartWidget w = (StripChartWidget) gw;
+    StripChartWidget w = (StripChartWidget) widget;
     Dimension s = w->threeD.shadow_width;
     XPoint * points;
     Cardinal size;
@@ -518,9 +552,5 @@ Widget gw;
 	points[i - 1].x = 0;
 	points[i - 1].y = ( short)(((double)w->core.height - 2.0 * (double) s) / (double) w->strip_chart.scale );
     }
-    /* this kind of incremental approach creates a problem with the way the */
-    /* scale bars appear on the graph for larger values .ie. the spread of */
-    /* lines are uniform, but appears incorrect */
     points[0].y += (short)s;
 }
-

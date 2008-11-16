@@ -9,7 +9,7 @@ proc tclCommandClear {widget args}   { send tclEntry set string "" }
 proc tclCommandExecute {widget args} { send server [send tclEntry {get string}]
 }
 proc tclCommand {widget mode command args} { send server $command }
-proc tclClose {widget args}                { send tcl_panel unmap }
+proc tclClose {widget args}                { tclPanel }
 proc tclOpen args \
 { 
     global tcl_up

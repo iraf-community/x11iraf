@@ -42,7 +42,9 @@
 #define	MAXCONN		5
 
 
-#define	IIS_VERSION	10		/* version 10 -> 1.0		*/
+#define	IIS_VERSION	11		/* version 10 => 1.0		*/
+					/* v1.1 => fast subraster write */
+#define	IIS_DEBUG	0		/* local debug flag		*/
 
 #define	SZ_IMCURVAL	160
 #define	PACKED		0040000
@@ -51,6 +53,7 @@
 #define	IMC_SAMPLE	0040000
 #define	IMT_FBCONFIG	077
 #define	XYMASK		077777
+#define	ALLBITPL	255
 
 struct	iism70 {
 	short	tid;
@@ -91,16 +94,21 @@ extern int errno;
 xim_iisOpen (xim)
 register XimDataPtr xim;
 {
-	int nopen = 0;
+    int i, port, last_port = (xim->port + xim->nports - 1);
+    int nopen = 0;
 
-	if (open_fifo (xim))
-	    nopen++;
-	if (open_inet (xim))
-	    nopen++;
-	if (open_unix (xim))
-	    nopen++;
 
-	return (nopen);
+    if (open_unix (xim))
+        nopen++;
+    if (open_fifo (xim))
+        nopen++;
+
+    for (port=xim->port; port > 0 && port <= last_port; port++) {
+        if (open_inet (xim, port))
+            nopen++;
+    }
+
+    return (nopen);
 }
 
 
@@ -158,7 +166,8 @@ register XimDataPtr xim;
 	int datain, dataout;
 	int keepalive;
 
-#ifdef __DARWIN__
+
+#if defined (__DARWIN__) || defined(__CYGWIN__)
 	/* On OS X we don't use fifos. */
 	xim->input_fifo = "none";
 	return (NULL);
@@ -171,6 +180,9 @@ register XimDataPtr xim;
 	    return (NULL);
 
 	datain = dataout = -1;
+
+	if (IIS_DEBUG)
+	    printf ("Opening fifo: '%s'\n", xim->input_fifo);
 
 	/* Open the output fifo (which is the client's input fifo).  We have
 	 * to open it ourselves first as a client to get around the fifo
@@ -212,8 +224,8 @@ done:
 	    chan->rf_p = &xim->frames[0];
 	} else {
 	    fprintf (stderr, "Warning: cannot open %s\n", xim->output_fifo);
-	    strcpy (xim->input_fifo, "none");
-	    chan = NULL;
+	    xim->input_fifo = "none";
+	    return (NULL);
 	}
 
 	/* Register input callback. */
@@ -235,8 +247,9 @@ done:
  * using internet domain sockets.
  */
 static IoChanPtr
-open_inet (xim)
+open_inet (xim, portnum)
 register XimDataPtr xim;
+int     portnum;
 {
 	register int s = 0;
 	register IoChanPtr chan;
@@ -244,15 +257,19 @@ register XimDataPtr xim;
 	int	reuse = 1;
 
 	/* Setting the port to zero disables inet socket support. */
-	if (xim->port <= 0)
+	if (portnum <= 0)
 	    return (NULL);
+
+
+	if (IIS_DEBUG)
+	    printf ("Opening inet port: %d\n", portnum);
 
 	if ((s = socket (AF_INET, SOCK_STREAM, 0)) < 0)
 	    goto err;
 
 	memset ((void *)&sockaddr, 0, sizeof(sockaddr));
 	sockaddr.sin_family = AF_INET;
-	sockaddr.sin_port = htons((short)xim->port);
+	sockaddr.sin_port = htons((short)portnum);
 	sockaddr.sin_addr.s_addr = htonl(INADDR_ANY);
         if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse,
 	    sizeof(reuse)) < 0)
@@ -278,13 +295,15 @@ register XimDataPtr xim;
 	    chan->id = xim_addInput (xim,s,xim_connectClient,(XtPointer)chan);
 	    return (chan);
 	}
+
+
 err:
 	if (errno == EADDRINUSE) {
 	    fprintf (stderr,"ximtool: inet port %d already in use - disabled\n",
-	        xim->port);
+	        portnum);
 	} else {
 	    fprintf (stderr, "ximtool: can't open inet socket %d, errno=%d\n",
-	        xim->port, errno);
+	        portnum, errno);
 	}
 	xim->port = 0;
 	if (s)
@@ -311,6 +330,10 @@ register XimDataPtr xim;
 	 */
 	if (!xim->unixaddr[0] || strcmp(xim->unixaddr,"none")==0)
 	    return (NULL);
+
+
+	if (IIS_DEBUG)
+	    printf ("Opening unix socket: '%s'\n", xim->unixaddr);
 
 	/* Get path to be used for the unix domain socket. */
 	sprintf (path, xim->unixaddr, getuid());
@@ -631,8 +654,27 @@ XtInputId *id_addr;
 			"read %d bytes at [%d,%d]\n", nbytes, x, y);
 		    memset ((void *)iobuf, 0, nbytes);
 		} else {
+		    int nx, ny;
+
+		    /**********  OLD CODE  ********* 
 		    GtReadPixels (xim->gt, chan->rf_p->raster, iobuf, 8, x, y,
 			min(xim->width-x,nbytes), max(1,nbytes/xim->width));
+		    **********  OLD CODE  **********/
+
+		    /*  If the iis.t element is set, it will contain the width
+		    **  of the subraster being read.  In the old scheme we
+		    **  assumed we were reading the entire width of the FB.
+		    */
+		    if (iis.t > 0 && iis.t != ALLBITPL) {
+			nx = min (xim->width-x, iis.t);
+			ny = max (1, nbytes/iis.t);
+		    } else {
+			nx = min (xim->width-x, nbytes);
+			ny = max (1, nbytes/xim->width);
+		    }
+		    GtReadPixels (xim->gt, chan->rf_p->raster, iobuf, 8, x, y,
+			nx, ny);
+
 		    if (iis_debug)
                         fprintf (stderr,
                             "read %d bytes at [%d,%d]\n", nbytes, x, y);
@@ -691,11 +733,30 @@ XtInputId *id_addr;
 			"write %d bytes at [%d,%d]\n", nbytes, x, y);
 		    memset ((void *)iobuf, 0, nbytes);
 		} else {
+		    int nx, ny;
+
+		    /**********  OLD CODE  ********* 
 		    GtWritePixels (xim->gt, chan->rf_p->raster, iobuf, 8, x, y,
 			min(xim->width-x,nbytes), max(1,nbytes/xim->width));
+		    **********  OLD CODE  **********/
+
+		    /*  If the iis.t element is set, it will contain the width
+		    **  of the subraster being written.  In the old scheme we
+		    **  assumed we were writing the entire width of the FB.
+		    */
+		    if (iis.t > 0 && iis.t != ALLBITPL) {
+			nx = min (xim->width-x, iis.t);
+			ny = max (1, nbytes/iis.t);
+		    } else {
+			nx = min (xim->width-x, nbytes);
+			ny = max (1, nbytes/xim->width);
+		    }
+		    GtWritePixels (xim->gt, chan->rf_p->raster, iobuf, 8,
+			x, y, nx, ny);
+
 		    if (iis_debug)
                 	fprintf (stderr, "write %d bytes at x=%d, y=%d\n",
-                    	    nbytes, x, y);
+                    	    nbytes, x, y, nx, ny);
 		}
 
 		return;
@@ -1032,6 +1093,8 @@ int *first, *ngray, *rgb_len;
 	delta = min(maxelem,209) - 209;
 
 	/* Set the colormap. */
+	for (i=0;  i < 256;  i++)
+	    r[i] = g[i] = b[i] = 0;
 	for (i=0;  i < 200 + delta;  i++)
 	    r[i] = g[i] = b[i] = (i * 255 / (200 + delta));
 

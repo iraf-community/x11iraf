@@ -6,6 +6,8 @@
 
 set doHcut	0
 set doVcut	0
+set hstate	0
+set vstate	0
 set plotSpeed	1 ; send plotSpeed  set on True
 set curJump	1 ; send curJump  set on True
 set curTrack	1 ; send curTrack set on True
@@ -130,7 +132,7 @@ foreach w { plotSpeed plotAccurate plotImgPix curJump curSmooth curTrack } {
 
 proc cutPlotToggle { widget type state args } \
 {
-    global doHcut doVcut cutXPos cutYPos
+    global doHcut doVcut cutXPos cutYPos hstate vstate
     set    debug  0
 
     set hstate [send hcut get state]
@@ -226,11 +228,17 @@ proc cutPlotToggle { widget type state args } \
 # Draw the cut plots.
 proc cutPlots { xpos ypos args } \
 {
-    global doHcut doVcut cutXPos cutYPos
+    global doHcut doVcut cutXPos cutYPos hstate vstate
 
     catch {
-        if {$doHcut} { plotHcut $xpos $ypos }
-        if {$doVcut} { plotVcut $xpos $ypos }
+        if {$doHcut} {
+    	    drawHcutIndicator $xpos
+	     if {$hstate} { plotHcut $xpos $ypos }
+	}
+        if {$doVcut} {
+    	    drawVcutIndicator $xpos
+            if {$vstate} { plotVcut $xpos $ypos }
+	}
     }
 
     set cutXPos $xpos  ;  set cutYPos $ypos
@@ -444,7 +452,7 @@ proc vcutInit args \
 proc plotVcut { xpos ypos } \
 {
     global doVcut cutYScale
-    global vcutVec cutXPos plotSpeed
+    global vcutVec cutXPos cutYPos plotSpeed
 
 
     if { ($xpos == 0 && $ypos == 0) || ! $doVcut } \

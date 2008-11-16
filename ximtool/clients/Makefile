@@ -992,7 +992,7 @@ cleandir::
 	$(RM) DONE
 
 cleandir::
-	$(RM) *.[aeo]
+	@(rmbin -v .)
 	touch DONE
 
 includes::

@@ -154,10 +154,30 @@ main()
 
 	    case 'q':					/* QUIT 	  */
 		goto quit;
+	    case 'f':					/* (FAST) REGION  */
+		make_raster (raster, 256, 256, TEST_PATTERN);
+		for (i=0; i < 256; i++) 	/* diagonal 	*/
+		    (void) imd_writeSubRaster(imd,i,i,256,256,raster);
+		for (; i > 0; i--) 		/* left 	*/
+		    (void) imd_writeSubRaster(imd,i,256,256,256,raster);
+		for (i=256; i > 0; i--) 	/* down 	*/
+		    (void) imd_writeSubRaster(imd,0,i,256,256,raster);
+		for (i=0; i < 256; i++) 	/* right 	*/
+		    (void) imd_writeSubRaster(imd,i,0,256,256,raster);
+		for (i=0; i < 256; i++) 	/* up 		*/
+		    (void) imd_writeSubRaster(imd,256,i,256,256,raster);
+		break;
 	    case 'r':					/* WRITE REGION	  */
 		make_raster (raster, 256, 256, TEST_PATTERN);
-		if (imd_writeSubRaster (imd, 128, 128, 256, 256, raster))
-		    printf ("...returns an error\n");
+		for (i=0; i < 100; i++) {
+		    if (imd_writeSubRaster (imd,103+i,103+i,256,256,raster)) {
+		        printf ("...returns an error\n");
+			break;
+		    }
+		}
+
+		/*  Old test to make sure we clip properly.
+
 		make_raster (raster, 32, 32, color);
 		if (imd_writeSubRaster (imd, -16, -16, 32, 32, raster))
 		    printf ("...returns an error\n");
@@ -167,6 +187,7 @@ main()
 		    printf ("...returns an error\n");
 		if (imd_writeSubRaster (imd, 496, 496, 32, 32, raster))
 		    printf ("...returns an error\n");
+		*/
 		color = (color+1 > 209 ? 201 : color+1);
 		break;
 

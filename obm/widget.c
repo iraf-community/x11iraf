@@ -4071,7 +4071,7 @@ char **argv;
 	Widget w = wp->w;
 
 	if (!XtIsRealized(w) || !XtWindow(w))
-	    return;
+	    return (TCL_ERROR);
 
 	XmuUpdateMapHints (obm->display, XtWindow(w), NULL);
 	XWithdrawWindow (obm->display, XtWindow(w),

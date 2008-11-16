@@ -9,7 +9,7 @@ update:
         ;
 
 relink:
-	$set LIBS = "-lds -lxtools -lslalib"
+	$set LIBS = "-lds -lxtools -liminterp -lslalib"
         $update	libpkg.a
         $omake  x_ism.x
         $link   -z x_ism.o libpkg.a -o ism_wcspix.e $(LIBS)

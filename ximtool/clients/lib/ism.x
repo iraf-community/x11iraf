@@ -309,6 +309,8 @@ begin
                 if (n < 0) 
 	            return (EOF)
             } then {
+                if (n < 0) 
+	            return (EOF)
         	call xer_reset()
         	call zdojmp (ism_jmp, X_IPC)
             }

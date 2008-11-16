@@ -1,8 +1,32 @@
-/* $XConsortium: Paned.c,v 1.24 91/10/16 21:36:16 eswu Exp $ */
+/* $XConsortium: Paned.c,v 1.27 94/04/17 20:12:28 kaleb Exp $ */
 
 /***********************************************************
-Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts,
-and the Massachusetts Institute of Technology, Cambridge, Massachusetts.
+
+Copyright (c) 1987, 1988, 1994  X Consortium
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of the X Consortium shall not be
+used in advertising or otherwise to promote the sale, use or other dealings
+in this Software without prior written authorization from the X Consortium.
+
+
+Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
@@ -10,7 +34,7 @@ Permission to use, copy, modify, and distribute this software and its
 documentation for any purpose and without fee is hereby granted, 
 provided that the above copyright notice appear in all copies and that
 both that copyright notice and this permission notice appear in 
-supporting documentation, and that the names of Digital or MIT not be
+supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
 software without specific, written prior permission.  
 
@@ -46,6 +70,9 @@ SOFTWARE.
 #include <X11/Xaw3d/XawInit.h>
 #include <X11/Xaw3d/Grip.h>
 #include <X11/Xaw3d/PanedP.h>
+
+/* I don't know why Paned.c calls _XawImCallVendorShellExtResize, but... */
+#include <X11/Xaw3d/XawImP.h> 
 
 #include <ctype.h>
 
@@ -289,6 +316,7 @@ Dimension * on_size_ret, * off_size_ret;
       request.request_mode |= XtCWQueryOnly;
 
       *result_ret = XtMakeGeometryRequest( (Widget) pw, &request, &reply );
+      _XawImCallVendorShellExtResize( (Widget) pw );
 
       if ( (newsize == old_size) || (*result_ret == XtGeometryNo) ) {
 	  *on_size_ret = old_size;
@@ -390,8 +418,10 @@ Boolean shrink;
 					   backwards. */
     }
     childP = pw->composite.children + _index;
+
+    /* CONSTCOND */
     while(TRUE) {
-        register Pane pane = PaneInfo(*childP);
+        Pane pane = PaneInfo(*childP);
         
         if ( (rules < 3 || SatisfiesRule3(pane, shrink)) &&
 	     (rules < 2 || SatisfiesRule2(pane))         &&
@@ -566,7 +596,7 @@ PanedWidget pw;
 int paneindex;
 Direction dir;
 {
-    register Widget *childP;
+    Widget *childP;
     int pane_size = (int) PaneSize( (Widget) pw, IsVert(pw) );
     int sizeused = 0;
     Position loc = 0;
@@ -578,7 +608,7 @@ Direction dir;
  */
 
     ForAllPanes(pw, childP) {
-        register Pane pane = PaneInfo(*childP);
+        Pane pane = PaneInfo(*childP);
 	AssignMax(pane->size, (int) pane->min);
 	AssignMin(pane->size, (int) pane->max);
 	sizeused += (int) pane->size + (int) pw->paned.internal_bw;
@@ -627,14 +657,14 @@ static void
 CommitNewLocations(pw)
 PanedWidget pw;
 {
-    register Widget *childP;
+    Widget *childP;
     XWindowChanges changes;
 
     changes.stack_mode = Above;
 
     ForAllPanes(pw, childP) {
-	register Pane pane = PaneInfo(*childP);
-	register Widget grip = pane->grip; /* may be NULL. */
+	Pane pane = PaneInfo(*childP);
+	Widget grip = pane->grip; /* may be NULL. */
 
 	if (IsVert(pw)) {
 	    XtMoveWidget(*childP, (Position) 0, pane->delta);
@@ -1025,7 +1055,7 @@ XtPointer junk, callData;
     int loc;
     char action_type;
     Cursor cursor;
-    Direction direction;
+    Direction direction = 0;
     Arg arglist[1];
 
     action_type = *call_data->params[0];
@@ -1422,7 +1452,7 @@ XtWidgetGeometry *request, *reply;
     XtGeometryMask mask = request->request_mode;
     Dimension old_size, old_wpsize, old_paned_size;
     Pane pane = PaneInfo(w);
-    register Boolean vert = IsVert(pw);
+    Boolean vert = IsVert(pw);
     Dimension on_size, off_size;
     XtGeometryResult result;
     Boolean almost = FALSE;
@@ -1499,7 +1529,7 @@ XtWidgetGeometry *request, *reply;
 	    request->height = w->core.height;
 
     almost = GetRequestInfo(request, !vert) != GetRequestInfo(reply, !vert);
-    almost |= GetRequestInfo(request, vert) != GetRequestInfo(reply, vert);
+    almost |= (GetRequestInfo(request, vert) != GetRequestInfo(reply, vert));
 
     if ( (mask & XtCWQueryOnly) || almost ) {
 	pane->wp_size = old_wpsize;
@@ -1542,10 +1572,8 @@ XSetWindowAttributes *attributes;
     PanedWidget pw = (PanedWidget) w;
     Widget * childP;
 
-#ifdef USE_CWCURSOR
     if ((attributes->cursor = (pw)->paned.cursor) != None)
 	*valueMask |= CWCursor;
-#endif
 
     (*SuperClass->core_class.realize) (w, valueMask, attributes);
 
@@ -1568,7 +1596,7 @@ static void
 ReleaseGCs(w)
 Widget w;
 {
-    register PanedWidget pw = (PanedWidget)w;
+    PanedWidget pw = (PanedWidget)w;
 
     XtReleaseGC( w, pw->paned.normgc );
     XtReleaseGC( w, pw->paned.invgc );
@@ -1576,7 +1604,7 @@ Widget w;
 } 
 
 static void InsertChild(w)
-register Widget w;
+Widget w;
 {
    Pane pane = PaneInfo(w);
 
@@ -1623,7 +1651,7 @@ static void ChangeManaged(w)
    PanedWidget pw = (PanedWidget)w;
    Boolean vert = IsVert(pw);
    Dimension size;
-   register Widget *childP;
+   Widget *childP;
 
    if (pw->paned.recursively_called++) return;
 
@@ -1915,4 +1943,3 @@ Boolean allow_resize;
 {
     PaneInfo(widget)->allow_resize = allow_resize;
 }
-

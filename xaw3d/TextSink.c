@@ -1,25 +1,32 @@
-/* $XConsortium: TextSink.c,v 1.17 91/10/16 21:40:09 eswu Exp $ */
+/* $XConsortium: TextSink.c,v 1.19 94/04/17 20:13:11 kaleb Exp $ */
+/*
+
+Copyright (c) 1989, 1994  X Consortium
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of the X Consortium shall not be
+used in advertising or otherwise to promote the sale, use or other dealings
+in this Software without prior written authorization from the X Consortium.
+
+*/
 
 /*
- * Copyright 1989 Massachusetts Institute of Technology
- *
- * Permission to use, copy, modify, distribute, and sell this software and its
- * documentation for any purpose is hereby granted without fee, provided that
- * the above copyright notice appear in all copies and that both that
- * copyright notice and this permission notice appear in supporting
- * documentation, and that the name of M.I.T. not be used in advertising or
- * publicity pertaining to distribution of the software without specific,
- * written prior permission.  M.I.T. makes no representations about the
- * suitability of this software for any purpose.  It is provided "as is"
- * without express or implied warranty.
- *
- * M.I.T. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING ALL
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL M.I.T.
- * BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
- * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
- * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- *
  * Author:  Chris Peterson, MIT X Consortium.
  *
  * Much code taken from X11R3 AsciiSink.
@@ -53,8 +60,6 @@ static void FindDistance(), Resolve(), SetTabs(), GetCursorBounds();
 
 #define offset(field) XtOffsetOf(TextSinkRec, text_sink.field)
 static XtResource resources[] = {
-  {XtNfont, XtCFont, XtRFontStruct, sizeof (XFontStruct *),
-     offset(font), XtRString, XtDefaultFont},
   {XtNforeground, XtCForeground, XtRPixel, sizeof (Pixel),
      offset(foreground), XtRString, XtDefaultForeground}, 
   {XtNbackground, XtCBackground, XtRPixel, sizeof (Pixel),
@@ -120,7 +125,7 @@ static void
 ClassPartInitialize(wc)
 WidgetClass wc;
 {
-  register TextSinkObjectClass t_src, superC;
+  TextSinkObjectClass t_src, superC;
 
   t_src = (TextSinkObjectClass) wc;
   superC = (TextSinkObjectClass) t_src->object_class.superclass;
@@ -222,16 +227,9 @@ Cardinal *num_args;
 {
   TextSinkObject w = (TextSinkObject) new;
   TextSinkObject old_w = (TextSinkObject) current;
-  TextSinkObjectClass class = (TextSinkObjectClass) w->object.widget_class;
 
-  if (w->text_sink.font != old_w->text_sink.font) {
-    (*class->text_sink_class.SetTabs)(new, w->text_sink.tab_count, 
-				      w->text_sink.char_tabs);
-    ((TextWidget)XtParent(new))->text.redisplay_needed = True;
-  } else {
-      if (w->text_sink.foreground != old_w->text_sink.foreground)
-	  ((TextWidget)XtParent(new))->text.redisplay_needed = True;
-  }
+  if (w->text_sink.foreground != old_w->text_sink.foreground)
+     ((TextWidget)XtParent(new))->text.redisplay_needed = True;
 
   return FALSE;
 }
@@ -403,11 +401,13 @@ MaxLines(w, height)
 Widget w;
 Dimension height;
 {
-  TextSinkObject sink = (TextSinkObject) w;
-  int font_height;
-
-  font_height = sink->text_sink.font->ascent + sink->text_sink.font->descent;
-  return( ((int) height) / font_height );
+  /*
+   * The fontset has gone down to descent Sink Widget, so
+   * the functions such MaxLines, SetTabs... are bound to the descent.
+   *
+   * by Li Yuhong, Jan. 15, 1991
+   */
+  return 0;
 }
 
 /*	Function Name: MaxHeight
@@ -424,10 +424,7 @@ MaxHeight(w, lines)
 Widget w;
 int lines;
 {
-  TextSinkObject sink = (TextSinkObject) w;
-
-  return(lines * (sink->text_sink.font->ascent + 
-		  sink->text_sink.font->descent));
+  return 0;
 }
 
 /*	Function Name: SetTabs
@@ -438,47 +435,14 @@ int lines;
  *	Returns: none
  */
 
+/*ARGSUSED*/
 static void
 SetTabs(w, tab_count, tabs)
 Widget w;
 int tab_count;
 short *tabs;
 {
-  TextSinkObject sink = (TextSinkObject) w;
-  int i;
-  Atom XA_FIGURE_WIDTH;
-  unsigned long figure_width = 0;
-  XFontStruct *font = sink->text_sink.font;
-
-/*
- * Find the figure width of the current font.
- */
-
-  XA_FIGURE_WIDTH = XInternAtom(XtDisplayOfObject(w), "FIGURE_WIDTH", FALSE);
-  if ( XA_FIGURE_WIDTH != None && 
-       ( (!XGetFontProperty(font, XA_FIGURE_WIDTH, &figure_width)) ||
-	 (figure_width == 0)) ) 
-    if (font->per_char && font->min_char_or_byte2 <= '$' &&
-	font->max_char_or_byte2 >= '$')
-      figure_width = font->per_char['$' - font->min_char_or_byte2].width;
-    else
-      figure_width = font->max_bounds.width;
-
-  if (tab_count > sink->text_sink.tab_count) {
-    sink->text_sink.tabs = (Position *)
-	XtRealloc((char *) sink->text_sink.tabs,
-		  (Cardinal) (tab_count * sizeof(Position)));
-    sink->text_sink.char_tabs = (short *)
-	XtRealloc((char *) sink->text_sink.char_tabs,
-		  (Cardinal) (tab_count * sizeof(short)));
-  }
-
-  for ( i = 0 ; i < tab_count ; i++ ) {
-    sink->text_sink.tabs[i] = tabs[i] * figure_width;
-    sink->text_sink.char_tabs[i] = tabs[i];
-  }
-    
-  sink->text_sink.tab_count = tab_count;
+  return;
 }
 
 /*	Function Name: GetCursorBounds
@@ -593,9 +557,7 @@ void
 #if NeedFunctionPrototypes
 XawTextSinkClearToBackground (Widget w,
 #if NeedWidePrototypes
-			      int x, int y, 
-				unsigned int width, 
-				unsigned int height)
+			      int x, int y, int width, int height)
 #else
 			      Position x, Position y, 
 			      Dimension width, Dimension height)
@@ -726,7 +688,7 @@ int
 #if NeedFunctionPrototypes
 XawTextSinkMaxLines(Widget w,
 #if NeedWidePrototypes
-		    /* Dimension */ unsigned int height)
+		    /* Dimension */ int height)
 #else
 		    Dimension height)
 #endif
@@ -784,8 +746,8 @@ int tab_count, *tabs;
   if (tab_count > 0) {
     TextSinkObjectClass class = (TextSinkObjectClass) w->core.widget_class;
     short *char_tabs = (short*)XtMalloc( (unsigned)tab_count*sizeof(short) );
-    register short *tab;
-    register int i;
+    short *tab;
+    int i;
 
     for (i = tab_count, tab = char_tabs; i; i--) *tab++ = (short)*tabs++;
 

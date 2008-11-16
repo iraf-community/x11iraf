@@ -194,7 +194,7 @@ XTOOLONLYLIB =  -no_so -lXt -so_archive
 #endif
 
 /* Set needed flags for the OS X.  Shut off the endless -Wall warnings.*/
-#if defined (PpcDarwinArchitecture) || defined (TenonServer)
+#if defined (DarwinArchitecture)
         CCOPTIONS = -w
 #endif
 

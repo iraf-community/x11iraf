@@ -1,29 +1,31 @@
-/* $XConsortium: AsciiSrc.c,v 1.57 92/05/15 13:56:09 keith Exp $ */
+/* $XConsortium: AsciiSrc.c,v 1.65 94/04/17 20:11:45 kaleb Exp $ */
 
 /*
- * Copyright 1989 Massachusetts Institute of Technology
- *
- * Permission to use, copy, modify, distribute, and sell this software and its
- * documentation for any purpose is hereby granted without fee, provided that
- * the above copyright notice appear in all copies and that both that
- * copyright notice and this permission notice appear in supporting
- * documentation, and that the name of M.I.T. not be used in advertising or
- * publicity pertaining to distribution of the software without specific,
- * written prior permission.  M.I.T. makes no representations about the
- * suitability of this software for any purpose.  It is provided "as is"
- * without express or implied warranty.
- *
- * M.I.T. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING ALL
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL M.I.T.
- * BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
- * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
- * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- *
- * Author:  Chris Peterson, MIT X Consortium.
- *
- * Much code taken from X11R3 String and Disk Sources.
- */
+
+Copyright (c) 1989, 1994  X Consortium
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of the X Consortium shall not be
+used in advertising or otherwise to promote the sale, use or other dealings
+in this Software without prior written authorization from the X Consortium.
+
+*/
 
 /*
  * AsciiSrc.c - AsciiSrc object. (For use with the text widget).
@@ -36,14 +38,19 @@
 #include <errno.h>
 #include <X11/StringDefs.h>
 #include <X11/Xos.h>
+#ifndef X_NOT_STDC_ENV
+#include <stdlib.h>
+#endif
 #include <X11/Xfuncs.h>
 #include <X11/Xaw3d/XawInit.h>
 #include <X11/Xaw3d/AsciiSrcP.h>
 #include <X11/Xmu/Misc.h>
 #include <X11/Xmu/CharSet.h>
+#include <X11/Xaw3d/MultiSrcP.h> 
+
 
 #if (defined(ASCII_STRING) || defined(ASCII_DISK))
-#  include <X11/Xaw/AsciiText.h> /* for Widget Classes. */
+#  include <X11/Xaw3d/AsciiText.h> /* for Widget Classes. */
 #endif
 
 
@@ -91,9 +98,16 @@ static void RemoveOldStringOrFile(),  CvtStringToAsciiType();
 static void ClassInitialize(), Initialize(), Destroy(), GetValuesHook();
 static String MyStrncpy(), StorePiecesInString();
 static Boolean SetValues(), WriteToFile();
+#ifdef X_NOT_STDC_ENV
 extern int errno;
-#if !defined(__APPLE__) || (__APPLE_CC__ < 1151)
-extern int sys_nerr;
+#endif
+
+#ifdef X_NOT_POSIX
+#define Off_t long
+#define Size_t unsigned int
+#else
+#define Off_t off_t
+#define Size_t size_t
 #endif
 
 #define superclass		(&textSrcClassRec)
@@ -167,7 +181,7 @@ ClassInitialize()
 {
   XawInitializeWidgetSet();
   XtAddConverter( XtRString, XtRAsciiType, CvtStringToAsciiType,
-		 (XtConvertArgList) NULL, (Cardinal) 0);
+		 NULL, (Cardinal) 0);
 }
 
 /*      Function Name: Initialize
@@ -192,6 +206,8 @@ Cardinal *num_args;
  * Set correct flags (override resources) depending upon widget class.
  */
 
+  src->text_src.text_format = XawFmt8Bit;	/* data format. */
+
 #ifdef ASCII_DISK
   if (XtIsSubclass(XtParent(new), asciiDiskWidgetClass)) {
     src->ascii_src.type = XawAsciiFile;
@@ -210,10 +226,9 @@ Cardinal *num_args;
   src->ascii_src.allocated_string = FALSE;
 
   file = InitStringOrFile(src, src->ascii_src.type == XawAsciiFile);
-  LoadPieces(src, file, (char *) NULL);
+  LoadPieces(src, file, NULL);
 
-  if (file != NULL) 
-    (void) fclose(file);
+  if (file != NULL) fclose(file);
 }
 
 /*	Function Name: ReadText
@@ -355,8 +370,8 @@ XawTextBlock *text;
       
       ptr = start_piece->text + (startPos - start_first);
       MyStrncpy(ptr + fill, ptr, 
-		(int) (start_piece->used - (startPos - start_first)));
-      (void) strncpy(ptr, text->ptr + firstPos, fill);
+		(int) start_piece->used - (startPos - start_first));
+      strncpy(ptr, text->ptr + firstPos, fill);
       
       startPos += fill;
       firstPos += fill;
@@ -368,8 +383,8 @@ XawTextBlock *text;
   if (src->ascii_src.use_string_in_place)
     start_piece->text[start_piece->used] = '\0';
 
-  /* Call callbacks, we have changed the buffer. */
-  XtCallCallbacks(w, XtNcallback, (XtPointer) NULL); 
+  XtCallCallbacks(w, XtNcallback, NULL); /* Call callbacks, we have changed 
+					    the buffer. */
 
   return(XawEditDone);
 }
@@ -402,10 +417,10 @@ int     	      count;
 Boolean	              include;
 {
   AsciiSrcObject src = (AsciiSrcObject) w;
-  register int inc;
-  Piece * piece;
-  XawTextPosition first, first_eol_position;
-  register char * ptr;
+  int inc;
+  Piece* piece;
+  XawTextPosition first, first_eol_position = 0;
+  char* ptr;
 
   if (type == XawstAll) {	/* Optomize this common case. */
     if (dir == XawsdRight)
@@ -447,8 +462,9 @@ Boolean	              include;
   case XawstWhiteSpace: 
     for ( ; count > 0 ; count-- ) {
       Boolean non_space = FALSE, first_eol = TRUE;
+      /* CONSTCOND */
       while (TRUE) {
-	register unsigned char c = *ptr;
+	unsigned char c = *ptr;
 
 	ptr += inc;
 	position += inc;
@@ -502,7 +518,9 @@ Boolean	              include;
   case XawstPositions: 
     position += count * inc;
     break;
-/*  case XawstAll:		---- handled in special code above */
+  case XawstAll:		/* handled in special code above */
+  default: 
+    break;
   }
 
   if ( dir == XawsdLeft )
@@ -533,8 +551,8 @@ XawTextScanDirection  dir;
 XawTextBlock *        text;
 {
   AsciiSrcObject src = (AsciiSrcObject) w;
-  register int inc, count = 0;
-  register char * ptr;
+  int inc, count = 0;
+  char * ptr;
   Piece * piece;
   char * buf;
   XawTextPosition first;
@@ -548,11 +566,12 @@ XawTextBlock *        text;
     position--;
   }
 
-  buf = XtMalloc((unsigned) sizeof(unsigned char) * text->length);
-  (void) strncpy(buf, (text->ptr + text->firstPos), text->length);
+  buf = XtMalloc((unsigned)sizeof(unsigned char) * text->length);
+  strncpy(buf, (text->ptr + text->firstPos), text->length);
   piece = FindPiece(src, position, &first);
   ptr = (position - first) + piece->text;
 
+  /* CONSTCOND */
   while (TRUE) {
     if (*ptr == ((dir == XawsdRight) ? *(buf + count) 
 		                     : *(buf + text->length - count - 1)) ) {
@@ -635,11 +654,10 @@ Cardinal * num_args;
   if ( string_set || (old_src->ascii_src.type != src->ascii_src.type) ) {
     RemoveOldStringOrFile(old_src, string_set); /* remove old info. */
     file = InitStringOrFile(src, string_set);	/* Init new info. */
-    LoadPieces(src, file, (char *) NULL);       /* load new info. */
-    if (file != NULL) 
-	(void) fclose(file);
-    /* Tell text widget what happened. */
-    XawTextSetSource( XtParent(new), new, (XawTextPosition) 0);   
+    LoadPieces(src, file, NULL);    /* load new info into internal buffers. */
+    if (file != NULL) fclose(file);
+    XawTextSetSource( XtParent(new), new, 0);   /* Tell text widget
+						   what happened. */
     total_reset = TRUE;
   }
 
@@ -650,7 +668,7 @@ Cardinal * num_args;
       (old_src->ascii_src.piece_size != src->ascii_src.piece_size) ) {
       String string = StorePiecesInString(old_src);
       FreeAllPieces(old_src);
-      LoadPieces(src, (FILE *) NULL, string);
+      LoadPieces(src, NULL, string);
       XtFree(string);
   }
 
@@ -673,7 +691,7 @@ ArgList args;
 Cardinal * num_args;
 {
   AsciiSrcObject src = (AsciiSrcObject) w;
-  register int i;
+  int i;
 
   if (src->ascii_src.type == XawAsciiString) {
     for (i = 0; i < *num_args ; i++ ) 
@@ -726,6 +744,19 @@ Widget w;
 {
   AsciiSrcObject src = (AsciiSrcObject) w;
 
+  /* If the src is really a multi, call the multi routine.*/
+
+  if ( XtIsSubclass( w, multiSrcObjectClass ) ) {
+      _XawMultiSourceFreeString( w );
+      return;
+  }
+
+  else if ( !XtIsSubclass( w, asciiSrcObjectClass ) ) {
+      XtErrorMsg("bad argument", "asciiSource", "XawError",
+            "XawAsciiSourceFreeString's parameter must be an asciiSrc or multiSrc.",
+	     NULL, NULL);
+  }
+
   if (src->ascii_src.allocated_string && src->ascii_src.type != XawAsciiFile) {
     src->ascii_src.allocated_string = FALSE;
     XtFree(src->ascii_src.string);
@@ -749,6 +780,17 @@ Widget w;
 {
   AsciiSrcObject src = (AsciiSrcObject) w;
 
+  /* If the src is really a multi, call the multi save. */
+
+  if ( XtIsSubclass( w, multiSrcObjectClass ) )
+      return( _XawMultiSave( w ) );
+
+  else if ( !XtIsSubclass( w, asciiSrcObjectClass ) ) {
+      	XtErrorMsg("bad argument", "asciiSource", "XawError",
+		"XawAsciiSave's parameter must be an asciiSrc or multiSrc.",
+		   NULL, NULL);
+  }
+
 /*
  * If using the string in place then there is no need to play games
  * to get the internal info into a readable string.
@@ -771,7 +813,7 @@ Widget w;
     }
     XtFree(string);
   }
-  else {			/* This is a string widget. */
+  else {
     if (src->ascii_src.allocated_string == TRUE) 
       XtFree(src->ascii_src.string);
     else
@@ -803,6 +845,17 @@ String name;
   String string;
   Boolean ret;
 
+  /* If the src is really a multi, call the multi save. - */
+
+  if ( XtIsSubclass( w, multiSrcObjectClass ) )
+      return( _XawMultiSaveAsFile( w, name ) );
+
+  else if ( !XtIsSubclass( w, asciiSrcObjectClass ) ) {
+      	XtErrorMsg("bad argument", "asciiSource", "XawError",
+		"XawAsciiSaveAsFile's 1st parameter must be an asciiSrc or multiSrc.",
+		   NULL, NULL);
+  }
+
   string = StorePiecesInString(src); 
 
   ret = WriteToFile(string, name);
@@ -824,7 +877,17 @@ XawAsciiSourceChanged(w)
 Widget w;
 #endif
 {
-  return( ((AsciiSrcObject) w)->ascii_src.changes );
+  if ( XtIsSubclass( w, multiSrcObjectClass ) )
+      return( ( (MultiSrcObject) w )->multi_src.changes );
+
+  if ( XtIsSubclass( w, asciiSrcObjectClass ) )
+      return( ( (AsciiSrcObject) w)->ascii_src.changes );
+
+  XtErrorMsg("bad argument", "asciiSource", "XawError",
+		"XawAsciiSourceChanged parameter must be an asciiSrc or multiSrc.",
+		   NULL, NULL);
+
+  return( True ); /* for gcc -Wall */
 }
   
 /************************************************************
@@ -885,12 +948,12 @@ AsciiSrcObject src;
   XawTextPosition first;
   Piece * piece;
 
-  string = 
-    XtMalloc((unsigned)(sizeof(unsigned char) * src->ascii_src.length + 1));
+  string = XtMalloc((unsigned) sizeof(unsigned char) * 
+		    src->ascii_src.length + 1);
   
   for (first = 0, piece = src->ascii_src.first_piece ; piece != NULL; 
        first += piece->used, piece = piece->next) 
-    (void) strncpy(string + first, piece->text, (int) piece->used);
+    strncpy(string + first, piece->text, piece->used);
 
   string[src->ascii_src.length] = '\0';	/* NULL terminate this sucker. */
 
@@ -900,7 +963,7 @@ AsciiSrcObject src;
 
   if (src->ascii_src.data_compression) {	
     FreeAllPieces(src);
-    LoadPieces(src, (FILE *) NULL, string);
+    LoadPieces(src, NULL, string);
   }
 
   return(string);
@@ -917,7 +980,7 @@ InitStringOrFile(src, newString)
 AsciiSrcObject src;
 Boolean newString;
 {
-    char * open_mode;
+    char * open_mode = NULL;
     FILE * file;
     char fileName[TMPSIZ];
 
@@ -958,14 +1021,14 @@ Boolean newString;
 	if (src->ascii_src.string == NULL)
 	    XtErrorMsg("NoFile", "asciiSourceCreate", "XawError",
 		     "Creating a read only disk widget and no file specified.",
-		       (String *)NULL, (Cardinal *)0);
+		       NULL, 0);
 	open_mode = "r";
 	break;
     case XawtextAppend:
     case XawtextEdit:
 	if (src->ascii_src.string == NULL) {
 	    src->ascii_src.string = fileName;
-	    (void) mkstemp(src->ascii_src.string);
+	    (void) tmpnam(src->ascii_src.string);
 	    src->ascii_src.is_tempfile = TRUE;
 	    open_mode = "w";
 	} else
@@ -974,7 +1037,7 @@ Boolean newString;
     default:
 	XtErrorMsg("badMode", "asciiSourceCreate", "XawError",
 		"Bad editMode for ascii source; must be Read, Append or Edit.",
-		   (String *)NULL, (Cardinal *)NULL);
+		   NULL, NULL);
     }
 
     /* Allocate new memory for the temp filename, because it is held in
@@ -989,21 +1052,15 @@ Boolean newString;
     
     if (!src->ascii_src.is_tempfile) {
 	if ((file = fopen(src->ascii_src.string, open_mode)) != 0) {
-	    (void) fseek(file, 0L, 2);
-	    src->ascii_src.length = ftell(file);
+	    (void) fseek(file, (Off_t)0, 2);
+	    src->ascii_src.length = (XawTextPosition) ftell(file);
 	    return file;
 	} else {
 	    String params[2];
 	    Cardinal num_params = 2;
-	    char msg[11];
 	    
 	    params[0] = src->ascii_src.string;
-	    if (errno > 0)
-		params[1] = (char *)strerror(errno);
-	    else {
-		(void) sprintf(msg, "errno=%.4d", errno);
-		params[1] = msg;
-	    }
+	    params[1] = strerror(errno);
 	    XtAppWarningMsg(XtWidgetToApplicationContext((Widget)src),
 			    "openError", "asciiSourceCreate", "XawWarning",
 			    "Cannot open file %s; %s", params, &num_params);
@@ -1020,20 +1077,20 @@ FILE * file;
 char * string;
 {
   char *local_str, *ptr;
-  register Piece * piece = NULL;
+  Piece * piece = NULL;
   XawTextPosition left;
 
   if (string == NULL) {
     if (src->ascii_src.type == XawAsciiFile) {
-      local_str = 
-	XtMalloc((unsigned)(src->ascii_src.length + 1) *sizeof(unsigned char));
+      local_str = XtMalloc((unsigned) (src->ascii_src.length + 1) 
+			   * sizeof(unsigned char));
       if (src->ascii_src.length != 0) {
-	(void) fseek(file, 0L, 0);
-	if ( fread(local_str, sizeof(unsigned char),
-		   (int)src->ascii_src.length, file) != src->ascii_src.length ) 
+	fseek(file, (Off_t)0, 0);
+	src->ascii_src.length = fread(local_str, (Size_t)sizeof(unsigned char),
+				      (Size_t)src->ascii_src.length, file);
+	if (src->ascii_src.length <= 0)
 	  XtErrorMsg("readError", "asciiSourceCreate", "XawError",
-		     "fread returned error.", 
-		     (String *)NULL, (Cardinal *) NULL);
+		     "fread returned error.", NULL, NULL);
       }
       local_str[src->ascii_src.length] = '\0';
     }
@@ -1043,13 +1100,6 @@ char * string;
   else
     local_str = string;
 
-/*
- * If we are using teh string in place then set the other fields as follows:
- *
- * piece_size = length;
- * piece->used = src->ascii_src.length;
- */
-  
   if (src->ascii_src.use_string_in_place) {
     piece = AllocNewPiece(src, piece);
     piece->used = Min(src->ascii_src.length, src->ascii_src.piece_size);
@@ -1063,11 +1113,11 @@ char * string;
   do {
     piece = AllocNewPiece(src, piece);
 
-    piece->text = 
-      XtMalloc((unsigned)src->ascii_src.piece_size * sizeof(unsigned char));
+    piece->text = XtMalloc((unsigned)src->ascii_src.piece_size
+			   * sizeof(unsigned char));
     piece->used = Min(left, src->ascii_src.piece_size);
     if (piece->used != 0)
-      (void) strncpy(piece->text, ptr, (int) piece->used);
+      strncpy(piece->text, ptr, piece->used);
 
     left -= piece->used;
     ptr += piece->used;
@@ -1120,7 +1170,7 @@ AsciiSrcObject src;
   Piece * next, * first = src->ascii_src.first_piece;
 
   if (first->prev != NULL)
-    (void) printf("Programmer Botch in FreeAllPieces, there may be a memory leak.\n");
+    (void) printf("Xaw AsciiSrc Object: possible memory leak in FreeAllPieces().\n");
 
   for ( ; first != NULL ; first = next ) {
     next = first->next;
@@ -1167,7 +1217,7 @@ FindPiece(src, position, first)
 AsciiSrcObject src;
 XawTextPosition position, *first;
 {
-  Piece * old_piece, * piece = src->ascii_src.first_piece;
+  Piece * old_piece = NULL, * piece = src->ascii_src.first_piece;
   XawTextPosition temp;
 
   for ( temp = 0 ; piece != NULL ; temp += piece->used, piece = piece->next ) {
@@ -1193,12 +1243,19 @@ MyStrncpy(s1, s2, n)
 char * s1, * s2;
 int n;
 {
-  char * temp = XtMalloc((unsigned) sizeof(unsigned char) * n);
+  char buf[256];
+  char* temp;
 
-  (void) strncpy(temp, s2, n);/* Saber has a bug that causes it to generate*/
-  (void) strncpy(s1, temp, n);/* a bogus warning message here (CDP 6/32/89)*/
-  XtFree(temp);
-  return(s1);
+  if (n == 0) return s1;
+
+  if (n < sizeof buf) temp = buf;
+  else temp = XtMalloc((unsigned)sizeof(unsigned char) * n);
+
+  strncpy(temp, s2, n);		/* Saber has a bug that causes it to generate*/
+  strncpy(s1, temp, n);		/* a bogus warning message here (CDP 6/32/89)*/
+
+  if (temp != buf) XtFree(temp);
+  return s1;
 }
   
 /*	Function Name: BreakPiece
@@ -1217,10 +1274,9 @@ Piece * piece;
 {
   Piece * new = AllocNewPiece(src, piece);
   
-  new->text = 
-    XtMalloc((unsigned) src->ascii_src.piece_size * sizeof(unsigned char));
-  (void) strncpy(new->text, piece->text + HALF_PIECE,
-	  (int)(src->ascii_src.piece_size - HALF_PIECE));
+  new->text = XtMalloc(src->ascii_src.piece_size * sizeof(unsigned char));
+  strncpy(new->text, piece->text + HALF_PIECE,
+	  src->ascii_src.piece_size - HALF_PIECE);
   piece->used = HALF_PIECE;
   new->used = src->ascii_src.piece_size - HALF_PIECE; 
 }
@@ -1237,26 +1293,34 @@ XrmValuePtr	toVal;
   static XrmQuark  XtQEstring = NULLQUARK;
   static XrmQuark  XtQEfile;
   XrmQuark q;
-  char lowerName[BUFSIZ];
+  char lowerName[40];
 
   if (XtQEstring == NULLQUARK) {
     XtQEstring = XrmPermStringToQuark(XtEstring);
     XtQEfile   = XrmPermStringToQuark(XtEfile);
   }
 
-  XmuCopyISOLatin1Lowered(lowerName, (char *) fromVal->addr);
-  q = XrmStringToQuark(lowerName);
+  if (strlen ((char*)fromVal->addr) < sizeof lowerName) {
+    XmuCopyISOLatin1Lowered(lowerName, (char *) fromVal->addr);
+    q = XrmStringToQuark(lowerName);
 
-  if (q == XtQEstring) type = XawAsciiString;
-  if (q == XtQEfile)  type = XawAsciiFile;
-
-  (*toVal).size = sizeof(XawAsciiType);
-  (*toVal).addr = (XPointer) &type;
-  return;
+    if (q == XtQEstring)     type = XawAsciiString;
+    else if (q == XtQEfile)  type = XawAsciiFile;
+    else {
+      toVal->size = 0;
+      toVal->addr = NULL;
+      return;
+    }
+    toVal->size = sizeof type;
+    toVal->addr = (XPointer) &type;
+    return;
+  }
+  toVal->size = 0;
+  toVal->addr = NULL;
 }
 
 #if (defined(ASCII_STRING) || defined(ASCII_DISK))
-#  include <X11/Xaw/Cardinals.h>
+#  include <X11/Xaw3d/Cardinals.h>
 #endif
 
 #ifdef ASCII_STRING
@@ -1328,7 +1392,7 @@ Cardinal num_args;
   XawTextSource src;
   ArgList ascii_args;
   Arg temp[1];
-  register int i;
+  int i;
 
   XtSetArg(temp[0], XtNtype, XawAsciiFile);
   ascii_args = XtMergeArgLists(temp, ONE, args, num_args);

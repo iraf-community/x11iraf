@@ -1,8 +1,32 @@
-/* $XConsortium: AsciiSink.c,v 1.59 91/10/16 22:16:18 eswu Exp $ */
+/* $XConsortium: AsciiSink.c,v 1.62 94/04/17 20:11:41 kaleb Exp $ */
 
 /***********************************************************
-Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts,
-and the Massachusetts Institute of Technology, Cambridge, Massachusetts.
+
+Copyright (c) 1987, 1988, 1994  X Consortium
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of the X Consortium shall not be
+used in advertising or otherwise to promote the sale, use or other dealings
+in this Software without prior written authorization from the X Consortium.
+
+
+Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
@@ -10,7 +34,7 @@ Permission to use, copy, modify, and distribute this software and its
 documentation for any purpose and without fee is hereby granted, 
 provided that the above copyright notice appear in all copies and that
 both that copyright notice and this permission notice appear in 
-supporting documentation, and that the names of Digital or MIT not be
+supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
 software without specific, written prior permission.  
 
@@ -26,8 +50,6 @@ SOFTWARE.
 
 #include <stdio.h>
 
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
 #include <X11/Xatom.h>
 #include <X11/IntrinsicP.h>
 #include <X11/StringDefs.h>
@@ -44,6 +66,8 @@ SOFTWARE.
 
 static void Initialize(), Destroy();
 static Boolean SetValues();
+static int MaxLines(), MaxHeight();
+static void SetTabs();
 
 static void DisplayText(), InsertCursor(), FindPosition();
 static void FindDistance(), Resolve(), GetCursorBounds();
@@ -51,6 +75,8 @@ static void FindDistance(), Resolve(), GetCursorBounds();
 #define offset(field) XtOffsetOf(AsciiSinkRec, ascii_sink.field)
 
 static XtResource resources[] = {
+    {XtNfont, XtCFont, XtRFontStruct, sizeof (XFontStruct *),
+	offset(font), XtRString, XtDefaultFont},
     {XtNecho, XtCOutput, XtRBoolean, sizeof(Boolean),
 	offset(echo), XtRImmediate, (XtPointer) True},
     {XtNdisplayNonprinting, XtCOutput, XtRBoolean, sizeof(Boolean),
@@ -103,9 +129,9 @@ AsciiSinkClassRec asciiSinkClassRec = {
     /* FindPosition             */      FindPosition,
     /* FindDistance             */      FindDistance,
     /* Resolve                  */      Resolve,
-    /* MaxLines                 */      XtInheritMaxLines,
-    /* MaxHeight                */      XtInheritMaxHeight,
-    /* SetTabs                  */      XtInheritSetTabs,
+    /* MaxLines                 */      MaxLines,
+    /* MaxHeight                */      MaxHeight,
+    /* SetTabs                  */      SetTabs,
     /* GetCursorBounds          */      GetCursorBounds
   },
 /* ascii_sink_class fields */
@@ -124,9 +150,9 @@ Widget w;
 int x;
 unsigned char c;
 {
-    register int    i, width, nonPrinting;
+    int    i, width, nonPrinting;
     AsciiSinkObject sink = (AsciiSinkObject) w;
-    XFontStruct *font = sink->text_sink.font;
+    XFontStruct *font = sink->ascii_sink.font;
     Position *tab;
 
     if ( c == XawLF ) return(0);
@@ -192,7 +218,7 @@ int len;
     TextWidget ctx = (TextWidget) XtParent(w);
 
     Position max_x;
-    Dimension width = XTextWidth(sink->text_sink.font, (char *) buf, len); 
+    Dimension width = XTextWidth(sink->ascii_sink.font, (char *) buf, len); 
     max_x = (Position) ctx->core.width;
 
     if ( ((int) width) <= -x)	           /* Don't draw if we can't see it. */
@@ -203,14 +229,12 @@ int len;
     if ( (((Position) width + x) > max_x) && (ctx->text.margin.right != 0) ) {
 	x = ctx->core.width - ctx->text.margin.right;
 	width = ctx->text.margin.right;
-/*
 	XFillRectangle(XtDisplay((Widget) ctx), XtWindow( (Widget) ctx),
 		       sink->ascii_sink.normgc, (int) x,
-		       (int) y - sink->text_sink.font->ascent, 
+		       (int) y - sink->ascii_sink.font->ascent, 
 		       (unsigned int) width,
-		       (unsigned int) (sink->text_sink.font->ascent +
-				       sink->text_sink.font->descent));
-*/
+		       (unsigned int) (sink->ascii_sink.font->ascent +
+				       sink->ascii_sink.font->descent));
 	return(0);
     }
     return(width);
@@ -240,9 +264,9 @@ XawTextPosition pos1, pos2;
 
     if (!sink->ascii_sink.echo) return;
 
-    y += sink->text_sink.font->ascent;
+    y += sink->ascii_sink.font->ascent;
     for ( j = 0 ; pos1 < pos2 ; ) {
-	pos1 = XawTextSourceRead(source, pos1, &blk, (int)(pos2 - pos1));
+	pos1 = XawTextSourceRead(source, pos1, &blk, (int) pos2 - pos1);
 	for (k = 0; k < blk.length; k++) {
 	    if (j >= BUFSIZ) {	/* buffer full, dump the text. */
 	        x += PaintText(w, gc, x, y, buf, j);
@@ -263,10 +287,10 @@ XawTextPosition pos1, pos2;
 		width = CharWidth(w, x, (unsigned char) '\t');
 		XFillRectangle(XtDisplayOfObject(w), XtWindowOfObject(w),
 			       invgc, (int) x,
-			       (int) y - sink->text_sink.font->ascent,
+			       (int) y - sink->ascii_sink.font->ascent,
 			       (unsigned int) width,
-			       (unsigned int) (sink->text_sink.font->ascent +
-					       sink->text_sink.font->descent));
+			       (unsigned int) (sink->ascii_sink.font->ascent +
+					       sink->ascii_sink.font->descent));
 		x += width;
 		j = -1;
 	    }
@@ -362,17 +386,17 @@ int *resHeight;			/* Height required. */
     AsciiSinkObject sink = (AsciiSinkObject) w;
     Widget source = XawTextGetSource(XtParent(w));
 
-    register XawTextPosition index, lastPos;
-    register unsigned char c;
+    XawTextPosition index, lastPos;
+    unsigned char c;
     XawTextBlock blk;
 
     /* we may not need this */
     lastPos = GETLASTPOS;
-    XawTextSourceRead(source, fromPos, &blk, (int)(toPos - fromPos));
+    XawTextSourceRead(source, fromPos, &blk, (int) toPos - fromPos);
     *resWidth = 0;
     for (index = fromPos; index != toPos && index < lastPos; index++) {
 	if (index - blk.firstPos >= blk.length)
-	    XawTextSourceRead(source, index, &blk, (int)(toPos - fromPos));
+	    XawTextSourceRead(source, index, &blk, (int) toPos - fromPos);
 	c = blk.ptr[index - blk.firstPos];
 	*resWidth += CharWidth(w, fromx + *resWidth, c);
 	if (c == XawLF) {
@@ -381,7 +405,7 @@ int *resHeight;			/* Height required. */
 	}
     }
     *resPos = index;
-    *resHeight = sink->text_sink.font->ascent +sink->text_sink.font->descent;
+    *resHeight = sink->ascii_sink.font->ascent +sink->ascii_sink.font->descent;
 }
 
 
@@ -401,8 +425,8 @@ int *resHeight;			/* Height required. */
     AsciiSinkObject sink = (AsciiSinkObject) w;
     Widget source = XawTextGetSource(XtParent(w));
 
-    XawTextPosition lastPos, index, whiteSpacePosition;
-    int     lastWidth, whiteSpaceWidth;
+    XawTextPosition lastPos, index, whiteSpacePosition = 0;
+    int     lastWidth = 0, whiteSpaceWidth = 0;
     Boolean whiteSpaceSeen;
     unsigned char c;
     XawTextBlock blk;
@@ -440,7 +464,7 @@ int *resHeight;			/* Height required. */
     }
     if (index == lastPos && c != XawLF) index = lastPos + 1;
     *resPos = index;
-    *resHeight = sink->text_sink.font->ascent +sink->text_sink.font->descent;
+    *resHeight = sink->ascii_sink.font->ascent +sink->ascii_sink.font->descent;
 }
 
 static void
@@ -467,7 +491,7 @@ AsciiSinkObject sink;
 			  GCGraphicsExposures | GCForeground | GCBackground );
     XGCValues values;
 
-    values.font = sink->text_sink.font->fid;
+    values.font = sink->ascii_sink.font->fid;
     values.graphics_exposures = (Bool) FALSE;
     
     values.foreground = sink->text_sink.foreground;
@@ -551,7 +575,7 @@ Cardinal *num_args;
     AsciiSinkObject w = (AsciiSinkObject) new;
     AsciiSinkObject old_w = (AsciiSinkObject) current;
 
-    if (w->text_sink.font != old_w->text_sink.font
+    if (w->ascii_sink.font != old_w->ascii_sink.font
 	|| w->text_sink.background != old_w->text_sink.background
 	|| w->text_sink.foreground != old_w->text_sink.foreground) {
 	XtReleaseGC((Widget)w, w->ascii_sink.normgc);
@@ -567,4 +591,103 @@ Cardinal *num_args;
     }
     
     return False;
+}
+
+/*	Function Name: MaxLines
+ *	Description: Finds the Maximum number of lines that will fit in
+ *                   a given height.
+ *	Arguments: w - the AsciiSink Object.
+ *                 height - height to fit lines into.
+ *	Returns: the number of lines that will fit.
+ */
+
+/* ARGSUSED */
+static int
+MaxLines(w, height)
+Widget w;
+Dimension height;
+{
+  AsciiSinkObject sink = (AsciiSinkObject) w;
+  int font_height;
+
+  font_height = sink->ascii_sink.font->ascent + sink->ascii_sink.font->descent;
+  return( ((int) height) / font_height );
+}
+
+/*	Function Name: MaxHeight
+ *	Description: Finds the Minium height that will contain a given number 
+ *                   lines.
+ *	Arguments: w - the AsciiSink Object.
+ *                 lines - the number of lines.
+ *	Returns: the height.
+ */
+
+/* ARGSUSED */
+static int
+MaxHeight(w, lines)
+Widget w;
+int lines;
+{
+  AsciiSinkObject sink = (AsciiSinkObject) w;
+
+  return(lines * (sink->ascii_sink.font->ascent + 
+		  sink->ascii_sink.font->descent));
+}
+
+/*	Function Name: SetTabs
+ *	Description: Sets the Tab stops.
+ *	Arguments: w - the AsciiSink Object.
+ *                 tab_count - the number of tabs in the list.
+ *                 tabs - the text positions of the tabs.
+ *	Returns: none
+ */
+
+static void
+SetTabs(w, tab_count, tabs)
+Widget w;
+int tab_count;
+short *tabs;
+{
+  AsciiSinkObject sink = (AsciiSinkObject) w;
+  int i;
+  Atom XA_FIGURE_WIDTH;
+  unsigned long figure_width = 0;
+  XFontStruct *font = sink->ascii_sink.font;
+
+/*
+ * Find the figure width of the current font.
+ */
+
+  XA_FIGURE_WIDTH = XInternAtom(XtDisplayOfObject(w), "FIGURE_WIDTH", FALSE);
+  if ( (XA_FIGURE_WIDTH != None) && 
+       ( (!XGetFontProperty(font, XA_FIGURE_WIDTH, &figure_width)) ||
+	 (figure_width == 0)) ) 
+    if (font->per_char && font->min_char_or_byte2 <= '$' &&
+	font->max_char_or_byte2 >= '$')
+      figure_width = font->per_char['$' - font->min_char_or_byte2].width;
+    else
+      figure_width = font->max_bounds.width;
+
+  if (tab_count > sink->text_sink.tab_count) {
+    sink->text_sink.tabs = (Position *)
+	XtRealloc((char *) sink->text_sink.tabs,
+		  (Cardinal) (tab_count * sizeof(Position)));
+    sink->text_sink.char_tabs = (short *)
+	XtRealloc((char *) sink->text_sink.char_tabs,
+		  (Cardinal) (tab_count * sizeof(short)));
+  }
+
+  for ( i = 0 ; i < tab_count ; i++ ) {
+    sink->text_sink.tabs[i] = tabs[i] * figure_width;
+    sink->text_sink.char_tabs[i] = tabs[i];
+  }
+    
+  sink->text_sink.tab_count = tab_count;
+
+#ifndef NO_TAB_FIX
+  {  TextWidget ctx = (TextWidget)XtParent(w);
+      ctx->text.redisplay_needed = True;
+      _XawTextBuildLineTable(ctx, ctx->text.lt.top, TRUE);
+  }
+#endif
 }

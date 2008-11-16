@@ -9,7 +9,7 @@
 #define	MAX_FBCONFIG		128	/* max possible frame buf sizes	*/
 #define	MAX_FRAMES		16	/* max number of frames		*/
 #define	MAX_MAPPINGS		100	/* max number of mappings/frame	*/
-#define	MAX_CLIENTS		8	/* max display server clients	*/
+#define	MAX_CLIENTS		32	/* max display server clients	*/
 #define	MAX_ISM			8	/* max ISM module clients	*/
 #define	MAX_COLORMAPS		256	/* max number of colormaps	*/
 #define	MAX_COLORS		256	/* max size colormap		*/
@@ -47,11 +47,12 @@
 #define	M_FILL			2
 
 /* Magic numbers. */
-#define DEF_PORT	   5137			/* default tcp/ip socket      */
-#define	I_DEVNAME	   "/dev/imt1o"		/* pseudo device names        */
-#define	O_DEVNAME	   "/dev/imt1i"		/* our IN is client's OUT     */
-#define	DEF_UNIXADDR	   "/tmp/.IMT%d"	/* default unix socket        */
-#define DEF_ANTIALIASTYPE  "boxcar"		/* default antialiasing       */
+#define DEF_PORT	   5137			/* default tcp/ip socket     */
+#define	DEF_NPORTS	   1			/* no. of inet ports to open */
+#define	I_DEVNAME	   "/dev/imt1o"		/* pseudo device names       */
+#define	O_DEVNAME	   "/dev/imt1i"		/* our IN is client's OUT    */
+#define	DEF_UNIXADDR	   "/tmp/.IMT%d"	/* default unix socket       */
+#define DEF_ANTIALIASTYPE  "boxcar"		/* default antialiasing      */
 #define	FBCONFIG_1	   ".imtoolrc"
 #define	FBCONFIG_2	   "/usr/local/lib/imtoolrc"
 #define	CMAPCONFIG	   "/usr/local/lib/imtoolcmap"
@@ -63,6 +64,7 @@
 #define	DEF_ISM_TEMPLATE   "/tmp/.ISM%d_%d"	/* ISM client socket template */
 #define DEF_ISM_TASK	   "wcspix"
 #define DEF_ISM_CMD	   "ism_wcspix.e wcspix &"
+#define DEF_ISM_CMD	   "/usr/local/bin/ism_wcspix.e wcspix &"
 #define	SZ_ISMBUF	   4096
 
 /* WCS definitions. */
@@ -259,6 +261,7 @@ typedef struct {
 	int def_nframes;		/* default number of frames 	     */
 	int ncolors;			/* number of image pixel colors      */
 	int tileBorder;			/* image border when tiling frames   */
+	int cm_focus;			/* colormap update screen size       */
 	String borderColor;		/* border color for tileFrames 	     */
 	String gui;			/* GUI file name 		     */
 	String imtoolrc;		/* imtoolrc file name 		     */
@@ -275,6 +278,7 @@ typedef struct {
 	String ism_addr;		/* format for ISM unix socket path   */
 	String ism_task;		/* image support module taskname     */
 	int port;			/* port for INET socket	 	     */
+	int nports;			/* no. of INET ports to open 	     */
 
 	/* Internal state. */
 	XtPointer obm;			/* object manager 		*/
@@ -345,6 +349,8 @@ XimData ximtool_data;
 #define	XtCMemModel		"MemModel"
 #define	XtNuserCMap1		"cmap1"
 #define	XtNuserCMap2		"cmap2"
+#define	XtNcmFocus		"cmFocus"
+#define	XtCCmFocus		"cmFocus"
 #define	XtCUserCMap		"UserCMap"
 #define	XtNuserCMapDir1		"cmapDir1"
 #define	XtNuserCMapDir2		"cmapDir2"
@@ -361,6 +367,8 @@ XimData ximtool_data;
 #define	XtCIsm_addr		"Ism_addr"
 #define	XtNport			"port"
 #define	XtCPort			"Port"
+#define	XtNnports		"nports"
+#define	XtCNPorts		"NPorts"
 #define	XtNism_task		"ism_task"
 #define	XtCIsm_task		"Ism_task"
 
@@ -463,6 +471,15 @@ static XtResource resources[] = {
 	XtOffsetOf(XimData, highlightFrames),
 	XtRImmediate,
 	(caddr_t)TRUE
+    },
+    {
+	XtNcmFocus,
+	XtCCmFocus,
+	XtRInt,
+	sizeof(int),
+	XtOffsetOf(XimData, cm_focus),
+	XtRImmediate,
+	(caddr_t)512
     },
     {
 	XtNgui,
@@ -580,6 +597,15 @@ static XtResource resources[] = {
 	XtOffsetOf(XimData, port),
 	XtRImmediate,
 	(caddr_t)DEF_PORT
+    },
+    {
+	XtNnports,
+	XtCNPorts,
+	XtRInt,
+	sizeof(int),
+	XtOffsetOf(XimData, nports),
+	XtRImmediate,
+	(caddr_t)DEF_NPORTS
     },
     {
 	XtNism_task,

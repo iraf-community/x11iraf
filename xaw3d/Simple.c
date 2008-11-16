@@ -1,8 +1,32 @@
-/* $XConsortium: Simple.c,v 1.34 91/10/16 21:39:47 eswu Exp $ */
+/* $XConsortium: Simple.c,v 1.36 94/04/17 20:12:43 kaleb Exp $ */
 
 /***********************************************************
-Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts,
-and the Massachusetts Institute of Technology, Cambridge, Massachusetts.
+
+Copyright (c) 1987, 1988, 1994  X Consortium
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of the X Consortium shall not be
+used in advertising or otherwise to promote the sale, use or other dealings
+in this Software without prior written authorization from the X Consortium.
+
+
+Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
@@ -10,7 +34,7 @@ Permission to use, copy, modify, and distribute this software and its
 documentation for any purpose and without fee is hereby granted, 
 provided that the above copyright notice appear in all copies and that
 both that copyright notice and this permission notice appear in 
-supporting documentation, and that the names of Digital or MIT not be
+supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
 software without specific, written prior permission.  
 
@@ -44,6 +68,8 @@ static XtResource resources[] = {
      offset(pointer_bg), XtRString, XtDefaultBackground},
   {XtNcursorName, XtCCursor, XtRString, sizeof(String),
      offset(cursor_name), XtRString, NULL},
+  {XtNinternational, XtCInternational, XtRBoolean, sizeof(Boolean),
+     offset(international), XtRImmediate, (XtPointer) FALSE},
 #undef offset
 };
 
@@ -113,9 +139,9 @@ static void ClassInitialize()
 static void ClassPartInitialize(class)
     WidgetClass class;
 {
-    register SimpleWidgetClass c = (SimpleWidgetClass)class;
-    register SimpleWidgetClass super = (SimpleWidgetClass) 
-	c->core_class.superclass;
+    SimpleWidgetClass c     = (SimpleWidgetClass) class;
+    SimpleWidgetClass super = (SimpleWidgetClass)
+      c->core_class.superclass;
 
     if (c->simple_class.change_sensitive == NULL) {
 	char buf[BUFSIZ];
@@ -132,41 +158,20 @@ static void ClassPartInitialize(class)
 }
 
 static void Realize(w, valueMask, attributes)
-    register Widget w;
+    Widget w;
     Mask *valueMask;
     XSetWindowAttributes *attributes;
 {
-    Pixmap border_pixmap;
-#ifndef USE_XMU_STIPPLE
-    Screen *screen = XtScreen((Widget)w);
-    Display *display = XtDisplay((Widget)w);
-    int pixmap_width = 2, pixmap_height = 2;
-    static unsigned char pixmap_bits[] = {
-        0x02, 0x01,
-    };
-#endif
-
+    Pixmap border_pixmap = 0;
     if (!XtIsSensitive(w)) {
 	/* change border to gray; have to remember the old one,
 	 * so XtDestroyWidget deletes the proper one */
 	if (((SimpleWidget)w)->simple.insensitive_border == None)
-#ifdef USE_XMU_STIPPLE
 	    ((SimpleWidget)w)->simple.insensitive_border =
 		XmuCreateStippledPixmap(XtScreen(w),
 					w->core.border_pixel, 
 					w->core.background_pixel,
 					w->core.depth);
-#else
-	    ((SimpleWidget)w)->simple.insensitive_border =
-                XCreatePixmapFromBitmapData (display,
-                            RootWindowOfScreen(screen),
-                            (char *)pixmap_bits,
-                            pixmap_width, pixmap_height,
-                            w->core.border_pixel,
-                            w->core.background_pixel,
-                            w->core.depth);
-
-#endif
         border_pixmap = w->core.border_pixmap;
 	attributes->border_pixmap =
 	  w->core.border_pixmap = ((SimpleWidget)w)->simple.insensitive_border;
@@ -177,10 +182,8 @@ static void Realize(w, valueMask, attributes)
 
     ConvertCursor(w);
 
-#ifdef USE_CWCURSOR
     if ((attributes->cursor = ((SimpleWidget)w)->simple.cursor) != None)
 	*valueMask |= CWCursor;
-#endif
 
     XtCreateWindow( w, (unsigned int)InputOutput, (Visual *)CopyFromParent,
 		    *valueMask, attributes );
@@ -235,6 +238,9 @@ static Boolean SetValues(current, request, new, args, num_args)
     SimpleWidget s_new = (SimpleWidget) new;
     Boolean new_cursor = FALSE;
 
+    /* this disables user changes after creation*/
+    s_new->simple.international = s_old->simple.international;
+
     if ( XtIsSensitive(current) != XtIsSensitive(new) )
 	(*((SimpleWidgetClass)XtClass(new))->
 	     simple_class.change_sensitive) ( new );
@@ -262,44 +268,23 @@ static Boolean SetValues(current, request, new, args, num_args)
 
 
 static Boolean ChangeSensitive(w)
-    register Widget w;
+    Widget w;
 {
-#ifndef USE_XMU_STIPPLE
-    Screen *screen = XtScreen((Widget)w);
-    Display *display = XtDisplay((Widget)w);
-    int pixmap_width = 2, pixmap_height = 2;
-    static unsigned char pixmap_bits[] = {
-        0x02, 0x01,
-    };
-#endif
-
-
     if (XtIsRealized(w)) {
-	if (XtIsSensitive(w)) {
+	if (XtIsSensitive(w))
 	    if (w->core.border_pixmap != XtUnspecifiedPixmap)
 		XSetWindowBorderPixmap( XtDisplay(w), XtWindow(w),
 				        w->core.border_pixmap );
 	    else
 		XSetWindowBorder( XtDisplay(w), XtWindow(w), 
 				  w->core.border_pixel );
-	} else {
+	else {
 	    if (((SimpleWidget)w)->simple.insensitive_border == None)
-#ifdef USE_XMU_STIPPLE
 		((SimpleWidget)w)->simple.insensitive_border =
 		    XmuCreateStippledPixmap(XtScreen(w),
 					    w->core.border_pixel, 
 					    w->core.background_pixel,
 					    w->core.depth);
-#else
-		((SimpleWidget)w)->simple.insensitive_border =
-		    XCreatePixmapFromBitmapData (display,
-                            RootWindowOfScreen(screen),
-                            (char *)pixmap_bits,
-                            pixmap_width, pixmap_height,
-                            w->core.border_pixel,
-                            w->core.background_pixel,
-                            w->core.depth);
-#endif
 	    XSetWindowBorderPixmap( XtDisplay(w), XtWindow(w),
 				    ((SimpleWidget)w)->
 				        simple.insensitive_border );

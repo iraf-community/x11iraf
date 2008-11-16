@@ -48,7 +48,7 @@ XCOMM - The following are for SunSoft/Solaris
   EXTRA_LDOPTIONS = -xildoff
       GCC_FLAGS = 
        AC_FLAGS = -DNO_GETWD=1 -DNO_WAIT3=1 -DHAVE_UNISTD_H=1 \
-		  -DNO_UNION_WAIT=1 -DNEED_MATHERR=1
+		  -DNO_UNION_WAIT=1 -DNEED_MATHERR=1 -DUSE_STDARG
     COMPAT_OBJS = tclMtherr.o
 #else
 
@@ -102,10 +102,17 @@ XCOMM - The following are for AIX on Rs/6000
     COMPAT_OBJS = tclMtherr.o
 
 #else
+#if defined(cygwinArchitecture)
+
+      GCC_FLAGS = -DUSE_STDARG
+       AC_FLAGS = -DHAVE_UNISTD_H=1 -DNO_UNION_WAIT=1 -DNO_STDLIB_H=1
+    COMPAT_OBJS =
+#else
 
       GCC_FLAGS =
        AC_FLAGS =
     COMPAT_OBJS =
+#endif
 #endif
 #endif
 #endif

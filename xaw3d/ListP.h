@@ -1,36 +1,36 @@
+/* $XConsortium: ListP.h,v 1.14 94/04/17 20:12:17 kaleb Exp $ */
+
 /*
- * $XConsortium: ListP.h,v 1.12 89/12/11 15:09:04 kit Exp $
- *
- * Copyright 1989 Massachusetts Institute of Technology
- *
- * Permission to use, copy, modify, distribute, and sell this software and its
- * documentation for any purpose is hereby granted without fee, provided that
- * the above copyright notice appear in all copies and that both that
- * copyright notice and this permission notice appear in supporting
- * documentation, and that the name of M.I.T. not be used in advertising or
- * publicity pertaining to distribution of the software without specific,
- * written prior permission.  M.I.T. makes no representations about the
- * suitability of this software for any purpose.  It is provided "as is"
- * without express or implied warranty.
- *
- * M.I.T. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING ALL
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL M.I.T.
- * BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
- * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN 
- * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- *
- * Author:  Chris D. Peterson, MIT X Consortium
- */
+Copyright (c) 1989, 1994  X Consortium
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of the X Consortium shall not be
+used in advertising or otherwise to promote the sale, use or other dealings
+in this Software without prior written authorization from the X Consortium.
+*/
 
 
 /* 
  * ListP.h - Private definitions for List widget
  * 
- * This is the List widget, it is useful to display a list, without the
- * overhead of having a widget for each item in the list.  It allows 
- * the user to select an item in a list and notifies the application through
- * a callback function.
+ * This is a List widget.  It allows the user to select an item in a list and
+ * notifies the application through a callback function.
  *
  *	Created: 	8/13/88
  *	By:		Chris D. Peterson
@@ -70,31 +70,33 @@ extern ListClassRec listClassRec;
 typedef struct {
     /* resources */
     Pixel	foreground;
-    Dimension	internal_width,
+    Dimension	internal_width, /* if not 3d, user sets directly. */
         	internal_height,
-                column_space,
-                row_space;
+                column_space,	/* half of *_space is add on top/bot/left of*/
+                row_space;	/* each item's text bounding box. half added to longest for right */
     int         default_cols;
     Boolean     force_cols,
                 paste,
                 vertical_cols;
-    int         longest;
+    int         longest;	/* in pixels */
     int         nitems;		/* number of items in the list. */
     XFontStruct	*font;
-    String *    list;
-    XtCallbackList  callback;
+    XFontSet 	fontset;	/* Sheeran, Omron KK, 93/03/05 */
+    String *    list;		/* for i18n, always in multibyte format */
+    XtCallbackList callback;
 
     /* private state */
-
     int         is_highlighted,	/* set to the item currently highlighted. */
-                highlight,	/*set to the item that should be highlighted.*/
+                highlight,	/* set to the item that should be highlighted.*/
                 col_width,	/* width of each column. */
                 row_height,	/* height of each row. */
                 nrows,		/* number of rows in the list. */
                 ncols;		/* number of columns in the list. */
-    GC		normgc,		/* a couple o' GC's. */
+    GC		normgc,		/* a couple of GC's. */
                 revgc,
                 graygc;		/* used when inactive. */
+
+    int         freedoms;       /* flags for resizing height and width */
 
 } ListPart;
 

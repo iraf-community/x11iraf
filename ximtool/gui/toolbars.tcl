@@ -491,9 +491,11 @@ proc tbToggleAutoReg args \
     if {$auto_reg} {
         cpAutoRegister autoregButton dummy 0
         set auto_reg 0
+        send tbAutoReg set state 0
     } else {
         cpAutoRegister autoregButton dummy 1
         set auto_reg 1
+        send tbAutoReg set state 1
     }
 }
 
@@ -529,9 +531,9 @@ proc tbTileFramesToggle args \
     set value [send tileFramesButton get on]
     if {$value} { set not 0 } else { set not 1 }
 
-    send tileFramesButton set on [expr $not]
-    send tbTile set on [expr $not]
-    cpSetTileFrames
+    send tileFramesButton set on $not
+    send tbTile set state $not
+    cpSetTileFrames tbTile junk $not
 }
 
 

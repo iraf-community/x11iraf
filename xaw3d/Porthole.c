@@ -1,24 +1,28 @@
 /*
- * $XConsortium: Porthole.c,v 1.14 91/03/14 16:48:01 converse Exp $
+ * $XConsortium: Porthole.c,v 1.16 94/04/17 20:12:34 kaleb Exp $
  *
- * Copyright 1990 Massachusetts Institute of Technology
- *
- * Permission to use, copy, modify, distribute, and sell this software and its
- * documentation for any purpose is hereby granted without fee, provided that
- * the above copyright notice appear in all copies and that both that
- * copyright notice and this permission notice appear in supporting
- * documentation, and that the name of M.I.T. not be used in advertising or
- * publicity pertaining to distribution of the software without specific,
- * written prior permission.  M.I.T. makes no representations about the
- * suitability of this software for any purpose.  It is provided "as is"
- * without express or implied warranty.
- *
- * M.I.T. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING ALL
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL M.I.T.
- * BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
- * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN 
- * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+Copyright (c) 1990, 1994  X Consortium
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of the X Consortium shall not be
+used in advertising or otherwise to promote the sale, use or other dealings
+in this Software without prior written authorization from the X Consortium.
  *
  * Author:  Jim Fulton, MIT X Consortium
  * 
@@ -26,11 +30,10 @@
  * panner or scrollbar to navigate.
  */
 
-#include <X11/IntrinsicP.h>		/* get basic toolkit stuff */
+#include <X11/IntrinsicP.h>
 #include <X11/StringDefs.h>		/* get XtN and XtC defines */
 #include <X11/Xaw3d/XawInit.h>		/* get Xaw initialize stuff */
 #include <X11/Xaw3d/PortholeP.h>		/* get porthole structs */
-
 #include <X11/Xmu/Misc.h>		/* for MAX */
 
 
@@ -111,10 +114,10 @@ WidgetClass portholeWidgetClass = (WidgetClass) &portholeClassRec;
  *****************************************************************************/
 
 static Widget find_child (pw)
-    register PortholeWidget pw;
+    PortholeWidget pw;
 {
-    register Widget *children;
-    register int i;
+    Widget *children;
+    int i;
 
     /*
      * Find the managed child on which we should operate.  Ignore multiple
@@ -201,7 +204,7 @@ static void layout_child (pw, child, geomp, xp, yp, widthp, heightp)
 
 
 static void Realize (gw, valueMask, attributes)
-    register Widget gw;
+    Widget gw;
     Mask *valueMask;
     XSetWindowAttributes *attributes;
 {
@@ -242,7 +245,7 @@ static XtGeometryResult QueryGeometry (gw, intended, preferred)
     Widget gw;
     XtWidgetGeometry *intended, *preferred;
 {
-    register PortholeWidget pw = (PortholeWidget) gw;
+    PortholeWidget pw = (PortholeWidget) gw;
     Widget child = find_child (pw);
 
     if (child) {
@@ -361,4 +364,3 @@ static void ChangeManaged (gw)
 	SendReport (pw, (unsigned int) XawPRAll);
     }
 }
-

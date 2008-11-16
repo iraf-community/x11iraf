@@ -2,10 +2,10 @@
 #
 # XIMTOOL.GUI -- Default GUI for the Ximtool image display server.
 #
-# Version 1.3 -- EXPORT VERSION
+# Version 2.0 -- BETA VERSION
 
 
-set Version	"NOAO/IRAF XImtool Version 1.3EXPORT"
+set Version	"NOAO/IRAF XImtool Version 2.0BETA"
 
 
 reset-server
@@ -37,6 +37,7 @@ set Objects(ximtool) { \
 	hcutFrame	Gterm		hcutPlot\
 	display		Frame		vcutFrame\
 	vcutFrame	Gterm		vcutPlot\
+	display		Slider2d	focusSlider\
 \
 	display		Group		plotOpts\
 	plotOpts	Layout		poptsLayout\

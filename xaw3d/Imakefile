@@ -11,7 +11,8 @@ XCOMM #define DoSharedLib SharedLibXaw
 #define HasSharedData YES
 #define LibName Xaw3d
 #define SoRev SOXAWREV
-#define IncSubdir Xaw3d
+#define IncSubSubdir Xaw3d
+#define IncSubdir X11
 
 #ifdef LinuxArchitecture
 JUMP_ROOT_Xaw3d = $(AWIDGETSRC)3d
@@ -38,18 +39,20 @@ JUMP_LDLIBS_Xaw3d = $(JUMP_ROOT_Xt)/libXt.sa $(JUMP_ROOT_Xt)/libXmu.sa \
 REQUIREDLIBS = SharedXawReqs
 #endif
 
+XCOMM DEFINES = XawI18nDefines
 DEFINES = 
 
        LINTLIBS = $(LINTXLIB) $(LINTXTOOL)
 
 #if defined(PpcDarwinArchitecture) || defined (TenonServer)
 XCOMM - The following is for OS X on a PowerPC
-  EXTRA_DEFINES = -DARROW_SCROLLBAR -traditional-cpp
+  EXTRA_DEFINES = -DARROW_SCROLLBAR -traditional-cpp -DUSEGRAY
 #else
-  EXTRA_DEFINES = -DARROW_SCROLLBAR
+  EXTRA_DEFINES = -DARROW_SCROLLBAR -DUSEGRAY
 #endif
 
  EXTRA_INCLUDES = -I. -I../include
+
 
 HEADERS = \
 	AllWidgets.h \
@@ -72,10 +75,16 @@ HEADERS = \
 	GripP.h \
 	Label.h \
 	LabelP.h \
+	Layout.h \
+	LayoutP.h \
 	List.h \
 	ListP.h \
 	MenuButton.h \
 	MenuButtoP.h \
+	MultiSrc.h \
+	MultiSrcP.h \
+	MultiSink.h \
+	MultiSinkP.h \
 	Paned.h \
 	PanedP.h \
 	Panner.h \
@@ -116,8 +125,10 @@ HEADERS = \
 	ToggleP.h \
 	Tree.h \
 	TreeP.h \
+	VendorEP.h \
 	Viewport.h \
 	ViewportP.h \
+	XawImP.h \
 	XawInit.h
 
 SRCS = \
@@ -127,12 +138,13 @@ SRCS = \
 	AsciiText.c \
 	Box.c \
 	Command.c \
-	Dialog.c \
-	Form.c \
+	Dialog.c \ Form.c \
 	Grip.c \
 	Label.c \
 	List.c \
 	MenuButton.c \
+	MultiSrc.c \
+	MultiSink.c \
 	Paned.c \
 	Panner.c \
 	Porthole.c \
@@ -156,9 +168,12 @@ SRCS = \
 	Tree.c \
 	Vendor.c \
 	Viewport.c \
+	XawIm.c \
 	XawInit.c \
-	sharedlib.c 
-
+	XawI18n.c \
+	sharedlib.c \
+	laygram.c \
+	laylex.c
 
 #if SharedDataSeparation
 UNSHAREDOBJS = AllWidgets.o sharedlib.o
@@ -177,6 +192,8 @@ OBJS = \
 	Label.o \
 	List.o \
 	MenuButton.o \
+	MultiSrc.o \
+	MultiSink.o \
 	Paned.o \
 	Panner.o \
 	Porthole.o \
@@ -198,9 +215,15 @@ OBJS = \
 	ThreeD.o \
 	Toggle.o \
 	Tree.o \
+	Vendor.o \
 	Viewport.o \
-	XawInit.o 
+	XawIm.o \
+	XawI18n.o \
+	XawInit.o \
+	laygram.o \
+	laylex.o
 
+XCOMM #include <Library.tmpl>
 
 #ifdef LexCmd
 LEX=LexCmd
@@ -208,6 +231,7 @@ LEX=LexCmd
 #ifdef YaccCmd
 YACC=YaccCmd
 #endif
+
 
 all:: libXaw3d.a
 
@@ -256,7 +280,9 @@ install::
 	@(set -x; $(CP) -p libXaw3d.a X11irafLibDir/libXaw3d.a)
 #endif
 
+
 depend:: laygram.c laylex.c
+
 
 #if DoSharedLib && SharedDataSeparation
 SpecialCObjectRule(sharedlib.o,NullParameter,$(SHLIBDEF))
@@ -267,12 +293,6 @@ laygram.c : laygram.y
 	sed 's/yy/LayYY/g' y.tab.c > laygram.c
 	sed 's/yy/LayYY/g' y.tab.h > laygram.h
 	$(RM) y.tab.c y.tab.h
-
-# Hack to compile under SunPRO V4 on Solaris
-#if defined (SunArchitecture) && HasSunC && OSMajorVersion >= 5
-laygram.o:
-        $(CC) $(EXTRA_INCLUDES) -c laygram.c
-#endif
 
 laylex.c: laylex.l
 	$(LEX) laylex.l

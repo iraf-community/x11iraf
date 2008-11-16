@@ -2,9 +2,9 @@
 #
 # XIMTOOL-ALT.GUI -- Default GUI for the Ximtool-alt image display server.
 #
-# Version 1.3 -- EXPORT VERSION
+# Version 2.0 -- BETA VERSION
 
-set Version     "NOAO/IRAF XImtool Version 1.3EXPORT"
+set Version     "NOAO/IRAF XImtool Version 2.0BETA"
 
 reset-server
 
@@ -56,6 +56,7 @@ set Objects(ximtool) { \
 	hcutFrame	Gterm		hcutPlot\
 	display		Frame		vcutFrame\
 	vcutFrame	Gterm		vcutPlot\
+	display		Slider2d	focusSlider\
 \
 	display		Group		plotOpts\
 	plotOpts	Layout		poptsLayout\
@@ -510,6 +511,7 @@ set Objects(parameters) { \
 	ximtool		Parameter	frameFit\
 	ximtool		Parameter	enhancement\
 	ximtool		Parameter	colortables\
+	ximtool		Parameter	cmfocus\
 	ximtool		Parameter	autoscale\
 	ximtool		Parameter	antialias\
 	ximtool		Parameter	tileFrames\
@@ -698,7 +700,7 @@ set Resources(global) {	\
     ! Define some global widget resources for the main panels.
     !---------------------------------------------------------
     *shadowWidth:			1
-    *background:			gray77
+    *background:			#c4c4c4
 !   *foreground:			black
     *Arrow.width:			16
     *Arrow.height:			25
@@ -717,18 +719,18 @@ set Resources(global) {	\
     *Group.shrinkToFit:			True
 
     *Arrow.foreground:			gray
-    *Arrow.background:			gray68
-    *Text*background:			gray68
-    *AsciiText*background:		gray68
-    *TextBox.background:		gray68
-    *MultiList*background:		gray68
-    *Slider2d.thumbColor:		gray77
+    *Arrow.background:			#adadad
+    *Text*background:			#adadad
+    *AsciiText*background:		#adadad
+    *TextBox.background:		#adadad
+    *MultiList*background:		#adadad
+    *Slider2d.thumbColor:		#c4c4c4
 
 
     !-------------------------------------------------------------
     ! Define resources to take advantage of the	3D scrollbar look.
     !-------------------------------------------------------------
-    *Scrollbar*background:		gray77
+    *Scrollbar*background:		#c4c4c4
     *Scrollbar*shadowWidth:		1
     *Scrollbar*width:			15
     *Scrollbar*height:			15
@@ -746,52 +748,110 @@ set Resources(global) {	\
     *SmeBSB.leftMargin:			10
     *SmeBSB.rightMargin:		5
     *SmeBSB.shadowWidth:		2
-    *SmeBSB.foreground:			gray90
+    *SmeBSB.foreground:			#e5e5e5
     *SmeBSB.background:			SteelBlue
-    *SimpleMenu.background:		gray77
+    *SimpleMenu.background:		#c4c4c4
     *SimpleMenu.borderWidth:		2
     *SimpleMenu.borderColor:		black
-    *SimpleMenu.line1.foreground:	gray61
-    *SimpleMenu.line2.foreground:	gray91
-    *SimpleMenu.line3.foreground:	gray61
-    *SimpleMenu.line4.foreground:	gray91
-    *SimpleMenu.line5.foreground:	gray61
-    *SimpleMenu.line6.foreground:	gray91
-    *SimpleMenu.line7.foreground:	gray61
-    *SimpleMenu.line8.foreground:	gray91
-    *SimpleMenu.line9.foreground:	gray61
-    *SimpleMenu.line10.foreground:	gray91
-    *SimpleMenu.line11.foreground:	gray61
-    *SimpleMenu.line12.foreground:	gray91
-    *SimpleMenu.line13.foreground:	gray61
-    *SimpleMenu.line14.foreground:	gray91
-    *SimpleMenu.line15.foreground:	gray61
-    *SimpleMenu.line16.foreground:	gray91
-    *SimpleMenu.line17.foreground:	gray61
-    *SimpleMenu.line18.foreground:	gray91
-    *SimpleMenu.line19.foreground:	gray61
-    *SimpleMenu.line20.foreground:	gray91
-    *SimpleMenu.line21.foreground:	gray61
-    *SimpleMenu.line22.foreground:	gray91
-    *SimpleMenu.line23.foreground:	gray61
-    *SimpleMenu.line24.foreground:	gray91
-    *SimpleMenu.line25.foreground:	gray61
-    *SimpleMenu.line26.foreground:	gray91
-    *SimpleMenu.line27.foreground:	gray61
-    *SimpleMenu.line28.foreground:	gray91
-    *SimpleMenu.line29.foreground:	gray61
-    *SimpleMenu.line30.foreground:	gray91
-    *SimpleMenu.line31.foreground:	gray61
-    *SimpleMenu.line32.foreground:	gray91
-    *SimpleMenu.line33.foreground:	gray61
-    *SimpleMenu.line34.foreground:	gray91
-    *SimpleMenu.line35.foreground:	gray61
-    *SimpleMenu.line36.foreground:	gray91
-    *SimpleMenu.line37.foreground:	gray61
-    *SimpleMenu.line38.foreground:	gray91
-    *SimpleMenu.line39.foreground:	gray61
-    *SimpleMenu.line40.foreground:	gray91
+    *SimpleMenu.line1.foreground:	#9c9c9c
+    *SimpleMenu.line2.foreground:	#e8e8e8
+    *SimpleMenu.line3.foreground:	#9c9c9c
+    *SimpleMenu.line4.foreground:	#e8e8e8
+    *SimpleMenu.line5.foreground:	#9c9c9c
+    *SimpleMenu.line6.foreground:	#e8e8e8
+    *SimpleMenu.line7.foreground:	#9c9c9c
+    *SimpleMenu.line8.foreground:	#e8e8e8
+    *SimpleMenu.line9.foreground:	#9c9c9c
+    *SimpleMenu.line10.foreground:	#e8e8e8
+    *SimpleMenu.line11.foreground:	#9c9c9c
+    *SimpleMenu.line12.foreground:	#e8e8e8
+    *SimpleMenu.line13.foreground:	#9c9c9c
+    *SimpleMenu.line14.foreground:	#e8e8e8
+    *SimpleMenu.line15.foreground:	#9c9c9c
+    *SimpleMenu.line16.foreground:	#e8e8e8
+    *SimpleMenu.line17.foreground:	#9c9c9c
+    *SimpleMenu.line18.foreground:	#e8e8e8
+    *SimpleMenu.line19.foreground:	#9c9c9c
+    *SimpleMenu.line20.foreground:	#e8e8e8
+    *SimpleMenu.line21.foreground:	#9c9c9c
+    *SimpleMenu.line22.foreground:	#e8e8e8
+    *SimpleMenu.line23.foreground:	#9c9c9c
+    *SimpleMenu.line24.foreground:	#e8e8e8
+    *SimpleMenu.line25.foreground:	#9c9c9c
+    *SimpleMenu.line26.foreground:	#e8e8e8
+    *SimpleMenu.line27.foreground:	#9c9c9c
+    *SimpleMenu.line28.foreground:	#e8e8e8
+    *SimpleMenu.line29.foreground:	#9c9c9c
+    *SimpleMenu.line30.foreground:	#e8e8e8
+    *SimpleMenu.line31.foreground:	#9c9c9c
+    *SimpleMenu.line32.foreground:	#e8e8e8
+    *SimpleMenu.line33.foreground:	#9c9c9c
+    *SimpleMenu.line34.foreground:	#e8e8e8
+    *SimpleMenu.line35.foreground:	#9c9c9c
+    *SimpleMenu.line36.foreground:	#e8e8e8
+    *SimpleMenu.line37.foreground:	#9c9c9c
+    *SimpleMenu.line38.foreground:	#e8e8e8
+    *SimpleMenu.line39.foreground:	#9c9c9c
+    *SimpleMenu.line40.foreground:	#e8e8e8
+
+
+    !---------------------------------------------
+    !  Fixups for 24-bit displays
+    !---------------------------------------------
+    *hFindEntry.background:		#adadad
+    *hdrIGText.background:		#adadad
+    *hdrKGText.background:		#adadad
+    *hfEntry.background:		#adadad
+    *printcmd.background:		#adadad
+    *titleString.background:		#adadad
+    *fnameText.background:		#adadad
+    *imtemplateText.background:		#adadad
+    *z1Value.background:		#adadad
+    *z2Value.background:		#adadad
+    *nsampValue.background:		#adadad
+    *saveFile.background:		#adadad
+    *infoText.background:		#adadad
+    *wtName.background:			#adadad
+    *wtTitle.background:		#adadad
+    *wtFBCfg.background:		#adadad
+    *wtIPixval.background:		#adadad
+    *wtSPixval.background:		#adadad
+    *wtBPixval.background:		#adadad
+    *wtWcs1.background:			#adadad
+    *wtWcs2.background:			#adadad
+    *wtWcs3.background:			#adadad
+    *wtWcs4.background:			#adadad
+    *wcsIsmCmd.background:		#adadad
+    *tclEntry.background:		#adadad
+
+    *hFindEntry.foreground:		#000000
+    *hdrIGText.foreground:		#000000
+    *hdrKGText.foreground:		#000000
+    *hfEntry.foreground:		#000000
+    *printcmd.foreground:		#000000
+    *titleString.foreground:		#000000
+    *fnameText.foreground:		#000000
+    *imtemplateText.foreground:		#000000
+    *z1Value.foreground:		#000000
+    *z2Value.foreground:		#000000
+    *nsampValue.foreground:		#000000
+    *saveFile.foreground:		#000000
+    *infoText.foreground:		#000000
+    *wtName.foreground:			#000000
+    *wtTitle.foreground:		#000000
+    *wtFBCfg.foreground:		#000000
+    *wtIPixval.foreground:		#000000
+    *wtSPixval.foreground:		#000000
+    *wtBPixval.foreground:		#000000
+    *wtWcs1.foreground:			#000000
+    *wtWcs2.foreground:			#000000
+    *wtWcs3.foreground:			#000000
+    *wtWcs4.foreground:			#000000
+    *wcsIsmCmd.foreground:		#000000
+    *tclEntry.foreground:		#000000
 }
+    
+    
     
     
 
@@ -828,7 +888,7 @@ set Resources(ximtool) { \
 
     *ximtool.title:				XIMTOOL_VERSION
 
-    *display.borderWidth:			0
+    *display.borderWidth:			2
     *display.layout: horizontal	{ \
 	-0 \
 	vertical { \
@@ -840,15 +900,18 @@ set Resources(ximtool) { \
 	    vertical { \
 	        horizontal { \
 	            imageFrame < +inf -inf * +inf -inf > \
+		    -2 \
 	            vcutFrame  < * +inf -inf > \
 	        } \
+		-3 \
 	        horizontal { \
 	            hcutFrame  < +inf -inf * > 1 \
-		    vertical { 4 plotOpts -4 } \
+		    vertical { 4 horizontal { -4 plotOpts}  -4 } \
 	        } \
+		-3 \
 	        horizontal { \
 	            cbarFrame  < +inf -inf * > \
-	            hcut 2 vcut  \
+	            focusSlider 2 hcut 2 vcut 15 \
 	        } \
 	    } \
 	} \
@@ -858,18 +921,19 @@ set Resources(ximtool) { \
     *hcut.font:					*lucida-bold-r*10*
     *vcut.label:				V
     *vcut.font:					*lucida-bold-r*10*
+    *focusSlider.location:			0 0 100 15
 
     *hcutFrame.frameType:                       sunken
     *hcutFrame.frameWidth:                      1
-    *hcutFrame.innerOffset:                     0
-    *hcutFrame.outerOffset:                     0
-    *hcutPlot.color0:                           gray77
-    *hcutPlot.color1:                           black
-    *hcutPlot.color0:                           darkslategray
-    *hcutPlot.color1:                           ivory2
+    *hcutFrame.innerOffset:             	1
+    *hcutFrame.outerOffset:             	1
+    //*hcutPlot.color0:                           #c4c4c4
+    //*hcutPlot.color1:                           #000000
+    *hcutPlot.color0:                           #000000
+    *hcutPlot.color1:                           #ffffff
     *hcutPlot.crosshairCursorColor:		red
     *hcutPlot.width:                            512
-    *hcutPlot.height:                           5
+    *hcutPlot.height:                           6
     *hcutPlot.borderWidth:			0
     *hcutPlot.alphaFont1:			6x10
     *hcutPlot.alphaFont2:			6x10
@@ -904,7 +968,7 @@ set Resources(ximtool) { \
 	  Ctrl <Key>\<:	call(cpSetBlinkRate,BRdecrease)	\n\
 	  Ctrl <Key>\>:	call(cpSetBlinkRate,BRincrease)	\n\
 	  !Alt	<Key>b:	call(toggleBlink)	     	\n\
-	  !Alt	<Key>c:	call(controlPanel)		\n\
+	  !Alt	<Key>c:	call(displayPanel)		\n\
 	  !Alt	<Key>h:	call(Help)		 	\n\
 	  !Alt	<Key>i:	call(infoPanel)		      	\n\
       !Ctrl Alt <Key>f: call(fitFrame)		 	\n\
@@ -922,14 +986,14 @@ set Resources(ximtool) { \
 
     *vcutFrame.frameType:                       sunken
     *vcutFrame.frameWidth:                      1
-    *vcutFrame.innerOffset:                     0
-    *vcutFrame.outerOffset:                     0
-    *vcutPlot.color0:                           gray77
-    *vcutPlot.color1:                           black
-    *vcutPlot.color0:                           darkslategray
-    *vcutPlot.color1:                           ivory2
+    *vcutFrame.innerOffset:             	0
+    *vcutFrame.outerOffset:             	0
+    //*vcutPlot.color0:                           #c4c4c4
+    //*vcutPlot.color1:                           black
+    *vcutPlot.color0:                           #000000
+    *vcutPlot.color1:                           #ffffff
     *vcutPlot.crosshairCursorColor:		red
-    *vcutPlot.width:                            5
+    *vcutPlot.width:                            6
     *vcutPlot.height:                           512
     *vcutPlot.borderWidth:			0
     *vcutPlot.alphaFont1:			6x10
@@ -965,7 +1029,7 @@ set Resources(ximtool) { \
 	  Ctrl <Key>\<:	call(cpSetBlinkRate,BRdecrease)	\n\
 	  Ctrl <Key>\>:	call(cpSetBlinkRate,BRincrease)	\n\
 	  !Alt	<Key>b:	call(toggleBlink)	     	\n\
-	  !Alt	<Key>c:	call(controlPanel)		\n\
+	  !Alt	<Key>c:	call(displayPanel)		\n\
 	  !Alt	<Key>h:	call(Help)		 	\n\
 	  !Alt	<Key>i:	call(infoPanel)		      	\n\
       !Ctrl Alt <Key>f: call(fitFrame)		 	\n\
@@ -1029,8 +1093,8 @@ set Resources(ximtool) { \
 
 
     *menuGroup.label:				
-    *menuGroup.height:				40
-    *menuGroup.width:				518
+    *menuGroup.height:				38
+    *menuGroup.width:				512
     *menuGroup.frameType:			raised
     *menuGroup.frameWidth:			2
     *menubar.layout: horizontal	{ \
@@ -1053,7 +1117,7 @@ set Resources(ximtool) { \
     *menubar*SimpleMenu.background:		SteelBlue
     *SmeBSB.vertSpace:				10
 
-    *menubar.width:				518
+    *menubar.width:				512
     *menubar*borderWidth:			0
     *menubar*Command.internalWidth:		0
     *menubar*Command.borderWidth:		0
@@ -1082,7 +1146,7 @@ set Resources(ximtool) { \
 	frameButton < +inf -inf * > 1 < -1 > \
 	nextButton  < +inf -inf * > 1 < -1 > \
     }
-    *toolbar.width:				518
+    *toolbar.width:				512
     *toolbar.height:				25
     *toolbar*borderWidth:			0
     *toolbar*Command.internalWidth:		3
@@ -1179,13 +1243,13 @@ set Resources(ximtool) { \
     *imageFrame.frameWidth:			1
     *imageFrame.outerOffset:			0
     *imageFrame.innerOffset:			0
-    *imageFrame.width:                          518
-    *imageFrame.height:                         518
+    *imageFrame.width:                          512
+    *imageFrame.height:                         512
     *cbarFrame.frameType:			sunken
     *cbarFrame.frameWidth:			1
     *cbarFrame.outerOffset:			0
     *cbarFrame.innerOffset:			0
-    *cbarFrame.width:                           518
+    *cbarFrame.width:                           512
     *imagewin.warpCursor:			true
     *imagewin.raiseWindow:			true
     *imagewin.deiconifyWindow:			true
@@ -1196,11 +1260,8 @@ set Resources(ximtool) { \
     *imagewin.copyOnResize:			false
     *imagewin.width:				512
     *imagewin.height:				512
-    *imagewin.color8:				#7c8498
-    *imagewin.color9:				SteelBlue
     *imagewin.maxMappings:			64
     *imagewin.borderWidth:			0
-
 
     *imagewin.translations:	\
 	 None<Key>Left:	call(move_cursor,-1,0)		\n\
@@ -1266,14 +1327,16 @@ set Resources(ximtool) { \
 	 !Ctrl	<Key>0:	call(centroid,$x,$y,peak) 	\n\
       !Ctrl Alt <Key>0:	call(centroid,$x,$y,min) 	\n\
 	  !Alt	<Key>b:	call(toggleBlink)	     	\n\
-	  !Alt	<Key>c:	call(controlPanel)		\n\
+	  !Alt	<Key>c:	call(displayPanel)		\n\
+    !Ctrl Shift <Key>c:	call(displayPanel)		\n\
+      !Ctrl Alt <Key>f: call(fitFrame)		 	\n\
 	  !Alt	<Key>h:	call(Help)		 	\n\
 	  !Alt	<Key>i:	call(infoPanel)		      	\n\
-      !Ctrl Alt <Key>f: call(fitFrame)		 	\n\
 	  !Alt	<Key>l:	call(loadPanel)		      	\n\
 	  !Alt	<Key>p:	call(printPanel)	       	\n\
 	  !Alt	<Key>s:	call(savePanel)		      	\n\
 	  !Alt	<Key>t:	call(tclPanel)		     	\n\
+    !Ctrl Shift <Key>t:	call(tclPanel)		     	\n\
       !Shift<Btn1Down>: call(setDynamicMagnifier,1)	\n\
         !Shift<Btn1Up>: call(setDynamicMagnifier,0)	\n\
 	   !<Btn1Down>:	call(makeMarker,$name,$x,$y) m_create()	\n\
@@ -1283,6 +1346,7 @@ set Resources(ximtool) { \
  	     !<Btn2Up>:	crosshair(off)			\n\
 	   !<Btn2Down>:	call(zoom,$x,$y)		\n\
 	   !<Btn3Down>:	call(windowColormap,$x,$y)	\n\
+	     !<Btn3Up>:	call(updateColormap,$x,$y)	\n\
 	 !<Btn3Motion>:	call(windowColormap,$x,$y)	\n\
       !Ctrl <Btn1Down>:	call(makeRuler,$name,$x,$y) 	\n\
     !Ctrl <Btn1Motion>:	track-cursor() call(wcsUpdate,$x,$y) call(magnifierMapImage,$x,$y) call(resizeRuler,$x,$y,0) 	\n\
@@ -1630,7 +1694,7 @@ set Resources(display_panel) { \
     *prevFrame.label:				Previous Frame
     *fitFrame.label:				Fit Frame
     *aspect.label:				Aspect
-    *clearFrame.label:				Clear	Frame
+    *clearFrame.label:				Clear Frame
     *flipX.label:				Flip X
     *flipY.label:				Flip Y
     *flipXY.label:				Flip XY
@@ -2060,7 +2124,7 @@ set Resources(print_panel) { \
     *titleButton.label:				\ Title
     *bordersButton.label:			\ Borders
     *colorbarButton.label:			\ Colorbar
-    *titleLabel.label:				Title	String
+    *titleLabel.label:				Title String
     *titleString*string:			imtitle
     *titleString*height:			23
     *titleString*Text*editType:			edit
@@ -2153,7 +2217,7 @@ set Resources(info_panel) { \
     *infoLayout*Text*scrollVertical:		whenNeeded
     *infoLayout*Text*scrollHorizontal:		whenNeeded
     *infoLayout*Text*displayCaret:		False
-    *infoLayout*Scrollbar.background:		gray77
+    *infoLayout*Scrollbar.background:		#c4c4c4
     *infoLayout*Scrollbar.width:		17
     *infoLayout*Scrollbar.height:		17
 
@@ -2602,7 +2666,7 @@ set Resources(tile_panel) { \
     *geomFrame.innerOffset:			4
     *tileGeometry.width:			220
     *tileGeometry.height;			37
-    *tileGeometry.background:			gray77
+    *tileGeometry.background:			#c4c4c4
     *tileGeometry.font:				7x13bold
     *tileGeometry.label:			Tile Geometry:  1 x 2
 
@@ -2630,7 +2694,7 @@ set Resources(tile_panel) { \
     *nrdecrease.direction:			left
     *nrincrease.direction:			right
     *nrowLab.label:				Tile Rows:
-    *nrtext.background:				gray68
+    *nrtext.background:				#adadad
     *nrtext.justify:				center
     *nrtext.font:				7x13bold
     *nrtext.label:				1
@@ -2639,7 +2703,7 @@ set Resources(tile_panel) { \
     *ncdecrease.direction:			left
     *ncincrease.direction:			right
     *ncolLab.label:				Tile Columns:
-    *nctext.background:				gray68
+    *nctext.background:				#adadad
     *nctext.justify:				center
     *nctext.font:				7x13bold
     *nctext.label:				2
@@ -3116,7 +3180,7 @@ set Resources(hdr_panel) { \
 !   *hdrText*scrollHorizontal:			Always
 !   *hdrText*editType:				edit
 !   *hdrText*font:				7x13
-!   *hdrText*background:			gray77
+!   *hdrText*background:			#c4c4c4
 !   *hdrText*displayCaret:			False
 !   *hdrText*bottomMargin:			10
 !   *hdrText*Scrollbar.width:			15
@@ -3162,7 +3226,7 @@ set Resources(hdr_panel) { \
     *hdrIGText.height:				130
 !   *hdrIGText*background:			black
 !   *hdrIGText*foreground:			yellow2
-    *hdrIGText*background:			gray68
+    *hdrIGText*background:			#adadad
     *hdrIGText*foreground:			black
     *hdrWcsGroup*hdrIGText*scrollVertical:	never
     *hdrWcsGroup*hdrIGText*scrollHorizontal:	never
@@ -3172,10 +3236,10 @@ set Resources(hdr_panel) { \
     *hdrKeywGroup.innerOffset:			5
     *hdrKGFrame.frameType:			sunken
     *hdrKGFrame.frameWidth:			1
-    *hdrKGText*background:			gray77
+    *hdrKGText*background:			#c4c4c4
     *hdrKGText*bottomMargin:			10
 
-    *hdrIGText*background:			gray77
+    *hdrIGText*background:			#c4c4c4
     *hdrIGFrame.frameWidth:			0
 }
 
@@ -3239,9 +3303,9 @@ set Resources(pixel_table) { \
     *pixtabFrame*MultiList.columnSpacing:	2
     *pixtabFrame*MultiList.maxSelectable:	1
     *pixtabFrame*MultiList.highlightForeground:	red
-    *pixtabFrame*MultiList.highlightBackground:	gray77
-    *pixtabFrame*MultiList.background:		gray77
-    *pixtabFrame*TextToggle.background:		gray77
+    *pixtabFrame*MultiList.highlightBackground:	#c4c4c4
+    *pixtabFrame*MultiList.background:		#c4c4c4
+    *pixtabFrame*TextToggle.background:		#c4c4c4
 
     *pixtabFrame*Label.width:			00
     !*pixtabFrame*Label.resize:			False
@@ -3400,7 +3464,7 @@ set Resources(help_panel) { \
 	5 \
     }
     *helpInfo1.label:		XIMTOOL_VERSION
-    *helpInfo2.label:		iraf@noao.edu     (520) 318-8160
+    *helpInfo2.label:		For help or questions:   http://iraf.net
     *helpInfo3.label: \
 	NOAO is operated by AURA under cooperative agreement with the NSF
 
@@ -3506,7 +3570,7 @@ set Resources(warning) { \
     *warnText.label:				generic warning text
     *warnText.width:				270
     *warnText.height:				60
-    *warnText.background:			gray77
+    *warnText.background:			#c4c4c4
 }
 
 
@@ -3625,7 +3689,7 @@ proc min {a b} { expr {($a < $b) ? $a : $b} }
 proc max {a b} { expr {($a > $b) ? $a : $b} }
 
 # Global variables.
-set version	"NOAO/IRAF XImtool Version 1.3EXPORT"
+set version	"NOAO/IRAF XImtool Version 2.0BETA"
 
 set winWidth 	[send imagewin get width ]	;# display window width
 set winHeight 	[send imagewin get height]	;# display window height
@@ -3766,6 +3830,8 @@ proc debug_pvar { name element op } \
 
 set doHcut	0
 set doVcut	0
+set hstate	0
+set vstate	0
 set plotSpeed	1 ; send plotSpeed  set on True
 set curJump	1 ; send curJump  set on True
 set curTrack	1 ; send curTrack set on True
@@ -3890,7 +3956,7 @@ foreach w { plotSpeed plotAccurate plotImgPix curJump curSmooth curTrack } {
 
 proc cutPlotToggle { widget type state args } \
 {
-    global doHcut doVcut cutXPos cutYPos
+    global doHcut doVcut cutXPos cutYPos hstate vstate
     set    debug  0
 
     set hstate [send hcut get state]
@@ -3986,11 +4052,17 @@ proc cutPlotToggle { widget type state args } \
 # Draw the cut plots.
 proc cutPlots { xpos ypos args } \
 {
-    global doHcut doVcut cutXPos cutYPos
+    global doHcut doVcut cutXPos cutYPos hstate vstate
 
     catch {
-        if {$doHcut} { plotHcut $xpos $ypos }
-        if {$doVcut} { plotVcut $xpos $ypos }
+        if {$doHcut} {
+    	    drawHcutIndicator $xpos
+	     if {$hstate} { plotHcut $xpos $ypos }
+	}
+        if {$doVcut} {
+    	    drawVcutIndicator $xpos
+            if {$vstate} { plotVcut $xpos $ypos }
+	}
     }
 
     set cutXPos $xpos  ;  set cutYPos $ypos
@@ -4204,7 +4276,7 @@ proc vcutInit args \
 proc plotVcut { xpos ypos } \
 {
     global doVcut cutYScale
-    global vcutVec cutXPos plotSpeed
+    global vcutVec cutXPos cutYPos plotSpeed
 
 
     if { ($xpos == 0 && $ypos == 0) || ! $doVcut } \
@@ -4738,15 +4810,45 @@ send blinkPanel  "set bitmap panel"
 
 
 # WINDOW the current frame.
+set old_cm_x	0
+set old_cm_y	0
+
 proc windowColormap {x y} \
 {
-    global winWidth winHeight maxContrast
+    global winWidth winHeight maxContrast old_cm_x old_cm_y
+
+    # For efficiency we won't compute the sqrt of the distance but instead
+    # just compare the square.  Use a threshold of 6 pixels so when we
+    # narrow in on the ROI we refine the colormap more precisely.
+
+    set diff  [expr (($old_cm_x - $x) * ($old_cm_x - $x)) + \
+                   (($old_cm_y - $y) * ($old_cm_y - $y))]
+
+    # Keep the old position.
+    set old_cm_x $x
+    set old_cm_y $y
+    if {$diff > 36} {
+       return
+    }
 
     send client windowColormap \
 	[expr "double($x) / $winWidth"] \
 	[expr "(double($y) - $winHeight / 2.0) / $winHeight * \
 	    $maxContrast * 2.0"]
 }
+
+proc updateColormap {x y} \
+{
+    global winWidth winHeight maxContrast old_cm_x old_cm_y
+
+    set old_cm_x $x
+    set old_cm_y $y
+    send client updateColormap \
+	[expr "double($x) / $winWidth"] \
+	[expr "(double($y) - $winHeight / 2.0) / $winHeight * \
+	    $maxContrast * 2.0"]
+}
+
 
 
 # WINDOW the current frame, but only one color at a time.
@@ -5348,7 +5450,7 @@ proc normalize args \
     #set xcen [expr $frameWidth / 2]
     #set ycen [expr $frameHeight / 2]
     #send client zoom 1 1 $xcen $ycen
-    send client windowColormap 0.5 1.0
+    send client updateColormap 0.5 1.0
 }
 
 
@@ -5373,6 +5475,7 @@ createMenu fileMenu fileButton {
 			    send client Reset
 			    #resetView initialize done done
 			}					  }
+    {	"Debug Panel"	f.exec { tclPanel 1			} }
     {	"Quit"		f.exec { Quit				} }
 }
 
@@ -5541,6 +5644,7 @@ proc curtrack_destroy args \
     }
 }
 
+
 ################################################################################
 # CURSOR CENTEROID AND AUTO-REGISTER FUNCTIONS.
 ################################################################################
@@ -5595,6 +5699,85 @@ proc setCtrBoxSize { x y delta args } \
 
     set ctid [ postTimedCallback cbxDestroy 500]
 }
+
+
+# Box size is half-width of the marker size.  Value is the slider value.
+set focusBoxSize	$winWidth			
+set focusValue	       100.0
+set fid			 0
+set ftid		 0
+set moving		 0
+
+proc setFocusBoxSize { sz args } \
+{
+    global focusBoxSize fid ftid focusValue moving
+    global winWidth winHeight
+
+
+    if { $moving == 0 } {
+        return done
+    }
+
+    if { $winWidth < $winHeight } {
+	set max [expr $winWidth / 2 - 64]
+    } else {
+	set max [expr $winHeight / 2 - 64]
+    }
+    set focusBoxSize [expr 64 + ($sz * $max) - 1]
+    #send client setOption cmfocus [expr ($focusBoxSize / 2)]
+    send client setOption cmfocus $focusBoxSize
+
+    # Destroy any existing markers.
+    catch { 
+        if {$ftid != 0} {
+            send fm$fid destroy 
+            set ftid 0
+	}
+    }
+
+    # create a transient marker indicating the centering box and post a
+    # callback to delete it in about a second.
+    incr fid
+    send imagewin createMarker fm$fid \
+	type            box \
+	createMode      noninteractive \
+	lineColor       green \
+	lineWidth       4 \
+	x               [expr $winWidth / 2] \
+	y               [expr $winHeight / 2] \
+	width           $focusBoxSize \
+	height          $focusBoxSize \
+	activated       True \
+	visible         True \
+	sensitive       False
+
+    set ftid [ postTimedCallback fbxDestroy 500]
+    set moving  0
+}
+
+proc fbxDestroy args \
+{
+    global fid ftid moving
+    catch { 
+        if {$ftid != 0} {
+            send fm$fid destroy 
+            set ftid 0
+        }
+    }
+}
+
+proc setFocusSize { widget cbtype x y } \
+{
+    global focusValue ftid moving
+
+    # Only update once we've stopped the movement.
+    if { $x == $focusValue && $moving == 1 } {
+	set ftid [ postWorkProc setFocusBoxSize $x ]
+    } else {
+        set moving  1
+    }
+    set focusValue $x
+} ; send focusSlider addCallback setFocusSize scroll
 
 
 # Compute a centroid offset for the current position to peak-up on the
@@ -5693,6 +5876,7 @@ send contrastLabel	set bitmap contrast
 send brightnessLabel	set bitmap brightness
 send contrastSlider	resizeThumb 0.1 1.0
 send brightnessSlider	resizeThumb 0.1 1.0
+send focusSlider	"resizeThumb 0.1 1.0 ; moveThumb 1.0"
 
 
 # panel -- Toggle control panel display.
@@ -5806,27 +5990,28 @@ proc panelDismiss args \
 
 proc panelTabToggle { panel args } \
 {
-    global tabTop panel_up
+    global tabTop panel_up TabToWidget
 
     if {$tabTop == $panel && $panel_up} {
 	send panelShell unmap
-	send $widget set state 0
+	send $TabToWidget($panel) set state 0
 	set panel_up 0
-	return
-    }
 
-    # Special cases for each panel.
-    if {$panel == "load_panel"} {
-        send client setLoadOption rescan
-    }
+    } else {
+        # Special cases for each panel.
+        if {$panel == "load_panel"} {
+            send client setLoadOption rescan
+        }
 
-    send panelTabs setTop $panel
-    set tabTop $panel
+        send panelTabs setTop $panel
+        set tabTop $panel
 
-    # Now fire it up if it's not already open.
-    if {$panel_up == 0} {
-	send panelShell map
-	set panel_up 1
+        # Now fire it up if it's not already open.
+        if {$panel_up == 0} {
+	    send panelShell map
+	    set panel_up 1
+        }
+
     }
 }
 
@@ -6161,7 +6346,7 @@ proc cpInvert args \
 {
     global enhancement frame
     set contrast [lindex $enhancement($frame) 2]
-    send client windowColormap [lindex $enhancement($frame) 1] \
+    send client updateColormap [lindex $enhancement($frame) 1] \
 	[expr -1.0 * $contrast]
 }
 
@@ -6955,6 +7140,7 @@ proc magnifierMapImage {x y} \
     if [send imagewin activeMapping $magnifier_mapping] {
 	send imagewin raiseMapping $magnifier_mapping
     }
+
     # initialize the magnifier zoom factor, if necessary
     if { !$mag_w || !$mag_h } {
 	setMagnifierZoom 4
@@ -7183,6 +7369,7 @@ proc setPanner {state} \
 	    translations	$pannerWinTranslations \
 	    visible		true \
 	    sensitive		true \
+	    autoRedraw		true \
 	    activated		true
 
 	# Update the panner window position variables so that it comes up
@@ -9131,7 +9318,7 @@ proc drawCompass args \
     global panner_x panner_y panner_width panner_height cur_objid
     global redraw_compass last_compass
 
-
+	
     if {! [send compass get on]} \
 	return
 
@@ -9146,20 +9333,20 @@ proc drawCompass args \
     }
 
     if { [info exists Compass($id)] } {
-        set angle  [lindex $Compass($id) 0]
-        set n_x    [lindex $Compass($id) 1]
-        set n_y    [lindex $Compass($id) 2]
-        set e_x    [lindex $Compass($id) 3]
-        set e_y    [lindex $Compass($id) 4]
-        set trans  [lindex $Compass($id) 5]
-        set xlab   [lindex $Compass($id) 6]
-        set ylab   [lindex $Compass($id) 7]
+        set angle     [lindex $Compass($id) 0]
+        set north_x   [lindex $Compass($id) 1]
+        set north_y   [lindex $Compass($id) 2]
+        set east_x    [lindex $Compass($id) 3]
+        set east_y    [lindex $Compass($id) 4]
+        set transpose [lindex $Compass($id) 5]
+        set xlab      [lindex $Compass($id) 6]
+        set ylab      [lindex $Compass($id) 7]
     } else {
-	set n_x    0.0   ; set n_y    1.0
-	set e_x    1.0	 ; set e_y    0.0
-	set xlab     X   ; set ylab     Y
-        set angle  0.0   ; set trans    0
-	set Compass($id) { 0.0 0.0 1.0 1.0 0.0 0 X Y }
+	set north_x  0.0   	; set north_y  1.0
+	set east_x   1.0	; set east_y   0.0
+	set xlab       X   	; set ylab       Y
+        set angle    0.0   	; set transpose  0
+	set Compass($id) { 0.0 1.0 0.0 1.0 0.0 0 X Y }
     }
     set xflip 1
     set yflip 1
@@ -9195,109 +9382,119 @@ proc drawCompass args \
 
 
     # Get rotation and scale factors.
-    set angle [expr "atan2($n_y,$n_x)"]
+    set angle [expr "atan2($north_y,$north_x)"]
+    set coso  [expr "cos (-$angle)"]
+    set sino  [expr "sin (-$angle)"]
     set scale [expr ([min $panner_width $panner_height] * 0.3)]
 
-    # Initialize the graphics.
-    send imagewin setColorIndex $compassColor
-    send imagewin setFillType solid
+    # Initialize the drawing points.
+    set pts {}
 
-    # Now draw the parts of the compass.
-    drawCompassAxes   $n_x $n_y $e_x $e_y $trans $xflip $yflip $scale \
-	$pcx $pcy
-    drawCompassLabels $n_x $n_y $e_x $e_y $trans $xflip $yflip $scale\
-	 $pcx $pcy $xlab $ylab
-    drawCompassPtr   $n_x $n_y $e_x $e_y $trans $xflip $yflip $scale \
-	$pcx $pcy $angle
-
-    # Reset the logical resolution of the window.
-    send imagewin setLogRes $sv_xl $sv_yl
-    set redraw_compass 0
-
-} ; foreach w {xflip yflip} { send $w addCallback drawCompass }
-
-
-proc drawCompassAxes {n_x n_y e_x e_y trans xflip yflip scale pcx pcy} \
-{
     set cpoints { }
-    lappend cpoints [list $e_x  $e_y ]
+    lappend cpoints [list $east_x  $east_y ]
     lappend cpoints [list 0 0]
-    lappend cpoints [list $n_x $n_y]
+    lappend cpoints [list $north_x $north_y]
     foreach p $cpoints {
 	# Get the scaled position.
-	set sx [expr ($scale * [lindex $p [expr "($trans > 0) ? 1 : 0"]])]
-	set sy [expr ($scale * [lindex $p [expr "($trans > 0) ? 0 : 1"]])]
+	set sx [expr ($scale * [lindex $p [expr "($transpose > 0) ? 1 : 0"]])]
+	set sy [expr ($scale * [lindex $p [expr "($transpose > 0) ? 0 : 1"]])]
 
 	# Translate to the scaled position.
 	set rx [expr int($pcx + $sx + 0.5)]
 	set ry [expr int($pcy - $sy + 0.5)]
 
+	# Now handle the axis flip.
+	set rx [expr (($xflip < 0) ? ($pcx + ($pcx - $rx)) : $rx)]
+	set ry [expr (($yflip < 0) ? ($pcy + ($pcy - $ry)) : $ry)]
 	lappend pts $rx $ry
     }
 
-    # Draw the compass axes.
-    send imagewin drawPolyline $pts
-}
 
-proc drawCompassLabels {n_x n_y e_x e_y trans xflip yflip scale pcx pcy xlab ylab} \
-{
+    set rpoints { }
+    set hpoints { {0.0 0.0} {-0.1 -0.07} {-0.1 0.07} {0.0 0.0} }
+    foreach p $hpoints {
+	# Break out the position.
+	set sx [lindex $p [expr "($transpose > 0) ? 1 : 0"]]
+	set sy [lindex $p [expr "($transpose > 0) ? 0 : 1"]]
 
-    set pts { }
+	# Do the rotation of the head at the origin.
+	set rx [expr ($north_x + ($sx * $coso + $sy * $sino))]
+	set ry [expr ($north_y - ($sx * $sino + $sy * $coso))]
+
+	lappend rpoints [list $rx $ry]
+    }
+    foreach p $rpoints {
+	# Get the scaled position.
+	set sx [expr ($scale * [lindex $p [expr "($transpose > 0) ? 1 : 0"]])]
+	set sy [expr ($scale * [lindex $p [expr "($transpose > 0) ? 0 : 1"]])]
+
+	# Translate to the scaled position.
+	set rx [expr int($pcx + $sx + 0.5)]
+	set ry [expr int($pcy - $sy + 0.5)]
+
+	# Now handle the axis flip.
+	set rx [expr (($xflip < 0) ? ($pcx + ($pcx - $rx)) : $rx)]
+	set ry [expr (($yflip < 0) ? ($pcy + ($pcy - $ry)) : $ry)]
+	lappend pts $rx $ry
+    }
+
     set lpoints { }
-   
-    set xo [expr (0.2 * [expr "($xflip > 0) ? -1 : 1"])]
-    set yo [expr (0.2 * [expr "($yflip > 0) ? 1 : -1"])]
-
-    lappend lpoints [list [expr "$e_x+$xo"] $e_y ]
-    lappend lpoints [list $n_x [expr "$n_y+$yo"] ]
+    lappend lpoints [list [expr "$east_x-0.2"] $east_y ]
+    lappend lpoints [list $north_x [expr "$north_y+0.2"] ]
     foreach p $lpoints {
 	# Get the scaled position.
-	set sx [expr ($scale * [lindex $p [expr "($trans > 0) ? 1 : 0"]])]
-	set sy [expr ($scale * [lindex $p [expr "($trans > 0) ? 0 : 1"]])]
+	set sx [expr ($scale * [lindex $p [expr "($transpose > 0) ? 1 : 0"]])]
+	set sy [expr ($scale * [lindex $p [expr "($transpose > 0) ? 0 : 1"]])]
 
 	# Translate to the scaled position.
 	set rx [expr int($pcx + $sx + 0.5)]
 	set ry [expr int($pcy - $sy - 0.5)]
 
+	# Now handle the axis flip.
+	set rx [expr (($xflip < 0) ? ($pcx + ($pcx - $rx)) : $rx)]
+	set ry [expr (($yflip < 0) ? ($pcy + ($pcy - $ry)) : $ry)]
 	lappend pts $rx $ry
     }
+
+
+    # Draw the compass axes.
+    set compassPts [lrange $pts 0 5]
+    send imagewin setColorIndex $compassColor
+    send imagewin drawPolyline $compassPts
+
+    
+    # Draw the compass pointer.
+    set head [lrange $pts 6 13]
+    send imagewin setFillType solid
+    send imagewin drawPolygon $head
 
     # Draw the labels.
-    send imagewin drawAlphaText [lindex $pts 0] [lindex $pts 1] $xlab
-    send imagewin drawAlphaText [lindex $pts 2] [lindex $pts 3] $ylab
-}
+    send imagewin drawAlphaText [lindex $pts 14] [lindex $pts 15] $xlab
+    send imagewin drawAlphaText [lindex $pts 16] [lindex $pts 17] $ylab
 
-proc drawCompassPtr {n_x n_y e_x e_y trans xflip yflip scale pcx pcy angle} \
+    send imagewin setLogRes $sv_xl $sv_yl
+
+    set redraw_compass 0
+
+} ; foreach w {xflip yflip} { send $w addCallback drawCompass }
+
+
+# This is a kludge to redraw the compass after it is erased when displaying
+# a new image.  Once the user moves the mouse back into the main window we'll
+# do the redraw.
+send imagewin addEventHandler drawCompass enterWindowMask
+
+
+
+proc createCompassMarker { pts args } \
 {
+    set cm_points { }
+    lappend cm_points [lrange $pts 0 1]
+    lappend cm_points [lrange $pts 2 3]
+    lappend cm_points [lrange $pts 4 5]
 
-    set coso  [expr "cos (-$angle)"]
-    set sino  [expr "sin (-$angle)"]
+    print [list $cm_points]
 
-    # Initialize the drawing points.
-    set pts {}
-    set hpoints { {0.0 0.0} {-0.1 -0.07} {-0.1 0.07} {0.0 0.0} }
-    foreach p $hpoints {
-	# Break out the position.
-	set sx [lindex $p [expr "($trans > 0) ? 1 : 0"]]
-	set sy [lindex $p [expr "($trans > 0) ? 0 : 1"]]
-
-	# Do the rotation of the head at the origin.
-	set rx [expr ($n_x + ($sx * $coso + $sy * $sino))]
-	set ry [expr ($n_y - ($sx * $sino + $sy * $coso))]
-
-	# Get the scaled position.
-	set sx [expr ($scale * $rx)]
-	set sy [expr ($scale * $ry)]
-
-	# Translate to the scaled position.
-	set rx [expr int($pcx + $sx + 0.5)]
-	set ry [expr int($pcy - $sy + 0.5)]
-
-	lappend pts $rx $ry
-    }
-
-    # Draw the compass pointer.
-    send imagewin drawPolygon $pts
 }
 
 
@@ -10363,7 +10560,7 @@ proc tclCommandClear {widget args}   { send tclEntry set string "" }
 proc tclCommandExecute {widget args} { send server [send tclEntry {get string}]
 }
 proc tclCommand {widget mode command args} { send server $command }
-proc tclClose {widget args}                { send tcl_panel unmap }
+proc tclClose {widget args}                { tclPanel }
 proc tclOpen args \
 { 
     global tcl_up
@@ -10492,35 +10689,35 @@ proc wcspix_msg { argc argv } \
 
 
     switch $cmd {
-    startup	{ wcspix_startup				}
-    shutdown	{ wcspix_shutdown				}
-    disable	{ wcspix_disable				}
-    capable	{ wcspix_capable				}
+    startup	{ wcspix_startup					}
+    shutdown	{ wcspix_shutdown					}
+    disable	{ wcspix_disable					}
+    capable	{ wcspix_capable					}
 
-    cache	{ wcspix_cache   [lrange $arg 1 end]		}
-    uncache	{ wcspix_uncache [lrange $arg 1 end]		}
-    wcstran	{ wcspix_wcstran [lrange $arg 1 end]		}
-    wcslist	{ wcspix_wcslist [lrange $arg 1 end] 		}
+    cache	{ wcspix_cache   [lrange $arg 1 end]			}
+    uncache	{ wcspix_uncache [lrange $arg 1 end]			}
+    wcstran	{ wcspix_wcstran [lrange $arg 1 end]			}
+    wcslist	{ wcspix_wcslist [lrange $arg 1 end] 			}
 
     imghdr	{ send hdrText \
 			setText [format "<pre>%s\n%s</pre>" \
 			[string trimright [send hdrText getText simple] "\n"]\
 			[lindex $arg 1] ]
 		}
-    wcshdr	{ send hdrKGText append [lindex $arg 1]		}
+    wcshdr	{ send hdrKGText append [lindex $arg 1]			}
 
     wcsinfo	{ send hdrIGText append [lindex $arg 1]		
 		  send hdrText   gotoId 0
 		  send hdrKGText set insertPosition 0
 		}
 
-    compass	{ wcspix_compass [lrange $arg 1 end] 		}
-    orient	{ wcspix_orient  [lrange $arg 1 end] 		}
-    wcstype	{ wcspix_wcstype [lindex $arg 1] [lindex $arg 2]}
+    compass	{ wcspix_compass [lrange $arg 1 end] ; drawCompass 	}
+    orient	{ wcspix_orient  [lrange $arg 1 end] 			}
+    wcstype	{ wcspix_wcstype [lindex $arg 1] [lindex $arg 2]	}
     wcsfmt	{ set num [lindex $arg 2]
-		  send fmtWcs$num set label [lindex $arg 1] 	}
+		  send fmtWcs$num set label [lindex $arg 1] 		}
 
-    wcspix_cmd	{ send wcsIsmCmd set string [lindex $arg 1]	}
+    wcspix_cmd	{ send wcsIsmCmd set string [lindex $arg 1]		}
 
     pixtab	{ set tab  [lindex [lindex $arg 1] 0]
 		  set col  [lindex [lindex $arg 1] 1]
@@ -11304,9 +11501,11 @@ proc tbToggleAutoReg args \
     if {$auto_reg} {
         cpAutoRegister autoregButton dummy 0
         set auto_reg 0
+        send tbAutoReg set state 0
     } else {
         cpAutoRegister autoregButton dummy 1
         set auto_reg 1
+        send tbAutoReg set state 1
     }
 }
 
@@ -11342,9 +11541,9 @@ proc tbTileFramesToggle args \
     set value [send tileFramesButton get on]
     if {$value} { set not 0 } else { set not 1 }
 
-    send tileFramesButton set on [expr $not]
-    send tbTile set on [expr $not]
-    cpSetTileFrames
+    send tileFramesButton set on $not
+    send tbTile set state $not
+    cpSetTileFrames tbTile junk $not
 }
 
 
