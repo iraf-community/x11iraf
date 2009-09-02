@@ -1,0 +1,90 @@
+
+
+initColorResources (w)
+    GtermWidget w;
+{
+    w->gterm.color0 = ColorNameToPixel (w, w->gterm.color0Str);
+    w->gterm.color1 = ColorNameToPixel (w, w->gterm.color1Str);
+    w->gterm.color2 = ColorNameToPixel (w, w->gterm.color2Str);
+    w->gterm.color3 = ColorNameToPixel (w, w->gterm.color3Str);
+    w->gterm.color4 = ColorNameToPixel (w, w->gterm.color4Str);
+    w->gterm.color5 = ColorNameToPixel (w, w->gterm.color5Str);
+    w->gterm.color6 = ColorNameToPixel (w, w->gterm.color6Str);
+    w->gterm.color7 = ColorNameToPixel (w, w->gterm.color7Str);
+    w->gterm.color8 = ColorNameToPixel (w, w->gterm.color8Str);
+    w->gterm.color9 = ColorNameToPixel (w, w->gterm.color9Str);
+
+    w->gterm.dialogBgColor =
+        ColorNameToPixel (w, w->gterm.dialogBgColorStr);
+    w->gterm.dialogFgColor =
+        ColorNameToPixel (w, w->gterm.dialogFgColorStr);
+
+    w->gterm.idleCursorBgColor =
+        ColorNameToPixel (w, w->gterm.idleCursorBgColorStr);
+    w->gterm.idleCursorFgColor =
+        ColorNameToPixel (w, w->gterm.idleCursorFgColorStr);
+
+    w->gterm.busyCursorBgColor =
+        ColorNameToPixel (w, w->gterm.busyCursorBgColorStr);
+    w->gterm.busyCursorFgColor =
+        ColorNameToPixel (w, w->gterm.busyCursorFgColorStr);
+
+    w->gterm.ginmodeCursorBgColor =
+        ColorNameToPixel (w, w->gterm.ginmodeCursorBgColorStr);
+    w->gterm.ginmodeCursorFgColor =
+        ColorNameToPixel (w, w->gterm.ginmodeCursorFgColorStr);
+    w->gterm.crosshairCursorColor =
+        ColorNameToPixel (w, w->gterm.crosshairCursorColorStr);
+
+    w->gterm.gm_fillColor =
+        ColorNameToPixel (w, w->gterm.gm_fillColorStr);
+    w->gterm.gm_fillBgColor =
+        ColorNameToPixel (w, w->gterm.gm_fillBgColorStr);
+
+    w->gterm.gm_highlightColor =
+        ColorNameToPixel (w, w->gterm.gm_highlightColorStr);
+
+    w->gterm.gm_cursorFgColor =
+        ColorNameToPixel (w, w->gterm.gm_cursorFgColorStr);
+    w->gterm.gm_cursorBgColor =
+        ColorNameToPixel (w, w->gterm.gm_cursorBgColorStr);
+
+    w->gterm.gm_LineLineColor =
+        ColorNameToPixel (w, w->gterm.gm_LineLineColorStr);
+    w->gterm.gm_LineKnotColor =
+        ColorNameToPixel (w, w->gterm.gm_LineKnotColorStr);
+
+    w->gterm.gm_TextLineColor =
+        ColorNameToPixel (w, w->gterm.gm_TextLineColorStr);
+    w->gterm.gm_TextColor =
+        ColorNameToPixel (w, w->gterm.gm_TextColorStr);
+    w->gterm.gm_TextBgColor =
+        ColorNameToPixel (w, w->gterm.gm_TextBgColorStr);
+
+    w->gterm.gm_RectLineColor =
+        ColorNameToPixel (w, w->gterm.gm_RectLineColorStr);
+    w->gterm.gm_RectKnotColor =
+        ColorNameToPixel (w, w->gterm.gm_RectKnotColorStr);
+
+    w->gterm.gm_BoxLineColor =
+        ColorNameToPixel (w, w->gterm.gm_BoxLineColorStr);
+    w->gterm.gm_BoxKnotColor =
+        ColorNameToPixel (w, w->gterm.gm_BoxKnotColorStr);
+
+    w->gterm.gm_CircleLineColor =
+        ColorNameToPixel (w, w->gterm.gm_CircleLineColorStr);
+    w->gterm.gm_CircleKnotColor =
+        ColorNameToPixel (w, w->gterm.gm_CircleKnotColorStr);
+
+    w->gterm.gm_EllipseLineColor =
+        ColorNameToPixel (w, w->gterm.gm_EllipseLineColorStr);
+    w->gterm.gm_EllipseKnotColor =
+        ColorNameToPixel (w, w->gterm.gm_EllipseKnotColorStr);
+
+    w->gterm.gm_PgonLineColor =
+        ColorNameToPixel (w, w->gterm.gm_PgonLineColorStr);
+    w->gterm.gm_PgonKnotColor =
+        ColorNameToPixel (w, w->gterm.gm_PgonKnotColorStr);
+}
+
+

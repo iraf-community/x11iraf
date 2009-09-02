@@ -1,0 +1,288 @@
+XCOMM $XConsortium: Imakefile,v 1.78 91/09/18 14:28:23 rws Exp $
+#define DoNormalLib YES
+XCOMM -- Set the following to SharedLibXaw to enable shared library
+#define DoSharedLib NO
+#define DoDebugLib DebugLibXaw 
+#define DoProfileLib ProfileLibXaw 
+
+X11IRAFDIR = ../
+#include <../X11IRAF.tmpl>
+
+#ifdef RsArchitecture
+REQUIREDLIBS = $(XMUSRC)/libXmu.a $(EXTENSIONSRC)/lib/libXext.a $(TOOLKITSRC)/libXt.a $(XLIBSRC)/libX11.a
+#endif
+
+   INSTALLFLAGS = $(INSTINCFLAGS)
+       LINTLIBS = $(LINTXLIB) $(LINTXTOOL)
+#ifdef UseInstalled
+ EXTRA_INCLUDES = -I. -I../include
+#endif
+  EXTRA_DEFINES = -DARROW_SCROLLBAR
+
+HEADERS = \
+	AllWidgets.h \
+	AsciiSink.h \
+	AsciiSinkP.h \
+	AsciiSrc.h \
+	AsciiSrcP.h \
+	AsciiText.h \
+	AsciiTextP.h \
+	Box.h \
+	BoxP.h \
+	Cardinals.h \
+	Clock.h \
+	ClockP.h \
+	Command.h \
+	CommandP.h \
+	Dialog.h \
+	DialogP.h \
+	Form.h \
+	FormP.h \
+	Grip.h \
+	GripP.h \
+	Label.h \
+	LabelP.h \
+	Layout.h \
+	LayoutP.h \
+	List.h \
+	ListP.h \
+	Logo.h \
+	LogoP.h \
+	Mailbox.h \
+	MailboxP.h \
+	MenuButton.h \
+	MenuButtoP.h \
+	Paned.h \
+	PanedP.h \
+	Panner.h \
+	PannerP.h \
+	Porthole.h \
+	PortholeP.h \
+	Repeater.h \
+	RepeaterP.h \
+	Reports.h \
+	Scrollbar.h \
+	ScrollbarP.h \
+	Simple.h \
+	SimpleP.h \
+	SimpleMenu.h \
+	SimpleMenP.h \
+	Sme.h \
+	SmeP.h \
+	SmeBSB.h \
+	SmeBSBP.h \
+	SmeLine.h \
+	SmeLineP.h \
+	SmeThreeD.h \
+	SmeThreeDP.h \
+	StripChart.h \
+	StripCharP.h \
+	Template.h \
+	TemplateP.h \
+	Text.h \
+	TextP.h \
+	TextSink.h \
+	TextSinkP.h \
+	TextSrc.h \
+	TextSrcP.h \
+	ThreeD.h \
+	ThreeDP.h \
+	Toggle.h \
+	ToggleP.h \
+	Tree.h \
+	TreeP.h \
+	Viewport.h \
+	ViewportP.h \
+	XawInit.h
+
+SRCS = \
+	AllWidgets.c \
+	AsciiSink.c \
+	AsciiSrc.c \
+	AsciiText.c \
+	Box.c \
+	Clock.c \
+	Command.c \
+	Dialog.c \
+	Form.c \
+	Grip.c \
+	Label.c \
+	Layout.c \
+	List.c \
+	Logo.c \
+	Mailbox.c \
+	MenuButton.c \
+	Paned.c \
+	Panner.c \
+	Porthole.c \
+	Repeater.c \
+	Scrollbar.c \
+	Simple.c \
+	SimpleMenu.c \
+	Sme.c \
+	SmeBSB.c \
+	SmeLine.c \
+	SmeThreeD.c \
+	StripChart.c \
+	Template.c \
+	Text.c \
+	TextSink.c \
+	TextSrc.c \
+	TextAction.c \
+	TextPop.c \
+	TextTr.c \
+	ThreeD.c \
+	Toggle.c \
+	Tree.c \
+	Vendor.c \
+	Viewport.c \
+	XawInit.c \
+	sharedlib.c \
+	laygram.c \
+	laylex.c
+
+#if SharedDataSeparation
+UNSHAREDOBJS = AllWidgets.o sharedlib.o
+#endif
+
+OBJS = \
+	AllWidgets.o \
+	AsciiSink.o \
+	AsciiSrc.o \
+	AsciiText.o \
+	Box.o \
+	Clock.o \
+	Command.o \
+	Dialog.o \
+	Form.o \
+	Grip.o \
+	Label.o \
+	Layout.o \
+	List.o \
+	Logo.o \
+	Mailbox.o \
+	MenuButton.o \
+	Paned.o \
+	Panner.o \
+	Porthole.o \
+	Repeater.o \
+	Scrollbar.o \
+	Simple.o \
+	SimpleMenu.o \
+	Sme.o \
+	SmeBSB.o \
+	SmeLine.o \
+	SmeThreeD.o \
+	StripChart.o \
+	Text.o \
+	TextSink.o \
+	TextSrc.o \
+	TextAction.o \
+	TextPop.o \
+	TextTr.o \
+	ThreeD.o \
+	Toggle.o \
+	Tree.o \
+	Vendor.o \
+	Viewport.o \
+	XawInit.o \
+	laygram.o \
+	laylex.o
+
+#ifdef LexCmd
+LEX=LexCmd
+#endif
+#ifdef YaccCmd
+YACC=YaccCmd
+#endif
+
+all::
+
+depend:: laygram.c laylex.c
+
+LibraryObjectRule()
+
+#if DoSharedLib && SharedDataSeparation
+SpecialObjectRule(sharedlib.o,,$(SHLIBDEF))
+#endif
+
+#if DoSharedLib
+#if DoNormalLib
+SharedLibraryTarget(Xaw3d,$(SOXAWREV),$(OBJS),shared,..)
+#else
+SharedLibraryTarget(Xaw3d,$(SOXAWREV),$(OBJS),.,.)
+#endif
+SharedLibraryDataTarget(Xaw3d,$(SOXAWREV),$(UNSHAREDOBJS))
+#if InstallLibraries
+InstallSharedLibrary(Xaw3d,$(SOXAWREV),X11irafLibDir)
+InstallSharedLibraryData(Xaw3d,$(SOXAWREV),X11irafLibDir)
+#endif
+#endif
+#if DoNormalLib
+NormalLibraryTarget(Xaw3d,$(OBJS))
+#if InstallLibraries
+install::
+	@(set -x; $(RM) X11irafLibDir/libXaw3d.a)
+	$(INSTALL) -c $(INSTLIBFLAGS) libXaw3d.a X11irafLibDir
+	$(RANLIB) X11irafLibDir/libXaw3d.a
+#endif
+#endif
+#if DoProfileLib
+ProfiledLibraryTarget(Xaw3d,$(OBJS))
+#if InstallLibraries
+install::
+	@(set -x; $(RM) X11irafLibDir/libXaw3d.a)
+	$(INSTALL) -c $(INSTLIBFLAGS) libXaw3d.a X11irafLibDir
+	$(RANLIB) X11irafLibDir/libXaw3d.a
+#endif
+#endif
+#if DoDebugLib
+DebuggedLibraryTarget(Xaw3d,$(OBJS))
+#if InstallLibraries
+install::
+	@(set -x; $(RM) X11irafLibDir/libXaw3d.a)
+	$(INSTALL) -c $(INSTLIBFLAGS) libXaw3d.a X11irafLibDir
+	$(RANLIB) X11irafLibDir/libXaw3d.a
+#endif
+#endif
+
+LintLibraryTarget(Xaw3d,$(SRCS))
+InstallLintLibrary(Xaw3d,$(LINTLIBDIR))
+
+LinkFileList(linklibs,libXaw3d.a,X11irafLibDir,Xaw3dDir)
+
+includes::
+	MakeDir(X11irafIncDir/X11/Xaw3d)
+	@(set -x; for i in $(HEADERS); do \
+		$(RM) X11irafIncDir/X11/Xaw3d/$$i; \
+		$(LN) ../../../xaw3d/$$i X11irafIncDir/X11/Xaw3d/$$i; \
+	done) 
+
+#if InstallIncludes
+install::
+	@(set -x; for i in $(HEADERS); do \
+	    $(RM) X11irafIncDir/X11/Xaw3d/$$i; \
+	    $(INSTALL) -c $(INSTDATFLAGS) $$i X11irafIncDir/X11/Xaw3d; \
+	done)
+#endif
+
+laygram.c : laygram.y
+	yacc -d laygram.y
+	sed 's/yy/LayYY/g' y.tab.c > laygram.c
+	sed 's/yy/LayYY/g' y.tab.h > laygram.h
+	rm y.tab.c y.tab.h
+
+clean::
+	$(RM) laygram.c laygram.h
+   
+laylex.c: laylex.l
+	$(LEX) laylex.l
+	sed 's/yy/LayYY/g' lex.yy.c > laylex.c
+	rm lex.yy.c
+
+clean::
+	$(RM) laylex.c
+
+DependTarget()
+
+NormalLintTarget($(SRCS))
