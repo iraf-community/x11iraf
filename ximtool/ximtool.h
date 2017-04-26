@@ -63,8 +63,8 @@
 #define	DEF_ISM_ADDR	   "/tmp/.ISM%d"	/* default ISM unix socket    */
 #define	DEF_ISM_TEMPLATE   "/tmp/.ISM%d_%d"	/* ISM client socket template */
 #define DEF_ISM_TASK	   "wcspix"
-#define DEF_ISM_CMD	   "ism_wcspix.e wcspix &"
 #define DEF_ISM_CMD	   "/usr/local/bin/ism_wcspix.e wcspix &"
+#define DEF_ISM_CMD	   "ism_wcspix.e wcspix &"
 #define	SZ_ISMBUF	   4096
 
 /* WCS definitions. */

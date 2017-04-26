@@ -11,7 +11,7 @@ include "wcspix.h"
 
 
 # Image class data.
-define  LEN_IMGDATA	15
+define  LEN_IMGDATA	18
 define  IMG_WP          Memi[$1  ]              # wcspix back-pointer
 define  IMG_IM          Memi[$1+1]              # image pointer
 define  IMG_BPM         Memi[$1+2]              # bad pixel mask pointer
@@ -21,9 +21,9 @@ define  IMG_CTW         Memi[$1+5]              # mwcs log->world transform ptr
 define  IMG_CTP         Memi[$1+6]              # mwcs log->phys transform ptr
 define  IMG_CTA         Memi[$1+7]              # mwcs log->amplifier transform
 define  IMG_CTD         Memi[$1+8]              # mwcs log->detector transform
-define  IMG_ROT         Memr[$1+9]              # rotation angle
-define  IMG_SCALE       Memr[$1+10]             # plate scale
-define  IMG_LINEAR      Memi[$1+11]             # linear coords
+define  IMG_ROT         Memr[P2R($1+10)]              # rotation angle
+define  IMG_SCALE       Memr[P2R($1+12)]             # plate scale
+define  IMG_LINEAR      Memi[$1+14]             # linear coords
 
 
 define	IMG_DEBUG	FALSE
@@ -359,7 +359,6 @@ pointer imgs2r(), imgs2i(), ds_pmmap()
 errchk	ds_pmmap
 
 begin
-
 	img  = C_DATA(cp)
 	wp   = IMG_WP(img)
 	im   = IMG_IM(img)
