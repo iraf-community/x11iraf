@@ -1,4 +1,5 @@
 
+#include <stdint.h>
 /* Convenience macros.
 */
 #define	GPMtoRPM		gtermPM_to_rasPM	/* Pixmap	*/
@@ -199,7 +200,7 @@ int	sx, sy, dnx, dny;
 int     bpl, bpp, border;
 {
     register int i, j, npix = (width * height);
-    unsigned long  *lp, xcol, lval;
+    uint32_t  *lp, xcol, lval;
     int    nbytes = ((depth == ColormapDepth) ? 1 : 4);
     uchar  *ip = in, pv;
     uchar  *img = (uchar *) NULL;
@@ -232,12 +233,11 @@ int     bpl, bpp, border;
     ** off-screen pixels.
     */
     ip = &in[sy * width + sx];
-    lp = (unsigned long *) img;
+    lp = (uint32_t *) img;
     lp += sy * width + sx;
     for (i=0; i < dny; i++) {
         for (j=0; j < dnx; j++)
 	    *lp++ = global_lut[*ip++];
-
 	ip += (width - dnx);		/* advance to next line of rect	*/
 	lp += (width - dnx);
     }
