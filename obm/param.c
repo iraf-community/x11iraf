@@ -209,16 +209,16 @@ char *command;
 	} else {
 	    status = Tcl_Eval (msg->tcl, command);
 	    if (status == TCL_ERROR) {
-		if (*msg->tcl->result)
-		    Tcl_SetResult (obm->tcl, msg->tcl->result, TCL_VOLATILE);
+		if (*Tcl_GetStringResult (msg->tcl))
+		    Tcl_SetResult (obm->tcl, Tcl_GetStringResult (msg->tcl), TCL_VOLATILE);
 		else {
 		    /* Supply a default error message if none was returned. */
 		    Tcl_SetResult (obm->tcl, "evaluation error", TCL_VOLATILE);
 		}
-		obm->tcl->errorLine = msg->tcl->errorLine;
+		Tcl_SetErrorLine (obm->tcl, Tcl_GetErrorLine (msg->tcl));
 
-	    } else if (*msg->tcl->result)
-		Tcl_SetResult (obm->tcl, msg->tcl->result, TCL_VOLATILE);
+	    } else if (*Tcl_GetStringResult (msg->tcl))
+		Tcl_SetResult (obm->tcl, Tcl_GetStringResult (msg->tcl), TCL_VOLATILE);
 	}
 
 	msg->level--;
@@ -268,8 +268,8 @@ i, obj->core.name, cb->name, new_value);*/
 	    if (status != TCL_OK) {
 		char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
 		fprintf (stderr, "Error on line %d in %s: %s\n",
-		    obm->tcl->errorLine, cb->name,
-		    errstr ? errstr : obm->tcl->result);
+		    Tcl_GetErrorLine (obm->tcl), cb->name,
+		    errstr ? errstr : Tcl_GetStringResult (obm->tcl));
 	    }
 	}
 
@@ -328,8 +328,8 @@ char **argv;
 	    if (status != TCL_OK) {
 		char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
 		fprintf (stderr, "Error on line %d in %s: %s\n",
-		    obm->tcl->errorLine, cb->name,
-		    errstr ? errstr : obm->tcl->result);
+		    Tcl_GetErrorLine (obm->tcl), cb->name,
+		    errstr ? errstr : Tcl_GetStringResult (obm->tcl));
 	    }
 	}
 

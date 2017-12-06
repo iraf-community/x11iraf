@@ -602,7 +602,7 @@ ObmObject object;
 	 * we can't assume that Xt allocated the buffer.
 	 */
 	if (wp->data)
-	    free (wp->data);
+	    Tcl_Free (wp->data);
 
 	/* Mark any widget children as being destroyed so that we don't try
 	 * to destroy them twice.
@@ -688,8 +688,8 @@ char *command;
 	if (omsg && (tcl = omsg->tcl) && obmClientCommand(tcl,command)) {
 	    omsg->object[++omsg->level] = object;
 	    if (Tcl_Eval (tcl, command) == TCL_OK) {
-		if (*tcl->result)
-		    Tcl_SetResult (server, tcl->result, TCL_VOLATILE);
+		if (*Tcl_GetStringResult (tcl))
+		    Tcl_SetResult (server, Tcl_GetStringResult (tcl), TCL_VOLATILE);
 		omsg->level--;
 		return (TCL_OK);
 
@@ -700,7 +700,7 @@ char *command;
 		/* Exit with an error return if the class code recognized
 		 * the command but failed to execute it.
 		 */
-		if (strncmp (tcl->result, invalid, strlen(invalid)) != 0)
+		if (strncmp (Tcl_GetStringResult (tcl), invalid, strlen(invalid)) != 0)
 		    goto error;
 	    }
 	}
@@ -712,8 +712,8 @@ char *command;
 		obmClientCommand(tcl,command)) {
 	    pmsg->object[++pmsg->level] = object;
 	    if (Tcl_Eval (tcl, command) == TCL_OK) {
-		if (*tcl->result)
-		    Tcl_SetResult (server, tcl->result, TCL_VOLATILE);
+	    	if (*Tcl_GetStringResult (tcl))
+		    Tcl_SetResult (server, Tcl_GetStringResult (tcl), TCL_VOLATILE);
 		pmsg->level--;
 		return (TCL_OK);
 	    } else
@@ -721,14 +721,14 @@ char *command;
 	}
 
 error:
-	if (*tcl->result)
-	    Tcl_SetResult (server, tcl->result, TCL_VOLATILE);
+	if (*Tcl_GetStringResult (tcl))
+	    Tcl_SetResult (server, Tcl_GetStringResult (tcl), TCL_VOLATILE);
 	else {
 	    /* Supply a default error message if none was returned. */
 	    Tcl_SetResult (server, obmClientCommand (tcl, command) ?
 		"evaluation error" : "invalid command", TCL_VOLATILE);
 	}
-	server->errorLine = tcl->errorLine;
+	Tcl_SetErrorLine (server, Tcl_GetErrorLine (tcl));
 	return (TCL_ERROR);
 }
 
@@ -1350,12 +1350,12 @@ caddr_t call_data;
 		callback_name, " ",
 		NULL);
 	    if (status == TCL_OK)
-		*((double *)call_data) = atof (obm->tcl->result);
+	        *((double *)call_data) = atof (Tcl_GetStringResult (obm->tcl));
 	    else {
 		char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
 		fprintf (stderr, "Error on line %d in %s: %s\n",
-		    obm->tcl->errorLine, cb->name,
-		    errstr ? errstr : obm->tcl->result);
+		    Tcl_GetErrorLine (obm->tcl), cb->name,
+		    errstr ? errstr : Tcl_GetStringResult (obm->tcl));
 	    }
 	    break;
 	}
@@ -1442,8 +1442,8 @@ char *message;
 	    if (status != TCL_OK) {
 		char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
 		fprintf (stderr, "Error on line %d in %s: %s\n",
-		    obm->tcl->errorLine, cb->name,
-		    errstr ? errstr : obm->tcl->result);
+		    Tcl_GetErrorLine (obm->tcl), cb->name,
+		     errstr ? errstr : Tcl_GetStringResult (obm->tcl));
 	    }
 	}
 }
@@ -1618,7 +1618,7 @@ Cardinal *num_params;
 	status = Tcl_Eval (obm->tcl, cmd);
 	if (status != TCL_OK) {
 	    fprintf (stderr, "Error on line %d of %s: %s\n",
-		obm->tcl->errorLine, params[0], obm->tcl->result);
+		Tcl_GetErrorLine (obm->tcl), params[0], Tcl_GetStringResult (obm->tcl));
 	}
 }
 
@@ -2152,7 +2152,7 @@ char **argv;
   	    if (font_struct == NULL || name == NULL)
 	        name = XtNewString("-*-*-*-R-*-*-*-120-*-*-*-*-ISO8859-1");
 	    strcpy (result, name);
-	    free ((char *)name);
+	    XtFree ((char *)name);
 
 	} else {
 	    caddr_t value;  Arg args[1];
@@ -2187,12 +2187,12 @@ char **argv;
 	char *text;
 
 	if (!(obmClass (obj->core.classrec, WtAsciiText))) {
-	    obm->tcl->result = "not a text widget";
+	    Tcl_SetResult (obm->tcl, "not a text widget", TCL_STATIC);
 	    return (TCL_ERROR);
 	}
 
 	if (argc < 2) {
-	    obm->tcl->result = "missing argument";
+	    Tcl_SetResult (obm->tcl, "missing argument", TCL_STATIC);
 	    return (TCL_ERROR);
 	} else
 	    text = argv[1];
@@ -2252,12 +2252,12 @@ char **argv;
 
 	if (!(obmClass (obj->core.classrec, WtList) ||
 	      obmClass (obj->core.classrec, WtMultiList))) {
-	    obm->tcl->result = "not a list widget";
+	    Tcl_SetResult (obm->tcl, "not a list widget", TCL_STATIC);
 	    return (TCL_ERROR);
 	}
 
 	if (argc < 2) {
-	    obm->tcl->result = "missing argument";
+	    Tcl_SetResult (obm->tcl, "missing argument", TCL_STATIC);
 	    return (TCL_ERROR);
 	} else
 	    list = argv[1];
@@ -2274,7 +2274,7 @@ char **argv;
 		items, nitems, 0, resize, NULL);
 
 	if (wp->data)
-	    free (wp->data);
+	    Tcl_Free (wp->data);
 
 	wp->data = (char *) items;
 	wp->datalen = nitems;
@@ -2316,12 +2316,12 @@ char **argv;
 
 	if (!(obmClass (obj->core.classrec, WtList) ||
 	      obmClass (obj->core.classrec, WtMultiList))) {
-	    obm->tcl->result = "not a list widget";
+	    Tcl_SetResult (obm->tcl, "not a list widget", TCL_STATIC);
 	    return (TCL_ERROR);
 	}
 
 	if (argc < 2) {
-	    obm->tcl->result = "missing argument";
+	    Tcl_SetResult (obm->tcl, "missing argument", TCL_STATIC);
 	    return (TCL_ERROR);
 	} else
 	    itemno = argv[1];
@@ -2431,12 +2431,12 @@ char **argv;
 
 	if (!(obmClass (obj->core.classrec, WtList) ||
 	      obmClass (obj->core.classrec, WtMultiList))) {
-	    obm->tcl->result = "not a list widget";
+	    Tcl_SetResult (obm->tcl, "not a list widget", TCL_STATIC);
 	    return (TCL_ERROR);
 	}
 
 	if (argc < 2) {
-	    obm->tcl->result = "missing argument";
+	    Tcl_SetResult (obm->tcl, "missing argument", TCL_STATIC);
 	    return (TCL_ERROR);
 	} else
 	    itemno = get_itemno (obj, argv[1]);
@@ -2474,7 +2474,7 @@ char **argv;
 
 	if (!(obmClass (obj->core.classrec, WtList) ||
 	      obmClass (obj->core.classrec, WtMultiList))) {
-	    obm->tcl->result = "not a list widget";
+	    Tcl_SetResult (obm->tcl, "not a list widget", TCL_STATIC);
 	    return (TCL_ERROR);
 	}
 
@@ -2556,7 +2556,7 @@ char **argv;
 	char *value;
 
 	if (!(obmClass (obj->core.classrec, WtDialog))) {
-	    obm->tcl->result = "not a dialog widget";
+	    Tcl_SetResult (obm->tcl, "not a dialog widget", TCL_STATIC);
 	    return (TCL_ERROR);
 	}
 
@@ -2586,7 +2586,7 @@ char **argv;
 	char buf[SZ_NUMBER];
 
 	if (!(obmClass (obj->core.classrec, WtSlider2d))) {
-	    obm->tcl->result = "not a slider2d widget";
+	    Tcl_SetResult (obm->tcl, "not a slider2d widget", TCL_STATIC);
 	    return (TCL_ERROR);
 	}
 
@@ -2639,12 +2639,12 @@ char **argv;
 	double atof();
 
 	if (!(obmClass (obj->core.classrec, WtSlider2d))) {
-	    obm->tcl->result = "not a slider2D widget";
+	    Tcl_SetResult (obm->tcl, "not a slider2d widget", TCL_STATIC);
 	    return (TCL_ERROR);
 	}
 
 	if (argc < 2) {
-	    obm->tcl->result = "missing argument";
+	    Tcl_SetResult (obm->tcl, "missing argument", TCL_STATIC);
 	    return (TCL_ERROR);
 	} else {
 	    x = atof (argv[1]);
@@ -2681,12 +2681,12 @@ char **argv;
 	double atof();
 
 	if (!(obmClass (obj->core.classrec, WtSlider2d))) {
-	    obm->tcl->result = "not a slider2D widget";
+	    Tcl_SetResult (obm->tcl, "not a slider2d widget", TCL_STATIC);
 	    return (TCL_ERROR);
 	}
 
 	if (argc < 2) {
-	    obm->tcl->result = "missing argument";
+	    Tcl_SetResult (obm->tcl, "missing argument", TCL_STATIC);
 	    return (TCL_ERROR);
 	} else {
 	    width = atof (argv[1]);
@@ -2724,13 +2724,12 @@ char **argv;
 
 	if (!(obmClass (obj->core.classrec, WtScrollbar) ||
 	      obmClass (obj->core.classrec, WtScrollbar2))) {
-
-	    obm->tcl->result = "not a scrollbar widget";
+	    Tcl_SetResult (obm->tcl, "not a scrollbar widget", TCL_STATIC);
 	    return (TCL_ERROR);
 	}
 
 	if (argc < 3) {
-	    obm->tcl->result = "missing argument";
+	    Tcl_SetResult (obm->tcl, "missing argument", TCL_STATIC);
 	    return (TCL_ERROR);
 	} else {
 	    position = atof (argv[1]);
@@ -2768,12 +2767,12 @@ char **argv;
 	double atof();
 
 	if (!(obmClass (obj->core.classrec, WtViewport))) {
-	    obm->tcl->result = "not a viewport widget";
+	    Tcl_SetResult (obm->tcl, "not a viewport widget", TCL_STATIC);
 	    return (TCL_ERROR);
 	}
 
 	if (argc < 3) {
-	    obm->tcl->result = "missing argument";
+	    Tcl_SetResult (obm->tcl, "missing argument", TCL_STATIC);
 	    return (TCL_ERROR);
 	} else {
 	    x = atof (argv[1]);
@@ -2805,12 +2804,12 @@ char **argv;
 	double atof();
 
 	if (!(obmClass (obj->core.classrec, WtViewport))) {
-	    obm->tcl->result = "not a viewport widget";
+	    Tcl_SetResult (obm->tcl, "not a viewport widget", TCL_STATIC);
 	    return (TCL_ERROR);
 	}
 
 	if (argc < 3) {
-	    obm->tcl->result = "missing argument";
+	    Tcl_SetResult (obm->tcl, "missing argument", TCL_STATIC);
 	    return (TCL_ERROR);
 	} else {
 	    x = atoi (argv[1]);
@@ -2841,10 +2840,10 @@ char **argv;
 	ObmObject child = (ObmObject) NULL;
 
 	if (!(obmClass (obj->core.classrec, WtTabs))) {
-	    obm->tcl->result = "not a Tabs widget";
+	    Tcl_SetResult (obm->tcl, "not a tabs widget", TCL_STATIC);
 	    return (TCL_ERROR);
 	} else if (argc < 2) {
-	    obm->tcl->result = "missing argument";
+	    Tcl_SetResult (obm->tcl, "missing argument", TCL_STATIC);
 	    return (TCL_ERROR);
 	}
 
@@ -2897,10 +2896,10 @@ char **argv;
 
 	/* Do some error checking first. */
 	if (!(obmClass (obj->core.classrec, WtListTree))) {
-	    obm->tcl->result = "not a ListTree widget";
+	    Tcl_SetResult (obm->tcl, "not a ListTree widget", TCL_STATIC);
 	    return (TCL_ERROR);
 	} else if (argc < 2) {
-	    obm->tcl->result = "missing list argument";
+	    Tcl_SetResult (obm->tcl, "missing list argument", TCL_STATIC);
 	    return (TCL_ERROR);
 	}
 
@@ -2984,7 +2983,7 @@ char	*item;
 	        buildTreeList (w, tcl, level, entry[i]);
 	}
 
-	free ((char *) fields);
+	Tcl_Free ((char *) fields);
 /*	free ((char *) entry);*/
 	return (TCL_OK);
 }
@@ -3341,8 +3340,8 @@ char **argv;
 	        XawTableSetLabel (wp->w, i, j, cols[j]);
 	}
 
-	free ((char *) rows);
-	free ((char *) cols);
+	Tcl_Free ((char *) rows);
+	Tcl_Free ((char *) cols);
         return (TCL_OK);
 }
 
@@ -4927,7 +4926,7 @@ Boolean *continue_to_dispatch;
 	status = Tcl_Eval (obm->tcl, cmd);
 	if (status != TCL_OK) {
 	    fprintf (stderr, "Error on line %d of %s: %s\n",
-		obm->tcl->errorLine, cb->name, obm->tcl->result);
+		Tcl_GetErrorLine (obm->tcl), cb->name, Tcl_GetStringResult (obm->tcl));
 	}
 }
 

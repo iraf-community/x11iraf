@@ -544,7 +544,7 @@ char **argv;
 		(*cb->u.fcn) (cb->client_data, wp->w, message);
 
 	if (message)
-	    free ((char *)message);
+	    Tcl_Free ((char *)message);
 
 	return (TCL_OK);
 }
@@ -889,8 +889,8 @@ XEvent *event;
 	if (status != TCL_OK) {
 	    char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
 	    fprintf (stderr, "Error on line %d in %s: %s\n",
-		obm->tcl->errorLine, cb->name,
-		errstr ? errstr : obm->tcl->result);
+		Tcl_GetErrorLine (obm->tcl), cb->name,
+		errstr ? errstr : Tcl_GetStringResult (obm->tcl));
 	}
 }
 
@@ -925,8 +925,8 @@ Widget w;
 	if (status != TCL_OK) {
 	    char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
 	    fprintf (stderr, "Error on line %d in %s: %s\n",
-		obm->tcl->errorLine, cb->name,
-		errstr ? errstr : obm->tcl->result);
+		Tcl_GetErrorLine (obm->tcl), cb->name,
+		errstr ? errstr : Tcl_GetStringResult (obm->tcl));
 	}
 }
 
@@ -954,8 +954,8 @@ Widget w;
 	if (status != TCL_OK) {
 	    char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
 	    fprintf (stderr, "Error on line %d in %s: %s\n",
-		obm->tcl->errorLine, cb->name,
-		errstr ? errstr : obm->tcl->result);
+		Tcl_GetErrorLine (obm->tcl), cb->name,
+		errstr ? errstr : Tcl_GetStringResult (obm->tcl));
 	}
 }
 
@@ -4127,8 +4127,10 @@ char **argv;
 
 	obmNewObject (obm, name, "Marker", obj->core.name, args, nargs);
 
-	if (argc > 2)
-	    free ((char *) items);
+	if (argc == 3)
+	    Tcl_Free ((char *) items);
+	if (argc > 3)
+	    XtFree ((char *) items);
 
 	return (TCL_OK);
 }

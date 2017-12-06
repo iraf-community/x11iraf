@@ -142,7 +142,7 @@ literal:    if (Tcl_SplitList (tcl, command, &argc, &argvp) == TCL_OK) {
 		    argv[i+1] = argvp[i];
 
 		status = clientLiteral (object, tcl, argc + 1, argv);
-		free ((char *) argvp);
+		Tcl_Free ((char *) argvp);
 	    }
 	}
 
@@ -172,7 +172,7 @@ char **argv;
 	if (argc >= 2) {
 	    char *message = Tcl_Concat (argc-1, &argv[1]);
 	    stat = client_output (obm, obj->core.name, ':', message);
-	    free ((char *)message);
+	    Tcl_Free ((char *)message);
 	} else
 	    stat = -1;
 
@@ -224,7 +224,7 @@ char **argv;
 	if (argc >= 2) {
 	    char *message = Tcl_Concat (argc-1, &argv[1]);
 	    stat = client_output (obm, obj->core.name, 0, message);
-	    free ((char *)message);
+	    Tcl_Free ((char *)message);
 	} else
 	    stat = -1;
 
