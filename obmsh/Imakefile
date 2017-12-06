@@ -18,7 +18,7 @@ X11IRAFDIR = ../
 
   LOCAL_LDFLAGS = $(X11IRAF_LDFLAGS)
  EXTRA_INCLUDES = $(X11IRAF_INCLUDES)
-        OBMLIBS = LibObm LibXpm
+        OBMLIBS = LibObm LibXpm -ltcl
         MATHLIB = -lm
          XAWLIB = LibXaw3d
 

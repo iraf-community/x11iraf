@@ -4,7 +4,7 @@
 #include <sys/stat.h>
 #include <X11/Intrinsic.h>
 #include <X11/StringDefs.h>
-#include <Tcl/tcl.h>
+#include <tcl/tcl.h>
 #include <Obm.h>
 #include <ObmW/Gterm.h>
 #include "ximtool.h"
