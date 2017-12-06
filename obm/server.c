@@ -1757,7 +1757,7 @@ char *description;
 
 	/* Create the pixmap (actually icon).
 	 */
-	status = XpmCreateXpmImageFromBuffer (description, &image, NULL, NULL);
+	status = XpmCreateXpmImageFromBuffer (description, &image, NULL);
 	if (status != XpmSuccess)
 	    return (TCL_ERROR);
 	XpmCreateDataFromXpmImage (&data, &image, NULL);
