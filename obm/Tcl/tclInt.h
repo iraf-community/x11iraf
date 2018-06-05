@@ -65,26 +65,7 @@
 #include <string.h>
 #endif
 
-/*
-*/
-#if defined(__DARWIN__) || defined(USE_STDARG)
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
-
-/* Workaround for our old varargs handling on LinuxPPC systems.
-#if defined(linux) && defined(__powerpc__)
-#undef va_start
-#undef va_alist
-#undef va_dcl
-
-#define va_start(AP) __va_start_common (AP, 1)
-#define va_alist __va_1st_arg
-#define va_dcl register int va_alist; ...
-#endif
-*/
-
 
 /*
  * At present (12/91) not all stdlib.h implementations declare strtod.

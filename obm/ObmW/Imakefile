@@ -21,14 +21,6 @@ X11IRAFDIR = ../../
         CCOPTIONS = -traditional-cpp
 #endif
 
-#if ((GccMajorVersion == 3) && (GccMinorVersion >= 1))
-        CCOPTIONS = -DUSE_STDARG
-#else
-        CCOPTIONS =
-#endif
-
-
-
 HEADERS = \
 	Arrow.h ArrowP.h Board.h BoardP.h Button.h ButtonP.h \
 	Common.h CommonP.h Converters.h DrawingArea.h DrawingAreaP.h \

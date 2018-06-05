@@ -48,26 +48,7 @@
 #include <math.h>
 #include "HTMLP.h"
 
-#ifdef _GNU_SOURCE
-#define USE_STDARG
-#endif
-#if defined(__APPLE__) || (__APPLE_CC__ > 1151) || defined(USE_STDARG)
 #include <stdarg.h>
-#else
-#include <varargs.h>
-
-/* Workaround for our old varargs handling on LinuxPPC systems.
-#if defined(linux) && defined(__powerpc__)
-#undef va_start
-#undef va_alist
-#undef va_dcl
-
-#define va_start(AP) __va_start_common (AP, 1)
-#define va_alist __va_1st_arg
-#define va_dcl register int va_alist; ...
-#endif
-*/
-#endif
 
 #if !defined(__DARWIN__)
 #include <malloc.h>
@@ -191,44 +172,7 @@ static float GetDpi ARG1(HTMLWidget, hw) {
  |
 */
 
-#ifdef BROKEN_SOLARIS_COMPILER_STDARG
-/* "Looks like there's a bug in Sun's C compiler and the stdarg.h use
-   of va_start() in HTML-PSformat.c. Until the SunPro folks can take a
-   look at the problem, the following pre-ANSI code should workaround
-   the problem." */
-static int PSprintf ARG1V(char *,format, ...) {
-        va_dcl
-        va_list args;
-        int     len;
-        char    *s;
-
-        if (PS_size - PS_len < 1024) {
-                PS_size += 1024;
-                if ((s = (char *) realloc(PS_string, PS_size)) == NULL) {
-                        fprintf(stderr, "PSprintf malloc failed\n");
-                        return(EOF);
-                }
-                PS_string = s;
-        }
-        va_start(args);
-        len = vsprintf(PS_string+PS_len, format, args);
-        /* this is a hack to make it work on systems were vsprintf(s,.)
-         * returns s, instead of the len.
-         */
-        if (len != EOF && len != NULL)
-                PS_len += strlen(PS_string+PS_len);
-        va_end(args);
-        return(len);
-}
-#else /* not BROKEN_SOLARIS_COMPILER_STDARG */
-
-#if defined(__APPLE__) || (__APPLE_CC__ > 1151) || defined(USE_STDARG)
 static int PSprintf (char *format, ... )
-#else
-static int PSprintf (format, va_alist)
-char* format;
-va_dcl
-#endif
 {
 	int 	len;
 	char 	*s;
@@ -242,11 +186,7 @@ va_dcl
 		}
 		PS_string = s;
 	}
-#if defined(__APPLE__) || (__APPLE_CC__ > 1151) || defined(USE_STDARG)
 	va_start(args,format);
-#else
-	va_start(args);
-#endif
 	len = vsprintf(PS_string+PS_len, format, args);
 	/* this is a hack to make it work on systems were vsprintf(s,...)
 	 * returns s, instead of the len.
@@ -256,7 +196,6 @@ va_dcl
 	va_end(args);
 	return(len);
 }
-#endif /* not BROKEN_SOLARIS_COMPILER_STDARG */
 
 /*__________________________________________________________________________
  |
