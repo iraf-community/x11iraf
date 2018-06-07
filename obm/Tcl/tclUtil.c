@@ -1042,22 +1042,7 @@ Tcl_SetResult(interp, string, freeProc)
 
 	/* VARARGS2 */
 void
-#ifdef USE_STDARG
 Tcl_AppendResult(Tcl_Interp *interp, ...)
-#else
-#ifndef lint
-Tcl_AppendResult(va_alist)
-#else
-void
-	/* VARARGS2 */ /* ARGSUSED */
-Tcl_AppendResult(interp, p, va_alist)
-    Tcl_Interp *interp;		/* Interpreter whose result is to be
-				 * extended. */
-    char *p;			/* One or more strings to add to the
-				 * result, terminated with NULL. */
-#endif
-    va_dcl
-#endif
 {
     va_list argList;
     Interp *iPtr = (Interp *) interp;
@@ -1069,12 +1054,7 @@ Tcl_AppendResult(interp, p, va_alist)
      * needed.
      */
 
-#ifdef USE_STDARG
     va_start(argList, interp);
-#else
-    va_start(argList);
-    (void) va_arg(argList, Interp *);
-#endif
     newSpace = 0;
     while (1) {
 	string = va_arg(argList, char *);
@@ -1101,12 +1081,7 @@ Tcl_AppendResult(interp, p, va_alist)
      * them into the buffer.
      */
 
-#ifdef USE_STDARG
     va_start(argList, interp);
-#else
-    va_start(argList);
-    (void) va_arg(argList, Interp *);
-#endif
     while (1) {
 	string = va_arg(argList, char *);
 	if (string == NULL) {
@@ -1308,22 +1283,7 @@ Tcl_ResetResult(interp)
  */
 	/* VARARGS2 */
 void
-#ifdef USE_STDARG
 Tcl_SetErrorCode(Tcl_Interp *interp, ...)
-#else
-#ifndef lint
-Tcl_SetErrorCode(va_alist)
-#else
-void
-	/* VARARGS2 */ /* ARGSUSED */
-Tcl_SetErrorCode(interp, p, va_alist)
-    Tcl_Interp *interp;		/* Interpreter whose errorCode variable is
-				 * to be set. */
-    char *p;			/* One or more elements to add to errorCode,
-				 * terminated with NULL. */
-#endif
-    va_dcl
-#endif
 {
     va_list argList;
     char *string;
@@ -1335,11 +1295,7 @@ Tcl_SetErrorCode(interp, p, va_alist)
      * $errorCode as list elements.
      */
 
-#ifdef USE_STDARG
     va_start(argList, interp);
-#else
-    va_start(argList);
-#endif
     (void) va_arg(argList, Tcl_Interp *);
     flags = TCL_GLOBAL_ONLY | TCL_LIST_ELEMENT;
     while (1) {
