@@ -138,7 +138,8 @@ SRCS = \
 	AsciiText.c \
 	Box.c \
 	Command.c \
-	Dialog.c \ Form.c \
+	Dialog.c \
+	Form.c \
 	Grip.c \
 	Label.c \
 	List.c \
