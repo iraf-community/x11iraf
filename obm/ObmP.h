@@ -107,7 +107,10 @@
 #define	OtMarker	6		/* gterm marker class */
 #define	OtNClasses	6
 
+typedef	struct obmObject *ObmObject;
+
 typedef	int (*ObmFunc)();
+typedef	ObmObject (*ObmCreateFunc)();
 typedef	void (*ObmMethod)();
 
 extern	void ServerClassInit(), ClientClassInit(), ParameterClassInit();
@@ -189,7 +192,7 @@ typedef struct {
 	unsigned long flag1, flag2;	/* widget class bit flags. */
 	ObmMethod ClassInit;		/* initializes class record */
 	ObmMethod ClassDestroy;		/* close class record */
-	ObmFunc Create;			/* create proc */
+	ObmCreateFunc Create;		/* create proc */
 	ObmMethod Destroy;		/* destroy proc */
 	ObmFunc Evaluate;		/* evaluate proc */
 	XtPointer class_data;		/* class specific data */

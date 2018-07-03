@@ -1886,7 +1886,7 @@ CleanupChildren(interp, numPids, pidPtr, errorId, keepNewline)
 {
     int result = TCL_OK;
     int i, pid, length, abnormalExit;
-    WAIT_STATUS_TYPE waitStatus;
+    int waitStatus;
 
     abnormalExit = 0;
     for (i = 0; i < numPids; i++) {

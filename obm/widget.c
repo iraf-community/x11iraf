@@ -1,6 +1,7 @@
 /* Copyright(c) 1993 Association of Universities for Research in Astronomy Inc.
  */
 
+#include <stdlib.h>
 #include <ObmP.h>
 #include "widget.h"
 

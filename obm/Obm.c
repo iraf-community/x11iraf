@@ -690,7 +690,7 @@ int nargs;			/* optional argument list */
 
 	/* Create the object. */
 	    
-	newobj = (ObmObject) (*(classrec->Create)) (obm,
+	newobj = (*(classrec->Create)) (obm,
 	    name, classrec, parent, args, nargs);
 	if (!newobj) {
 	    fprintf (stderr, "obm: could not create object %s class %s\n",

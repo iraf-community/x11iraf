@@ -132,7 +132,7 @@ ObmContext obm;
 register ObjClassRec classrec;
 {
 	classrec->ClassDestroy = obmGenericClassDestroy;
-	classrec->Create = (ObmFunc) ServerCreate;
+	classrec->Create = ServerCreate;
 	classrec->Destroy = ServerDestroy;
 	classrec->Evaluate = ServerEvaluate;
 }

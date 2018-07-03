@@ -65,7 +65,7 @@ ObmContext obm;
 register ObjClassRec classrec;
 {
 	classrec->ClassDestroy = obmGenericClassDestroy;
-	classrec->Create = (ObmFunc) ClientCreate;
+	classrec->Create = ClientCreate;
 	classrec->Destroy = ClientDestroy;
 	classrec->Evaluate = ClientEvaluate;
 }
