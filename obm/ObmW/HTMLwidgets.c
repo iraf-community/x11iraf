@@ -69,13 +69,13 @@
 #else
 #include <X11/Intrinsic.h>
 #include <X11/StringDefs.h>
-#include <X11/Xaw/Toggle.h>
-#include <X11/Xaw/AsciiText.h>
-#include <X11/Xaw/List.h>
-#include <X11/Xaw/Viewport.h>
-#include <X11/Xaw/MenuButton.h>
-#include <X11/Xaw/SimpleMenu.h>
-#include <X11/Xaw/SmeBSB.h>
+#include <X11/Xraw/Toggle.h>
+#include <X11/Xraw/AsciiText.h>
+#include <X11/Xraw/List.h>
+#include <X11/Xraw/Viewport.h>
+#include <X11/Xraw/MenuButton.h>
+#include <X11/Xraw/SimpleMenu.h>
+#include <X11/Xraw/SmeBSB.h>
 #endif /* MOTIF */
 #include "HTMLP.h"
 

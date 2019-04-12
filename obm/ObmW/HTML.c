@@ -59,7 +59,7 @@
 #include <Xm/ScrollBar.h>
 #else
 #include "DrawingArea.h"
-#include <X11/Xaw/Scrollbar.h>
+#include <X11/Xraw/Scrollbar.h>
 #endif
 #include <X11/cursorfont.h>
 
@@ -3898,7 +3898,7 @@ _HTMLInput(
 
 
 #ifndef MOTIF
-#include <X11/Xaw/AsciiText.h>
+#include <X11/Xraw/AsciiText.h>
 /*
  * Process key input passwd widgets
  */

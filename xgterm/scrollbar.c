@@ -34,7 +34,7 @@
 #include <X11/StringDefs.h>
 #include <X11/Shell.h>
 
-#include <X11/Xaw/Scrollbar.h>
+#include <X11/Xaw3d/Scrollbar.h>
 
 #include "data.h"
 #include "error.h"

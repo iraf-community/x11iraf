@@ -7,7 +7,7 @@
 
 #include <X11/Intrinsic.h>
 #include <X11/StringDefs.h>
-#include <X11/Xaw/Cardinals.h>
+#include <X11/Xaw3d/Cardinals.h>
 #include <X11/Shell.h>
 #include <ObmW/Gterm.h>
 #include <Obm.h>

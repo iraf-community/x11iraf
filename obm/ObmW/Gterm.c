@@ -8,7 +8,7 @@
 #include <X11/StringDefs.h>
 #include <X11/IntrinsicP.h>
 #include <X11/cursorfont.h>
-#include <X11/Xaw/XawInit.h>
+#include <X11/Xraw/XawInit.h>
 #include "GtermP.h"
 
 

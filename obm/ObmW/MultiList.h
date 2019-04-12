@@ -53,7 +53,7 @@
 #ifndef _MULTILIST_H_
 #define _MULTILIST_H_
 
-#include <X11/Xaw/Simple.h>
+#include <X11/Xraw/Simple.h>
 
 /*---------------------------------------------------------------------------*
 

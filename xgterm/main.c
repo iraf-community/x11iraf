@@ -94,7 +94,7 @@ SOFTWARE.
 
 #include <X11/Xos.h>
 #include <X11/cursorfont.h>
-#include <X11/Xaw/SimpleMenu.h>
+#include <X11/Xaw3d/SimpleMenu.h>
 #include <pwd.h>
 #include <ctype.h>
 

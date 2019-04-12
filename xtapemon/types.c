@@ -9,8 +9,8 @@
 #include <X11/IntrinsicP.h>
 #include <X11/StringDefs.h>
 #include <X11/Xmu/CharSet.h>
-#include <X11/Xaw/Form.h>
-#include <X11/Xaw/Cardinals.h>
+#include <X11/Xaw3d/Form.h>
+#include <X11/Xaw3d/Cardinals.h>
 #include "types.h"
 extern void XmuConvertStringToWidget();		/* original converter */
 

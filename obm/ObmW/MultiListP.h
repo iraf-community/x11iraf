@@ -53,7 +53,7 @@
 #ifndef _MULTILISTP_H_
 #define _MULTILISTP_H_
 
-#include <X11/Xaw/SimpleP.h>
+#include <X11/Xraw/SimpleP.h>
 #include "MultiList.h"
 
 /*---------------------------------------------------------------------------*

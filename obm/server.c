@@ -7,7 +7,7 @@
  * included in this file.
  */
 #include <X11/IntrinsicP.h>
-#include <X11/Xaw/SmeBSBP.h>
+#include <X11/Xraw/SmeBSBP.h>
 
 /*
  * SERVER class.

@@ -12,7 +12,7 @@
 /*
 #include <X11/Xmu/Converters.h>
 #include <X11/Xmu/CharSet.h>
-#include <X11/Xaw/XawInit.h>
+#include <X11/Xraw/XawInit.h>
 */
 
 #include "DrawingAreaP.h"
