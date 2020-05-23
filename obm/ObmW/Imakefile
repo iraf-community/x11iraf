@@ -24,8 +24,8 @@ X11IRAFDIR = ../../
 HEADERS = \
 	Arrow.h ArrowP.h Board.h BoardP.h Button.h ButtonP.h \
 	Common.h CommonP.h Converters.h DrawingArea.h DrawingAreaP.h \
-	Frame.h FrameP.h Group.h GroupP.h Gterm.h GtermP.h HTML.h HTMLP.h \
-	HTMLamp.h Icon.h IconP.h Label.h LabelP.h Layout.h LayoutP.h \
+	Frame.h FrameP.h Group.h GroupP.h Gterm.h GtermP.h \
+	Icon.h IconP.h Label.h LabelP.h Layout.h LayoutP.h \
 	MenuBar.h MenuBarP.h MultiList.h MultiListP.h RadioGrp.h RadioGrpP.h \
 	RowCol.h RowColP.h Scrollbar.h ScrollbarP.h Slider2.h Slider2P.h \
 	TabString.h Toggle.h ToggleP.h done.h inkstore.h laygram.h scroll.h \
@@ -50,9 +50,8 @@ XRAW_HEADERS = \
 
 SRCS = \
 	Arrow.c Board.c Button.c Common.c DrawIString.c DrawString.c \
-	DrawingArea.c Frame.c Group.c Gterm.c HTML-PSformat.c HTML.c \
-	HTMLformat.c HTMLimages.c HTMLjot.c HTMLlists.c HTMLparse.c \
-	HTMLwidgets.c Icon.c Label.c Layout.c MenuBar.c MultiList.c \
+	DrawingArea.c Frame.c Group.c Gterm.c \
+	Icon.c Label.c Layout.c MenuBar.c MultiList.c \
 	RadioGrp.c RowCol.c Scrollbar.c Slider2.c Tablist2Tabs.c TextWidth.c \
 	Toggle.c cvtLong.c iconutil.c laygram.c laylex.c scroll.c strnchr.c \
 	Tabs.c Gcs.c ListTree.c Separator.c Table.c Table3d.c TableUtil.c \
@@ -60,9 +59,8 @@ SRCS = \
 
 OBJS = \
 	Arrow.o Board.o Button.o Common.o DrawIString.o DrawString.o \
-	DrawingArea.o Frame.o Group.o Gterm.o HTML-PSformat.o HTML.o \
-	HTMLformat.o HTMLimages.o HTMLjot.o HTMLlists.o HTMLparse.o \
-	HTMLwidgets.o Icon.o Label.o Layout.o MenuBar.o MultiList.o \
+	DrawingArea.o Frame.o Group.o Gterm.o \
+	Icon.o Label.o Layout.o MenuBar.o MultiList.o \
 	RadioGrp.o RowCol.o Scrollbar.o Slider2.o Tablist2Tabs.o TextWidth.o \
 	Toggle.o cvtLong.o iconutil.o laygram.o laylex.o scroll.o strnchr.o \
 	Tabs.o Gcs.o ListTree.o Separator.o Table.o Table3d.o TableUtil.o \
@@ -83,26 +81,8 @@ SubdirLibraryRule($(OBJS))
 NormalLintTarget($(SRCS))
 LintLibraryTarget(ar,$(SRCS))
 
-# Turn off compiler warnings for the HTML and FWF widgets.
+# Turn off compiler warnings for the FWF widgets.
     FWFCFLAGS = $(CFLAGS) -c -w
-
-HTML.o: HTML.c
-	$(CC) $(FWFCFLAGS) HTML.c
-HTML-PSformat.o: HTML-PSformat.c
-	$(CC) $(FWFCFLAGS) HTML-PSformat.c
-HTMLformat.o: HTMLformat.c
-	$(CC) $(FWFCFLAGS) HTMLformat.c
-HTMLimages.o: HTMLimages.c
-	$(CC) $(FWFCFLAGS) HTMLimages.c
-HTMLjot.o: HTMLjot.c
-	$(CC) $(FWFCFLAGS) HTMLjot.c
-HTMLlists.o: HTMLlists.c
-	$(CC) $(FWFCFLAGS) HTMLlists.c
-HTMLparse.o: HTMLparse.c
-	$(CC) $(FWFCFLAGS) HTMLparse.c
-HTMLwidgets.o: HTMLwidgets.c
-	$(CC) $(FWFCFLAGS) HTMLwidgets.c
-
 
 Arrow.o:
 	$(CC) $(FWFCFLAGS) Arrow.c

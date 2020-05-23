@@ -19,7 +19,6 @@ extern WidgetClass coreWidgetClass;
 extern WidgetClass dialogWidgetClass;
 extern WidgetClass formWidgetClass;
 extern WidgetClass gripWidgetClass;
-extern WidgetClass htmlWidgetClass;
 extern WidgetClass labelWidgetClass;
 extern WidgetClass layoutWidgetClass;
 extern WidgetClass listWidgetClass;
@@ -124,7 +123,6 @@ XmuWidgetNode XawWidgetArray[] = {
 { "arrow", &xfwfArrowWidgetClass },
 { "gterm", &gtermWidgetClass },
 { "layout", &layoutWidgetClass },
-{ "html", &htmlWidgetClass },
 { "board", &xfwfBoardWidgetClass },
 { "frame", &xfwfFrameWidgetClass },
 { "group", &xfwfGroupWidgetClass },

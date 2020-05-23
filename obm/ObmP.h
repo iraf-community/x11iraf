@@ -47,7 +47,6 @@
 #include <ObmW/Frame.h>
 #include <ObmW/Group.h>
 #include <ObmW/Gterm.h>
-#include <ObmW/HTML.h>
 #include <ObmW/Icon.h>
 #include <ObmW/Label.h>
 #include <ObmW/Layout.h>
@@ -115,7 +114,7 @@ typedef	void (*ObmMethod)();
 
 extern	void ServerClassInit(), ClientClassInit(), ParameterClassInit();
 extern	void WidgetClassInit(), GenericClassDestroy();
-extern	void GtermClassInit(), MarkerClassInit(), HTMLClassInit();
+extern	void GtermClassInit(), MarkerClassInit();
 
 /* Dummy WtClass bit flag definitions for initializers. */
 #define	WtServer		0, 0
@@ -289,8 +288,6 @@ objClassRec UiObjects[] = {
 			MarkerClassInit, NULL, NULL, NULL, NULL, NULL },
 	{ "Layout",	OtNonShell, &layoutWidgetClass, WtLayout,
 			WidgetClassInit, NULL, NULL, NULL, NULL, NULL },
-	{ "HTML",	OtNonShell, &htmlWidgetClass, WtHTML,
-			HTMLClassInit, NULL, NULL, NULL, NULL, NULL },
 
 	{ "Arrow",	OtNonShell, &xfwfArrowWidgetClass, WtArrow,
 			WidgetClassInit, NULL, NULL, NULL, NULL, NULL },

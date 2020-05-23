@@ -24,10 +24,8 @@ X11IRAFDIR = ../
         SUBDIRS = $(LIBDIRS)
 
         HEADERS = Obm.h ObmP.h widget.h
-           SRCS = Obm.c client.c param.c server.c widget.c gterm.c marker.c \
-		    html.c geom.c
-           OBJS = Obm.o client.o param.o server.o widget.o gterm.o marker.o \
-		    html.o geom.o
+           SRCS = Obm.c client.c param.c server.c widget.c gterm.c marker.c geom.c
+           OBJS = Obm.o client.o param.o server.o widget.o gterm.o marker.o geom.o
        ALL_OBJS = ObmW/[A-Za-z]*.o $(OBJS)
        ALL_DONE = ObmW/DONE
          RESOBJ = obmres.o
