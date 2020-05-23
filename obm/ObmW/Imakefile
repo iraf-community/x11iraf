@@ -28,7 +28,7 @@ HEADERS = \
 	Icon.h IconP.h Label.h LabelP.h Layout.h LayoutP.h \
 	MenuBar.h MenuBarP.h MultiList.h MultiListP.h RadioGrp.h RadioGrpP.h \
 	RowCol.h RowColP.h Scrollbar.h ScrollbarP.h Slider2.h Slider2P.h \
-	TabString.h Toggle.h ToggleP.h done.h inkstore.h laygram.h scroll.h \
+	TabString.h Toggle.h ToggleP.h done.h laygram.h scroll.h \
 	Tabs.h TabsP.h Gcs.h ListTree.h ListTreeP.h 
 
 XRAW_HEADERS = \
