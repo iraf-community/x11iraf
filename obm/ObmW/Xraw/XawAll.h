@@ -14,7 +14,6 @@
 #include <X11/Xraw/Container.h>
 #include <X11/Xraw/Dialog.h>
 #include <X11/Xraw/Form.h>
-#include <X11/Xraw/Frame.h>
 #include <X11/Xraw/Grip.h>
 #include <X11/Xraw/Label.h>
 #include <X11/Xraw/List.h>

@@ -61,7 +61,6 @@
 #include <ObmW/Toggle.h>
 
 #include <X11/Xraw/Separator.h>
-#include <X11/Xraw/Table.h>
 
 #include <X11/xpm.h>
 #include <tcl/tcl.h>
@@ -270,8 +269,6 @@ objClassRec UiObjects[] = {
 	{ "SmeLine",	OtNonShell, &smeLineObjectClass, WtSmeLine,
 			WidgetClassInit, NULL, NULL, NULL, NULL, NULL },
 	{ "StripChart",	OtNonShell, &stripChartWidgetClass, WtStripChart,
-			WidgetClassInit, NULL, NULL, NULL, NULL, NULL },
-	{ "Table",	OtNonShell, &tableWidgetClass, WtTable,
 			WidgetClassInit, NULL, NULL, NULL, NULL, NULL },
 	{ "Tabs",	OtNonShell, &tabsWidgetClass, WtTabs,
 			WidgetClassInit, NULL, NULL, NULL, NULL, NULL },

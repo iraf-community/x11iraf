@@ -32,7 +32,6 @@ SOFTWARE.
 
 #include <X11/Xraw/Viewport.h>
 #include <X11/Xraw/ContainerP.h>
-#include <X11/Xraw/FrameP.h>
 
 typedef struct {int empty;} ViewportClassPart;
 

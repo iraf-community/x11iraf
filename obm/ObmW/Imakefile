@@ -35,26 +35,26 @@ XRAW_HEADERS = \
 	3d.h AllWidgets.h Arrow.h ArrowP.h AsciiSink.h AsciiSinkP.h \
 	AsciiSrc.h AsciiSrcP.h AsciiText.h AsciiTextP.h Box.h BoxP.h \
 	Cardinals.h Clock.h ClockP.h Command.h CommandP.h Container.h \
-	ContainerP.h Dialog.h DialogP.h Form.h FormP.h Frame.h FrameP.h \
+	ContainerP.h Dialog.h DialogP.h Form.h FormP.h \
 	Grip.h GripP.h Label.h LabelP.h List.h ListP.h Logo.h LogoP.h \
 	Mailbox.h MailboxP.h MenuButtoP.h MenuButton.h Object.h Paned.h \
 	PanedP.h Panner.h PannerP.h Porthole.h PortholeP.h Repeater.h \
-	RepeaterP.h Reports.h Scrollbar.h ScrollbarP.h ScrolledTable.h \
-	ScrolledTableP.h Separator.h SeparatorP.h Simple.h SimpleMenP.h \
+	RepeaterP.h Reports.h Scrollbar.h ScrollbarP.h \
+	Separator.h SeparatorP.h Simple.h SimpleMenP.h \
 	SimpleMenu.h SimpleP.h Sme.h SmeBSB.h SmeBSBP.h SmeLine.h SmeLineP.h \
-	SmeP.h StripCharP.h StripChart.h Table.h Table3d.h TableP.h \
-	TableUtil.h Template.h TemplateP.h Text.h TextP.h TextSink.h \
+	SmeP.h StripCharP.h StripChart.h \
+	Template.h TemplateP.h Text.h TextP.h TextSink.h \
 	TextSinkP.h TextSrc.h TextSrcP.h Toggle.h ToggleP.h Tree.h TreeP.h \
 	Viewport.h ViewportP.h XawAll.h XawInit.h Xosdefs.h XrawInit.h \
-	color.h xraw_table.h
+	color.h
 
 SRCS = \
 	Arrow.c Board.c Button.c Common.c DrawIString.c DrawString.c \
 	DrawingArea.c Frame.c Group.c Gterm.c \
 	Icon.c Label.c Layout.c MenuBar.c MultiList.c \
 	RadioGrp.c RowCol.c Scrollbar.c Slider2.c Tablist2Tabs.c TextWidth.c \
-	Toggle.c cvtLong.c iconutil.c laygram.c laylex.c scroll.c strnchr.c \
-	Tabs.c Gcs.c ListTree.c Separator.c Table.c Table3d.c TableUtil.c \
+	Toggle.c cvtLong.c iconutil.c scroll.c strnchr.c \
+	Tabs.c Gcs.c ListTree.c Separator.c \
 	Container.c color.c 
 
 OBJS = \
@@ -63,7 +63,7 @@ OBJS = \
 	Icon.o Label.o Layout.o MenuBar.o MultiList.o \
 	RadioGrp.o RowCol.o Scrollbar.o Slider2.o Tablist2Tabs.o TextWidth.o \
 	Toggle.o cvtLong.o iconutil.o laygram.o laylex.o scroll.o strnchr.o \
-	Tabs.o Gcs.o ListTree.o Separator.o Table.o Table3d.o TableUtil.o \
+	Tabs.o Gcs.o ListTree.o Separator.o \
 	Container.o color.o 
 
 #ifdef LexCmd
