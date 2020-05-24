@@ -76,9 +76,6 @@
 #ifndef XpmDir
 #define XpmDir 		$(X11IRAFDIR)/xpm
 #endif
-#ifndef CDLDir
-#define CDLDir 		$(X11IRAFDIR)/cdl
-#endif
 
 /* Libraries: */
 #ifndef LibObm
@@ -90,9 +87,6 @@
 #ifndef LibXaw3d
 #define LibXaw3d 	-lXaw3d
 #endif
-#ifndef LibCDL
-#define LibCDL 		-lcdl
-#endif
 
 /* Dependency libraries: */
 #ifndef DepLibObm
@@ -103,9 +97,6 @@
 #endif
 #ifndef DepLibXaw3d
 #define DepLibXaw3d 	$(XAW3DDIR)/libXaw3d.a
-#endif
-#ifndef DepLibCDL
-#define DepLibCDL 	$(CDLDIR)/libcdl.a
 #endif
 
 
@@ -121,7 +112,6 @@
            OBMDIR = ObmDir
            XPMDIR = XpmDir
          XAW3DDIR = Xaw3dDir
-           CDLDIR = CDLDir
     
         DEPLIBOBM = DepLibObm
            LIBOBM = LibObm
@@ -129,7 +119,6 @@
            LIBXPM = LibXpm
       DEPLIBXAW3D = DepLibXaw3d
          LIBXAW3D = LibXaw3d
-           LIBCDL = LibCDL
     
   X11IRAF_LDFLAGS = -L$(X11IRAFDIR)/lib -L../lib
  X11IRAF_INCLUDES = -I$(X11IRAFDIR)/include -I../include
