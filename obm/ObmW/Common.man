@@ -25,7 +25,7 @@ these keys for other purposes, the keyboard traversal will not work.
 
 .SS "Public variables"
 
-.ps-2
+.ps -2
 .TS
 center box;
 cBsss
@@ -144,7 +144,7 @@ in any way.
 
 .eh
 
-.ps-2
+.ps -2
 .TS
 center box;
 cBsss
@@ -159,7 +159,7 @@ numChildren	XtCNumChildren	Cardinal 	0
 .TE
 .ps
 
-.ps-2
+.ps -2
 .TS
 center box;
 cBsss

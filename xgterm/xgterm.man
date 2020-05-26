@@ -370,7 +370,7 @@ height	highlightColor	imageText	knotColor
 knotSize	lineColor	lineStyle	lineWidth
 rotangle	sensitive	textBgColor	textBorder
 textColor	translations	type	visible
-width	x	y	\fP
+width  	x    	y    	    \fP
 .TE
 .TP 18
 \fIm_raise()\fP
@@ -456,7 +456,7 @@ imaging, area fills, the status line, etc.
 All escape sequences begin with an \fBESC\fP character (octal \\033), followed
 by up to three characters defining the action to be taken.  All strings in
 capital letters refer to the ASCII code (e.g. \fILF\fP is the ASCII linefeed
-code), a three digit number preceeded by a '\' refers to an octal code (e.g.
+code), a three digit number preceded by a '\' refers to an octal code (e.g.
 "\012" is octal 12) , all others are characters in the escape code (e.g.
 "/bc" are the three characters '/', 'b', and 'c').
 
