@@ -4,6 +4,11 @@ OBJS = button.o charproc.o cursor.o data.o gtermio.o input.o main.o	\
 all: xgterm
 
 CFLAGS += -I../obm -DALLOWLOGGING
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+    CFLAGS += -I/usr/X11/include -DUSE_SYSV_PGRP -D__DARWIN__
+    LDFLAGS += -L/usr/X11/lib
+endif
 
 xgterm: $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(OBJS) \
