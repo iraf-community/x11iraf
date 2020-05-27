@@ -381,7 +381,7 @@ int	*ncolors;
 
 	    if (c == '!') { 	/* Extension */
 		if (!ReadOK(fd, &c, 1))
-		    return "OF / read error on extention function code";
+		    return "OF / read error on extension function code";
 		DoExtension(fd, c);
 		continue;
 	    }

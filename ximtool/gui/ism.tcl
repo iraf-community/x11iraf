@@ -30,7 +30,7 @@ proc ismToggle { widget type state args } \
 
 
 
-# Handle messages from ISM clients and pass them on to the appropiate
+# Handle messages from ISM clients and pass them on to the appropriate
 # callback.
 
 proc ism_msg { param old new } \
