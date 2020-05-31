@@ -28,7 +28,7 @@ manual pages for more detailed configuration instructions.
 To build the GUIDEMO IRAF package type "mkpkg" in the guidemo directory.
 
 The LIB and INCLUDE directories should be referenced in applications which
-use any of the x11iraf libaries (libobm.a, libXaw3d.a, libXpm.a, libcdl.a).
+use any of the x11iraf libaries (libobm.a, libXaw3d.a, libXpm.a).
 
 
 USING THE INSTALL SCRIPT
@@ -51,15 +51,12 @@ Binaries may be installed in any place normally in the user's path but
 we recommend something like the following
 
     % mv bin.<arch>/* /usr/local/bin			# for the binaries
-    % mv lib.<arch>/* /usr/local/lib			# for the CDL library
-    % mv include/* /usr/local/include			# for CDL include files
     % mv app-defaults/* /usr/lib/X11/app-defaults	# app resource defaults
     % mv man/* /usr/man/man1				# man pages
 
-The CDL file installation is not required unless you plan to use it for
-building local applications.  The app-defaults file are for XGterm and
-XTapemon.  Note that on Sun systems these files may need to be installed
-in the /usr/openwin/lib/app-defaults directory.
+The app-defaults file are for XGterm and XTapemon.  Note that on Sun systems
+these files may need to be installed in the /usr/openwin/lib/app-defaults
+directory.
 
 Anyone with questions or problems should feel free to contact site support,
 iraf@noao.edu

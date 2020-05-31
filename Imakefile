@@ -11,7 +11,7 @@
 
 RELEASE		= v2.0BETA2
 
-LIBDIRS 	= obm xaw3d xpm cdl
+LIBDIRS 	= obm xaw3d xpm
 APPDIRS 	= xgterm ximtool xtapemon obmsh vximtool
 SUBDIRS 	= $(LIBDIRS) $(APPDIRS)
 
@@ -128,10 +128,8 @@ unknown:
 BTARFILE  = ../x11iraf-$(RELEASE)-bin.`./mkarch -arch`.tar
 
 DISTFILES = bin.`./mkarch -arch`/[a-z]* \
-	    lib.`./mkarch -arch`/libcdl.a \
 	    Notes-V2.0.txt \
 	    Revisions.v20 \
-	    include/cdl* \
 	    app-defaults \
 	    man \
 	    mkarch \
