@@ -1,0 +1,128 @@
+The source code if x11iraf is mostly Open Source conform to the Open Source
+Definition by the Open Source Initiative, https://opensource.org/osd
+
+This file lists copyright holders and licenses for this source code.  Due to
+the age of the software, it is almost impossible to assign specific licenses
+to individual files. Most of the files were edited several times by different
+copyright holders, and the changes may have a different license. All licenses
+are permissible licenses.
+
+Files that are not Open Source are specified with their copyright holders and
+licenses in a separate file. LICENSES-nonfeee. These files may be removed from
+the distribution with minimal functional loss.
+
+
+Copyright holders
+=================
+
+1986-2014 Association of Universities for Research in Astronomy Inc.
+1984-1988 Digital Equipment Corporation, Maynard, Massachusetts
+1984-1991 Massachusetts Institute of Technology
+1987-1989 The X Consortium
+1987 Christopher A. Kent (DEC)
+1989 Prentice Hall
+1990 David Koblas
+1989-1991 Jef Poskanzer
+1995 Robert W. McMullen
+2020 Ole Streicher <olebole@debian.org>
+
+
+IRAF license
+============
+
+The IRAF software is publicly available, but is NOT in the public domain.
+The difference is that copyrights granting rights for unrestricted use and
+redistribution have been placed on all of the software to identify its authors.
+You are allowed and encouraged to take this software and use it as you wish,
+subject to the restrictions outlined below.
+
+Permission to use, copy, modify, and distribute this software and its
+documentation is hereby granted without fee, provided that the above copyright
+notice appear in all copies and that both that copyright notice and this
+permission notice appear in supporting documentation, and that references to
+the Association of Universities for Research in Astronomy Inc. (AURA),
+the National Optical Astronomy Observatories (NOAO), or the Image Reduction
+and Analysis Facility (IRAF) not be used in advertising or publicity
+pertaining to distribution of the software without specific, written prior
+permission from NOAO.  NOAO makes no representations about the suitability
+of this software for any purpose.  It is provided "as is" without express or
+implied warranty.
+
+NOAO DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING ALL
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL NOAO
+BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
+OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+EXPAT/MIT license
+=================
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE ABOVE LISTED COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name(s) of the above copyright
+holders shall not be used in advertising or otherwise to promote the
+sale, use or other dealings in this Software without prior written
+authorization.
+
+
+DEC license
+===========
+
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
+provided that the above copyright notice appear in all copies and that
+both that copyright notice and this permission notice appear in
+supporting documentation, and that the name of Digital Equipment
+Corporation not be used in advertising or publicity pertaining to
+distribution of the software without specific, written prior permission.
+.
+DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
+DIGITAL BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR
+ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
+WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
+SOFTWARE.
+
+
+Old MIT license
+===============
+
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation, and that the name of M.I.T. not be used in advertising or
+publicity pertaining to distribution of the software without specific,
+written prior permission.  M.I.T. makes no representations about the
+suitability of this software for any purpose.  It is provided "as is"
+without express or implied warranty.
+
+
+Other, BSD-alike license
+========================
+
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted, provided
+that the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.  This software is provided "as is" without express or
+implied warranty.
