@@ -4487,9 +4487,9 @@ spawn ()
 		ioctl(0, TIOCSCTTY, 0);
 #endif
 		ioctl(0, TIOCSPGRP, (char *)&pgrp);
-		setpgrp(0,0);
+		setpgrp();
 		close(open(ttydev, O_WRONLY, 0));
-		setpgrp (0, pgrp);
+		setpgrp ();
 #endif /* !USE_SYSV_PGRP */
 
 #ifdef UTMP

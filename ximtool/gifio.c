@@ -376,7 +376,7 @@ int	*ncolors;
 	    if (c == ';') {		/* GIF terminator */
 		if (imageCount < imageNumber)
 		    return "requested image number not found";
-		return;
+		return NULL;
 	    }
 
 	    if (c == '!') { 	/* Extension */
@@ -676,7 +676,7 @@ uchar	**image;
 	if (ignore) {
 	    while (LWZReadByte(fd, FALSE, c) >= 0)
 		;
-	    return;
+	    return NULL;
 	}
 
 	if ((*image = (uchar *)malloc(len * height)) == NULL)

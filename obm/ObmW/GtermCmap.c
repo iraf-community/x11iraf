@@ -270,7 +270,7 @@ use_default:
  * used for windows that have a colormap different than that of the top
  * level window.
  */
-static
+static void
 request_colormap_focus (w)
     GtermWidget w;
 {
@@ -322,7 +322,7 @@ request_colormap_focus (w)
  * that had the focus in the list, but drop its priority one notch.  This
  * should follow a prior call to request_colormap_focus.
  */
-static
+static void
 restore_colormap_focus (w)
     GtermWidget w;
 {
@@ -356,7 +356,7 @@ restore_colormap_focus (w)
  * works if a few unused cells can be reserved, e.g., at the beginning of
  * the colormap (which is usually where X allocates its colors).
  */
-static
+static void
 inherit_default_colormap (w)
     GtermWidget w;
 {
@@ -440,7 +440,7 @@ inherit_default_colormap (w)
  * does not have the colormap focus, and minimizes flashing when the
  * colormap focus changes.
  */
-static
+static void
 update_default_colormap (w)
     GtermWidget w;
 {

@@ -2364,7 +2364,7 @@ char **argv;
 	    list = XfwfMultiListGetHighlighted ((XfwfMultiListWidget)wp->w);
 	    buflen = SZ_COMMAND;
 	    if (!(buffer = XtMalloc (buflen)))
-		return;
+		return (TCL_ERROR);
 
 	    /* Generate list of item strings. */
 	    strlist = op = buffer;
@@ -2376,7 +2376,7 @@ char **argv;
 		if (buflen < (op-buffer)+need) {
 		    buflen += max (need, SZ_COMMAND);
 		    if (!(buffer = XtRealloc (buffer, buflen)))
-			return;
+			return (TCL_ERROR);
 		}
 		*op++ = ' ';
 		*op++ = '{';

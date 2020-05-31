@@ -103,7 +103,7 @@ static void obm_call_activate_callbacks();
  * since then.
  */
 #if (TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION < 6)
-char *
+int
 Tcl_GetErrorLine(tcl)
 Tcl_Interp *tcl;
 {
@@ -111,11 +111,11 @@ Tcl_Interp *tcl;
 }
 
 void
-Tcl_SetErrorLine(tcl, s)
+Tcl_SetErrorLine(tcl, lineNum)
 Tcl_Interp *tcl;
-char *s;
+int lineNum;
 {
-	tcl->errorLine = s;
+	tcl->errorLine = lineNum;
 }
 #endif
 

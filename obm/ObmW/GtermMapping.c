@@ -5,7 +5,7 @@
  * to be refreshed.  If the given source rect is not within the mapping,
  * this is a no-op.
  */
-static
+static int
 refresh_source (w, mp, x1, y1, nx, ny)
     GtermWidget w;
     register Mapping mp;	/* mapping defining refresh operation */
@@ -88,7 +88,7 @@ refresh_source (w, mp, x1, y1, nx, ny)
  * drawable.  Note: the destination rect must be specified in raster pixel
  * coordinates (no NDC).
  */
-static
+static int
 refresh_destination (w, mp, x1, y1, nx, ny)
     GtermWidget w;
     Mapping mp;			/* mapping defining refresh operation */
@@ -843,7 +843,7 @@ done:
 /* scale_zoom -- Compute the given destination rect from the input image,
  * using pixel replication and the given x and y dst->scr pixels maps.
  */
-static
+static void
 scale_zoom (idata,ibpl, odata,obpl, xmap,ymap, dx,dy,dnx,dny, clip_region)
 
     uchar *idata, *odata;		/* input, output data */
@@ -886,7 +886,7 @@ scale_zoom (idata,ibpl, odata,obpl, xmap,ymap, dx,dy,dnx,dny, clip_region)
  * equivalent to scale_zoom using the lookup tables, but optimized for the
  * case of integer scaling.
  */
-static
+static void
 scale_intzoom (idata,ibpl,odata,obpl, sx,sy,dx,dy,dnx,dny, xflip,yflip, nx,ny)
 
     uchar *idata, *odata;		/* input, output data */
@@ -1075,7 +1075,7 @@ scale_intzoom (idata,ibpl,odata,obpl, sx,sy,dx,dy,dnx,dny, xflip,yflip, nx,ny)
 /* scale_nearest -- Compute the given destination rect from the input image,
  * using the nearest neighbor technique.
  */
-static
+static void
 scale_nearest (idata,inx,iny,ibpl, odata,onx,ony,obpl,
     x_src,y_src, dx,dy,dnx,dny, clip_region)
 
@@ -1112,7 +1112,7 @@ scale_nearest (idata,inx,iny,ibpl, odata,onx,ony,obpl,
 /* scale_bilinear -- Compute the given destination rect from the input image,
  * using bilinear interpolation.
  */
-static
+static void
 scale_bilinear (idata,inx,iny,ibpl, odata,onx,ony,obpl,
     x_src,y_src, dx,dy,dnx,dny, clip_region)
 
@@ -1190,7 +1190,7 @@ scale_bilinear (idata,inx,iny,ibpl, odata,onx,ony,obpl,
  * The size of the convolution kernel is adjusted to match the scale factors
  * xscale, yscale.
  */
-static
+static void
 scale_lowpass (idata,inx,iny,ibpl, odata,onx,ony,obpl, x_src,y_src,
     sx,sy,snx,sny, dx,dy,dnx,dny, xscale,yscale, clip_region)
 
@@ -1222,7 +1222,7 @@ scale_lowpass (idata,inx,iny,ibpl, odata,onx,ony,obpl, x_src,y_src,
 
 /* lw_convolve -- Convolution primitive for scale_lowpass.
  */
-static
+static void
 lw_convolve (idata,inx,iny,ibpl,ix,iy, odata,onx,ony,obpl,ox,oy,
     nx, ny, xscale, yscale)
 
@@ -1308,7 +1308,7 @@ lw_convolve (idata,inx,iny,ibpl,ix,iy, odata,onx,ony,obpl,ox,oy,
  * be as fast as possible but still does a reasonable job of reducing the
  * image.
  */
-static
+static void
 scale_boxcar (idata,inx,iny,ibpl, odata,onx,ony,obpl, x_src,y_src,
     sx,sy,snx,sny, dx,dy,dnx,dny, xscale,yscale, interp, clip_region)
 
@@ -1382,7 +1382,7 @@ scale_boxcar (idata,inx,iny,ibpl, odata,onx,ony,obpl, x_src,y_src,
 
 /* bx_boxcar -- Block average primitive for scale_boxcar.
  */
-static
+static void
 bx_boxcar (idata,inx,iny,ibpl, x1,y1,x2,y2, obuf, xblock, yblock)
     uchar *idata;			/* input data array */
     int inx, iny, ibpl;			/* array dimensions */
@@ -1426,7 +1426,7 @@ bx_boxcar (idata,inx,iny,ibpl, x1,y1,x2,y2, obuf, xblock, yblock)
 
 /* bx_extract -- Block extract primitive for scale_boxcar.
  */
-static
+static void
 bx_extract (idata,inx,iny,ibpl, odata,onx,ony,obpl,
     x_src,y_src, xoff,yoff,xstep,ystep, dx,dy,dnx,dny, clip_region)
 
@@ -1465,7 +1465,7 @@ bx_extract (idata,inx,iny,ibpl, odata,onx,ony,obpl,
 
 /* bx_interp -- Bilinear interpolation primitive for scale_boxcar.
  */
-static
+static void
 bx_interp (idata,inx,iny,ibpl, odata,onx,ony,obpl,
     x_src,y_src, xoff,yoff,xstep,ystep, dx,dy,dnx,dny, clip_region)
 
@@ -1542,7 +1542,7 @@ bx_interp (idata,inx,iny,ibpl, odata,onx,ony,obpl,
 /* mf_getinten -- Copy the source rect to the destination rect, converting
  * pixel numbers to pixel intensities.
  */
-static
+static void
 mf_getinten (w, idata,inx,iny,ibpl, sx,sy, odata,onx,ony,obpl, dx,dy, nx,ny)
 
     GtermWidget w;
@@ -1571,7 +1571,7 @@ mf_getinten (w, idata,inx,iny,ibpl, sx,sy, odata,onx,ony,obpl, dx,dy, nx,ny)
 /* mf_getpixel -- Copy the source rect to the destination rect, converting
  * pixel intensities to pixel numbers.
  */
-static
+static void
 mf_getpixel (w, idata,inx,iny,ibpl, sx,sy, odata,onx,ony,obpl, dx,dy, nx,ny)
 
     GtermWidget w;
@@ -1603,7 +1603,7 @@ mf_getpixel (w, idata,inx,iny,ibpl, sx,sy, odata,onx,ony,obpl, dx,dy, nx,ny)
  * values are equal (XV=0), not equal (XV=1), or not common to (XV=2) the two
  * regions.  The number of regions output is returned as the function value.
  */
-static
+static int
 get_regions (xs,xe,xv, max_regions, dx, dnx, xmap, alt_dx, alt_dnx, alt_xmap)
     int *xs, *xe, *xv, max_regions;
     int dx, dnx, *xmap;
@@ -1652,7 +1652,7 @@ get_regions (xs,xe,xv, max_regions, dx, dnx, xmap, alt_dx, alt_dnx, alt_xmap)
  * region lists.  Only rects for which the given condition is true in either
  * X or Y are selected.  Adjacent rects are combined.
  */
-static
+static int
 get_rects (o_rl, max_rects, xs,xe,xv,nx, ys,ye,yv,ny, xcond,ycond)
     XRectangle *o_rl;		/* receives list of rectangles */
     int max_rects;		/* max rectangles out */
@@ -1734,7 +1734,7 @@ get_rects (o_rl, max_rects, xs,xe,xv,nx, ys,ye,yv,ny, xcond,ycond)
  * the intersection is returned as the function value, i.e., zero is
  * returned if the rects do not intersect.
  */
-static
+static int
 rect_intersect (in, r1, r2)
     register XRectangle *in;
     register XRectangle *r1, *r2;
@@ -1757,7 +1757,7 @@ rect_intersect (in, r1, r2)
 
 /* save_mapping -- Store a mapping in a mapping descriptor.
  */
-static
+static void 
 save_mapping (mp, mapping, rop, src, st, sx,sy,sw,sh, dst, dt, dx,dy,dw,dh)
     register Mapping mp;
     int mapping, rop;
@@ -1775,7 +1775,7 @@ save_mapping (mp, mapping, rop, src, st, sx,sy,sw,sh, dst, dt, dx,dy,dw,dh)
 
 /* load_mapping -- Load a mapping from a mapping descriptor.
  */
-static
+static void
 load_mapping (mp, mapping, rop, src, st, sx,sy,sw,sh, dst, dt, dx,dy,dw,dh)
     register Mapping mp;
     int *mapping, *rop;
@@ -1794,7 +1794,7 @@ load_mapping (mp, mapping, rop, src, st, sx,sy,sw,sh, dst, dt, dx,dy,dw,dh)
 /* get_pixel_mapping -- Copy a mapping, converting to pixel coordinates in
  * the process if the mapping is not already in pixel coordinates.
  */
-static
+static void
 get_pixel_mapping (w, mp1, mp2, update)
     GtermWidget w;
     register Mapping mp1;		/* input mapping */
@@ -1875,7 +1875,7 @@ get_pixel_mapping (w, mp1, mp2, update)
 /* valid_mapping -- Perform some sanity checks on a mapping to verify that
  * it contains something meaningful.
  */
-static
+static int
 valid_mapping (w, mp)
     GtermWidget w;
     register Mapping mp;
@@ -1945,7 +1945,7 @@ valid_mapping (w, mp)
 
 /* initialize_mapping -- Initialize the contents of a mapping descriptor.
  */
-static
+static void
 initialize_mapping (mp)
     register Mapping mp;
 {
@@ -1958,7 +1958,7 @@ initialize_mapping (mp)
  * lookup tables and other parameters describing how a destination pixel
  * maps back to a source pixel and vice versa.
  */
-static
+static void
 update_mapping (w, mp)
     GtermWidget w;
     register Mapping mp;
@@ -2118,7 +2118,7 @@ update_mapping (w, mp)
 /* free_mapping -- Free any storage used internally by a mapping descriptor,
  * and deactivate the mapping.
  */
-static
+static void
 free_mapping (w, mp)
     GtermWidget w;
     register Mapping mp;

@@ -71,6 +71,7 @@ static void SelectSet();
 static void StartSelect();
 static int Length();
 static char *SaveText();
+void TrackText();
 
 extern XgtermWidget term;
 
@@ -1005,8 +1006,7 @@ ComputeSelect(startRow, startCol, endRow, endCol, extend)
 	TrackText(startSRow, startSCol, endSRow, endSCol);
 	return;
 }
-
-
+void
 TrackText(frow, fcol, trow, tcol)
     register int frow, fcol, trow, tcol;
     /* Guaranteed (frow, fcol) <= (trow, tcol) */

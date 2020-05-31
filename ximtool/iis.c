@@ -82,6 +82,8 @@ static IoChanPtr open_fifo(), open_inet(), open_unix();
 static IoChanPtr get_iochan();
 static MappingPtr xim_getMapping();
 
+void xim_retCursorVal();
+
 extern int errno;
 
 
@@ -1195,6 +1197,7 @@ register int	z;
 /* XIM_RETCURSORVAL -- Return the cursor value on the output datastream to
  * the client which requested the cursor read.
  */
+void
 xim_retCursorVal (xim, sx, sy, frame, wcs, key, strval)
 register XimDataPtr xim;
 float	sx, sy;			/* cursor screen coordinates */

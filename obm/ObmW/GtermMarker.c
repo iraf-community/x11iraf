@@ -62,7 +62,8 @@
 
 static void gm_text_init(), gm_line_init(), gm_plin_init(), gm_rect_init();
 static void gm_boxx_init(), gm_circ_init(), gm_elip_init(), gm_pgon_init();
-static int gm_putint(), gm_putfloat(), gm_do_callbacks(), gm_constraint();
+static int gm_putint(), gm_putfloat(), gm_do_callbacks();
+static void gm_constraint();
 static int gm_getint(), gm_getattribute(), gm_gettype();
 static double gm_getfloat();
 static char *gm_getstring();
@@ -858,6 +859,7 @@ GmRedraw (gm, func, erase)
 /* GmRedisplay -- Redisplay the markers in the given region, or redisplay
  * the entire window if the region is given as (char *)NULL.
  */
+void
 GmRedisplay (w, region)
     GtermWidget w;
     Region region;
@@ -897,6 +899,7 @@ GmRedisplay (w, region)
 /* GmRaise -- Change the stacking order of a marker relative to another
  * marker, causing the first marker to be drawn above the second.
  */
+void
 GmRaise (gm, ref_gm)
     register Marker gm, ref_gm;
 {
@@ -920,6 +923,7 @@ GmRaise (gm, ref_gm)
 /* GmLower -- Change the stacking order of a marker relative to another
  * marker, causing the first marker to be drawn below the second.
  */
+void
 GmLower (gm, ref_gm)
     register Marker gm, ref_gm;
 {
@@ -1578,6 +1582,7 @@ GmGetAttribute (gm, attribute, value, type)
 
 /* GmSetVertices -- Set the vertices of a "poly" type object.
  */
+void
 GmSetVertices (gm, points, first, npts)
     Marker gm;
     DPoint *points;		/* input array of points */
@@ -2192,7 +2197,7 @@ gm_do_callbacks (gm, events, event, params, nparams)
  * client to apply any constraints, e.g. to keep the marker within a
  * certain area or range of sizes, to forbid rotation, and so on.
  */
-static int
+static void
 gm_constraint (gm, new_gm, what)
     register Marker gm, new_gm;
     register int what;
