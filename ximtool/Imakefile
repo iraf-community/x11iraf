@@ -71,13 +71,9 @@ ${DEPOBM}:
 
 ximtool.o:		ximtool.gui.h ../version.h
 ximtool.c:		ximtool.gui.h
-ximclient.o:		ximtool.html.h
-ximclient.c:		ximtool.html.h
 
 ximtool.gui.h: ximtool.gui
 	sed -f gui2c.sed ximtool.gui > ximtool.gui.h
-ximtool.html.h: ximtool.html
-	sed -f gui2c.sed ximtool.html > ximtool.html.h
 
 XCOMM XImtool.ad: ximtool.gui
 XCOMM 	sed -e '1,/^appInitialize/d' -e '/^}/,\$d' ximtool.gui > XImtool.ad

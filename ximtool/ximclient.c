@@ -2044,7 +2044,6 @@ char **argv;
 /* The builtin default help text. */
 static char *help_text[] = {
     "setValue {",
-#   include "ximtool.html.h"
     "}",
     NULL
 };

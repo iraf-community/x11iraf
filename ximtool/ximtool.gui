@@ -547,7 +547,6 @@ set Objects(help_panel) { \
         helpLayout      Command         hfFind\
         helpLayout      Command         hfClear\
 	helpLayout  	Frame	 	helpTextFrame\
-	helpTextFrame 	HTML	 	helpText\
 \
 	helpInfoLayout	Label	 	helpIRAFLogo\
 	helpInfoLayout	Label	 	helpInfo1\
@@ -627,7 +626,7 @@ set Objects(hdr_panel) { \
         hdrHdrLayout    Command         hdrFilter\
         hdrHdrLayout    Command         hdrFind\
         hdrHdrLayout    Command         hdrClear\
-	hdrHdrLayout 	HTML  		hdrText\
+	hdrHdrLayout 	AsciiText	hdrText\
 \
 	hdrWcsGroup	Layout		hdrWcsLayout\
 	hdrWcsLayout	Group		hdrInfoGroup\
@@ -10145,7 +10144,7 @@ proc getHelpText { param old new } \
 {
     send helpText setText $new
     helpPanel
-}; send help addCallback getHelpText
+}
 
 proc anchorSelected {widget cbtype event text href args} \
 {
@@ -10174,13 +10173,13 @@ proc anchorSelected {widget cbtype event text href args} \
     }
     send helpText gotoId $anchID
     send helpText retestAnchors
-}; send helpText addCallback anchorSelected anchor     
+}
 
 proc testAnchor {widget cbtype href} \
 {
     global visited
     return [info exists visited($href)]
-}; send helpText addCallback testAnchor testAnchor
+}
 
 
 # Callbacks to position forwards and backwards in link list.
