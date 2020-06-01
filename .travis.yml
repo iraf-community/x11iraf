@@ -1,0 +1,39 @@
+os: linux
+
+dist: bionic
+
+env: IRAFARCH=linux64
+
+addons:
+  apt:
+    packages:
+      - xutils-dev
+      - csh
+      - libxt-dev
+      - libncurses-dev
+      - libxaw7-dev
+      - libxmu-dev
+      - libxpm-dev
+      - iraf-dev
+      - xauth
+      - xvfb
+      
+language: c
+
+cache:
+  ccache: true
+  directories:
+    - $HOME/.ccache
+
+git:
+  depth: 3
+
+before_script:
+  - xmkmf -a
+  - make
+
+script:
+  - test -x xgterm/xgterm
+  - test -x ximtool/ximtool
+  - test -x bin/ism_wcspix.e
+  - xvfb-run xgterm/xgterm -e sleep 1
