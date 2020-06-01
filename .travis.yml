@@ -14,6 +14,7 @@ addons:
       - libxaw7-dev
       - libxmu-dev
       - libxpm-dev
+      - xaw3dg-dev
       - iraf-dev
       - xauth
       - xvfb
