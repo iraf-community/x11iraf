@@ -648,7 +648,7 @@ int	nelem;
 
 
 /* convert the raw data, as stored in the FITS file, to the format
- * appropiate for the data representation of the host computer.
+ * appropriate for the data representation of the host computer.
  * Assumes that
  *  short int = 2 byte integer
  *  int       = 4 byte integer

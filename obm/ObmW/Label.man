@@ -20,7 +20,7 @@ its own.
 
 .SS "Public variables"
 
-.ps-2
+.ps -2
 .TS
 center box;
 cBsss
@@ -249,7 +249,7 @@ turned off.
 
 .eh
 
-.ps-2
+.ps -2
 .TS
 center box;
 cBsss
@@ -272,7 +272,7 @@ XtNlocation	XtCLocation	String 	NULL
 .TE
 .ps
 
-.ps-2
+.ps -2
 .TS
 center box;
 cBsss
@@ -294,7 +294,7 @@ XtNbottomShadowStipple	XtCBottomShadowStipple	Bitmap 	NULL
 .TE
 .ps
 
-.ps-2
+.ps -2
 .TS
 center box;
 cBsss
@@ -312,7 +312,7 @@ XtNuserData	XtCUserData	Pointer	NULL
 .TE
 .ps
 
-.ps-2
+.ps -2
 .TS
 center box;
 cBsss
@@ -327,7 +327,7 @@ numChildren	XtCNumChildren	Cardinal 	0
 .TE
 .ps
 
-.ps-2
+.ps -2
 .TS
 center box;
 cBsss

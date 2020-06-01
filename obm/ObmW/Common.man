@@ -25,7 +25,7 @@ these keys for other purposes, the keyboard traversal will not work.
 
 .SS "Public variables"
 
-.ps-2
+.ps -2
 .TS
 center box;
 cBsss
@@ -144,7 +144,7 @@ in any way.
 
 .eh
 
-.ps-2
+.ps -2
 .TS
 center box;
 cBsss
@@ -159,7 +159,7 @@ numChildren	XtCNumChildren	Cardinal 	0
 .TE
 .ps
 
-.ps-2
+.ps -2
 .TS
 center box;
 cBsss
@@ -328,7 +328,7 @@ void focusOut($, XEvent* event, String* params, Cardinal* num_params)
 .I "traverseDown
 
 This and the following actions all call the \fItraverse\fP method of the
-widget's parent, with the appropiate direction arguments.
+widget's parent, with the appropriate direction arguments.
 \fItraverseDown\fP tries to set the focus to a widget that is located
 roughly below the current one.
 

@@ -33,7 +33,7 @@ background.
 
 .SS "Public variables"
 
-.ps-2
+.ps -2
 .TS
 center box;
 cBsss
@@ -225,7 +225,7 @@ instead of 1.
 
 .eh
 
-.ps-2
+.ps -2
 .TS
 center box;
 cBsss
@@ -243,7 +243,7 @@ XtNuserData	XtCUserData	Pointer	NULL
 .TE
 .ps
 
-.ps-2
+.ps -2
 .TS
 center box;
 cBsss
@@ -258,7 +258,7 @@ numChildren	XtCNumChildren	Cardinal 	0
 .TE
 .ps
 
-.ps-2
+.ps -2
 .TS
 center box;
 cBsss

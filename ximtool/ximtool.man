@@ -930,8 +930,8 @@ if it means clipping the image.  If a new frame buffer is a different size
 than previously defined frames, all available frames will be initialized
 and cleared prior to the display.  The default frame buffer configuration
 file is /usr/local/lib/imtoolrc, this can be overridden by defining a
-IMTOOLRC environment variable naming the file to be used, by creating a
-.imtoolrc file in your home directory, or a new file may be specified
+IMTOOLRC environment variable naming the file to be used, by creating
+a .imtoolrc file in your home directory, or a new file may be specified
 using the \fI-imtoolrc\fR command line flag or \fIimtoolrc\fR application
 resource.
 
@@ -1243,7 +1243,7 @@ too much accuracy.
 Draw the graphics using all screen pixels to produce the most accurate
 display.  On fast modern machines this can be enabled with no apparent
 loss of speed, however older machines may wish to use this only
-occassionally to limit any lag in the cursor tracking.
+occasionally to limit any lag in the cursor tracking.
 .TP 20
 .B Image Pixels
 (\fINot Yet Implemented\fP)
@@ -2041,7 +2041,7 @@ containing e.g. pixels.
 Beginning with XImtool V1.3 the protocol was modified even more to allow
 extra text at the end of the WCS string to define image mappings and to
 better support multiple world coordinate systems within a frame.   For
-backwards compatability none of the existing IIS protocols were
+backwards compatibility none of the existing IIS protocols were
 modified completely, however we take advantage of unused registers to flag
 the new features in existing functions (like read/write WCS). The WCS mapping
 changes required only that the unused 'x' register be set to indicate the new
@@ -2093,7 +2093,6 @@ The four IIS registers are set differently depending on the operation, a
 summary of the header packets for each operation is summarized below. 
 .br
 
-.KS
 .ce 1
 \fBIIS Header Packet Summary\fR
 .TS
@@ -2119,7 +2118,6 @@ New Write WCS:IIS_WRITE\fB|\fPPACKED:WCS:-N:1:-:fr:fb:1024
 New Read WCS:IIS_READ:WCS:-:1:-:fr:wcs:1024
 :_:_:_:_:_:_:_:_
 .TE
-.KE
 
 .TS
 l l l.
@@ -2184,7 +2182,7 @@ the ISM appears as just another named object which can receive OBM messages.
 .SS "COMMUNICATIONS PROTOCOL"
 
 Messages from the ISM are written to the connection socket and must
-be preceeded by one of the following keywords:
+be preceded by one of the following keywords:
 .RS
 .TP 15
 .B callback
