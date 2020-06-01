@@ -14,7 +14,7 @@
 #define	SZ_NUMBER		64
 #define	SZ_STATIC_CMAP		10		/* bg+fg+NColors              */
 #define	SZ_DYNAMIC_CMAP		201		/* bg+fg+NColors              */
-#define	SZ_OVERLAY_CMAP		18		/* bg+fg+NColors              */
+#define	SZ_OVERLAY_CMAP		17		/* bg+fg+NColors              */
 #define MAX_SZCMAP		256		/* max size colormap          */
 #define	DEF_MAXCOLORS		216		/* max dynamic colors         */
 #define MAX_WMWIN		32		/* max WM colormaps           */

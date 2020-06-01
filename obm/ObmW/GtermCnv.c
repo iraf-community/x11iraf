@@ -282,7 +282,7 @@ int	border;
 	/* Create the lookup table.
 	*/
 	bzero (global_lut, sizeof(long) * MAX_SZCMAP);
-	for (i=0; i < MAX_SZCMAP; i++) {
+	for (i=0; i < MAX_SZCMAP - SZ_STATIC_CMAP; i++) {
 	    pv = global_cmap[i + SZ_STATIC_CMAP];
 
 	    /* Get the color components.
