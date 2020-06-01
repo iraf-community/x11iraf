@@ -9,7 +9,6 @@ X11IRAFDIR = ../
  EXTRA_INCLUDES = $(X11IRAF_INCLUDES)
         OBMLIBS =
         MATHLIB = -lm
-         CDLLIB = -lcdl
          XAWLIB =
 
            SRCS = vximtool.c
@@ -20,11 +19,11 @@ AllTarget(vximtool)
 
 vximtool: vximtool.o
 	$(RM) vximtool
-	$(CC) -o vximtool -DHAVE_CDL vximtool.o $(LDOPTIONS) $(CDLLIB) \
+	$(CC) -o vximtool vximtool.o $(LDOPTIONS) \
 	    $(MATHLIB) $(EXTRA_LIBRARIES)
 
 vximtool.o:
-	$(CC) -c $(CFLAGS) -DHAVE_CDL vximtool.c
+	$(CC) -c $(CFLAGS) vximtool.c
 
 clean::
 	$(RM) vximtool vximtool.o
