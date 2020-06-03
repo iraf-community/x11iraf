@@ -25,7 +25,7 @@ Boolean cvtStringToIcon(
 
 #ifndef NO_XPM
 
-#include <xpm.h>
+#include <X11/xpm.h>
 
 /* The |Icon| type is a convenient combination of a pixmap, a mask and
 the pixmaps's attributes. Not all attributes are stored, only width

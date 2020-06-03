@@ -123,7 +123,7 @@ static void file_to_xpmimage (dpy, file, image)
     Cardinal one = 1;
     int status;
 
-    status = XpmReadFileToXpmImage (file, image, NULL, NULL);
+    status = XpmReadFileToXpmImage (file, image, NULL);
 
     switch (status) {
     case XpmOpenFailed:

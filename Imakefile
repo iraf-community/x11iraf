@@ -11,7 +11,7 @@
 
 RELEASE		= v2.0BETA2
 
-LIBDIRS 	= obm xaw3d xpm
+LIBDIRS 	= obm
 APPDIRS 	= xgterm ximtool xtapemon obmsh vximtool
 SUBDIRS 	= $(LIBDIRS) $(APPDIRS)
 

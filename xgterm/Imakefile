@@ -40,7 +40,6 @@ X11IRAFDIR = ../
 
     CDEBUGFLAGS = -g
          XAWLIB = LibXaw3d
-      DEPXAWLIB = DepLibXaw3d
      X11IRAFDIR = ../
 
    MAIN_DEFINES = -DUTMP $(TTYGROUPDEF) $(PUCCPTYDDEF) \
@@ -63,7 +62,7 @@ X11IRAFDIR = ../
           OBJS2 = resize.o
            SRCS = $(SRCS1) $(SRCS2)
            OBJS = $(OBJS1) $(OBJS2)
-         DEPOBM = DepLibObm DepLibXpm DepLibXaw3d
+         DEPOBM = DepLibObm
 
        PROGRAMS = resize xgterm
        DEPLIBS1 = XawClientDepLibs $(DEPOBM)
@@ -84,7 +83,7 @@ X11IRAFDIR = ../
 
 
      TERMCAPLIB = TermcapLibrary
-        OBMLIBS = -lobm -lXpm
+        OBMLIBS = LibObm LibXpm
         MATHLIB = -lm
 
 AllTarget($(PROGRAMS))
