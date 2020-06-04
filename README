@@ -24,18 +24,12 @@
     xtapemon		IRAF tape monitor GUI
 
     obm			Source for the Object Manager (OBM)
-    xpm			OBM-compatible copy of the X pixmap source
-    xaw3d		OBM-compatible copy of the 3D Xaw widget set
     util		Miscellaneous utility programs
 
 The Xaw3D and XPM libraries are publically available software packages which
 x11iraf only uses, we did did not develop them.  Similarly OBM uses Tcl as
 well as a collection of Xt-based widgets, including the FWF (Free Widget
-Foundation) widgets, which were developed by others.  Even if you already
-have copies of these libraries on your system you should let x11iraf use the
-included versions, as interface evolution will likely render other versions
-incompatible with x11iraf (we periodically update our copies and perform the
-necessary integration).
+Foundation) widgets, which were developed by others.
 
 Both XGterm and XImtool rely upon the IRAF Object Manager for the GUI.
 The GUIDEMO package illustrates how to use GUIs in IRAF applications.
@@ -85,5 +79,5 @@ manual pages for more detailed configuration instructions.
 To build the GUIDEMO IRAF package type "mkpkg" in the guidemo directory.
 
 The LIB and INCLUDE directories should be referenced in applications which
-use any of the x11iraf libaries (libobm.a, libXaw3d.a, libXpm.a).
+use any of the x11iraf libaries (libobm.a).
 
