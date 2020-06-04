@@ -3,7 +3,7 @@
 #include <sys/errno.h>
 #include <X11/Intrinsic.h>
 #include <X11/StringDefs.h>
-#include <Tcl/tcl.h>
+#include <tcl/tcl.h>
 #include "ximtool.h"
 
 /*

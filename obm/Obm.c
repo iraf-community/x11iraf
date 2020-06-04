@@ -94,6 +94,32 @@
 static void obm_call_activate_callbacks();
 
 
+#if (TCL_MAJOR_VERSION < 8)
+#error Tcl 8 or higher is required
+#endif
+
+/* Backward compatibility patch for errorLine access. These functions were
+ * introduced only in Tcl 8.6, and direct access to errorLine is deprecated
+ * since then.
+ */
+#if (TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION < 6)
+char *
+Tcl_GetErrorLine(tcl)
+Tcl_Interp *tcl;
+{
+	return tcl->errorLine;
+}
+
+void
+Tcl_SetErrorLine(tcl, s)
+Tcl_Interp *tcl;
+char *s;
+{
+	tcl->errorLine = s;
+}
+#endif
+
+
 /* ObmOpen -- Open the object manager.
  */
 ObmContext
@@ -377,8 +403,8 @@ int state;
 		if (status != TCL_OK) {
 		    char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
 		    fprintf (stderr, "Error on line %d in activate: %s\n",
-			obm->tcl->errorLine,
-			errstr ? errstr : obm->tcl->result);
+			Tcl_GetErrorLine (obm->tcl),
+			errstr ? errstr : Tcl_GetStringResult (obm->tcl));
 		}
 	    }
 }
@@ -458,8 +484,8 @@ char *message;
 		if (status != TCL_OK) {
 		    char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
 		    fprintf (stderr, "Error in message to %s, line %d: %s\n",
-			object, obm->tcl->errorLine,
-			errstr ? errstr : obm->tcl->result);
+			object, Tcl_GetErrorLine (obm->tcl),
+			     errstr ? errstr : Tcl_GetStringResult (obm->tcl));
 		}
 	    } else
 		status = TCL_OK;

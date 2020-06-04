@@ -20,7 +20,7 @@ X11IRAFDIR = ../
      ARADD = ar rul
 #endif
 
-        LIBDIRS = Tcl ObmW
+        LIBDIRS = ObmW
         SUBDIRS = $(LIBDIRS)
 
         HEADERS = Obm.h ObmP.h widget.h
@@ -28,8 +28,8 @@ X11IRAFDIR = ../
 		    html.c geom.c
            OBJS = Obm.o client.o param.o server.o widget.o gterm.o marker.o \
 		    html.o geom.o
-       ALL_OBJS = Tcl/[A-Za-z]*.o ObmW/[A-Za-z]*.o $(OBJS)
-       ALL_DONE = Tcl/DONE ObmW/DONE
+       ALL_OBJS = ObmW/[A-Za-z]*.o $(OBJS)
+       ALL_DONE = ObmW/DONE
          RESOBJ = obmres.o
 
 all::	libobm.a
@@ -48,7 +48,6 @@ World:
 
 libobm.a: $(LIBDIRS) $(ALL_DONE) $(OBJS)
 	$(RM) $@
-	@(cd Tcl;  $(MAKE) $(MFLAGS) all X11IRAFDIR=../../)
 	@(cd ObmW; $(MAKE) $(MFLAGS) all X11IRAFDIR=../../)
 	$(AR) $@ $(OBJS)
 	$(ARADD) $@ $(ALL_OBJS)

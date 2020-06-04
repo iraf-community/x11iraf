@@ -1243,7 +1243,7 @@ char *href;
 
 	    if (status != TCL_OK)
 		cb_error (obm, cb);
-	    else if (atoi (obm->tcl->result))
+	    else if (atoi (Tcl_GetStringResult (obm->tcl)))
 		retval = 1;
 	}
 
@@ -1478,8 +1478,8 @@ register ObmCallback cb;
 	register Tcl_Interp *tcl = obm->tcl;
 	char *errstr = Tcl_GetVar (tcl, "errorInfo", 0);
 	fprintf (stderr, "Error on line %d in %s: %s\n",
-	    tcl->errorLine, cb->name,
-	    errstr ? errstr : tcl->result);
+	    Tcl_GetErrorLine (tcl), cb->name,
+	    errstr ? errstr : Tcl_GetStringResult (tcl));
 }
 
 /* cb_decode -- Convert a callback_type string to a callback type code.

@@ -830,7 +830,7 @@ char **argv;
 	else {
 	    char *message = Tcl_Merge (argc-2, &argv[2]);
 	    status = ObmDeliverMsg (obm, argv[1], message);
-	    free ((char *)message);
+	    Tcl_Free ((char *)message);
 	}
 	
 	return (status);
@@ -856,7 +856,7 @@ char **argv;
 	    char *message = Tcl_Concat (argc-1, &argv[1]);
 	    printf ("%s\n", message);
 	    fflush (stdout);
-	    free ((char *)message);
+	    Tcl_Free ((char *)message);
 	}
 	
 	return (TCL_OK);
@@ -991,13 +991,13 @@ char **argv;
 	Value values[MAX_RESOURCES];
 
 	if (argc < 2) {
-	    tcl->result = "missing resource-list argument";
+	    Tcl_SetResult (tcl, "missing resource-list argument", TCL_STATIC);
 	    return (TCL_ERROR);
 	} else
 	    resource_list = argv[1];
 
 	if (Tcl_SplitList (tcl, resource_list, &nitems, &items) != TCL_OK) {
-	    tcl->result = "could not parse resource list";
+	    Tcl_SetResult (tcl, "could not parse resource list", TCL_STATIC);
 	    return (TCL_ERROR);
 	} else if (nitems > MAX_MENUITEMS)
 	    nitems = MAX_MENUITEMS;
@@ -1042,9 +1042,9 @@ err:		sprintf (buf, "bad item '%d' in resource list", item + 1);
 		    "Warning (getResources): cannot set value of %s\n",
 		    values[item].variable);
 	    }
-	    free (values[item].item_list);
+	    Tcl_Free (values[item].item_list);
 	}
-	free ((char *) items);
+	Tcl_Free ((char *) items);
 
 	return (TCL_OK);
 }
@@ -1138,8 +1138,8 @@ XtIntervalId *id;
 	if (status != TCL_OK) {
 	    char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
 	    fprintf (stderr, "Error on line %d in %s: %s\n",
-		obm->tcl->errorLine, cb->userproc,
-		errstr ? errstr : obm->tcl->result);
+		Tcl_GetErrorLine (obm->tcl), cb->userproc,
+		errstr ? errstr : Tcl_GetStringResult (obm->tcl));
 	}
 
 	unlink_callback (&obj->server, cb);
@@ -1264,11 +1264,11 @@ XtPointer cb_ptr;
 	if (status != TCL_OK) {
 	    char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
 	    fprintf (stderr, "Error on line %d in %s: %s\n",
-		obm->tcl->errorLine, cb->userproc,
-		errstr ? errstr : obm->tcl->result);
+		Tcl_GetErrorLine (obm->tcl), cb->userproc,
+		errstr ? errstr : Tcl_GetStringResult (obm->tcl));
 	    done = True;
 	} else
-	    done = (strcmp (obm->tcl->result, "done") == 0) ? True : False;
+	    done = (strcmp (Tcl_GetStringResult (obm->tcl), "done") == 0) ? True : False;
 
 	if (done) {
 	    unlink_callback (&obj->server, cb);
@@ -2171,8 +2171,8 @@ char **argv;
 		if (Tcl_ExprString (tcl, cp) != TCL_OK)
 		    ip->label = cp;
 		else {
-		    ip->label = XtMalloc (strlen(tcl->result) + 1);
-		    strcpy (ip->label, tcl->result);
+		    ip->label = XtMalloc (strlen(Tcl_GetStringResult (tcl)) + 1);
+		    strcpy (ip->label, Tcl_GetStringResult (tcl));
 		    ip->flags |= M_FreeLabel;
 		}
 	    }
@@ -2218,7 +2218,7 @@ char **argv;
 		    if (Tcl_ExprString (tcl, cp) != TCL_OK)
 			ip->pixmap = findBitmap (obm, cp);
 		    else
-			ip->pixmap = findBitmap (obm, tcl->result);
+			ip->pixmap = findBitmap (obm, Tcl_GetStringResult (tcl));
 
 		} else if (strcmp (fields[field], "justify") == 0) {
 		    char *justify = fields[++field];
@@ -2242,7 +2242,7 @@ char **argv;
 				fields[field], &bval) != TCL_OK) {
 			    fprintf (stderr,
 				"menu %s.%d sensitive option: %s\n",
-				menu_name, item, tcl->result);
+				menu_name, item, Tcl_GetStringResult (tcl));
 			} else if (!bval)
 			    ip->flags |= M_Insensitive;
 		    }
@@ -2261,7 +2261,7 @@ char **argv;
 	}
 
 	/* Free list of menu item specification strings. */
-	free ((char *) items);
+	Tcl_Free ((char *) items);
 
 	/* Search the menu list and see if there is already a menu with
 	 * the given menu name.
@@ -2707,7 +2707,7 @@ register MenuPtr mp;
 	    if ((ip->flags & M_FreeData) && ip->data)
 		XtFree (ip->data);
 
-	    XtFree (ip->sbuf);
+	    Tcl_Free (ip->sbuf);
 	}
 
 	XtFree ((char *)mp);
@@ -2743,8 +2743,8 @@ XtPointer call_data;
 	    if (Tcl_Eval (obm->tcl, ip->data) != TCL_OK) {
 		char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
 		fprintf (stderr, "Error %s.%s line %d: %s\n",
-		    mp->obj->core.name, XtName(ip->entry), obm->tcl->errorLine,
-		    errstr ? errstr : obm->tcl->result);
+		    mp->obj->core.name, XtName(ip->entry), Tcl_GetErrorLine (obm->tcl),
+		    errstr ? errstr : Tcl_GetStringResult (obm->tcl));
 	    }
 }
 

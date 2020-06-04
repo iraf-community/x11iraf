@@ -4,7 +4,7 @@
 #include <sys/stat.h>
 #include <X11/Intrinsic.h>
 #include <X11/StringDefs.h>
-#include <Tcl/tcl.h>
+#include <tcl/tcl.h>
 #include <Obm.h>
 #include <ObmW/Gterm.h>
 #include "ximtool.h"
@@ -192,6 +192,8 @@ XimDataPtr xim;
             "ism_stop", ism_stop, (ClientData)xc, NULL);
         Tcl_CreateCommand (tcl,
             "ism_cmd", ism_cmd, (ClientData)xc, NULL);
+
+	Tcl_Preserve(tcl);
 }
 
 
@@ -202,7 +204,10 @@ xim_clientClose (xim)
 XimDataPtr xim;
 {
 	register XimClientPtr xc = (XimClientPtr) xim->clientPrivate;
-	Tcl_DeleteInterp (xc->tcl);
+	Tcl_Eval(xc->tcl, "exit");
+	if (!Tcl_InterpDeleted(xc->tcl))
+	    Tcl_DeleteInterp (xc->tcl);
+	Tcl_Release(xc->tcl);
 }
 
 
@@ -774,7 +779,7 @@ nolist1:	    for (i=0;  i < xim->nframes;  i++)
 	    	    goto nolist2;
 	        for (i=0;  i < nitems;  i++)
 	    	    frame_list |= (1 << (atoi(items[i]) - 1));
-	        XtFree ((char *)items);
+	        Tcl_Free ((char *)items);
 	    } else {
 nolist2:        for (i=0;  i < xim->nframes;  i++)
 	    	    frame_list |= (1 << i);

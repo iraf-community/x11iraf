@@ -65,7 +65,7 @@
 #include <X11/Xraw/Table.h>
 
 #include <X11/xpm.h>
-#include <Tcl/tcl.h>
+#include <tcl/tcl.h>
 
 /* Size limiting definitions. */
 #define SZ_NAME		128		/* class or object name */
