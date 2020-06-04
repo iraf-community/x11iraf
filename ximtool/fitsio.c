@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <ctype.h>
+#include <string.h>
 
 #define NCARDS 		36
 #define BLOCKSIZE 	2880
@@ -110,6 +111,7 @@ int	nsample;			/* number of sample pts */
 	int	i, w = 0, h = 0, bitpix, np;
 	byte 	*image;
 	char	*error;
+	extern void flip();
 
 	error = ftopen2d (&fs, fname, &w, &h, &bitpix);
 	if (error)
@@ -202,7 +204,7 @@ char	*fname;				/* input filename */
 	int value = 0;
 	char keyw[8], val;
 
-	if (fp = fopen (fname, "r")) {
+	if ((fp = fopen (fname, "r"))) {
 	    fscanf (fp, "%6s = %c", keyw, &val);
 	    if (strcmp ("SIMPLE", keyw) == 0 && val == 'T')
 		value = 1;
@@ -220,7 +222,7 @@ getFITSHdr (fname)
 char	*fname;
 {
 	FITS 	fs;
-	char 	*error, *title, *line;
+	char 	*error, *line;
 	int  	w, h, bitpix;
 
 	line = (char *) malloc (80);
@@ -293,7 +295,7 @@ char	*file;
 int	*nx, *ny, *bitpix;
 {
 	FILE 	*fp;
-	int	naxis, i;
+	int	i;
 	char	*error;
 
 	fp = fopen(file, "rb");
@@ -317,8 +319,6 @@ int	*nx, *ny, *bitpix;
 	fs->ndata = 1;
 	for (i = 0; i < fs->naxis; i++) 
 	    fs->ndata = fs->ndata * fs->axes[i];
-
-	naxis = fs->naxis;
 
 	*nx = fs->axes[0];
 	*ny = fs->axes[1];
@@ -769,6 +769,7 @@ int	nsample;
 	int	pmin = 0, pmax = 255;
 	int	npts, stdline;
 	extern	void zscale();
+	extern void min_max();
 
 	/* if the data is uchar, then read it directly */
 	if (fs->bitpix == 8 && (fs->bscale == 1.0 && fs->bzero == 0.0)) {

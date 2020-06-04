@@ -75,7 +75,6 @@
 #define bzero(b, len) memset(b, 0, len)
 #endif
 
-
 /*
  * Used for special images
  */

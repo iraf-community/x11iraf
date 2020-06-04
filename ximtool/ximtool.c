@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <signal.h>
 #include <errno.h>
+#include <sys/wait.h>
+#include <sys/types.h>
 #include <X11/Intrinsic.h>
 #include <X11/StringDefs.h>
 #include <X11/Xmu/Error.h>
@@ -24,15 +26,6 @@ char *ximtool_version[] = {
  * manager library or OBM) and the gterm-image widget.
  */
 
-/* Compatibility hacks. */
-#ifdef AUX
-void *memmove(a,b,n) void *a; const void *b; size_t n; { bcopy(b,a,n); }
-#else
-#if defined(sun) && !defined(SVR4)
-void *memmove(a,b,n) void *a; void *b; size_t n; { bcopy(b,a,n); }
-#endif
-#endif
-
 /* Data. */
 XtAppContext app_context;
 static char server[] = "server";
@@ -47,19 +40,15 @@ char *defgui_text[] = {
     NULL
 };
 
-
-#ifdef AUX
-#define SIGFUNC sigfunc_t
-#else
-typedef void  (*SIGFUNC)();
-#endif
-
-void	xim_onsig();
+void xim_onsig();
+void Usage();
+void printoption();
 
 
 /* MAIN -- XImtool main program.  This is the only ximtool routine containing
  * window system specific code.
  */
+int
 main (argc, argv)
 int argc;
 char *argv[];
@@ -68,13 +57,11 @@ char *argv[];
 	register int i;
         register IsmModule ism;
 
-	Screen *screen;
-	Visual *visual;
 	Widget toplevel;
 	XtPointer obm;
 	char **sv_argv, *init_file = NULL, *str;
 	int sv_argc, ncolors, base;
-	int depth, tile = 0;
+	int tile = 0;
 
 	extern IsmModule ismNameToPtr();
 	int 	xerror(), xioerror();
@@ -346,7 +333,7 @@ char *argv[];
 	    int i;
 
 	    message = (char *) malloc (409600);
-	    for (i=0, op=message;  ip = defgui_text[i];  i++) {
+	    for (i=0, op=message;  (ip = defgui_text[i]);  i++) {
 		while (*ip)
 		    *op++ = *ip++;
 		*op++ = '\n';
@@ -405,6 +392,7 @@ char *argv[];
 
 /* XIM_SHUTDOWN -- Terminate ximtool.
  */
+int
 xim_shutdown (xim)
 register XimDataPtr xim;
 {
@@ -424,15 +412,15 @@ register XimDataPtr xim;
  * to be processed on the given input source.  The ximtool code doesn't
  * talk to X directly so we need to provide this interface routine.
  */
-XtPointer
+XtInputId
 xim_addInput (xim, input, proc, client_data)
 register XimDataPtr xim;
 int input;
 void (*proc)();
 XtPointer client_data;
 {
-	return ((XtPointer) XtAppAddInput (app_context, input,
-	    (XtPointer)XtInputReadMask, *proc, client_data));
+	return XtAppAddInput (app_context, input,
+	    (XtPointer)XtInputReadMask, *proc, client_data);
 }
 
 
@@ -449,6 +437,7 @@ XtPointer id;
 
 /* USAGE -- Print a list of command-line options.
  */
+void
 Usage ()
 {
     fprintf (stderr, "Usage:\n\n");
@@ -489,6 +478,7 @@ Usage ()
 /* PRINTOPTION -- Pretty-print an option string.
  */
 static int cpos = 0;
+void
 printoption(st)
 char 	*st;
 {
@@ -505,6 +495,7 @@ char 	*st;
  * will cause us to crash with a BadMatch error.  Instead, abort with a
  * more informative message so the user can correct the visual.
  */
+int
 xim_badVisual (depth, class)
 int	depth;
 int	class;
@@ -560,6 +551,7 @@ int	class;
  * depending upon the value of the environment variable XGXERROR, if defined.
 */
 /*ARGSUSED*/
+int
 xerror (display, event)
 Display *display;
 register XErrorEvent *event;
@@ -576,7 +568,7 @@ register XErrorEvent *event;
         if (nerrs++ > 50)
             exit (ERROR_XERROR);
 
-        if (action = getenv (envvar)) {
+        if ((action = getenv (envvar))) {
             if (strcmp (action, "dumpcore") == 0) {
                 if ((pid = fork()) >= 0) {
                     if (pid) {
@@ -603,6 +595,7 @@ register XErrorEvent *event;
 
 
 /*ARGSUSED*/
+int
 xioerror(dpy)
 Display *dpy;
 {

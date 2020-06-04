@@ -5,6 +5,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 /*
  * GEOM.C -- Code to get geometry information for a window.  This code was

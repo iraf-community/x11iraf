@@ -1845,7 +1845,7 @@ get_pixel_mapping (w, mp1, mp2, update)
      * these to the new mapping if the old mapping was updated.
      */
     if (update && mp1->updated) {
-	if (mp2->mapdata = (uchar *) XtMalloc (mp1->datalen)) {
+	if ((mp2->mapdata = (uchar *) XtMalloc (mp1->datalen))) {
 
 	    memmove (mp2->mapdata, mp1->mapdata, mp1->datalen);
 	    mp2->datalen = mp1->datalen;

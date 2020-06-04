@@ -29,6 +29,7 @@ in this Software without prior written authorization from the X Consortium.
 #include "ptyx.h"
 #include "data.h"
 #include "menu.h"
+#include "gtermio.h"
 #include <X11/StringDefs.h>
 #include <X11/Shell.h>
 #include <X11/Xmu/CharSet.h>
@@ -215,12 +216,12 @@ static Bool domenu (w, event, params, param_count)
 	}
 
 	/* Update tekshow entry to reflect current graphics application. */
-	if (ww = vtMenuEntries[vtMenu_tekshow].widget) {
+	if ((ww = vtMenuEntries[vtMenu_tekshow].widget)) {
 	    char *ip, *op, *start;
 	    char label[128];
 
 	    XtVaGetValues (ww, XtNlabel, &ip, NULL);
-	    for (op=label, start=NULL;  *op = *ip;  op++, ip++)
+	    for (op=label, start=NULL;  (*op = *ip);  op++, ip++)
 		if (*op == '(')
 		    start = isspace(*(op-1)) ? op - 1 : op;
 	    if (!start)

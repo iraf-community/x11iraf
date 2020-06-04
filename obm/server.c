@@ -592,7 +592,7 @@ char **argv;
 	s_class = (argc > 2) ? argv[2] : NULL;
 	s_subclass = (argc > 3) ? argv[3] : NULL;
 
-	if (o = obmFindObject (obm, object_name)) {
+	if ((o = obmFindObject (obm, object_name))) {
 	    classrec = o->core.classrec;
 	    if (s_class) {
 		BaseClassRec bp;
@@ -1136,7 +1136,7 @@ XtIntervalId *id;
 	    cb->client_data ? cb->client_data : " ",
 	    NULL);
 	if (status != TCL_OK) {
-	    char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
+	    const char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
 	    fprintf (stderr, "Error on line %d in %s: %s\n",
 		Tcl_GetErrorLine (obm->tcl), cb->userproc,
 		errstr ? errstr : Tcl_GetStringResult (obm->tcl));
@@ -1169,7 +1169,7 @@ char **argv;
 	if (argc < 2)
 	    return (TCL_ERROR);
 	
-	if (cb = (ServerCallback) strtol (argv[1], (char **)NULL, 16)) {
+	if ((cb = (ServerCallback) strtol (argv[1], (char **)NULL, 16))) {
 	    XtRemoveTimeOut (cb->id.intervalId);
 	    unlink_callback (&obj->server, cb);
 	    XtFree ((char *)cb);
@@ -1262,7 +1262,7 @@ XtPointer cb_ptr;
 	    NULL);
 
 	if (status != TCL_OK) {
-	    char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
+	    const char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
 	    fprintf (stderr, "Error on line %d in %s: %s\n",
 		Tcl_GetErrorLine (obm->tcl), cb->userproc,
 		errstr ? errstr : Tcl_GetStringResult (obm->tcl));
@@ -1351,48 +1351,10 @@ register ServerCallback cb;
 }
 
 
-/* serverCreateBitmap -- Create a named bitmap.  This replaces any old bitmap
- * of the same name.  The new bitmap is cached in server memory; when a widget
- * bitmap resource is set, the bitmap cache will be searched for the named
- * bitmap before asking Xlib to find the bitmap.
- *
- *  Usage:	createBitmap name width height data
- *
- * e.g., 
- *	createBitmap foo 16 16 {
- *	    0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xc0,0x01,
- *	    0x60,0x03,0x20,0x02,0x60,0x03,0xc0,0x01,0x00,0x00,0x00,0x00,
- *	    0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 }
- */
-static int 
-serverCreateBitmap (object, tcl, argc, argv)
-ObmObject object;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
-{
-	ServerObject obj = (ServerObject) object;
-	ObmContext obm = (ObmContext) obj->server.obm;
-	char *name, *pixels;
-	int width, height;
-	int status;
-
-	if (argc < 5)
-	    return (TCL_ERROR);
-
-	name = argv[1];
-	width = atoi (argv[2]);
-	height = atoi (argv[3]);
-	pixels = argv[4];
-
-	status = createBitmap (obm, name, width, height, pixels);
-	return (status == OK ? TCL_OK : TCL_ERROR);
-}
-
-
 /* createBitmap -- Create a bitmap of the indicated size and add it to the
  * pixmap cache.
  */
+int
 createBitmap (obm, name, width, height, pixels)
 ObmContext obm;
 char *name;
@@ -1453,6 +1415,45 @@ char *pixels;
 }
 
 
+/* serverCreateBitmap -- Create a named bitmap.  This replaces any old bitmap
+ * of the same name.  The new bitmap is cached in server memory; when a widget
+ * bitmap resource is set, the bitmap cache will be searched for the named
+ * bitmap before asking Xlib to find the bitmap.
+ *
+ *  Usage:	createBitmap name width height data
+ *
+ * e.g., 
+ *	createBitmap foo 16 16 {
+ *	    0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xc0,0x01,
+ *	    0x60,0x03,0x20,0x02,0x60,0x03,0xc0,0x01,0x00,0x00,0x00,0x00,
+ *	    0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 }
+ */
+static int 
+serverCreateBitmap (object, tcl, argc, argv)
+ObmObject object;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+	ServerObject obj = (ServerObject) object;
+	ObmContext obm = (ObmContext) obj->server.obm;
+	char *name, *pixels;
+	int width, height;
+	int status;
+
+	if (argc < 5)
+	    return (TCL_ERROR);
+
+	name = argv[1];
+	width = atoi (argv[2]);
+	height = atoi (argv[3]);
+	pixels = argv[4];
+
+	status = createBitmap (obm, name, width, height, pixels);
+	return (status == OK ? TCL_OK : TCL_ERROR);
+}
+
+
 /* findBitmap -- Search the bitmap cache for the named bitmap.  Note that
  * a bitmap is a pixmap of depth one, hence bitmaps are stored in the pixmap
  * cache.
@@ -1466,77 +1467,6 @@ char *name;
 }
 
 
-/* serverCreatePixmap -- Create a named pixmap.  This replaces any old pixmap
- * of the same name.  The new pixmap is cached in server memory; when a widget
- * pixmap resource is set, the pixmap cache will be searched for the named
- * pixmap before asking Xlib to find the pixmap.
- *
- *  Usage:	createPixmap name width height depth fg_color bg_color data
- *
- * e.g., 
- *	createPixmap foo 16 16 8 black white {
- *	    0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xc0,0x01,
- *	    0x60,0x03,0x20,0x02,0x60,0x03,0xc0,0x01,0x00,0x00,0x00,0x00,
- *	    0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 }
- */
-static int 
-serverCreatePixmap (object, tcl, argc, argv)
-ObmObject object;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
-{
-	ServerObject obj = (ServerObject) object;
-	ObmContext obm = (ObmContext) obj->server.obm;
-	int width, height, depth;
-	char *name, *pixels;
-	unsigned long fg, bg;
-	int status;
-
-	if (argc < 8)
-	    return (TCL_ERROR);
-
-	name = argv[1];
-	width = atoi (argv[2]);
-	height = atoi (argv[3]);
-	depth = atoi (argv[4]);
-	pixels = argv[7];
-
-	/* Get fg_color pixel value. */
-	if (isdigit (*argv[5]))
-	    fg = strtol (argv[5], NULL, 0);
-	else {
-	    XrmValue from, to;
-	    from.size = strlen (argv[5]) + 1;
-	    from.addr = argv[5];
-	    to.addr = (caddr_t) &fg;
-	    to.size = sizeof(fg);
-
-	    if (!XtConvertAndStore (obm->toplevel,
-		XtRString, &from, XtRPixel, &to))
-		fg = BlackPixelOfScreen (obm->screen);
-	}
-
-	/* Get bg_color pixel value. */
-	if (isdigit (*argv[6]))
-	    bg = strtol (argv[6], NULL, 0);
-	else {
-	    XrmValue from, to;
-	    from.size = strlen (argv[6]) + 1;
-	    from.addr = argv[6];
-	    to.addr = (caddr_t) &bg;
-	    to.size = sizeof(bg);
-
-	    if (!XtConvertAndStore (obm->toplevel,
-		XtRString, &from, XtRPixel, &to))
-		bg = WhitePixelOfScreen (obm->screen);
-	}
-
-	status = createPixmap (obm, name, width,height,8, NULL, pixels, fg,bg);
-	return (status == OK ? TCL_OK : TCL_ERROR);
-}
-
-
 /* createPixmap -- Create a pixmap of the indicated size and add it to the
  * pixmap cache.  If PIXMAP is non-null the existing pixmap is merely entered
  * into the pixmap cache.  Otherwise, if PIXELS is NULL an empty pixmap is
@@ -1544,6 +1474,7 @@ char **argv;
  * pixmap data in bitmap format, and BG and FG give the background and
  * foreground colors.
  */
+int
 createPixmap (obm, name, width, height, depth, pixmap, pixels, bg, fg)
 ObmContext obm;
 char *name;
@@ -1616,6 +1547,164 @@ unsigned long fg, bg;
 	lp->ptr = (caddr_t) icon;
 	XtFree ((char *)data);
 
+	return (OK);
+}
+
+
+/* serverCreatePixmap -- Create a named pixmap.  This replaces any old pixmap
+ * of the same name.  The new pixmap is cached in server memory; when a widget
+ * pixmap resource is set, the pixmap cache will be searched for the named
+ * pixmap before asking Xlib to find the pixmap.
+ *
+ *  Usage:	createPixmap name width height depth fg_color bg_color data
+ *
+ * e.g., 
+ *	createPixmap foo 16 16 8 black white {
+ *	    0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xc0,0x01,
+ *	    0x60,0x03,0x20,0x02,0x60,0x03,0xc0,0x01,0x00,0x00,0x00,0x00,
+ *	    0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 }
+ */
+static int 
+serverCreatePixmap (object, tcl, argc, argv)
+ObmObject object;
+Tcl_Interp *tcl;
+int argc;
+char **argv;
+{
+	ServerObject obj = (ServerObject) object;
+	ObmContext obm = (ObmContext) obj->server.obm;
+	int width, height, depth;
+	char *name, *pixels;
+	unsigned long fg, bg;
+	int status;
+
+	if (argc < 8)
+	    return (TCL_ERROR);
+
+	name = argv[1];
+	width = atoi (argv[2]);
+	height = atoi (argv[3]);
+	depth = atoi (argv[4]);
+	pixels = argv[7];
+
+	/* Get fg_color pixel value. */
+	if (isdigit (*argv[5]))
+	    fg = strtol (argv[5], NULL, 0);
+	else {
+	    XrmValue from, to;
+	    from.size = strlen (argv[5]) + 1;
+	    from.addr = argv[5];
+	    to.addr = (caddr_t) &fg;
+	    to.size = sizeof(fg);
+
+	    if (!XtConvertAndStore (obm->toplevel,
+		XtRString, &from, XtRPixel, &to))
+		fg = BlackPixelOfScreen (obm->screen);
+	}
+
+	/* Get bg_color pixel value. */
+	if (isdigit (*argv[6]))
+	    bg = strtol (argv[6], NULL, 0);
+	else {
+	    XrmValue from, to;
+	    from.size = strlen (argv[6]) + 1;
+	    from.addr = argv[6];
+	    to.addr = (caddr_t) &bg;
+	    to.size = sizeof(bg);
+
+	    if (!XtConvertAndStore (obm->toplevel,
+		XtRString, &from, XtRPixel, &to))
+		bg = WhitePixelOfScreen (obm->screen);
+	}
+
+	status = createPixmap (obm, name, width,height,8, 0, pixels, fg,bg);
+	return (status == OK ? TCL_OK : TCL_ERROR);
+}
+
+
+/* createXPixmap -- Create a pixmap defined in an XPM format description and
+ * add it to the pixmap cache.  DESCRIPTION points to a character string
+ * containing the pixmap description in XPM format.  A reference widget object
+ * may be given to associate color resources with the pixmap.
+ */
+int
+createXPixmap (obm, name, widget, description)
+ObmContext obm;
+char *name;
+char *widget;
+char *description;
+{
+	register char *ip, *op;
+	register ObjList lp, last_lp;
+	XpmImage image;
+	ObmObject obj;
+	String *data;
+	Icon *icon;
+	int status;
+	Widget w;
+
+	if (!obm->specified || !obm->display)
+	    return (TCL_ERROR);
+
+	/* Get reference widget if any. */
+	w = NULL;
+	if ((obj = obmFindObject (obm, widget, obm->toplevel)))
+	    w = widgetGetPointer (obj);
+
+	/* Create the pixmap (actually icon).
+	 */
+	status = XpmCreateXpmImageFromBuffer (description, &image, NULL);
+	if (status != XpmSuccess)
+	    return (TCL_ERROR);
+	XpmCreateDataFromXpmImage (&data, &image, NULL);
+
+	if (data) {
+	    static XpmColorSymbol table[MAXCOLORSYM];
+	    Cardinal n;
+
+	    if (!(icon = (Icon *) XtCalloc (1, sizeof(*icon))))
+		return (TCL_ERROR);
+
+	    build_colorlist (w, table, XtNumber(table), &n);
+	    icon->attributes.colorsymbols = table;
+	    icon->attributes.numsymbols = n;
+	    icon->attributes.valuemask = XpmColorSymbols;
+
+	    XpmCreatePixmapFromData (obm->display,
+		RootWindowOfScreen(obm->screen), data,
+	        &icon->pixmap, &icon->mask, &icon->attributes);
+
+	    XtFree ((String) data);
+/*	    XtFree ((String) table);*/
+	    XpmFreeXpmImage (&image);
+
+	} else {
+	    XpmFreeXpmImage (&image);
+	    return (TCL_ERROR);
+	}
+
+	/* Check if pixmap is already in cache. */
+	for (last_lp = lp = obm->pixmap_cache;  lp;  lp = lp->next) {
+	    if (strcmp (name, lp->name) == 0)
+		break;
+	    last_lp = lp;
+	}
+
+	/* Get an empty pixmap descriptor. */
+	if (lp) {
+	    if (lp->ptr)
+		freeIcon (obm, (Icon *) lp->ptr);
+	} else {
+	    lp = (ObjList) XtMalloc (sizeof (struct objList));
+	    if (last_lp)
+		last_lp->next = lp;
+	    else
+		obm->pixmap_cache = lp;
+	    strcpy (lp->name, name);
+	    lp->next = NULL;
+	}
+
+	lp->ptr = (caddr_t) icon;
 	return (OK);
 }
 
@@ -1724,92 +1813,6 @@ char **argv;
 
 	status = createXPixmap (obm, name, widget, description);
 	return (status == OK ? TCL_OK : TCL_ERROR);
-}
-
-
-/* createXPixmap -- Create a pixmap defined in an XPM format description and
- * add it to the pixmap cache.  DESCRIPTION points to a character string
- * containing the pixmap description in XPM format.  A reference widget object
- * may be given to associate color resources with the pixmap.
- */
-createXPixmap (obm, name, widget, description)
-ObmContext obm;
-char *name;
-char *widget;
-char *description;
-{
-	register char *ip, *op;
-	register ObjList lp, last_lp;
-	XpmImage image;
-	ObmObject obj;
-	String *data;
-	Icon *icon;
-	int status;
-	Widget w;
-
-	if (!obm->specified || !obm->display)
-	    return (TCL_ERROR);
-
-	/* Get reference widget if any. */
-	w = NULL;
-	if (obj = obmFindObject (obm, widget, obm->toplevel))
-	    w = widgetGetPointer (obj);
-
-	/* Create the pixmap (actually icon).
-	 */
-	status = XpmCreateXpmImageFromBuffer (description, &image, NULL);
-	if (status != XpmSuccess)
-	    return (TCL_ERROR);
-	XpmCreateDataFromXpmImage (&data, &image, NULL);
-
-	if (data) {
-	    static XpmColorSymbol table[MAXCOLORSYM];
-	    Cardinal n;
-
-	    if (!(icon = (Icon *) XtCalloc (1, sizeof(*icon))))
-		return (TCL_ERROR);
-
-	    build_colorlist (w, table, XtNumber(table), &n);
-	    icon->attributes.colorsymbols = table;
-	    icon->attributes.numsymbols = n;
-	    icon->attributes.valuemask = XpmColorSymbols;
-
-	    XpmCreatePixmapFromData (obm->display,
-		RootWindowOfScreen(obm->screen), data,
-	        &icon->pixmap, &icon->mask, &icon->attributes);
-
-	    XtFree ((String) data);
-/*	    XtFree ((String) table);*/
-	    XpmFreeXpmImage (&image);
-
-	} else {
-	    XpmFreeXpmImage (&image);
-	    return (TCL_ERROR);
-	}
-
-	/* Check if pixmap is already in cache. */
-	for (last_lp = lp = obm->pixmap_cache;  lp;  lp = lp->next) {
-	    if (strcmp (name, lp->name) == 0)
-		break;
-	    last_lp = lp;
-	}
-
-	/* Get an empty pixmap descriptor. */
-	if (lp) {
-	    if (lp->ptr)
-		freeIcon (obm, (Icon *) lp->ptr);
-	} else {
-	    lp = (ObjList) XtMalloc (sizeof (struct objList));
-	    if (last_lp)
-		last_lp->next = lp;
-	    else
-		obm->pixmap_cache = lp;
-	    strcpy (lp->name, name);
-	    lp->next = NULL;
-	}
-
-	lp->ptr = (caddr_t) icon;
-	return (OK);
 }
 
 
@@ -2166,7 +2169,7 @@ char **argv;
 	    if (strncmp (fields[field], "f.", 2) == 0)
 		ip->label = NULL;
 	    else {
-		char *cp = fields[field++];
+		const char *cp = fields[field++];
 
 		if (Tcl_ExprString (tcl, cp) != TCL_OK)
 		    ip->label = cp;
@@ -2213,7 +2216,7 @@ char **argv;
 		    ip->foreground = fields[++field];
 
 		} else if (strcmp (fields[field], "bitmap") == 0) {
-		    char *cp = fields[++field];
+		    const char *cp = fields[++field];
 
 		    if (Tcl_ExprString (tcl, cp) != TCL_OK)
 			ip->pixmap = findBitmap (obm, cp);
@@ -2221,7 +2224,7 @@ char **argv;
 			ip->pixmap = findBitmap (obm, Tcl_GetStringResult (tcl));
 
 		} else if (strcmp (fields[field], "justify") == 0) {
-		    char *justify = fields[++field];
+		    const char *justify = fields[++field];
 		    if (strcmp (justify, "left") == 0)
 			ip->justify = XtJustifyLeft;
 		    else if (strcmp (justify, "center") == 0)
@@ -2741,7 +2744,7 @@ XtPointer call_data;
 
 	if (ip && ip->type == MI_EXEC)
 	    if (Tcl_Eval (obm->tcl, ip->data) != TCL_OK) {
-		char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
+		const char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
 		fprintf (stderr, "Error %s.%s line %d: %s\n",
 		    mp->obj->core.name, XtName(ip->entry), Tcl_GetErrorLine (obm->tcl),
 		    errstr ? errstr : Tcl_GetStringResult (obm->tcl));
@@ -2832,13 +2835,13 @@ int state;
 {
 	Pixmap bitmap;
 
-	if (bitmap = findBitmap (obm, state ? menu_bitmap2 : menu_bitmap1))
+	if ((bitmap = findBitmap (obm, state ? menu_bitmap2 : menu_bitmap1)))
 	    return (bitmap);
 
 	createBitmap (obm, menu_bitmap1, MB_WIDTH, MB_HEIGHT, MB1_PIXELS);
 	createBitmap (obm, menu_bitmap2, MB_WIDTH, MB_HEIGHT, MB2_PIXELS);
 
-	if (bitmap = findBitmap (obm, state ? menu_bitmap2 : menu_bitmap1))
+	if ((bitmap = findBitmap (obm, state ? menu_bitmap2 : menu_bitmap1)))
 	    return (bitmap);
 	else
 	    return ((Pixmap)NULL);
@@ -2998,7 +3001,7 @@ register Widget w;
 	/* If we are highlighting an entry in a menu then any pull-right
 	 * submenus which are still up should not be, so get rid of them.
 	 */
-	if (mp = findMenu (obm, XtName(w->core.parent)))
+	if ((mp = findMenu (obm, XtName(w->core.parent))))
 	    menu_popdown ((Widget)NULL, (XtPointer)mp, (XtPointer)NULL);
 
 	/* Is the menu entry being highlighted on our list of call-submenu

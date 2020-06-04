@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include <X11/Intrinsic.h>
 #include <X11/StringDefs.h>
 #include <Obm.h>
@@ -27,6 +29,7 @@ static void output();
 
 /* MAIN -- OBMSH main program.
  */
+int
 main (argc, argv)
 int argc;
 char *argv[];

@@ -1,6 +1,10 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <ctype.h>
+#include <time.h>
 
 #include <X11/Intrinsic.h>
 #include <X11/StringDefs.h>
@@ -102,8 +106,10 @@ static void load_testpattern();
 static void set_nframes();
 static void xim_frameRegion();
 static void xim_colortables();
-extern char *getenv();
-double strtod();
+static int xim_onScreen();
+static void xim_highlightFrame();
+static void hsv_to_rgb();
+
 void xim_labelTiles();
 void xim_getScreen();
 
@@ -136,7 +142,6 @@ int hardreset;
 	char buf[SZ_LINE];
 	FbConfigPtr cf;
 	ColorMapPtr cm;
-	struct dir *dp;
 	int startup;
 	DIR *dir;
 
@@ -329,7 +334,7 @@ int hardreset;
 
 	for (i=1, op=sbuf;  dirs[i];  i++) {
 	    if (strcmp (dirs[i], "none") != 0) {
-		if (dir = opendir (dirs[i])) {
+		if ((dir = opendir (dirs[i]))) {
 		    while ((n = get_dirfile (dir, op, SZ_FNAME)) > 0) {
 			maps[nfiles++] = op;
 			op += n + 1;
@@ -704,7 +709,6 @@ char *memModel;
 	register FrameBufPtr fb = &xim->frames[frame-1];
 	register Widget gt = xim->gt;
 	int sx, sy, width, height, depth;
-	char buf[SZ_LINE];
 
 	if (frame < 1 || frame > MAX_FRAMES)
 	    return;
@@ -965,6 +969,7 @@ int frame_list;
 /* XIM_HIGHLIGHTFRAME -- If in tile frames mode, highlight the current frame
  * by coloring the border of the frame.
  */
+static void
 xim_highlightFrame (xim, frame)
 register XimDataPtr xim;
 int frame;
@@ -977,15 +982,13 @@ int frame;
 
 	if (xim->tileFrames && xim->highlightFrames) {
 	    int sx, sy, width, height, depth;
-	    int interactive, erase;
 	    XtPointer gm;
 	    Arg args[20];
 	    int nargs = 0;
 
 	    xim_getScreen (xim, frame, &sx, &sy, &width, &height, &depth);
 	    if (sx > 0 && sy > 0) {
-		gm = (XtPointer) GmCreate (xim->gt, Gm_Box,
-		    interactive=False);
+		gm = GmCreate (xim->gt, Gm_Box, False);
 
 		XtSetArg (args[nargs], GmX, sx + (width-1)/2);        nargs++;
 		XtSetArg (args[nargs], GmY, sy + (height-1)/2);       nargs++;
@@ -1015,7 +1018,6 @@ register XimDataPtr xim;
 {
 	FrameBufPtr  fb;
 	MappingPtr   mp;
-	Widget       gt = xim->gt;
 	XtPointer    gm;
 	Arg 	     args[10];
 	char	     text[256], tw[16];
@@ -1079,7 +1081,7 @@ register XimDataPtr xim;
 		 * and provide a background which lets them be read despite
 		 * whatever image scaling is in place.
 		 */
-		gm = (XtPointer) GmCreate (xim->gt, Gm_Text, False);
+		gm = GmCreate (xim->gt, Gm_Text, False);
 
 		nargs = 0;			/* initialize		*/
 		len = strlen (text);
@@ -1119,8 +1121,6 @@ int reference_frame;
 {
 	register FrameBufPtr fr, fb = &xim->frames[reference_frame-1];
 	register int *ip, i;
-	Widget gt = xim->gt;
-	char buf[256];
 	int bits;
 
 	/* If frames is NULL match all frames.  Set one bit in BITS for
@@ -1415,9 +1415,9 @@ Boolean absolute;	/* ignore xscale/yscale */
 	}
 
 	/* Avoid roundoff if integer scaling. */
-	if (xreplicate = (abs(xscale - (int)(xscale+0.5)) < TOL))
+	if ((xreplicate = (abs(xscale - (int)(xscale+0.5)) < TOL)))
 	    xscale = (int)(xscale+0.5);
-	if (yreplicate = (abs(yscale - (int)(yscale+0.5)) < TOL))
+	if ((yreplicate = (abs(yscale - (int)(yscale+0.5)) < TOL)))
 	    yscale = (int)(yscale+0.5);
 
 	/* Sanity check, return if we're getting too small. */
@@ -1677,6 +1677,7 @@ int *width, *height, *depth;
 
 /* XIM_ONSCREEN -- Test whether the given frame is visible onscreen.
  */
+static int
 xim_onScreen (xim, frame)
 register XimDataPtr xim;
 int frame;
@@ -1814,8 +1815,6 @@ int *ncolors;				/* size of colortable (output) */
 	register int i, j;
 
 	int raster, x1, y1, nc;
-	int first, nelem, maxelem;
-	char buf[SZ_LINE], *tmpfile;
 	unsigned short *rs, *gs, *bs;
 	int junk, width, height, depth;
 	unsigned short *cmap=NULL, *iomap=NULL;
@@ -1924,7 +1923,6 @@ int *ncolors;				/* size of colortable (output) */
 
 	} else {
 	    unsigned long lut[MAX_COLORS];
-	    int   start = 10;			/* static colors offset  */
 
 	    GtReadLUT (gt, lut, 0, MAX_COLORS);
 
@@ -1983,12 +1981,10 @@ int ncolors;
 	register Widget gt = xim->gt;
 	unsigned short rs[MAX_COLORS], gs[MAX_COLORS], bs[MAX_COLORS];
 	unsigned short iomap[MAX_COLORS], sv_iomap[MAX_COLORS];
-	unsigned short invmap[MAX_COLORS];
-	int want, npix, nx, ny, sx0, sy0, dx0, dy0;
+	int nx, ny, sx0, sy0, dx0, dy0;
 	int sx, sy, width, height, depth;
 	float xzoom, yzoom, zoom;
 	int debug=0, autoscale=xim->autoscale;
-	unsigned char *gtpix;
 	ColorMapPtr cm;
 
 
@@ -2305,7 +2301,7 @@ XimDataPtr xim;
 
 	for (i=0, op=buf;  i < ncolormaps;  i++) {
 	    *op++ = '"';
-	    for (ip = colormaps[i].name;  *op = *ip++;  op++)
+	    for (ip = colormaps[i].name;  (*op = *ip++);  op++)
 		;
 	    *op++ = '"';
 	    *op++ = '\n';
@@ -2319,6 +2315,7 @@ XimDataPtr xim;
 /* XIM_ENHANCEMENT -- Called when the "enhancement" UI parameter needs to
  * be updated for a frame.
  */
+void
 xim_enhancement (xim, fb)
 register XimDataPtr xim;
 register FrameBufPtr fb;
@@ -2458,6 +2455,7 @@ register XimDataPtr xim;
 /* XIM_GETANTIALIAS -- Convert a antialias algorithm expressed as a string
  * into a Gterm rasterop code.
  */
+int
 xim_getAntialias (xim, s)
 XimDataPtr xim;
 char *s;
@@ -2500,6 +2498,7 @@ char *s;
 /* XIM_SETCOLORMAP -- Set up the RGB lookup tables used to map the windowed
  * monochrome output of a frame buffer into the hardware colormap.
  */
+int
 xim_setColormap (function, dirs, m_red, m_green, m_blue, nelem)
 char *function;			/* type of colormap */
 String *dirs;
@@ -2835,7 +2834,7 @@ int nelem;
 	return (OK);
 }
 
-
+void
 hsv_to_rgb (h, s, v, r, g, b)
 float h, s, v;
 float *r, *g, *b;

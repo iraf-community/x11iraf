@@ -53,7 +53,7 @@
 #ifndef _color_h_
 #define _color_h_
 
-#include <X11/Xraw/XawInit.h>
+#include <X11/Xraw/XrawInit.h>
 
 typedef	struct _RGB {
 	unsigned short r, g, b;

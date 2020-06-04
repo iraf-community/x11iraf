@@ -32,6 +32,7 @@
 #include "data.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <signal.h>
 #ifdef SVR4
 #include <termios.h>

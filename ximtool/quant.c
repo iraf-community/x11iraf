@@ -1,4 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <time.h>
 
 /* QUANT.C -- Quantize the colors in a pixmap down to a specified number.
 ** This code is largely stolen from PBMPlus by Jef Poskanzer.

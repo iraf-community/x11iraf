@@ -7,7 +7,7 @@
  *
  ***********************************************************************/
 
-#include <X11/Xraw/XawInit.h>
+#include <X11/Xraw/XrawInit.h>
 #include <X11/Xraw/Simple.h>
 
 /* Resources:

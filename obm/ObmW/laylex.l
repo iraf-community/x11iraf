@@ -85,12 +85,14 @@ count (s, c)
     return i;
 }
 
+void
 yysetsource(s)
     char    *s;
 {
     yysourcebase = yysource = s;
 }
 
+void
 yyerror(s)
     char    *s;
 {

@@ -2,11 +2,14 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <X11/Intrinsic.h>
 #include <X11/StringDefs.h>
 
+#include <Obm.h>
+#include <ObmW/Gterm.h>
 #include "ximtool.h"
 
 /* LOAD.C -- Package for browsing directories and loading raster files into
@@ -120,7 +123,7 @@ int frame;
 
 	float	 z1=0.0, z2=0.0;
 	int status = 0, has_private_cmap = 0, pixtype, w, h, ncolors;
-	int	zscale = flp->zscale, zrange = flp->zrange, nsamp=flp->nsample;
+	int	zscale = flp->zscale, zrange = flp->zrange;
 	unsigned char *pix=NULL, r[256], g[256], b[256];
 	char *mapname, *err, buf[SZ_LINE];
 
@@ -128,6 +131,7 @@ int frame;
 	extern char *loadFITS();
 	extern char *loadGIF();
 	extern char *loadIRAF();
+	extern void ppmquant();
 	extern int objid[];
 
         /* Make sure the file exists. */
@@ -140,8 +144,8 @@ int frame;
         switch (fileType(fname)) {
         case XIM_RAS: 					/* Sun rasterfile.  */
 	    loadstat (xim, "Reading rasterfile...");
-	    if (err = loadSunRas(fname,&pix,&pixtype,&w,&h,r,g,b,&ncolors,
-		flp->gray)) {
+	    if ((err = loadSunRas(fname,&pix,&pixtype,&w,&h,r,g,b,&ncolors,
+		flp->gray))) {
 		    pix = NULL;
 		    xim_alert (xim, err, NULL, NULL);
 	    }
@@ -157,8 +161,8 @@ int frame;
 	    loadstat (xim, "Reading FITS file...");
 	    z1 = flp->z1;
 	    z2 = flp->z2;
-	    if (err = loadFITS(fname, &pix, &w, &h, r,g,b, &ncolors,
-		zscale, zrange, &z1, &z2, flp->nsample)){
+	    if ((err = loadFITS(fname, &pix, &w, &h, r,g,b, &ncolors,
+		zscale, zrange, &z1, &z2, flp->nsample))){
 		    pix = NULL;
 		    xim_alert (xim, err, NULL, NULL);
 	    }
@@ -167,7 +171,7 @@ int frame;
 
         case XIM_GIF:					/* GIF image 	    */
 	    loadstat (xim, "Reading GIF fle...");
-	    if (err = loadGIF(fname, &pix, &w,&h, r,g,b, &ncolors, flp->gray)) {
+	    if ((err = loadGIF(fname, &pix, &w,&h, r,g,b, &ncolors, flp->gray))) {
 		pix = NULL;
 		xim_alert (xim, err, NULL, NULL);
 	    }
@@ -178,8 +182,8 @@ int frame;
 	    loadstat (xim, "Reading IRAF image...");
 	    z1 = flp->z1;
 	    z2 = flp->z2;
-	    if (err = loadIRAF(fname, &pix, &w, &h, r,g,b, &ncolors,
-		zscale, zrange, &z1, &z2, flp->nsample)){
+	    if ((err = loadIRAF(fname, &pix, &w, &h, r,g,b, &ncolors,
+		zscale, zrange, &z1, &z2, flp->nsample))){
 		    pix = NULL;
 		    xim_alert (xim, err, NULL, NULL);
 	    }
@@ -429,7 +433,7 @@ register XimDataPtr xim;
 	strcpy (flist, "setValue {");
         for (i=0, op = flist+10; i < flp->nfiles;  i++) {
             *op++ = '"';
-            for (ip = flp->FileList[i];  *op = *ip++;  op++)
+            for (ip = flp->FileList[i];  (*op = *ip++);  op++)
                 ;
             *op++ = '"';
             *op++ = '\n';
@@ -481,7 +485,7 @@ register XimDataPtr xim;
 	    if (entry) {
 	        /* Copy the entry to the list. */
                 *op++ = '"';
-                for (ip = entry;  *op = *ip++;  op++)
+                for (ip = entry;  (*op = *ip++);  op++)
                     ;
                 *op++ = '"';
                 *op++ = '\n';
@@ -512,6 +516,10 @@ fileType (fname)
 char *fname;
 {
 	int format;
+	extern int isSunRas();
+	extern int isFITS();
+	extern int isGIF();
+	extern int isIRAF();
 
 	if (isFITS (fname))
 	    format = XIM_FITS;

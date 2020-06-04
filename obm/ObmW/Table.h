@@ -20,7 +20,7 @@ Commercial  usage is  also  possible  with  participation of the author.
 #include <X11/Xmu/Converters.h>
 
 #include <X11/Xraw/Simple.h>
-#include <X11/Xraw/XawInit.h>
+#include <X11/Xraw/XrawInit.h>
 
 
 
@@ -420,7 +420,7 @@ extern char *XawTableGetLabelByPosition Xraw_PROTO((Widget w,
 extern int XawTableSetLabel 		Xraw_PROTO((Widget w,
 						     int row,
 						     int column,
-						     char *label));
+						     const char *label));
      
 
 /*#########################################################################*/
@@ -522,6 +522,10 @@ extern int XawTableGetColumnWidth          Xraw_PROTO((Widget w,
 extern int XawTableGetColumnPixelWidth          Xraw_PROTO((Widget w,
 						        int   column));
 
+extern void XawTableSetMultiColumnWidths	Xraw_PROTO((Widget w,
+							int *columns,
+							int *widths,
+							int ncols));
 
 
 /*#########################################################################*/

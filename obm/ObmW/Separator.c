@@ -7,7 +7,7 @@
 #include <X11/StringDefs.h>
 #include <X11/Xos.h>
 
-#include <X11/Xraw/XawInit.h>
+#include <X11/Xraw/XrawInit.h>
 #include <X11/Xraw/SeparatorP.h>
 
 #include <X11/Xmu/Converters.h>

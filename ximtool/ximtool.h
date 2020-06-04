@@ -63,8 +63,8 @@
 #define	DEF_ISM_ADDR	   "/tmp/.ISM%d"	/* default ISM unix socket    */
 #define	DEF_ISM_TEMPLATE   "/tmp/.ISM%d_%d"	/* ISM client socket template */
 #define DEF_ISM_TASK	   "wcspix"
-#define DEF_ISM_CMD	   "/usr/local/bin/ism_wcspix.e wcspix &"
 #define DEF_ISM_CMD	   "ism_wcspix.e wcspix &"
+/* "/usr/local/bin/ism_wcspix.e wcspix &" */
 #define	SZ_ISMBUF	   4096
 
 /* WCS definitions. */
@@ -148,7 +148,7 @@ typedef struct {
 /* Client IIS I/O channel. */
 typedef struct {
 	XtPointer xim;			/* backpointer to xim descriptor */
-	XtPointer id;			/* input callback id 		 */
+	XtInputId id;			/* input callback id 		 */
 	int type;			/* channel type 		 */
 	int datain;			/* input channel 		 */
 	int dataout;			/* output channel 		 */
@@ -167,7 +167,7 @@ typedef struct {
 /* Client ISM I/O channel. */
 typedef struct {
 	XtPointer xim;			/* backpointer to xim descriptor */
-	XtPointer id;			/* input callback id 		 */
+	XtInputId id;			/* input callback id 		 */
 	int datain;			/* input channel 		 */
 	int dataout;			/* output channel 		 */
 	int connected;			/* client connected? 		 */
@@ -706,6 +706,7 @@ extern Printer printer_list[];
 #endif
 
 void xim_initialize(), xim_reset(), xim_resize(), xim_refresh();
+int xim_shutdown ();
 void xim_close(), xim_initFrame(), xim_setFrame(), xim_setRop();
 void xim_setReferenceFrame(), xim_setDisplayFrame();
 void xim_delFrame(), xim_setMapping(), xim_setZoom();
@@ -716,6 +717,16 @@ void xim_message(), xim_msgi(), xim_alert();
 int xim_setColormap();
 int xim_getAntialias();
 char *xim_frameLabel();
+void xim_displayLogo ();
+void xim_initPrinterOps();
+int xim_getPrinterInfo();
+int xim_print();
+void print_mappings();
+void xim_initLoad();
+void xim_scanHeaders();
+void xim_dirRescan();
+int xim_loadFile();
+void xim_loadClose();
 
 int xim_writeDisplay();
 unsigned char *xim_readDisplay();
@@ -723,11 +734,26 @@ void xim_initSave(), xim_closeSave();
 void ximp_rename(), ximp_cancel();
 void xims_rename(), xims_cancel();
 int xim_saveFile();
+void xim_saveClose();
 
-int xim_iisopen();
-void xim_iisclose(), xim_iisio();
-XtPointer xim_addInput();
+int xim_iisOpen();
+void xim_iisClose(), xim_iisio();
+XtInputId xim_addInput();
+void xim_iisiomap();
+void xim_iiscolormap();
+
 void xim_removeInput();
+void xim_encodewcs();
+void xim_retCursorVal();
 
 void xim_clientOpen(), xim_clientClose();
 int xim_clientExecute();
+void xim_ismOpen(), xim_ismClose();
+void xim_enhancement();
+void xim_eraseFrame();
+void xim_tileFrames();
+void xim_fitFrame();
+void xim_cursorMode();
+
+int ism_message();
+void wcspix_message();

@@ -2160,6 +2160,7 @@ get_pixel (w, client_pixel)
 
 /* GtGetClientPixel -- Convert a gterm pixel into a client pixel.
  */
+int
 GtGetClientPixel (w, pixel)
     GtermWidget w;
     register int pixel;
@@ -2183,6 +2184,7 @@ GtGetClientPixel (w, pixel)
 
 /* GtInitMappings -- Delete all mappings and initialize the mapping subsystem.
  */
+void
 GtInitMappings (w)
     register GtermWidget w;
 {
@@ -2219,6 +2221,7 @@ GtInitMappings (w)
 /* GtNextMapping -- Return the index of the next available mapping descriptor.
  * This routine always returns a mapping index of 1 or higher.
  */
+int
 GtNextMapping (w)
     register GtermWidget w;
 {
@@ -2237,6 +2240,7 @@ GtNextMapping (w)
 
 /* GtFreeMapping -- Free a mapping descriptor.
  */
+void
 GtFreeMapping (w, mapping)
     register GtermWidget w;
     int mapping;
@@ -2316,6 +2320,7 @@ GtLowerMapping (w, mapping, reference)
  * negative value is returned if the m1 < m2, zero is returned if the
  * mappings are the same, and a positive value is returned if m1 > m2.
  */
+int
 GtCompareMappings (w, map1, map2)
     register GtermWidget w;
     int map1, map2;
@@ -2360,6 +2365,7 @@ GtCompareMappings (w, map1, map2)
  * the raster is 10 pixels wide, the client coordinate system would range
  * from 0.5 to 10.5 at the edges of the NDC space.
  */
+int
 GtSelectRaster (w, dras, dt, dx, dy, rt, rx, ry, rmap)
     GtermWidget w;
     int dras;		/* display raster */
@@ -2473,6 +2479,7 @@ GtSelectRaster (w, dras, dt, dx, dy, rt, rx, ry, rmap)
  * force a refresh, implement a transient mapping, or in the case of a dezoom
  * (many-to-one) mapping, select the antialiasing technique to be used.
  */
+int
 GtCopyRaster (w, rop, src,st,sx,sy,snx,sny, dst,dt,dx,dy,dnx,dny)
     GtermWidget w;
     int rop;			/* rasterop */
@@ -2525,6 +2532,7 @@ GtCopyRaster (w, rop, src,st,sx,sy,snx,sny, dst,dt,dx,dy,dnx,dny)
  * which were previously covered by the mapping but which were exposed by
  * modifying the mapping are redrawn.
  */
+int
 GtSetMapping (w, mapping, rop, src,st,sx,sy,snx,sny, dst,dt,dx,dy,dnx,dny)
     GtermWidget w;
     int mapping;		/* mapping number */
@@ -2763,6 +2771,7 @@ GtSetMapping (w, mapping, rop, src,st,sx,sy,snx,sny, dst,dt,dx,dy,dnx,dny)
  * mapping is defined but not enabled, and 1 is returned if the mapping
  * is active.
  */
+int
 GtGetMapping (w, mapping, rop, src,st,sx,sy,snx,sny, dst,dt,dx,dy,dnx,dny)
     GtermWidget w;
     int mapping;		/* mapping number */
@@ -2793,6 +2802,7 @@ GtGetMapping (w, mapping, rop, src,st,sx,sy,snx,sny, dst,dt,dx,dy,dnx,dny)
 
 /* GtActiveMapping -- Query whether a mapping is active.
  */
+int
 GtActiveMapping (w, mapping)
     register GtermWidget w;
     int mapping;		/* mapping number */
@@ -2813,6 +2823,7 @@ GtActiveMapping (w, mapping)
  * mapping activates the mapping so that any changes to the source will
  * be mapped to the destination.
  */
+int
 GtEnableMapping (w, mapping, refresh)
     GtermWidget w;
     int mapping;		/* mapping number */
@@ -2848,7 +2859,7 @@ GtEnableMapping (w, mapping, refresh)
 ** and we have no way to get back to the pixel values.
 ** 
 */	 
-
+void
 GtSetDisplayRaster (gt, raster)
     GtermWidget gt;
     int raster;				/* raster number */
@@ -2865,6 +2876,7 @@ GtSetDisplayRaster (gt, raster)
  * reenabled.  If the ERASE flag is set the destination region is redrawn
  * with the mapping disabled.
  */
+int
 GtDisableMapping (w, mapping, erase)
     GtermWidget w;
     int mapping;		/* mapping number */
@@ -2921,6 +2933,7 @@ GtDisableMapping (w, mapping, erase)
 
 /* GtRefreshMapping -- Refresh the destination region defined by a mapping.
  */
+void
 GtRefreshMapping (w, mapping)
     GtermWidget w;
     int mapping;		/* mapping number */
@@ -2963,6 +2976,7 @@ GtRefreshMapping (w, mapping)
  * point vector is maintained in floating point for this operation to avoid
  * loss of precision.  The input and output vectors may be the same vector.
  */
+void
 GtMapVector (w, mapping, dir, pv1, pv2, npts)
     GtermWidget w;
     int mapping;
@@ -3028,6 +3042,7 @@ GtMapVector (w, mapping, dir, pv1, pv2, npts)
  * coordinate system of the given reference raster.  The input and output
  * vectors may be the same vector.
  */
+void
 GtPixelToNDC (w, raster, pv1, pv2, npts)
     GtermWidget w;
     int raster;
@@ -3051,6 +3066,7 @@ GtPixelToNDC (w, raster, pv1, pv2, npts)
  * coordinate system of the given reference raster.  The input and output
  * vectors may be the same vector.
  */
+void
 GtNDCToPixel (w, raster, pv1, pv2, npts)
     GtermWidget w;
     int raster;
@@ -3085,6 +3101,7 @@ GtNDCToPixel (w, raster, pv1, pv2, npts)
  *
  * This routine is intended only for use during debugging.
  */
+void
 GtDebug (w, fp, what)
     GtermWidget w;
     FILE *fp;

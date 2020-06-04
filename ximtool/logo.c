@@ -7,6 +7,7 @@
 #include <X11/Intrinsic.h>
 #include <X11/StringDefs.h>
 
+#include <ObmW/Gterm.h>
 #include "ximtool.h"
 #include "logo.h"
 

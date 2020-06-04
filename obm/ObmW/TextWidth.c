@@ -36,4 +36,5 @@ XfwfTextWidth(font, str, length, tabs)
 			if (rc < 0) return rc; else return rc + tx;
 		}
 	}
+	return 0;
 }

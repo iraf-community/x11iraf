@@ -4,7 +4,9 @@
 #include <X11/IntrinsicP.h>
 #include <X11/StringDefs.h>
 #include <stdio.h>
+#include <ctype.h>
 #include <X11/Xmu/Converters.h>
+#include <X11/Xmu/CharSet.h>
 #include "Converters.h"
 #include "CommonP.h"
 #define focus_detail(detail) (detail ==NotifyAncestor ?"NotifyAncestor":detail ==NotifyVirtual ?"NotifyVirtual":detail ==NotifyInferior ?"NotifyInferior":detail ==NotifyNonlinear ?"NotifyNonlinear":detail ==NotifyNonlinearVirtual ?"NotifyNonlinearVirtual":detail ==NotifyPointer ?"NotifyPointer":detail ==NotifyPointerRoot ?"NotifyPointerRoot":detail ==NotifyDetailNone ?"NotifyDetailNone":"???")

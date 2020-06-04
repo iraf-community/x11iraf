@@ -53,6 +53,7 @@
  ****************************************************************************/
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "HTMLP.h"
 #ifdef MOTIF
 #include <Xm/DrawingA.h>
@@ -62,6 +63,7 @@
 #include <X11/Xaw/Scrollbar.h>
 #endif
 #include <X11/cursorfont.h>
+#include <X11/Xmu/StdSel.h>
 
 
 #define	MARGIN_DEFAULT		20
@@ -97,6 +99,7 @@ extern int SwapElements();
 extern int ElementLessThan();
 extern int IsDelayedHRef();
 extern int IsIsMapForm();
+extern void BulletRefresh();
 extern int AnchoredHeight();
 extern char *ParseMarkTag();
 extern char *ParseTextToString();

@@ -71,6 +71,7 @@ static void SelectSet();
 static void StartSelect();
 static int Length();
 static char *SaveText();
+void DisownSelection();
 void TrackText();
 
 extern XgtermWidget term;
@@ -721,7 +722,7 @@ Cardinal *num_params;		/* unused */
     do_start_extend (w, event, params, num_params, True);
 }
 
-
+void
 ScrollSelection(screen, amount)
 register TScreen* screen;
 register int amount;
@@ -757,6 +758,7 @@ register int amount;
 
 
 /*ARGSUSED*/
+void
 ResizeSelection (screen, rows, cols)
     TScreen *screen;
     int rows, cols;
@@ -787,7 +789,7 @@ PointToRowCol(y, x, r, c)
        maximum value. */
 {
 	register TScreen *screen = &term->screen;
-	register row, col;
+	register int row, col;
 
 	row = (y - screen->border) / FontHeight(screen);
 	if(row < firstValidRow)
@@ -1341,7 +1343,7 @@ static void _OwnSelection(termw, selections, count)
 	TrackText(0, 0, 0, 0);
 }
 
-/* void */
+void
 DisownSelection(termw)
     register XgtermWidget termw;
 {

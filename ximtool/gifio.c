@@ -21,6 +21,7 @@
 
 #include <stdio.h>
 #include <math.h>
+#include <string.h>
 
 
 /* a code_int must be able to hold 2**GIFBITS values of type int, and also -1
@@ -81,7 +82,6 @@ static struct {
 #include <stdlib.h>
 
 static int colorstobpp (int colors);
-static int GetPixel (int x, int y);
 static void BumpPixel (void);
 static int GIFNextPixel ();
 static void GIFEncode (FILE* fp, int GWidth, int GHeight, int GInterlace, 
@@ -213,7 +213,7 @@ char	*fname;	    	    /* input filename */
 	int	value = 0;
 	char	tag[5];
 
-        if (fp = fopen (fname, "r")) {
+        if ((fp = fopen (fname, "r"))) {
             fread (tag, sizeof(char), 4, fp);
             if (strncmp ("GIF8", tag, 4) == 0)
                 value = 1;
@@ -364,11 +364,6 @@ int	*ncolors;
 		return "error reading global colormap";
 	}
 
-	if (GifScreen.AspectRatio != 0 && GifScreen.AspectRatio != 49) {
-	    float	r;
-	    r = ( (float) GifScreen.AspectRatio + 15.0 ) / 64.0;
-	}
-
 	for (; ; ) {
 	    if (!ReadOK(fd, &c, 1))
 		return "EOF / read error on image data";
@@ -441,22 +436,17 @@ FILE	*fd;
 int	label;
 {
 	static char	buf[256];
-	char	*str;
 
 	switch (label) {
 	case 0x01:		/* Plain Text Extension */
-	    str = "Plain Text Extension";
 	    break;
 	case 0xff:		/* Application Extension */
-	    str = "Application Extension";
 	    break;
 	case 0xfe:		/* Comment Extension */
-	    str = "Comment Extension";
 	    while (GetDataBlock(fd, (uchar * ) buf) != 0) 
 		;
 	    return FALSE;
 	case 0xf9:		/* Graphic Control Extension */
-	    str = "Graphic Control Extension";
 	    (void) GetDataBlock(fd, (uchar * ) buf);
 	    Gif89.disposal    = (buf[0] >> 2) & 0x7;
 	    Gif89.inputFlag   = (buf[0] >> 1) & 0x1;
@@ -468,7 +458,6 @@ int	label;
 		;
 	    return FALSE;
 	default:
-	    str = buf;
 	    sprintf(buf, "UNKNOWN (0x%02x)", label);
 	    break;
 	}

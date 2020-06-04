@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <errno.h>
@@ -121,7 +122,7 @@ int x0, y0, nx, ny;		/* region of display to be saved */
 	fsp->d = 8;
 
 	if (access (fname, F_OK) < 0) {
-	    if (fp = fopen (fname, "w")) {
+	    if ((fp = fopen (fname, "w"))) {
 		struct stat fs;
 
 		xims_write (xim, fp, fileformat, pixels, w,h,8, r,g,b, 256);
@@ -150,7 +151,7 @@ int x0, y0, nx, ny;		/* region of display to be saved */
 	    char *ip, *op, *last;
 
 	    /* Write to a temporary file in the same directory as fname. */
-	    for (ip=fname, op=tmpfile, last=tmpfile;  *op = *ip++;  op++)
+	    for (ip=fname, op=tmpfile, last=tmpfile;  (*op = *ip++);  op++)
 		if (*op == '/')
 		    last = op + 1;
 	    *last = '\0';
@@ -196,14 +197,16 @@ int w, h, d;
 unsigned char *r, *g, *b;
 int ncolors;
 {
-	register fileSavePtr fsp = xim->fsp;
         register PSImagePtr psim = xim->psim;
         register FrameBufPtr fb = xim->df_p;
         register ColorMapPtr cm = &colormaps[fb->colormap-1];
 	register int sv_annotate = psim->annotate;
 	register int sv_colorClass = psim->colorClass;
 	int gray=0, status=0;
-
+	extern int writeSunRas();
+	extern int writeFITS();
+	extern int writeGIF();
+	extern int writeTIFF();
 
         switch (fileformat) {
         case XIM_RAS:

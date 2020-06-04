@@ -21,8 +21,9 @@ int ObmStatus (/* obm, app_name, app_class */);
 XtPointer ObmGetInterp (/* obm, object */);
 int ObmDeliverMsg (/* obm, object, message */);
 int ObmDeliverMsgFromFile (/* obm, object, filename */);
-XtPointer ObmAddCallback (/* obm, fcn, callback_type, client_data */);
+void ObmAddCallback (/* obm, fcn, callback_type, client_data */);
 void ObmRemoveCallback (/* obm, callback_id */);
+void obmNewObject();
 
 /* Callback type flags. */
 #define	OBMCB_preserve			0000001 /* preserve over ObmInit */

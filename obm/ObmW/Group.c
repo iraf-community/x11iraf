@@ -6,6 +6,7 @@
 #include "Toggle.h"
 #include <stdio.h>
 #include <X11/Xmu/Converters.h>
+#include <X11/Xmu/CharSet.h>
 #include "Converters.h"
 #include "GroupP.h"
 static void _resolve_inheritance(

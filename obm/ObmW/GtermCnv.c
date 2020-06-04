@@ -19,9 +19,7 @@ XImage  *ximage_to_gtermPM (GtermWidget w, XImage *xin,
 XImage  *ximage_to_rasPM (GtermWidget w, XImage *xin, Raster dest, 
 	    int sx, int sy, int dnx, int dny);
 
-
-
-
+static int init_lut (int bpp, int border);
 
 
 /*  Match the destination pixmap to the Gterm pixmap.  If they are the 
@@ -37,6 +35,7 @@ Pixmap gtermPM_to_rasPM (GtermWidget w, Raster dest)
     /* Should be a no-op in 8-bit Pseudocolor mode. */
     if (w->gterm.w_depth == dest->depth)
 	return (w->gterm.pixmap);
+    return 0; /* not implemented yet */
 }
 
 
@@ -57,10 +56,10 @@ Pixmap rasPM_to_rasPM (Raster src, Raster dest)
 
     if (src->depth < dest->depth) {
 	fprintf (stderr, "RPMtoRPM: %d < %d\n", src->depth, dest->depth);
-	;
+	return 0; /* not implemented yet */
     } else if (src->depth > dest->depth) {
 	fprintf (stderr, "RPMtoRPM: %d > %d\n", src->depth, dest->depth);
-	;
+	return 0; /* not implemented yet */
     }
 }
 
@@ -83,10 +82,10 @@ Pixmap rasPM_to_gtermPM (Raster src, GtermWidget w)
 
     if (src->depth < w->gterm.w_depth) {
 	fprintf (stderr, "RPMtoRPM: %d < %d\n", src->depth, w->gterm.w_depth);
-	;
+	return 0; /* not implemented yet */
     } else if (src->depth > w->gterm.w_depth) {
 	fprintf (stderr, "RPMtoRPM: %d > %d\n", src->depth, w->gterm.w_depth);
-	;
+	return 0; /* not implemented yet */
     }
 }
 
@@ -208,10 +207,9 @@ int     bpl, bpp, border;
     int    min=256, max=0, cmin=256, cmax=0, xmin=0, xmax=0;
     time_t start, end;
 
-
     
     if (DBG_TRACE) {
-	start = time ((time_t) NULL);
+	start = time (NULL);
 	fprintf (stderr, "renderPix: ENTER\n");
     }
 
@@ -246,7 +244,7 @@ int     bpl, bpp, border;
 	fprintf (stderr,
 	    "renderPix: pix %d %d  cmap %d %d  xcol 0x%x 0x%x  bpp = %d\n",
 	    min,max, cmin,cmax, xmin,xmax, bpp);
-	end = time ((time_t) NULL);
+	end = time (NULL);
 	fprintf (stderr, "renderPix: DONE  time = %.5f  %ld %ld\n",
 	    difftime(start,end), (long)start, (long)end);
     }
@@ -257,9 +255,8 @@ int     bpl, bpp, border;
 
 /*  Compute the lookup table for the RGB rendering.
 */
-init_lut (bpp, border)
-int	bpp;
-int	border;
+static int
+init_lut (int bpp, int border)
 {
     register int i;
     unsigned long  rmask, gmask, bmask, rpix, gpix, bpix, xcol, lval;
@@ -395,8 +392,7 @@ int lowbit(unsigned long i)
 
 /* Debug Utilities.
 */
-bob() { int i = 0; fprintf (stderr, "Hi from Bob\n");  }
-
+static void
 dbg_printCmaps (GtermWidget w)
 {
     int     i, j, first, nelem, maxelem, nc;
@@ -444,6 +440,7 @@ dbg_printCmaps (GtermWidget w)
           w->gterm.cmap_in[i], w->gterm.cmap_out[i]);
 }
 
+static void
 dbg_printMappings (GtermWidget w)
 {
     Mapping mp;
@@ -459,13 +456,14 @@ dbg_printMappings (GtermWidget w)
 	fprintf (stderr, "      : rop=%d  refresh=%d  enabled=%d def=%d  %s\n",
 	    mp->rop, mp->refresh, mp->enabled, mp->defined,
 	    scales[mp->scaling]);
-	fprintf (stderr, "      : src=0x%x  dst=0x%x  pixmap=0x%x\n",
-	    (int)&w->gterm.rasters[mp->src], (int)&w->gterm.rasters[mp->dst],
-	    (int)&w->gterm.rasters[0]);
+	fprintf (stderr, "      : src=%p  dst=%p  pixmap=%p\n",
+	    &w->gterm.rasters[mp->src], &w->gterm.rasters[mp->dst],
+	    &w->gterm.rasters[0]);
     }
 }
 
 
+static void
 dbg_printRasters (GtermWidget w)
 {
     register int i;

@@ -4,6 +4,7 @@
 #include <X11/Intrinsic.h>
 #include <X11/StringDefs.h>
 #include <tcl/tcl.h>
+#include <Obm.h>
 #include "ximtool.h"
 
 /*
@@ -114,7 +115,6 @@ int	argc;
 char	**argv;
 {
 	register int i;
-	char	cmd[SZ_FNAME];
 
 	if (wcspix_debug) printf ("CommandCB....\n");
 

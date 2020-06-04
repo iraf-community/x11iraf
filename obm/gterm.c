@@ -223,8 +223,12 @@ static	void gtermInputCallback();
 static	void gtermResizeCallback(), gtermResetCallback();
 static	void get_mapping(), put_mapping();
 static	XPoint *get_points();
-extern	double strtod(), atof();
 
+static int dataLevelType();
+static int lineStyle();
+static int fillType();
+static int colorToIndex();
+static void ndcToPixel();
 
 /* GtermClassInit -- Initialize the class record for the gterm widget class.
  */
@@ -838,7 +842,7 @@ XEvent *event;
 			    ip++;
 		} else {
 		    /* This case occurs when only a modifier is typed. */
-		    for (ip = "??";  *op++ = *ip++; )
+		    for (ip = "??";  (*op++ = *ip++); )
 			;
 		}
 		*op++ = ' ';
@@ -887,7 +891,7 @@ XEvent *event;
 	    NULL);
 
 	if (status != TCL_OK) {
-	    char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
+	    const char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
 	    fprintf (stderr, "Error on line %d in %s: %s\n",
 		Tcl_GetErrorLine (obm->tcl), cb->name,
 		errstr ? errstr : Tcl_GetStringResult (obm->tcl));
@@ -923,7 +927,7 @@ Widget w;
 	    NULL); 
 
 	if (status != TCL_OK) {
-	    char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
+	    const char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
 	    fprintf (stderr, "Error on line %d in %s: %s\n",
 		Tcl_GetErrorLine (obm->tcl), cb->name,
 		errstr ? errstr : Tcl_GetStringResult (obm->tcl));
@@ -952,7 +956,7 @@ Widget w;
 	    NULL); 
 
 	if (status != TCL_OK) {
-	    char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
+	    const char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
 	    fprintf (stderr, "Error on line %d in %s: %s\n",
 		Tcl_GetErrorLine (obm->tcl), cb->name,
 		errstr ? errstr : Tcl_GetStringResult (obm->tcl));
@@ -2963,7 +2967,7 @@ char **argv;
 	    ny = 1.0;
 	}
 
-	if (pixmap = GtExtractPixmap (w, raster, ctype, x1, y1, nx, ny))
+	if ((pixmap = GtExtractPixmap (w, raster, ctype, x1, y1, nx, ny)))
 	    createPixmap (obm, s_pixmap, nx, ny, 8, pixmap, NULL, 0, 0);
 	else
 	    return (TCL_ERROR);
@@ -3015,7 +3019,7 @@ char **argv;
 	    ny = 1.0;
 	}
 
-	if (pixmap = findPixmap (obm, s_pixmap)) {
+	if ((pixmap = findPixmap (obm, s_pixmap))) {
 	    if (GtInsertPixmap (w, pixmap, raster, ctype,x1,y1,nx,ny) == ERR)
 		return (TCL_ERROR);
 	} else
@@ -4111,7 +4115,7 @@ char **argv;
 	} else if (argc > 3) {
 	    /* Attribute list passed as separate arguments. */
 	    nitems = argc - 2;
-	    items = (char **) XtMalloc (nitems * sizeof(char *));
+	    items = (char **) Tcl_Alloc (nitems * sizeof(char *));
 	    if (items == NULL)
 		return (TCL_ERROR);
 	    for (i=0;  i < nitems;  i++)
@@ -4127,10 +4131,7 @@ char **argv;
 
 	obmNewObject (obm, name, "Marker", obj->core.name, args, nargs);
 
-	if (argc == 3)
-	    Tcl_Free ((char *) items);
-	if (argc > 3)
-	    XtFree ((char *) items);
+	Tcl_Free ((char *) items);
 
 	return (TCL_OK);
 }
@@ -4145,6 +4146,7 @@ char **argv;
 /* coordType -- Convert a coordinate type string "pixel" or "ndc" to an
  * integer code.
  */
+int
 coordType (name)
 char *name;
 {
@@ -4167,6 +4169,7 @@ char *name;
 
 /* dataLevelType -- Convert a data level type string to an integer code.
  */
+static int
 dataLevelType (name)
 char *name;
 {
@@ -4183,6 +4186,7 @@ char *name;
 
 /* lineStyle -- Convert a line style string to an integer code.
  */
+static int
 lineStyle (name)
 char *name;
 {
@@ -4203,6 +4207,7 @@ char *name;
 
 /* fillType -- Convert a fill type string to an integer code.
  */
+static int
 fillType (name)
 char *name;
 {
@@ -4218,6 +4223,7 @@ char *name;
 /* colorToIndex -- Convert a color name or number to a gterm widget color
  * index.
  */
+static int
 colorToIndex (name)
 char *name;
 {
@@ -4254,6 +4260,7 @@ char *name;
 
 /* ncdToPixel -- Convert NDC (integer) to raster pixel (floating) coordinates.
  */
+static void
 ndcToPixel (w, raster, nx, ny, rx, ry)
 Widget w;
 int raster;
