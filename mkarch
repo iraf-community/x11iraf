@@ -5,7 +5,7 @@
 # and set mkpkg to produce FFF binaries (FFF = ssun, sparc, etc.).
 # Based on the IRAF hlib$mkfloat.csh script.
 
-set DIRS 	= "obm obmsh vximtool xaw3d xgterm ximtool xpm xtapemon"
+set DIRS 	= "obm obmsh xgterm ximtool xtapemon"
 set new_arch 	= "$1"
 set clean	= 1
 

@@ -22,7 +22,6 @@
     ximtool		Source for ximtool (image display server/browser)
     guidemo		Some sample GUI applications
     xtapemon		IRAF tape monitor GUI
-    vximtool		Source for Virtual XImtool dummy display server
 
     obm			Source for the Object Manager (OBM)
     xpm			OBM-compatible copy of the X pixmap source

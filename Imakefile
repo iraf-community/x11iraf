@@ -12,7 +12,7 @@
 RELEASE		= v2.0BETA2
 
 LIBDIRS 	= obm
-APPDIRS 	= xgterm ximtool xtapemon obmsh vximtool
+APPDIRS 	= xgterm ximtool xtapemon obmsh
 SUBDIRS 	= $(LIBDIRS) $(APPDIRS)
 
 all:: World
