@@ -24,7 +24,6 @@
     xtapemon		IRAF tape monitor GUI
 
     obm			Source for the Object Manager (OBM)
-    util		Miscellaneous utility programs
 
 The Xaw3D and XPM libraries are publically available software packages which
 x11iraf only uses, we did did not develop them.  Similarly OBM uses Tcl as
