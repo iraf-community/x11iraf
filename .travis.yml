@@ -1,25 +1,25 @@
-os: linux
+matrix:
+  include:
+    - os: linux
+      dist: bionic
+      addons:
+        apt:
+          packages:
+            - xutils-dev
+            - csh
+            - libxt-dev
+            - libncurses-dev
+            - libxaw7-dev
+            - libxmu-dev
+            - libxpm-dev
+            - xaw3dg-dev
+            - tcl-dev
+            - iraf-dev
+            - xauth
+            - xvfb
+    - os: osx
+      osx_image: xcode11.5
 
-dist: bionic
-
-env: IRAFARCH=linux64
-
-addons:
-  apt:
-    packages:
-      - xutils-dev
-      - csh
-      - libxt-dev
-      - libncurses-dev
-      - libxaw7-dev
-      - libxmu-dev
-      - libxpm-dev
-      - xaw3dg-dev
-      - tcl-dev
-      - iraf-dev
-      - xauth
-      - xvfb
-      
 language: c
 
 cache:
@@ -36,5 +36,6 @@ before_script:
 script:
   - test -x xgterm/xgterm
   - test -x ximtool/ximtool
-  - test -x ximtool/clients/ism_wcspix.e
-  - xvfb-run xgterm/xgterm -e sleep 1
+  - test "${TRAVIS_OS_NAME}" = osx -o -x ximtool/clients/ism_wcspix.e
+  - if [ "${TRAVIS_OS_NAME}" = linux ]; then xvfb-run xgterm/xgterm -e sleep 1; fi
+  - if [ "${TRAVIS_OS_NAME}" = osx ]; then xgterm/xgterm -e sleep 1; fi
