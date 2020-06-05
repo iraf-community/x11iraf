@@ -285,7 +285,7 @@ else
 endif
 
 set BINFILES = \
-	"ism_wcspix.e obmsh resize vximtool xgterm ximtool ximtool-alt xtapemon"
+	"ism_wcspix.e obmsh resize xgterm ximtool ximtool-alt xtapemon"
 
 
 NEWLINE ; BOLD_ON

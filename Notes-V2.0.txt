@@ -538,10 +538,8 @@ users should notice a considerable improvement in the speed.
 
 	This section is meant to provide an up-to-date reference of the IIS
 protocol used in X11IRAF v2.0, including any changes described above or in
-following sections.  These changes are implemented in XImtool display
-server, the VXImtool virtual frame buffer, and the CDL application library
-included with this release.  Necessary changes in the current IRAF v2.14
-release are also implied.
+following sections.  These changes are implemented in XImtool display server.
+Necessary changes in the current IRAF v2.14 release are also implied.
 
 
                  		   IIS Header Packet Summary
