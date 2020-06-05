@@ -159,7 +159,7 @@ char **argv;
     port = appResources.port + appResources.alternate;
     if ((server_socket = portSetup(port)) >= 0)
 	XtAppAddInput (appContext, server_socket, (XtPointer)XtInputReadMask,
-	    (XtInputCallbackProc)connectToClient, (XtPointer)server_socket);
+	    (XtInputCallbackProc)connectToClient, (XtPointer)&server_socket);
 
     /* Identify port in use. */
     sprintf (buf, "ready on port %s (%d)", 
@@ -494,7 +494,7 @@ XtInputId *id;
 
 	/* Enable the following if XtRemoveInput is used in XtInputCallback
 	 * XtAppAddInput (appContext, server_socket, XtInputReadMask,
-	 *   (XtInputCallbackProc)connectToClient, (XtPointer)server_socket);
+	 *   (XtInputCallbackProc)connectToClient, (XtPointer)&server_socket);
 	 */
     }
 
