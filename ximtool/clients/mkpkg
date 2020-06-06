@@ -27,6 +27,9 @@ install:
 	$move ism_wcspix.e ../../bin/ism_wcspix.e
         ;
 
+clean:
+	$delete ism_wcspix.e libpkg.a x_ism.o
+	;
 
 libpkg.a:
 	@lib

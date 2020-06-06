@@ -474,9 +474,7 @@ extern void exit();
 extern char *ttyname();
 #endif
 
-#ifdef SYSV
 extern char *ptsname();
-#endif
 
 extern char *strindex ();
 extern void HandlePopupMenu();

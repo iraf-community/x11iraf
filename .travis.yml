@@ -31,11 +31,10 @@ git:
   depth: 3
 
 before_script:
-  - xmkmf -a
   - make
 
 script:
   - test -x xgterm/xgterm
   - test -x ximtool/ximtool
-  - test -x bin/ism_wcspix.e
+  - test -x ximtool/clients/ism_wcspix.e
   - xvfb-run xgterm/xgterm -e sleep 1
