@@ -40,6 +40,10 @@ static char server[] = "server";
 /* The builtin default GUI. */
 char *defgui_text[] = {
 #   include "ximtool.gui.h"
+#ifndef OSI_COMPLIANT
+    "send helpText addCallback anchorSelected anchor",
+    "send helpText addCallback testAnchor testAnchor",
+#endif
     NULL
 };
 

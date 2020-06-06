@@ -5,15 +5,18 @@ OBJS = Arrow.o Board.o Button.o Common.o DrawIString.o DrawString.o	\
  strnchr.o Tabs.o Gcs.o ListTree.o Separator.o Container.o color.o	\
  laygram.o laylex.o
 
-# Non-free
-OBJS += HTML-PSformat.o HTML.o HTMLformat.o HTMLimages.o HTMLjot.o	\
- HTMLlists.o HTMLparse.o HTMLwidgets.o Table.o Table3d.o TableUtil.o
-
 CFLAGS += -I.
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
     CFLAGS += -I/usr/X11/include -D__DARWIN__
     LDFLAGS += -L/usr/X11/lib
+endif
+
+ifeq ($(OSI_COMPLIANT), YES)
+      CFLAGS += -DOSI_COMPLIANT
+else
+      OBJS += HTML-PSformat.o HTML.o HTMLformat.o HTMLimages.o HTMLjot.o     \
+         HTMLlists.o HTMLparse.o HTMLwidgets.o Table.o Table3d.o TableUtil.o
 endif
 
 all: $(OBJS)

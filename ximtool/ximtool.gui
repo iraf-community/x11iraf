@@ -10174,13 +10174,13 @@ proc anchorSelected {widget cbtype event text href args} \
     }
     send helpText gotoId $anchID
     send helpText retestAnchors
-}; send helpText addCallback anchorSelected anchor     
+}
 
 proc testAnchor {widget cbtype href} \
 {
     global visited
     return [info exists visited($href)]
-}; send helpText addCallback testAnchor testAnchor
+}
 
 
 # Callbacks to position forwards and backwards in link list.

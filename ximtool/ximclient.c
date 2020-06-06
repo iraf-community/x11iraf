@@ -2044,7 +2044,9 @@ char **argv;
 /* The builtin default help text. */
 static char *help_text[] = {
     "setValue {",
+#ifndef OSI_COMPLIANT
 #   include "ximtool.html.h"
+#endif
     "}",
     NULL
 };
