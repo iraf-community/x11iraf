@@ -16,7 +16,7 @@ ximtool: obm/libobm.a
 xtapemon:
 	$(MAKE) -C xtapemon
 
-obmsh:
+obmsh: obm/libobm.a
 	$(MAKE) -C obmsh
 
 clean:
