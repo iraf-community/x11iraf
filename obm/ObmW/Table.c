@@ -34,8 +34,8 @@ Commercial  usage is  also  possible  with  participation of the author.
 #include <X11/Xraw/TableP.h>
 #include <X11/Xraw/TableUtil.h>
 #include <X11/Xraw/Frame.h>
-#include <X11/Xraw/AsciiText.h>
-#include <X11/Xraw/Viewport.h>
+#include <X11/Xaw/AsciiText.h>
+#include <X11/Xaw/Viewport.h>
 #include <X11/Xraw/Scrollbar.h>
 #include <X11/Xraw/ScrolledTable.h>
 

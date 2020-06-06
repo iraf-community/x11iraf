@@ -18,7 +18,7 @@ Commercial  usage is  also  possible  with  participation of the author.
 #define _XawScrolledTable_H_
 
 #include <X11/Xraw/Container.h>
-#include <X11/Xraw/Viewport.h>
+#include <X11/Xaw/Viewport.h>
 
 /*#########################################################################*/
 /*#                                                                       #*/
