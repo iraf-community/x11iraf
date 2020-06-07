@@ -17,6 +17,7 @@ matrix:
             - iraf-dev
             - xauth
             - xvfb
+      env: OSI_COMPLIANT=YES
     - os: osx
       osx_image: xcode11.5
 
