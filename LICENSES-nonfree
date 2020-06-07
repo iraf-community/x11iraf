@@ -1,0 +1,111 @@
+This file collects copyright and license statements for source code that is
+not Open Source. These files may be removed from the distribution with minimal
+functional loss. While it is allowed to distibute these files, they limit
+commercial usage or modification, which both contradicts the OSI definition.
+
+
+ObmW HTML widget
+================
+
+Files: HTMLjot.c HTMLparse.c HTMLlists.c HTMLwidgets.c HTMLP.h HTMLamp.h
+       HTMLformat.c HTML.h HTML-PSformat.c HTML.c HTMLimages.c
+
+NCSA Mosaic for the X Window System
+Software Development Group
+National Center for Supercomputing Applications
+University of Illinois at Urbana-Champaign
+605 E. Springfield, Champaign IL 61820
+mosaic@ncsa.uiuc.edu
+
+Copyright (C) 1993, Board of Trustees of the University of Illinois
+
+NCSA Mosaic software, both binary and source (hereafter, Software) is
+copyrighted by The Board of Trustees of the University of Illinois
+(UI), and ownership remains with the UI.
+
+The UI grants you (hereafter, Licensee) a license to use the Software
+for academic, research and internal business purposes only, without a
+fee.  Licensee may distribute the binary and source code (if released)
+to third parties provided that the copyright notice and this statement
+appears on all copies and that no charge is associated with such
+copies.
+
+Licensee may make derivative works.  However, if Licensee distributes
+any derivative work based on or derived from the Software, then
+Licensee will (1) notify NCSA regarding its distribution of the
+derivative work, and (2) clearly notify users that such derivative
+work is a modified version and not the original NCSA Mosaic
+distributed by the UI.
+
+Any Licensee wishing to make commercial use of the Software should
+contact the UI, c/o NCSA, to negotiate an appropriate license for such
+commercial use.  Commercial use includes (1) integration of all or
+part of the source code into a product for sale or license by or on
+behalf of Licensee to third parties, or (2) distribution of the binary
+code or source code to third parties that need it to utilize a
+commercial product sold or licensed by or on behalf of Licensee.
+
+UI MAKES NO REPRESENTATIONS ABOUT THE SUITABILITY OF THIS SOFTWARE FOR
+ANY PURPOSE.  IT IS PROVIDED "AS IS" WITHOUT EXPRESS OR IMPLIED
+WARRANTY.  THE UI SHALL NOT BE LIABLE FOR ANY DAMAGES SUFFERED BY THE
+USERS OF THIS SOFTWARE.
+
+By using or copying this Software, Licensee agrees to abide by the
+copyright law and all other applicable laws of the U.S. including, but
+not limited to, export control laws, and the terms of this license.
+UI shall have the right to terminate this license immediately by
+written notice upon Licensee's breach of, or non-compliance with, any
+of its terms.  Licensee may be held legally responsible for any
+copyright infringement that is caused or encouraged by Licensee's
+failure to abide by the terms of this license.
+
+Comments and questions are welcome and can be sent to
+mosaic-x@ncsa.uiuc.edu.
+
+
+ObmW Table widget
+=================
+
+Files: Table.c Table.h TableP.h TableUtil.c TableUtil.h
+       Xraw/Table.h Xraw/TableP.h Xraw/TableUtil.h
+       Xraw/ScrolledTable.h Xraw/xraw_table.h 
+       Xraw/Frame.h Xraw/FrameP.h 
+
+Table widget
+Copyright by Vladimir T. Romanovski
+All rights reserved.
+
+This library is designed  for  free,  non-commercial  software  creation.
+It is changeable and can be improved. The author would greatly appreciate
+any  advice, new  components  and  patches  of  the  existing  programs.
+Commercial  usage is  also  possible  with  participation of the author.
+  
+romsky@hp1.oea.ihep.su (Russia)
+romsky@munin.ucsf.edu  (USA)
+
+
+Inkstore
+========
+
+File: obm/ObmW/inkstore.h
+
+Copyright 1993, Slate Corporation, All Rights Reserved.
+
+This document is part of the Jot specification for the storage and
+interchange of electronic ink data.  This specification is the joint work
+of representatives of Slate Corporation, Lotus Development Corporation,
+GO, Microsoft, Apple, General Magic, and others.
+
+This document and the accompanying code samples on disk comprise Version 
+1.0 of the Jot specification for the storage and interchange of electronic 
+ink data.  Permission is granted to incorporate and otherwise use any 
+portion of the specification.  You may make copies of the specification 
+for distribution to others, provided you include the notice "Copyright 
+1993, Slate Corporation.  All Rights Reserved" on both the document and
+the disk label.  You may not modify this specification without written 
+permission from Slate Corporation.
+
+The specification is provided "as is" without warranty of any kind.  Slate 
+further disclaims all implied warranties of merchantability or of fitness 
+for a particular purpose.  The entire risk arising out of the use or 
+performance of the specification remains with you.

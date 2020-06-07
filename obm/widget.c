@@ -230,10 +230,12 @@ static	int widgetSetScrollbar(), widgetSetTTName(), widgetGetTTName();
 static	int widgetSetListTree(), widgetListTreeSelect();
 static	int widgetListTreeHighlight(), widgetListTreeDelete();
 static 	int widgetSetLocation(), widgetSetCoordinates();
+#ifndef OSI_COMPLIANT
 static	int widgetSetTable(), widgetSetCellAttr(), widgetGetCellAttr();
 static	int widgetGetColAttr(), widgetSetColAttr(), widgetSetRowAttr();
 static	int widgetDeleteRow(), widgetAddRow(), widgetGetTableSize();
 static	int widgetDeleteCol(), widgetAddCol(), widgetSetTableSize();
+#endif
 static	int get_itemno(), buildTreeList(), widgetGetRowAttr();
 
 
@@ -341,6 +343,7 @@ register ObjClassRec classrec;
 		"listTreeHighlight", widgetListTreeHighlight,
 		(ClientData)msg, NULL);
 
+#ifndef OSI_COMPLIANT
 	    /* Table Widget Callbacks */
 	    Tcl_CreateCommand (tcl,
 		"setTable", widgetSetTable, (ClientData)msg, NULL);
@@ -368,6 +371,7 @@ register ObjClassRec classrec;
 		"setTableSize", widgetSetTableSize, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
 		"getTableSize", widgetGetTableSize, (ClientData)msg, NULL);
+#endif
 
 	    Tcl_CreateCommand (tcl,
 		"realize", widgetRealize, (ClientData)msg, NULL);
@@ -3279,6 +3283,7 @@ char **argv;
 }
 
 
+#ifndef OSI_COMPLIANT
 /* widgetSetTable -- Set the contents of a Table widget.
  *
  * Usage:       setTable nrows ncols data
@@ -3967,7 +3972,7 @@ char **argv;
 
         return (TCL_OK);
 }
-
+#endif
 
 
 /* widgetRealize -- Realize a widget.  This activates and assigns windows for

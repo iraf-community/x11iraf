@@ -47,7 +47,9 @@
 #include <ObmW/Frame.h>
 #include <ObmW/Group.h>
 #include <ObmW/Gterm.h>
+#ifndef OSI_COMPLIANT
 #include <ObmW/HTML.h>
+#endif
 #include <ObmW/Icon.h>
 #include <ObmW/Label.h>
 #include <ObmW/Layout.h>
@@ -62,7 +64,9 @@
 #include <ObmW/Toggle.h>
 
 #include <X11/Xraw/Separator.h>
+#ifndef OSI_COMPLIANT
 #include <X11/Xraw/Table.h>
+#endif
 
 #include <X11/xpm.h>
 #include <tcl/tcl.h>
@@ -115,7 +119,10 @@ typedef	void (*ObmMethod)();
 
 extern	void ServerClassInit(), ClientClassInit(), ParameterClassInit();
 extern	void WidgetClassInit(), GenericClassDestroy();
-extern	void GtermClassInit(), MarkerClassInit(), HTMLClassInit();
+extern	void GtermClassInit(), MarkerClassInit();
+#ifndef OSI_COMPLIANT
+extern void HTMLClassInit();
+#endif
 
 /* Dummy WtClass bit flag definitions for initializers. */
 #define	WtServer		0, 0
@@ -272,8 +279,10 @@ objClassRec UiObjects[] = {
 			WidgetClassInit, NULL, NULL, NULL, NULL, NULL },
 	{ "StripChart",	OtNonShell, &stripChartWidgetClass, WtStripChart,
 			WidgetClassInit, NULL, NULL, NULL, NULL, NULL },
+#ifndef OSI_COMPLIANT
 	{ "Table",	OtNonShell, &tableWidgetClass, WtTable,
 			WidgetClassInit, NULL, NULL, NULL, NULL, NULL },
+#endif
 	{ "Tabs",	OtNonShell, &tabsWidgetClass, WtTabs,
 			WidgetClassInit, NULL, NULL, NULL, NULL, NULL },
 	{ "Toggle",	OtNonShell, &toggleWidgetClass, WtToggle,
@@ -289,8 +298,10 @@ objClassRec UiObjects[] = {
 			MarkerClassInit, NULL, NULL, NULL, NULL, NULL },
 	{ "Layout",	OtNonShell, &layoutWidgetClass, WtLayout,
 			WidgetClassInit, NULL, NULL, NULL, NULL, NULL },
+#ifndef OSI_COMPLIANT
 	{ "HTML",	OtNonShell, &htmlWidgetClass, WtHTML,
 			HTMLClassInit, NULL, NULL, NULL, NULL, NULL },
+#endif
 
 	{ "Arrow",	OtNonShell, &xfwfArrowWidgetClass, WtArrow,
 			WidgetClassInit, NULL, NULL, NULL, NULL, NULL },

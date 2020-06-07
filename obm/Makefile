@@ -1,8 +1,5 @@
 OBJS = Obm.o client.o param.o server.o widget.o gterm.o marker.o geom.o
 
-# Non-free
-OBJS += html.o
-
 ALL_OBJS = ObmW/[A-Za-z]*.o $(OBJS)
 
 CFLAGS += -I. -IObmW
@@ -11,6 +8,12 @@ UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
     CFLAGS += -I/usr/X11/include -D__DARWIN__
     LDFLAGS += -L/usr/X11/lib
+endif
+
+ifeq ($(OSI_COMPLIANT), YES)
+    CFLAGS += -DOSI_COMPLIANT
+else
+    OBJS += html.o
 endif
 
 all: libobm.a

@@ -19,7 +19,9 @@ extern WidgetClass coreWidgetClass;
 extern WidgetClass dialogWidgetClass;
 extern WidgetClass formWidgetClass;
 extern WidgetClass gripWidgetClass;
+#ifndef OSI_COMPLIANT
 extern WidgetClass htmlWidgetClass;
+#endif
 extern WidgetClass labelWidgetClass;
 extern WidgetClass layoutWidgetClass;
 extern WidgetClass listWidgetClass;
@@ -71,7 +73,9 @@ extern WidgetClass xfwfToggleWidgetClass;
 extern WidgetClass tabsWidgetClass;
 extern WidgetClass listtreeWidgetClass;
 extern WidgetClass separatorWidgetClass;
+#ifndef OSI_COMPLIANT
 extern WidgetClass tableWidgetClass;
+#endif
 /*
 extern WidgetClass scrolledTableWidgetClass;
 */
@@ -124,7 +128,9 @@ XmuWidgetNode XawWidgetArray[] = {
 { "arrow", &xfwfArrowWidgetClass },
 { "gterm", &gtermWidgetClass },
 { "layout", &layoutWidgetClass },
+#ifndef OSI_COMPLIANT
 { "html", &htmlWidgetClass },
+#endif
 { "board", &xfwfBoardWidgetClass },
 { "frame", &xfwfFrameWidgetClass },
 { "group", &xfwfGroupWidgetClass },
@@ -141,7 +147,9 @@ XmuWidgetNode XawWidgetArray[] = {
 { "listtree", &listtreeWidgetClass },
 { "tabs", &tabsWidgetClass },
 { "separator", &separatorWidgetClass },
+#ifndef OSI_COMPLIANT
 { "table", &tableWidgetClass },
+#endif
 /*
 { "scrolledtable", &scrolledTableWidgetClass },
 */
