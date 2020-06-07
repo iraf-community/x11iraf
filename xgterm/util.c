@@ -37,6 +37,8 @@
 static void horizontal_copy_area();
 static void vertical_copy_area();
 
+void Scroll(), InsertLine(), DeleteLine(), CopyWait(), recolor_cursor();
+
 /*
  * These routines are used for the jump scroll feature
  */
@@ -157,6 +159,7 @@ register TScreen *screen;
  * All done within the scrolling region, of course. 
  * requires: amount > 0
  */
+void
 Scroll(screen, amount)
 register TScreen *screen;
 register int amount;
@@ -332,6 +335,7 @@ register int amount;
  * inserts n blank lines at the cursor's position.  Lines above the
  * bottom margin are lost.
  */
+void
 InsertLine (screen, n)
 register TScreen *screen;
 register int n;
@@ -395,6 +399,7 @@ register int n;
  * If cursor not in scrolling region, returns.  Else, deletes n lines
  * at the cursor's position, lines added at bottom margin are blank.
  */
+void
 DeleteLine(screen, n)
 register TScreen *screen;
 register int n;
@@ -736,6 +741,7 @@ register TScreen *screen;
 	ClearBufRows (screen, 0, screen->max_row);
 }
 
+void
 CopyWait(screen)
 register TScreen *screen;
 {
@@ -1009,6 +1015,7 @@ ReverseVideo (termw)
 }
 
 
+void
 recolor_cursor (cursor, fg, bg)
     Cursor cursor;			/* X cursor ID to set */
     unsigned long fg, bg;		/* pixel indexes to look up */

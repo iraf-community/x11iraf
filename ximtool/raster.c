@@ -104,6 +104,8 @@ static void xim_frameRegion();
 static void xim_colortables();
 extern char *getenv();
 double strtod();
+void xim_labelTiles();
+void xim_getScreen();
 
 #define	TOL	0.0001
 
@@ -1007,6 +1009,7 @@ int frame;
 
 /* XIM_LABELTILES -- Label the tile with the frame number.
  */
+void
 xim_labelTiles (xim)
 register XimDataPtr xim;
 {
@@ -1608,6 +1611,7 @@ src_recenter:
 /* XIM_GETSCREEN -- Determine the region of the display window to which
  * the given frame is mapped.
  */
+void
 xim_getScreen (xim, frame, sx, sy, width, height, depth)
 register XimDataPtr xim;
 int frame;

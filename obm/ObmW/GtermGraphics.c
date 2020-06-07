@@ -279,6 +279,7 @@ GtSetLineStyle (w, ival)
     invalidate_draw_context (w);
 }
 
+void
 GtSetColorIndex (w, ival)
     GtermWidget w;
     int ival;
@@ -311,6 +312,7 @@ GtSetColorIndex (w, ival)
     }
 }
 
+void
 GtSetFillType (w, ival)
     GtermWidget w;
     int ival;
@@ -323,6 +325,7 @@ GtSetFillType (w, ival)
     }
 }
 
+void
 GtClearScreen (w)
 GtermWidget w;
 {
@@ -512,6 +515,7 @@ GtBell (w)
  * In this case (raster=0) there may still be a logical to physical
  * coordinate transformation, but there are no mappings to complicate things.
  */
+void
 GtSetCursorPos (w, x, y)
     GtermWidget w;
     int x, y;
@@ -633,7 +637,7 @@ havemap:
     GtSetLogRes (w, sv_xres, sv_yres);
 }
 
-
+void
 GtGetCursorPos (w, x, y)
     GtermWidget w;
     int *x, *y;
@@ -642,6 +646,7 @@ GtGetCursorPos (w, x, y)
     *y = w->gterm.last_y;
 }
 
+void
 GtSetCursorType (w, type)
     GtermWidget w;
     int type;
@@ -1122,7 +1127,7 @@ set_default_color_index (w)
 }
 
 
-static
+static void
 draw_crosshair (w, x, y)
     GtermWidget w;
     int x, y;
@@ -1161,7 +1166,7 @@ draw_crosshair (w, x, y)
 }
 
 
-static
+static void
 erase_crosshair (w)
     GtermWidget w;
 {
@@ -1197,7 +1202,7 @@ erase_crosshair (w)
 }
 
 
-static
+static void
 update_transients (w, region)
     GtermWidget w;
     Region region;
@@ -1216,7 +1221,7 @@ update_transients (w, region)
 }
 
 
-static
+static void
 update_cursor (w)
     GtermWidget w;
 {
@@ -1409,7 +1414,7 @@ get_draw_context (w)
 }
 
 
-static
+static void
 invalidate_draw_context (w)
     GtermWidget w;
 {

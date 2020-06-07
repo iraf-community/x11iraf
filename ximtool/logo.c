@@ -11,6 +11,7 @@
 #include "logo.h"
 
 
+void
 xim_displayLogo (xim)
 register XimDataPtr xim;
 {

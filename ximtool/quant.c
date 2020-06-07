@@ -138,12 +138,12 @@ int	newcolors;			/* requested number of colors       */
 	cols = nx;
   	pixels = (pixel **) malloc (rows * sizeof(pixel *));
   	if (!pixels) 
-	    return;
+	    return -1;
 
   	for (row=0; row<rows; row++) {
     	    pixels[row] = (pixel *) malloc(cols * sizeof(pixel));
     	    if (!pixels[row])
-		return;
+		return -1;
 
     	    for (col=0, pP=pixels[row]; col<cols; col++, pP++) {
       	        pP->r = (pixval) r[*pix];

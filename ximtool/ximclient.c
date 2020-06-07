@@ -92,7 +92,7 @@ static int ism_start(), ism_stop(), ism_cmd();
 extern int ism_evaluate(), info();
 extern IsmModule ismNameToPtr();
 extern double atof();
-
+void info_wcs();
 
 /* xim_clientOpen -- Initialize the ximtool client code.
  */
@@ -2239,6 +2239,7 @@ char	*text;
 /* INFO_WCS -- Helper routine to report WCS and mapping information for 
  * each frame in the display.
  */
+void
 info_wcs (xim, text)
 register XimDataPtr xim;
 char	*text;

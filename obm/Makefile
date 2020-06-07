@@ -7,6 +7,12 @@ ALL_OBJS = ObmW/[A-Za-z]*.o $(OBJS)
 
 CFLAGS += -I. -IObmW
 
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+    CFLAGS += -I/usr/X11/include -D__DARWIN__
+    LDFLAGS += -L/usr/X11/lib
+endif
+
 all: libobm.a
 
 .PHONY: ObmW listres

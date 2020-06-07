@@ -214,7 +214,8 @@ static	int gio_reset(), gio_clear(), gio_setginmodeterm(), gio_output();
 static	int gio_retcursor(), gio_queue_output(), gio_queue_request();
 static	int gio_hardreset(), gio_activate(), gio_enable(), gio_tekmode();
 static	int gio_processdata(), gio_ptyinput(), gio_escape(), gio_status();
-static	int gio_activate_cb(), gio_connect_cb();
+static	void gio_activate_cb();
+static  int gio_connect_cb();
 static	int gio_deactivate_cb();
 static	void gio_keyinput(), gio_resize();
 static	void pl_decodepts(), gio_retenq();
@@ -392,7 +393,7 @@ char *app_class;		/* can be NULL */
 /* GIO_ACTIVATE_CB -- Activate callback, called by the gterm widget when the
  * user interface is activated.
  */
-static
+static void
 gio_activate_cb (dummy, w, state)
 int dummy;
 Widget w;

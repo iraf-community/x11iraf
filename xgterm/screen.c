@@ -161,6 +161,7 @@ Reallocate(sbuf, sbufaddr, nrow, ncol, oldrow, oldcol)
 	return move_down ? move_down/4 : -move_up/4; /* convert to rows */
 }
 
+void
 ScreenWrite (screen, str, flags, cur_fg, cur_bg, length)
 /*
    Writes str into buf at row row and column col.  Characters are set to match

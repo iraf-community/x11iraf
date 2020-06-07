@@ -45,6 +45,8 @@
 static void ScrollTextTo();
 static void ScrollTextUpDownBy();
 
+void ScrollBarOn(), ScrollBarOff(), WindowScroll();
+
 
 /* resize the text window for a terminal screen, modifying the
  * appropriate WM_SIZE_HINTS and taking advantage of bit gravity.
@@ -255,6 +257,7 @@ ResizeScrollBar(scrollWidget, x, y, height)
 	ScrollBarDrawThumb(scrollWidget);
 }
 
+void
 WindowScroll(screen, top)
 	register TScreen *screen;
 	int top;
@@ -304,6 +307,7 @@ WindowScroll(screen, top)
 }
 
 
+void
 ScrollBarOn (xw, init, doalloc)
     XgtermWidget xw;
     int init, doalloc;
@@ -378,6 +382,7 @@ ScrollBarOn (xw, init, doalloc)
 	}
 }
 
+void
 ScrollBarOff(screen)
 	register TScreen *screen;
 {

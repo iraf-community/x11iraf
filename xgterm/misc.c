@@ -60,8 +60,12 @@ extern char *getenv();
 static void DoSpecialEnterNotify();
 static void DoSpecialLeaveNotify();
 
+void selectwindow(), unselectwindow();
+void VisualBell(), FlushLog(), Setenv();
+
 extern XtAppContext app_con;
 
+void
 xevents()
 {
         XEvent event;
@@ -274,7 +278,7 @@ caddr_t eventdata;
 }
 
 
-
+void
 selectwindow(screen, flag)
 register TScreen *screen;
 register int flag;
@@ -293,6 +297,7 @@ register int flag;
 	return;
 }
 
+void
 unselectwindow(screen, flag)
 register TScreen *screen;
 register int flag;
@@ -314,6 +319,7 @@ register int flag;
 
 static long lastBellTime;	/* in milliseconds */
 
+void
 Bell()
 {
     extern XgtermWidget term;
@@ -362,7 +368,7 @@ Bell()
     }
 }
 
-
+void
 VisualBell()
 {
     extern XgtermWidget term;
@@ -497,7 +503,7 @@ creat_as(uid, gid, pathname, mode)
  * write arbitrary data to an arbitrary file.  So it is disabled
  * by default.
  */ 
-
+void
 StartLog(screen)
 register TScreen *screen;
 {
@@ -604,6 +610,7 @@ register TScreen *screen;
 	update_logging();
 }
 
+void
 CloseLog(screen)
 register TScreen *screen;
 {
@@ -615,6 +622,7 @@ register TScreen *screen;
 	update_logging();
 }
 
+void
 FlushLog(screen)
 register TScreen *screen;
 {
@@ -1001,6 +1009,7 @@ int code;
  * was allocated using calloc, with enough extra room at the end so not
  * to have to do a realloc().
  */
+void
 Setenv (var, value)
 register char *var, *value;
 {

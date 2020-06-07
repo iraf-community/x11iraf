@@ -82,6 +82,7 @@ register TScreen *screen;
 	}
 }
 
+void
 Input (keyboard, screen, event, eightbit)
     register TKeyboard	*keyboard;
     register TScreen	*screen;

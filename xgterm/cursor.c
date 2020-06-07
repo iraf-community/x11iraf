@@ -155,6 +155,7 @@ int		n;
  * Moves cursor down amount lines, scrolls if necessary.
  * Won't leave scrolling region. No carriage return.
  */
+void
 Index(screen, amount)
 register TScreen	*screen;
 register int	amount;
@@ -179,6 +180,7 @@ register int	amount;
  * Moves cursor up amount lines, reverse scrolls if necessary.
  * Won't leave scrolling region. No carriage return.
  */
+void
 RevIndex(screen, amount)
 register TScreen	*screen;
 register int	amount;

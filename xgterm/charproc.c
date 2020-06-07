@@ -114,6 +114,7 @@ static void FromAlternate();
 static void update_font_info();
 
 static void bitset(), bitclr();
+void ShowCursor(), HideCursor();
     
 #define	DEFAULT		-1
 #define	TEXT_BUF_SIZE	1024
@@ -3072,6 +3073,7 @@ static Boolean VTSetValues (cur, request, new, args, num_args)
 /*
  * Shows cursor at new cursor position in screen.
  */
+void
 ShowCursor()
 {
 	register TScreen *screen = &term->screen;
@@ -3190,6 +3192,7 @@ ShowCursor()
 /*
  * hide cursor at previous cursor position in screen.
  */
+void
 HideCursor()
 {
 	register TScreen *screen = &term->screen;
