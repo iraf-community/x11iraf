@@ -22,10 +22,6 @@ provides the following programs:
    about either axis, frame blink, windowing of the display, and colortable
    enhancement.
 
- * **XTapemon** is a conventional Xt/Athena application which allows the
-   status of an IRAF tape job to be monitored continuously while the tape is
-   being accessed.
-
 Manual pages are included for all the above utilities.
 
 
@@ -64,7 +60,7 @@ The source distribution file is built as a tarball with the package
 name and version as base directory. Thus, distribution files can be
 unpacked with the command
 
-    $ tar zxf /<path>/x11iraf-2.0-2020.06.15.tar.gz
+    $ tar xzf /<path>/x11iraf-2.0-2020.06.15.tar.gz
     $ cd x11iraf-2.0-2020.06.15/
 
 
@@ -87,3 +83,7 @@ root
 Both XGterm and XImtool rely upon the IRAF Object Manager for the GUI.  The
 **guidemo** package illustrates how to use GUIs in IRAF applications. The
 **obmsh** package provides a simple shell for the object manager.
+
+**XTapemon** is a conventional Xt/Athena application which allows the status
+of an IRAF tape job to be monitored continuously while the tape is being
+accessed.

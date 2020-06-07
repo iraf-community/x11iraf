@@ -1,4 +1,4 @@
-all: xgterm ximtool xtapemon
+all: xgterm ximtool
 
 PREFIX = /usr/local
 
@@ -35,5 +35,3 @@ install: xgterm ximtool xtapemon
 	if [ -x ximtool/clients/ism_wcspix.e ] ; then \
 	    install -m755 ximtool/clients/ism_wcspix.e ${PREFIX}/bin ; \
 	fi
-	install -m755 xtapemon/xtapemon ${PREFIX}/bin
-	install -m755 xtapemon/xtapemon.man ${PREFIX}/man/man1/xtapemon.1
