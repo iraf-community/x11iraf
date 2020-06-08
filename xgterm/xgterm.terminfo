@@ -1,0 +1,4 @@
+# xgterm.terminfo: Terminfo entry source for xgterm
+# compile with "tic xgterm.terminfo"
+xgterm|graphic terminal for IRAF,
+	use=xterm-r5,

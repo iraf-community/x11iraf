@@ -30,6 +30,7 @@ install: xgterm ximtool xtapemon
 	mkdir -p ${PREFIX}/bin ${PREFIX}/man/man1
 	install -m755 xgterm/xgterm ${PREFIX}/bin
 	install -m755 xgterm/xgterm.man ${PREFIX}/man/man1/xgterm.1
+	tic xgterm/xgterm.terminfo
 	install -m755 ximtool/ximtool ${PREFIX}/bin
 	install -m755 ximtool/ximtool.man ${PREFIX}/man/man1/ximtool.1
 	if [ -x ximtool/clients/ism_wcspix.e ] ; then \
