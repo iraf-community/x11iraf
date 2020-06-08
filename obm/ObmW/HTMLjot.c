@@ -578,7 +578,7 @@ JOTfromJot(w, buffer_len)
 	dataArray = (MY_INK_POINT *)malloc(dlen);
 	cnt = 0;
 	sptr = jptr->strokes;
-	while ((sptr != NULL)&&(cnt < jptr->stroke_cnt));
+	while ((sptr != NULL)&&(cnt < jptr->stroke_cnt))
 	{
 		dataArray[cnt].position.x = sptr->x;
 		dataArray[cnt].position.y = sptr->y;
