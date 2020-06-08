@@ -44,33 +44,33 @@
 #include <X11/Xaw/Viewport.h>
 #include <X11/Xmu/WinUtil.h>
 
-#include <ObmW/Arrow.h>
-#include <ObmW/Board.h>
-#include <ObmW/Button.h>
-#include <ObmW/Common.h>
-#include <ObmW/Frame.h>
-#include <ObmW/Group.h>
-#include <ObmW/Gterm.h>
+#include "ObmW/Arrow.h"
+#include "ObmW/Board.h"
+#include "ObmW/Button.h"
+#include "ObmW/Common.h"
+#include "ObmW/Frame.h"
+#include "ObmW/Group.h"
+#include "ObmW/Gterm.h"
 #ifndef OSI_COMPLIANT
-#include <ObmW/HTML.h>
+#include "ObmW/HTML.h"
 #endif
-#include <ObmW/Icon.h>
-#include <ObmW/Label.h>
-#include <ObmW/Layout.h>
-#include <ObmW/ListTree.h>
-#include <ObmW/MenuBar.h>
-#include <ObmW/MultiList.h>
-#include <ObmW/RadioGrp.h>
-#include <ObmW/RowCol.h>
-#include <ObmW/Scrollbar.h>
-#include <ObmW/Slider2.h>
-#include <ObmW/Tabs.h>
-#include <ObmW/Table.h>
-#include <ObmW/Toggle.h>
+#include "ObmW/Icon.h"
+#include "ObmW/Label.h"
+#include "ObmW/Layout.h"
+#include "ObmW/ListTree.h"
+#include "ObmW/MenuBar.h"
+#include "ObmW/MultiList.h"
+#include "ObmW/RadioGrp.h"
+#include "ObmW/RowCol.h"
+#include "ObmW/Scrollbar.h"
+#include "ObmW/Slider2.h"
+#include "ObmW/Tabs.h"
+#include "ObmW/Table.h"
+#include "ObmW/Toggle.h"
 
-#include <X11/Xraw/Separator.h>
+#include "ObmW/Xraw/Separator.h"
 #ifndef OSI_COMPLIANT
-#include <X11/Xraw/Table.h>
+#include "ObmW/Xraw/Table.h"
 #endif
 
 #include <X11/xpm.h>

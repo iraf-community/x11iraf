@@ -2,7 +2,7 @@
  */
 
 #define Obm_Main
-#include <ObmP.h>
+#include "ObmP.h"
 
 /*
  * OBM.C -- Object manager for the graphics subsystem.

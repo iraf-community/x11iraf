@@ -13,8 +13,8 @@
  ***********************************************************************/
 
 #include <X11/Xmu/Converters.h>
-#include <X11/Xraw/SimpleP.h>
-#include <X11/Xraw/Separator.h>
+#include "SimpleP.h"
+#include "Separator.h"
 
 
 /* New fields for the Separator widget class record */

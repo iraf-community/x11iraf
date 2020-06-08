@@ -19,7 +19,7 @@ Commercial  usage is  also  possible  with  participation of the author.
 
 
 
-#include <X11/Xraw/3d.h>
+#include "3d.h"
 
 /***********************************************************************
  *

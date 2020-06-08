@@ -21,9 +21,9 @@ Commercial  usage is  also  possible  with  participation of it's author.
  ***********************************************************************/
 
 
-#include <X11/Xraw/ContainerP.h>
-#include <X11/Xraw/Table.h>
-#include <X11/Xraw/xraw_table.h>
+#include "ContainerP.h"
+#include "Table.h"
+#include "TableUtil.h"
 
 /* New fields for the Table widget class record */
 

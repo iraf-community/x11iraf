@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <X11/IntrinsicP.h>
 #include <X11/StringDefs.h>
-#include <X11/Xraw/XrawInit.h>
+#include "XrawInit.h"
 
 typedef enum {
   XawRAISED = Xraw_3d,

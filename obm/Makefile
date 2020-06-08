@@ -2,8 +2,6 @@ OBJS = Obm.o client.o param.o server.o widget.o gterm.o marker.o geom.o
 
 ALL_OBJS = ObmW/[A-Za-z]*.o $(OBJS)
 
-CFLAGS += -I. -IObmW
-
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
     CFLAGS += -I/usr/X11/include -D__DARWIN__

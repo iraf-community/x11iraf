@@ -7,8 +7,8 @@
  *
  ***********************************************************************/
 
-#include <X11/Xraw/XrawInit.h>
-#include <X11/Xraw/Simple.h>
+#include "XrawInit.h"
+#include "Simple.h"
 
 /* Resources:
 

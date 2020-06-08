@@ -2,7 +2,7 @@
  */
 
 #include <stdlib.h>
-#include <ObmP.h>
+#include "ObmP.h"
 #include "widget.h"
 
 /*

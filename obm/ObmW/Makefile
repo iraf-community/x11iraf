@@ -5,7 +5,6 @@ OBJS = Arrow.o Board.o Button.o Common.o DrawIString.o DrawString.o	\
  strnchr.o Tabs.o Gcs.o ListTree.o Separator.o Container.o color.o	\
  laygram.o laylex.o
 
-CFLAGS += -I.
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
     CFLAGS += -I/usr/X11/include -D__DARWIN__

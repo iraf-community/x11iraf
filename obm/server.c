@@ -1,7 +1,7 @@
 /* Copyright(c) 1993 Association of Universities for Research in Astronomy Inc.
  */
 
-#include <ObmP.h>
+#include "ObmP.h"
 
 /* The following internal files are needed for some widget level SmeBSB code
  * included in this file.
