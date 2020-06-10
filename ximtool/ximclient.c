@@ -523,7 +523,7 @@ char **argv;
 	    for (i=0, frames=frame_list;  i < nitems;  i++)
 		frames[i] = atoi (items[i]);
 	    frames[i] = 0;
-	    XtFree ((char *)items);
+	    Tcl_Free ((char *)items);
 	} else
 nolist:	    frames = NULL;
 
@@ -565,7 +565,7 @@ char **argv;
 	    for (i=0, frames=frame_list;  i < nitems;  i++)
 		frames[i] = atoi (items[i]);
 	    frames[i] = 0;
-	    XtFree ((char *)items);
+	    Tcl_Free ((char *)items);
 	} else
 nolist:	    frames = NULL;
 
@@ -753,7 +753,7 @@ char **argv;
 			goto nolist1;
 		    for (i=0;  i < nitems;  i++)
 			frame_list |= (1 << (atoi(items[i]) - 1));
-		    XtFree ((char *)items);
+		    Tcl_Free ((char *)items);
 		} else {
 nolist1:	    for (i=0;  i < xim->nframes;  i++)
 			frame_list |= (1 << i);

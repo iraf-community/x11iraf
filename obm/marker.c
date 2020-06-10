@@ -1254,7 +1254,7 @@ char **argv;
 	} else if (argc > 2) {
 	    /* Attribute list passed as separate arguments. */
 	    nitems = argc - 1;
-	    items = (char **) XtMalloc (nitems * sizeof(char *));
+	    items = (char **) Tcl_Alloc (nitems * sizeof(char *));
 	    if (items == NULL)
 		return (TCL_ERROR);
 	    for (i=0;  i < nitems;  i++)
@@ -1272,7 +1272,8 @@ char **argv;
 		status++;
 	}
 
-	XtFree ((char *) items);
+	Tcl_Free((char *) items);
+
 	return (status ? TCL_ERROR : TCL_OK);
 }
 
@@ -1310,7 +1311,7 @@ char **argv;
 	} else if (argc > 2) {
 	    /* Attribute list passed as separate arguments. */
 	    nitems = argc - 1;
-	    items = (char **) XtMalloc (nitems * sizeof(char *));
+	    items = (char **) Tcl_Alloc (nitems * sizeof(char *));
 	    if (items == NULL)
 		return (TCL_ERROR);
 	    for (i=0;  i < nitems;  i++)
@@ -1329,7 +1330,7 @@ char **argv;
 	else
 	    status = TCL_OK;
 
-	XtFree ((char *) items);
+	Tcl_Free ((char *) items);
 	return (status);
 }
 

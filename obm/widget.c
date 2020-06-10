@@ -2946,7 +2946,7 @@ char **argv;
 	    }
 	}
 
-ret:	free ((char *) items);
+ret:	Tcl_Free ((char *) items);
 	return (TCL_OK);
 }
 
@@ -3516,6 +3516,7 @@ char **argv;
 	            cols[i] = atoi(items[i]) - 1;
 	    }
 	}
+	Tcl_Free((char *)items);
 	attr  	= argv[2];
 
 	/* Get current table size. */
@@ -3529,10 +3530,12 @@ char **argv;
         	if (Tcl_SplitList (tcl, argv[3], &nitems, &items) != TCL_OK)
 	            return (TCL_ERROR);
 	        if (nitems > 128)
+		    Tcl_Free((char *)items);
                     return (TCL_ERROR);
 	        for (i=0; i < nitems; i++)
 	            widths[i] = atoi(items[i]) - 1;
 	        XawTableSetMultiColumnWidths (wp->w, cols, widths, nitems);
+		Tcl_Free((char *)items);
 	    }
 
 	} else if (strcmp(attr, "background") == 0) {
