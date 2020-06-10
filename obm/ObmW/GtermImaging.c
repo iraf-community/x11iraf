@@ -609,18 +609,20 @@ GtWritePixels (w, raster, pixels, nbits, x1, y1, nx, ny)
 	    if (DBG_TRACE) 
 		fprintf(stderr, "GtWritePix: type = pixmap, raster=0\n");
 
+	    XImage *img = IMGtoGPM(w,ximage,0,0,nx,ny);
 	    XPutImage (display, w->gterm.pixmap, w->gterm.exposeGC, 
-		IMGtoGPM(w,ximage,0,0,nx,ny),
-		0, 0, x1, y1, nx, ny);
+		img, 0, 0, x1, y1, nx, ny);
+	    XDestroyImage(img);
 
 	    XCopyArea (display, 
 		GPMtoRPM(w, rp), rp->r.pixmap,
 		w->gterm.exposeGC, x1, y1, nx, ny, x1, y1);
 
 	} else {
+	  XImage *img = IMGtoRPM(w,ximage,rp, 0,0,nx,ny);
 	    XPutImage (display, rp->r.pixmap, w->gterm.exposeGC, 
-		IMGtoRPM (w,ximage,rp,0,0,nx,ny),
-		0, 0, x1, y1, nx, ny);
+		img, 0, 0, x1, y1, nx, ny);
+	    XDestroyImage(img);
 	}
 
 	XtFree ((char *)data);
