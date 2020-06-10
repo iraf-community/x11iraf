@@ -36,12 +36,16 @@
 
 static void horizontal_copy_area();
 static void vertical_copy_area();
+void scrolling_copy_area();
 
 void Scroll(), InsertLine(), DeleteLine(), CopyWait(), recolor_cursor();
+void ShowCursor(), HideCursor();
+void ClearScreen(), ClearLeft(), ClearRight();
 
 /*
  * These routines are used for the jump scroll feature
  */
+void
 FlushScroll(screen)
 register TScreen *screen;
 {
@@ -125,6 +129,7 @@ register TScreen *screen;
 	}
 }
 
+int
 AddToRefresh(screen)
 register TScreen *screen;
 {
@@ -265,6 +270,7 @@ register int amount;
  * All done within the scrolling region, of course.
  * Requires: amount > 0
  */
+void
 RevScroll(screen, amount)
 register TScreen *screen;
 register int amount;
@@ -482,6 +488,7 @@ register int n;
 /*
  * Insert n blanks at the cursor's position, no wraparound
  */
+void
 InsertChar (screen, n)
     register TScreen *screen;
     register int n;
@@ -525,6 +532,7 @@ InsertChar (screen, n)
 /*
  * Deletes n chars at the cursor's position, no wraparound.
  */
+void
 DeleteChar (screen, n)
     register TScreen *screen;
     register int	n;
@@ -566,10 +574,11 @@ DeleteChar (screen, n)
 /*
  * Clear from cursor position to beginning of display, inclusive.
  */
+void
 ClearAbove (screen)
 register TScreen *screen;
 {
-	register top, height;
+	register int top, height;
 
 	if(screen->cursor_state)
 		HideCursor();
@@ -595,10 +604,11 @@ register TScreen *screen;
 /*
  * Clear from cursor position to end of display, inclusive.
  */
+void
 ClearBelow (screen)
 register TScreen *screen;
 {
-	register top;
+	register int top;
 
 	ClearRight(screen);
 	if((top = screen->cur_row - screen->topline) <= screen->max_row) {
@@ -619,6 +629,7 @@ register TScreen *screen;
 /* 
  * Clear last part of cursor's line, inclusive.
  */
+void
 ClearRight (screen)
 register TScreen *screen;
 {
@@ -652,6 +663,7 @@ register TScreen *screen;
 /*
  * Clear first part of cursor's line, inclusive.
  */
+void
 ClearLeft (screen)
     register TScreen *screen;
 {
@@ -691,6 +703,7 @@ ClearLeft (screen)
 /* 
  * Erase the cursor's line.
  */
+void
 ClearLine(screen)
 register TScreen *screen;
 {
@@ -716,6 +729,7 @@ register TScreen *screen;
 	memset(screen->buf [4 * screen->cur_row + 3], 0, (screen->max_col + 1));
 }
 
+void
 ClearScreen(screen)
 register TScreen *screen;
 {
@@ -855,6 +869,7 @@ vertical_copy_area(screen, firstline, nlines, amount)
 /*
  * use when scrolling the entire screen
  */
+void
 scrolling_copy_area(screen, firstline, nlines, amount)
     TScreen *screen;
     int firstline;		/* line on screen to start copying at */
@@ -871,6 +886,7 @@ scrolling_copy_area(screen, firstline, nlines, amount)
  * Handler for Expose events on the VT widget.
  * Returns 1 iff the area where the cursor was got refreshed.
  */
+int
 HandleExposure (screen, event)
     register TScreen *screen;
     register XEvent *event;
@@ -916,6 +932,7 @@ HandleExposure (screen, event)
  * have been translated to allow for any CopyArea in progress.
  * The rectangle passed in is pixel coordinates.
  */
+int
 handle_translated_exposure (screen, rect_x, rect_y, rect_width, rect_height)
     register TScreen *screen;
     register int rect_x, rect_y;
@@ -970,6 +987,7 @@ handle_translated_exposure (screen, rect_x, rect_y, rect_width, rect_height)
 	return (0);
 }
 
+void
 ReverseVideo (termw)
 	XgtermWidget termw;
 {
@@ -1053,6 +1071,7 @@ GetColors(term,pColors)
 }
 
 
+void
 ChangeColors(term,pNew)
         XgtermWidget term;
         ScrnColors *pNew;

@@ -6,10 +6,12 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #ifdef ULTRIX
 #include <sys/types.h>
 #endif
 #include <unistd.h>
+#include <string.h>
 
 
 /* TIFF Tag description
@@ -49,11 +51,12 @@ static char    *l_order = "II*\0";
 /* MONO returns total intensity of r,g,b components */
 #define MONO(rd,gn,bl) (((rd)*11 + (gn)*16 + (bl)*5) >> 5)  /*.33R+ .5G+ .17B*/
 
-
+extern int is_swapped();
+void create_TIFFtag();
 
 /* writeTIFF -- Write a TIFF 6.0 image.
 */
-
+void
 writeTIFF (fa, data, w, h, ncolors, gray, r, g, b)
 FILE 	*fa;				/* output file descriptor	*/
 unsigned char *data;			/* pixel data			*/
@@ -182,7 +185,7 @@ unsigned char *r, *g, *b;		/* colormap			*/
 
 /* create_TIFFtag - Create a TIFF IFD (Image File Directory).
 */
-
+void
 create_TIFFtag (tag, desig, type, count, offset)
 TiffTag *tag;				/* tag to create		*/
 short desig;				/* tag definition		*/

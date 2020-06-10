@@ -29,15 +29,16 @@ Commercial  usage is  also  possible  with  participation of the author.
 #include <X11/Xmu/Converters.h>
 #include <X11/Xmu/Drawing.h>
 
-#include <X11/Xraw/XawInit.h>
-#include <X11/Xraw/3d.h>
-#include <X11/Xraw/TableP.h>
-#include <X11/Xraw/TableUtil.h>
-#include <X11/Xraw/Frame.h>
-#include <X11/Xraw/AsciiText.h>
-#include <X11/Xraw/Viewport.h>
-#include <X11/Xraw/Scrollbar.h>
-#include <X11/Xraw/ScrolledTable.h>
+#include "Xraw/XrawInit.h"
+#include "Xraw/3d.h"
+#include "Xraw/TableP.h"
+#include "Xraw/TableUtil.h"
+#include "Xraw/Frame.h"
+#include "Xraw/Scrollbar.h"
+#include "Xraw/ScrolledTable.h"
+
+#include <X11/Xaw/AsciiText.h>
+#include <X11/Xaw/Viewport.h>
 
 #ifdef EBUG_XRAW_MALLOC
 #include <dbmalloc/malloc.h>
@@ -3221,13 +3222,13 @@ XawTableIsEditManaged (w)
 
 int
 #ifdef Xraw_NEED_PROTO
-XawTableSetLabel (Widget w, int row, int column, char *raw_label)
+XawTableSetLabel (Widget w, int row, int column, const char *raw_label)
 #else
 XawTableSetLabel(w, row, column, raw_label)
      Widget w;
      int    row;
      int    column;
-     char  *raw_label;
+     const char  *raw_label;
 #endif
 {
   register XawTableWidget tw = (XawTableWidget)w;

@@ -29,8 +29,6 @@
 **  startup to initialize the print options and load the list of local printers.
 */
 
-void 	xim_initPrinterOps();
-int 	xim_getPrinterInfo();
 
 static void printstat();
 static void xim_initPrinterList();
@@ -39,7 +37,7 @@ static void xim_initPrinterList();
 /*  XIM_PRINT -- Print the indicated region of the current display frame to
 **  the printer device or to a file.
 */
-
+int
 xim_print (xim, x0,y0, nx,ny)
 register XimDataPtr xim;
 int x0,y0, nx,ny;				/* region of source raster */
@@ -95,7 +93,7 @@ int x0,y0, nx,ny;				/* region of source raster */
 	        strcpy (fname, pcp->printFile);
 
 	    if (access (fname, F_OK) < 0) {
-		if (fp = fopen (fname, "w")) {
+		if ((fp = fopen (fname, "w"))) {
 		    struct stat fs;
 
 		    printstat (xim, "Generating postscript output...");
@@ -129,7 +127,7 @@ int x0,y0, nx,ny;				/* region of source raster */
 
 		/* Write to a temporary file in the same directory as fname. 
 		*/
-		for (ip=fname, op=tmpfile, last=tmpfile;  *op = *ip++;  op++) {
+		for (ip=fname, op=tmpfile, last=tmpfile;  (*op = *ip++);  op++) {
 		    if (*op == '/')
 			last = op + 1;
 		}
@@ -183,8 +181,6 @@ int x0,y0, nx,ny;				/* region of source raster */
 	free ((char *) pixels);
 	return (0);
 }
-
-pbob () { int i = 0; }
 
 
 /*  The following implement the ok and cancel actions posted by the alert in
@@ -339,7 +335,7 @@ register XimDataPtr xim;
 	 */
         for (i=0, pl=plist;  i < nprinters;  i++) {
             *pl++ = '"';
-            for (ip = printer_list[i].printerName;  *pl = *ip++;  pl++)
+            for (ip = printer_list[i].printerName;  (*pl = *ip++);  pl++)
                 ;
             *pl++ = '"';
             *pl++ = '\n';

@@ -479,11 +479,11 @@ extern char *ptsname();
 extern char *strindex ();
 extern void HandlePopupMenu();
 extern void gtermio_connect();
+extern void resize();
 
 int switchfb[] = {0, 2, 1, 3};
 
 static SIGNAL_T reapchild ();
-
 static Bool added_utmp_entry = False;
 
 static char **command_to_exec;
@@ -1018,6 +1018,7 @@ XtActionsRec actionProcs[] = {
 Atom wm_delete_window;
 
 
+int
 main (argc, argv)
 int argc;
 char **argv;
@@ -5072,6 +5073,7 @@ Exit(n)
 }
 
 /* ARGSUSED */
+void
 resize(screen, TermName, oldtc, newtc)
 TScreen *screen;
 char *TermName;
@@ -5167,33 +5169,8 @@ static SIGNAL_T reapchild (n)
     SIGNAL_RETURN;
 }
 
-/* VARARGS1 */
-consolepr(fmt,x0,x1,x2,x3,x4,x5,x6,x7,x8,x9)
-char *fmt;
-{
-	extern char *SysErrorMsg();
-	int oerrno;
-	int f;
- 	char buf[ BUFSIZ ];
 
-	oerrno = errno;
- 	strcpy(buf, "new-xgterm: ");
- 	sprintf(buf+strlen(buf), fmt, x0,x1,x2,x3,x4,x5,x6,x7,x8,x9);
- 	strcat(buf, ": ");
- 	strcat(buf, SysErrorMsg (oerrno));
- 	strcat(buf, "\n");	
-	f = open("/dev/console",O_WRONLY);
-	write(f, buf, strlen(buf));
-	close(f);
-#ifdef TIOCNOTTY
-	if ((f = open("/dev/tty", 2)) >= 0) {
-		ioctl(f, TIOCNOTTY, (char *)NULL);
-		close(f);
-	}
-#endif	/* TIOCNOTTY */
-}
-
-
+int
 remove_termcap_entry (buf, str)
     char *buf;
     char *str;

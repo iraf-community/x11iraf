@@ -115,32 +115,7 @@ typedef struct {
 #define MINOR_TICK_WIDTH   0.5		/* Width of major tic mark           */
 #define NTICMARKS	   5		/* Number of major tick marks        */
 
-
-typedef struct {
-	float	sizex, sizey;		/* page size in inches */
-	int	npixx, npixy;		/* pix resolution at 72 dpi */
-} PSPageInfo;
-
-static PSPageInfo  PageInfo[] = {	/* assumes 300 dpi */
-	{ 8.500, 11.000, 		/* US NORMAL, aka LETTER */
-	  612, 762 
-	},   
-	{ 8.500, 14.000,   		/* US LEGAL */
-          612, 1008
-	},
-	{ 8.267, 11.811,   		/* A4 */
-	  595, 850
-	},
-	{ 7.283, 10.630,   		/* B5 */
-	  524, 765
-	},
-	{11.000, 17.000,   		/* B-size */
-          762, 1224
-	},
-	{ 3.875,  4.875,   		/* 4 by 5 */
-	  279, 351
-	},
-	{ 0.945,  1.417,  		/* 35mm (24x36) */
-	  68, 102
-	}
-};
+void eps_close();
+void eps_setPage(), eps_setTransform(), eps_setCorners();
+void eps_setCmap(), eps_print();
+void eps_setLabel();

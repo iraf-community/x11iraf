@@ -2,7 +2,7 @@
  */
 
 #include <ctype.h>
-#include <ObmP.h>
+#include "ObmP.h"
 #include "widget.h"
 
 /*
@@ -662,7 +662,7 @@ Cardinal nparams;
 				ip++;
 		    } else {
 			/* This case occurs when only a modifier is typed. */
-			for (ip = "??";  *op++ = *ip++; )
+			for (ip = "??";  (*op++ = *ip++); )
 			    ;
 		    }
 		    *op++ = ' ';
@@ -747,7 +747,7 @@ Cardinal nparams;
 	 */
 	if (events & GmEvConstraint) {
 	    Tcl_Interp *tcl = obm->tcl;
-	    char **items, **fields;
+	    const char **items, **fields;
 	    int nitems;
 	    int n, i, j;
 
@@ -801,7 +801,7 @@ Cardinal nparams;
 	}
 
 	if (status != TCL_OK) {
-	    char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
+	    const char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
 	    fprintf (stderr, "Error on line %d in %s: %s\n",
 		Tcl_GetErrorLine (obm->tcl), cb->name,
 		errstr ? errstr : Tcl_GetStringResult (obm->tcl));
@@ -1011,7 +1011,7 @@ char **argv;
 	MarkerObject ref;
 
 	if (argc > 1) {
-	    if (ref = (MarkerObject) obmFindObject (obm, argv[1]))
+	    if ((ref = (MarkerObject) obmFindObject (obm, argv[1])))
 		ref_gm = ref->marker.gm;
 	    else
 		return (TCL_ERROR);
@@ -1046,7 +1046,7 @@ char **argv;
 	MarkerObject ref;
 
 	if (argc > 1) {
-	    if (ref = (MarkerObject) obmFindObject (obm, argv[1]))
+	    if ((ref = (MarkerObject) obmFindObject (obm, argv[1])))
 		ref_gm = ref->marker.gm;
 	    else
 		return (TCL_ERROR);
@@ -1254,7 +1254,7 @@ char **argv;
 	} else if (argc > 2) {
 	    /* Attribute list passed as separate arguments. */
 	    nitems = argc - 1;
-	    items = (char **) XtMalloc (nitems * sizeof(char *));
+	    items = (char **) Tcl_Alloc (nitems * sizeof(char *));
 	    if (items == NULL)
 		return (TCL_ERROR);
 	    for (i=0;  i < nitems;  i++)
@@ -1272,7 +1272,8 @@ char **argv;
 		status++;
 	}
 
-	XtFree ((char *) items);
+	Tcl_Free((char *) items);
+
 	return (status ? TCL_ERROR : TCL_OK);
 }
 
@@ -1310,7 +1311,7 @@ char **argv;
 	} else if (argc > 2) {
 	    /* Attribute list passed as separate arguments. */
 	    nitems = argc - 1;
-	    items = (char **) XtMalloc (nitems * sizeof(char *));
+	    items = (char **) Tcl_Alloc (nitems * sizeof(char *));
 	    if (items == NULL)
 		return (TCL_ERROR);
 	    for (i=0;  i < nitems;  i++)
@@ -1329,7 +1330,7 @@ char **argv;
 	else
 	    status = TCL_OK;
 
-	XtFree ((char *) items);
+	Tcl_Free ((char *) items);
 	return (status);
 }
 
@@ -1570,8 +1571,7 @@ char **argv;
 	XtSetArg (args[2], GmY, &y);
 	XtSetArg (args[3], GmWidth, &width);
 	XtSetArg (args[4], GmHeight, &height);
-	if (GmGetAttributes (mp->gm, args, 5, XtRInt) < 0)
-	    return (TCL_ERROR);
+	GmGetAttributes (mp->gm, args, 5, XtRInt);
 
 	if (GmGetAttribute (mp->gm, GmRotangle, &rotangle, XtRFloat) < 0)
 	    return (TCL_ERROR);
@@ -1821,8 +1821,7 @@ char **argv;
 	XtSetArg (args[2], GmY, &y);
 	XtSetArg (args[3], GmWidth, &width);
 	XtSetArg (args[4], GmHeight, &height);
-	if (GmGetAttributes (mp->gm, args, 5, XtRInt) < 0)
-	    return (TCL_ERROR);
+	GmGetAttributes (mp->gm, args, 5, XtRInt);
 
 	/* Get the coordinates of the marker boundary. */
 	if (marker_type == Gm_Text) {

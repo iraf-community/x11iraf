@@ -2,7 +2,7 @@
  */
 
 #define Obm_Main
-#include <ObmP.h>
+#include "ObmP.h"
 
 /*
  * OBM.C -- Object manager for the graphics subsystem.
@@ -143,7 +143,7 @@ char *argv[];
 	obm->debug = ((s = getenv("OBMDEBUG")) != NULL);
 	if (s && (i = atoi(s)))
 	    obm->debug = i;
-	if (s = getenv("OBMOBJECTS")) {
+	if ((s = getenv("OBMOBJECTS"))) {
 	    obm->debug_objs = (char *) XtCalloc (1, strlen(s)+1);
 	    strcpy (obm->debug_objs, s);
 	} else
@@ -217,7 +217,7 @@ register ObmContext obm;
          * first.  Then we destroy whatever else is left.
          */
 	obm->being_destroyed++;
-	if (obj = obmFindObject (obm, "toplevel")) {
+	if ((obj = obmFindObject (obm, "toplevel"))) {
 	    obmUndisplay (obm, obj);
 	    obmDestroyObject (obm, obj);
 	}
@@ -296,7 +296,7 @@ register ObmContext obm;
 	/* UI has already been activated? */
 	if (obm->activated) {
 	    if (!obm->mapped) {
-		if (obj = obmFindObject (obm, "toplevel"))
+		if ((obj = obmFindObject (obm, "toplevel")))
 		    obmDisplay (obm, obj);
 		obm->mapped++;
 
@@ -323,7 +323,7 @@ register ObmContext obm;
 	}
 
 	/* Realize the toplevel widgets. */
-	if (obj = obmFindObject (obm, "toplevel"))
+	if ((obj = obmFindObject (obm, "toplevel")))
 	    obmDisplay (obm, obj);
 
 	obm->activated++;
@@ -361,7 +361,7 @@ Boolean unmap;
 	obm_call_activate_callbacks (obm, 0);
 
 	if (unmap) {
-	    if (obj = obmFindObject (obm, "toplevel"))
+	  if ((obj = obmFindObject (obm, "toplevel")))
 		obmUndisplay (obm, obj);
 	    obm->mapped = 0;
 	}
@@ -401,7 +401,7 @@ int state;
 		    NULL); 
 
 		if (status != TCL_OK) {
-		    char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
+		    const char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
 		    fprintf (stderr, "Error on line %d in activate: %s\n",
 			Tcl_GetErrorLine (obm->tcl),
 			errstr ? errstr : Tcl_GetStringResult (obm->tcl));
@@ -413,6 +413,7 @@ int state;
 /* ObmActivated -- Test whether the GUI is activated, i.e., both defined
  * and mapped.
  */
+int
 ObmActivated (obm)
 register ObmContext obm;
 {
@@ -422,6 +423,7 @@ register ObmContext obm;
 
 /* ObmStatus -- Get the Object Manager status.
  */
+int
 ObmStatus (obm, app_name, app_class)
 register ObmContext obm;
 char *app_name;
@@ -455,6 +457,7 @@ register ObmContext obm;
 
 /* ObmDeliverMsg -- Deliver a message to a UI object.
  */
+int
 ObmDeliverMsg (obm, object, message)
 register ObmContext obm;
 char *object;
@@ -478,11 +481,11 @@ char *message;
 	 * updated or not used again after the evaluate call.
          */
 	Tcl_SetResult (obm->tcl, "", TCL_STATIC);
-	if (obj = obmFindObject (obm, object)) {
-	    if (evaluate = obj->core.classrec->Evaluate) {
+	if ((obj = obmFindObject (obm, object))) {
+	    if ((evaluate = obj->core.classrec->Evaluate)) {
 		status = (*evaluate)(obj, message);
 		if (status != TCL_OK) {
-		    char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
+		    const char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
 		    fprintf (stderr, "Error in message to %s, line %d: %s\n",
 			object, Tcl_GetErrorLine (obm->tcl),
 			     errstr ? errstr : Tcl_GetStringResult (obm->tcl));
@@ -502,6 +505,7 @@ char *message;
 /* ObmDeliverMsgFromFile -- Deliver a message to a UI object, taking the
  * message from the named text file.
  */
+int
 ObmDeliverMsgFromFile (obm, object, fname)
 register ObmContext obm;
 char *object;
@@ -541,7 +545,7 @@ err:
 /* ObmAddCallback -- Add a callback of the given type to the OBM global
  * callback list.
  */
-XtPointer
+void
 ObmAddCallback (obm, callback_type, fcn, client_data)
 register ObmContext obm;
 int callback_type;
@@ -551,7 +555,7 @@ XtPointer client_data;
 	register ObmCallback cb;
 
 	if (!(cb = obmAddCallback (&obm->callback_list)))
-	    return (NULL);
+	    return;
 
 	cb->u.fcn = fcn;
 	cb->callback_type = callback_type;
@@ -638,6 +642,7 @@ char *object;
  * parent object list is empty the list of all objects with the given name
  * is returned.
  */
+int
 obm_nameToObjectList (obm, object, pobjs, nobjs, objs)
 ObmContext obm;
 char *object;			/* object name */
@@ -731,7 +736,7 @@ int nargs;			/* optional argument list */
 	/* Link the object into the object list. */
 	if (!obm->head)
 	    obm->head = newobj;
-	if (newobj->core.prevglob = obm->tail)
+	if ((newobj->core.prevglob = obm->tail))
 	    obm->tail->core.nextglob = newobj;
 	obm->tail = newobj;
 
@@ -740,7 +745,7 @@ int nargs;			/* optional argument list */
 	    hashval += (hashval + *ip);
 
 	/* Enter the object into the hash table. */
-	if (obj = obm->objindex[hashval%SZ_INDEX]) {
+	if ((obj = obm->objindex[hashval%SZ_INDEX])) {
 	    while (obj->core.nexthash)
 		obj = obj->core.nexthash;
 	    obj->core.nexthash = newobj;
@@ -818,7 +823,7 @@ ObmObject object;
 	}
 
 	/* Remove this object from the child list of the parent. */
-	if (obj = object->core.parent) {
+	if ((obj = object->core.parent)) {
 	    if (obj->core.nchildren == 1) {
 		XtFree ((char *)obj->core.children);
 		obj->core.nchildren = 0;
@@ -841,13 +846,13 @@ ObmObject object;
 	}
 
 	/* Unlink the object from the global object list. */
-	if (obj = object->core.prevglob) {
+	if ((obj = object->core.prevglob)) {
 	    if (!(obj->core.nextglob = object->core.nextglob))
 		obm->tail = obj;
 	} else
 	    obm->head = object->core.nextglob;
 
-	if (obj = object->core.nextglob) {
+	if ((obj = object->core.nextglob)) {
 	    if (!(obj->core.prevglob = object->core.prevglob))
 		obm->head = obj;
 	} else
@@ -857,7 +862,7 @@ ObmObject object;
 	ip = object->core.name;
 	for (hashval=0, n=MAX_HASHCHARS;  --n >= 0 && *ip;  ip++)
 	    hashval += (hashval + *ip);
-	if (obj = obm->objindex[hashval%SZ_INDEX]) {
+	if ((obj = obm->objindex[hashval%SZ_INDEX])) {
 	    while (obj && obj->core.nexthash != object)
 		obj = obj->core.nexthash;
 	    if (obj)
@@ -923,7 +928,7 @@ ObmObject obj;
 
 	if (XtWindow(w)) {
 	    /* The following isn't used anymore. */
-	    if (s = get_geometry (obm->display, obm->screen, XtWindow(w), 1))
+	    if ((s = get_geometry (obm->display, obm->screen, XtWindow(w), 1)))
 		strcpy (obj->core.geometry, s);
 	    if (XGetWindowAttributes (obm->display, XtWindow(w), &wa))
 		obj->core.mapped = (wa.map_state != IsUnmapped);
@@ -970,6 +975,7 @@ register ObjClassRec classrec;
 
 /* obmClass -- Test if a class record belongs to the given object class.
  */
+int
 obmClass (classrec, flag1, flag2)
 register ObjClassRec classrec;
 unsigned long flag1, flag2;
@@ -1034,6 +1040,7 @@ ObmCallback callback;
 /* obmDefined -- Test if the named function is a defined client function in
  * the given Tcl interepter.
  */
+int
 obmClientCommand (tcl, commmand)
 Tcl_Interp *tcl;
 char *commmand;

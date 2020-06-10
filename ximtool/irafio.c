@@ -17,6 +17,7 @@
 #include <sys/types.h>
 #endif
 #include <unistd.h>
+#include <string.h>
 
 
 #define VERSION_1       1
@@ -72,18 +73,19 @@ typedef unsigned char uchar;
 #endif
 
 /* Function prototypes */
-#ifdef __STDC__
-
 #include <stddef.h>
 #include <stdlib.h>
 
-#else
-
-#endif
+extern int is_swapped();
+extern void bswap2(), bswap4(), bswap8();
+extern void strpak();
+extern void min_max();
+extern void flip();
+extern void zscale();
 
 char 	*index();
 char 	*getIRAFHdr();
-
+int	isIRAF();
 static char 	*irafReadPixels();
 static void 	irafGetPixfile ();
 
@@ -108,10 +110,8 @@ float   *z1, *z2;                       /* zscale values        */
 int	nsample;			/* nu,ber of sample pts */
 {
 	FILE 	*hdr;
-	int 	i, len, px, py, version, swapped;
+	int 	i, px, py, version, swapped;
 	int  	ptype, offset;
-	char 	temp[SZ_V1PIXFILE], *ip;
-	char 	path[SZ_V1PIXFILE];
 
         /* Get the format version. */
         version = isIRAF (fname);
@@ -220,7 +220,7 @@ char	*fname;				/* input filename */
 	int value = 0;
 	char magic[24];
 
-        if (fp = fopen (fname, "r")) {
+        if ((fp = fopen (fname, "r"))) {
             fread ((char *)magic, sizeof (char), 12, fp);
             fclose (fp);
 
@@ -247,8 +247,8 @@ getIRAFHdr (fname)
 char    *fname;
 {
 	FILE 	*hdr;
-        char    *error, *title, *line;
-	int 	i, bitpix, len, nx, ny, version, swapped, ptype;
+        char    *title, *line;
+	int 	bitpix, nx, ny, version, swapped, ptype;
 
 
         /* Get the format version. */
@@ -259,7 +259,6 @@ char    *fname;
 
         if (version == VERSION_1) {
             int     header_v1[SZ_V1HDR];
-            char    pixfile_v1[SZ_V1PIXFILE];
             char    title_v1[SZ_V1TITLE];
 
 
@@ -279,7 +278,6 @@ char    *fname;
 
         }  else if (version == VERSION_2) {
             char   header_v2[SZ_V2HDR];
-            char   pixfile_v2[SZ_V2PIXFILE];
             char   title_v2[SZ_V2TITLE];
 
 
@@ -405,7 +403,6 @@ int	nsample;
 	FILE *fd;
 	register int i, j, npix, stdline;
 	register float scale;
-	uchar  *line;
 	unsigned short  *uspix, *usline;
 	short  *spix, *sline;
 	int    *ipix, *iline;

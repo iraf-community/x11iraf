@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <ctype.h>
+#include <strings.h>
 
 /*
  * RASIO.C -- Routines to load and save Sun rasterfiles.
@@ -426,6 +428,7 @@ int ncolors, colorstyle;
 
 /* IsSunRas -- Test a file to see if it is a Sun rasterfile.
  */
+int
 isSunRas (fname)
 char *fname;				/* input filename */
 {
@@ -433,7 +436,7 @@ char *fname;				/* input filename */
 	struct rasterfile sunhdr;
 	int value = 0;
 
-	if (fp = fopen (fname, "r")) {
+	if ((fp = fopen (fname, "r"))) {
 	    read_sun_long (&sunhdr.ras_magic, fp);
 	    value = (sunhdr.ras_magic == RAS_MAGIC);
 	    fclose (fp);

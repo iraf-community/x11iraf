@@ -1,14 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <sys/errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <sys/un.h>
 #include <fcntl.h>
+#include <ctype.h>
+#include <time.h>
 
 #include <X11/Intrinsic.h>
 #include <X11/StringDefs.h>
+#include <ObmW/Gterm.h>
 #include "ximtool.h"
 #include "iis.h"
 
@@ -82,10 +86,6 @@ static IoChanPtr open_fifo(), open_inet(), open_unix();
 static IoChanPtr get_iochan();
 static MappingPtr xim_getMapping();
 
-void xim_retCursorVal();
-
-extern int errno;
-
 
 /* XIM_IISOPEN -- Initialize the IIS protocol module and ready the module to
  * accept client connections and begin processing client requests.  Clients
@@ -93,10 +93,11 @@ extern int errno;
  * UNIX domain socket connection.  All three types of server ports are
  * simultaneously ready to receive client connections.
  */
+int
 xim_iisOpen (xim)
 register XimDataPtr xim;
 {
-    int i, port, last_port = (xim->port + xim->nports - 1);
+    int port, last_port = (xim->port + xim->nports - 1);
     int nopen = 0;
 
 
@@ -127,7 +128,7 @@ register XimDataPtr xim;
 	    chan = &xim->chan[i];
 	    if (chan->id) {
 		xim_removeInput (xim, chan->id);
-		chan->id = NULL;
+		chan->id = 0;
 	    }
 
 	    switch (chan->type) {
@@ -284,7 +285,7 @@ int     portnum;
 	    goto err;
 
 	/* Allocate and fill in i/o channel descriptor. */
-	if (chan = get_iochan(xim)) {
+	if ((chan = get_iochan(xim))) {
 	    chan->xim = (XtPointer) xim;
 	    chan->type = IO_INET;
 	    chan->datain = s;
@@ -355,7 +356,7 @@ register XimDataPtr xim;
 	    goto err;
 
 	/* Allocate and fill in i/o channel descriptor. */
-	if (chan = get_iochan(xim)) {
+	if ((chan = get_iochan(xim))) {
 	    chan->xim = (XtPointer) xim;
 	    chan->type = IO_UNIX;
 	    chan->datain = s;
@@ -409,7 +410,7 @@ XtPointer id;
 */
 
 	/* Allocate and fill in i/o channel descriptor. */
-	if (chan = get_iochan(xim)) {
+	if ((chan = get_iochan(xim))) {
 	    chan->xim = (XtPointer) xim;
 	    chan->type = chan_port->type;
 	    chan->datain = s;
@@ -436,7 +437,7 @@ register IoChanPtr chan;
 	    close (chan->datain);
 	    if (chan->id) {
 		xim_removeInput (chan->xim, chan->id);
-		chan->id = NULL;
+		chan->id = 0;
 	    }
 	    chan->type = 0;
 	    break;
@@ -452,7 +453,6 @@ static IoChanPtr
 get_iochan (xim)
 register XimDataPtr xim;
 {
-	register IoChanPtr chan;
 	register int i;
 
 	for (i=0;  i < XtNumber(xim->chan);  i++)
@@ -483,7 +483,7 @@ XtInputId *id_addr;
 	struct	iism70 iis;
 	char	buf[SZ_FIFOBUF];
 	static	int errmsg=0, bswap=0;
-
+	extern void bswap2();
 
 	/* Initialize the debug output. */
 	if (iis_debug == -1)
@@ -777,7 +777,7 @@ XtInputId *id_addr;
 		 */
 		char emsg[SZ_WCSBUF];
 		char *text;
-		int frame, wcsnum;
+		int frame;
 
 		memset ((char *)emsg, 0, SZ_WCSBUF);
 
@@ -1051,6 +1051,7 @@ map_found:	    if (ct) {
  * iomap entries and number of RGB entries set is returned in the output
  * variables iomap_len and rgb_len.
  */
+void
 xim_iisiomap (w, iomap, iomap_len)
 register XtPointer w;
 unsigned short *iomap;
@@ -1082,6 +1083,7 @@ int *iomap_len;
  * before the IIS iomap is defined.  The first colormap cell corresponds to
  * first = gterm color 10.
  */
+void
 xim_iiscolormap (w, r, g, b, first, ngray, rgb_len)
 register XtPointer w;
 unsigned short *r, *g, *b;
@@ -1177,7 +1179,7 @@ int frame;
 
 /* DECODE_FRAMENO -- Decode encoded IIS register frame number.
  */
-static
+static int
 decode_frameno (z)
 register int	z;
 {
@@ -1279,6 +1281,7 @@ char	*strval;		/* optional string value */
  * pixel value and return a string giving X, Y, and the pixel intensity in
  * world units.
  */
+void
 xim_encodewcs (xim, sx, sy, sz, obuf)
 register XimDataPtr xim;
 float sx, sy;			/* screen (raster) pixel coordinates */
@@ -1288,8 +1291,7 @@ char *obuf;			/* receives encoded string */
 	register CtranPtr ct;
 	MappingPtr  mp = (MappingPtr) NULL;
 	float 	wx, wy, wz;
-	float 	y = xim->height - sy;
-	register int j=0, i=0, ch, map_found = 0;
+	register int i=0, ch, map_found = 0;
 	char buf[SZ_LINE];
 
 
@@ -1401,8 +1403,7 @@ int	frame;
 	MappingPtr mp = (MappingPtr) NULL;
 	register int j=0, i=0;
 	float y = xim->height - sy;
-	char buf[SZ_LINE];
-	register map_debug = 0;
+	register int map_debug = 0;
 
 
 	/* Loop through the frame buffers until we find the current one.
@@ -1547,7 +1548,7 @@ FrameBufPtr fr;
 	register MappingPtr mp = &fr->mapping[fr->nmaps];
         register CtranPtr   ct = &mp->ctran;
 	register int  i, j, frame = fr->frameno;
-	char buf[SZ_WCSBUF], *format;
+	char buf[SZ_WCSBUF];
 
         /* Attempt to read the WCS and set up a unitary transformation
          * if the information cannot be read.
@@ -1628,6 +1629,7 @@ FrameBufPtr fr;
 
 /* PRINT_MAPPINGS -- Debug routine to print all mappings on a frame.
  */
+void
 print_mappings (fr)
 FrameBufPtr fr;
 {

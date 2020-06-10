@@ -4,6 +4,7 @@
  * --------------------------------------
  */
 
+void
 GtActivate (w)
     GtermWidget w;
 {
@@ -11,6 +12,7 @@ GtActivate (w)
     w->gterm.save_x = w->gterm.save_y = 0;
 }
 
+void
 GtDeactivate (w)
     GtermWidget w;
 {
@@ -37,12 +39,14 @@ GtDeactivate (w)
     }
 }
 
+int
 GtReady (w)
     GtermWidget w;
 {
     return (w->gterm.delay == 0);
 }
 
+void
 GtReset (w)
     GtermWidget w;
 {
@@ -60,6 +64,7 @@ GtReset (w)
     w->gterm.raster     = 0;
 }
 
+void
 GtTimerInhibit (w, state)
     GtermWidget w;
     Boolean state;
@@ -70,6 +75,7 @@ GtTimerInhibit (w, state)
     w->gterm.useTimers = !state;
 }
 
+void
 GtAugmentTranslations (w, translations)
     register GtermWidget w;
     char *translations;
@@ -85,6 +91,7 @@ GtAugmentTranslations (w, translations)
     }
 }
 
+void
 GtOverrideTranslations (w, translations)
     register GtermWidget w;
     char *translations;
@@ -100,12 +107,14 @@ GtOverrideTranslations (w, translations)
     }
 }
 
+void
 GtFlush (w)
     GtermWidget w;
 {
     XFlush (w->gterm.display);
 }
 
+void
 GtSetLogRes (w, width, height)
     GtermWidget w;
     int width, height;
@@ -114,6 +123,7 @@ GtSetLogRes (w, width, height)
     w->gterm.yres = height;
 }
 
+void
 GtGetLogRes (w, width, height)
     GtermWidget w;
     int *width, *height;
@@ -122,6 +132,7 @@ GtGetLogRes (w, width, height)
     *height = w->gterm.yres;
 }
 
+void
 GtGetPhysRes (w, raster, width, height)
     GtermWidget w;
     int raster;				/* zero for screen size */
@@ -137,6 +148,7 @@ GtGetPhysRes (w, raster, width, height)
     }
 }
 
+void
 GtSetPhysRes (w, raster, width, height)
     GtermWidget w;
     int raster;
@@ -145,6 +157,7 @@ GtSetPhysRes (w, raster, width, height)
     GtCreateRaster (w, raster, GtServer, width, height, RasterDepth);
 }
 
+void
 GtSetRaster (w, raster)
     GtermWidget w;
     int raster;
@@ -155,6 +168,7 @@ GtSetRaster (w, raster)
     }
 }
 
+int
 GtGetRaster (w)
     GtermWidget w;
 {
@@ -162,6 +176,7 @@ GtGetRaster (w)
 }
 
 /* ARGSUSED */
+void
 GtSetTextRes (w, optrows, optcols)
     GtermWidget w;
     int optrows, optcols;
@@ -171,12 +186,14 @@ GtSetTextRes (w, optrows, optcols)
 }
 
 /* ARGSUSED */
+void
 GtSetCharSize (w, ival)
     GtermWidget w;
     int ival;
 {
 }
 
+void
 GtSetDataLevel (w, ival)
     GtermWidget w;
     int ival;
@@ -214,6 +231,7 @@ GtSetDataLevel (w, ival)
 }
 
 
+void
 GtSetLineWidth (w, ival)
     GtermWidget w;
     int ival;
@@ -227,6 +245,7 @@ GtSetLineWidth (w, ival)
 #define	DashDot		"\016\003\001\003"
 #define	Dash3Dot	"\024\003\001\003\001\003\001\003"
 
+void
 GtSetLineStyle (w, ival)
     GtermWidget w;
     int ival;
@@ -372,6 +391,7 @@ GtermWidget w;
         initialize_shadow_pixmap (w, 0);
 }
 
+void
 GtDrawPolyline (w, pv, npts)
     GtermWidget w;
     XPoint *pv;
@@ -397,6 +417,7 @@ GtDrawPolyline (w, pv, npts)
     update_transients (w, (Region)NULL);
 }
 
+void
 GtDrawPolymarker (w, pv, npts)
     GtermWidget w;
     XPoint *pv;
@@ -422,6 +443,7 @@ GtDrawPolymarker (w, pv, npts)
     update_transients (w, (Region)NULL);
 }
 
+void
 GtDrawPolygon (w, pv, npts)
     GtermWidget w;
     XPoint *pv;
@@ -478,6 +500,7 @@ GtDrawPolygon (w, pv, npts)
     update_transients (w, (Region)NULL);
 }
 
+void
 GtDrawMarker (w, x, y, xsize, ysize, type)
     GtermWidget w;
     int x, y;
@@ -486,6 +509,7 @@ GtDrawMarker (w, x, y, xsize, ysize, type)
 {
 }
 
+void
 GtBell (w)
     GtermWidget w;
 {
@@ -789,7 +813,7 @@ GtSetCursorType (w, type)
 	    update_cursor (w);
 
 	cursor = w->gterm.ginmode_cursor;
-	if (interval = w->gterm.ginmodeBlinkInterval) {
+	if ((interval = w->gterm.ginmodeBlinkInterval)) {
 	    XtAppContext appcon = XtWidgetToApplicationContext ((Widget) w);
 	    id = XtAppAddTimeOut (appcon,
 		interval, blink_cursor, (XtPointer)w);
@@ -836,11 +860,12 @@ blink_cursor (w, id)
     w->gterm.ginmodeColors[0] = bg;
     w->gterm.ginmodeColors[1] = fg;
 
-    if (interval = w->gterm.ginmodeBlinkInterval)
+    if ((interval = w->gterm.ginmodeBlinkInterval))
 	XtAppAddTimeOut (app_context,
 	    interval, (XtTimerCallbackProc) blink_cursor, (XtPointer)w);
 }
 
+void
 GtPostInputProc (w, userfcn, client_data)
     GtermWidget w;
     GtCallbackProc userfcn;
@@ -861,6 +886,7 @@ GtPostInputProc (w, userfcn, client_data)
 	w->gterm.inputCallback = new;
 }
 
+void
 GtDeleteInputProc (w, userfcn, client_data)
     GtermWidget w;
     GtCallbackProc userfcn;
@@ -880,6 +906,7 @@ GtDeleteInputProc (w, userfcn, client_data)
 	    prev = cb;
 }
 
+void
 GtPostResetProc (w, userfcn, client_data)
     GtermWidget w;
     GtCallbackProc userfcn;
@@ -900,6 +927,7 @@ GtPostResetProc (w, userfcn, client_data)
 	w->gterm.resetCallback = new;
 }
 
+void
 GtDeleteResetProc (w, userfcn, client_data)
     GtermWidget w;
     GtCallbackProc userfcn;
@@ -919,6 +947,7 @@ GtDeleteResetProc (w, userfcn, client_data)
 	    prev = cb;
 }
 
+void
 GtPostResizeProc (w, userfcn, client_data)
     GtermWidget w;
     GtCallbackProc userfcn;
@@ -939,6 +968,7 @@ GtPostResizeProc (w, userfcn, client_data)
 	w->gterm.resizeCallback = new;
 }
 
+void
 GtDeleteResizeProc (w, userfcn, client_data)
     GtermWidget w;
     GtCallbackProc userfcn;
@@ -958,6 +988,7 @@ GtDeleteResizeProc (w, userfcn, client_data)
 	    prev = cb;
 }
 
+void
 GtDrawAlphaText (w, x, y, text)
     GtermWidget w;
     int x, y;
@@ -987,6 +1018,7 @@ GtDrawAlphaText (w, x, y, text)
     update_transients (w, (Region)NULL);
 }
 
+void
 GtGetAlphaTextSize (w, string, width, height, base)
     GtermWidget w;
     char *string;
@@ -1004,17 +1036,20 @@ GtGetAlphaTextSize (w, string, width, height, base)
     *base = fp->max_bounds.ascent;
 }
 
+void
 GtWriteAlphaCursor (w, x, y)
     GtermWidget w;
     int x, y;
 {
 }
 
+void
 GtEraseAlphaCursor (w)
     GtermWidget w;
 {
 }
 
+void
 GtStartDialog (w)
     GtermWidget w;
 {
@@ -1039,6 +1074,7 @@ GtStartDialog (w)
 	fprintf (stderr, "GtStartDialog:  LEAVING\n");
 }
 
+void
 GtEndDialog (w)
     GtermWidget w;
 {
@@ -1046,6 +1082,7 @@ GtEndDialog (w)
     w->gterm.d_saved = 0;
 }
 
+void
 GtEraseDialog (w)
     GtermWidget w;
 {
@@ -1069,6 +1106,7 @@ GtEraseDialog (w)
 	fprintf (stderr, "GtEraseDialog:  LEAVING\n");
 }
 
+void
 GtDrawDialogText (w, x, y, text)
     GtermWidget w;
     int x, y;
@@ -1084,6 +1122,7 @@ GtDrawDialogText (w, x, y, text)
 	w->gterm.dialogGC, xpos, ypos, text, strlen(text));
 }
 
+void
 GtGetDialogTextSize (w, string, width, height, base)
     GtermWidget w;
     char *string;
@@ -1107,7 +1146,7 @@ GtGetDialogTextSize (w, string, width, height, base)
  * ----------------------------------------
  */
 
-static
+static void
 set_default_color_index (w)
     GtermWidget w;
 {

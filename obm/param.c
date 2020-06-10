@@ -1,7 +1,7 @@
 /* Copyright(c) 1993 Association of Universities for Research in Astronomy Inc.
  */
 
-#include <ObmP.h>
+#include "ObmP.h"
 
 
 /*
@@ -266,7 +266,7 @@ i, obj->core.name, cb->name, new_value);*/
 		"{", new_value, "} ",
 		NULL);
 	    if (status != TCL_OK) {
-		char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
+		const char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
 		fprintf (stderr, "Error on line %d in %s: %s\n",
 		    Tcl_GetErrorLine (obm->tcl), cb->name,
 		    errstr ? errstr : Tcl_GetStringResult (obm->tcl));
@@ -326,7 +326,7 @@ char **argv;
 		"{", pp->value, "} ",
 		NULL);
 	    if (status != TCL_OK) {
-		char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
+		const char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
 		fprintf (stderr, "Error on line %d in %s: %s\n",
 		    Tcl_GetErrorLine (obm->tcl), cb->name,
 		    errstr ? errstr : Tcl_GetStringResult (obm->tcl));

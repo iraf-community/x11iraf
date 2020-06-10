@@ -143,7 +143,7 @@ Widget
     XGCValues values;
 
     if (((XfwfSlider2Widget)self)->xfwfSlider2.thumbgc != NULL) XtReleaseGC(self, ((XfwfSlider2Widget)self)->xfwfSlider2.thumbgc);
-    if (((XfwfSlider2Widget)self)->xfwfSlider2.thumbPixmap != NULL) {
+    if (((XfwfSlider2Widget)self)->xfwfSlider2.thumbPixmap != 0) {
 	mask = GCTile | GCFillStyle;
 	values.tile = ((XfwfSlider2Widget)self)->xfwfSlider2.thumbPixmap;
 	values.fill_style = FillTiled;
@@ -525,7 +525,7 @@ WidgetClass class;
 	create_thumbgc(self);
 	need_redisplay = True;
     } else if (((XfwfSlider2Widget)self)->xfwfSlider2.thumbColor != ((XfwfSlider2Widget)old)->xfwfSlider2.thumbColor) {
-	((XfwfSlider2Widget)self)->xfwfSlider2.thumbPixmap = NULL;
+	((XfwfSlider2Widget)self)->xfwfSlider2.thumbPixmap = 0;
 	create_thumbgc(self);
 	need_redisplay = True;
     }

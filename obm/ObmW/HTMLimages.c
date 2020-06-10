@@ -53,6 +53,7 @@
  ****************************************************************************/
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <ctype.h>
 #include "HTMLP.h"
 #include "bitmaps/NoImage.xbm"
@@ -811,14 +812,14 @@ InfoToImage(hw, img_info)
 						delta = *ptr2 - 64;
 						*ptr2 = white_pixel;
 					}
-					if (not_right_col =
-						(cx < (img_info->width-1)))
+					if ((not_right_col =
+						(cx < (img_info->width-1))))
 					{
 						*(ptr2+1) += delta*7 >> 4;
 					}
 
-					if (not_last_row =
-						(cy < (img_info->height-1)))
+					if ((not_last_row =
+						(cy < (img_info->height-1))))
 					{
 						(*(ptr2+img_info->width)) +=
 							delta*5 >> 4;

@@ -1,4 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <ctype.h>
 #include <sys/errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -25,6 +28,7 @@
 #include "xtapemon.h"
 #include "classnames.h"
 #include "patchlevel.h"
+#include "types.h"
 
 /*
  * XTAPEMON -- X window system based tape monitoring utility.
@@ -44,8 +48,6 @@
 #define SZ_LINE		512
 #define SZ_MSGBUF	2048
 
-extern	errno;
-
 /* Functions defined in this file.
  */
 int main();
@@ -60,7 +62,7 @@ static void initGraphics(), initWidgets();
 static void selectItem(), portClose();
 static void syntax(), appendText();
 static void Quit();
-static XtInputCallbackProc connectToClient(), readClientData();
+static void connectToClient(), readClientData();
 
 /* Global graphics data.
  */
@@ -126,6 +128,7 @@ void *memmove(a,b,n) void *a, *b; int n; { bcopy(b,a,n); }
 /*
  * The main program.
  */
+int
 main(argc,argv)
 int argc;
 char **argv;
@@ -156,7 +159,7 @@ char **argv;
     port = appResources.port + appResources.alternate;
     if ((server_socket = portSetup(port)) >= 0)
 	XtAppAddInput (appContext, server_socket, (XtPointer)XtInputReadMask,
-	    (XtInputCallbackProc)connectToClient, (XtPointer)server_socket);
+	    (XtInputCallbackProc)connectToClient, (XtPointer)&server_socket);
 
     /* Identify port in use. */
     sprintf (buf, "ready on port %s (%d)", 
@@ -308,7 +311,7 @@ char *resourceStr,*resourceName;
  * the xtapemon socket.  Accept the connection and open a file pointer on
  * the status output stream of the client.
  */
-static XtInputCallbackProc
+static void
 connectToClient (client_data, source, id)
 XtPointer client_data;
 int *source;
@@ -342,7 +345,7 @@ XtInputId *id;
 /* readClientData -- Called when there is client data to be read and
  * displayed.
  */
-static XtInputCallbackProc
+static void
 readClientData (client_data, source, id)
 XtPointer client_data;
 int *source;
@@ -491,7 +494,7 @@ XtInputId *id;
 
 	/* Enable the following if XtRemoveInput is used in XtInputCallback
 	 * XtAppAddInput (appContext, server_socket, XtInputReadMask,
-	 *   (XtInputCallbackProc)connectToClient, (XtPointer)server_socket);
+	 *   (XtInputCallbackProc)connectToClient, (XtPointer)&server_socket);
 	 */
     }
 
@@ -524,7 +527,7 @@ char *text;
     for (ip=text;  *ip;  )
 	*op++ = *ip++;
 
-    if (newline = (*(ip-1) == '\n'))
+    if ((newline = (*(ip-1) == '\n')))
 	op--;
 
     *op = EOS;
@@ -610,7 +613,7 @@ portOpen (s)
 int	s;
 {
 	int fd;
-	if ((fd = accept (s, (struct sockaddr *)0, (int *)0)) < 0)
+	if ((fd = accept (s, NULL, NULL)) < 0)
 	    return (ERR);
 	else
 	    return (fd);

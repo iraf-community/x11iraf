@@ -31,6 +31,7 @@ typedef unsigned char uchar;
  * pairs of bytes.  The two arrays may be the same but may not be offset
  * and overlapping.
  */
+void
 bswap2 (a, b, nbytes)
 char    *a, *b;         	/* input array                  */
 int     nbytes;         	/* number of bytes to swap      */
@@ -57,6 +58,7 @@ int     nbytes;         	/* number of bytes to swap      */
  * in each successive 4 byte group, i.e., 12345678 becomes 43218765.
  * The input and output arrays may be the same but may not partially overlap.
  */
+void
 bswap4 (a, aoff, b, boff, nbytes)
 char	*a;			/* input array			*/
 int	aoff;			/* first byte in input array	*/
@@ -98,6 +100,7 @@ int	nbytes;			/* number of bytes to swap	*/
  * in each successive 8 byte group, i.e., 12345678 becomes 87654321.
  * The input and output arrays may be the same but may not partially overlap.
  */
+void
 bswap8 (a, aoff, b, boff, nbytes)
 char	*a;			/* input array			*/
 int	aoff;			/* first byte in input array	*/
@@ -145,7 +148,7 @@ int	nbytes;		/* number of bytes to swap	*/
 
 /* IS_SWAPPED -- See if this is a byte-swapped (relative to Sun) machine.
  */
-
+int
 is_swapped ()
 {
         union {
@@ -160,7 +163,7 @@ is_swapped ()
 
 /* MIN_MAX -- Get the min and max values of an array.
  */
-
+void
 min_max (a, npts, bitpix, min, max)
 char	*a;
 int	npts;
@@ -207,7 +210,7 @@ float	*min, *max;
 
 /* STRPAK -- Convert ASCII string from SPP char per short to C char per byte
  */
-
+void
 strpak (in, out, len)
 char	*in, *out;
 int	len;
@@ -231,6 +234,7 @@ int	len;
  * rather than when reading so the sampling grid for zscale is the same as
  * for DISPLAY, even though the pixels are stored "flipped" in the pixfile.
  */
+void
 flip (buffer, nx, ny)
 uchar *buffer;
 int  nx, ny;

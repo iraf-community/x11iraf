@@ -7,6 +7,10 @@
 extern void	XfwfDrawImageString(Display *display, Drawable drawable,
 			GC gc, int x, int y, String string, int length,
 			int *tabs);
+extern void	XfwfDrawString(Display *display, Drawable drawable,
+			GC gc, int x, int y, String string, int length,
+			int *tabs);
+
 extern void	XtabDrawString(Display *display, Drawable drawable, GC gc,
 			int x, int y, String string, int length, int *tabs);
 extern int *	XfwfTablist2Tabs(char *tablist);
@@ -17,6 +21,7 @@ extern char *	strnchr(char *s, int c, int n);
 #else
 
 extern void	XfwfDrawImageString();
+extern void	XfwfDrawString();
 extern void	XtabDrawString();
 extern int *	XfwfTablist2Tabs();
 extern int	XfwfTextWidth();

@@ -54,6 +54,7 @@
 /* #ifdef MOTIF */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "inkstore.h"
 #include "HTMLP.h"
 
@@ -98,7 +99,7 @@ NewJot(w, width, height)
 		JotCurrent->w = w;
 		JotCurrent->width = width;
 		JotCurrent->height = height;
-		JotCurrent->pix = NULL;
+		JotCurrent->pix = 0;
 		JotCurrent->drawing = False;
 		JotCurrent->strokes = NULL;
 		JotCurrent->last_stroke = NULL;
@@ -116,7 +117,7 @@ NewJot(w, width, height)
 		JotCurrent->w = w;
 		JotCurrent->width = width;
 		JotCurrent->height = height;
-		JotCurrent->pix = NULL;
+		JotCurrent->pix = 0;
 		JotCurrent->drawing = False;
 		JotCurrent->strokes = NULL;
 		JotCurrent->last_stroke = NULL;
@@ -182,7 +183,7 @@ ClearJot(hw, w, width, height)
 		return;
 	}
 
-	if (jptr->pix != NULL)
+	if (jptr->pix != 0)
 	{
                 XSetForeground(XtDisplay(w), hw->html.drawGC,
 			hw->core.background_pixel);
@@ -260,12 +261,12 @@ EVJotExpose(w, data, event)
 		return;
 	}
 
-	if (jptr->pix == NULL)
+	if (jptr->pix == 0)
 	{
 		jptr->pix = XCreatePixmap(XtDisplay(w), XtWindow(w),
 			jptr->width, jptr->height,
 			XDefaultDepth(XtDisplay(w), XDefaultScreen(XtDisplay(w))));
-		if (jptr->pix == NULL)
+		if (jptr->pix == 0)
 		{
 			return;
 		}
@@ -323,7 +324,7 @@ EVJotPress(w, data, event)
 #endif /* MOTIF */
 	XDrawPoint(XtDisplay(w), XtWindow(w),
 			hw->html.drawGC, sptr->x, sptr->y);
-	if (jptr->pix != NULL)
+	if (jptr->pix != 0)
 	{
 		XDrawPoint(XtDisplay(w), jptr->pix,
 				hw->html.drawGC, sptr->x, sptr->y);
@@ -377,7 +378,7 @@ EVJotMove(w, data, event)
 #endif /* MOTIF */
 	XDrawLine(XtDisplay(w), XtWindow(w), hw->html.drawGC,
 		jptr->last_x, jptr->last_y, sptr->x, sptr->y);
-	if (jptr->pix != NULL)
+	if (jptr->pix != 0)
 	{
 		XDrawLine(XtDisplay(w), jptr->pix, hw->html.drawGC,
 			jptr->last_x, jptr->last_y, sptr->x, sptr->y);
@@ -431,7 +432,7 @@ EVJotRelease(w, data, event)
 #endif /* MOTIF */
 	XDrawLine(XtDisplay(w), XtWindow(w), hw->html.drawGC,
 		jptr->last_x, jptr->last_y, sptr->x, sptr->y);
-	if (jptr->pix != NULL)
+	if (jptr->pix != 0)
 	{
 		XDrawLine(XtDisplay(w), jptr->pix, hw->html.drawGC,
 			jptr->last_x, jptr->last_y, sptr->x, sptr->y);
@@ -577,7 +578,7 @@ JOTfromJot(w, buffer_len)
 	dataArray = (MY_INK_POINT *)malloc(dlen);
 	cnt = 0;
 	sptr = jptr->strokes;
-	while ((sptr != NULL)&&(cnt < jptr->stroke_cnt));
+	while ((sptr != NULL)&&(cnt < jptr->stroke_cnt))
 	{
 		dataArray[cnt].position.x = sptr->x;
 		dataArray[cnt].position.y = sptr->y;

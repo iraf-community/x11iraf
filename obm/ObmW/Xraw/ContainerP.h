@@ -3,7 +3,7 @@
 
 
 #include <X11/ConstrainP.h>
-#include <X11/Xraw/Container.h>
+#include "Container.h"
 
 #define CORE(w)      ((Widget)(w))->core
 #define COMPOSITE(w) ((CompositeWidget)(w))->composite

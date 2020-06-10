@@ -1,7 +1,7 @@
 /* Copyright(c) 1993 Association of Universities for Research in Astronomy Inc.
  */
 
-#include <ObmP.h>
+#include "ObmP.h"
 #include "widget.h"
 
 /*
@@ -369,7 +369,7 @@ char **argv;
 		pretty = 2;
 	}
 
-	if (text = HTMLGetText (wp->w, pretty)) {
+	if ((text = HTMLGetText (wp->w, pretty))) {
 	    Tcl_SetResult (wp->obm->tcl, text, TCL_VOLATILE);
 	    free (text);
 	}
@@ -610,7 +610,7 @@ char **argv;
 	else
 	    a_list = argv[1];
 
-	if (list = HTMLGetHRefs (wp->w, &n)) {
+	if ((list = HTMLGetHRefs (wp->w, &n))) {
 	    if (!(lbuf = makeList (list, n))) {
 		free ((char *)list);
 		return (TCL_ERROR);
@@ -665,7 +665,7 @@ char **argv;
 	else
 	    a_list = argv[1];
 
-	if (list = HTMLGetImageSrcs (wp->w, &n)) {
+	if ((list = HTMLGetImageSrcs (wp->w, &n))) {
 	    if (!(lbuf = makeList (list, n))) {
 		free ((char *)list);
 		return (TCL_ERROR);
@@ -719,7 +719,7 @@ char **argv;
 	else
 	    a_list = argv[1];
 
-	if (list = HTMLGetLinks (wp->w, &n)) {
+	if ((list = HTMLGetLinks (wp->w, &n))) {
 	    register char *ip, *op;
 	    register int i;
 
@@ -1170,7 +1170,7 @@ XtPointer call_data;
 			    ip++;
 		} else {
 		    /* This case occurs when only a modifier is typed. */
-		    for (ip = "??";  *op++ = *ip++; )
+		    for (ip = "??";  (*op++ = *ip++); )
 			;
 		}
 		*op = '\0';
@@ -1316,7 +1316,7 @@ XtPointer call_data;
 			    ip++;
 		} else {
 		    /* This case occurs when only a modifier is typed. */
-		    for (ip = "??";  *op++ = *ip++; )
+		    for (ip = "??";  (*op++ = *ip++); )
 			;
 		}
 		*op = '\0';
@@ -1476,7 +1476,7 @@ register ObmContext obm;
 register ObmCallback cb;
 {
 	register Tcl_Interp *tcl = obm->tcl;
-	char *errstr = Tcl_GetVar (tcl, "errorInfo", 0);
+	const char *errstr = Tcl_GetVar (tcl, "errorInfo", 0);
 	fprintf (stderr, "Error on line %d in %s: %s\n",
 	    Tcl_GetErrorLine (tcl), cb->name,
 	    errstr ? errstr : Tcl_GetStringResult (tcl));

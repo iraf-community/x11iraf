@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <unistd.h>
 #include <math.h>
 #include <time.h>
 #include <pwd.h>
@@ -76,10 +77,34 @@ static int	pixnum 	= 0, lpix = 0;
 static uchar   *pixbuf;
 
 
-/* Public procedures. 
-*/
-void	eps_setPage(), eps_setTransform(), eps_setCorners();
+typedef struct {
+	float	sizex, sizey;		/* page size in inches */
+	int	npixx, npixy;		/* pix resolution at 72 dpi */
+} PSPageInfo;
 
+static PSPageInfo  PageInfo[] = {	/* assumes 300 dpi */
+	{ 8.500, 11.000, 		/* US NORMAL, aka LETTER */
+	  612, 762
+	},
+	{ 8.500, 14.000,   		/* US LEGAL */
+          612, 1008
+	},
+	{ 8.267, 11.811,   		/* A4 */
+	  595, 850
+	},
+	{ 7.283, 10.630,   		/* B5 */
+	  524, 765
+	},
+	{11.000, 17.000,   		/* B-size */
+          762, 1224
+	},
+	{ 3.875,  4.875,   		/* 4 by 5 */
+	  279, 351
+	},
+	{ 0.945,  1.417,  		/* 35mm (24x36) */
+	  68, 102
+	}
+};
 
 /* Private procedures. 
 */
@@ -88,12 +113,11 @@ static void eps_pageParams(), eps_simpleTrailer();
 static void eps_writeCmap(), eps_writeTrailer();
 static void eps_writeMono(), eps_writePix();
 static void eps_writeMonoRGB(), eps_writeRGB();
-static void eps_putPix(), eps_flushPix();
+static void eps_flushPix();
 static void eps_annotate(), eps_portLabels(), eps_landLabels();
 static void eps_doColorbar();
 static float ticstep();
 static char *make_label();
-
 
 static int 	debug = 0;
 
@@ -104,9 +128,8 @@ static int 	debug = 0;
 PSImage *
 eps_init()
 {
-	register int i, n;
+	register int i;
 	register PSImage *ps;
-	register uchar *op;
 
 
         /* Allocate the structure. */
@@ -781,7 +804,7 @@ int     xdim;
 int     depth;
 int     pad;
 {
-        register int i, j, min, max;
+        register int i, min, max;
 	register uchar val;
 
 
@@ -980,12 +1003,8 @@ eps_annotate (psim, fp)
 PSImagePtr psim;
 FILE       *fp;
 {
-        register char **line;
-	register int i;
         int     icols=0, irows=0, scols=0, srows=0, turnflag=0;
-	int	cbar_size, nlabels;
-	int	xpos, xstep, ypos, ystep;
-	float	Mval, xval, yval, tic, mtic, Mtic;
+	int	cbar_size;
         float   llx = 0.0, lly = 0.0;
 
 
@@ -1149,14 +1168,13 @@ int	scols, srows;
 int	icols, irows;
 float	llx, lly;
 {
-	int	start, end, range, nlabels;
+	int	start, end, range;
 	float 	xpos, xstep, ypos, ystep;
         float   Mval, xval=0.0, yval=0.0, tic, mtic, Mtic;
 
 
 	/* X Axis labeling and ticmarks. 
 	*/
-	nlabels = (scols > 256 ? 5 : 3);
         fprintf (fp, "/axLabelX {\n");
 	if (psim->urx > psim->llx) {
 	    start = psim->llx;
@@ -1196,7 +1214,6 @@ float	llx, lly;
         fprintf (fp, "axLabelX\n");
 
 	/* Y Axis labeling and ticmarks. */
-	nlabels = (srows > 256 ? 5 : 3);
         fprintf (fp, "/axLabelY {\n");
 	if (psim->ury > psim->lly) {
 	    start = psim->lly;
@@ -1249,12 +1266,11 @@ int	icols, irows;
 float	llx, lly;
 {
 	float	xpos, xstep, ypos, ystep;
-	int	start, end, range, nlabels;
+	int	start, end, range;
         float   Mval, xval=0.0, yval=0.0, tic, mtic, Mtic;
 
 
 	/* X Axis labeling and ticmarks. */
-	nlabels = (srows > 256 ? 5 : 3);
         fprintf (fp, "/axLabelX {\n");
         if (psim->ury > psim->lly) {
             start = psim->lly;
@@ -1294,7 +1310,6 @@ float	llx, lly;
         fprintf (fp, "axLabelX\n");
 
 	/* Y Axis labeling and ticmarks. */
-	nlabels = (srows > 256 ? 5 : 3);
         fprintf (fp, "/axLabelY {\n");
         if (psim->urx > psim->llx) {
             start = psim->llx;

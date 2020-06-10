@@ -70,7 +70,7 @@ struct timezone Tz;
 
 extern void FreeObjList();
 extern struct mark_up *AddObj();
-
+extern int ParseMarkType();
 
 #ifdef NOT_ASCII
 #define TOLOWER(x)	(tolower(x))

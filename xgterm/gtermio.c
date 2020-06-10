@@ -4,6 +4,8 @@
 #include <sys/ioctl.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 #include <X11/Intrinsic.h>
 #include <X11/StringDefs.h>
@@ -210,13 +212,14 @@ typedef Request	*RequestPtr;
 static RequestPtr request_head = NULL;
 static RequestPtr request_tail = NULL;
 
-static	int gio_reset(), gio_clear(), gio_setginmodeterm(), gio_output();
+static	int gio_reset(), gio_setginmodeterm(), gio_output();
+static	int gio_clear();
 static	int gio_retcursor(), gio_queue_output(), gio_queue_request();
 static	int gio_hardreset(), gio_activate(), gio_enable(), gio_tekmode();
 static	int gio_processdata(), gio_ptyinput(), gio_escape(), gio_status();
 static	void gio_activate_cb();
-static  int gio_connect_cb();
-static	int gio_deactivate_cb();
+static  void gio_connect_cb();
+static	void gio_deactivate_cb();
 static	void gio_keyinput(), gio_resize();
 static	void pl_decodepts(), gio_retenq();
 
@@ -312,7 +315,7 @@ int client_data;
 /* GIO_ENABLE -- Enable or disable the graphics window.  If graphics is
  * disabled, all i/o is directed to the text window.
  */
-static
+static int
 gio_enable (dummy, onoff)
 int	dummy;
 int	onoff;
@@ -334,7 +337,7 @@ int	onoff;
 /* GIO_ACTIVATE -- Callback procedure called by the client application to
  * forcibly activate or deactivate the graphics UI.
  */
-static
+static int
 gio_activate (dummy, state)
 int dummy;
 int state;
@@ -343,7 +346,7 @@ int state;
 
 	/* Cancel any buffered command output. */
 	wait_cursor = 0;
-	while (rp = request_head) {
+	while ((rp = request_head)) {
 	    request_head = rp->next;
 	    free ((char *)rp);
 	}
@@ -380,7 +383,7 @@ int state;
 /* GIO_STATUS -- Query the status of the Object Manager, i.e., whether or
  * not a GUI has been loaded.
  */
-static
+static int
 gio_status (dummy, app_name, app_class)
 int dummy;
 char *app_name;			/* can be NULL */
@@ -406,7 +409,7 @@ int state;
 
 	/* Cancel any buffered command output. */
 	wait_cursor = 0;
-	while (rp = request_head) {
+	while ((rp = request_head)) {
 	    request_head = rp->next;
 	    free ((char *)rp);
 	}
@@ -429,7 +432,7 @@ int state;
  * to intercept a window close action in a GUI to keep from shutting down 
  * completely.
  */
-static
+static void
 gio_deactivate_cb (dummy, w, state)
 int dummy;
 Widget w;
@@ -441,7 +444,7 @@ int state;
 /* GIO_CONNECT_CB -- Connect callback, called by the gterm widget when a new
  * application GUI is initialized or when the display connection is closed.
  */
-static
+static void
 gio_connect_cb (dummy, display, toplevel, state)
 int dummy;
 Display *display;
@@ -459,7 +462,7 @@ int state;
 	     * appears to be no alternative at present.
 	     */
 	    strcpy (buf, "/tmp/XGdbXXXXXX");
-	    if (fname = mktemp (buf)) {
+	    if ((fname = mktemp (buf))) {
 		/* Merge XGterm resources. */
 		db1 = XrmGetDatabase (XtDisplay(term));
 		XrmPutFileDatabase (db1, fname);
@@ -484,7 +487,7 @@ int state;
  * Normally this is done by the client via the datastream but this routine
  * can be called to manually switch the input to a window.
  */
-static
+static int
 gio_tekmode (dummy, onoff)
 int dummy;
 int onoff;
@@ -505,7 +508,7 @@ int onoff;
 
 /* GIO_CLEAR -- Clear the graphics window.
  */
-static
+static int
 gio_clear (dummy)
 int dummy;
 {
@@ -518,20 +521,13 @@ int dummy;
 	sl_y = sl_charbase;
 	cur_x = tx_leftmargin;
 	cur_y = tx_charbase;
+	return 0;
 }
-
-/* debug routine. */
-gio_eventmask (w)
-Widget w;
-{
-	printf ("mask = 0x%x\n", XtBuildEventMask(w));
-}
-
 
 /* GIO_HARDRESET -- Reset everything, including cancelling any cursor read
  * that may be in progress.
  */
-static
+static int
 gio_hardreset (dummy)
 int dummy;
 {
@@ -582,7 +578,7 @@ int dummy;
 
 	/* Cancel any buffered command output. */
 	wait_cursor = 0;
-	while (rp = request_head) {
+	while ((rp = request_head)) {
 	    request_head = rp->next;
 	    free ((char *)rp);
 	}
@@ -595,7 +591,7 @@ int dummy;
  * whenever any important data structures change, e.g., if the graphics
  * window is resized.
  */
-static
+static int
 gio_reset (notused, w, args)
 int notused;
 register Widget w;
@@ -672,7 +668,7 @@ char *args;
 /* GIO_SETGINMODETERM -- Set the GIN mode (cursor read) trailer codes,
  * expressed as octal constants in the input string argument.
  */
-static
+static int
 gio_setginmodeterm (dummy, str)
 int	dummy;
 char	*str;
@@ -747,7 +743,7 @@ Widget w;
 	 */
 	if (!g_havedata) {
 	    if (gw)
-		gio_reset (NULL, gw, NULL);
+		gio_reset (0, gw, NULL);
 
 	    /* If the client posted a resize escape sequence, send this
 	     * value to the client as a cursor read to signal the resize
@@ -847,6 +843,8 @@ char *strval;
 	 */
 	if (wait_cursor)
 	    gio_output();
+
+	return 0;
 }
 
 
@@ -1106,7 +1104,7 @@ again:
 				 * downloaded already by client.  Note
 				 * that this causes a gio_reset.
 				 */
-				gio_activate (NULL, 1);
+				gio_activate (0, 1);
 			    }
 			    if (gw)
 				GtActivate (gw);

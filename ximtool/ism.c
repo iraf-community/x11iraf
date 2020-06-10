@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <ctype.h>
+
 #include <sys/errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -43,7 +46,6 @@
 #define MAXCONN         5
 #define MAX_TRY         5
 
-void 	     xim_ismOpen(), xim_ismClose();
 IsmModule    ismNameToPtr();
 
 static void  ism_connectClient(), ism_disconnectClient(), ism_io();
@@ -51,6 +53,7 @@ static int   ism_read(), ism_write(), ism_type(), ism_parseSend();
 static int   ism_openSocket();
 static IsmIoChanPtr ism_getChannel();
 static char *ism_parse();
+static int ismObjects();
 
 static int ism_debug = 0;
 extern int errno;
@@ -103,7 +106,7 @@ register XimDataPtr xim;
 	    char *dev = ism_path;
 
 	    while (1) {
-		if (*dev == (char)NULL) {
+		if (*dev == '\0') {
 		    dev = ism_path;
 		    break;
 		} else if (*dev == ':') {
@@ -156,7 +159,7 @@ register XimDataPtr xim;
 	    chan = &xim->ism_client[i];
             if (chan->id) {
                 xim_removeInput (xim, chan->id);
-                chan->id = NULL;
+                chan->id = 0;
 	    }
 
 	    if (chan->connected)
@@ -169,7 +172,7 @@ register XimDataPtr xim;
 	chan = &(xim->ism_chan);
         if (chan->id) {
             xim_removeInput (xim, chan->id);
-            chan->id = NULL;
+            chan->id = 0;
         }
         close (chan->datain);
         unlink (chan->path);
@@ -242,7 +245,7 @@ register IsmIoChanPtr chan;
 	if (chan->id) {
 	    xim_removeInput (chan->xim, chan->id);
 	    chan->connected = 0;
-	    chan->id = NULL;
+	    chan->id = 0;
 	}
 }
 
@@ -261,7 +264,7 @@ XtInputId *id_addr;
     IsmIoChanPtr new_chan;
     int     datain = *fd_addr;
     int     dataout = chan->dataout;
-    int	    s, n, ip, type, count = 0;
+    int	    s, n, ip, count = 0;
     char    name[SZ_FNAME], path[SZ_FNAME];
     char    message[2*SZ_ISMBUF+1];
     char    buf[SZ_ISMBUF+1];
@@ -304,7 +307,7 @@ XtInputId *id_addr;
 
     ip = 0;
     incomplete_msg = 0;
-    while (text = ism_parse (message, &ip, &incomplete_msg, count)) {
+    while ((text = ism_parse (message, &ip, &incomplete_msg, count))) {
 
         if (incomplete_msg) {
 	    /* Save the incomplete message to the buffer for later parsing.
@@ -330,7 +333,7 @@ XtInputId *id_addr;
 	    sscanf (text, "connect %s", name);
 
 	    /* Get a new i/o channel. */
-	    if (new_chan = ism_getChannel (xim)) {
+	    if ((new_chan = ism_getChannel (xim))) {
 
                 /* Get path to be used for the unix domain socket. */
                 sprintf (path, DEF_ISM_TEMPLATE, getuid(), new_chan->id);
@@ -432,7 +435,7 @@ int	*ip;
 int	*incomplete;
 int	maxch;
 {
-	register int j, i = *ip, count=0;
+	register int j, i = *ip;
 	char	text[SZ_ISMBUF+1];
 
 	if (msg[*ip] == '\0') {
@@ -532,6 +535,7 @@ char	*text;
  * send messages to the ISM, which will be ignored if the client is not
  * connected.
  */
+void
 ism_evaluate (xim, object, command)
 register XimDataPtr xim;
 char	*object;
@@ -559,6 +563,7 @@ char	*command;
 
 /* ISM_MESSAGE -- Convenience wrapper for the evaluate procedure.
  */
+int
 ism_message (xim, object, command)
 register XimDataPtr xim;
 char	*object, *command;
@@ -611,12 +616,11 @@ static IsmIoChanPtr
 ism_getChannel (xim)
 register XimDataPtr xim;
 {
-        register IsmIoChanPtr chan;
         register int i;
 
         for (i=0;  i < XtNumber(xim->ism_client); i++) {
             if (!xim->ism_client[i].connected) {
-                xim->ism_client[i].id = (XtPointer) i;
+                xim->ism_client[i].id = i;
                 return (&xim->ism_client[i]);
 	    }
 	}
@@ -629,6 +633,7 @@ register XimDataPtr xim;
  *  return zero if this is a new object.  We keep a list so we don't keep
  *  creating the same object in the OBM each time a client connects.
  */
+static int
 ismObjects (name)
 char	*name;
 {

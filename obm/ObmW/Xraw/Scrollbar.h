@@ -35,8 +35,8 @@ SOFTWARE.
  ****************************************************************/
 
 #include <X11/Xmu/Converters.h>
-#include <X11/Xraw/XawInit.h>
-#include <X11/Xraw/Simple.h>
+#include "XrawInit.h"
+#include "Simple.h"
 
 /* Scrollbar resources:
 

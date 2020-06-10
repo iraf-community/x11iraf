@@ -306,7 +306,7 @@ WidgetClass class;
 	    create_arrowdarkgc(self);
 	    need_redisplay = True;
 	}
-    } else if (((XfwfArrowWidget)self)->xfwfFrame.shadowScheme = XfwfStipple) {
+    } else if (((XfwfArrowWidget)self)->xfwfFrame.shadowScheme == XfwfStipple) {
 	if (((XfwfArrowWidget)self)->xfwfFrame.topShadowStipple != ((XfwfArrowWidget)old)->xfwfFrame.topShadowStipple) {
 	    create_arrowlightgc(self);
 	    need_redisplay = True;

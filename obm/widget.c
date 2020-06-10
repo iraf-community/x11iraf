@@ -2,7 +2,7 @@
  */
 
 #include <stdlib.h>
-#include <ObmP.h>
+#include "ObmP.h"
 #include "widget.h"
 
 /*
@@ -429,7 +429,7 @@ register ObjClassRec classrec;
 		n = MAX_HASHCHARS;
 		for (hashval=0, ip=rp->name;  --n >= 0 && *ip;  ip++)
 		    hashval += (hashval + *ip);
-		if (hp = rhash[hashval%LEN_RHASH]) {
+		if ((hp = rhash[hashval%LEN_RHASH])) {
 		    for (  ;  hp->next;  hp = hp->next)
 			;
 		    hp->next = rp;
@@ -672,6 +672,7 @@ register ObmObject obj;
 
 /* WidgetEvaluate -- Evaluate a widget command or message.
  */
+int
 WidgetEvaluate (object, command)
 ObmObject object;
 char *command;
@@ -963,7 +964,7 @@ caddr_t call_data;
 		}
 		*op++ = ' ';
 		*op++ = '{';
-		for (ip=string;  *op = *ip++;  op++)
+		for (ip=string;  (*op = *ip++);  op++)
 		    ;
 		*op++ = '}';
 	    }
@@ -1356,7 +1357,7 @@ caddr_t call_data;
 	    if (status == TCL_OK)
 	        *((double *)call_data) = atof (Tcl_GetStringResult (obm->tcl));
 	    else {
-		char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
+		const char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
 		fprintf (stderr, "Error on line %d in %s: %s\n",
 		    Tcl_GetErrorLine (obm->tcl), cb->name,
 		    errstr ? errstr : Tcl_GetStringResult (obm->tcl));
@@ -1444,7 +1445,7 @@ char *message;
 	    }
 
 	    if (status != TCL_OK) {
-		char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
+		const char *errstr = Tcl_GetVar (obm->tcl, "errorInfo", 0);
 		fprintf (stderr, "Error on line %d in %s: %s\n",
 		    Tcl_GetErrorLine (obm->tcl), cb->name,
 		     errstr ? errstr : Tcl_GetStringResult (obm->tcl));
@@ -1577,7 +1578,7 @@ Cardinal *num_params;
 		    WidgetObject obj;
 		    char *name;
 
-		    if (obj = widgetToObject (obm, w))
+		    if ((obj = widgetToObject (obm, w)))
 			name = obj->widget.translation_table_name;
 		    else
 			name = XtName (w);
@@ -1804,7 +1805,7 @@ Cardinal *num_params;
 	    return;
 
 	menu_name = params[0];
-	if (obj = (WidgetObject) obmFindObject (obm, menu_name)) {
+	if ((obj = (WidgetObject) obmFindObject (obm, menu_name))) {
 	    menu = obj->widget.w;
 	    XtPopdown (menu);
 	}
@@ -1839,7 +1840,7 @@ char **argv;
 	for (hashval=0, ip=argv[1], n=MAX_HASHCHARS;  --n >= 0 && *ip;  ip++)
 	    hashval += (hashval + *ip);
 
-	if (rp = rhash[hashval%LEN_RHASH]) {
+	if ((rp = rhash[hashval%LEN_RHASH])) {
 	    for (  ;  rp;  rp = rp->next)
 		if (!strcmp(rp->name,argv[1]) &&
 		    obmClass (obj->core.classrec, rp->flag1, rp->flag2))
@@ -2019,7 +2020,7 @@ set_bval:	XtSetArg (args[0], rp->name, value);
 	    Widget value;
 
 	    /* Convert resource value. */
-	    if (value = XtNameToWidget (obm->toplevel, argv[2])) {
+	    if ((value = XtNameToWidget (obm->toplevel, argv[2]))) {
 		XtSetArg (args[0], rp->name, value);
 		XtSetValues (wp->w, args, 1);
 	    }
@@ -2078,7 +2079,7 @@ char **argv;
 	for (hashval=0, ip=argv[1], n=MAX_HASHCHARS;  --n >= 0 && *ip;  ip++)
 	    hashval += (hashval + *ip);
 
-	if (rp = rhash[hashval%LEN_RHASH]) {
+	if ((rp = rhash[hashval%LEN_RHASH])) {
 	    for (  ;  rp;  rp = rp->next)
 		if (!strcmp(rp->name,argv[1]) &&
 		    obmClass (obj->core.classrec, rp->flag1, rp->flag2))
@@ -2214,7 +2215,7 @@ char **argv;
 	for (ip=text;  *ip;  )
 	    *op++ = *ip++;
 
-	if (wp->text_newline = (*(ip-1) == '\n'))
+	if ((wp->text_newline = (*(ip-1) == '\n')))
 	    op--;
 
 	*op = '\0';
@@ -2309,7 +2310,7 @@ char **argv;
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
 
-	register nelem;
+	register int nelem;
 	register String *list;
 	register char *ip, *op;
 	XawListReturnStruct *itemp;
@@ -2384,7 +2385,7 @@ char **argv;
 		}
 		*op++ = ' ';
 		*op++ = '{';
-		for (ip=string;  *op = *ip++;  op++)
+		for (ip=string;  (*op = *ip++);  op++)
 		    ;
 		*op++ = '}';
 	    }
@@ -2506,7 +2507,7 @@ char **argv;
 /* get_itemno -- Get the item number of an item in a list widget, given
  * either the ascii representation of the item number, or the item string.
  */
-static
+static int
 get_itemno (obj, itemstr)
 WidgetObject obj;
 char *itemstr;
@@ -2890,7 +2891,8 @@ char **argv;
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
 	Boolean append;
-	char *list, **items, buf[SZ_LINE];
+	char *list, buf[SZ_LINE];
+	const char **items;
 	int nitems, item;
 	static char **sv_items = NULL;
 	static int sv_nitems;
@@ -2944,7 +2946,7 @@ char **argv;
 	    }
 	}
 
-ret:	free ((char *) items);
+ret:	Tcl_Free ((char *) items);
 	return (TCL_OK);
 }
 
@@ -2959,7 +2961,7 @@ Tcl_Interp *tcl;
 ListTreeItem *parent;
 char	*item;
 {
-	char **fields, **entry;
+	const char **fields, **entry;
 	int i, nentries, nfields, field;
 	char buf[SZ_LINE];
 	ListTreeItem *level;
@@ -3313,7 +3315,7 @@ char **argv;
 
 	register int i, j;
 	int	nrows, ncols, ndrows=0, ndcols=0, onrows, oncols;
-	char	*list = NULL, **rows = NULL, **cols = NULL;
+	const char	*list = NULL, **rows = NULL, **cols = NULL;
 
 
 	if (argc < 4)
@@ -3492,7 +3494,7 @@ char **argv;
 	unsigned long bg, fg;
 	int	cols[128], widths[128];
 	int	nitems, row, col, nrows, ncols, i;
-	String	*items;
+	const char	**items;
 	char	*attr;
 
 
@@ -3514,6 +3516,7 @@ char **argv;
 	            cols[i] = atoi(items[i]) - 1;
 	    }
 	}
+	Tcl_Free((char *)items);
 	attr  	= argv[2];
 
 	/* Get current table size. */
@@ -3527,10 +3530,12 @@ char **argv;
         	if (Tcl_SplitList (tcl, argv[3], &nitems, &items) != TCL_OK)
 	            return (TCL_ERROR);
 	        if (nitems > 128)
+		    Tcl_Free((char *)items);
                     return (TCL_ERROR);
 	        for (i=0; i < nitems; i++)
 	            widths[i] = atoi(items[i]) - 1;
 	        XawTableSetMultiColumnWidths (wp->w, cols, widths, nitems);
+		Tcl_Free((char *)items);
 	    }
 
 	} else if (strcmp(attr, "background") == 0) {
@@ -4109,7 +4114,7 @@ char **argv;
 	int nchildren, i;
 
 	for (i=1, nchildren=0;  i < argc;  i++)
-	    if (w = XtNameToWidget (wp->w, argv[i]))
+	    if ((w = XtNameToWidget (wp->w, argv[i])))
 		children[nchildren++] = w;
 		
 	XtManageChildren (children, nchildren);
@@ -4141,7 +4146,7 @@ char **argv;
 	int nchildren, i;
 
 	for (i=1, nchildren=0;  i < argc;  i++)
-	    if (w = XtNameToWidget (wp->w, argv[i]))
+	    if ((w = XtNameToWidget (wp->w, argv[i])))
 		children[nchildren++] = w;
 
 	XtUnmanageChildren (children, nchildren);
@@ -4779,7 +4784,7 @@ Boolean *continue_to_dispatch;
 			    ip++;
 		} else {
 		    /* This case occurs when only a modifier is typed. */
-		    for (ip = "??";  *op++ = *ip++; )
+		    for (ip = "??";  (*op++ = *ip++); )
 			;
 		}
 		*op++ = ' ';
@@ -4820,7 +4825,7 @@ Boolean *continue_to_dispatch;
 			if ((ev->key_vector[j]) & (1 << i)) {
 			    keysym = XKeycodeToKeysym (obm->display,
 				j * 8 + i, 0);
-			    if (ip = XKeysymToString (keysym)) {
+			    if ((ip = XKeysymToString (keysym))) {
 				while (*ip)
 				    *op++ = *ip++;
 				*op++ = ' ';

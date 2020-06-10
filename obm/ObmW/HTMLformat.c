@@ -59,6 +59,7 @@ struct timezone Tz;
 #endif
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <ctype.h>
 #include "HTMLP.h"
 
@@ -111,6 +112,7 @@ extern void AddNewForm();
 extern void PrepareFormEnd();
 extern char *ComposeCommaList();
 extern void FreeCommaList();
+extern int IsIsMapForm();
 
 
 /*

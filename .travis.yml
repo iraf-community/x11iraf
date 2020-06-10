@@ -5,9 +5,6 @@ matrix:
       addons:
         apt:
           packages:
-            - xutils-dev
-            - csh
-            - libxt-dev
             - libncurses-dev
             - libxaw7-dev
             - libxmu-dev

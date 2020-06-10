@@ -100,7 +100,7 @@ typedef struct _ListTreeActivateStruct {
 void ListTreeRefresh P_((Widget w));
 void ListTreeRefreshOff P_((Widget w));
 void ListTreeRefreshOn P_((Widget w));
-ListTreeItem *ListTreeAdd P_((Widget w, ListTreeItem *parent, char *string));
+ListTreeItem *ListTreeAdd P_((Widget w, ListTreeItem *parent, const char *string));
 void ListTreeRenameItem P_((Widget w, ListTreeItem *item, char *string));
 int ListTreeDelete P_((Widget w, ListTreeItem *item));
 int ListTreeDeleteChildren P_((Widget w, ListTreeItem *item));
@@ -112,6 +112,9 @@ ListTreeItem *ListTreeFindSiblingName P_((Widget w, ListTreeItem *item, char *na
 ListTreeItem *ListTreeFindChildName P_((Widget w, ListTreeItem *item, char *name));
 void ListTreeHighlightItem P_((Widget w, ListTreeItem *item));
 ListTreeItem *ListTreeFirstItem P_((Widget w));
+void ListTreeOpenAll P_((Widget w, ListTreeItem *start, int child_only));
+void ListTreeCloseAll P_((Widget w, ListTreeItem *start, int child_only));
+
 #ifdef USE_RDD
 void ListTreeHighlightDrop P_((Widget w, XEvent *event, String *params, Cardinal *num_params));
 ListTreeReturnStruct *ListTreeGetDrop P_((Widget w));

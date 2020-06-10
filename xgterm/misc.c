@@ -34,6 +34,7 @@
 #include <ctype.h>
 #include <pwd.h>
 #include <errno.h>
+#include <sys/wait.h>
 
 #include <X11/Xatom.h>
 #include <X11/cursorfont.h>
@@ -411,6 +412,7 @@ void HandleBellPropertyChange(w, data, ev, more)
     }
 }
 
+void
 Redraw()
 {
 	extern XgtermWidget term;
@@ -1338,8 +1340,8 @@ set_workstation_state (state)
 	update_vttekmode();
 }
 
-gtermio_open_workstation()  { set_workstation_state(1); }
-gtermio_close_workstation() { set_workstation_state(0); }
+void gtermio_open_workstation()  { set_workstation_state(1); }
+void gtermio_close_workstation() { set_workstation_state(0); }
 
 
 /* GTERMIO protocol module functions.
@@ -1359,6 +1361,7 @@ int (*gtermio_SGMT)();		XtPointer gtermio_SGMT_data;
  * functions, called by the xgterm code during execution to process
  * graphics data, activate or deactivate the graphics window, and so on.
  */
+void
 gtermio_register (functions, nfunc)
 struct GT_function *functions;
 int nfunc;
@@ -1414,6 +1417,7 @@ char *name;
 
 /* gt_reset -- Reset the graphics window.
  */
+void
 gt_reset()
 {
 	if (gtermio_reset)
@@ -1422,6 +1426,7 @@ gt_reset()
 
 /* gt_clear -- Clear the graphics window.
  */
+void
 gt_clear()
 {
 	if (gtermio_clear)
@@ -1432,6 +1437,7 @@ gt_clear()
  * number of bytes of data left after the graphics data is removed is
  * returned as the function value.
  */
+int
 gt_input (bptr, bcnt)
 char *bptr;
 int bcnt;
@@ -1445,6 +1451,7 @@ int bcnt;
 /* gt_flush -- Process the gterm output buffer once.  Any buffered input
  * graphics data is processed and output to the screen.
  */
+int
 gt_flush()
 {
     if (gtermio_output)
@@ -1455,6 +1462,7 @@ gt_flush()
 
 /* gt_activate -- Activate the graphics window.
  */
+void
 gt_activate()
 {
 	if (gtermio_activate)
@@ -1463,6 +1471,7 @@ gt_activate()
 
 /* gt_deactivate -- Deactivate the graphics window.
  */
+void
 gt_deactivate()
 {
 	if (gtermio_activate)
@@ -1471,6 +1480,7 @@ gt_deactivate()
 
 /* gt_activated -- Test whether the graphics window is activated.
  */
+int
 gt_activated()
 {
 	if (gtermio_activate)
@@ -1481,13 +1491,14 @@ gt_activated()
 
 /* gt_status -- Test whether the graphics window is instantiated or reset.
  */
+int
 gt_status()
 {
 	if (gtermio_status) {
 	    char name[256];
 	    int status;
 
-	    if (status = (*gtermio_status)(gtermio_status_data, name, NULL)) {
+	    if ((status = (*gtermio_status)(gtermio_status_data, name, NULL))) {
 		strncpy (gtermio_appname, name, SZ_APPNAME);
 		gtermio_appname[SZ_APPNAME] = '\0';
 	    } else
@@ -1504,6 +1515,7 @@ gt_status()
  * disabled graphics/text mode switches will be ignored and all output will
  * be directed to the text window.
  */
+int
 gt_enable (state)
 int state;
 {
@@ -1515,6 +1527,7 @@ int state;
 
 /* gt_tekmode -- Activate the graphics window.
  */
+int
 gt_tekmode (state)
 int state;
 {
@@ -1524,6 +1537,7 @@ int state;
 	if (gtermio_tekmode) {
 	    tekEmu = ((*gtermio_tekmode)(gtermio_tekmode_data, state));
 	    screen->TekEmu = tekEmu;
+	    return tekEmu;
 	} else
 	    return (0);
 }
@@ -1531,6 +1545,7 @@ int state;
 /* g_set_ginmode_trailers -- Set the trailer codes used to deliminate a
  * cursor read value in the gtermio code.
  */
+void
 gt_set_ginmode_trailers (trailers)
 char *trailers;
 {

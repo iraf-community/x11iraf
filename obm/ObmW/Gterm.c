@@ -529,7 +529,7 @@ static void gm_focusin(), gm_focusout(), gm_refocus();
 static void gm_request_translations(), gm_load_translations();
 static int gm_curpos();
 
-static set_default_color_index();
+static void set_default_color_index();
 static void inherit_default_colormap();
 static void update_default_colormap();
 static void update_transients(), update_cursor();
@@ -586,8 +586,9 @@ static XImage *GetCachedXImage();				/* MF004 */
 
 static char 	*dbg_wSize();			/* debug utils		 */
 static char 	*dbg_visStr();
-
-extern double atof();
+static void dbg_printCmaps();
+static void dbg_printMappings();
+static void dbg_printRasters();
 
 
 
@@ -618,7 +619,7 @@ GtermClassRec gtermClassRec = {
     /* num_actions		*/	XtNumber(gtermActionsList),
     /* resources		*/	resources,
     /* resource_count		*/	XtNumber(resources),
-    /* xrm_class		*/	(XrmClass)NULL,
+    /* xrm_class		*/	0,
     /* compress_motion		*/	True,
     /* compress_exposure	*/	True,
     /* compress_enterleave	*/	True,
@@ -716,10 +717,10 @@ Initialize (request, new)
         if (!strncmp(w->gterm.cmapName,"default",7)) {
             char *p;
 
-            if (p=strstr(w->gterm.cmapName,"[")) {
-                if (p=strstr(p,",")) {
+            if ((p=strstr(w->gterm.cmapName,"["))) {
+                if ((p=strstr(p,","))) {
                     strcpy(global_cmapname,++p);
-                    if (p=strstr(global_cmapname,"]")) {
+                    if ((p=strstr(global_cmapname,"]"))) {
                         *p='\0';                /* cut off the last ']' */
                         strcpy(w->gterm.cmapName,global_cmapname);
                     }

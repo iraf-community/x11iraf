@@ -2,7 +2,7 @@
 #define _XawContainer_h
 
 
-#include <X11/Xraw/XawInit.h>
+#include "XrawInit.h"
 
 /***********************************************************************
  *

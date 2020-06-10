@@ -28,6 +28,7 @@
 #include "ptyx.h"		/* gets Xt headers, too */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <ctype.h>
 #include <X11/Xatom.h>
 

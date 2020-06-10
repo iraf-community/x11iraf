@@ -6,6 +6,9 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -39,37 +42,41 @@
 #include <X11/Xaw/Toggle.h>
 #include <X11/Xaw/Tree.h>
 #include <X11/Xaw/Viewport.h>
+#include <X11/Xmu/WinUtil.h>
 
-#include <ObmW/Arrow.h>
-#include <ObmW/Board.h>
-#include <ObmW/Button.h>
-#include <ObmW/Common.h>
-#include <ObmW/Frame.h>
-#include <ObmW/Group.h>
-#include <ObmW/Gterm.h>
+#include "ObmW/Arrow.h"
+#include "ObmW/Board.h"
+#include "ObmW/Button.h"
+#include "ObmW/Common.h"
+#include "ObmW/Frame.h"
+#include "ObmW/Group.h"
+#include "ObmW/Gterm.h"
 #ifndef OSI_COMPLIANT
-#include <ObmW/HTML.h>
+#include "ObmW/HTML.h"
 #endif
-#include <ObmW/Icon.h>
-#include <ObmW/Label.h>
-#include <ObmW/Layout.h>
-#include <ObmW/ListTree.h>
-#include <ObmW/MenuBar.h>
-#include <ObmW/MultiList.h>
-#include <ObmW/RadioGrp.h>
-#include <ObmW/RowCol.h>
-#include <ObmW/Scrollbar.h>
-#include <ObmW/Slider2.h>
-#include <ObmW/Tabs.h>
-#include <ObmW/Toggle.h>
+#include "ObmW/Icon.h"
+#include "ObmW/Label.h"
+#include "ObmW/Layout.h"
+#include "ObmW/ListTree.h"
+#include "ObmW/MenuBar.h"
+#include "ObmW/MultiList.h"
+#include "ObmW/RadioGrp.h"
+#include "ObmW/RowCol.h"
+#include "ObmW/Scrollbar.h"
+#include "ObmW/Slider2.h"
+#include "ObmW/Tabs.h"
+#include "ObmW/Table.h"
+#include "ObmW/Toggle.h"
 
-#include <X11/Xraw/Separator.h>
+#include "ObmW/Xraw/Separator.h"
 #ifndef OSI_COMPLIANT
-#include <X11/Xraw/Table.h>
+#include "ObmW/Xraw/Table.h"
 #endif
 
 #include <X11/xpm.h>
 #include <tcl/tcl.h>
+int Tcl_GetErrorLine();
+void Tcl_SetErrorLine();
 
 /* Size limiting definitions. */
 #define SZ_NAME		128		/* class or object name */
@@ -494,18 +501,20 @@ typedef unsigned char	uchar;
 #define	TRUESTR		"1"
 #define	FALSESTR	"0"
 
-extern	ObmObject obmFindObject();
+int obmClientCommand ();
+extern int obmClass();
+extern ObmObject obmFindObject();
 extern	ObjClassRec obmGetClassrec();
 extern	Widget widgetGetPointer();
 extern	ObmCallback obmAddCallback();
 extern	void widget_setTTName();
 extern	char *widget_getTTName();
 extern	void obmRemoveCallback();
-extern	void obmNewObject();
 extern	void obmFreeObject();
 extern	void obmDestroyObject();
 extern	void obmGenericClassDestroy();
 extern	void obmDisplay(), obmUndisplay();
+extern int obm_nameToObjectList ();
 extern  void freeMenu();
 extern  void freeIcon();
 extern	Pixmap findBitmap();

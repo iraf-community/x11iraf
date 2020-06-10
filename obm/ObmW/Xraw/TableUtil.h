@@ -19,7 +19,7 @@ Commercial  usage is  also  possible  with  participation of the author.
 
 #include <stdio.h>
 #include <X11/Intrinsic.h>
-#include <X11/Xraw/Table.h>
+#include "Table.h"
 
 #if __STDC__ || defined(__cplusplus)
 #define F_PROTO(s) s
