@@ -75,7 +75,7 @@ haven't, you can install them with:
 
 Click "Install" to download and install Xcode Command Line
 Tools. Additionally, you need to install XQuartz from
-https://www.xquartz.org/.
+[www.xquartz.org](https://www.xquartz.org/).
 
 For the `ism_wcspix.e` helper of XImtool, you also need a working IRAF
 installation. Make sure that the `xc` compiler works and can be found in the
