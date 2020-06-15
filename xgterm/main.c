@@ -113,6 +113,7 @@ SOFTWARE.
 #define NEW_SPAWN
 #define USE_HANDSHAKE
 #define USE_USG_PTYS
+#define USE_SYSV_PGRP
 #define TMODE(ind,var) if (ttymodelist[ind].set) var = ttymodelist[ind].value
 #define USE_STRUCT_WINSIZE 1
 #define TTYSIZE_STRUCT struct winsize
