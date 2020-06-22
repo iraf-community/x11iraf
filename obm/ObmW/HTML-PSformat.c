@@ -51,7 +51,7 @@
 
 #include <stdarg.h>
 
-#if !defined(__DARWIN__)
+#if !defined(__APPLE__)
 #include <malloc.h>
 #endif
 

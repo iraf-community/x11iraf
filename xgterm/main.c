@@ -108,7 +108,7 @@ SOFTWARE.
 #define USE_SYSV_SIGHUP
 #endif
 
-#ifdef __DARWIN__
+#ifdef __APPLE__
 #define NEW_GET_PTY
 #define NEW_SPAWN
 #define USE_HANDSHAKE
@@ -1524,7 +1524,7 @@ char *name;
 #ifdef NEW_GET_PTY
 
 
-#ifdef __DARWIN__
+#ifdef __APPLE__
 #define USE_OPENPTY 1
 static int opened_tty = -1;
 #endif
@@ -2565,7 +2565,7 @@ spawn(void)
 		int ptyfd = 0;
 		char *pty_name = 0;
 
-#ifdef __DARWIN__
+#ifdef __APPLE__
  ; 
 #else
 		setpgrp();
