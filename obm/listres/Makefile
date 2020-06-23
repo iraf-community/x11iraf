@@ -3,7 +3,7 @@ OBJS = listres.o AllWidgets.o
 CFLAGS += -I.. -I../ObmW
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
-    CFLAGS += -I/usr/X11/include -D__DARWIN__
+    CFLAGS += -I/usr/X11/include
     LDFLAGS += -L/usr/X11/lib
 endif
 

@@ -5,7 +5,7 @@ all: obmsh
 CFLAGS += -I../obm
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
-    CFLAGS += -I/usr/X11/include -D__DARWIN__
+    CFLAGS += -I/usr/X11/include
     LDFLAGS += -L/usr/X11/lib
 endif
 

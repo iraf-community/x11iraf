@@ -170,7 +170,7 @@ register XimDataPtr xim;
 	int keepalive;
 
 
-#if defined (__DARWIN__) || defined(__CYGWIN__)
+#if defined (__APPLE__) || defined(__CYGWIN__)
 	/* On OS X we don't use fifos. */
 	xim->input_fifo = "none";
 	return (NULL);
