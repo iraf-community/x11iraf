@@ -522,6 +522,10 @@ extern int XawTableGetColumnWidth          Xraw_PROTO((Widget w,
 extern int XawTableGetColumnPixelWidth          Xraw_PROTO((Widget w,
 						        int   column));
 
+extern void XawTableSetMultiColumnWidths	Xraw_PROTO((Widget w,
+							int *columns,
+							int *widths,
+							int ncols));
 
 
 /*#########################################################################*/

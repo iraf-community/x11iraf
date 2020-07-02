@@ -66,10 +66,8 @@ mosaic-x@ncsa.uiuc.edu.
 ObmW Table widget
 =================
 
-Files: Table.c Table.h TableP.h TableUtil.c TableUtil.h
-       Xraw/Table.h Xraw/TableP.h Xraw/TableUtil.h
-       Xraw/ScrolledTable.h Xraw/xraw_table.h 
-       Xraw/Frame.h Xraw/FrameP.h 
+Files: Table.c TableUtil.c Xraw/Table.h Xraw/TableP.h Xraw/TableUtil.h
+       Xraw/ScrolledTable.h Xraw/Frame.h Xraw/FrameP.h
 
 Table widget
 Copyright by Vladimir T. Romanovski

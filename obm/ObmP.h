@@ -65,7 +65,6 @@
 #include "ObmW/Scrollbar.h"
 #include "ObmW/Slider2.h"
 #include "ObmW/Tabs.h"
-#include "ObmW/Table.h"
 #include "ObmW/Toggle.h"
 
 #include "ObmW/Xraw/Separator.h"
