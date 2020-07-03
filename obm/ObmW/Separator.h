@@ -7,7 +7,7 @@
  *
  ***********************************************************************/
 
-#include "Xraw/XrawInit.h"
+#include "XrawInit.h"
 
 /* Resources:
 

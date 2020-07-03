@@ -3,9 +3,9 @@
 #include <X11/IntrinsicP.h>
 #include <X11/StringDefs.h>
 
-#include "Xraw/XrawInit.h"
-#include "Xraw/3d.h"
-#include "Xraw/ContainerP.h"
+#include "XrawInit.h"
+#include "Table3d.h"
+#include "ContainerP.h"
 
 
 

@@ -7,9 +7,9 @@
 #include <X11/StringDefs.h>
 #include <X11/Xos.h>
 
-#include "Xraw/XrawInit.h"
+#include "XrawInit.h"
 #include "SeparatorP.h"
-#include "Xraw/Container.h"
+#include "Container.h"
 
 #include <X11/Xmu/Converters.h>
 #include <X11/Xmu/CharSet.h>

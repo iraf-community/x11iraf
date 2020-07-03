@@ -4,7 +4,7 @@
 #include <X11/IntrinsicP.h>
 #include <X11/Xaw/Simple.h>
 
-#include "Xraw/XrawInit.h"
+#include "XrawInit.h"
 
 #define SIMPLE(w) ((SimpleWidget) w)->simple
 
