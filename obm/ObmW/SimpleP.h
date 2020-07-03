@@ -2,9 +2,9 @@
 #define _SimpleP_h
 
 #include <X11/IntrinsicP.h>
+#include <X11/Xaw/Simple.h>
 
-#include "XrawInit.h"
-#include "Simple.h"
+#include "Xraw/XrawInit.h"
 
 #define SIMPLE(w) ((SimpleWidget) w)->simple
 

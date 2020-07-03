@@ -9,6 +9,7 @@
 
 #include "Xraw/XrawInit.h"
 #include "SeparatorP.h"
+#include "Xraw/Container.h"
 
 #include <X11/Xmu/Converters.h>
 #include <X11/Xmu/CharSet.h>

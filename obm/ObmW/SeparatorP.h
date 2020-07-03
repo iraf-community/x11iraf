@@ -13,7 +13,7 @@
  ***********************************************************************/
 
 #include <X11/Xmu/Converters.h>
-#include "Xraw/SimpleP.h"
+#include "SimpleP.h"
 #include "Separator.h"
 
 

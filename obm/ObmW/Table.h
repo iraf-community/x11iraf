@@ -19,7 +19,6 @@ Commercial  usage is  also  possible  with  participation of the author.
 
 #include <X11/Xmu/Converters.h>
 
-#include "Xraw/Simple.h"
 #include "Xraw/XrawInit.h"
 
 

@@ -8,7 +8,6 @@
  ***********************************************************************/
 
 #include "Xraw/XrawInit.h"
-#include "Xraw/Simple.h"
 
 /* Resources:
 
