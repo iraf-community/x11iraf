@@ -26,7 +26,7 @@ clean:
 	$(MAKE) -C obmsh clean
 	$(MAKE) -C obm clean
 
-install: xgterm ximtool xtapemon
+install: xgterm ximtool
 	mkdir -p ${PREFIX}/bin ${PREFIX}/man/man1
 	install -m755 xgterm/xgterm ${PREFIX}/bin
 	install -m755 xgterm/xgterm.man ${PREFIX}/man/man1/xgterm.1
