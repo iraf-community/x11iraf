@@ -8,7 +8,7 @@
 #include <X11/Xos.h>
 
 #include "Xraw/XrawInit.h"
-#include "Xraw/SeparatorP.h"
+#include "SeparatorP.h"
 
 #include <X11/Xmu/Converters.h>
 #include <X11/Xmu/CharSet.h>

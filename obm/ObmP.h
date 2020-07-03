@@ -67,9 +67,9 @@
 #include "ObmW/Tabs.h"
 #include "ObmW/Toggle.h"
 
-#include "ObmW/Xraw/Separator.h"
 #ifndef OSI_COMPLIANT
-#include "ObmW/Xraw/Table.h"
+#include "ObmW/Separator.h"
+#include "ObmW/Table.h"
 #endif
 
 #include <X11/xpm.h>
@@ -273,8 +273,10 @@ objClassRec UiObjects[] = {
 			WidgetClassInit, NULL, NULL, NULL, NULL, NULL },
 	{ "Scrollbar",	OtNonShell, &scrollbarWidgetClass, WtScrollbar,
 			WidgetClassInit, NULL, NULL, NULL, NULL, NULL },
+#ifndef OSI_COMPLIANT
 	{ "Separator",	OtNonShell, &separatorWidgetClass, WtSeparator,
 			WidgetClassInit, NULL, NULL, NULL, NULL, NULL },
+#endif
 	{ "SimpleMenu",	OtShell, &simpleMenuWidgetClass, WtSimpleMenu,
 			WidgetClassInit, NULL, NULL, NULL, NULL, NULL },
 	{ "Sme",	OtNonShell, &smeObjectClass, WtSme,
