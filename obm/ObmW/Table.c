@@ -33,11 +33,11 @@ Commercial  usage is  also  possible  with  participation of the author.
 #include "Xraw/3d.h"
 #include "TableP.h"
 #include "TableUtil.h"
-#include "Xraw/Scrollbar.h"
 #include "ScrolledTable.h"
 
 #include <X11/Xaw/AsciiText.h>
 #include <X11/Xaw/Viewport.h>
+#include <X11/Xaw/Scrollbar.h>
 
 #ifdef EBUG_XRAW_MALLOC
 #include <dbmalloc/malloc.h>
