@@ -42,6 +42,7 @@
 #include <X11/Xaw/Toggle.h>
 #include <X11/Xaw/Tree.h>
 #include <X11/Xaw/Viewport.h>
+#include <X11/Xaw3d/Layout.h>
 #include <X11/Xmu/WinUtil.h>
 
 #include "ObmW/Arrow.h"
@@ -56,7 +57,6 @@
 #endif
 #include "ObmW/Icon.h"
 #include "ObmW/Label.h"
-#include "ObmW/Layout.h"
 #include "ObmW/ListTree.h"
 #include "ObmW/MenuBar.h"
 #include "ObmW/MultiList.h"
@@ -65,12 +65,11 @@
 #include "ObmW/Scrollbar.h"
 #include "ObmW/Slider2.h"
 #include "ObmW/Tabs.h"
-#include "ObmW/Table.h"
 #include "ObmW/Toggle.h"
 
-#include "ObmW/Xraw/Separator.h"
 #ifndef OSI_COMPLIANT
-#include "ObmW/Xraw/Table.h"
+#include "ObmW/Separator.h"
+#include "ObmW/Table.h"
 #endif
 
 #include <X11/xpm.h>
@@ -274,8 +273,10 @@ objClassRec UiObjects[] = {
 			WidgetClassInit, NULL, NULL, NULL, NULL, NULL },
 	{ "Scrollbar",	OtNonShell, &scrollbarWidgetClass, WtScrollbar,
 			WidgetClassInit, NULL, NULL, NULL, NULL, NULL },
+#ifndef OSI_COMPLIANT
 	{ "Separator",	OtNonShell, &separatorWidgetClass, WtSeparator,
 			WidgetClassInit, NULL, NULL, NULL, NULL, NULL },
+#endif
 	{ "SimpleMenu",	OtShell, &simpleMenuWidgetClass, WtSimpleMenu,
 			WidgetClassInit, NULL, NULL, NULL, NULL, NULL },
 	{ "Sme",	OtNonShell, &smeObjectClass, WtSme,

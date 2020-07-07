@@ -62,7 +62,7 @@
 static char rcs_ident[] = "$Header: /users/romsky/Xraw/last/Xraw/RCS/color.c,v 1.4 1995/12/09 08:03:23 romsky Exp $";
 
 #include <X11/Xlib.h>
-#include "Xraw/color.h"
+#include "color.h"
 
 #define	MAX_INTENSITY	65535			    /* for X11 */
 

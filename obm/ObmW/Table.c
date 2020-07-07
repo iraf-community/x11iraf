@@ -29,16 +29,15 @@ Commercial  usage is  also  possible  with  participation of the author.
 #include <X11/Xmu/Converters.h>
 #include <X11/Xmu/Drawing.h>
 
-#include "Xraw/XrawInit.h"
-#include "Xraw/3d.h"
-#include "Xraw/TableP.h"
-#include "Xraw/TableUtil.h"
-#include "Xraw/Frame.h"
-#include "Xraw/Scrollbar.h"
-#include "Xraw/ScrolledTable.h"
+#include "XrawInit.h"
+#include "Table3d.h"
+#include "TableP.h"
+#include "TableUtil.h"
+#include "ScrolledTable.h"
 
 #include <X11/Xaw/AsciiText.h>
 #include <X11/Xaw/Viewport.h>
+#include <X11/Xaw/Scrollbar.h>
 
 #ifdef EBUG_XRAW_MALLOC
 #include <dbmalloc/malloc.h>

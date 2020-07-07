@@ -1,5 +1,5 @@
-#include "Xraw/3d.h"
-#include "Xraw/color.h"
+#include "Table3d.h"
+#include "color.h"
 
 #define WHITE WhitePixelOfScreen
 #define BLACK BlackPixelOfScreen

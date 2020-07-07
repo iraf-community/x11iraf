@@ -14,7 +14,7 @@ Commercial  usage is  also  possible  with  participation of the author.
 	
 *************************************************************************/
 
-#include "Xraw/TableUtil.h"
+#include "TableUtil.h"
 
 #ifdef EBUG_XRAW_MALLOC
 #include <dbmalloc/malloc.h>
