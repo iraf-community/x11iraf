@@ -1388,7 +1388,7 @@ usedef:	    /* Allocate private r/w colors from default colormap. */
 	     * does not yet exist we create one.  Multiple gterm widget
 	     * instances may share the same colormap.
 	     */
-	    long timeval, time();
+	    long timeval;
 	    int shadow;
 
 
