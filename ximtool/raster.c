@@ -184,7 +184,7 @@ int hardreset;
 	    GtRasterInit (gt);
 	    if (DBG_RASTER)
 		fprintf (stderr, "xim_initialize: Raster init.....DONE\n");
-	    for (i=1;  i <= MAX_FRAMES;  i++)
+	    for (i=0;  i < MAX_FRAMES;  i++)
 		xim->frames[i].frameno = 0;
 
 	    cf = &xim->fb_config[config-1];
