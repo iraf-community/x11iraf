@@ -73,7 +73,7 @@
 #endif
 
 #include <X11/xpm.h>
-#include <tcl/tcl.h>
+#include <tcl.h>
 int Tcl_GetErrorLine();
 void Tcl_SetErrorLine();
 

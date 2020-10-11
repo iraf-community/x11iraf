@@ -6,7 +6,8 @@ all: ximtool clients
 
 .PHONY: clients
 
-CFLAGS += -I../obm
+CFLAGS += -I../obm -I${TCL_INCLUDE_DIR}
+
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
     CFLAGS += -I/usr/X11/include

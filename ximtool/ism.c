@@ -12,7 +12,7 @@
 
 #include <X11/Intrinsic.h>
 #include <X11/StringDefs.h>
-#include <tcl/tcl.h>
+#include <tcl.h>
 #include <Obm.h>
 #include <ObmW/Gterm.h>
 #include "ximtool.h"
