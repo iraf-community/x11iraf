@@ -2,8 +2,11 @@ all: xgterm ximtool
 
 PREFIX = /usr/local
 
+export TCL_INCLUDE_DIR = /usr/include/tcl
+
 .PHONY: xgterm ximtool xtapemon obmsh
 
+	
 obm/libobm.a:
 	$(MAKE) -C obm
 
