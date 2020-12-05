@@ -3,7 +3,7 @@ OBJS = button.o charproc.o cursor.o data.o gtermio.o input.o main.o	\
 
 all: xgterm
 
-CFLAGS += -I../obm -DALLOWLOGGING
+CFLAGS += -I../obm -DALLOWLOGGING -Wno-implicit-function-declaration -Wno-implicit-int
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
     CFLAGS += -I/usr/X11/include

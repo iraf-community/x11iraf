@@ -2946,6 +2946,7 @@ char **argv;
 	int raster, ctype;
 	Pixmap pixmap;
 	char *s_pixmap;
+	int createPixmap();
 
 	if (argc < 3)
 	    return (TCL_ERROR);
