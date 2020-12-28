@@ -35,7 +35,7 @@ files.
 
 ## Contributing
 
-The x11iraf package is developed on
+The x11iraf package is maintained on
 [Github](https://github.com/iraf-community/x11iraf). The preferred way
 to report a bug is to create a new issue on the [x11iraf GitHub
 issue](https://github.com/iraf-community/x11iraf/issues) page.  To
@@ -64,7 +64,7 @@ IRAF installation with its development tools is required.
 
 On Debian and its derivatives (Ubuntu, Mint, Devuan, Raspbian etc.):
 
-    $ sudo apt install gcc make libncurses-dev tcl-dev
+    $ sudo apt install gcc make bison flex libncurses-dev tcl-dev
     $ sudo apt install libxaw7-dev libxmu-dev xaw3dg-dev libxpm-dev
     $ sudo apt install iraf-dev
 
