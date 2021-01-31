@@ -1,0 +1,50 @@
+name: X11IRAF CI test
+
+on: [push, pull_request]
+
+jobs:
+  tests:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        include:
+          - name: Ubuntu 20.04 Focal x86_64
+            os: ubuntu-20.04
+
+          - name: macOS 10.15 Catalina x86_64
+            os: macos-10.15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup dependencies on Ubuntu 64 bit
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libncurses-dev libxaw7-dev libxmu-dev libxpm-dev xaw3dg-dev tcl-dev iraf-dev xauth xvfb
+
+      - name: Setup XQuartz on macOS
+        if: runner.os == 'macos'
+        run: |
+          wget https://dl.bintray.com/xquartz/downloads/XQuartz-2.7.11.dmg
+          sudo hdiutil attach XQuartz-2.7.11.dmg
+          sudo installer -package /Volumes/XQuartz-2.7.11/XQuartz.pkg -target /
+          sudo rm -f /usr/local/include/tcl.h
+
+      - name: build X11IRAF
+        run: |
+          make
+
+      - name: Simple CI tests
+        run: |
+          test -x xgterm/xgterm
+          test -x ximtool/ximtool
+          if [ -x /usr/bin/xc ] ; then
+            test -x ximtool/clients/ism_wcspix.e
+          fi
+          if [ -x /usr/bin/xvfb-run ]; then
+            xvfb-run xgterm/xgterm -e sleep 1
+          fi
