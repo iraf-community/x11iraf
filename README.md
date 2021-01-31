@@ -1,5 +1,5 @@
 [![GitHub release](https://img.shields.io/github/release/iraf-community/x11iraf.svg)](https://github.com/iraf-community/x11iraf/releases/latest)
-[![X11IRAF's Travis CI Status](https://travis-ci.com/iraf-community/x11iraf.svg)](https://travis-ci.com/iraf-community/x11iraf)
+[![X11IRAF CI test](https://github.com/iraf-community/x11iraf/workflows/X11IRAF%20CI%20test/badge.svg)](https://github.com/iraf-community/x11iraf/actions?query=workflow%3A%22X11IRAF+CI+test%22)
 
 # X11IRAF
 
