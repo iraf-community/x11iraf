@@ -28,7 +28,7 @@ provides the following programs:
 The source code if x11iraf is mostly Open Source conform to the Open Source
 Definition by the [Open Source Initiative](https://opensource.org/osd). 
 The list of files that are not conform is documented in the file
-[`LICENSES-nonfree`](https://github.com/iraf-community/x11iraf/blob/master/LICENSES-nonfree)
+[`LICENSES-nonfree`](https://github.com/iraf-community/x11iraf/blob/main/LICENSES-nonfree)
 of the source package. Note that x11iraf can be built without using these
 files.
 
