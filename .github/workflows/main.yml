@@ -29,9 +29,9 @@ jobs:
       - name: Setup XQuartz on macOS
         if: runner.os == 'macos'
         run: |
-          wget https://dl.bintray.com/xquartz/downloads/XQuartz-2.7.11.dmg
-          sudo hdiutil attach XQuartz-2.7.11.dmg
-          sudo installer -package /Volumes/XQuartz-2.7.11/XQuartz.pkg -target /
+          wget https://github.com/XQuartz/XQuartz/releases/download/XQuartz-2.8.1/XQuartz-2.8.1.dmg
+          sudo hdiutil attach XQuartz-2.8.1.dmg
+          sudo installer -package /Volumes/XQuartz-2.8.1/XQuartz.pkg -target /
           sudo rm -f /usr/local/include/tcl.h
 
       - name: build X11IRAF
