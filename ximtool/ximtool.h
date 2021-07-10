@@ -2,6 +2,7 @@
  * XIMTOOL.H -- Global definitions for XImtool.
  */
 
+#include "../version.h"
 #include "eps.h"
 
 /* Default values, size limiting values.

@@ -13,13 +13,6 @@
 #define XIMTOOL_MAIN
 #include "ximtool.h"
 
-/* The X11IRAF version. */
-char *ximtool_version[] = {
-#   include "../version.h"
-    NULL
-};
-
-
 /*
  * XIMTOOL -- X11 based image display server and standalone image display
  * client.  This program is based on the IRAF prototype widget server (object
@@ -77,7 +70,7 @@ char *argv[];
       	        exit (1);
 
     	    } else if (strcmp (argv[1], "-version") == 0) {
-		printf ("Version:  %s\n", ximtool_version[0]);
+		printf ("Version:  %s\n", X11IRAF_VERSION);
       	        exit (1);
 
     	    } else if (strcmp (argv[1], "-defgui") == 0) {
