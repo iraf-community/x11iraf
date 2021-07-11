@@ -525,11 +525,7 @@ int	class;
     fprintf (stderr, 
 	"window manager/desktop used, and in some cases video hardware.\n");
     fprintf (stderr, 
-	"See the Xserver(1) and xinit(1) man page for details. Users should\n");
-    fprintf (stderr, 
-	"also contact IRAF site support (iraf@noao.edu) with any questions\n");
-    fprintf (stderr, 
-	"or problems.\n\n");
+	"See the Xserver(1) and xinit(1) man page for details. Users should\n\n");
 
     exit (1);
 }
