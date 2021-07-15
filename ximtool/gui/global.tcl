@@ -12,7 +12,7 @@ proc min {a b} { expr {($a < $b) ? $a : $b} }
 proc max {a b} { expr {($a > $b) ? $a : $b} }
 
 # Global variables.
-set version	"NOAO/IRAF XImtool Version 2.0BETA"
+set version	"IRAF XImtool Version 2.1"
 
 set winWidth 	[send imagewin get width ]	;# display window width
 set winHeight 	[send imagewin get height]	;# display window height
