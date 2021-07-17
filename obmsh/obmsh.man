@@ -28,8 +28,7 @@ Obmsh script support all features of the Tcl language but also provide a
 builtin GUI capability.  For applications which do not require a client
 to perform more complex operations, the obmsh provides a fully featured
 GUI scripting language.  For more information on the IRAF Widget Server /
-OBM contact iraf@noao.edu or see Tody, D. 1995, in ADASS IV Proceedings,
-ASP Conf. Ser, Vol 77, p. 89.
+OBM see Tody, D. 1995, in ADASS IV Proceedings, ASP Conf. Ser, Vol 77, p. 89.
 
 .SH EXAMPLE
 .LP

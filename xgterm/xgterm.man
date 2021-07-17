@@ -29,8 +29,7 @@ programmatic interface to all of the features available; however, as of
 this writing it is not yet fully documented.  Users are referred to the
 \fIXImtool\fP task as an example of a more complex application using the
 \fIOBM Library\fP and \fIGterm\fP widget, as well as demo tasks in the
-\fIguidemo\fP directory of the X11IRAF sources.  Questions or comments may
-also be sent to \fIiraf@noao.edu\fP. 
+\fIguidemo\fP directory of the X11IRAF sources.
 .PP
 The VT102 text window is unchanged from the original \fIxterm\fR application.
 All of it's resources, command-line options and operation are identical to 

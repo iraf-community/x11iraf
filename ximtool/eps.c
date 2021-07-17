@@ -1910,7 +1910,7 @@ make_label()
         strcpy (username, pw->pw_name);
         endpwent();
 
-        sprintf (buf, "NOAO/IRAF  %s@%s  %s",
+        sprintf (buf, "IRAF  %s@%s  %s",
             username, hostname, asctime(localtime(&clock)));
 
         return (buf);

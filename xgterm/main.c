@@ -71,6 +71,7 @@ SOFTWARE.
 #include "data.h"
 #include "error.h"
 #include "menu.h"
+#include "../version.h"
 #include <ObmW/Gterm.h>
 #include <X11/StringDefs.h>
 #include <X11/Shell.h>
@@ -859,14 +860,6 @@ static char *message[] = {
 "default.",
 NULL};
 
-
-/* The X11IRAF version. */
-char *xgterm_version[] = {
-#   include "../version.h"
-    NULL
-};
-
-
 /*
  * If we're linked to terminfo, tgetent() will return an empty buffer.  We
  * cannot use that to adjust the $TERMCAP variable.
@@ -1296,7 +1289,7 @@ char **argv;
 		break;
 	     case 'v':
 		if (strcmp (*argv, "-version") == 0) {
-                    printf ("Version:  %s\n", xgterm_version[0]);
+                    printf ("Version:  %s\n", X11IRAF_VERSION);
                     exit (1);
 		}
 		break;

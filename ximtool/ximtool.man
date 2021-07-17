@@ -1988,8 +1988,7 @@ this is of little use at the moment.
 
 There are a number of other resources that can be used to modify the
 behavior of the Gterm widget color management scheme, but these are the
-most useful ones.  For question and further information feel free to
-contact \fIiraf@noao.edu\fP.
+most useful ones.
 
 
 .SH "DISPLAY CLIENT CONNECTIONS"
@@ -2327,7 +2326,7 @@ Default unix ISM connection socket
 .sp -0.5
 
 .SH BUGS
-Users should report bugs to \fIiraf@noao.edu\fR.
+Users should report bugs to \fIhttps://github.io/iraf-community/x11iraf\fR.
 
 .SH SEE ALSO
 xgterm(1), xtapemon(1)

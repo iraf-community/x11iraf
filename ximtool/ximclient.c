@@ -2126,12 +2126,11 @@ int	argc;
 char	**argv;
 char	*text;
 {
-	extern char *ximtool_version[];
 	extern int ncolormaps, first_color;
 	char cmapname[80], line[SZ_LINE];
         ColorMapPtr cm;
 
-	sprintf (text, "\t%s\n\n", ximtool_version[0]);
+	sprintf (text, "\t%s\n\n", X11IRAF_VERSION);
 
 	sprintf (line, "%20s:  %s\n", "Base Pixel",
 		(argc >= 3 ? argv[2] :""));
