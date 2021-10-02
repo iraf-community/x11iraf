@@ -112,6 +112,30 @@ don't want to invoke `make install`, you should make sure to run
 `tic xgterm/xgterm.terminfo` to compile and install the terminfo file.
 
 
+### Use another font on xgterm
+
+On modern, HighDPI monitors, **xgterm** often appears too small to be
+usable. The reason here is that xgterm uses the "fixed" font by
+default. The "lucidasanstypewriter" font family is available by
+default on many system and provides font sizes that fit on many
+screens. To try it out, start xgterm with the option `-fn
+lucidasanstypewriter-14`. Available font sizes are 12,14,16,18,20, 22,
+24, 28, 32.
+
+To make the font setting default, put the selected font into the
+file `~/.Xresources` (create the file if it does not exist):
+
+    xgterm*font: lucidasanstypewriter-18
+
+and load them into the X11 resources with
+
+    $ xrdb ~/.Xresources
+
+Other fonts can be used as well as long as they are fixed width
+(typewriter) X11 bitmap fonts. One font worthwile to try out is
+"terminus" (package "xfonts-terminus" on Debian/Ubuntu/Mint systems).
+
+
 ## Other included programs
 
 The sources include a few more programs that are out of interest for
