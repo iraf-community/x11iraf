@@ -1,0 +1,1672 @@
+/usr/bin/cc -g -Os  -DUSE_STDARG   -I../../include -I/usr/X11R6/include    -D__DARWIN__                                 -DNO_ALLOCA -DCSRG_BASED       -D_NO_PROTO   -c -o Table.o Table.c
+In file included from ../../include/X11/Xraw/TableP.h:25,
+                 from Table.c:34:
+../../include/X11/Xraw/Table.h:84: error: parse error before "XawTableProc"
+In file included from Table.c:34:
+../../include/X11/Xraw/TableP.h:121: error: parse error before "XawTableColumn"
+../../include/X11/Xraw/TableP.h:121: warning: no semicolon at end of struct or union
+../../include/X11/Xraw/TableP.h:128: error: parse error before "cell_own"
+../../include/X11/Xraw/TableP.h:128: warning: data definition has no type or storage class
+../../include/X11/Xraw/TableP.h:129: error: parse error before "table_stuff"
+../../include/X11/Xraw/TableP.h:129: warning: data definition has no type or storage class
+../../include/X11/Xraw/TableP.h:148: error: parse error before '}' token
+../../include/X11/Xraw/TableP.h:148: warning: data definition has no type or storage class
+../../include/X11/Xraw/TableP.h:161: error: parse error before "TablePart"
+../../include/X11/Xraw/TableP.h:161: warning: no semicolon at end of struct or union
+../../include/X11/Xraw/TableP.h:162: warning: data definition has no type or storage class
+Table.c:202: error: parse error before ')' token
+Table.c:202: error: initializer element is not constant
+Table.c:202: error: (near initialization for `resources[0].resource_offset')
+Table.c:203: error: initializer element is not constant
+Table.c:203: error: (near initialization for `resources[0]')
+Table.c:205: error: `XtNeditForeground' undeclared here (not in a function)
+Table.c:205: error: initializer element is not constant
+Table.c:205: error: (near initialization for `resources[1].resource_name')
+Table.c:206: error: parse error before ')' token
+Table.c:206: error: initializer element is not constant
+Table.c:206: error: (near initialization for `resources[1].resource_offset')
+Table.c:207: error: initializer element is not constant
+Table.c:207: error: (near initialization for `resources[1]')
+Table.c:209: error: `XtNeditBackground' undeclared here (not in a function)
+Table.c:209: error: initializer element is not constant
+Table.c:209: error: (near initialization for `resources[2].resource_name')
+Table.c:210: error: parse error before ')' token
+Table.c:210: error: initializer element is not constant
+Table.c:210: error: (near initialization for `resources[2].resource_offset')
+Table.c:211: error: initializer element is not constant
+Table.c:211: error: (near initialization for `resources[2]')
+Table.c:213: error: `XtNrowForeground' undeclared here (not in a function)
+Table.c:213: error: initializer element is not constant
+Table.c:213: error: (near initialization for `resources[3].resource_name')
+Table.c:214: error: parse error before ')' token
+Table.c:214: error: initializer element is not constant
+Table.c:214: error: (near initialization for `resources[3].resource_offset')
+Table.c:215: error: initializer element is not constant
+Table.c:215: error: (near initialization for `resources[3]')
+Table.c:217: error: `XtNcolumnForeground' undeclared here (not in a function)
+Table.c:217: error: initializer element is not constant
+Table.c:217: error: (near initialization for `resources[4].resource_name')
+Table.c:218: error: parse error before ')' token
+Table.c:218: error: initializer element is not constant
+Table.c:218: error: (near initialization for `resources[4].resource_offset')
+Table.c:219: error: initializer element is not constant
+Table.c:219: error: (near initialization for `resources[4]')
+Table.c:222: error: parse error before ')' token
+Table.c:222: error: initializer element is not constant
+Table.c:222: error: (near initialization for `resources[5].resource_offset')
+Table.c:223: error: initializer element is not constant
+Table.c:223: error: (near initialization for `resources[5]')
+Table.c:225: error: `XtNliteral' undeclared here (not in a function)
+Table.c:225: error: initializer element is not constant
+Table.c:225: error: (near initialization for `resources[6].resource_name')
+Table.c:225: error: `XtCLiteral' undeclared here (not in a function)
+Table.c:225: error: initializer element is not constant
+Table.c:225: error: (near initialization for `resources[6].resource_class')
+Table.c:226: error: parse error before ')' token
+Table.c:226: error: initializer element is not constant
+Table.c:226: error: (near initialization for `resources[6].resource_offset')
+Table.c:227: error: initializer element is not constant
+Table.c:227: error: (near initialization for `resources[6]')
+Table.c:229: error: `XtNrowOriented' undeclared here (not in a function)
+Table.c:229: error: initializer element is not constant
+Table.c:229: error: (near initialization for `resources[7].resource_name')
+Table.c:229: error: `XtCRowOriented' undeclared here (not in a function)
+Table.c:229: error: initializer element is not constant
+Table.c:229: error: (near initialization for `resources[7].resource_class')
+Table.c:230: error: parse error before ')' token
+Table.c:230: error: initializer element is not constant
+Table.c:230: error: (near initialization for `resources[7].resource_offset')
+Table.c:231: error: initializer element is not constant
+Table.c:231: error: (near initialization for `resources[7]')
+Table.c:233: error: `XtNmaskNumber' undeclared here (not in a function)
+Table.c:233: error: initializer element is not constant
+Table.c:233: error: (near initialization for `resources[8].resource_name')
+Table.c:233: error: `XtCMaskNumber' undeclared here (not in a function)
+Table.c:233: error: initializer element is not constant
+Table.c:233: error: (near initialization for `resources[8].resource_class')
+Table.c:234: error: parse error before ')' token
+Table.c:234: error: initializer element is not constant
+Table.c:234: error: (near initialization for `resources[8].resource_offset')
+Table.c:235: error: initializer element is not constant
+Table.c:235: error: (near initialization for `resources[8]')
+Table.c:237: error: `XtNcolumns' undeclared here (not in a function)
+Table.c:237: error: initializer element is not constant
+Table.c:237: error: (near initialization for `resources[9].resource_name')
+Table.c:237: error: `XtCColumns' undeclared here (not in a function)
+Table.c:237: error: initializer element is not constant
+Table.c:237: error: (near initialization for `resources[9].resource_class')
+Table.c:238: error: parse error before ')' token
+Table.c:238: error: initializer element is not constant
+Table.c:238: error: (near initialization for `resources[9].resource_offset')
+Table.c:239: error: initializer element is not constant
+Table.c:239: error: (near initialization for `resources[9]')
+Table.c:241: error: `XtNrows' undeclared here (not in a function)
+Table.c:241: error: initializer element is not constant
+Table.c:241: error: (near initialization for `resources[10].resource_name')
+Table.c:241: error: `XtCRows' undeclared here (not in a function)
+Table.c:241: error: initializer element is not constant
+Table.c:241: error: (near initialization for `resources[10].resource_class')
+Table.c:242: error: parse error before ')' token
+Table.c:242: error: initializer element is not constant
+Table.c:242: error: (near initialization for `resources[10].resource_offset')
+Table.c:243: error: initializer element is not constant
+Table.c:243: error: (near initialization for `resources[10]')
+Table.c:245: error: `XtNtableMargin' undeclared here (not in a function)
+Table.c:245: error: initializer element is not constant
+Table.c:245: error: (near initialization for `resources[11].resource_name')
+Table.c:245: error: `XtCTableMargin' undeclared here (not in a function)
+Table.c:245: error: initializer element is not constant
+Table.c:245: error: (near initialization for `resources[11].resource_class')
+Table.c:246: error: parse error before ')' token
+Table.c:246: error: initializer element is not constant
+Table.c:246: error: (near initialization for `resources[11].resource_offset')
+Table.c:247: error: initializer element is not constant
+Table.c:247: error: (near initialization for `resources[11]')
+Table.c:249: error: `XtNrowMargin' undeclared here (not in a function)
+Table.c:249: error: initializer element is not constant
+Table.c:249: error: (near initialization for `resources[12].resource_name')
+Table.c:249: error: `XtCRowMargin' undeclared here (not in a function)
+Table.c:249: error: initializer element is not constant
+Table.c:249: error: (near initialization for `resources[12].resource_class')
+Table.c:250: error: parse error before ')' token
+Table.c:250: error: initializer element is not constant
+Table.c:250: error: (near initialization for `resources[12].resource_offset')
+Table.c:251: error: initializer element is not constant
+Table.c:251: error: (near initialization for `resources[12]')
+Table.c:253: error: `XtNcolumnMargin' undeclared here (not in a function)
+Table.c:253: error: initializer element is not constant
+Table.c:253: error: (near initialization for `resources[13].resource_name')
+Table.c:253: error: `XtCColumnMargin' undeclared here (not in a function)
+Table.c:253: error: initializer element is not constant
+Table.c:253: error: (near initialization for `resources[13].resource_class')
+Table.c:254: error: parse error before ')' token
+Table.c:254: error: initializer element is not constant
+Table.c:254: error: (near initialization for `resources[13].resource_offset')
+Table.c:255: error: initializer element is not constant
+Table.c:255: error: (near initialization for `resources[13]')
+Table.c:257: error: `XtNlabelShadowWidth' undeclared here (not in a function)
+Table.c:257: error: initializer element is not constant
+Table.c:257: error: (near initialization for `resources[14].resource_name')
+Table.c:257: error: `XtCLabelShadowWidth' undeclared here (not in a function)
+Table.c:257: error: initializer element is not constant
+Table.c:257: error: (near initialization for `resources[14].resource_class')
+Table.c:258: error: parse error before ')' token
+Table.c:258: error: initializer element is not constant
+Table.c:258: error: (near initialization for `resources[14].resource_offset')
+Table.c:260: error: initializer element is not constant
+Table.c:260: error: (near initialization for `resources[14]')
+Table.c:263: error: parse error before ')' token
+Table.c:263: error: initializer element is not constant
+Table.c:263: error: (near initialization for `resources[15].resource_offset')
+Table.c:264: error: initializer element is not constant
+Table.c:264: error: (near initialization for `resources[15]')
+Table.c:267: error: parse error before ')' token
+Table.c:267: error: initializer element is not constant
+Table.c:267: error: (near initialization for `resources[16].resource_offset')
+Table.c:268: error: initializer element is not constant
+Table.c:268: error: (near initialization for `resources[16]')
+Table.c:271: error: parse error before ')' token
+Table.c:271: error: initializer element is not constant
+Table.c:271: error: (near initialization for `resources[17].resource_offset')
+Table.c:272: error: initializer element is not constant
+Table.c:272: error: (near initialization for `resources[17]')
+Table.c:274: error: `XtNencoding' undeclared here (not in a function)
+Table.c:274: error: initializer element is not constant
+Table.c:274: error: (near initialization for `resources[18].resource_name')
+Table.c:274: error: `XtCEncoding' undeclared here (not in a function)
+Table.c:274: error: initializer element is not constant
+Table.c:274: error: (near initialization for `resources[18].resource_class')
+Table.c:275: error: parse error before ')' token
+Table.c:275: error: initializer element is not constant
+Table.c:275: error: (near initialization for `resources[18].resource_offset')
+Table.c:276: error: `XawTextEncoding8bit' undeclared here (not in a function)
+Table.c:276: error: initializer element is not constant
+Table.c:276: error: (near initialization for `resources[18].default_addr')
+Table.c:276: error: initializer element is not constant
+Table.c:276: error: (near initialization for `resources[18]')
+Table.c:279: error: parse error before ')' token
+Table.c:279: error: initializer element is not constant
+Table.c:279: error: (near initialization for `resources[19].resource_offset')
+Table.c:281: error: initializer element is not constant
+Table.c:281: error: (near initialization for `resources[19]')
+Table.c:283: error: `XtNvetricalScroll' undeclared here (not in a function)
+Table.c:283: error: initializer element is not constant
+Table.c:283: error: (near initialization for `resources[20].resource_name')
+Table.c:284: error: parse error before ')' token
+Table.c:284: error: initializer element is not constant
+Table.c:284: error: (near initialization for `resources[20].resource_offset')
+Table.c:285: error: initializer element is not constant
+Table.c:285: error: (near initialization for `resources[20]')
+Table.c:287: error: `XtNhorizontalScroll' undeclared here (not in a function)
+Table.c:287: error: initializer element is not constant
+Table.c:287: error: (near initialization for `resources[21].resource_name')
+Table.c:288: error: parse error before ')' token
+Table.c:288: error: initializer element is not constant
+Table.c:288: error: (near initialization for `resources[21].resource_offset')
+Table.c:289: error: initializer element is not constant
+Table.c:289: error: (near initialization for `resources[21]')
+Table.c:291: error: `XtNrowHeight' undeclared here (not in a function)
+Table.c:291: error: initializer element is not constant
+Table.c:291: error: (near initialization for `resources[22].resource_name')
+Table.c:291: error: `XtCRowHeight' undeclared here (not in a function)
+Table.c:291: error: initializer element is not constant
+Table.c:291: error: (near initialization for `resources[22].resource_class')
+Table.c:292: error: parse error before ')' token
+Table.c:292: error: initializer element is not constant
+Table.c:292: error: (near initialization for `resources[22].resource_offset')
+Table.c:293: error: initializer element is not constant
+Table.c:293: error: (near initialization for `resources[22]')
+Table.c:295: error: `XtNdefaultWidth' undeclared here (not in a function)
+Table.c:295: error: initializer element is not constant
+Table.c:295: error: (near initialization for `resources[23].resource_name')
+Table.c:295: error: `XtCDefaultWidth' undeclared here (not in a function)
+Table.c:295: error: initializer element is not constant
+Table.c:295: error: (near initialization for `resources[23].resource_class')
+Table.c:296: error: parse error before ')' token
+Table.c:296: error: initializer element is not constant
+Table.c:296: error: (near initialization for `resources[23].resource_offset')
+Table.c:298: error: initializer element is not constant
+Table.c:298: error: (near initialization for `resources[23]')
+Table.c:300: error: `XtNeditable' undeclared here (not in a function)
+Table.c:300: error: initializer element is not constant
+Table.c:300: error: (near initialization for `resources[24].resource_name')
+Table.c:300: error: `XtCEditable' undeclared here (not in a function)
+Table.c:300: error: initializer element is not constant
+Table.c:300: error: (near initialization for `resources[24].resource_class')
+Table.c:301: error: parse error before ')' token
+Table.c:301: error: initializer element is not constant
+Table.c:301: error: (near initialization for `resources[24].resource_offset')
+Table.c:302: error: initializer element is not constant
+Table.c:302: error: (near initialization for `resources[24]')
+Table.c:304: error: `XtNliteralWidth' undeclared here (not in a function)
+Table.c:304: error: initializer element is not constant
+Table.c:304: error: (near initialization for `resources[25].resource_name')
+Table.c:304: error: `XtCLiteralWidth' undeclared here (not in a function)
+Table.c:304: error: initializer element is not constant
+Table.c:304: error: (near initialization for `resources[25].resource_class')
+Table.c:305: error: parse error before ')' token
+Table.c:305: error: initializer element is not constant
+Table.c:305: error: (near initialization for `resources[25].resource_offset')
+Table.c:306: error: initializer element is not constant
+Table.c:306: error: (near initialization for `resources[25]')
+Table.c:310: error: `XtNallowAddColumn' undeclared here (not in a function)
+Table.c:310: error: initializer element is not constant
+Table.c:310: error: (near initialization for `resources[26].resource_name')
+Table.c:311: error: parse error before ')' token
+Table.c:311: error: initializer element is not constant
+Table.c:311: error: (near initialization for `resources[26].resource_offset')
+Table.c:312: error: initializer element is not constant
+Table.c:312: error: (near initialization for `resources[26]')
+Table.c:314: error: `XtNallowAddRow' undeclared here (not in a function)
+Table.c:314: error: initializer element is not constant
+Table.c:314: error: (near initialization for `resources[27].resource_name')
+Table.c:315: error: parse error before ')' token
+Table.c:315: error: initializer element is not constant
+Table.c:315: error: (near initialization for `resources[27].resource_offset')
+Table.c:316: error: initializer element is not constant
+Table.c:316: error: (near initialization for `resources[27]')
+Table.c:318: error: `XtNallowDeleteColumn' undeclared here (not in a function)
+Table.c:318: error: initializer element is not constant
+Table.c:318: error: (near initialization for `resources[28].resource_name')
+Table.c:319: error: parse error before ')' token
+Table.c:319: error: initializer element is not constant
+Table.c:319: error: (near initialization for `resources[28].resource_offset')
+Table.c:320: error: initializer element is not constant
+Table.c:320: error: (near initialization for `resources[28]')
+Table.c:322: error: `XtNallowDeleteRow' undeclared here (not in a function)
+Table.c:322: error: initializer element is not constant
+Table.c:322: error: (near initialization for `resources[29].resource_name')
+Table.c:323: error: parse error before ')' token
+Table.c:323: error: initializer element is not constant
+Table.c:323: error: (near initialization for `resources[29].resource_offset')
+Table.c:324: error: initializer element is not constant
+Table.c:324: error: (near initialization for `resources[29]')
+Table.c:326: error: `XtNallowDeleteTable' undeclared here (not in a function)
+Table.c:326: error: initializer element is not constant
+Table.c:326: error: (near initialization for `resources[30].resource_name')
+Table.c:327: error: parse error before ')' token
+Table.c:327: error: initializer element is not constant
+Table.c:327: error: (near initialization for `resources[30].resource_offset')
+Table.c:328: error: initializer element is not constant
+Table.c:328: error: (near initialization for `resources[30]')
+Table.c:332: error: `XtNaddColumn' undeclared here (not in a function)
+Table.c:332: error: initializer element is not constant
+Table.c:332: error: (near initialization for `resources[31].resource_name')
+Table.c:333: error: parse error before ')' token
+Table.c:333: error: initializer element is not constant
+Table.c:333: error: (near initialization for `resources[31].resource_offset')
+Table.c:334: error: initializer element is not constant
+Table.c:334: error: (near initialization for `resources[31]')
+Table.c:336: error: `XtNaddRow' undeclared here (not in a function)
+Table.c:336: error: initializer element is not constant
+Table.c:336: error: (near initialization for `resources[32].resource_name')
+Table.c:337: error: parse error before ')' token
+Table.c:337: error: initializer element is not constant
+Table.c:337: error: (near initialization for `resources[32].resource_offset')
+Table.c:338: error: initializer element is not constant
+Table.c:338: error: (near initialization for `resources[32]')
+Table.c:340: error: `XtNcreateTable' undeclared here (not in a function)
+Table.c:340: error: initializer element is not constant
+Table.c:340: error: (near initialization for `resources[33].resource_name')
+Table.c:341: error: parse error before ')' token
+Table.c:341: error: initializer element is not constant
+Table.c:341: error: (near initialization for `resources[33].resource_offset')
+Table.c:342: error: initializer element is not constant
+Table.c:342: error: (near initialization for `resources[33]')
+Table.c:344: error: `XtNchangedCell' undeclared here (not in a function)
+Table.c:344: error: initializer element is not constant
+Table.c:344: error: (near initialization for `resources[34].resource_name')
+Table.c:345: error: parse error before ')' token
+Table.c:345: error: initializer element is not constant
+Table.c:345: error: (near initialization for `resources[34].resource_offset')
+Table.c:346: error: initializer element is not constant
+Table.c:346: error: (near initialization for `resources[34]')
+Table.c:348: error: `XtNchangedColumnWidth' undeclared here (not in a function)
+Table.c:348: error: initializer element is not constant
+Table.c:348: error: (near initialization for `resources[35].resource_name')
+Table.c:349: error: parse error before ')' token
+Table.c:349: error: initializer element is not constant
+Table.c:349: error: (near initialization for `resources[35].resource_offset')
+Table.c:350: error: initializer element is not constant
+Table.c:350: error: (near initialization for `resources[35]')
+Table.c:352: error: `XtNchangedRowHeight' undeclared here (not in a function)
+Table.c:352: error: initializer element is not constant
+Table.c:352: error: (near initialization for `resources[36].resource_name')
+Table.c:353: error: parse error before ')' token
+Table.c:353: error: initializer element is not constant
+Table.c:353: error: (near initialization for `resources[36].resource_offset')
+Table.c:354: error: initializer element is not constant
+Table.c:354: error: (near initialization for `resources[36]')
+Table.c:356: error: `XtNdeleteColumn' undeclared here (not in a function)
+Table.c:356: error: initializer element is not constant
+Table.c:356: error: (near initialization for `resources[37].resource_name')
+Table.c:357: error: parse error before ')' token
+Table.c:357: error: initializer element is not constant
+Table.c:357: error: (near initialization for `resources[37].resource_offset')
+Table.c:358: error: initializer element is not constant
+Table.c:358: error: (near initialization for `resources[37]')
+Table.c:360: error: `XtNdeleteRow' undeclared here (not in a function)
+Table.c:360: error: initializer element is not constant
+Table.c:360: error: (near initialization for `resources[38].resource_name')
+Table.c:361: error: parse error before ')' token
+Table.c:361: error: initializer element is not constant
+Table.c:361: error: (near initialization for `resources[38].resource_offset')
+Table.c:362: error: initializer element is not constant
+Table.c:362: error: (near initialization for `resources[38]')
+Table.c:364: error: `XtNdeleteTable' undeclared here (not in a function)
+Table.c:364: error: initializer element is not constant
+Table.c:364: error: (near initialization for `resources[39].resource_name')
+Table.c:365: error: parse error before ')' token
+Table.c:365: error: initializer element is not constant
+Table.c:365: error: (near initialization for `resources[39].resource_offset')
+Table.c:366: error: initializer element is not constant
+Table.c:366: error: (near initialization for `resources[39]')
+Table.c:368: error: `XtNwhatCell' undeclared here (not in a function)
+Table.c:368: error: initializer element is not constant
+Table.c:368: error: (near initialization for `resources[40].resource_name')
+Table.c:369: error: parse error before ')' token
+Table.c:369: error: initializer element is not constant
+Table.c:369: error: (near initialization for `resources[40].resource_offset')
+Table.c:370: error: initializer element is not constant
+Table.c:370: error: (near initialization for `resources[40]')
+Table.c: In function `Def_pixel':
+Table.c:381: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:381: error: (Each undeclared identifier is reported only once
+Table.c:381: error: for each function it appears in.)
+Table.c:381: error: parse error before "tw"
+Table.c:385: error: parse error before ')' token
+Table.c:386: error: `tw' undeclared (first use in this function)
+Table.c:387: error: parse error before ')' token
+Table.c: In function `Def_scroll':
+Table.c:413: error: parse error before ')' token
+Table.c:420: error: parse error before ')' token
+Table.c: In function `Def_column_default_width':
+Table.c:437: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:437: error: parse error before "tw"
+Table.c:440: error: `tw' undeclared (first use in this function)
+Table.c: In function `Def_literal_width':
+Table.c:460: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:460: error: parse error before "tw"
+Table.c:463: error: `tw' undeclared (first use in this function)
+Table.c: In function `GetNormalGC':
+Table.c:645: error: syntax error before "tw"
+Table.c:646: error: `tw' undeclared (first use in this function)
+Table.c: In function `GetShadowGC':
+Table.c:703: error: syntax error before "tw"
+Table.c:704: error: `tw' undeclared (first use in this function)
+Table.c: In function `ReleaseNormalGC':
+Table.c:744: error: syntax error before "tw"
+Table.c:745: error: `tw' undeclared (first use in this function)
+Table.c: In function `ReleaseShadowGC':
+Table.c:766: error: syntax error before "tw"
+Table.c:767: error: `tw' undeclared (first use in this function)
+Table.c: In function `CalculatePreferredSize':
+Table.c:852: error: syntax error before "tw"
+Table.c:861: error: `tw' undeclared (first use in this function)
+Table.c:862: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:862: error: parse error before "tw"
+Table.c:862: error: parse error before "tw"
+Table.c:863: error: parse error before "tw"
+Table.c:865: error: parse error before "tw"
+Table.c:873: error: parse error before "tw"
+Table.c:873: error: parse error before "tw"
+Table.c:874: error: parse error before "tw"
+Table.c:875: error: parse error before "tw"
+Table.c: In function `GetX':
+Table.c:886: error: parse error before "tw"
+Table.c:886: error: declaration for parameter `XawTableWidget' but no such parameter
+Table.c:889: error: syntax error before '*' token
+Table.c:892: error: `table' undeclared (first use in this function)
+Table.c:893: error: invalid type argument of `->'
+Table.c:898: error: invalid type argument of `->'
+Table.c:898: error: invalid type argument of `->'
+Table.c:898: error: invalid type argument of `->'
+Table.c:898: error: invalid type argument of `->'
+Table.c:898: error: invalid type argument of `->'
+Table.c:898: error: invalid type argument of `->'
+Table.c:898: error: invalid type argument of `->'
+Table.c:898: error: invalid type argument of `->'
+Table.c:898: error: invalid type argument of `->'
+Table.c: At top level:
+Table.c:904: error: parse error before "XawTableWidget"
+Table.c:904: error: `tw' used prior to declaration
+Table.c:904: warning: data definition has no type or storage class
+Table.c:906: error: parse error before '{' token
+Table.c:918: error: parse error before "XawTableWidget"
+Table.c:918: warning: data definition has no type or storage class
+Table.c:921: error: invalid type argument of `->'
+Table.c:923: error: parse error before "if"
+Table.c:943: error: parse error before "XawTableWidget"
+Table.c:943: warning: data definition has no type or storage class
+Table.c:955: error: parse error before "XawTableWidget"
+Table.c:955: warning: data definition has no type or storage class
+Table.c:957: error: parse error before '{' token
+Table.c:959: warning: data definition has no type or storage class
+Table.c:961: error: `XawTableCell' undeclared here (not in a function)
+Table.c:961: error: parse error before "get_cell"
+Table.c: In function `CreateTableCellGC':
+Table.c:983: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:983: error: parse error before "tw"
+Table.c:985: error: invalid type argument of `->'
+Table.c:986: error: invalid type argument of `->'
+Table.c:989: error: invalid type argument of `->'
+Table.c:990: error: invalid type argument of `->'
+Table.c:991: error: invalid type argument of `->'
+Table.c:992: error: invalid type argument of `->'
+Table.c:993: error: invalid type argument of `->'
+Table.c: At top level:
+Table.c:998: error: parse error before "XawTableWidget"
+Table.c:998: warning: data definition has no type or storage class
+Table.c:1000: error: parse error before '{' token
+Table.c:1003: error: initializer element is not constant
+Table.c:1003: warning: data definition has no type or storage class
+Table.c:1004: error: parse error before "for"
+Table.c:1018: error: parse error before "XawTableWidget"
+Table.c:1018: warning: data definition has no type or storage class
+Table.c:1020: error: parse error before '{' token
+Table.c:1023: error: initializer element is not constant
+Table.c:1023: warning: data definition has no type or storage class
+Table.c:1024: error: parse error before "for"
+Table.c:1038: error: parse error before "XawTableWidget"
+Table.c:1038: warning: data definition has no type or storage class
+Table.c:1040: error: parse error before '{' token
+Table.c:1042: error: initializer element is not constant
+Table.c:1043: error: initializer element is not constant
+Table.c:1045: error: parse error before "if"
+Table.c: In function `Reposition':
+Table.c:1097: error: parse error before "tw"
+Table.c:1097: error: declaration for parameter `XawTableWidget' but no such parameter
+Table.c:1104: warning: comparison between pointer and integer
+Table.c:1105: error: `XawTableCell' undeclared (first use in this function)
+Table.c:1105: error: parse error before "get_cell"
+Table.c:1105: error: parse error before "tw"
+Table.c:1107: error: invalid type argument of `->'
+Table.c:1108: error: invalid type argument of `->'
+Table.c:1110: error: invalid type argument of `->'
+Table.c:1113: error: invalid type argument of `->'
+Table.c:1115: error: invalid type argument of `->'
+Table.c:1115: error: invalid type argument of `->'
+Table.c:1115: error: invalid type argument of `->'
+Table.c:1115: error: invalid type argument of `->'
+Table.c:1115: error: invalid type argument of `->'
+Table.c:1115: error: invalid type argument of `->'
+Table.c:1115: error: invalid type argument of `->'
+Table.c:1115: error: invalid type argument of `->'
+Table.c:1115: error: invalid type argument of `->'
+Table.c:1116: error: invalid type argument of `->'
+Table.c:1117: error: invalid type argument of `->'
+Table.c:1120: error: invalid type argument of `->'
+Table.c:1120: error: invalid type argument of `->'
+Table.c:1120: error: invalid type argument of `->'
+Table.c:1120: error: invalid type argument of `->'
+Table.c:1120: error: invalid type argument of `->'
+Table.c:1120: error: invalid type argument of `->'
+Table.c:1120: error: invalid type argument of `->'
+Table.c:1120: error: invalid type argument of `->'
+Table.c:1120: error: invalid type argument of `->'
+Table.c:1121: error: invalid type argument of `->'
+Table.c:1125: error: invalid type argument of `->'
+Table.c:1125: error: invalid type argument of `->'
+Table.c:1125: error: invalid type argument of `->'
+Table.c: In function `DeleteCell':
+Table.c:1137: error: `XawTableCell' undeclared (first use in this function)
+Table.c:1137: error: parse error before "cell"
+Table.c:1140: error: invalid type argument of `->'
+Table.c:1141: error: invalid type argument of `->'
+Table.c:1143: error: invalid type argument of `->'
+Table.c:1145: error: invalid type argument of `->'
+Table.c:1145: error: invalid type argument of `->'
+Table.c:1146: error: invalid type argument of `->'
+Table.c: At top level:
+Table.c:1153: error: parse error before "XawTableWidget"
+Table.c:1153: warning: data definition has no type or storage class
+Table.c:1158: error: parse error before "if"
+Table.c:1161: error: parse error before '(' token
+Table.c:1170: error: parse error before '.' token
+Table.c: In function `SetTableSize':
+Table.c:1180: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:1180: error: parse error before "tw"
+Table.c:1181: error: `XawTableCallbackStruct' undeclared (first use in this function)
+Table.c:1195: error: parse error before "tw"
+Table.c:1197: error: `callback_str' undeclared (first use in this function)
+Table.c:1197: error: `XawTABLE_ALLOW_DELETE_TABLE' undeclared (first use in this function)
+Table.c:1199: error: parse error before "tw"
+Table.c:1200: error: parse error before "tw"
+Table.c:1205: error: `XtNallowDeleteTable' undeclared (first use in this function)
+Table.c:1210: error: `XawTABLE_DELETE_TABLE' undeclared (first use in this function)
+Table.c:1212: error: parse error before "tw"
+Table.c:1213: error: parse error before "tw"
+Table.c:1218: error: `XtNdeleteTable' undeclared (first use in this function)
+Table.c:1220: error: `XawTableProc' undeclared (first use in this function)
+Table.c:1220: error: parse error before "DeleteCell"
+Table.c:1223: error: parse error before "tw"
+Table.c:1225: error: parse error before "tw"
+Table.c:1225: error: `XawTableCell' undeclared (first use in this function)
+Table.c:1226: error: parse error before "tw"
+Table.c:1227: error: parse error before "tw"
+Table.c:1233: error: parse error before "tw"
+Table.c:1234: error: parse error before "create_table"
+Table.c:1236: error: parse error before "tw"
+Table.c:1239: error: parse error before "tw"
+Table.c:1240: error: parse error before "tw"
+Table.c:1242: error: parse error before "InitCell"
+Table.c:1244: error: parse error before "tw"
+Table.c:1245: error: invalid type argument of `->'
+Table.c:1245: error: `XawTableColumn' undeclared (first use in this function)
+Table.c:1246: error: parse error before "XtRealloc"
+Table.c:1248: error: parse error before "tw"
+Table.c:1249: error: invalid type argument of `->'
+Table.c:1252: error: invalid type argument of `->'
+Table.c:1253: error: invalid type argument of `->'
+Table.c:1256: error: `XawTABLE_CREATE_TABLE' undeclared (first use in this function)
+Table.c:1264: error: `XtNcreateTable' undeclared (first use in this function)
+Table.c: In function `Initialize':
+Table.c:1277: error: syntax error before "tw"
+Table.c:1282: error: invalid type argument of `->'
+Table.c:1283: error: invalid type argument of `->'
+Table.c:1284: error: invalid type argument of `->'
+Table.c:1285: error: invalid type argument of `->'
+Table.c:1285: error: `XawTableCell' undeclared (first use in this function)
+Table.c:1286: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:1286: error: parse error before "tw"
+Table.c:1287: error: invalid type argument of `->'
+Table.c:1288: error: invalid type argument of `->'
+Table.c:1290: error: parse error before "tw"
+Table.c:1290: error: parse error before "tw"
+Table.c:1290: error: parse error before "tw"
+Table.c:1291: error: parse error before "tw"
+Table.c:1291: error: parse error before "tw"
+Table.c:1291: error: parse error before "tw"
+Table.c:1293: error: parse error before "tw"
+Table.c:1294: error: invalid type argument of `->'
+Table.c:1294: error: `XawTableColumn' undeclared (first use in this function)
+Table.c:1295: error: parse error before "tw"
+Table.c:1295: error: parse error before "tw"
+Table.c:1296: error: parse error before "tw"
+Table.c:1297: error: invalid type argument of `->'
+Table.c:1300: error: invalid type argument of `->'
+Table.c:1304: error: parse error before "tw"
+Table.c:1307: error: invalid type argument of `->'
+Table.c:1308: error: invalid type argument of `->'
+Table.c:1315: error: invalid type argument of `->'
+Table.c:1319: error: parse error before "tw"
+Table.c:1321: error: invalid type argument of `->'
+Table.c:1321: error: invalid type argument of `->'
+Table.c:1322: error: invalid type argument of `->'
+Table.c:1322: error: invalid type argument of `->'
+Table.c:1324: error: parse error before "tw"
+Table.c:1324: error: parse error before "tw"
+Table.c:1326: error: parse error before "tw"
+Table.c:1326: error: parse error before "tw"
+Table.c:1328: error: parse error before "tw"
+Table.c:1329: error: parse error before "tw"
+Table.c:1330: error: parse error before "tw"
+Table.c:1334: error: invalid type argument of `->'
+Table.c:1335: error: invalid type argument of `->'
+Table.c:1336: error: invalid type argument of `->'
+Table.c:1338: error: invalid type argument of `->'
+Table.c:1338: error: invalid type argument of `->'
+Table.c:1340: error: invalid type argument of `->'
+Table.c:1341: error: invalid type argument of `->'
+Table.c:1341: error: invalid type argument of `->'
+Table.c:1343: error: invalid type argument of `->'
+Table.c:1343: error: invalid type argument of `->'
+Table.c:1343: error: invalid type argument of `->'
+Table.c:1345: error: invalid type argument of `->'
+Table.c:1347: error: invalid type argument of `->'
+Table.c:1348: error: invalid type argument of `->'
+Table.c:1349: error: invalid type argument of `->'
+Table.c:1350: error: invalid type argument of `->'
+Table.c:1351: error: invalid type argument of `->'
+Table.c:1352: error: invalid type argument of `->'
+Table.c: In function `Realize':
+Table.c:1369: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:1369: error: parse error before "tw"
+Table.c:1376: error: invalid type argument of `->'
+Table.c:1377: error: invalid type argument of `->'
+Table.c:1378: error: invalid type argument of `->'
+Table.c:1380: error: invalid type argument of `->'
+Table.c:1381: error: invalid type argument of `->'
+Table.c:1382: error: invalid type argument of `->'
+Table.c:1384: error: parse error before "w"
+Table.c: In function `MatchLabel':
+Table.c:1395: error: `XawTableCell' undeclared (first use in this function)
+Table.c:1395: error: parse error before "cell"
+Table.c:1398: error: invalid type argument of `->'
+Table.c:1398: error: invalid type argument of `->'
+Table.c: In function `InitCell':
+Table.c:1409: error: `XawTableCell' undeclared (first use in this function)
+Table.c:1409: error: parse error before "cell"
+Table.c:1411: error: invalid type argument of `->'
+Table.c:1412: error: invalid type argument of `->'
+Table.c:1413: error: invalid type argument of `->'
+Table.c:1414: error: invalid type argument of `->'
+Table.c:1415: error: invalid type argument of `->'
+Table.c:1416: error: invalid type argument of `->'
+Table.c:1417: error: invalid type argument of `->'
+Table.c:1418: error: invalid type argument of `->'
+Table.c:1419: error: invalid type argument of `->'
+Table.c: In function `PaintShadow':
+Table.c:1435: error: parse error before "XawTableCell"
+Table.c:1437: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:1439: error: invalid type argument of `->'
+Table.c:1442: error: parse error before "tw"
+Table.c:1442: error: invalid type argument of `->'
+Table.c:1442: error: invalid type argument of `->'
+Table.c:1444: error: invalid type argument of `->'
+Table.c:1445: error: invalid type argument of `->'
+Table.c:1447: error: invalid type argument of `->'
+Table.c:1449: error: invalid type argument of `->'
+Table.c:1450: error: invalid type argument of `->'
+Table.c:1452: error: invalid type argument of `->'
+Table.c:1453: error: invalid type argument of `->'
+Table.c:1459: error: invalid type argument of `->'
+Table.c:1459: error: invalid type argument of `->'
+Table.c:1459: error: invalid type argument of `->'
+Table.c:1459: error: invalid type argument of `->'
+Table.c:1459: error: invalid type argument of `->'
+Table.c:1459: error: invalid type argument of `->'
+Table.c:1459: error: invalid type argument of `->'
+Table.c:1459: error: invalid type argument of `->'
+Table.c:1459: error: invalid type argument of `->'
+Table.c:1460: error: invalid type argument of `->'
+Table.c:1461: error: invalid type argument of `->'
+Table.c:1462: error: invalid type argument of `->'
+Table.c:1464: error: invalid type argument of `->'
+Table.c: In function `PaintLabel':
+Table.c:1477: error: parse error before "XawTableCell"
+Table.c:1479: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:1483: error: invalid type argument of `->'
+Table.c:1483: error: invalid type argument of `->'
+Table.c:1483: error: invalid type argument of `->'
+Table.c:1483: error: invalid type argument of `->'
+Table.c:1483: error: invalid type argument of `->'
+Table.c:1483: error: invalid type argument of `->'
+Table.c:1483: error: invalid type argument of `->'
+Table.c:1483: error: invalid type argument of `->'
+Table.c:1483: error: invalid type argument of `->'
+Table.c:1484: error: invalid type argument of `->'
+Table.c:1486: error: invalid type argument of `->'
+Table.c:1487: error: invalid type argument of `->'
+Table.c:1489: error: invalid type argument of `->'
+Table.c:1489: error: invalid type argument of `->'
+Table.c:1493: error: invalid type argument of `->'
+Table.c:1494: error: invalid type argument of `->'
+Table.c:1494: error: invalid type argument of `->'
+Table.c:1494: error: invalid type argument of `->'
+Table.c:1496: error: invalid type argument of `->'
+Table.c:1508: error: invalid type argument of `->'
+Table.c:1511: error: invalid type argument of `->'
+Table.c:1513: error: invalid type argument of `->'
+Table.c:1514: error: invalid type argument of `->'
+Table.c:1514: error: invalid type argument of `->'
+Table.c:1514: error: invalid type argument of `->'
+Table.c:1516: error: invalid type argument of `->'
+Table.c:1516: error: invalid type argument of `->'
+Table.c:1516: error: invalid type argument of `->'
+Table.c:1521: error: invalid type argument of `->'
+Table.c:1521: error: invalid type argument of `->'
+Table.c:1521: error: invalid type argument of `->'
+Table.c:1521: error: invalid type argument of `->'
+Table.c:1521: error: invalid type argument of `->'
+Table.c:1521: error: invalid type argument of `->'
+Table.c:1521: error: invalid type argument of `->'
+Table.c:1521: error: invalid type argument of `->'
+Table.c:1521: error: invalid type argument of `->'
+Table.c:1522: error: invalid type argument of `->'
+Table.c:1527: error: invalid type argument of `->'
+Table.c:1529: error: invalid type argument of `->'
+Table.c:1533: error: invalid type argument of `->'
+Table.c:1535: error: invalid type argument of `->'
+Table.c:1536: error: invalid type argument of `->'
+Table.c:1539: error: invalid type argument of `->'
+Table.c:1539: error: invalid type argument of `->'
+Table.c: In function `PaintCell':
+Table.c:1555: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:1555: error: parse error before "tw"
+Table.c:1556: error: `XawTableCell' undeclared (first use in this function)
+Table.c: At top level:
+Table.c:1571: error: parse error before "XawTableWidget"
+Table.c:1571: warning: data definition has no type or storage class
+Table.c:1573: error: conflicting types for `b_row'
+Table.c:1039: error: previous declaration of `b_row'
+Table.c:1573: error: conflicting types for `e_row'
+Table.c:1039: error: previous declaration of `e_row'
+Table.c:1573: error: conflicting types for `b_column'
+Table.c:1039: error: previous declaration of `b_column'
+Table.c:1573: error: conflicting types for `e_column'
+Table.c:1039: error: previous declaration of `e_column'
+Table.c:1574: error: parse error before '{' token
+Table.c:1580: error: parse error before '<' token
+Table.c:1580: error: parse error before '++' token
+Table.c:1590: error: parse error before '<' token
+Table.c:1590: error: parse error before '++' token
+Table.c:1597: error: parse error before '<' token
+Table.c:1597: error: parse error before '++' token
+Table.c:1607: error: parse error before '<' token
+Table.c:1607: error: parse error before '++' token
+Table.c: In function `Redisplay':
+Table.c:1620: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:1620: error: parse error before "tw"
+Table.c:1625: error: invalid type argument of `->'
+Table.c:1628: error: invalid type argument of `->'
+Table.c:1651: error: invalid type argument of `->'
+Table.c:1651: error: invalid type argument of `->'
+Table.c:1655: error: invalid type argument of `->'
+Table.c:1656: error: invalid type argument of `->'
+Table.c:1658: error: invalid type argument of `->'
+Table.c:1658: error: invalid type argument of `->'
+Table.c:1663: error: invalid type argument of `->'
+Table.c:1668: error: invalid type argument of `->'
+Table.c:1669: error: invalid type argument of `->'
+Table.c:1672: error: invalid type argument of `->'
+Table.c:1672: error: invalid type argument of `->'
+Table.c:1677: error: invalid type argument of `->'
+Table.c:1682: error: invalid type argument of `->'
+Table.c:1683: error: invalid type argument of `->'
+Table.c:1692: error: parse error before "tw"
+Table.c:1694: error: parse error before "tw"
+Table.c:1699: error: `XawTableProc' undeclared (first use in this function)
+Table.c:1699: error: parse error before "PaintCell"
+Table.c: In function `SetValues':
+Table.c:1712: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:1712: error: parse error before "curtw"
+Table.c:1721: error: `curtw' undeclared (first use in this function)
+Table.c:1721: error: `newtw' undeclared (first use in this function)
+Table.c:1728: error: parse error before "newtw"
+Table.c:1758: error: parse error before "newtw"
+Table.c:1758: error: parse error before "newtw"
+Table.c:1765: error: `XawTableCallbackStruct' undeclared (first use in this function)
+Table.c:1765: error: parse error before "callback_str"
+Table.c:1766: error: `callback_str' undeclared (first use in this function)
+Table.c:1766: error: `XawTABLE_CHANGED_ROW_HEIGHT' undeclared (first use in this function)
+Table.c:1768: error: `XawTableCell' undeclared (first use in this function)
+Table.c:1774: error: `XtNchangedRowHeight' undeclared (first use in this function)
+Table.c:1779: error: parse error before "newtw"
+Table.c:1780: error: parse error before "newtw"
+Table.c:1790: error: parse error before "newtw"
+Table.c:1791: error: parse error before "newtw"
+Table.c:1795: error: parse error before "newtw"
+Table.c:1796: error: parse error before "newtw"
+Table.c: In function `Destroy':
+Table.c:1843: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:1843: error: parse error before "tw"
+Table.c:1844: error: `XawTableCallbackStruct' undeclared (first use in this function)
+Table.c:1846: error: parse error before "tw"
+Table.c:1846: error: `XawTableCell' undeclared (first use in this function)
+Table.c:1848: error: `callback_str' undeclared (first use in this function)
+Table.c:1848: error: `XawTABLE_DELETE_TABLE' undeclared (first use in this function)
+Table.c:1856: error: `XtNdeleteTable' undeclared (first use in this function)
+Table.c:1859: error: invalid type argument of `->'
+Table.c:1860: error: invalid type argument of `->'
+Table.c:1861: error: invalid type argument of `->'
+Table.c:1863: error: invalid type argument of `->'
+Table.c:1864: error: invalid type argument of `->'
+Table.c:1865: error: invalid type argument of `->'
+Table.c:1867: error: invalid type argument of `->'
+Table.c:1868: error: invalid type argument of `->'
+Table.c:1869: error: invalid type argument of `->'
+Table.c:1872: error: invalid type argument of `->'
+Table.c:1873: error: invalid type argument of `->'
+Table.c:1874: error: invalid type argument of `->'
+Table.c:1877: error: `XawTableProc' undeclared (first use in this function)
+Table.c:1877: error: parse error before "DeleteCell"
+Table.c:1879: error: invalid type argument of `->'
+Table.c:1880: error: invalid type argument of `->'
+Table.c:1882: error: invalid type argument of `->'
+Table.c:1883: error: parse error before "tw"
+Table.c:1885: error: invalid type argument of `->'
+Table.c:1886: error: invalid type argument of `->'
+Table.c:1888: error: parse error before "w"
+Table.c:1888: error: parse error before "w"
+Table.c:1889: error: parse error before "w"
+Table.c: In function `Resize':
+Table.c:1896: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:1896: error: parse error before "tw"
+Table.c:1899: error: invalid type argument of `->'
+Table.c:1905: error: invalid type argument of `->'
+Table.c: At top level:
+Table.c:1986: error: parse error before "XawTableWidget"
+Table.c:1986: warning: data definition has no type or storage class
+Table.c:1989: error: parse error before '{' token
+Table.c:1991: error: conflicting types for `y'
+Table.c:1003: error: previous declaration of `y'
+Table.c:1993: error: parse error before "for"
+Table.c:1993: error: parse error before '<' token
+Table.c:1993: error: parse error before '++' token
+Table.c:1994: error: parse error before '<' token
+Table.c:1994: error: parse error before '++' token
+Table.c: In function `WalkForCells':
+Table.c:2010: error: parse error before "XawTableProc"
+Table.c:2013: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:2013: error: parse error before "tw"
+Table.c:2016: error: parse error before "tw"
+Table.c:2018: error: `XawTABLE_RIGHT_DOWN' undeclared (first use in this function)
+Table.c: At top level:
+Table.c:2093: error: parse error before "XawTableWidget"
+Table.c:2093: warning: data definition has no type or storage class
+Table.c:2094: error: conflicting types for `row'
+Table.c:1988: error: previous declaration of `row'
+Table.c:2095: error: conflicting types for `column'
+Table.c:1988: error: previous declaration of `column'
+Table.c:2096: error: parse error before '{' token
+Table.c:2099: error: redefinition of `x'
+Table.c:1023: error: `x' previously defined here
+Table.c:2099: error: initializer element is not constant
+Table.c:2099: warning: data definition has no type or storage class
+Table.c:2100: error: conflicting types for `y'
+Table.c:1991: error: previous declaration of `y'
+Table.c:2100: warning: data definition has no type or storage class
+Table.c:2102: error: parse error before '(' token
+Table.c:2108: error: parse error before '(' token
+Table.c:2111: error: parse error before "Dimension"
+Table.c: In function `CompareCells':
+Table.c:2130: error: `XawTableCell' undeclared (first use in this function)
+Table.c:2130: error: parse error before "cell"
+Table.c:2133: error: `test_cell' undeclared (first use in this function)
+Table.c: In function `XawTableGetSize':
+Table.c:2155: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:2155: error: parse error before "tw"
+Table.c:2157: error: parse error before "tw"
+Table.c:2158: error: parse error before "tw"
+Table.c: At top level:
+Table.c:2170: warning: type mismatch with previous implicit declaration
+Table.c:1649: warning: previous implicit declaration of `XawTableDoLayout'
+Table.c:2170: warning: `XawTableDoLayout' was previously implicitly declared to return `int'
+Table.c: In function `XawTableDoLayout':
+Table.c:2171: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:2171: error: parse error before "tw"
+Table.c:2174: error: invalid type argument of `->'
+Table.c:2176: error: invalid type argument of `->'
+Table.c:2178: error: invalid type argument of `->'
+Table.c:2178: error: invalid type argument of `->'
+Table.c:2178: error: invalid type argument of `->'
+Table.c:2180: error: invalid type argument of `->'
+Table.c: In function `XawTableSetNewSize':
+Table.c:2199: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:2199: error: parse error before "w"
+Table.c: At top level:
+Table.c:2205: error: parse error before "cell"
+Table.c: In function `XawTableGetLabelByCell':
+Table.c:2211: error: invalid type argument of `->'
+Table.c:2211: error: invalid type argument of `->'
+Table.c: In function `XawTableGetEditPosition':
+Table.c:2224: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:2224: error: parse error before "tw"
+Table.c:2226: error: invalid type argument of `->'
+Table.c:2227: error: invalid type argument of `->'
+Table.c: At top level:
+Table.c:2234: error: parse error before "XawTableProc"
+Table.c: In function `XawTableWalk':
+Table.c:2255: error: `w' undeclared (first use in this function)
+Table.c:2255: error: `proc' undeclared (first use in this function)
+Table.c:2255: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:2255: error: parse error before "w"
+Table.c:2257: error: `direction' undeclared (first use in this function)
+Table.c:2258: error: `client_data' undeclared (first use in this function)
+Table.c:1573: error: register name not specified for `b_row'
+Table.c:1573: error: register name not specified for `e_row'
+Table.c:1573: error: register name not specified for `b_column'
+Table.c:1573: error: register name not specified for `e_column'
+Table.c: In function `XawTableSearchLabel':
+Table.c:2275: error: `XawTableProc' undeclared (first use in this function)
+Table.c:2275: error: parse error before "MatchLabel"
+Table.c: In function `XawTablePrependRow':
+Table.c:2321: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:2321: error: parse error before "tw"
+Table.c:2322: error: `XawTableCell' undeclared (first use in this function)
+Table.c:2323: error: `XawTableCallbackStruct' undeclared (first use in this function)
+Table.c:2325: error: parse error before "tw"
+Table.c:2339: error: parse error before "tw"
+Table.c:2341: error: `callback_str' undeclared (first use in this function)
+Table.c:2341: error: `XawTABLE_ALLOW_ADD_ROW' undeclared (first use in this function)
+Table.c:2349: error: `XtNallowAddRow' undeclared (first use in this function)
+Table.c:2359: error: parse error before "tw"
+Table.c:2360: error: parse error before "tw"
+Table.c:2362: error: parse error before "tw"
+Table.c:2362: error: parse error before "get_table"
+Table.c:2364: error: `XawTableProc' undeclared (first use in this function)
+Table.c:2364: error: parse error before "InitCell"
+Table.c:2367: error: invalid type argument of `->'
+Table.c:2367: error: invalid type argument of `->'
+Table.c:2376: error: `XtNaddRow' undeclared (first use in this function)
+Table.c:2378: error: parse error before "tw"
+Table.c:2380: error: `XawTABLE_ADD_ROW' undeclared (first use in this function)
+Table.c: In function `XawTableAppendRow':
+Table.c:2402: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:2402: error: parse error before "tw"
+Table.c:2403: error: `XawTableCell' undeclared (first use in this function)
+Table.c:2404: error: `XawTableCallbackStruct' undeclared (first use in this function)
+Table.c:2406: error: parse error before "tw"
+Table.c:2421: error: parse error before "get_cell"
+Table.c:2423: error: `callback_str' undeclared (first use in this function)
+Table.c:2423: error: `XawTABLE_ALLOW_ADD_ROW' undeclared (first use in this function)
+Table.c:2431: error: `XtNallowAddRow' undeclared (first use in this function)
+Table.c:2441: error: parse error before "tw"
+Table.c:2441: error: parse error before "tw"
+Table.c:2444: error: parse error before "tw"
+Table.c:2446: error: `XawTableProc' undeclared (first use in this function)
+Table.c:2446: error: parse error before "InitCell"
+Table.c:2455: error: `XtNaddRow' undeclared (first use in this function)
+Table.c:2457: error: parse error before "get_cell"
+Table.c:2459: error: `XawTABLE_ADD_ROW' undeclared (first use in this function)
+Table.c:2463: error: parse error before "tw"
+Table.c: In function `XawTableInsertRow':
+Table.c:2482: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:2482: error: parse error before "tw"
+Table.c:2483: error: `XawTableCell' undeclared (first use in this function)
+Table.c:2484: error: `XawTableCallbackStruct' undeclared (first use in this function)
+Table.c:2486: error: parse error before "tw"
+Table.c:2497: error: parse error before "tw"
+Table.c:2497: error: parse error before "tw"
+Table.c:2497: error: parse error before "tw"
+Table.c:2497: error: parse error before "tw"
+Table.c:2510: error: parse error before "get_cell"
+Table.c:2512: error: `callback_str' undeclared (first use in this function)
+Table.c:2512: error: `XawTABLE_ALLOW_ADD_ROW' undeclared (first use in this function)
+Table.c:2520: error: `XtNallowAddRow' undeclared (first use in this function)
+Table.c:2530: error: parse error before "tw"
+Table.c:2533: error: parse error before "tw"
+Table.c:2536: error: parse error before "tw"
+Table.c:2536: error: parse error before "get_table"
+Table.c:2536: error: parse error before "tw"
+Table.c:2538: error: `XawTableProc' undeclared (first use in this function)
+Table.c:2538: error: parse error before "InitCell"
+Table.c:2544: error: invalid type argument of `->'
+Table.c:2545: error: invalid type argument of `->'
+Table.c:2546: error: invalid type argument of `->'
+Table.c:2546: error: invalid type argument of `->'
+Table.c:2547: error: invalid type argument of `->'
+Table.c:2552: error: `XtNaddRow' undeclared (first use in this function)
+Table.c:2554: error: parse error before "get_cell"
+Table.c:2556: error: `XawTABLE_ADD_ROW' undeclared (first use in this function)
+Table.c: In function `XawTableDeleteRow':
+Table.c:2579: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:2579: error: parse error before "tw"
+Table.c:2580: error: `XawTableCell' undeclared (first use in this function)
+Table.c:2581: error: `XawTableCallbackStruct' undeclared (first use in this function)
+Table.c:2583: error: parse error before "tw"
+Table.c:2594: error: parse error before "tw"
+Table.c:2594: error: parse error before "tw"
+Table.c:2594: error: parse error before "tw"
+Table.c:2594: error: parse error before "tw"
+Table.c:2598: error: parse error before "tw"
+Table.c:2610: error: parse error before "get_cell"
+Table.c:2612: error: `callback_str' undeclared (first use in this function)
+Table.c:2612: error: `XawTABLE_ALLOW_DELETE_ROW' undeclared (first use in this function)
+Table.c:2620: error: `XtNallowDeleteRow' undeclared (first use in this function)
+Table.c:2631: error: `XtNdeleteRow' undeclared (first use in this function)
+Table.c:2633: error: parse error before "get_cell"
+Table.c:2635: error: `XawTABLE_DELETE_ROW' undeclared (first use in this function)
+Table.c:2648: error: invalid type argument of `->'
+Table.c:2653: error: parse error before "tw"
+Table.c:2654: error: parse error before "tw"
+Table.c:2655: error: `XawTABLE_RIGHT_DOWN' undeclared (first use in this function)
+Table.c:2656: error: invalid type argument of `->'
+Table.c:2658: error: invalid type argument of `->'
+Table.c:2660: error: invalid type argument of `->'
+Table.c:2660: error: invalid type argument of `->'
+Table.c:2663: error: invalid type argument of `->'
+Table.c:2668: error: parse error before "tw"
+Table.c:2668: error: parse error before "get_cell"
+Table.c:2668: error: parse error before "tw"
+Table.c:2670: error: parse error before "tw"
+Table.c:2671: error: parse error before "tw"
+Table.c:2673: error: `XawTableProc' undeclared (first use in this function)
+Table.c:2673: error: parse error before "DeleteCell"
+Table.c:2675: warning: passing arg 1 of `row_delete' makes pointer from integer without a cast
+Table.c:2679: error: invalid type argument of `->'
+Table.c:2680: error: invalid type argument of `->'
+Table.c:2681: error: invalid type argument of `->'
+Table.c:2681: error: invalid type argument of `->'
+Table.c:2683: error: invalid type argument of `->'
+Table.c:2684: error: parse error before "tw"
+Table.c:2684: error: invalid type argument of `->'
+Table.c:2685: error: invalid type argument of `->'
+Table.c:2685: error: invalid type argument of `->'
+Table.c:2685: error: parse error before "tw"
+Table.c:2685: error: invalid type argument of `->'
+Table.c:2685: error: parse error before "tw"
+Table.c:2685: error: invalid type argument of `->'
+Table.c:2685: error: parse error before "tw"
+Table.c:2685: error: invalid type argument of `->'
+Table.c:2685: error: parse error before "tw"
+Table.c:2686: error: invalid type argument of `->'
+Table.c:2686: error: invalid type argument of `->'
+Table.c:2688: error: invalid type argument of `->'
+Table.c: In function `XawTablePrependColumn':
+Table.c:2721: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:2721: error: parse error before "tw"
+Table.c:2723: error: `XawTableCell' undeclared (first use in this function)
+Table.c:2723: error: parse error before "cell"
+Table.c:2724: error: `XawTableCallbackStruct' undeclared (first use in this function)
+Table.c:2726: error: parse error before "tw"
+Table.c:2739: error: parse error before "tw"
+Table.c:2741: error: `callback_str' undeclared (first use in this function)
+Table.c:2741: error: `XawTABLE_ALLOW_ADD_COLUMN' undeclared (first use in this function)
+Table.c:2749: error: `XtNallowAddColumn' undeclared (first use in this function)
+Table.c:2759: error: parse error before "tw"
+Table.c:2760: error: parse error before "tw"
+Table.c:2762: error: parse error before "tw"
+Table.c:2762: error: parse error before "get_table"
+Table.c:2764: error: `XawTableProc' undeclared (first use in this function)
+Table.c:2764: error: parse error before "InitCell"
+Table.c:2770: error: invalid type argument of `->'
+Table.c:2772: error: invalid type argument of `->'
+Table.c:2772: error: `XawTableColumn' undeclared (first use in this function)
+Table.c:2773: error: parse error before "XtRealloc"
+Table.c:2778: error: invalid type argument of `->'
+Table.c:2778: error: parse error before "tw"
+Table.c:2778: error: parse error before "tw"
+Table.c:2779: error: parse error before "tw"
+Table.c:2780: error: invalid type argument of `->'
+Table.c:2783: error: parse error before "tw"
+Table.c:2784: error: invalid type argument of `->'
+Table.c:2784: error: invalid type argument of `->'
+Table.c:2787: error: invalid type argument of `->'
+Table.c:2788: error: invalid type argument of `->'
+Table.c:2792: error: invalid type argument of `->'
+Table.c:2792: error: invalid type argument of `->'
+Table.c:2802: error: `XtNaddColumn' undeclared (first use in this function)
+Table.c:2804: error: parse error before "tw"
+Table.c:2806: error: `XawTABLE_ADD_COLUMN' undeclared (first use in this function)
+Table.c: In function `XawTableAppendColumn':
+Table.c:2829: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:2829: error: parse error before "tw"
+Table.c:2831: error: `XawTableCell' undeclared (first use in this function)
+Table.c:2831: error: parse error before "cell"
+Table.c:2832: error: `XawTableCallbackStruct' undeclared (first use in this function)
+Table.c:2834: error: parse error before "tw"
+Table.c:2847: error: parse error before "get_cell"
+Table.c:2849: error: `callback_str' undeclared (first use in this function)
+Table.c:2849: error: `XawTABLE_ALLOW_ADD_COLUMN' undeclared (first use in this function)
+Table.c:2857: error: `XtNallowAddColumn' undeclared (first use in this function)
+Table.c:2868: error: parse error before "tw"
+Table.c:2868: error: parse error before "tw"
+Table.c:2871: error: parse error before "tw"
+Table.c:2873: error: `XawTableProc' undeclared (first use in this function)
+Table.c:2873: error: parse error before "InitCell"
+Table.c:2883: error: invalid type argument of `->'
+Table.c:2885: error: invalid type argument of `->'
+Table.c:2885: error: `XawTableColumn' undeclared (first use in this function)
+Table.c:2886: error: parse error before "XtRealloc"
+Table.c:2891: error: invalid type argument of `->'
+Table.c:2891: error: parse error before "tw"
+Table.c:2891: error: parse error before "tw"
+Table.c:2892: error: parse error before "tw"
+Table.c:2893: error: invalid type argument of `->'
+Table.c:2896: error: invalid type argument of `->'
+Table.c:2896: error: parse error before "tw"
+Table.c:2897: error: invalid type argument of `->'
+Table.c:2897: error: parse error before "tw"
+Table.c:2908: error: `XtNaddColumn' undeclared (first use in this function)
+Table.c:2910: error: parse error before "get_cell"
+Table.c:2912: error: `XawTABLE_ADD_COLUMN' undeclared (first use in this function)
+Table.c:2917: error: parse error before "tw"
+Table.c: In function `XawTableInsertColumn':
+Table.c:2936: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:2936: error: parse error before "tw"
+Table.c:2937: error: `XawTableCell' undeclared (first use in this function)
+Table.c:2939: error: `XawTableCallbackStruct' undeclared (first use in this function)
+Table.c:2939: error: parse error before "callback_str"
+Table.c:2941: error: parse error before "tw"
+Table.c:2952: error: parse error before "tw"
+Table.c:2952: error: parse error before "tw"
+Table.c:2952: error: parse error before "tw"
+Table.c:2952: error: parse error before "tw"
+Table.c:2965: error: parse error before "get_cell"
+Table.c:2967: error: `callback_str' undeclared (first use in this function)
+Table.c:2967: error: `XawTABLE_ALLOW_ADD_COLUMN' undeclared (first use in this function)
+Table.c:2975: error: `XtNallowAddColumn' undeclared (first use in this function)
+Table.c:2985: error: parse error before "tw"
+Table.c:2987: error: parse error before "tw"
+Table.c:2990: error: parse error before "tw"
+Table.c:2990: error: parse error before "get_table"
+Table.c:2990: error: parse error before "tw"
+Table.c:2992: error: `XawTableProc' undeclared (first use in this function)
+Table.c:2992: error: parse error before "InitCell"
+Table.c:3002: error: invalid type argument of `->'
+Table.c:3004: error: invalid type argument of `->'
+Table.c:3004: error: `XawTableColumn' undeclared (first use in this function)
+Table.c:3005: error: parse error before "XtRealloc"
+Table.c:3010: error: invalid type argument of `->'
+Table.c:3010: error: parse error before "tw"
+Table.c:3010: error: parse error before "tw"
+Table.c:3011: error: parse error before "tw"
+Table.c:3012: error: invalid type argument of `->'
+Table.c:3015: error: parse error before "tw"
+Table.c:3016: error: invalid type argument of `->'
+Table.c:3016: error: invalid type argument of `->'
+Table.c:3019: error: invalid type argument of `->'
+Table.c:3020: error: invalid type argument of `->'
+Table.c:3026: error: invalid type argument of `->'
+Table.c:3027: error: invalid type argument of `->'
+Table.c:3028: error: invalid type argument of `->'
+Table.c:3028: error: invalid type argument of `->'
+Table.c:3029: error: invalid type argument of `->'
+Table.c:3035: error: `XtNaddColumn' undeclared (first use in this function)
+Table.c:3037: error: parse error before "get_cell"
+Table.c:3039: error: `XawTABLE_ADD_COLUMN' undeclared (first use in this function)
+Table.c: In function `XawTableDeleteColumn':
+Table.c:3062: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:3062: error: parse error before "tw"
+Table.c:3063: error: `XawTableCell' undeclared (first use in this function)
+Table.c:3065: error: `XawTableCallbackStruct' undeclared (first use in this function)
+Table.c:3065: error: parse error before "callback_str"
+Table.c:3068: error: parse error before "tw"
+Table.c:3079: error: parse error before "tw"
+Table.c:3079: error: parse error before "tw"
+Table.c:3079: error: parse error before "tw"
+Table.c:3079: error: parse error before "tw"
+Table.c:3092: error: parse error before "get_cell"
+Table.c:3094: error: `callback_str' undeclared (first use in this function)
+Table.c:3094: error: `XawTABLE_ALLOW_DELETE_COLUMN' undeclared (first use in this function)
+Table.c:3102: error: `XtNallowDeleteColumn' undeclared (first use in this function)
+Table.c:3113: error: `XtNdeleteColumn' undeclared (first use in this function)
+Table.c:3115: error: parse error before "get_cell"
+Table.c:3117: error: `XawTABLE_DELETE_COLUMN' undeclared (first use in this function)
+Table.c:3130: error: invalid type argument of `->'
+Table.c:3135: error: parse error before "tw"
+Table.c:3136: error: parse error before "tw"
+Table.c:3137: error: `XawTABLE_RIGHT_DOWN' undeclared (first use in this function)
+Table.c:3138: error: invalid type argument of `->'
+Table.c:3140: error: invalid type argument of `->'
+Table.c:3142: error: invalid type argument of `->'
+Table.c:3142: error: invalid type argument of `->'
+Table.c:3145: error: invalid type argument of `->'
+Table.c:3150: error: parse error before "tw"
+Table.c:3150: error: parse error before "get_cell"
+Table.c:3150: error: parse error before "tw"
+Table.c:3152: error: parse error before "tw"
+Table.c:3153: error: parse error before "tw"
+Table.c:3156: error: `XawTableProc' undeclared (first use in this function)
+Table.c:3156: error: parse error before "DeleteCell"
+Table.c:3158: warning: passing arg 1 of `column_delete' makes pointer from integer without a cast
+Table.c:3164: error: parse error before "tw"
+Table.c:3165: error: invalid type argument of `->'
+Table.c:3166: error: invalid type argument of `->'
+Table.c:3170: error: parse error before "tw"
+Table.c:3171: error: invalid type argument of `->'
+Table.c:3171: error: invalid type argument of `->'
+Table.c:3174: error: invalid type argument of `->'
+Table.c:3174: error: `XawTableColumn' undeclared (first use in this function)
+Table.c:3175: error: parse error before "XtRealloc"
+Table.c:3186: error: invalid type argument of `->'
+Table.c:3187: error: invalid type argument of `->'
+Table.c:3188: error: invalid type argument of `->'
+Table.c:3188: error: invalid type argument of `->'
+Table.c:3190: error: invalid type argument of `->'
+Table.c:3191: error: parse error before "tw"
+Table.c:3191: error: invalid type argument of `->'
+Table.c:3192: error: invalid type argument of `->'
+Table.c:3192: error: invalid type argument of `->'
+Table.c:3192: error: parse error before "tw"
+Table.c:3192: error: invalid type argument of `->'
+Table.c:3192: error: parse error before "tw"
+Table.c:3192: error: invalid type argument of `->'
+Table.c:3192: error: parse error before "tw"
+Table.c:3192: error: invalid type argument of `->'
+Table.c:3192: error: parse error before "tw"
+Table.c:3193: error: invalid type argument of `->'
+Table.c:3193: error: invalid type argument of `->'
+Table.c:3195: error: invalid type argument of `->'
+Table.c: At top level:
+Table.c:3216: warning: type mismatch with previous implicit declaration
+Table.c:3184: warning: previous implicit declaration of `XawTableIsEditManaged'
+Table.c:3216: warning: `XawTableIsEditManaged' was previously implicitly declared to return `int'
+Table.c: In function `XawTableIsEditManaged':
+Table.c:3217: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:3217: error: parse error before "w"
+Table.c: In function `XawTableSetLabel':
+Table.c:3233: error: syntax error before "tw"
+Table.c:3234: error: `XawTableCallbackStruct' undeclared (first use in this function)
+Table.c:3235: error: `XawTableCell' undeclared (first use in this function)
+Table.c:3239: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:3239: error: parse error before "tw"
+Table.c:3239: error: parse error before "tw"
+Table.c:3240: error: parse error before "tw"
+Table.c:3240: error: parse error before "tw"
+Table.c:3240: error: parse error before "tw"
+Table.c:3240: error: parse error before "tw"
+Table.c:3241: error: parse error before "tw"
+Table.c:3241: error: parse error before "tw"
+Table.c:3241: error: parse error before "tw"
+Table.c:3241: error: parse error before "tw"
+Table.c:3255: error: parse error before "get_cell"
+Table.c:3262: error: invalid type argument of `->'
+Table.c:3270: error: `callback_str' undeclared (first use in this function)
+Table.c:3270: error: `XawTABLE_CHANGED_CELL' undeclared (first use in this function)
+Table.c:3278: error: `XtNchangedCell' undeclared (first use in this function)
+Table.c:3286: error: invalid type argument of `->'
+Table.c:3287: error: invalid type argument of `->'
+Table.c:3294: error: parse error before "tw"
+Table.c:3294: error: invalid type argument of `->'
+Table.c:3294: error: invalid type argument of `->'
+Table.c:3296: error: parse error before "w"
+Table.c:3296: error: invalid type argument of `->'
+Table.c:3298: error: invalid type argument of `->'
+Table.c:3302: error: invalid type argument of `->'
+Table.c:3302: error: invalid type argument of `->'
+Table.c:3302: error: invalid type argument of `->'
+Table.c:3302: error: invalid type argument of `->'
+Table.c:3302: error: invalid type argument of `->'
+Table.c:3302: error: invalid type argument of `->'
+Table.c:3302: error: invalid type argument of `->'
+Table.c:3302: error: invalid type argument of `->'
+Table.c:3302: error: invalid type argument of `->'
+Table.c:3303: error: invalid type argument of `->'
+Table.c: In function `XawTableSetCellColours':
+Table.c:3327: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:3327: error: parse error before "tw"
+Table.c:3328: error: `XawTableCallbackStruct' undeclared (first use in this function)
+Table.c:3329: error: `XawTableCell' undeclared (first use in this function)
+Table.c:3336: error: parse error before "tw"
+Table.c:3336: error: parse error before "tw"
+Table.c:3337: error: parse error before "tw"
+Table.c:3337: error: parse error before "tw"
+Table.c:3337: error: parse error before "tw"
+Table.c:3337: error: parse error before "tw"
+Table.c:3338: error: parse error before "tw"
+Table.c:3338: error: parse error before "tw"
+Table.c:3338: error: parse error before "tw"
+Table.c:3338: error: parse error before "tw"
+Table.c:3351: error: parse error before "get_cell"
+Table.c:3353: error: invalid type argument of `->'
+Table.c:3353: error: invalid type argument of `->'
+Table.c:3353: error: invalid type argument of `->'
+Table.c:3365: error: invalid type argument of `->'
+Table.c:3378: error: `callback_str' undeclared (first use in this function)
+Table.c:3378: error: `XawTABLE_CHANGED_CELL' undeclared (first use in this function)
+Table.c:3386: error: `XtNchangedCell' undeclared (first use in this function)
+Table.c:3392: error: invalid type argument of `->'
+Table.c:3392: error: invalid type argument of `->'
+Table.c:3392: error: invalid type argument of `->'
+Table.c:3392: error: invalid type argument of `->'
+Table.c:3392: error: invalid type argument of `->'
+Table.c:3392: error: invalid type argument of `->'
+Table.c:3392: error: invalid type argument of `->'
+Table.c:3392: error: invalid type argument of `->'
+Table.c:3392: error: invalid type argument of `->'
+Table.c:3393: error: invalid type argument of `->'
+Table.c:3396: error: invalid type argument of `->'
+Table.c:3396: error: invalid type argument of `->'
+Table.c:3398: error: invalid type argument of `->'
+Table.c:3399: error: invalid type argument of `->'
+Table.c:3406: error: invalid type argument of `->'
+Table.c:3407: error: invalid type argument of `->'
+Table.c:3407: error: invalid type argument of `->'
+Table.c:3408: error: invalid type argument of `->'
+Table.c: In function `XawTableSetCellDefaultColours':
+Table.c:3433: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:3433: error: parse error before "tw"
+Table.c:3434: error: `XawTableCallbackStruct' undeclared (first use in this function)
+Table.c:3435: error: `XawTableCell' undeclared (first use in this function)
+Table.c:3438: error: parse error before "tw"
+Table.c:3438: error: parse error before "tw"
+Table.c:3439: error: parse error before "tw"
+Table.c:3439: error: parse error before "tw"
+Table.c:3439: error: parse error before "tw"
+Table.c:3439: error: parse error before "tw"
+Table.c:3440: error: parse error before "tw"
+Table.c:3440: error: parse error before "tw"
+Table.c:3440: error: parse error before "tw"
+Table.c:3440: error: parse error before "tw"
+Table.c:3455: error: parse error before "get_cell"
+Table.c:3457: error: invalid type argument of `->'
+Table.c:3465: error: invalid type argument of `->'
+Table.c:3466: error: invalid type argument of `->'
+Table.c:3468: error: `callback_str' undeclared (first use in this function)
+Table.c:3468: error: `XawTABLE_CHANGED_CELL' undeclared (first use in this function)
+Table.c:3476: error: `XtNchangedCell' undeclared (first use in this function)
+Table.c:3482: error: invalid type argument of `->'
+Table.c:3482: error: invalid type argument of `->'
+Table.c:3482: error: invalid type argument of `->'
+Table.c:3482: error: invalid type argument of `->'
+Table.c:3482: error: invalid type argument of `->'
+Table.c:3482: error: invalid type argument of `->'
+Table.c:3482: error: invalid type argument of `->'
+Table.c:3482: error: invalid type argument of `->'
+Table.c:3482: error: invalid type argument of `->'
+Table.c:3483: error: invalid type argument of `->'
+Table.c:3485: error: invalid type argument of `->'
+Table.c:3487: error: invalid type argument of `->'
+Table.c:3488: error: invalid type argument of `->'
+Table.c:3495: error: invalid type argument of `->'
+Table.c:3496: error: invalid type argument of `->'
+Table.c:3496: error: invalid type argument of `->'
+Table.c:3497: error: invalid type argument of `->'
+Table.c: In function `XawTableSetCellBackground':
+Table.c:3520: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:3520: error: parse error before "tw"
+Table.c:3521: error: `XawTableCallbackStruct' undeclared (first use in this function)
+Table.c:3522: error: `XawTableCell' undeclared (first use in this function)
+Table.c:3527: error: parse error before "tw"
+Table.c:3527: error: parse error before "tw"
+Table.c:3528: error: parse error before "tw"
+Table.c:3528: error: parse error before "tw"
+Table.c:3528: error: parse error before "tw"
+Table.c:3528: error: parse error before "tw"
+Table.c:3529: error: parse error before "tw"
+Table.c:3529: error: parse error before "tw"
+Table.c:3529: error: parse error before "tw"
+Table.c:3529: error: parse error before "tw"
+Table.c:3544: error: parse error before "get_cell"
+Table.c:3546: error: invalid type argument of `->'
+Table.c:3546: error: invalid type argument of `->'
+Table.c:3556: error: invalid type argument of `->'
+Table.c:3557: error: invalid type argument of `->'
+Table.c:3560: error: invalid type argument of `->'
+Table.c:3573: error: `callback_str' undeclared (first use in this function)
+Table.c:3573: error: `XawTABLE_CHANGED_CELL' undeclared (first use in this function)
+Table.c:3581: error: `XtNchangedCell' undeclared (first use in this function)
+Table.c:3587: error: invalid type argument of `->'
+Table.c:3587: error: invalid type argument of `->'
+Table.c:3587: error: invalid type argument of `->'
+Table.c:3587: error: invalid type argument of `->'
+Table.c:3587: error: invalid type argument of `->'
+Table.c:3587: error: invalid type argument of `->'
+Table.c:3587: error: invalid type argument of `->'
+Table.c:3587: error: invalid type argument of `->'
+Table.c:3587: error: invalid type argument of `->'
+Table.c:3588: error: invalid type argument of `->'
+Table.c:3590: error: invalid type argument of `->'
+Table.c:3592: error: invalid type argument of `->'
+Table.c:3593: error: invalid type argument of `->'
+Table.c:3600: error: invalid type argument of `->'
+Table.c:3601: error: invalid type argument of `->'
+Table.c:3601: error: invalid type argument of `->'
+Table.c:3602: error: invalid type argument of `->'
+Table.c: In function `XawTableSetCellForeground':
+Table.c:3628: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:3628: error: parse error before "tw"
+Table.c:3629: error: `XawTableCallbackStruct' undeclared (first use in this function)
+Table.c:3630: error: `XawTableCell' undeclared (first use in this function)
+Table.c:3635: error: parse error before "tw"
+Table.c:3635: error: parse error before "tw"
+Table.c:3636: error: parse error before "tw"
+Table.c:3636: error: parse error before "tw"
+Table.c:3636: error: parse error before "tw"
+Table.c:3636: error: parse error before "tw"
+Table.c:3637: error: parse error before "tw"
+Table.c:3637: error: parse error before "tw"
+Table.c:3637: error: parse error before "tw"
+Table.c:3637: error: parse error before "tw"
+Table.c:3652: error: parse error before "get_cell"
+Table.c:3654: error: invalid type argument of `->'
+Table.c:3654: error: invalid type argument of `->'
+Table.c:3664: error: invalid type argument of `->'
+Table.c:3665: error: invalid type argument of `->'
+Table.c:3668: error: invalid type argument of `->'
+Table.c:3681: error: `callback_str' undeclared (first use in this function)
+Table.c:3681: error: `XawTABLE_CHANGED_CELL' undeclared (first use in this function)
+Table.c:3689: error: `XtNchangedCell' undeclared (first use in this function)
+Table.c:3695: error: invalid type argument of `->'
+Table.c:3695: error: invalid type argument of `->'
+Table.c:3695: error: invalid type argument of `->'
+Table.c:3695: error: invalid type argument of `->'
+Table.c:3695: error: invalid type argument of `->'
+Table.c:3695: error: invalid type argument of `->'
+Table.c:3695: error: invalid type argument of `->'
+Table.c:3695: error: invalid type argument of `->'
+Table.c:3695: error: invalid type argument of `->'
+Table.c:3696: error: invalid type argument of `->'
+Table.c:3698: error: invalid type argument of `->'
+Table.c:3700: error: invalid type argument of `->'
+Table.c:3701: error: invalid type argument of `->'
+Table.c:3708: error: invalid type argument of `->'
+Table.c:3709: error: invalid type argument of `->'
+Table.c:3709: error: invalid type argument of `->'
+Table.c:3710: error: invalid type argument of `->'
+Table.c: In function `XawTableGetCellColours':
+Table.c:3737: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:3737: error: parse error before "tw"
+Table.c:3738: error: `XawTableCell' undeclared (first use in this function)
+Table.c:3741: error: invalid type argument of `->'
+Table.c:3742: error: invalid type argument of `->'
+Table.c:3743: error: invalid type argument of `->'
+Table.c:3746: error: invalid type argument of `->'
+Table.c:3747: error: invalid type argument of `->'
+Table.c: At top level:
+Table.c:3753: error: parse error before "XawTableCell"
+Table.c: In function `XawTableGetCellColoursByCell':
+Table.c:3763: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:3763: error: parse error before "tw"
+Table.c:3765: error: invalid type argument of `->'
+Table.c:3766: error: `fore' undeclared (first use in this function)
+Table.c:3766: error: invalid type argument of `->'
+Table.c:3767: error: `back' undeclared (first use in this function)
+Table.c:3767: error: invalid type argument of `->'
+Table.c:3770: error: invalid type argument of `->'
+Table.c:3771: error: invalid type argument of `->'
+Table.c: In function `XawTableSetColumnJustify':
+Table.c:3825: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:3825: error: parse error before "tw"
+Table.c:3828: error: parse error before "tw"
+Table.c:3828: error: parse error before "tw"
+Table.c:3828: error: parse error before "tw"
+Table.c:3828: error: parse error before "tw"
+Table.c:3831: error: invalid type argument of `->'
+Table.c:3832: error: invalid type argument of `->'
+Table.c:3834: error: parse error before "tw"
+Table.c:3838: error: invalid type argument of `->'
+Table.c:3838: error: invalid type argument of `->'
+Table.c:3840: error: parse error before "tw"
+Table.c:3841: error: parse error before "tw"
+Table.c:3842: error: `XawTABLE_DOWN_RIGHT' undeclared (first use in this function)
+Table.c: In function `XawTableGetColumnJustify':
+Table.c:3858: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:3858: error: parse error before "tw"
+Table.c:3860: error: parse error before "tw"
+Table.c:3860: error: parse error before "tw"
+Table.c:3860: error: parse error before "tw"
+Table.c:3860: error: parse error before "tw"
+Table.c:3863: error: invalid type argument of `->'
+Table.c:3864: error: invalid type argument of `->'
+Table.c: In function `XawTableSetColumnWidth':
+Table.c:3880: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:3880: error: parse error before "tw"
+Table.c:3881: error: `XawTableCallbackStruct' undeclared (first use in this function)
+Table.c:3884: error: parse error before "tw"
+Table.c:3884: error: parse error before "tw"
+Table.c:3884: error: parse error before "tw"
+Table.c:3884: error: parse error before "tw"
+Table.c:3887: error: invalid type argument of `->'
+Table.c:3888: error: invalid type argument of `->'
+Table.c:3891: error: invalid type argument of `->'
+Table.c:3892: error: invalid type argument of `->'
+Table.c:3894: error: parse error before "tw"
+Table.c:3899: error: `callback_str' undeclared (first use in this function)
+Table.c:3899: error: `XawTABLE_CHANGED_COLUMN_WIDTH' undeclared (first use in this function)
+Table.c:3901: error: `XawTableCell' undeclared (first use in this function)
+Table.c:3907: error: `XtNchangedColumnWidth' undeclared (first use in this function)
+Table.c: In function `XawTableSetMultiColumnWidths':
+Table.c:3922: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:3922: error: parse error before "tw"
+Table.c:3923: error: `XawTableCallbackStruct' undeclared (first use in this function)
+Table.c:3927: error: parse error before "tw"
+Table.c:3927: error: parse error before "tw"
+Table.c:3927: error: parse error before "tw"
+Table.c:3927: error: parse error before "tw"
+Table.c:3932: error: invalid type argument of `->'
+Table.c:3933: error: invalid type argument of `->'
+Table.c:3936: error: invalid type argument of `->'
+Table.c:3937: error: invalid type argument of `->'
+Table.c:3939: error: parse error before "tw"
+Table.c: In function `XawTableGetColumnWidth':
+Table.c:3969: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:3969: error: parse error before "tw"
+Table.c:3971: error: parse error before "tw"
+Table.c:3971: error: parse error before "tw"
+Table.c:3971: error: parse error before "tw"
+Table.c:3971: error: parse error before "tw"
+Table.c:3972: error: invalid type argument of `->'
+Table.c:3974: error: invalid type argument of `->'
+Table.c:3975: error: invalid type argument of `->'
+Table.c:3977: error: invalid type argument of `->'
+Table.c: In function `XawTableGetColumnPixelWidth':
+Table.c:3989: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:3989: error: parse error before "tw"
+Table.c:3992: error: parse error before "tw"
+Table.c:3992: error: parse error before "tw"
+Table.c:3992: error: parse error before "tw"
+Table.c:3992: error: parse error before "tw"
+Table.c:3993: error: invalid type argument of `->'
+Table.c:3994: error: invalid type argument of `->'
+Table.c:3995: error: invalid type argument of `->'
+Table.c:3997: error: invalid type argument of `->'
+Table.c:3999: error: invalid type argument of `->'
+Table.c:4000: error: invalid type argument of `->'
+Table.c:4000: error: invalid type argument of `->'
+Table.c: In function `XawTableGetLabelByPosition':
+Table.c:4015: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:4015: error: parse error before "tw"
+Table.c:4016: error: `XawTableCell' undeclared (first use in this function)
+Table.c:4019: error: parse error before "tw"
+Table.c:4019: error: parse error before "tw"
+Table.c:4020: error: parse error before "tw"
+Table.c:4020: error: parse error before "tw"
+Table.c:4020: error: parse error before "tw"
+Table.c:4020: error: parse error before "tw"
+Table.c:4021: error: parse error before "tw"
+Table.c:4021: error: parse error before "tw"
+Table.c:4021: error: parse error before "tw"
+Table.c:4021: error: parse error before "tw"
+Table.c:4035: error: parse error before "get_cell"
+Table.c:4036: error: invalid type argument of `->'
+Table.c:4036: error: invalid type argument of `->'
+Table.c: In function `XawTableUnsetEdit':
+Table.c:4047: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:4047: error: parse error before "tw"
+Table.c:4049: error: `XawTableCell' undeclared (first use in this function)
+Table.c:4049: error: parse error before "cell"
+Table.c:4053: error: invalid type argument of `->'
+Table.c:4054: error: parse error before "tw"
+Table.c:4054: error: invalid type argument of `->'
+Table.c:4055: error: invalid type argument of `->'
+Table.c:4057: error: parse error before "w"
+Table.c:4062: error: parse error before "get_cell"
+Table.c:4064: error: invalid type argument of `->'
+Table.c:4065: error: invalid type argument of `->'
+Table.c:4065: error: invalid type argument of `->'
+Table.c: At top level:
+Table.c:4080: warning: type mismatch with previous implicit declaration
+Table.c:3193: warning: previous implicit declaration of `XawTableSetEdit'
+Table.c:4080: warning: `XawTableSetEdit' was previously implicitly declared to return `int'
+Table.c: In function `XawTableSetEdit':
+Table.c:4081: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:4081: error: parse error before "tw"
+Table.c:4082: error: `XawTableCell' undeclared (first use in this function)
+Table.c:4084: error: parse error before "tw"
+Table.c:4084: error: invalid type argument of `->'
+Table.c:4084: error: invalid type argument of `->'
+Table.c:4084: error: parse error before "tw"
+Table.c:4087: error: parse error before "tw"
+Table.c:4087: error: parse error before "tw"
+Table.c:4088: error: parse error before "tw"
+Table.c:4088: error: parse error before "tw"
+Table.c:4088: error: parse error before "tw"
+Table.c:4088: error: parse error before "tw"
+Table.c:4089: error: parse error before "tw"
+Table.c:4089: error: parse error before "tw"
+Table.c:4089: error: parse error before "tw"
+Table.c:4089: error: parse error before "tw"
+Table.c:4105: error: parse error before "get_cell"
+Table.c:4107: error: invalid type argument of `->'
+Table.c:4108: error: parse error before "tw"
+Table.c:4110: error: parse error before "tw"
+Table.c:4110: error: invalid type argument of `->'
+Table.c:4112: error: invalid type argument of `->'
+Table.c:4113: error: invalid type argument of `->'
+Table.c:4115: error: invalid type argument of `->'
+Table.c:4115: error: invalid type argument of `->'
+Table.c:4117: error: parse error before "tw"
+Table.c:4117: error: parse error before "tw"
+Table.c:4117: error: parse error before "tw"
+Table.c: In function `HighlightCell':
+Table.c:4132: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:4132: error: parse error before "tw"
+Table.c:4133: error: `XawTableCell' undeclared (first use in this function)
+Table.c:4138: error: invalid type argument of `->'
+Table.c:4157: error: parse error before "get_cell"
+Table.c:4159: error: invalid type argument of `->'
+Table.c:4162: error: invalid type argument of `->'
+Table.c: In function `UnhighlightCell':
+Table.c:4178: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:4178: error: parse error before "tw"
+Table.c:4179: error: `XawTableCell' undeclared (first use in this function)
+Table.c:4186: error: invalid type argument of `->'
+Table.c:4205: error: parse error before "get_cell"
+Table.c:4207: error: invalid type argument of `->'
+Table.c:4210: error: invalid type argument of `->'
+Table.c:4212: error: invalid type argument of `->'
+Table.c:4212: error: invalid type argument of `->'
+Table.c:4212: error: invalid type argument of `->'
+Table.c:4212: error: invalid type argument of `->'
+Table.c:4212: error: invalid type argument of `->'
+Table.c:4212: error: invalid type argument of `->'
+Table.c:4212: error: invalid type argument of `->'
+Table.c:4212: error: invalid type argument of `->'
+Table.c:4212: error: invalid type argument of `->'
+Table.c:4213: error: invalid type argument of `->'
+Table.c:4214: error: invalid type argument of `->'
+Table.c:4215: error: invalid type argument of `->'
+Table.c: In function `WhatCell':
+Table.c:4235: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:4235: error: parse error before "tw"
+Table.c:4238: error: `XawTableCallbackStruct' undeclared (first use in this function)
+Table.c:4238: error: parse error before "callback_str"
+Table.c:4239: error: `XawTableCell' undeclared (first use in this function)
+Table.c:4250: error: parse error before "get_cell"
+Table.c:4252: error: `callback_str' undeclared (first use in this function)
+Table.c:4252: error: `XawTABLE_WHAT_CELL' undeclared (first use in this function)
+Table.c:4260: error: `XtNwhatCell' undeclared (first use in this function)
+Table.c: In function `DeliverSelection':
+Table.c:4308: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:4308: error: parse error before "tw"
+Table.c:4326: error: invalid type argument of `->'
+Table.c:4326: error: invalid type argument of `->'
+Table.c:4326: error: invalid type argument of `->'
+Table.c:4327: error: invalid type argument of `->'
+Table.c: In function `LoseSelection':
+Table.c:4340: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:4340: error: parse error before "tw"
+Table.c:4341: error: `XawTableCell' undeclared (first use in this function)
+Table.c:4346: error: invalid type argument of `->'
+Table.c:4347: error: invalid type argument of `->'
+Table.c:4349: error: invalid type argument of `->'
+Table.c:4352: warning: passing arg 1 of `get_cell_positions' makes pointer from integer without a cast
+Table.c:4354: error: invalid type argument of `->'
+Table.c:4356: error: invalid type argument of `->'
+Table.c:4357: error: invalid type argument of `->'
+Table.c:4358: error: invalid type argument of `->'
+Table.c:4358: error: invalid type argument of `->'
+Table.c:4358: error: invalid type argument of `->'
+Table.c:4358: error: invalid type argument of `->'
+Table.c:4358: error: invalid type argument of `->'
+Table.c:4358: error: invalid type argument of `->'
+Table.c:4358: error: invalid type argument of `->'
+Table.c:4358: error: invalid type argument of `->'
+Table.c:4358: error: invalid type argument of `->'
+Table.c:4359: error: invalid type argument of `->'
+Table.c: In function `StoreBuffer':
+Table.c:4375: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:4375: error: parse error before "tw"
+Table.c:4382: error: invalid type argument of `->'
+Table.c:4393: error: invalid type argument of `->'
+Table.c:4393: error: `XawTableCell' undeclared (first use in this function)
+Table.c:4396: error: invalid type argument of `->'
+Table.c:4396: error: parse error before "get_cell"
+Table.c:4423: error: invalid type argument of `->'
+Table.c:4424: error: invalid type argument of `->'
+Table.c:4424: error: invalid type argument of `->'
+Table.c:4427: error: invalid type argument of `->'
+Table.c:4427: error: invalid type argument of `->'
+Table.c: In function `CallEdit':
+Table.c:4444: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:4444: error: parse error before "tw"
+Table.c:4449: error: invalid type argument of `->'
+Table.c: In function `InsertSelection':
+Table.c:4530: error: `XawTableWidget' undeclared (first use in this function)
+Table.c:4530: error: parse error before "tw"
+Table.c:4536: error: invalid type argument of `->'
+make: *** [Table.o] Error 1

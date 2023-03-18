@@ -1,0 +1,174 @@
+
+                   Three-D Athena Widgets (Xaw3d)
+                          Kaleb S. Keithley
+                   kaleb@jpl-devvax.jpl.nasa.gov
+
+Features:
+
+This is Release 0.6B (17 Feb, 1993) of a set of 3-D widgets based on the 
+R5 Athena Widget set.  The Three-D Athena may be used as a general 
+replacement for the Athena (Xaw) Widget set.
+
+In general, you may relink almost any Athena Widget based application with 
+the Three-D Athena Widget set and obtain a three dimensional appearance.  
+On systems with shared libraries, you can replace your shared libXaw with 
+libXaw3d and obtain the three dimensional appearance without even relinking.
+
+In this release, I have tested all of the clients distributed on the R5 MIT 
+source tape, plus xfig-2.1.5, xarchie-1.3, and aXe-3.1.  All Xaw3d sources 
+have been thoroughly delinted using Sun's /bin/lint and gcc using -traditional 
+-pedantic -Wall and -ansi -pedantic -Wall.
+
+Top and bottom shadow colors, shadow width, top and bottom shadow contrast
+should be self explanatory, and may be set via the usual and customary 
+methods, e.g. app-defaults, .Xdefaults, programmatically, with editres, 
+etc.  The user data resource may be used to "hang" application specific 
+data on a widget, and is only settable programmatically.
+
+
+This release adds the following features:
+
+    o The 0.6A release fixed a problem in the Imakefile and added comments
+      to the README.  No changes were made to the Xaw3d sources.
+
+    o The 0.6B release added a comment to the README.  No changes were
+      make to the Xaw3d sources.
+
+    o The Layout widget.  If I may borrow the phrase, this is an insanely
+      great widget written by Keith Packard, and introduced at the '93
+      X Technical Conference.  I have included it in Xaw3d, with Keith's
+      permission, because Xaw has been in need of a versatile manager
+      widget.  Subclassed from Constraint, the Layout widget uses TeX-
+      like semantics to describe where to place children and how to do 
+      geometry management.
+
+    o Scrollbar with arrows.  This is an Athena-based arrowhead-style 
+      Scrollbar written by Mitch Trachtenberg that is 100% compatible
+      with the normal Athena Scrollbar.  Selection of the normal style
+      or the arrow style Scrollbar is a compile-time option for Xaw3d.
+      The arrow style scrollbar is available separately on export in 
+      the file: /contrib/Xaw.Scrollbar.mta.Z
+
+    o Bug fixes.  More bug fixes than you can shake a stick at.
+
+
+Known problems:
+
+    o You won't be able to replace shared libXaw with libXaw3d on systems
+      with SVR3 style shared libraries.
+
+    o On SVR4/386, I've had reports that replacing shared libXaw with 
+      libXaw3d works, and I've had reports that it doesn't.  Try it and 
+      see.
+
+    o Xaw3d pixel allocation doesn't behave well when beNiceToColormap
+      is False and the Default Colormap is full.
+
+    o The samples in Layout.h are wrong and don't work.  Example programs
+      written by Keith Packard that use the Layout widget are available
+      on export in /contrib/Layout.tar.Z
+
+
+aXe-3.1 and xarchie:
+
+      aXe-3.1 and xarchie won't compile against Xaw3d because they subclass 
+      the Xaw widgets themselves.  To solve this, I now have a pair of 
+      patches for these programs.  See below for where to get these patches.
+
+      Renaming/replacing shared libXaw with libXaw3d will definitely break 
+      unpatched aXe-3.1 and xarchie.
+
+      aXe-4.0 includes optional support for Xaw3d.  Consult the aXe README
+      for more information.
+
+
+xterm:
+
+      A comment that appears in the xterm source:
+         *
+         * ...There be serious and nasty dragons here.
+         *
+
+      xterm is, well, xterm.  The auto-scroll in the arrow-style scrollbar 
+      doesn't work in xterm because it relies on XtTimeouts.  xterm, perhaps 
+      in the name of speed, circumvents XtAppNextEvent() and goes direct to 
+      XNextEvent() to get it's XEvents, with the unfortunate side effect of 
+      completely ignoring "other sources" like timeouts.  I have included a 
+      patch for xterm to support the arrow-style scrollbar.  See below for 
+      where to get this patch.
+
+
+Getting:
+
+Xaw3d may be found on export.lcs.mit.edu (18.24.0.12) and possibly other
+sites; check archie.  On export, it may be found in the file:
+
+    ~ftp/contrib/Xaw3d/R5/Xaw3d-0.6B.tar.Z
+
+There is no patch file from 0.5 to 0.6 -- it's larger than the tar file.
+
+Patches for xarchie-1.3, aXe-3.1, and xterm may be found in the files:
+
+    ~ftp/contrib/Xaw3d/R5/xarchie3d.patch
+    ~ftp/contrib/Xaw3d/R5/aXe3d.patch
+    ~ftp/contrib/Xaw3d/R5/xterm.patch
+
+
+Building:  
+
+Untar the distribution from the base of your MIT source tree.  This will 
+create the directory .../mit/lib/Xaw3d.  'cd' there and:
+
+    'make Makefile; make includes; make depend; make; make install'.  
+
+The Imakefile contains the line:
+
+#    EXTRA_DEFINES = -DARROW_SCROLLBAR
+
+If you want the arrow-scrollbar, then uncomment the line by deleting the '#'.
+
+The Imakefile uses the Xaw symbols in .../mit/config, so if you have 
+debugging, profiling, shared libs, etc. specified for Xaw, you'll get 
+them in Xaw3d too.
+
+
+Using:
+
+Just relink your Xaw based application with -lXaw3d.
+
+To obtain an appearance similar to another well know widget set, use the 
+following resources:
+    *background:        LightSkyBlue
+    *shapeStyle:        Rectangle
+    *beNiceToColormap:  False
+
+By default, Label widgets do not have shadows drawn for them.  You can
+force shadows to be drawn for specifying:
+    *shadowWidth: 2
+
+If you'd like the default behavior (i.e. not 3-D) on pulldown menus, use:
+    *SmeBSB*shadowWidth: 0
+
+
+Credits (in chronological order of their contribution):
+
+          All the people at the X Consortium
+
+          Achille Hui (eillihca@drizzle.stanford.edu)
+          Robert Withrow (witr@rwwa.com)
+          Malcolm Strickland (chuck-strickland@orl.mmc.com
+          David Flanagan (david@ora.com)
+          Jamie Zawinski (jwz%thalidomide@lucid.com
+          Frank Terhaar-Yonkers (fty@bizarre.trpnc.epa.gov)
+          Mike Schulze (mike@cs.curtin.edu.au)
+          Gustaf Neumann (neumann@dec4.wu-wien.ac.at)
+          Jerry Whelan (guru@stasi.bradley.edu)
+          Mark Rawling (mwr@mel.dit.csiro.au)
+          Tim Theisen (tim@cs.wisc.edu)
+          Mitch Trachtenberg (mitch@mta.com)
+          Keith Packard (keithp@ncd.com)
+
+
+Comments, fixes, etc. to: 
+          kaleb@jpl-devvax.jpl.nasa.gov
+

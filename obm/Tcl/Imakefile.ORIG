@@ -1,0 +1,163 @@
+XCOMM  Imakefile for maintaining Tcl in the Object Manager library.
+XCOMM  05-Sep-93, Doug Tody NOAO/IRAF.
+
+#include <Library.tmpl>
+
+XCOMM ------------------ BEGIN TCL DEFINITIONS ----------------------
+    exec_prefix = /usr/local
+         prefix = /usr/local
+
+    TCL_LIBRARY = $(prefix)/lib/tcl
+        LIB_DIR = $(exec_prefix)/lib
+        BIN_DIR = $(exec_prefix)/bin
+        SRC_DIR = .
+    INCLUDE_DIR = $(prefix)/include
+
+#if defined(MacIIArchitecture)
+XCOMM - The following are for Macintosh A/UX 
+      GCC_FLAGS = -w -Wunused -traditional
+       AC_FLAGS = -DHAVE_UNISTD_H=1 -DNO_STDLIB_H=1 -DNO_STRING_H=1 \
+                  -DNEED_MATHERR=1
+    COMPAT_OBJS = strerror.o strtoul.o tclMtherr.o
+
+#else
+#if defined(SunArchitecture) && (OSMajorVersion <= 4)
+XCOMM - The following are for SunOS
+      GCC_FLAGS = 
+       AC_FLAGS = -DHAVE_UNISTD_H=1 -DNO_FLOAT_H=1 -DNO_STDLIB_H=1 \
+                  -DNO_STRING_H=1 -DNEED_MATHERR=1
+
+    COMPAT_OBJS = \
+	    strerror.o strtoul.o tclMtherr.o
+
+#else
+#if defined(SunArchitecture)
+XCOMM - The following are for SunSoft/Solaris
+      GCC_FLAGS = 
+       AC_FLAGS = -DNO_GETWD=1 -DNO_WAIT3=1 -DHAVE_UNISTD_H=1 \
+		  -DNO_UNION_WAIT=1 -DNEED_MATHERR=1
+    COMPAT_OBJS = tclMtherr.o
+
+#else
+#if defined(LinuxArchitecture)
+      GCC_FLAGS = -DNOSTDHDRS -DSYSV -DANSI -D_BSD_SOURCE -W \
+		  -Wunused -Wcomment -fstrength-reduce -fpcc-struct-return
+       AC_FLAGS = -DHAVE_UNISTD_H=1
+    COMPAT_OBJS =
+
+#else
+#if defined(HPArchitecture)
+XCOMM - The following are for HP-UX
+      GCC_FLAGS = 
+       AC_FLAGS = -DNO_GETWD=1 -DNO_WAIT3=1 -DHAVE_UNISTD_H=1 \
+                  -DNO_UNION_WAIT=1 -DNEED_MATHERR=1
+    COMPAT_OBJS = tclMtherr.o
+
+#else
+#if defined(OSF1)
+      GCC_FLAGS =
+       AC_FLAGS = -DHAVE_UNISTD_H=1 -DNO_UNION_WAIT=1 -DNEED_MATHERR=1
+    COMPAT_OBJS = tclMtherr.o
+#else
+      GCC_FLAGS = 
+       AC_FLAGS =
+    COMPAT_OBJS =
+#endif
+#endif
+#endif
+#endif
+#endif
+#endif
+
+    DEPENDFLAGS = -I.. -I${SRC_DIR} ${AC_FLAGS}
+      CCOPTIONS = -I.. -I${SRC_DIR} ${AC_FLAGS} ${GCC_FLAGS} \
+                  -DTCL_LIBRARY=\"${TCL_LIBRARY}\"
+
+UNIX_OBJS = \
+	panic.o tclEnv.o tclGlob.o tclMain.o tclUnixAZ.o \
+	tclUnixStr.o tclUnixUtil.o
+
+GENERIC_OBJS = \
+	regexp.o tclAsync.o tclBasic.o tclCkalloc.o \
+	tclCmdAH.o tclCmdIL.o tclCmdMZ.o tclExpr.o tclGet.o \
+	tclHash.o tclHistory.o tclLink.o tclParse.o tclProc.o \
+	tclUtil.o tclVar.o
+
+TCL_OBJS = \
+	${GENERIC_OBJS} ${UNIX_OBJS} ${COMPAT_OBJS}
+XCOMM -------------------- END TCL DEFINITIONS ----------------------
+
+HEADERS = \
+	patchlevel.h \
+	tclRegexp.h \
+	tcl.h \
+	tclInt.h \
+	tclUnix.h
+
+SRCS = \
+	panic.c \
+	regexp.c \
+	tclAppInit.c \
+	tclAsync.c \
+	tclBasic.c \
+	tclCkalloc.c \
+	tclCmdAH.c \
+	tclCmdIL.c \
+	tclCmdMZ.c \
+	tclEnv.c \
+	tclExpr.c \
+	tclGet.c \
+	tclGlob.c \
+	tclHash.c \
+	tclHistory.c \
+	tclLink.c \
+	tclMain.c \
+	tclMtherr.c \
+	tclParse.c \
+	tclProc.c \
+	tclTest.c \
+	tclUnixAZ.c \
+	tclUnixStr.c \
+	tclUnixUtil.c \
+	tclUtil.c \
+	tclVar.c
+
+OBJS = \
+	${TCL_OBJS}
+
+SubdirLibraryRule($(OBJS))
+
+XCOMM ------------------ BEGIN TCL DEFINITIONS ----------------------
+getcwd.o: $(SRC_DIR)/compat/getcwd.c
+	$(CC) -c $(CCOPTIONS) $(SRC_DIR)/compat/getcwd.c
+
+opendir.o: $(SRC_DIR)/compat/opendir.c
+	$(CC) -c $(CCOPTIONS) $(SRC_DIR)/compat/opendir.c
+
+strerror.o: $(SRC_DIR)/compat/strerror.c
+	$(CC) -c $(CCOPTIONS) $(SRC_DIR)/compat/strerror.c
+
+strstr.o: $(SRC_DIR)/compat/strstr.c
+	$(CC) -c $(CCOPTIONS) $(SRC_DIR)/compat/strstr.c
+
+strtod.o: $(SRC_DIR)/compat/strtod.c
+	$(CC) -c $(CCOPTIONS) $(SRC_DIR)/compat/strtod.c
+
+strtol.o: $(SRC_DIR)/compat/strtol.c
+	$(CC) -c $(CCOPTIONS) $(SRC_DIR)/compat/strtol.c
+
+strtoul.o: $(SRC_DIR)/compat/strtoul.c
+	$(CC) -c $(CCOPTIONS) $(SRC_DIR)/compat/strtoul.c
+
+tmpnam.o: $(SRC_DIR)/compat/tmpnam.c
+	$(CC) -c $(CCOPTIONS) $(SRC_DIR)/compat/tmpnam.c
+
+waitpid.o: $(SRC_DIR)/compat/waitpid.c
+	$(CC) -c $(CCOPTIONS) $(SRC_DIR)/compat/waitpid.c
+XCOMM -------------------- END TCL DEFINITIONS ----------------------
+
+
+NormalLintTarget($(SRCS))
+LintLibraryTarget(ar,$(SRCS))
+
+DependTarget()
