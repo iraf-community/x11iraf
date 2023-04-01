@@ -102,9 +102,9 @@ setting `CFLAGS` and `LDFLAGS`. If the environment variable
 `OSI_COMPLIANT` is set to `YES`, the build uses only source files that
 are Open Source.
 
-To copy the executables to `/usr/local/bin`, execute as root
+To copy the executables to `/usr/local/bin`, execute
 
-    # make install
+    # sudo make install
 
 This will also install the manpages to `/usr/local/man/` und the
 required terminfo file for xgterm to `/usr/share/terminfo/`. If you
