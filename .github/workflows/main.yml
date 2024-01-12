@@ -10,11 +10,11 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: Ubuntu 20.04 Focal x86_64
-            os: ubuntu-20.04
+          - name: Ubuntu
+            os: ubuntu-latest
 
-          - name: macOS 10.15 Catalina x86_64
-            os: macos-10.15
+          - name: macOS
+            os: macos-latest
 
     steps:
       - name: Checkout repository
