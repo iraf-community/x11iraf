@@ -11,6 +11,11 @@
 #include    "LayoutP.h"
 
 static LayoutPtr    *dest;
+#define yysetdest LayYYsetdest
+#define yywrap LayYYwrap
+#define yyerror LayYYerror
+extern int LayYYlex ( void );
+extern void yyerror(char    *s);
 
 %}
 

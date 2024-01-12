@@ -14,6 +14,10 @@
 #include    "laygram.h"
 static char *yysourcebase, *yysource;
 
+#define yylval LayYYlval
+#define yyerror LayYYerror
+#define yysetsource LayYYsetsource
+
 #ifndef FLEX_SCANNER
 #define input() (*yysource++)
 #define unput(c)    (--yysource)
@@ -24,7 +28,7 @@ static void my_yyinput(char *buf, int *result, int max_size);
 #endif
 
 #ifdef __STDC__
-static int count ();
+static int count (char *s, char c);
 #endif
 %}
 %%
@@ -75,9 +79,7 @@ height			return HEIGHT;
 %%
 
 static int
-count (s, c)
-    char    *s;
-    char    c;
+count (char    *s, char    c)
 {
     int	i = 0;
     while (*s)
@@ -86,14 +88,13 @@ count (s, c)
     return i;
 }
 
-yysetsource(s)
-    char    *s;
+yysetsource(char    *s)
 {
     yysourcebase = yysource = s;
 }
 
-yyerror(s)
-    char    *s;
+void
+yyerror(char    *s)
 {
     char    *t;
     
@@ -115,8 +116,7 @@ yyerror(s)
 
 #ifdef FLEX_SCANNER
 static void
-my_yyinput(buf, result, max_size)
-    char *buf; int *result; int max_size;
+my_yyinput(char *buf, int *result, int max_size)
 {
     int size = max_size < strlen(yysource) ? max_size : strlen(yysource);
 
