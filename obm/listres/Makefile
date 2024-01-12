@@ -12,7 +12,7 @@ all: listres
 listres: $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(OBJS) \
 	    -L.. -lobm \
-	    -lXpm $(TCL_LIB) -lXaw3d -lXmu -lXt -lXext -lX11 -lm
+	    -lXpm $(TCL_LIB) -lXaw -lXmu -lXt -lXext -lX11 -lm
 
 clean:
 	rm -f listres $(OBJS)
