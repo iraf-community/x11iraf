@@ -3,6 +3,7 @@ all: xgterm ximtool
 prefix = /usr/local
 
 export TCL_INCLUDE_DIR = /usr/include/tcl
+export TCL_LIB = -ltcl
 
 .PHONY: xgterm ximtool xtapemon obmsh
 
