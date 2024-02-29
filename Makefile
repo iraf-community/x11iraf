@@ -30,12 +30,12 @@ clean:
 	$(MAKE) -C obm clean
 
 install: xgterm ximtool
-	mkdir -p ${DESTDIR}${prefix}/bin ${DESTDIR}${prefix}/man/man1
+	mkdir -p ${DESTDIR}${prefix}/bin ${DESTDIR}${prefix}/share/man/man1
 	install -m755 xgterm/xgterm ${DESTDIR}${prefix}/bin
-	install -m755 xgterm/xgterm.man ${DESTDIR}${prefix}/man/man1/xgterm.1
+	install -m755 xgterm/xgterm.man ${DESTDIR}${prefix}/share/man/man1/xgterm.1
 	tic xgterm/xgterm.terminfo
 	install -m755 ximtool/ximtool ${DESTDIR}${prefix}/bin
-	install -m755 ximtool/ximtool.man ${DESTDIR}${prefix}/man/man1/ximtool.1
+	install -m755 ximtool/ximtool.man ${DESTDIR}${prefix}/share/man/man1/ximtool.1
 	if [ -x ximtool/clients/ism_wcspix.e ] ; then \
 	    install -m755 ximtool/clients/ism_wcspix.e ${DESTDIR}${prefix}/bin ; \
 	fi
