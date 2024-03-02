@@ -6,6 +6,12 @@ all: ximtool clients
 
 .PHONY: clients
 
+ifdef iraf
+    MKPKG ?= $(iraf)unix/bin/mkpkg.e
+else
+    MKPKG ?= mkpkg
+endif
+
 CFLAGS += -I../obm -I${TCL_INCLUDE_DIR}
 
 UNAME_S := $(shell uname -s)
@@ -34,8 +40,8 @@ ximtool: $(OBJS)
 	    -lXpm $(TCL_LIB) -lXaw3d -lXmu -lXt -lXext -lX11 -lncurses -lm
 
 clients:
-	cd clients && mkpkg || true
+	cd clients && $(MKPKG) || true
 
 clean:
 	rm -f ximtool ximtool.gui.h ximtool.html.h $(OBJS)
-	cd clients && mkpkg clean || true
+	cd clients && $(MKPKG) clean || true
