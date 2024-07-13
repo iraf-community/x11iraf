@@ -23,11 +23,7 @@ static Display *dpy;
  * returned as the function value.
  */
 char *
-get_geometry (display, screen, window, origin)
-    Display *display;
-    Screen *screen;
-    Window window;
-    int origin;			/* return only origin-relative coords */
+get_geometry (Display *display, Screen *screen, Window window, int origin)
 {
     register char *op;
     int screen_number = XScreenNumberOfScreen (screen);

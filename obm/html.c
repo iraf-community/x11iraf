@@ -1,6 +1,7 @@
 /* Copyright(c) 1993 Association of Universities for Research in Astronomy Inc.
  */
 
+#include <stdlib.h>
 #include "ObmP.h"
 #include "widget.h"
 
@@ -88,33 +89,43 @@ typedef struct {
 } htmlClassData, *HTMLClassData;
 
 
-void HTMLDestroy();
-void HTMLClassDestroy();
-ObmObject HTMLCreate();
+void HTMLDestroy(ObmObject);
+void HTMLClassDestroy(ObmContext, ObjClassRec);
+ObmObject HTMLCreate(ObmContext, char *, ObjClassRec, char *, ArgList, int);
 
-static int htmlSetText(), htmlGetText(), htmlGetHRefs();
-static int htmlGetImageSrcs(), htmlGetLinks();
-static int htmlRetestAnchors(), htmlPositionToId(), htmlIdToPosition();
-static int htmlAnchorToPosition(), htmlAnchorToId();
-static int htmlGotoId(), htmlAddCallback(), htmlDeleteCallback();
-static int htmlSetSelection(), htmlGetSelection(), htmlClearSelection();
-static int htmlSearchText();
+static int htmlSetText(MsgContext, Tcl_Interp *, int, char **);
+static	int htmlGetText(MsgContext, Tcl_Interp *, int, char **);
+static	int htmlGetHRefs(MsgContext, Tcl_Interp *, int, char **);
+static int htmlGetImageSrcs(MsgContext, Tcl_Interp *, int, char **);
+static	int htmlGetLinks(MsgContext, Tcl_Interp *, int, char **);
+static int htmlRetestAnchors(MsgContext, Tcl_Interp *, int, char **);
+static	int htmlPositionToId(MsgContext, Tcl_Interp *, int, char **);
+static	int htmlIdToPosition(MsgContext, Tcl_Interp *, int, char **);
+static int htmlAnchorToPosition(MsgContext, Tcl_Interp *, int, char **);
+static	int htmlAnchorToId(MsgContext, Tcl_Interp *, int, char **);
+static int htmlGotoId(MsgContext, Tcl_Interp *, int, char **);
+static	int htmlAddCallback(MsgContext, Tcl_Interp *, int, char **);
+static	int htmlDeleteCallback(MsgContext, Tcl_Interp *, int, char **);
+static int htmlSetSelection(MsgContext, Tcl_Interp *, int, char **);
+static	int htmlGetSelection(MsgContext, Tcl_Interp *, int, char **);
+static	int htmlClearSelection(MsgContext, Tcl_Interp *, int, char **);
+static int htmlSearchText(MsgContext, Tcl_Interp *, int, char **);
 
-static void anchorCallback(), pointerMotionCallback();
-static void submitFormCallback(), linkCallback();
-static char *cb_encode(), *makeList();
-static int testAnchorCallback();
-static void cb_error();
-static int cb_decode();
-extern long strtol();
+static void anchorCallback(Widget, XtPointer, XtPointer);
+static void pointerMotionCallback(Widget, XtPointer, char *);
+static void submitFormCallback(Widget, XtPointer, XtPointer);
+static void linkCallback(Widget, XtPointer, XtPointer);
+static char *cb_encode(int);
+static char *makeList(char **, int);
+static int testAnchorCallback(Widget, XtPointer, char *);
+static void cb_error(ObmContext, ObmCallback);
+static int cb_decode(char *);
 
 
 /* HTMLClassInit -- Initialize the class record for the HTML widget class.
  */
 void
-HTMLClassInit (obm, classrec)
-ObmContext obm;
-register ObjClassRec classrec;
+HTMLClassInit (ObmContext obm, ObjClassRec classrec)
 {
 	register HTMLClassData gcd;
 	register Tcl_Interp *tcl;
@@ -122,7 +133,7 @@ register ObjClassRec classrec;
 
 	/* Install the class methods. */
 	classrec->ClassDestroy = HTMLClassDestroy;
-	classrec->Create = (ObmFunc) HTMLCreate;
+	classrec->Create = HTMLCreate;
 	classrec->Destroy = HTMLDestroy;
 	classrec->Evaluate = WidgetEvaluate;
 
@@ -179,9 +190,7 @@ register ObjClassRec classrec;
 /* HTMLClassDestroy -- Custom destroy procedure for the HTML class.
  */
 void
-HTMLClassDestroy (obm, classrec)
-ObmContext obm;
-register ObjClassRec classrec;
+HTMLClassDestroy (ObmContext obm, ObjClassRec classrec)
 {
 	register HTMLClassData gcd = (HTMLClassData) classrec->class_data;
 
@@ -197,13 +206,13 @@ register ObjClassRec classrec;
 /* HTMLCreate -- Create an instance of a HTML object.
  */
 ObmObject
-HTMLCreate (obm, name, classrec, parent, a_args, a_nargs)
-ObmContext obm;
-char *name;
-ObjClassRec classrec;
-char *parent;
-ArgList a_args;
-int a_nargs;
+HTMLCreate (
+  ObmContext obm,
+  char *name,
+  ObjClassRec classrec,
+  char *parent,
+  ArgList a_args,
+  int a_nargs)
 {
 	register HTMLObject obj;
 	register Widget w;
@@ -246,8 +255,7 @@ int a_nargs;
 /* HTMLDestroy -- Destroy an instance of a HTML object.
  */
 void
-HTMLDestroy (object)
-ObmObject object;
+HTMLDestroy (ObmObject object)
 {
 	HTMLObject obj = (HTMLObject) object;
 	ObjClassRec classrec = obj->core.classrec;
@@ -288,11 +296,7 @@ ObmObject object;
  * this will be displayed before or after the document passed in as "text".
  */
 static int 
-htmlSetText (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+htmlSetText (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	register HTMLClassData gcd = (HTMLClassData) msg;
 	HTMLObject obj = (HTMLObject) gcd->object[gcd->level];
@@ -337,11 +341,7 @@ char **argv;
  * The default Postscript font is Times.
  */
 static int 
-htmlGetText (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+htmlGetText (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	register HTMLClassData gcd = (HTMLClassData) msg;
 	HTMLObject obj = (HTMLObject) gcd->object[gcd->level];
@@ -388,11 +388,7 @@ char **argv;
  * beginning or the end of the document is returned.
  */
 static int 
-htmlPositionToId (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+htmlPositionToId (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	register HTMLClassData gcd = (HTMLClassData) msg;
 	HTMLObject obj = (HTMLObject) gcd->object[gcd->level];
@@ -423,11 +419,7 @@ char **argv;
  * the coordinates x,y are undefined.
  */
 static int 
-htmlIdToPosition (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+htmlIdToPosition (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	register HTMLClassData gcd = (HTMLClassData) msg;
 	HTMLObject obj = (HTMLObject) gcd->object[gcd->level];
@@ -473,11 +465,7 @@ char **argv;
  * coordinates x,y are undefined.
  */
 static int 
-htmlAnchorToPosition (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+htmlAnchorToPosition (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	register HTMLClassData gcd = (HTMLClassData) msg;
 	HTMLObject obj = (HTMLObject) gcd->object[gcd->level];
@@ -522,11 +510,7 @@ char **argv;
  * If there is no anchor with the given name false is returned.
  */
 static int 
-htmlAnchorToId (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+htmlAnchorToId (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	register HTMLClassData gcd = (HTMLClassData) msg;
 	HTMLObject obj = (HTMLObject) gcd->object[gcd->level];
@@ -555,11 +539,7 @@ char **argv;
  * An id of zero means go to the top of the document.
  */
 static int 
-htmlGotoId (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+htmlGotoId (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	register HTMLClassData gcd = (HTMLClassData) msg;
 	HTMLObject obj = (HTMLObject) gcd->object[gcd->level];
@@ -591,11 +571,7 @@ char **argv;
  * anchor in the document being displayed.
  */
 static int 
-htmlGetHRefs (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+htmlGetHRefs (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	HTMLClassData gcd = (HTMLClassData) msg;
 	HTMLObject obj = (HTMLObject) gcd->object[gcd->level];
@@ -646,11 +622,7 @@ char **argv;
  * A SRC is a HREF pointing to an image file.
  */
 static int 
-htmlGetImageSrcs (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+htmlGetImageSrcs (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	HTMLClassData gcd = (HTMLClassData) msg;
 	HTMLObject obj = (HTMLObject) gcd->object[gcd->level];
@@ -699,11 +671,7 @@ char **argv;
  * where the structure {{href} {role}} describes each link.
  */
 static int 
-htmlGetLinks (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+htmlGetLinks (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	HTMLClassData gcd = (HTMLClassData) msg;
 	HTMLObject obj = (HTMLObject) gcd->object[gcd->level];
@@ -774,9 +742,7 @@ char **argv;
  * Tcl list of strings.
  */
 static char *
-makeList (list, n)
-char **list;
-int n;
+makeList (char **list, int n)
 {
 	register char *ip, *op;
 	register int i;
@@ -819,11 +785,7 @@ int n;
  * given URL has been visited.
  */
 static int 
-htmlRetestAnchors (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+htmlRetestAnchors (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	register HTMLClassData gcd = (HTMLClassData) msg;
 	HTMLObject obj = (HTMLObject) gcd->object[gcd->level];
@@ -845,11 +807,7 @@ char **argv;
  * that element.
  */
 static int 
-htmlSetSelection (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+htmlSetSelection (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	register HTMLClassData gcd = (HTMLClassData) msg;
 	HTMLObject obj = (HTMLObject) gcd->object[gcd->level];
@@ -884,11 +842,7 @@ char **argv;
  * An empty string is returned if there is no current text selection.
  */
 static int 
-htmlGetSelection (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+htmlGetSelection (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	register HTMLClassData gcd = (HTMLClassData) msg;
 	HTMLObject obj = (HTMLObject) gcd->object[gcd->level];
@@ -913,11 +867,7 @@ char **argv;
  *  Usage:	clearSelection
  */
 static int 
-htmlClearSelection (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+htmlClearSelection (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	register HTMLClassData gcd = (HTMLClassData) msg;
 	HTMLObject obj = (HTMLObject) gcd->object[gcd->level];
@@ -944,11 +894,7 @@ char **argv;
  *
  */
 static int 
-htmlSearchText (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+htmlSearchText (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	register HTMLClassData gcd = (HTMLClassData) msg;
 	HTMLObject obj = (HTMLObject) gcd->object[gcd->level];
@@ -1033,11 +979,7 @@ retry: 	    start.id = start.pos = 0;
  * selects a new URL while viewing a document.
  */
 static int 
-htmlAddCallback (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+htmlAddCallback (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	HTMLObject obj = (HTMLObject) msg->object[msg->level];
 	register WidgetPrivate wp = &obj->widget;
@@ -1082,11 +1024,7 @@ char **argv;
  * named procedure are deleted.
  */
 static int 
-htmlDeleteCallback (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+htmlDeleteCallback (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	HTMLObject obj = (HTMLObject) msg->object[msg->level];
 	register HTMLPrivate hp = &obj->html;
@@ -1129,10 +1067,7 @@ char **argv;
  * are called in the order in which they were registered.
  */
 static void
-anchorCallback (w, client_data, call_data)
-Widget w;
-XtPointer client_data;
-XtPointer call_data;
+anchorCallback (Widget w, XtPointer client_data, XtPointer call_data)
 {
 	register char *ip, *op;
 	register ObmCallback cb;
@@ -1219,10 +1154,7 @@ XtPointer call_data;
  * has been visited previously, otherwise a zero should be returned.
  */
 static int
-testAnchorCallback (w, client_data, href)
-Widget w;
-XtPointer client_data;
-char *href;
+testAnchorCallback (Widget w, XtPointer client_data, char *href)
 {
 	register ObmCallback cb;
 	register HTMLObject obj = (HTMLObject) client_data;
@@ -1273,10 +1205,7 @@ char *href;
  * while "method" is the method to be used to submit the form.
  */
 static void
-submitFormCallback (w, client_data, call_data)
-Widget w;
-XtPointer client_data;
-XtPointer call_data;
+submitFormCallback (Widget w, XtPointer client_data, XtPointer call_data)
 {
 	register char *ip, *op;
 	register ObmCallback cb;
@@ -1397,10 +1326,7 @@ XtPointer call_data;
  * are called in the order in which they were registered.
  */
 static void
-linkCallback (w, client_data, call_data)
-Widget w;
-XtPointer client_data;
-XtPointer call_data;
+linkCallback (Widget w, XtPointer client_data, XtPointer call_data)
 {
 	register char *ip, *op;
 	register ObmCallback cb;
@@ -1440,10 +1366,7 @@ XtPointer call_data;
  *	userproc widget cbtype href
  */
 static void
-pointerMotionCallback (w, client_data, href)
-Widget w;
-XtPointer client_data;
-char *href;
+pointerMotionCallback (Widget w, XtPointer client_data, char *href)
 {
 	register ObmCallback cb;
 	register HTMLObject obj = (HTMLObject) client_data;
@@ -1471,9 +1394,7 @@ char *href;
 /* cb_error -- Convenience routine to return an error from a callback.
  */
 static void
-cb_error (obm, cb)
-register ObmContext obm;
-register ObmCallback cb;
+cb_error (ObmContext obm, ObmCallback cb)
 {
 	register Tcl_Interp *tcl = obm->tcl;
 	const char *errstr = Tcl_GetVar (tcl, "errorInfo", 0);
@@ -1485,8 +1406,7 @@ register ObmCallback cb;
 /* cb_decode -- Convert a callback_type string to a callback type code.
  */
 static int
-cb_decode (callback_type)
-register char *callback_type;
+cb_decode (char *callback_type)
 {
 	register int type = 0;
 
@@ -1507,8 +1427,7 @@ register char *callback_type;
 /* cb_encode -- Convert a callback_type string to a callback type code.
  */
 static char *
-cb_encode (callback_type)
-int callback_type;
+cb_encode (int callback_type)
 {
 	register char *type = "unknown";
 

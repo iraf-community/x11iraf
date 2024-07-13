@@ -2269,9 +2269,7 @@ struct resource_list {
 /* Prints a table listing the unique resource name/type pairs, with a bitmask
  * indicating the widget classes using each resource/type pair.
  */
-main (argc, argv)
-int	argc;
-char	*argv[];
+main (int argc, char *argv[])
 {
 	register struct resource_list *rp, *np;
 	register unsigned long flags1, flags2;

@@ -76,27 +76,28 @@ struct msgContext {
 };
 typedef struct msgContext *MsgContext;
 
-static	void ParameterDestroy();
-static	int ParameterEvaluate();
-static	ObmObject ParameterCreate();
-static	void ParameterClassDestroy();
-static	int parameterSetValue(), parameterGetValue(), parameterNotify();
-static	int parameterAddCallback(), parameterDeleteCallback();
+static	void ParameterDestroy(ObmObject);
+static	int ParameterEvaluate(ObmObject, char *);
+static	ObmObject ParameterCreate(ObmContext, char *, ObjClassRec, char *, ArgList, int);
+static	void ParameterClassDestroy(ObmContext, ObjClassRec);
+static	int parameterSetValue(MsgContext, Tcl_Interp *, int, char **);
+static	int parameterGetValue(MsgContext, Tcl_Interp *, int, char **);
+static	int parameterNotify(MsgContext, Tcl_Interp *, int, char **);
+static	int parameterAddCallback(MsgContext, Tcl_Interp *, int, char **);
+static	int parameterDeleteCallback(MsgContext, Tcl_Interp *, int, char **);
 
 
 /* ParameterClassInit -- Initialize the class record for the parameter class.
  */
 void
-ParameterClassInit (obm, classrec)
-ObmContext obm;
-register ObjClassRec classrec;
+ParameterClassInit (ObmContext obm, ObjClassRec classrec)
 {
 	register Tcl_Interp *tcl;
 	register MsgContext msg;
 
 	/* Install the class methods. */
 	classrec->ClassDestroy = ParameterClassDestroy;
-	classrec->Create = (ObmFunc) ParameterCreate;
+	classrec->Create = ParameterCreate;
 	classrec->Destroy = ParameterDestroy;
 	classrec->Evaluate = ParameterEvaluate;
 
@@ -127,9 +128,7 @@ register ObjClassRec classrec;
  * class.
  */
 static void
-ParameterClassDestroy (obm, classrec)
-ObmContext obm;
-register ObjClassRec classrec;
+ParameterClassDestroy (ObmContext obm, ObjClassRec classrec)
 {
 	register MsgContext msg = (MsgContext) classrec->class_data;
 
@@ -145,13 +144,13 @@ register ObjClassRec classrec;
 /* ParameterCreate -- Create an instance of a parameter object.
  */
 static ObmObject
-ParameterCreate (obm, name, classrec, parent, args, nargs)
-ObmContext obm;
-char *name;
-ObjClassRec classrec;
-char *parent;
-ArgList args;
-int nargs;
+ParameterCreate (
+  ObmContext obm,
+  char *name,
+  ObjClassRec classrec,
+  char *parent,
+  ArgList args,
+  int nargs)
 {
 	register ParameterObject obj;
 
@@ -165,8 +164,7 @@ int nargs;
 /* ParameterDestroy -- Destroy an instance of a parameter object.
  */
 static void
-ParameterDestroy (object)
-ObmObject object;
+ParameterDestroy (ObmObject object)
 {
 	register ParameterObject obj = (ParameterObject) object;
 	register ObmCallback cb, next;
@@ -186,9 +184,7 @@ ObmObject object;
 /* ParameterEvaluate -- Evaluate a parameter command or message.
  */
 static int
-ParameterEvaluate (object, command)
-ObmObject object;
-char *command;
+ParameterEvaluate (ObmObject object, char *command)
 {
 	register ParameterObject obj = (ParameterObject) object;
 	register MsgContext msg = (MsgContext) obj->core.classrec->class_data;
@@ -232,11 +228,7 @@ char *command;
  *  Usage:	setValue <new-value>
  */
 static int 
-parameterSetValue (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+parameterSetValue (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	ParameterObject obj = (ParameterObject) msg->object[msg->level];
 	register ObmContext obm = obj->parameter.obm;
@@ -284,11 +276,7 @@ i, obj->core.name, cb->name, new_value);*/
  *  Usage:	getValue
  */
 static int 
-parameterGetValue (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+parameterGetValue (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	ParameterObject obj = (ParameterObject) msg->object[msg->level];
 	register ObmContext obm = obj->parameter.obm;
@@ -305,11 +293,7 @@ char **argv;
  *  Usage:	notify
  */
 static int 
-parameterNotify (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+parameterNotify (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	ParameterObject obj = (ParameterObject) msg->object[msg->level];
 	register ObmContext obm = obj->parameter.obm;
@@ -344,11 +328,7 @@ char **argv;
  *  Usage:	addCallback <procedure-name>
  */
 static int 
-parameterAddCallback (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+parameterAddCallback (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	ParameterObject obj = (ParameterObject) msg->object[msg->level];
 	register ParameterPrivate pp = &obj->parameter;
@@ -376,11 +356,7 @@ char **argv;
  *  Usage:	deleteCallback <procedure-name>
  */
 static int 
-parameterDeleteCallback (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+parameterDeleteCallback (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	ParameterObject obj = (ParameterObject) msg->object[msg->level];
 	register ParameterPrivate pp = &obj->parameter;

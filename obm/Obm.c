@@ -104,16 +104,13 @@ static void obm_call_activate_callbacks();
  */
 #if (TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION < 6)
 int
-Tcl_GetErrorLine(tcl)
-Tcl_Interp *tcl;
+Tcl_GetErrorLine(Tcl_Interp *tcl)
 {
 	return tcl->errorLine;
 }
 
 void
-Tcl_SetErrorLine(tcl, lineNum)
-Tcl_Interp *tcl;
-int lineNum;
+Tcl_SetErrorLine(Tcl_Interp *tcl, int lineNum)
 {
 	tcl->errorLine = lineNum;
 }
@@ -123,10 +120,7 @@ int lineNum;
 /* ObmOpen -- Open the object manager.
  */
 ObmContext
-ObmOpen (app_context, argc, argv)
-XtAppContext app_context;
-int argc;
-char *argv[];
+ObmOpen (XtAppContext app_context, int argc, char *argv[])
 {
 	register ObmContext obm;
 	register ObjClassRec classrec;
@@ -167,8 +161,7 @@ char *argv[];
 /* ObmClose -- Close the object manager.
  */
 void
-ObmClose (obm)
-ObmContext obm;
+ObmClose (ObmContext obm)
 {
 	register ObjClassRec classrec;
 	register int i;
@@ -198,8 +191,7 @@ ObmContext obm;
  * user interface.
  */
 void
-ObmInitialize (obm)
-register ObmContext obm;
+ObmInitialize (ObmContext obm)
 {
 	register ObmObject obj, nextobj;
 	register ObmCallback cb;
@@ -287,8 +279,7 @@ register ObmContext obm;
  * such a state as to be ready for client i/o.
  */
 void
-ObmActivate (obm)
-register ObmContext obm;
+ObmActivate (ObmContext obm)
 {
 	register ObmObject obj;
 	char defaultUI[SZ_MESSAGE];
@@ -341,13 +332,10 @@ register ObmContext obm;
  * was deactivated.
  */
 void
-ObmDeactivate (obm, unmap)
-register ObmContext obm;
-Boolean unmap;
+ObmDeactivate (ObmContext obm, Boolean unmap)
 {
 	register ObmObject obj;
 	register ObmCallback cb;
-	ObmFunc deactivate;
 
 	/* The Obm "activated" flag is not affected by deactivation.
 	 * Deactivation merely means that control has temporarily been
@@ -374,9 +362,7 @@ Boolean unmap;
  * lists and call any activate/deactivate callbacks.
  */
 static void
-obm_call_activate_callbacks (obm, state)
-register ObmContext obm;
-int state;
+obm_call_activate_callbacks (ObmContext obm, int state)
 {
 	register ObmCallback cb;
 	register int type;
@@ -414,8 +400,7 @@ int state;
  * and mapped.
  */
 int
-ObmActivated (obm)
-register ObmContext obm;
+ObmActivated (ObmContext obm)
 {
 	return (obm->activated && obm->mapped);
 }
@@ -424,10 +409,7 @@ register ObmContext obm;
 /* ObmStatus -- Get the Object Manager status.
  */
 int
-ObmStatus (obm, app_name, app_class)
-register ObmContext obm;
-char *app_name;
-char *app_class;
+ObmStatus (ObmContext obm, char *app_name, char *app_class)
 {
 	if (obm->specified) {
 	    if (app_name)
@@ -448,8 +430,7 @@ char *app_class;
  * by the GUI code.
  */
 XtPointer
-ObmGetInterp (obm)
-register ObmContext obm;
+ObmGetInterp (ObmContext obm)
 {
 	return ((XtPointer)obm->tcl);
 }
@@ -458,12 +439,9 @@ register ObmContext obm;
 /* ObmDeliverMsg -- Deliver a message to a UI object.
  */
 int
-ObmDeliverMsg (obm, object, message)
-register ObmContext obm;
-char *object;
-char *message;
+ObmDeliverMsg (ObmContext obm, char *object, char *message)
 {
-	register ObmFunc evaluate;
+	register ObmEvaluateFunc evaluate;
 	register ObmObject obj;
 	int status = TCL_ERROR;
 
@@ -506,10 +484,7 @@ char *message;
  * message from the named text file.
  */
 int
-ObmDeliverMsgFromFile (obm, object, fname)
-register ObmContext obm;
-char *object;
-char *fname;
+ObmDeliverMsgFromFile (ObmContext obm, char *object, char *fname)
 {
 	struct stat fs;
 	char *message = NULL;
@@ -546,11 +521,7 @@ err:
  * callback list.
  */
 void
-ObmAddCallback (obm, callback_type, fcn, client_data)
-register ObmContext obm;
-int callback_type;
-ObmFunc fcn;
-XtPointer client_data;
+ObmAddCallback (ObmContext obm, int callback_type, ObmFunc fcn, XtPointer client_data)
 {
 	register ObmCallback cb;
 
@@ -567,9 +538,7 @@ XtPointer client_data;
 /* ObmRemoveCallback -- Remove a callback from the OBM global callback list.
  */
 void
-ObmRemoveCallback (obm, callback)
-register ObmContext obm;
-ObmCallback callback;
+ObmRemoveCallback (ObmContext obm, ObmCallback callback)
 {
 	obmRemoveCallback (&obm->callback_list, callback);
 }
@@ -586,9 +555,7 @@ ObmCallback callback;
  * may be given to specify which object to use.
  */
 ObmObject
-obmFindObject (obm, object)
-ObmContext obm;
-char *object;
+obmFindObject (ObmContext obm, char *object)
 {
 	register int hashval, n;
 	register char *ip, *op;
@@ -643,12 +610,12 @@ char *object;
  * is returned.
  */
 int
-obm_nameToObjectList (obm, object, pobjs, nobjs, objs)
-ObmContext obm;
-char *object;			/* object name */
-ObmObject *pobjs;		/* list of parent objects */
-int *nobjs;			/* number of objects found (output) */
-ObmObject *objs;		/* list of objects (output) */
+obm_nameToObjectList (
+  ObmContext obm,
+  char *object,			/* object name */
+  ObmObject *pobjs,		/* list of parent objects */
+  int *nobjs,			/* number of objects found (output) */
+  ObmObject *objs)		/* list of objects (output) */
 {
 	register char *ip;
 	register int hashval, n;
@@ -691,13 +658,13 @@ ObmObject *objs;		/* list of objects (output) */
 /* obmNewObject -- Create a new object of the given type.
  */
 void
-obmNewObject (obm, name, class, parent, args, nargs)
-register ObmContext obm;
-char *name;			/* name of new object */
-char *class;			/* name of class to which object belongs */
-char *parent;			/* name of parent widget, for widget objects */
-ArgList args;			/* optional argument list */
-int nargs;			/* optional argument list */
+obmNewObject (
+  ObmContext obm,
+  char *name,			/* name of new object */
+  char *class,			/* name of class to which object belongs */
+  char *parent,			/* name of parent widget, for widget objects */
+  ArgList args,			/* optional argument list */
+  int nargs)			/* optional argument list */
 {
 	register char *ip;
 	register int hashval, n;
@@ -778,9 +745,7 @@ int nargs;			/* optional argument list */
 /* obmDestroyObject -- Destroy an object and all its descendents.
  */
 void
-obmDestroyObject (obm, object)
-ObmContext obm;
-ObmObject object;
+obmDestroyObject (ObmContext obm, ObmObject object)
 {
 	register ObmObjectCore cp = &object->core;
 	register ObmObject obj;
@@ -881,9 +846,7 @@ ObmObject object;
  * shells.
  */
 void
-obmDisplay (obm, obj)
-ObmContext obm;
-ObmObject obj;
+obmDisplay (ObmContext obm, ObmObject obj)
 {
 	register Widget w = widgetGetPointer (obj);
 	register ObmObject child;
@@ -910,9 +873,7 @@ ObmObject obj;
  * shells.
  */
 void
-obmUndisplay (obm, obj)
-ObmContext obm;
-ObmObject obj;
+obmUndisplay (ObmContext obm, ObmObject obj)
 {
 	register int i;
 	register ObmObject child;
@@ -947,8 +908,7 @@ ObmObject obj;
 /* obmGetClassrec -- Get the class record for the named class.
  */
 ObjClassRec
-obmGetClassrec (classname)
-char *classname;
+obmGetClassrec (char *classname)
 {
 	register ObjClassRec classrec;
 	register int i;
@@ -966,9 +926,7 @@ char *classname;
 /* obmGenericClassDestroy - Free any resources associated with a class record.
  */
 void
-obmGenericClassDestroy (obm, classrec)
-ObmContext obm;
-register ObjClassRec classrec;
+obmGenericClassDestroy (ObmContext obm, ObjClassRec classrec)
 {
 }
 
@@ -976,9 +934,7 @@ register ObjClassRec classrec;
 /* obmClass -- Test if a class record belongs to the given object class.
  */
 int
-obmClass (classrec, flag1, flag2)
-register ObjClassRec classrec;
-unsigned long flag1, flag2;
+obmClass (ObjClassRec classrec, unsigned long flag1, unsigned long flag2)
 {
 	return ((classrec->flag1 & flag1) || (classrec->flag2 & flag2));
 }
@@ -987,8 +943,7 @@ unsigned long flag1, flag2;
 /* obmAddCallback -- Add a callback descriptor to a callback list.
  */
 ObmCallback
-obmAddCallback (callback_list)
-ObmCallback *callback_list;
+obmAddCallback (ObmCallback *callback_list)
 {
 	register ObmCallback cb, last_cb;
 
@@ -1011,9 +966,7 @@ ObmCallback *callback_list;
 /* obmRemoveCallback -- Remove a callback descriptor from a callback list.
  */
 void
-obmRemoveCallback (callback_list, callback)
-ObmCallback *callback_list;
-ObmCallback callback;
+obmRemoveCallback (ObmCallback *callback_list, ObmCallback callback)
 {
 	register ObmCallback cb, last_cb;
 
@@ -1041,9 +994,7 @@ ObmCallback callback;
  * the given Tcl interepter.
  */
 int
-obmClientCommand (tcl, commmand)
-Tcl_Interp *tcl;
-char *commmand;
+obmClientCommand (Tcl_Interp *tcl, char *commmand)
 {
 	register char *ip, *op;
 	char name[SZ_NAME];
