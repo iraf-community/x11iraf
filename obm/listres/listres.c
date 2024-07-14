@@ -104,10 +104,10 @@ usage ()
 }
 
 static void print_tree_level (wn, level)
-    register XmuWidgetNode *wn;
-    register int level;
+    XmuWidgetNode *wn;
+    int level;
 {
-    register int i;
+    int i;
 
     if (!wn) return;
 
@@ -121,8 +121,8 @@ static void print_tree_level (wn, level)
 
 static void tree_known_widgets ()
 {
-    register int i;
-    register XmuWidgetNode *wn;
+    int i;
+    XmuWidgetNode *wn;
 
     for (i = 0, wn = widget_list; i < nwidgets; i++, wn++) {
 	if (!wn->superclass) {		/* list all rooted objects */

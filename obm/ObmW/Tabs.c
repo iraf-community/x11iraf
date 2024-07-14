@@ -851,7 +851,7 @@ static XtGeometryResult
 TabsQueryGeometry(Widget w,
 	XtWidgetGeometry *intended, XtWidgetGeometry *preferred)
 {
-    register TabsWidget tw = (TabsWidget)w ;
+    TabsWidget tw = (TabsWidget)w ;
     XtGeometryMask mode = intended->request_mode ;
 
     preferred->request_mode = CWWidth | CWHeight ;

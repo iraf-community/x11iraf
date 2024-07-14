@@ -171,8 +171,8 @@ ServerCreate (
   ArgList args,
   int nargs)
 {
-	register ServerObject obj;
-	register Tcl_Interp *tcl;
+	ServerObject obj;
+	Tcl_Interp *tcl;
 
 	obj = (ServerObject) XtCalloc (1, sizeof (struct serverObject));
 	obm->tcl = tcl = Tcl_CreateInterp();
@@ -247,9 +247,9 @@ ServerCreate (
 static void
 ServerDestroy (ObmObject object)
 {
-	register ServerObject obj = (ServerObject) object;
-	register ObmContext obm = obj->server.obm;
-	register ServerCallback cb, next;
+	ServerObject obj = (ServerObject) object;
+	ObmContext obm = obj->server.obm;
+	ServerCallback cb, next;
 
 	/* Destroy the object in the second final call to Destroy. */
 	if (!obj->core.being_destroyed++)
@@ -285,10 +285,10 @@ ServerDestroy (ObmObject object)
 static int
 ServerEvaluate (ObmObject object, char *command)
 {
-	register ServerObject obj = (ServerObject) object;
-	register ObmContext obm = obj->server.obm;
+	ServerObject obj = (ServerObject) object;
+	ObmContext obm = obj->server.obm;
 	static char reset[] = "reset-server";
-	register char *ip;
+	char *ip;
 
 	/* The command "reset-server" is a special case.  This destroys the
 	 * current user interface including all objects and widgets.  One
@@ -337,9 +337,9 @@ ServerEvaluate (ObmObject object, char *command)
 static int
 serverAppInitialize (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register ServerObject obj = (ServerObject) object;
-	register ObmContext obm = obj->server.obm;
-	register ObmCallback cb;
+	ServerObject obj = (ServerObject) object;
+	ObmContext obm = obj->server.obm;
+	ObmCallback cb;
 
 	char *resource_buf, *resource_list[MAX_RESOURCES];
 	char *appname, *appclass, *resources;
@@ -442,8 +442,8 @@ serverAppInitialize (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 static int
 serverAppExtend (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register ServerObject obj = (ServerObject) object;
-	register ObmContext obm = obj->server.obm;
+	ServerObject obj = (ServerObject) object;
+	ObmContext obm = obj->server.obm;
 	XrmDatabase old_db, extended_db;
 	Boolean overwrite = False;
 	char *resources;
@@ -486,9 +486,9 @@ serverAppExtend (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 static int
 serverCreateObjects (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register char *ip, *op;
-	register ServerObject obj = (ServerObject) object;
-	register ObmContext obm = obj->server.obm;
+	char *ip, *op;
+	ServerObject obj = (ServerObject) object;
+	ObmContext obm = obj->server.obm;
 	char name[SZ_NAME], class[SZ_NAME], parent[SZ_NAME];
 	char *objects = NULL;
 	XtResource r;
@@ -550,8 +550,8 @@ serverCreateObjects (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 static int
 serverDestroyObject (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register ServerObject obj = (ServerObject) object;
-	register ObmContext obm = obj->server.obm;
+	ServerObject obj = (ServerObject) object;
+	ObmContext obm = obj->server.obm;
 	char *object_name;
 	ObmObject killobj;
 
@@ -578,8 +578,8 @@ serverDestroyObject (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 static int
 serverQueryObject (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register ServerObject obj = (ServerObject) object;
-	register ObmContext obm = obj->server.obm;
+	ServerObject obj = (ServerObject) object;
+	ObmContext obm = obj->server.obm;
 	char *object_name, *s_class, *s_subclass;
 	ObjClassRec classrec;
 	ObmObject o;
@@ -627,10 +627,10 @@ serverQueryObject (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 static int 
 serverActivate (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register ServerObject obj = (ServerObject) object;
-	register ObmContext obm = obj->server.obm; 
+	ServerObject obj = (ServerObject) object;
+	ObmContext obm = obj->server.obm; 
 	XWMHints hints;  
-	register int i;
+	int i;
 	ObmObject child; 
 	Widget    w;
 
@@ -677,8 +677,8 @@ serverActivate (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 static int 
 serverDeactivate (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register ServerObject obj = (ServerObject) object;
-	register ObmContext obm = obj->server.obm;
+	ServerObject obj = (ServerObject) object;
+	ObmContext obm = obj->server.obm;
 
 	ObmDeactivate (obm, argc >=2 && strcmp(argv[1],"unmap") == 0);
 	return (TCL_OK);
@@ -697,8 +697,8 @@ serverDeactivate (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 static int 
 serverSynchronize (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register ServerObject obj = (ServerObject) object;
-	register ObmContext obm = obj->server.obm;
+	ServerObject obj = (ServerObject) object;
+	ObmContext obm = obj->server.obm;
 
 	XSync (obm->display, False);
 	while (XtAppPending (obm->app_context))
@@ -718,8 +718,8 @@ serverSynchronize (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 static int 
 serverFlush (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register ServerObject obj = (ServerObject) object;
-	register ObmContext obm = obj->server.obm;
+	ServerObject obj = (ServerObject) object;
+	ObmContext obm = obj->server.obm;
 
 	XFlush (obm->display);
 
@@ -740,9 +740,9 @@ serverFlush (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 static int 
 serverPostActivateCallback (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register ServerObject obj = (ServerObject) object;
-	register ObmContext obm = obj->server.obm;
-	register ObmCallback cb;
+	ServerObject obj = (ServerObject) object;
+	ObmContext obm = obj->server.obm;
+	ObmCallback cb;
 
 	if (argc < 2)
 	    return (TCL_ERROR);
@@ -764,9 +764,9 @@ serverPostActivateCallback (ObmObject object, Tcl_Interp *tcl, int argc, char **
 static int 
 serverPostDeactivateCallback (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register ServerObject obj = (ServerObject) object;
-	register ObmContext obm = obj->server.obm;
-	register ObmCallback cb;
+	ServerObject obj = (ServerObject) object;
+	ObmContext obm = obj->server.obm;
+	ObmCallback cb;
 
 	if (argc < 2)
 	    return (TCL_ERROR);
@@ -789,8 +789,8 @@ serverPostDeactivateCallback (ObmObject object, Tcl_Interp *tcl, int argc, char 
 static int 
 serverSend (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register ServerObject obj = (ServerObject) object;
-	register ObmContext obm = obj->server.obm;
+	ServerObject obj = (ServerObject) object;
+	ObmContext obm = obj->server.obm;
 	int status;
 
 	/* The object which interprets the message leaves the string result,
@@ -816,8 +816,8 @@ serverSend (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 static int 
 serverPrint (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register ServerObject obj = (ServerObject) object;
-	register ObmContext obm = obj->server.obm;
+	ServerObject obj = (ServerObject) object;
+	ObmContext obm = obj->server.obm;
 
 	if (argc >= 2) {
 	    char *message = Tcl_Concat (argc-1, &argv[1]);
@@ -881,8 +881,8 @@ serverReset (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 static int 
 serverGetResource (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register ServerObject obj = (ServerObject) object;
-	register ObmContext obm = obj->server.obm;
+	ServerObject obj = (ServerObject) object;
+	ObmContext obm = obj->server.obm;
 	char *resource_name, *class_name, *default_value;
         char *value = NULL;
         XtResource r;
@@ -927,9 +927,9 @@ serverGetResource (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 static int 
 serverGetResources (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register ServerObject obj = (ServerObject) object;
-	register ObmContext obm = obj->server.obm;
-	register XtResource *r;
+	ServerObject obj = (ServerObject) object;
+	ObmContext obm = obj->server.obm;
+	XtResource *r;
         XtResource resources[MAX_RESOURCES];
 	char *resource_name, *class_name, *default_value;
 	char *resource_list, *variable;
@@ -1023,8 +1023,8 @@ err:		sprintf (buf, "bad item '%d' in resource list", item + 1);
 static int
 serverPostTimedCallback (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register ServerObject obj = (ServerObject) object;
-	register ObmContext obm = obj->server.obm;
+	ServerObject obj = (ServerObject) object;
+	ObmContext obm = obj->server.obm;
 	char *userproc, *client_data;
 	unsigned long interval;
 	char buf[SZ_NUMBER];
@@ -1075,8 +1075,8 @@ serverPostTimedCallback (ObmObject object, Tcl_Interp *tcl, int argc, char **arg
 static void
 serverTimedProc (XtPointer cb_ptr, XtIntervalId *id)
 {
-	register ServerCallback cb = (ServerCallback) cb_ptr;
-	register ServerObject obj = (ServerObject) cb->obj;
+	ServerCallback cb = (ServerCallback) cb_ptr;
+	ServerObject obj = (ServerObject) cb->obj;
 	ObmContext obm = obj->server.obm;
 	int status;
 
@@ -1107,7 +1107,7 @@ serverTimedProc (XtPointer cb_ptr, XtIntervalId *id)
 static int
 serverDeleteTimedCallback (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register ServerObject obj = (ServerObject) object;
+	ServerObject obj = (ServerObject) object;
 	ServerCallback cb;
 	XtIntervalId id;
 
@@ -1144,8 +1144,8 @@ serverDeleteTimedCallback (ObmObject object, Tcl_Interp *tcl, int argc, char **a
 static int
 serverPostWorkProc (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register ServerObject obj = (ServerObject) object;
-	register ObmContext obm = obj->server.obm;
+	ServerObject obj = (ServerObject) object;
+	ObmContext obm = obj->server.obm;
 	char *userproc, *client_data;
 	char buf[SZ_NUMBER];
 	ServerCallback cb;
@@ -1190,9 +1190,9 @@ serverPostWorkProc (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 static Boolean
 serverWorkProc (XtPointer cb_ptr)
 {
-	register ServerCallback cb = (ServerCallback) cb_ptr;
-	register ServerObject obj = (ServerObject) cb->obj;
-	register ObmContext obm = obj->server.obm;
+	ServerCallback cb = (ServerCallback) cb_ptr;
+	ServerObject obj = (ServerObject) cb->obj;
+	ObmContext obm = obj->server.obm;
 	Boolean done;
 	int status;
 
@@ -1229,7 +1229,7 @@ serverWorkProc (XtPointer cb_ptr)
 static int
 serverDeleteWorkProc (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register ServerObject obj = (ServerObject) object;
+	ServerObject obj = (ServerObject) object;
 	ServerCallback cb;
 	XtIntervalId id;
 
@@ -1266,7 +1266,7 @@ link_callback (ServerPrivate server, ServerCallback cb)
 static void
 unlink_callback (ServerPrivate server, ServerCallback cb)
 {
-	register ServerCallback cp;
+	ServerCallback cp;
 
 	if (cb == server->cb_head) {
 	    if (!(server->cb_head = cb->next))
@@ -1289,8 +1289,8 @@ unlink_callback (ServerPrivate server, ServerCallback cb)
 int
 createBitmap (ObmContext obm, char *name, int width, int height, char *pixels)
 {
-	register char *ip, *op;
-	register ObjList lp, last_lp;
+	char *ip, *op;
+	ObjList lp, last_lp;
 	char numbuf[32], *data, *dp;
 	Icon *icon;
 	int nchars;
@@ -1408,8 +1408,8 @@ createPixmap (
   unsigned long fg,
   unsigned long bg)
 {
-	register char *ip, *op;
-	register ObjList lp, last_lp;
+	char *ip, *op;
+	ObjList lp, last_lp;
 	char numbuf[32], *data, *dp;
 	Icon *icon;
 	int nchars;
@@ -1551,8 +1551,8 @@ serverCreatePixmap (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 int
 createXPixmap (ObmContext obm, char *name, char *widget, char *description)
 {
-	register char *ip, *op;
-	register ObjList lp, last_lp;
+	char *ip, *op;
+	ObjList lp, last_lp;
 	XpmImage image;
 	ObmObject obj;
 	String *data;
@@ -1767,7 +1767,7 @@ build_colorlist (Widget w, XpmColorSymbol *table, Cardinal size, Cardinal *n)
 Pixmap
 findPixmap (ObmContext obm, char *name)
 {
-	register ObjList lp;
+	ObjList lp;
 
 	for (lp = obm->pixmap_cache;  lp;  lp = lp->next)
 	    if (lp->ptr && strcmp (name, lp->name) == 0)
@@ -1782,7 +1782,7 @@ findPixmap (ObmContext obm, char *name)
 Icon *
 findIcon (ObmContext obm, char *name)
 {
-	register ObjList lp;
+	ObjList lp;
 
 	for (lp = obm->pixmap_cache;  lp;  lp = lp->next)
 	    if (lp->ptr && strcmp (name, lp->name) == 0)
@@ -1820,7 +1820,7 @@ serverCreateCursor (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 {
 	ServerObject obj = (ServerObject) object;
 	ObmContext obm = (ObmContext) obj->server.obm;
-	register ObjList lp, last_lp;
+	ObjList lp, last_lp;
 	XColor fg_color, bg_color;
 	unsigned long fg, bg;
 	Pixmap source, mask;
@@ -1915,7 +1915,7 @@ serverCreateCursor (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 Cursor
 findCursor (ObmContext obm, char *name)
 {
-	register ObjList lp;
+	ObjList lp;
 
 	for (lp = obm->cursor_cache;  lp;  lp = lp->next)
 	    if (lp->ptr && strcmp (name, lp->name) == 0)
@@ -1999,9 +1999,9 @@ serverCreateMenu (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 {
 	ServerObject obj = (ServerObject) object;
 	ObmContext obm = (ObmContext) obj->server.obm;
-	register MenuPtr mp, o_mp;
-	register MenuItem ip;
-	register ObjList lp, newobj;
+	MenuPtr mp, o_mp;
+	MenuItem ip;
+	ObjList lp, newobj;
 	char *menu_name, *menu_label;
 	char *parent, *item_list;
 	char **items, **fields;
@@ -2215,8 +2215,8 @@ serverDestroyMenu (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 {
 	ServerObject obj = (ServerObject) object;
 	ObmContext obm = (ObmContext) obj->server.obm;
-	register ObjList lp, lpp;
-	register MenuPtr mp;
+	ObjList lp, lpp;
+	MenuPtr mp;
 	char *menu_name;
 
 	if (argc < 2)
@@ -2257,7 +2257,7 @@ createMenu (
   char *parent,
   Widget pw)
 {
-	register MenuItem ip;
+	MenuItem ip;
 	int itemno, menuno, lineno, spaceno;
 	Widget menu, entry;
 	char name[SZ_NAME];
@@ -2426,8 +2426,8 @@ editMenu (
   MenuPtr mp,			/* existing menu */
   MenuPtr request)		/* requested values */
 {
-	register MenuItem old, new;
-	register int i;
+	MenuItem old, new;
+	int i;
 	int ncolors=0, nargs=0;
 	XrmValue from, to[2];
 	Pixel value[2];
@@ -2579,8 +2579,8 @@ editMenu (
 void
 freeMenu (MenuPtr mp)
 {
-	register MenuItem ip;
-	register int i;
+	MenuItem ip;
+	int i;
 
 	for (i=0;  i < mp->nitems;  i++) {
 	    ip = &mp->items[i];
@@ -2610,9 +2610,9 @@ freeMenu (MenuPtr mp)
 static void
 menuSelect (Widget w, XtPointer client_data, XtPointer call_data)
 {
-	register MenuPtr mp = (MenuPtr) client_data;
-	register MenuItem ip;
-	register int i;
+	MenuPtr mp = (MenuPtr) client_data;
+	MenuItem ip;
+	int i;
 	ObmContext obm = (ObmContext) mp->obm;
 
 	/* Locate the menu item to which the callback refers. */
@@ -2697,7 +2697,7 @@ static void (*BSB_unhighlight)(Widget);
 static void
 menu_classInit(void)
 {
-	register SmeClassPart *sme = &smeBSBClassRec.sme_class;
+	SmeClassPart *sme = &smeBSBClassRec.sme_class;
 
 	if (sme->highlight != menu_highlight) {
 	    BSB_highlight = sme->highlight;
@@ -2740,7 +2740,7 @@ menu_addEntry (
   char *child,			/* name of submenu shell widget */
   ObmContext obm)
 {
-	register MenuEntry mw, new;
+	MenuEntry mw, new;
 
 	for (mw=menuWidgetList;  mw && mw->next;  mw = mw->next)
 	    if (mw->w == w)
@@ -2766,7 +2766,7 @@ menu_addEntry (
 static void
 menu_delEntry (Widget w)
 {
-	register MenuEntry mw, prev_mw;
+	MenuEntry mw, prev_mw;
 
 	for (mw=menuWidgetList, prev_mw=NULL;  mw;  prev_mw=mw, mw=mw->next)
 	    if (mw->w == w)
@@ -2787,7 +2787,7 @@ menu_delEntry (Widget w)
 static void
 menu_popup (Widget w, XtPointer client_data, XtPointer call_data)
 {
-	register MenuPtr mp = (MenuPtr) client_data;
+	MenuPtr mp = (MenuPtr) client_data;
 	mp->popped_up = True;
 }
 
@@ -2798,10 +2798,10 @@ menu_popup (Widget w, XtPointer client_data, XtPointer call_data)
 static void
 menu_popdown (Widget w, XtPointer client_data, XtPointer call_data)
 {
-	register MenuPtr mp = (MenuPtr) client_data;
+	MenuPtr mp = (MenuPtr) client_data;
 	ObmContext obm = (ObmContext) mp->obm;
-	register MenuEntry mw;
-	register MenuPtr mm;
+	MenuEntry mw;
+	MenuPtr mm;
 	MenuItem mi;
 	int i;
 
@@ -2870,7 +2870,7 @@ menu_popdown_msgHandler (
 static void
 menu_highlight (Widget w)
 {
-	register MenuEntry mw, sm;
+	MenuEntry mw, sm;
 	ObmContext obm = global_obm_handle;
 	MenuPtr mp;
 
@@ -2965,7 +2965,7 @@ menu_highlight (Widget w)
 static void
 menu_unhighlight (Widget w)
 {
-	register MenuEntry mw;
+	MenuEntry mw;
 
 	/* Is the menu entry being unhighlighted on our list of call-submenu
 	 * widgets?
@@ -3041,7 +3041,7 @@ menu_unhighlight (Widget w)
 static MenuPtr
 findMenu (ObmContext obm, char *name)
 {
-	register ObjList lp;
+	ObjList lp;
 
 	for (lp = obm->menu_list;  lp;  lp = lp->next)
 	    if (strcmp (lp->name, name) == 0)

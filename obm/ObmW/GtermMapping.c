@@ -8,7 +8,7 @@
 static int
 refresh_source (w, mp, x1, y1, nx, ny)
     GtermWidget w;
-    register Mapping mp;	/* mapping defining refresh operation */
+    Mapping mp;	/* mapping defining refresh operation */
     int x1, y1, nx, ny;		/* region of source to be refreshed */
 {
     int sx1, sx2, sy1, sy2, snx, sny;
@@ -848,13 +848,13 @@ scale_zoom (idata,ibpl, odata,obpl, xmap,ymap, dx,dy,dnx,dny, clip_region)
 
     uchar *idata, *odata;		/* input, output data */
     int ibpl, obpl;			/* bytes per line */
-    register int *xmap;			/* src coords of each dst pixel */
+    int *xmap;			/* src coords of each dst pixel */
     int *ymap;				/* src coords of each dst pixel */
     int dx, dy, dnx, dny;		/* destination rect */
     Region clip_region;			/* clip Region or null */
 {
-    register int i, j;
-    register uchar *ip, *op;
+    int i, j;
+    uchar *ip, *op;
     uchar *last_ip = NULL;
     uchar *last_op = NULL;
 
@@ -896,9 +896,9 @@ scale_intzoom (idata,ibpl,odata,obpl, sx,sy,dx,dy,dnx,dny, xflip,yflip, nx,ny)
     int xflip, yflip;			/* set if x or y is flipped */
     int nx, ny;				/* replication factors */
 {
-    register int n;
-    register int pix;
-    register uchar *ip, *op;
+    int n;
+    int pix;
+    uchar *ip, *op;
     uchar *otop, *olast, *lp;
     int i, j, k;
 
@@ -1086,8 +1086,8 @@ scale_nearest (idata,inx,iny,ibpl, odata,onx,ony,obpl,
     int dx, dy, dnx, dny;		/* destination rect */
     Region clip_region;			/* clip Region or null */
 {
-    register int m, n, i, j;
-    register uchar *op;
+    int m, n, i, j;
+    uchar *op;
 
     for (j=0;  j < dny;  j++) {
 	op = odata + (j+dy) * obpl + dx;
@@ -1123,9 +1123,9 @@ scale_bilinear (idata,inx,iny,ibpl, odata,onx,ony,obpl,
     int dx, dy, dnx, dny;		/* destination rect */
     Region clip_region;			/* clip Region or null */
 {
-    register int i;
-    register uchar *op;
-    register float *lp, *w1, *w2;
+    int i;
+    uchar *op;
+    float *lp, *w1, *w2;
     int buflen, line, *px, pixel, j;
     float lo_w, hi_w, x, y;
     uchar *lo, *hi;
@@ -1233,8 +1233,8 @@ lw_convolve (idata,inx,iny,ibpl,ix,iy, odata,onx,ony,obpl,ox,oy,
     int nx, ny;				/* size of output region */
     float xscale, yscale;		/* determines amount of smoothing */
 {
-    register uchar *ip;
-    register int l, m, x, hx, pixval;
+    uchar *ip;
+    int l, m, x, hx, pixval;
     int kx, ky, hy, i, j, y;
     uchar *lp[11], *op;
 
@@ -1390,8 +1390,8 @@ bx_boxcar (idata,inx,iny,ibpl, x1,y1,x2,y2, obuf, xblock, yblock)
     uchar *obuf;			/* output array */
     int xblock, yblock;			/* blocking factors */
 {
-    register uchar *ip, *op;
-    register int count, i, *sp;
+    uchar *ip, *op;
+    int count, i, *sp;
     int obpl, block, nxblocks, nyblocks, j, k;
     uchar *lp, *bp;
     int *sb;
@@ -1439,8 +1439,8 @@ bx_extract (idata,inx,iny,ibpl, odata,onx,ony,obpl,
     float xstep, ystep;			/* scale of input region */
     Region clip_region;			/* clip Region or null */
 {
-    register int m, n, i;
-    register uchar *op;
+    int m, n, i;
+    uchar *op;
     int j;
 
     for (j=0;  j < dny;  j++) {
@@ -1478,9 +1478,9 @@ bx_interp (idata,inx,iny,ibpl, odata,onx,ony,obpl,
     int dx, dy, dnx, dny;		/* destination rect */
     Region clip_region;			/* clip Region or null */
 {
-    register int i;
-    register uchar *op;
-    register float *lp, *w1, *w2;
+    int i;
+    uchar *op;
+    float *lp, *w1, *w2;
     int buflen, line, *px, pixel, j;
     float lo_w, hi_w, x, y;
     uchar *lo, *hi;
@@ -1553,9 +1553,9 @@ mf_getinten (w, idata,inx,iny,ibpl, sx,sy, odata,onx,ony,obpl, dx,dy, nx,ny)
     int dx, dy;				/* destination offset */
     int nx, ny;				/* size of region */
 {
-    register Pixel *cmap;
-    register uchar *ip, *op;
-    register int n;
+    Pixel *cmap;
+    uchar *ip, *op;
+    int n;
     int j;
 
     cmap = get_cmap_out (w);
@@ -1582,9 +1582,9 @@ mf_getpixel (w, idata,inx,iny,ibpl, sx,sy, odata,onx,ony,obpl, dx,dy, nx,ny)
     int dx, dy;				/* destination offset */
     int nx, ny;				/* size of region */
 {
-    register Pixel *cmap;
-    register uchar *ip, *op;
-    register int n;
+    Pixel *cmap;
+    uchar *ip, *op;
+    int n;
     int j;
 
     cmap = get_cmap_in (w);
@@ -1609,8 +1609,8 @@ get_regions (xs,xe,xv, max_regions, dx, dnx, xmap, alt_dx, alt_dnx, alt_xmap)
     int dx, dnx, *xmap;
     int alt_dx, alt_dnx, *alt_xmap;
 {
-    register int state, current;
-    register int nx, i;
+    int state, current;
+    int nx, i;
     int offset, old_i;
 
     offset = dx - alt_dx;
@@ -1660,7 +1660,7 @@ get_rects (o_rl, max_rects, xs,xe,xv,nx, ys,ye,yv,ny, xcond,ycond)
     int *ys, *ye, *yv, ny;	/* Y list of regions */
     int xcond, ycond;		/* X,Y condition bitflags */
 {
-    register int i, j;
+    int i, j;
     XRectangle rl[MAX_REGIONS];
     int limit = min (max_rects, MAX_REGIONS);
     int o_nrects=0, nrects=0;
@@ -1736,8 +1736,8 @@ get_rects (o_rl, max_rects, xs,xe,xv,nx, ys,ye,yv,ny, xcond,ycond)
  */
 static int
 rect_intersect (in, r1, r2)
-    register XRectangle *in;
-    register XRectangle *r1, *r2;
+    XRectangle *in;
+    XRectangle *r1, *r2;
 {
     int x1, y1, x2, y2;
 
@@ -1759,7 +1759,7 @@ rect_intersect (in, r1, r2)
  */
 static void 
 save_mapping (mp, mapping, rop, src, st, sx,sy,sw,sh, dst, dt, dx,dy,dw,dh)
-    register Mapping mp;
+    Mapping mp;
     int mapping, rop;
     int src, st, sx,sy,sw,sh;
     int dst, dt, dx,dy,dw,dh;
@@ -1777,7 +1777,7 @@ save_mapping (mp, mapping, rop, src, st, sx,sy,sw,sh, dst, dt, dx,dy,dw,dh)
  */
 static void
 load_mapping (mp, mapping, rop, src, st, sx,sy,sw,sh, dst, dt, dx,dy,dw,dh)
-    register Mapping mp;
+    Mapping mp;
     int *mapping, *rop;
     int *src, *st, *sx,*sy,*sw,*sh;
     int *dst, *dt, *dx,*dy,*dw,*dh;
@@ -1797,8 +1797,8 @@ load_mapping (mp, mapping, rop, src, st, sx,sy,sw,sh, dst, dt, dx,dy,dw,dh)
 static void
 get_pixel_mapping (w, mp1, mp2, update)
     GtermWidget w;
-    register Mapping mp1;		/* input mapping */
-    register Mapping mp2;		/* output mapping */
+    Mapping mp1;		/* input mapping */
+    Mapping mp2;		/* output mapping */
     int update;				/* update mapping */
 {
     float maxndc = (float)MAXNDC;
@@ -1878,9 +1878,9 @@ get_pixel_mapping (w, mp1, mp2, update)
 static int
 valid_mapping (w, mp)
     GtermWidget w;
-    register Mapping mp;
+    Mapping mp;
 {
-    register int x, y;
+    int x, y;
     int snx, sny, dnx, dny;
     int s_width, s_height, d_width, d_height;
     Raster sr, dr;
@@ -1947,7 +1947,7 @@ valid_mapping (w, mp)
  */
 static void
 initialize_mapping (mp)
-    register Mapping mp;
+    Mapping mp;
 {
     memset ((char *)mp, 0, sizeof(struct mapping));
 }
@@ -1961,10 +1961,10 @@ initialize_mapping (mp)
 static void
 update_mapping (w, mp)
     GtermWidget w;
-    register Mapping mp;
+    Mapping mp;
 {
-    register uchar *op;
-    register int i, j, k;
+    uchar *op;
+    int i, j, k;
     int snx, sny, dnx, dny, sx, sy, dx, dy;
     int xmax, ymax, lo, hi, edge1, edge2;
     int temp, xflip=0, yflip=0;
@@ -2121,7 +2121,7 @@ update_mapping (w, mp)
 static void
 free_mapping (w, mp)
     GtermWidget w;
-    register Mapping mp;
+    Mapping mp;
 {
     mp_unlink (w, mp);
     mp->defined = mp->enabled = mp->updated = 0;
@@ -2138,11 +2138,11 @@ free_mapping (w, mp)
 
 static void
 mp_linkafter (w, mp, ref_mp)
-    register GtermWidget w;
-    register Mapping mp;
-    register Mapping ref_mp;
+    GtermWidget w;
+    Mapping mp;
+    Mapping ref_mp;
 {
-    register Mapping map;
+    Mapping map;
 
     /* Don't use the reference mapping unless it is already linked or
      * the list is empty.
@@ -2170,8 +2170,8 @@ mp_linkafter (w, mp, ref_mp)
 
 static void
 mp_unlink (w, mp)
-    register GtermWidget w;
-    register Mapping mp;
+    GtermWidget w;
+    Mapping mp;
 {
     if (mp->prev)
 	mp->prev->next = mp->next;

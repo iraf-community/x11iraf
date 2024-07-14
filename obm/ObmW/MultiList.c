@@ -794,7 +794,7 @@ Boolean width_changeable,height_changeable;
 {
 	String str;
 	Dimension width,height;
-	register int i,text_width;
+	int i,text_width;
 
 	width = MultiListWidth(mlw);
 	height = MultiListHeight(mlw);
@@ -1188,7 +1188,7 @@ static Boolean RowColumnToItem(mlw,row,column,item_ptr)
 XfwfMultiListWidget mlw;
 int row,column,*item_ptr;
 {
-	register int x_stride,y_stride;
+	int x_stride,y_stride;
 
 	if (row < 0 || row >= MultiListNumRows(mlw) ||
 	    column < 0 || column >= MultiListNumCols(mlw))

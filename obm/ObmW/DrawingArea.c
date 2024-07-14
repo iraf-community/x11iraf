@@ -157,9 +157,9 @@ static Boolean ConstraintSetValues(current, request, new, args, num_args)
     Cardinal *num_args;
 {
 /*
-  register DrawingAreaConstraints cfc = 
+  DrawingAreaConstraints cfc = 
       (DrawingAreaConstraints) current->core.constraints;
-  register DrawingAreaConstraints nfc = 
+  DrawingAreaConstraints nfc = 
       (DrawingAreaConstraints) new->core.constraints;
  */
   return( FALSE );

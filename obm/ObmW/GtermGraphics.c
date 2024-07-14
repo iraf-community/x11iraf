@@ -77,10 +77,10 @@ GtTimerInhibit (w, state)
 
 void
 GtAugmentTranslations (w, translations)
-    register GtermWidget w;
+    GtermWidget w;
     char *translations;
 {
-    register int i;
+    int i;
 
     if ((i = w->gterm.nauxTrans) < MAX_AUXTRANS) {
 	w->gterm.auxTrans[i] =
@@ -93,10 +93,10 @@ GtAugmentTranslations (w, translations)
 
 void
 GtOverrideTranslations (w, translations)
-    register GtermWidget w;
+    GtermWidget w;
     char *translations;
 {
-    register int i;
+    int i;
 
     if ((i = w->gterm.nauxTrans) < MAX_AUXTRANS) {
 	w->gterm.auxTrans[i] =
@@ -139,7 +139,7 @@ GtGetPhysRes (w, raster, width, height)
     int *width, *height;
 {
     if (raster) {
-	register Raster rp = &w->gterm.rasters[raster];
+	Raster rp = &w->gterm.rasters[raster];
 	*width = rp->width;
 	*height = rp->height;
     } else {
@@ -303,11 +303,11 @@ GtSetColorIndex (w, ival)
     GtermWidget w;
     int ival;
 {
-    register int color = w->gterm.iomap[ival];
+    int color = w->gterm.iomap[ival];
 
     if (color >= 0 && color < w->gterm.ncolors) {
 	if (w->gterm.useGlobalCmap) {
-	    register int i, found = 0;
+	    int i, found = 0;
 
 	    for (i=0; i < num_static_colors; i++) {
 		if (ival == static_colors[i].index) {
@@ -348,7 +348,7 @@ void
 GtClearScreen (w)
 GtermWidget w;
 {
-    register Mapping mp;
+    Mapping mp;
 
 
     if (!w || !XtIsRealized ((Widget)w))
@@ -399,8 +399,8 @@ GtDrawPolyline (w, pv, npts)
 {
     XPoint *points, o_pv[MAX_POINTS];
     DrawContext dx = get_draw_context (w);
-    register MappingContext mx;
-    register int i;
+    MappingContext mx;
+    int i;
 
     for (i=0;  i < dx->nmappings;  i++) {
 	mx = &dx->mapContext[i];
@@ -425,8 +425,8 @@ GtDrawPolymarker (w, pv, npts)
 {
     XPoint *points, o_pv[MAX_POINTS];
     DrawContext dx = get_draw_context (w);
-    register MappingContext mx;
-    register int i;
+    MappingContext mx;
+    int i;
 
     for (i=0;  i < dx->nmappings;  i++) {
 	mx = &dx->mapContext[i];
@@ -451,8 +451,8 @@ GtDrawPolygon (w, pv, npts)
 {
     XPoint *points, o_pv[MAX_POINTS];
     DrawContext dx = get_draw_context (w);
-    register MappingContext mx;
-    register int i;
+    MappingContext mx;
+    int i;
 
     for (i=0;  i < dx->nmappings;  i++) {
 	mx = &dx->mapContext[i];
@@ -544,9 +544,9 @@ GtSetCursorPos (w, x, y)
     GtermWidget w;
     int x, y;
 {
-    register MappingContext mx;
-    register DrawContext dx;
-    register Mapping mp;
+    MappingContext mx;
+    DrawContext dx;
+    Mapping mp;
 
     Window window = w->gterm.window;
     int sv_raster = w->gterm.raster;
@@ -871,7 +871,7 @@ GtPostInputProc (w, userfcn, client_data)
     GtCallbackProc userfcn;
     XtPointer client_data;
 {
-    register GtCallback *cb, *new;
+    GtCallback *cb, *new;
 
     new = (GtCallback *) XtMalloc (sizeof (GtCallback));
     new->proc = userfcn;
@@ -892,7 +892,7 @@ GtDeleteInputProc (w, userfcn, client_data)
     GtCallbackProc userfcn;
     XtPointer client_data;
 {
-    register GtCallback *cb, *prev;
+    GtCallback *cb, *prev;
 
     for (prev=NULL, cb = w->gterm.inputCallback;  cb;  cb = cb->next)
 	if (cb->proc == userfcn && cb->client_data == client_data) {
@@ -912,7 +912,7 @@ GtPostResetProc (w, userfcn, client_data)
     GtCallbackProc userfcn;
     XtPointer client_data;
 {
-    register GtCallback *cb, *new;
+    GtCallback *cb, *new;
 
     new = (GtCallback *) XtMalloc (sizeof (GtCallback));
     new->proc = userfcn;
@@ -933,7 +933,7 @@ GtDeleteResetProc (w, userfcn, client_data)
     GtCallbackProc userfcn;
     XtPointer client_data;
 {
-    register GtCallback *cb, *prev;
+    GtCallback *cb, *prev;
 
     for (prev=NULL, cb = w->gterm.resetCallback;  cb;  cb = cb->next)
 	if (cb->proc == userfcn && cb->client_data == client_data) {
@@ -953,7 +953,7 @@ GtPostResizeProc (w, userfcn, client_data)
     GtCallbackProc userfcn;
     XtPointer client_data;
 {
-    register GtCallback *cb, *new;
+    GtCallback *cb, *new;
 
     new = (GtCallback *) XtMalloc (sizeof (GtCallback));
     new->proc = userfcn;
@@ -974,7 +974,7 @@ GtDeleteResizeProc (w, userfcn, client_data)
     GtCallbackProc userfcn;
     XtPointer client_data;
 {
-    register GtCallback *cb, *prev;
+    GtCallback *cb, *prev;
 
     for (prev=NULL, cb = w->gterm.resizeCallback;  cb;  cb = cb->next)
 	if (cb->proc == userfcn && cb->client_data == client_data) {
@@ -996,8 +996,8 @@ GtDrawAlphaText (w, x, y, text)
 {
     XPoint *points, pv[1], o_pv[1];
     DrawContext dx = get_draw_context (w);
-    register MappingContext mx;
-    register int npts, i;
+    MappingContext mx;
+    int npts, i;
 
     pv[0].x = x;
     pv[0].y = y;
@@ -1213,8 +1213,8 @@ erase_crosshair (w)
 	return;
 
     if (w->gterm.cursor_drawn) {
-	register int x = w->gterm.cur_x;
-	register int y = w->gterm.cur_y;
+	int x = w->gterm.cur_x;
+	int y = w->gterm.cur_y;
 
 	XSetClipMask (w->gterm.display, w->gterm.exposeGC, None);
 	if (w->gterm.pixmap) {
@@ -1265,8 +1265,8 @@ update_cursor (w)
     GtermWidget w;
 {
     if (w->gterm.cursor_type == GtGinmodeCursor && w->gterm.full_crosshair) {
-	register int x = w->gterm.cur_x;
-	register int y = w->gterm.cur_y;
+	int x = w->gterm.cur_x;
+	int y = w->gterm.cur_y;
 
 	if (x || y)
 	    draw_crosshair (w, x, y);
@@ -1303,7 +1303,7 @@ get_draw_context (w)
     if (!dx->valid) {
 	int raster = w->gterm.raster;
 	Raster rp = &w->gterm.rasters[raster];
-	register MappingContext mx = &dx->mapContext[0];
+	MappingContext mx = &dx->mapContext[0];
 	Region clip_region, mask_region;
 	struct mapping *map, *mp, *np, p_mp;
 	int xres = w->gterm.xres;
@@ -1457,9 +1457,9 @@ static void
 invalidate_draw_context (w)
     GtermWidget w;
 {
-    register DrawContext dx = &w->gterm.draw;
-    register MappingContext mx;
-    register int i;
+    DrawContext dx = &w->gterm.draw;
+    MappingContext mx;
+    int i;
 
     if (dx->valid) {
 	for (i=0;  i < dx->nmappings;  i++) {
@@ -1473,14 +1473,14 @@ invalidate_draw_context (w)
 
 static XPoint *
 mapVector (mx, pv1, pv2, npts)
-    register MappingContext mx;
+    MappingContext mx;
     XPoint *pv1;
     XPoint *pv2;
     int npts;
 {
-    register XPoint *ip = pv1;
-    register XPoint *op = pv2;
-    register int n;
+    XPoint *ip = pv1;
+    XPoint *op = pv2;
+    int n;
 
     for (n=npts;  --n >= 0;  ip++, op++) {
 	op->x = ip->x * mx->xscale + mx->xoffset;

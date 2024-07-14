@@ -2271,8 +2271,8 @@ struct resource_list {
  */
 main (int argc, char *argv[])
 {
-	register struct resource_list *rp, *np;
-	register unsigned long flags1, flags2;
+	struct resource_list *rp, *np;
+	unsigned long flags1, flags2;
 	int decorate = 0;
 
 	if (argc >= 2 && !strcmp(argv[1],"-decorate"))

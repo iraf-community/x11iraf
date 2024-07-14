@@ -30,7 +30,7 @@ static Colormap
 get_colormap (w)
     GtermWidget w;
 {
-    register int i, j;
+    int i, j;
     Display *display = w->gterm.display;
     Screen *screen = w->gterm.screen;
     XColor def_colors[SZ_STATIC_CMAP], *cp, *c1, *c2;
@@ -289,7 +289,7 @@ request_colormap_focus (w)
     if (p) {
 	Window window = XtWindow (p);
 	Window *wl = NULL, n_wl[MAX_WMWIN+1];
-	register int n_nw, i;
+	int n_nw, i;
 	int nw;
 
 	/* If WM_COLORMAP_WINDOWS is already set save its value, otherwise
@@ -326,7 +326,7 @@ static void
 restore_colormap_focus (w)
     GtermWidget w;
 {
-    register int nw, n_nw, i;
+    int nw, n_nw, i;
     Window *wl, n_wl[MAX_WMWIN+1], old;
 
     if (!w || !XtIsRealized ((Widget)w))
@@ -360,8 +360,8 @@ static void
 inherit_default_colormap (w)
     GtermWidget w;
 {
-    register XColor *cp, *ap;
-    register int ncolors, i;
+    XColor *cp, *ap;
+    int ncolors, i;
     Display *display = w->gterm.display;
     Screen *screen = w->gterm.screen;
     Window root = w->gterm.root;
@@ -444,9 +444,9 @@ static void
 update_default_colormap (w)
     GtermWidget w;
 {
-    register XColor *ip, *op;
-    register int j, n;
-    register Pixel v;
+    XColor *ip, *op;
+    int j, n;
+    Pixel v;
 
     XColor colors[MAX_SZCMAP];
     Pixel pixels[MAX_SZCMAP];
@@ -629,7 +629,7 @@ static int ParseGlobalCmap(w)
 static int GetMaxCmapColors(w)
      GtermWidget w;
 {
-  register int n;
+  int n;
   unsigned long plane_masks[1];
   int req;
   int first, nelem, maxelem;

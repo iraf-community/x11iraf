@@ -122,9 +122,9 @@ Tcl_SetErrorLine(Tcl_Interp *tcl, int lineNum)
 ObmContext
 ObmOpen (XtAppContext app_context, int argc, char *argv[])
 {
-	register ObmContext obm;
-	register ObjClassRec classrec;
-	register int i;
+	ObmContext obm;
+	ObjClassRec classrec;
+	int i;
 	char *s;
 
 	/* Initialize object manager global context. */
@@ -163,8 +163,8 @@ ObmOpen (XtAppContext app_context, int argc, char *argv[])
 void
 ObmClose (ObmContext obm)
 {
-	register ObjClassRec classrec;
-	register int i;
+	ObjClassRec classrec;
+	int i;
 
 	/* Get rid of any current UI. */
 	ObmInitialize (obm);
@@ -193,9 +193,9 @@ ObmClose (ObmContext obm)
 void
 ObmInitialize (ObmContext obm)
 {
-	register ObmObject obj, nextobj;
-	register ObmCallback cb;
-	register MenuItem ip;
+	ObmObject obj, nextobj;
+	ObmCallback cb;
+	MenuItem ip;
 	ObjList lp, lp_next;
 	Menu mp;
 	int i;
@@ -281,7 +281,7 @@ ObmInitialize (ObmContext obm)
 void
 ObmActivate (ObmContext obm)
 {
-	register ObmObject obj;
+	ObmObject obj;
 	char defaultUI[SZ_MESSAGE];
 
 	/* UI has already been activated? */
@@ -334,8 +334,8 @@ ObmActivate (ObmContext obm)
 void
 ObmDeactivate (ObmContext obm, Boolean unmap)
 {
-	register ObmObject obj;
-	register ObmCallback cb;
+	ObmObject obj;
+	ObmCallback cb;
 
 	/* The Obm "activated" flag is not affected by deactivation.
 	 * Deactivation merely means that control has temporarily been
@@ -364,8 +364,8 @@ ObmDeactivate (ObmContext obm, Boolean unmap)
 static void
 obm_call_activate_callbacks (ObmContext obm, int state)
 {
-	register ObmCallback cb;
-	register int type;
+	ObmCallback cb;
+	int type;
 
 	/* Call any client activate callbacks. */
 	type = state ? OBMCB_activate : OBMCB_deactivate;
@@ -441,8 +441,8 @@ ObmGetInterp (ObmContext obm)
 int
 ObmDeliverMsg (ObmContext obm, char *object, char *message)
 {
-	register ObmEvaluateFunc evaluate;
-	register ObmObject obj;
+	ObmEvaluateFunc evaluate;
+	ObmObject obj;
 	int status = TCL_ERROR;
 
 	if (obm->debug) {
@@ -523,7 +523,7 @@ err:
 void
 ObmAddCallback (ObmContext obm, int callback_type, ObmFunc fcn, XtPointer client_data)
 {
-	register ObmCallback cb;
+	ObmCallback cb;
 
 	if (!(cb = obmAddCallback (&obm->callback_list)))
 	    return;
@@ -557,8 +557,8 @@ ObmRemoveCallback (ObmContext obm, ObmCallback callback)
 ObmObject
 obmFindObject (ObmContext obm, char *object)
 {
-	register int hashval, n;
-	register char *ip, *op;
+	int hashval, n;
+	char *ip, *op;
 	ObmObject objlist1[MAXOBJ], objlist2[MAXOBJ];
 	ObmObject obj, *otemp, *objs, *pobjs;
 	char name[SZ_NAME];
@@ -617,9 +617,9 @@ obm_nameToObjectList (
   int *nobjs,			/* number of objects found (output) */
   ObmObject *objs)		/* list of objects (output) */
 {
-	register char *ip;
-	register int hashval, n;
-	register ObmObject obj;
+	char *ip;
+	int hashval, n;
+	ObmObject obj;
 	int accept, i;
 
 	if (object == NULL)
@@ -666,8 +666,8 @@ obmNewObject (
   ArgList args,			/* optional argument list */
   int nargs)			/* optional argument list */
 {
-	register char *ip;
-	register int hashval, n;
+	char *ip;
+	int hashval, n;
 	ObmObject newobj, obj, pobj;
 	ObjClassRec classrec;
 
@@ -747,9 +747,9 @@ obmNewObject (
 void
 obmDestroyObject (ObmContext obm, ObmObject object)
 {
-	register ObmObjectCore cp = &object->core;
-	register ObmObject obj;
-	register int i;
+	ObmObjectCore cp = &object->core;
+	ObmObject obj;
+	int i;
 	int hashval, n;
 	char *ip;
 
@@ -848,9 +848,9 @@ obmDestroyObject (ObmContext obm, ObmObject object)
 void
 obmDisplay (ObmContext obm, ObmObject obj)
 {
-	register Widget w = widgetGetPointer (obj);
-	register ObmObject child;
-	register int i;
+	Widget w = widgetGetPointer (obj);
+	ObmObject child;
+	int i;
 	char buf[SZ_NAME];
 
 	for (i=0;  i < obj->core.nchildren;  i++) {
@@ -875,9 +875,9 @@ obmDisplay (ObmContext obm, ObmObject obj)
 void
 obmUndisplay (ObmContext obm, ObmObject obj)
 {
-	register int i;
-	register ObmObject child;
-	register Widget w = widgetGetPointer (obj);
+	int i;
+	ObmObject child;
+	Widget w = widgetGetPointer (obj);
 	XWindowAttributes wa;
 	char *s;
 
@@ -910,8 +910,8 @@ obmUndisplay (ObmContext obm, ObmObject obj)
 ObjClassRec
 obmGetClassrec (char *classname)
 {
-	register ObjClassRec classrec;
-	register int i;
+	ObjClassRec classrec;
+	int i;
 
 	for (i=0;  i < XtNumber(UiObjects);  i++) {
 	    classrec = &UiObjects[i];
@@ -945,7 +945,7 @@ obmClass (ObjClassRec classrec, unsigned long flag1, unsigned long flag2)
 ObmCallback
 obmAddCallback (ObmCallback *callback_list)
 {
-	register ObmCallback cb, last_cb;
+	ObmCallback cb, last_cb;
 
 	/* Find tail of list. */
 	for (cb = last_cb = *callback_list;  cb;  cb = cb->next)
@@ -968,7 +968,7 @@ obmAddCallback (ObmCallback *callback_list)
 void
 obmRemoveCallback (ObmCallback *callback_list, ObmCallback callback)
 {
-	register ObmCallback cb, last_cb;
+	ObmCallback cb, last_cb;
 
 	if (!callback)
 	    return;
@@ -996,7 +996,7 @@ obmRemoveCallback (ObmCallback *callback_list, ObmCallback callback)
 int
 obmClientCommand (Tcl_Interp *tcl, char *commmand)
 {
-	register char *ip, *op;
+	char *ip, *op;
 	char name[SZ_NAME];
 	Tcl_CmdInfo info;
 

@@ -25,7 +25,7 @@ static Display *dpy;
 char *
 get_geometry (Display *display, Screen *screen, Window window, int origin)
 {
-    register char *op;
+    char *op;
     int screen_number = XScreenNumberOfScreen (screen);
     XWindowAttributes win_attributes;
     XVisualInfo vistemplate, *vinfo;

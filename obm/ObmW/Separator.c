@@ -263,7 +263,7 @@ static void Redisplay(gw, event, region)
     XEvent *event;
     Region region;
 {
-  register SeparatorWidget sw = (SeparatorWidget) gw;
+  SeparatorWidget sw = (SeparatorWidget) gw;
   int x1, y1, x2, y2;
   
   if (!XtIsRealized(gw))

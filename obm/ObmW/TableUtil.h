@@ -79,8 +79,8 @@ extern Boolean go_table 	    F_PROTO((XtPointer w,
 					     int begin_column, 
 					     int end_column,
 					     int direction,
-					     register int *row,
-					     register int *column,
+					     int *row,
+					     int *column,
 					     XtPointer client_data));
 
 #ifdef EBUG_XRAW_MALLOC

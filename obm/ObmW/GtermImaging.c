@@ -76,9 +76,9 @@ void
 GtRasterInit (w)
     GtermWidget w;
 {
-    register int i;
-    register Raster rp;
-    register struct colormap *cm;
+    int i;
+    Raster rp;
+    struct colormap *cm;
     struct colormap *next_cm;
 
 
@@ -161,9 +161,9 @@ initialize_shadow_pixmap (GtermWidget w, int dst)
  */
 int
 GtNextRaster (w)
-    register GtermWidget w;
+    GtermWidget w;
 {
-    register int i;
+    int i;
 
     if (w->gterm.rasters)
         for (i=1;  i < w->gterm.maxRasters;  i++)
@@ -196,7 +196,7 @@ GtAssignRaster (w, raster, drawable, type)
     XtPointer drawable;		/* object containing pixel array */
     int type;			/* type of drawable [not used] */
 {
-    register Raster rp;
+    Raster rp;
     XWindowAttributes wa;
 
     if (raster <= 0 || raster >= w->gterm.maxRasters)
@@ -233,8 +233,8 @@ GtCreateRaster (w, raster, type, width, height, depth)
     int width, height;
     int depth;
 {
-    register uchar *op;
-    register int npix, pixel;
+    uchar *op;
+    int npix, pixel;
     uchar *data;
     XImage *xp;
     Raster rp;
@@ -436,8 +436,8 @@ GtDestroyRaster (w, raster)
     GtermWidget w;
     int raster;
 {
-    register Raster rp;
-    register Mapping mp, next;
+    Raster rp;
+    Mapping mp, next;
 
     if (raster <= 0)
 	return;
@@ -478,7 +478,7 @@ GtQueryRaster (w, raster, type, width, height, depth)
     int *width, *height;
     int *depth;
 {
-    register Raster rp;
+    Raster rp;
 
 
     if (DBG_TRACE && DBG_VERBOSE)
@@ -529,9 +529,9 @@ GtWritePixels (w, raster, pixels, nbits, x1, y1, nx, ny)
     int x1, y1;
     int nx, ny;
 {
-    register uchar *ip, *op;
-    register Pixel *cmap;
-    register int i, n, bytes_per_line;
+    uchar *ip, *op;
+    Pixel *cmap;
+    int i, n, bytes_per_line;
     Mapping mp;
     Raster  rp;
     uchar  *lp;
@@ -721,9 +721,9 @@ GtReadPixels (w, raster, pixels, nbits, x1, y1, nx, ny)
     int x1, y1;
     int nx, ny;
 {
-    register uchar *ip, *op;
-    register Pixel *cmap;
-    register int n;
+    uchar *ip, *op;
+    Pixel *cmap;
+    int n;
 
     int bytes_per_line, i, nskip = 1;
     int x, y, delxin = 0;
@@ -841,7 +841,7 @@ GtSetPixels (w, raster, ct, x1, y1, nx, ny, color, rop)
     int color;
     int rop;
 {
-    register Raster rp;
+    Raster rp;
     Mapping mp;
 
     /* Get raster pointer. */
@@ -897,9 +897,9 @@ GtSetPixels (w, raster, ct, x1, y1, nx, ny, color, rop)
 	XSetForeground (display, gc, w->gterm.color0);
 
     } else {
-	register int n, i;
-	register uchar *op;
-	register Pixel pixel;
+	int n, i;
+	uchar *op;
+	Pixel pixel;
 	int bytes_per_line;
 	uchar *lp;
 
@@ -947,8 +947,8 @@ GtRefreshPixels (w, raster, ct, x1, y1, nx, ny)
     int x1, y1;
     int nx, ny;
 {
-    register Raster rp = &w->gterm.rasters[raster];
-    register Mapping mp;
+    Raster rp = &w->gterm.rasters[raster];
+    Mapping mp;
 
     if (!w || !XtIsRealized ((Widget)w))
 	return;
@@ -1019,7 +1019,7 @@ GtExtractPixmap (w, src, ctype, x, y, width, height)
     int x, y;
     int width, height;
 {
-    register Raster rp;
+    Raster rp;
     int x1, y1, nx, ny;
     String cache;
     int i;
@@ -1103,7 +1103,7 @@ GtInsertPixmap (w, pixmap, dst, ctype, x, y, width, height)
     int x, y;
     int width, height;
 {
-    register Raster rp;
+    Raster rp;
     XWindowAttributes wa;
     int x1, y1, nx, ny;
     int i;
@@ -1196,8 +1196,8 @@ GtWriteColormap (w, map, first, nelem, r, g, b)
     ushort *r, *g, *b;
 {
     XWindowAttributes wa;
-    register XColor *cp;
-    register int i, j, v, n, use_wa = 1;
+    XColor *cp;
+    int i, j, v, n, use_wa = 1;
     unsigned long plane_masks[1];
     int req, need, ncolors;
 	    
@@ -1218,10 +1218,10 @@ GtWriteColormap (w, map, first, nelem, r, g, b)
 	/* Create or modify a colormap descriptor.  The display colormap
 	 * is not affected.
 	 */
-	register struct colormap *cm;
+	struct colormap *cm;
 	struct colormap *last_cm;
-	register XColor *cp;
-	register int i;
+	XColor *cp;
+	int i;
 
 
 
@@ -1531,7 +1531,7 @@ GtReadColormap (w, map, first, nelem, r, g, b)
     int nelem;
     ushort *r, *g, *b;
 {
-    register int i;
+    int i;
 	
 	
     if (DBG_TRACE)
@@ -1555,8 +1555,8 @@ GtReadColormap (w, map, first, nelem, r, g, b)
     if (map > 0) {
 	/* Read from a colormap descriptor.
 	 */
-	register struct colormap *cm;
-	register int i, j;
+	struct colormap *cm;
+	int i, j;
 
 	/* Locate colormap. */
 	for (cm = w->gterm.colormaps;  cm;  cm = cm->next)
@@ -1581,7 +1581,7 @@ GtReadColormap (w, map, first, nelem, r, g, b)
     } else {
 	/* Read the display colormap.
 	 */
-	register XColor *cp;
+	XColor *cp;
 
 	/* Return RGB values. */
 	for (i=0;  i < nelem;  i++) {
@@ -1633,9 +1633,9 @@ GtLoadColormap (w, map, offset, slope)
     int map;
     float offset, slope;
 {
-    register int i;
-    register XColor *cp;
-    register struct colormap *cm;
+    int i;
+    XColor *cp;
+    struct colormap *cm;
     struct colormap d_cmap, o_cmap;
     int noscale, nelem, c1, c2;
     float x, y, z, frac;
@@ -1825,11 +1825,11 @@ GtSetColormapFocus (int box_size)
  */
 int
 GtQueryColormap (w, map, first, nelem, maxelem)
-    register GtermWidget w;
+    GtermWidget w;
     int map;
     int *first, *nelem, *maxelem;
 {
-    register struct colormap *cm;
+    struct colormap *cm;
     int nitems;
 
     if (first)
@@ -1877,10 +1877,10 @@ GtQueryColormap (w, map, first, nelem, maxelem)
  */
 int
 GtNextColormap (w)
-    register GtermWidget w;
+    GtermWidget w;
 {
-    register struct colormap *cm;
-    register int mapno = 0;
+    struct colormap *cm;
+    int mapno = 0;
 
     /* Get the next map number. */
     for (cm = w->gterm.colormaps;  cm;  cm = cm->next)
@@ -1895,10 +1895,10 @@ GtNextColormap (w)
  */
 void
 GtFreeColormap (w, colormap)
-    register GtermWidget w;
+    GtermWidget w;
     int colormap;
 {
-    register struct colormap *p_cm, *cm;
+    struct colormap *p_cm, *cm;
 
     /* Find the colormap and free it. */
     for (p_cm = NULL, cm = w->gterm.colormaps;  cm;  p_cm = cm, cm = cm->next)
@@ -1935,11 +1935,11 @@ GtFreeColormap (w, colormap)
  */
 void
 GtWriteIomap (w, iomap, first, nelem)
-    register GtermWidget w;
+    GtermWidget w;
     ushort *iomap;
     int first, nelem;
 {
-    register int c1, c2;
+    int c1, c2;
 
     if (w->gterm.useGlobalCmap)
 	return;
@@ -1968,11 +1968,11 @@ GtWriteIomap (w, iomap, first, nelem)
  */
 void
 GtReadIomap (w, iomap, first, nelem)
-    register GtermWidget w;
+    GtermWidget w;
     uchar *iomap;
     int first, nelem;
 {
-    register int c1, c2;
+    int c1, c2;
 
     c1 = max(0, min(MAX_SZCMAP-1, first));
     c2 = max(0, min(MAX_SZCMAP-1, first + nelem - 1));
@@ -1986,11 +1986,11 @@ GtReadIomap (w, iomap, first, nelem)
  */
 void
 GtReadLUT (w, lut, first, nelem)
-    register GtermWidget w;
+    GtermWidget w;
     unsigned long *lut;
     int first, nelem;
 {
-    register int c1, c2;
+    int c1, c2;
 
     c1 = max(0, min(MAX_SZCMAP-1, first));
     c2 = max(0, min(MAX_SZCMAP-1, first + nelem - 1));
@@ -2006,8 +2006,8 @@ static void
 init_iomap (w)
     GtermWidget w;
 {
-    register ushort *iomap = w->gterm.iomap;
-    register int i;
+    ushort *iomap = w->gterm.iomap;
+    int i;
 
     for (i=0;  i < MAX_SZCMAP;  i++)
 	iomap[i] = i;
@@ -2019,7 +2019,7 @@ init_iomap (w)
 static void
 init_global_cmap ()
 {
-    register int i;
+    int i;
 
     for (i=0;  i < MAX_SZCMAP;  i++)
 	global_cmap[i] = (Pixel) i;
@@ -2029,7 +2029,7 @@ init_global_cmap ()
  */
 static void
 invalidate_cmap (w)
-    register GtermWidget w;
+    GtermWidget w;
 {
     w->gterm.cmap_in_valid = w->gterm.cmap_out_valid = 0;
 }
@@ -2040,11 +2040,11 @@ invalidate_cmap (w)
  */
 static Pixel *
 get_cmap_in (w)
-    register GtermWidget w;
+    GtermWidget w;
 {
-    register Pixel *cmap, *cmap_in = w->gterm.cmap_in;
-    register ushort *iomap;
-    register int i, j;
+    Pixel *cmap, *cmap_in = w->gterm.cmap_in;
+    ushort *iomap;
+    int i, j;
     int ncolors;
 
 
@@ -2085,10 +2085,10 @@ static Pixel *
 get_cmap_out (w)
     GtermWidget w;
 {
-    register Pixel *cmap;
-    register ushort *iomap;
+    Pixel *cmap;
+    ushort *iomap;
     Pixel *cmap_out = w->gterm.cmap_out;
-    register int pixel, i;
+    int pixel, i;
     int j;
 
 
@@ -2148,10 +2148,10 @@ get_cmap_out (w)
  */
 static Pixel
 get_pixel (w, client_pixel)
-    register GtermWidget w;
-    register int client_pixel;
+    GtermWidget w;
+    int client_pixel;
 {
-    register Pixel *cmap = get_cmap_in (w);
+    Pixel *cmap = get_cmap_in (w);
 
     if (client_pixel < 0 || client_pixel >= MAX_SZCMAP)
 	return (w->gterm.cmap[1]);
@@ -2165,10 +2165,10 @@ get_pixel (w, client_pixel)
 int
 GtGetClientPixel (w, pixel)
     GtermWidget w;
-    register int pixel;
+    int pixel;
 {
-    register int i;
-    register ushort *iomap;
+    int i;
+    ushort *iomap;
     int client_pixel = 0;
 
     get_cmap_in (w);
@@ -2188,10 +2188,10 @@ GtGetClientPixel (w, pixel)
  */
 void
 GtInitMappings (w)
-    register GtermWidget w;
+    GtermWidget w;
 {
-    register Mapping mp;
-    register int i;
+    Mapping mp;
+    int i;
 
     invalidate_draw_context (w);
 
@@ -2225,10 +2225,10 @@ GtInitMappings (w)
  */
 int
 GtNextMapping (w)
-    register GtermWidget w;
+    GtermWidget w;
 {
-    register Mapping mp;
-    register int i;
+    Mapping mp;
+    int i;
 
     for (i=1;  i < w->gterm.maxMappings;  i++) {
 	mp = &w->gterm.mappings[i];
@@ -2244,7 +2244,7 @@ GtNextMapping (w)
  */
 void
 GtFreeMapping (w, mapping)
-    register GtermWidget w;
+    GtermWidget w;
     int mapping;
 {
     free_mapping (w, &w->gterm.mappings[mapping]);
@@ -2257,10 +2257,10 @@ GtFreeMapping (w, mapping)
  */
 void
 GtRaiseMapping (w, mapping, reference)
-    register GtermWidget w;
+    GtermWidget w;
     int mapping, reference;
 {
-    register Mapping mp, ref_mp;
+    Mapping mp, ref_mp;
 
     mp = &w->gterm.mappings[mapping];
     if (!mp->defined)
@@ -2285,10 +2285,10 @@ GtRaiseMapping (w, mapping, reference)
  */
 void
 GtLowerMapping (w, mapping, reference)
-    register GtermWidget w;
+    GtermWidget w;
     int mapping, reference;
 {
-    register Mapping mp, ref_mp;
+    Mapping mp, ref_mp;
 
     mp = &w->gterm.mappings[mapping];
     if (!mp->defined)
@@ -2324,10 +2324,10 @@ GtLowerMapping (w, mapping, reference)
  */
 int
 GtCompareMappings (w, map1, map2)
-    register GtermWidget w;
+    GtermWidget w;
     int map1, map2;
 {
-    register Mapping mp, mp1, mp2;
+    Mapping mp, mp1, mp2;
 
     if (map1 == map2)
 	return (0);
@@ -2377,7 +2377,7 @@ GtSelectRaster (w, dras, dt, dx, dy, rt, rx, ry, rmap)
     int *rx, *ry;	/* raster coordinates (output) */
     int *rmap;		/* mapping selected */
 {
-    register Mapping mp;
+    Mapping mp;
     float x, y, x2, y2;
     int raster, mapping;
 
@@ -2546,8 +2546,8 @@ GtSetMapping (w, mapping, rop, src,st,sx,sy,snx,sny, dst,dt,dx,dy,dnx,dny)
     int dt;			/* coordinate type for source raster */
     int dx,dy,dnx,dny;		/* destination raster */
 {
-    register int i, j;
-    register Mapping mp, o_mp, n_mp;
+    int i, j;
+    Mapping mp, o_mp, n_mp;
     struct mapping pix_mp, new_mp;
     int defined, scale_changed, offset, current, state, old_i;
     int nx, xs[MAX_REGIONS], xe[MAX_REGIONS], xv[MAX_REGIONS];
@@ -2785,7 +2785,7 @@ GtGetMapping (w, mapping, rop, src,st,sx,sy,snx,sny, dst,dt,dx,dy,dnx,dny)
     int *dt;			/* coordinate type for source raster */
     int *dx,*dy,*dnx,*dny;	/* destination raster */
 {
-    register Mapping mp;
+    Mapping mp;
 
     if (mapping < 0 || mapping >= w->gterm.maxMappings)
 	return (-1);
@@ -2806,10 +2806,10 @@ GtGetMapping (w, mapping, rop, src,st,sx,sy,snx,sny, dst,dt,dx,dy,dnx,dny)
  */
 int
 GtActiveMapping (w, mapping)
-    register GtermWidget w;
+    GtermWidget w;
     int mapping;		/* mapping number */
 {
-    register Mapping mp;
+    Mapping mp;
 
     if (mapping < 0 || mapping >= w->gterm.maxMappings)
 	return (0);
@@ -2831,7 +2831,7 @@ GtEnableMapping (w, mapping, refresh)
     int mapping;		/* mapping number */
     int refresh;		/* refresh destination */
 {
-    register Mapping mp;
+    Mapping mp;
 
 
     if (DBG_TRACE)
@@ -2884,8 +2884,8 @@ GtDisableMapping (w, mapping, erase)
     int mapping;		/* mapping number */
     int erase;			/* erase the destination */
 {
-    register int i;
-    register Mapping mp, dmp;
+    int i;
+    Mapping mp, dmp;
     XRectangle r, d, in;
 
     invalidate_draw_context (w);
@@ -2940,7 +2940,7 @@ GtRefreshMapping (w, mapping)
     GtermWidget w;
     int mapping;		/* mapping number */
 {
-    register Mapping mp;
+    Mapping mp;
     struct mapping p_mp;
 
 
@@ -2987,10 +2987,10 @@ GtMapVector (w, mapping, dir, pv1, pv2, npts)
     DPoint *pv2;
     int npts;
 {
-    register DPoint *ip = pv1;
-    register DPoint *op = pv2;
-    register Mapping mp;
-    register int n;
+    DPoint *ip = pv1;
+    DPoint *op = pv2;
+    Mapping mp;
+    int n;
 
     struct mapping p_mp;
     double xscale, xoffset;
@@ -3052,10 +3052,10 @@ GtPixelToNDC (w, raster, pv1, pv2, npts)
     DPoint *pv2;
     int npts;
 {
-    register Raster rp = &w->gterm.rasters[raster];
-    register DPoint *ip = pv1;
-    register DPoint *op = pv2;
-    register int n;
+    Raster rp = &w->gterm.rasters[raster];
+    DPoint *ip = pv1;
+    DPoint *op = pv2;
+    int n;
 
     for (n=npts;  --n >= 0;  ip++, op++) {
 	op->x = (             ip->x) / rp->width * MAXNDC;
@@ -3076,10 +3076,10 @@ GtNDCToPixel (w, raster, pv1, pv2, npts)
     DPoint *pv2;
     int npts;
 {
-    register Raster rp = &w->gterm.rasters[raster];
-    register DPoint *ip = pv1;
-    register DPoint *op = pv2;
-    register int n;
+    Raster rp = &w->gterm.rasters[raster];
+    DPoint *ip = pv1;
+    DPoint *op = pv2;
+    int n;
 
     for (n=npts;  --n >= 0;  ip++, op++) {
 	op->x = ip->x / MAXNDC * rp->width;
@@ -3123,8 +3123,8 @@ GtDebug (w, fp, what)
 
     /* Print raster information. */
     if (what & 002) {
-	register int i;
-	register Raster rp;
+	int i;
+	Raster rp;
 
 	if (w->gterm.rasters) {
 	    for (i=0;  i < w->gterm.maxRasters;  i++) {
@@ -3141,8 +3141,8 @@ GtDebug (w, fp, what)
 
     /* Print mapping information. */
     if (what & 004) {
-	register int i;
-	register Mapping mp;
+	int i;
+	Mapping mp;
 	char flags[32];
 
 	if (w->gterm.mappings) {
@@ -3180,7 +3180,7 @@ GtDebug (w, fp, what)
 
     /* Print colormap information. */
     if (what & 010) {
-	register struct colormap *cm;
+	struct colormap *cm;
 
 	fprintf (fp, "cmapName=%s ncolors=%d basePixel=%d\n",
 	    w->gterm.cmapName, w->gterm.ncolors, w->gterm.base_pixel);
@@ -3190,7 +3190,7 @@ GtDebug (w, fp, what)
 
     /* Print marker information. */
     if (what & 020) {
-	register Marker mm;
+	Marker mm;
 	char value[256];
 
 	for (mm = w->gterm.gm_head;  mm;  mm = mm->next) {

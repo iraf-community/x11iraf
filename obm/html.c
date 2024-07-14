@@ -127,9 +127,9 @@ static int cb_decode(char *);
 void
 HTMLClassInit (ObmContext obm, ObjClassRec classrec)
 {
-	register HTMLClassData gcd;
-	register Tcl_Interp *tcl;
-	register ClientData c_gcd;
+	HTMLClassData gcd;
+	Tcl_Interp *tcl;
+	ClientData c_gcd;
 
 	/* Install the class methods. */
 	classrec->ClassDestroy = HTMLClassDestroy;
@@ -192,7 +192,7 @@ HTMLClassInit (ObmContext obm, ObjClassRec classrec)
 void
 HTMLClassDestroy (ObmContext obm, ObjClassRec classrec)
 {
-	register HTMLClassData gcd = (HTMLClassData) classrec->class_data;
+	HTMLClassData gcd = (HTMLClassData) classrec->class_data;
 
 	if (gcd) {
 	    if (gcd->tcl)
@@ -214,8 +214,8 @@ HTMLCreate (
   ArgList a_args,
   int a_nargs)
 {
-	register HTMLObject obj;
-	register Widget w;
+	HTMLObject obj;
+	Widget w;
 	Arg args[128];
 	int nargs = 0;
 
@@ -259,8 +259,8 @@ HTMLDestroy (ObmObject object)
 {
 	HTMLObject obj = (HTMLObject) object;
 	ObjClassRec classrec = obj->core.classrec;
-	register HTMLClassData gcd = (HTMLClassData) classrec->class_data;
-	register ObmCallback cb, cb_next;
+	HTMLClassData gcd = (HTMLClassData) classrec->class_data;
+	ObmCallback cb, cb_next;
 	ObmContext obm = obj->widget.obm;
 	Widget w = obj->widget.w;
 
@@ -298,9 +298,9 @@ HTMLDestroy (ObmObject object)
 static int 
 htmlSetText (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register HTMLClassData gcd = (HTMLClassData) msg;
+	HTMLClassData gcd = (HTMLClassData) msg;
 	HTMLObject obj = (HTMLObject) gcd->object[gcd->level];
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
 	char *text, *target_anchor;
 	char *header_text, *footer_text;
@@ -343,9 +343,9 @@ htmlSetText (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 static int 
 htmlGetText (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register HTMLClassData gcd = (HTMLClassData) msg;
+	HTMLClassData gcd = (HTMLClassData) msg;
 	HTMLObject obj = (HTMLObject) gcd->object[gcd->level];
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 	char *text, *format, *font;
 	int pretty = 0;
 
@@ -390,9 +390,9 @@ htmlGetText (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 static int 
 htmlPositionToId (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register HTMLClassData gcd = (HTMLClassData) msg;
+	HTMLClassData gcd = (HTMLClassData) msg;
 	HTMLObject obj = (HTMLObject) gcd->object[gcd->level];
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 	int element_id, x, y;
 	char buf[SZ_NUMBER];
 
@@ -421,9 +421,9 @@ htmlPositionToId (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 static int 
 htmlIdToPosition (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register HTMLClassData gcd = (HTMLClassData) msg;
+	HTMLClassData gcd = (HTMLClassData) msg;
 	HTMLObject obj = (HTMLObject) gcd->object[gcd->level];
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = obj->widget.obm;
 	int status, element_id, x, y;
 	char buf[SZ_NUMBER];
@@ -467,9 +467,9 @@ htmlIdToPosition (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 static int 
 htmlAnchorToPosition (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register HTMLClassData gcd = (HTMLClassData) msg;
+	HTMLClassData gcd = (HTMLClassData) msg;
 	HTMLObject obj = (HTMLObject) gcd->object[gcd->level];
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = obj->widget.obm;
 	char *anchor, *s_x, *s_y;
 	char buf[SZ_NUMBER];
@@ -512,9 +512,9 @@ htmlAnchorToPosition (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 static int 
 htmlAnchorToId (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register HTMLClassData gcd = (HTMLClassData) msg;
+	HTMLClassData gcd = (HTMLClassData) msg;
 	HTMLObject obj = (HTMLObject) gcd->object[gcd->level];
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 	char buf[SZ_NUMBER];
 	int element_id;
 	char *anchor;
@@ -541,9 +541,9 @@ htmlAnchorToId (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 static int 
 htmlGotoId (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register HTMLClassData gcd = (HTMLClassData) msg;
+	HTMLClassData gcd = (HTMLClassData) msg;
 	HTMLObject obj = (HTMLObject) gcd->object[gcd->level];
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 	int element_id;
 
 	if (argc < 2)
@@ -688,8 +688,8 @@ htmlGetLinks (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	    a_list = argv[1];
 
 	if ((list = HTMLGetLinks (wp->w, &n))) {
-	    register char *ip, *op;
-	    register int i;
+	    char *ip, *op;
+	    int i;
 
 	    /* Determine how much storage we need for the list. */
 	    for (i=0, nchars=0;  i < n;  i++) {
@@ -744,8 +744,8 @@ htmlGetLinks (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 static char *
 makeList (char **list, int n)
 {
-	register char *ip, *op;
-	register int i;
+	char *ip, *op;
+	int i;
 	int nchars;
 	char *buf;
 
@@ -787,9 +787,9 @@ makeList (char **list, int n)
 static int 
 htmlRetestAnchors (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register HTMLClassData gcd = (HTMLClassData) msg;
+	HTMLClassData gcd = (HTMLClassData) msg;
 	HTMLObject obj = (HTMLObject) gcd->object[gcd->level];
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 
 	HTMLRetestAnchors (wp->w, NULL, 0);
 	return (TCL_OK);
@@ -809,9 +809,9 @@ htmlRetestAnchors (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 static int 
 htmlSetSelection (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register HTMLClassData gcd = (HTMLClassData) msg;
+	HTMLClassData gcd = (HTMLClassData) msg;
 	HTMLObject obj = (HTMLObject) gcd->object[gcd->level];
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 	ElementRef start, end;
 	char *ip = (char *)NULL;
 
@@ -844,9 +844,9 @@ htmlSetSelection (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 static int 
 htmlGetSelection (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register HTMLClassData gcd = (HTMLClassData) msg;
+	HTMLClassData gcd = (HTMLClassData) msg;
 	HTMLObject obj = (HTMLObject) gcd->object[gcd->level];
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 	char *text, *start, *end, *insert;
 
 	text = HTMLGetTextAndSelection (wp->w, &start, &end, &insert);
@@ -869,9 +869,9 @@ htmlGetSelection (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 static int 
 htmlClearSelection (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register HTMLClassData gcd = (HTMLClassData) msg;
+	HTMLClassData gcd = (HTMLClassData) msg;
 	HTMLObject obj = (HTMLObject) gcd->object[gcd->level];
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 
 	HTMLClearSelection (wp->w);
 	return (TCL_OK);
@@ -896,9 +896,9 @@ htmlClearSelection (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 static int 
 htmlSearchText (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register HTMLClassData gcd = (HTMLClassData) msg;
+	HTMLClassData gcd = (HTMLClassData) msg;
 	HTMLObject obj = (HTMLObject) gcd->object[gcd->level];
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = obj->widget.obm;
 	char *pattern, *a_start, *a_end;
 	int backward = 0, caseless = 1;
@@ -982,9 +982,9 @@ static int
 htmlAddCallback (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	HTMLObject obj = (HTMLObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register HTMLPrivate hp = &obj->html;
-	register Widget w = wp->w;
+	WidgetPrivate wp = &obj->widget;
+	HTMLPrivate hp = &obj->html;
+	Widget w = wp->w;
 	char *userproc, *callback_type;
 	ObmCallback cb, new;
 	int type;
@@ -1027,8 +1027,8 @@ static int
 htmlDeleteCallback (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	HTMLObject obj = (HTMLObject) msg->object[msg->level];
-	register HTMLPrivate hp = &obj->html;
-	register ObmCallback cb, prev, next;
+	HTMLPrivate hp = &obj->html;
+	ObmCallback cb, prev, next;
 	char *procedure, *callback_type;
 	int type;
 
@@ -1069,9 +1069,9 @@ htmlDeleteCallback (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 static void
 anchorCallback (Widget w, XtPointer client_data, XtPointer call_data)
 {
-	register char *ip, *op;
-	register ObmCallback cb;
-	register WbAnchorCallbackData *ap = (WbAnchorCallbackData *)call_data;
+	char *ip, *op;
+	ObmCallback cb;
+	WbAnchorCallbackData *ap = (WbAnchorCallbackData *)call_data;
 	HTMLObject obj = (HTMLObject) client_data;
 	ObmContext obm = obj->widget.obm;
 	char *text, *href, *none = "none";
@@ -1156,9 +1156,9 @@ anchorCallback (Widget w, XtPointer client_data, XtPointer call_data)
 static int
 testAnchorCallback (Widget w, XtPointer client_data, char *href)
 {
-	register ObmCallback cb;
-	register HTMLObject obj = (HTMLObject) client_data;
-	register ObmContext obm = obj->widget.obm;
+	ObmCallback cb;
+	HTMLObject obj = (HTMLObject) client_data;
+	ObmContext obm = obj->widget.obm;
 	int status, retval = 0;
 
 	/* Call any registered callback functions. */
@@ -1207,9 +1207,9 @@ testAnchorCallback (Widget w, XtPointer client_data, char *href)
 static void
 submitFormCallback (Widget w, XtPointer client_data, XtPointer call_data)
 {
-	register char *ip, *op;
-	register ObmCallback cb;
-	register WbFormCallbackData *fp = (WbFormCallbackData *)call_data;
+	char *ip, *op;
+	ObmCallback cb;
+	WbFormCallbackData *fp = (WbFormCallbackData *)call_data;
 	HTMLObject obj = (HTMLObject) client_data;
 	ObmContext obm = obj->widget.obm;
 
@@ -1328,8 +1328,8 @@ submitFormCallback (Widget w, XtPointer client_data, XtPointer call_data)
 static void
 linkCallback (Widget w, XtPointer client_data, XtPointer call_data)
 {
-	register char *ip, *op;
-	register ObmCallback cb;
+	char *ip, *op;
+	ObmCallback cb;
 	LinkInfo *l_info = (LinkInfo *) call_data;
 	HTMLObject obj = (HTMLObject) client_data;
 	ObmContext obm = obj->widget.obm;
@@ -1368,9 +1368,9 @@ linkCallback (Widget w, XtPointer client_data, XtPointer call_data)
 static void
 pointerMotionCallback (Widget w, XtPointer client_data, char *href)
 {
-	register ObmCallback cb;
-	register HTMLObject obj = (HTMLObject) client_data;
-	register ObmContext obm = obj->widget.obm;
+	ObmCallback cb;
+	HTMLObject obj = (HTMLObject) client_data;
+	ObmContext obm = obj->widget.obm;
 	int status;
 
 	/* Call any registered callback functions. */
@@ -1396,7 +1396,7 @@ pointerMotionCallback (Widget w, XtPointer client_data, char *href)
 static void
 cb_error (ObmContext obm, ObmCallback cb)
 {
-	register Tcl_Interp *tcl = obm->tcl;
+	Tcl_Interp *tcl = obm->tcl;
 	const char *errstr = Tcl_GetVar (tcl, "errorInfo", 0);
 	fprintf (stderr, "Error on line %d in %s: %s\n",
 	    Tcl_GetErrorLine (tcl), cb->name,
@@ -1408,7 +1408,7 @@ cb_error (ObmContext obm, ObmCallback cb)
 static int
 cb_decode (char *callback_type)
 {
-	register int type = 0;
+	int type = 0;
 
 	if (strcmp (callback_type, "anchor") == 0)
 	    type = CB_Anchor;
@@ -1429,7 +1429,7 @@ cb_decode (char *callback_type)
 static char *
 cb_encode (int callback_type)
 {
-	register char *type = "unknown";
+	char *type = "unknown";
 
 	switch (callback_type) {
 	case CB_Anchor:

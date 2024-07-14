@@ -16,8 +16,8 @@ XfwfTextWidth(font, str, length, tabs)
      int length;
      int *tabs;
 {
-	register char	*p, *ep;
-	register int	tx, tab, rc;
+	char	*p, *ep;
+	int	tx, tab, rc;
 
 	tab = tx = 0;
  	if (length == 0) return 0;

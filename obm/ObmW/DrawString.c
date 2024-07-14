@@ -20,8 +20,8 @@ XfwfDrawString(display, drawable, gc, x, y, string, length, tabs)
      int length;
      int *tabs;
 {
-	register char	*p, *ep;
-	register int	tx, tab;
+	char	*p, *ep;
+	int	tx, tab;
 
 	tab = tx = 0;
 	for (p = string; length; )

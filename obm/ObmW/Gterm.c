@@ -659,8 +659,8 @@ static void
 Initialize (request, new)
     Widget request, new;
 {
-    register GtermWidget w = (GtermWidget)new;
-    register GC gc;
+    GtermWidget w = (GtermWidget)new;
+    GC gc;
 
     XColor fg_color, bg_color;
     XFontStruct **fp;
@@ -1369,7 +1369,7 @@ Destroy (gw)
     Widget gw;
 {
     GtermWidget w = (GtermWidget) gw;
-    register GtCallback *cb, *cb_next;
+    GtCallback *cb, *cb_next;
     Display *display = w->gterm.display;
 
 
@@ -1448,7 +1448,7 @@ Resize (gw)
     Widget gw;
 {
     GtermWidget w = (GtermWidget) gw;
-    register GtCallback *cb;
+    GtCallback *cb;
     int char_width, char_height, char_base;
     int bestfont, fonterr, dx, dy, i;
     unsigned int width, height, u_junk;
@@ -1604,8 +1604,8 @@ Redisplay (gw, event, region)
     XEvent *event;
     Region region;
 {
-    register GtermWidget w = (GtermWidget) gw;
-    register XExposeEvent *ev = (XExposeEvent *)event;
+    GtermWidget w = (GtermWidget) gw;
+    XExposeEvent *ev = (XExposeEvent *)event;
     int x, y, width, height;
 
     if (!w || !XtIsRealized (gw))
@@ -1661,10 +1661,10 @@ SetValues (current, request, set)
 {
     GtermWidget old = (GtermWidget) current;
     GtermWidget req = (GtermWidget) request;
-    register GtermWidget w = (GtermWidget) set;
+    GtermWidget w = (GtermWidget) set;
     Display *display = w->gterm.display;
     Boolean redisplay = False;
-    register GC gc;
+    GC gc;
 
 
     if (old->gterm.dialogBgColor != req->gterm.dialogBgColor) {
@@ -1713,12 +1713,12 @@ SetValues (current, request, set)
 
 static void
 color_crosshair (w)
-    register GtermWidget w;
+    GtermWidget w;
 {
-    register Display *display = w->gterm.display;
+    Display *display = w->gterm.display;
     XColor fg_color, bg_color;
     Colormap defcmap;
-    register GC gc;
+    GC gc;
 
     erase_crosshair (w);
     defcmap = DefaultColormapOfScreen (w->gterm.screen);
@@ -1739,9 +1739,9 @@ color_crosshair (w)
 
 static void
 color_ginmodeCursor (w)
-    register GtermWidget w;
+    GtermWidget w;
 {
-    register Display *display = w->gterm.display;
+    Display *display = w->gterm.display;
     XColor fg_color, bg_color;
     Colormap defcmap;
  
@@ -1778,9 +1778,9 @@ static void HandleGraphicsInput (widget, event, params, param_count)
     String *params;             /* unused */
     Cardinal *param_count;      /* unused */
 {
-    register GtermWidget w = (GtermWidget)widget;
-    register XKeyEvent *ev = (XKeyEvent *) event;
-    register GtCallback *cb;
+    GtermWidget w = (GtermWidget)widget;
+    XKeyEvent *ev = (XKeyEvent *) event;
+    GtCallback *cb;
     GtCallback cbl[128];
     int ncb, i;
 
@@ -1800,7 +1800,7 @@ static void HandleDisplayCrosshair (widget, event, params, nparams)
     String *params;             /* unused */
     Cardinal *nparams;      /* unused */
 {
-    register GtermWidget w = (GtermWidget)widget;
+    GtermWidget w = (GtermWidget)widget;
     XButtonEvent *ev = &event->xbutton;
 
     /* Ignore if cursor is in a marker. */
@@ -1825,7 +1825,7 @@ static void HandleTrackCursor (widget, event, params, param_count)
     String *params;             /* unused */
     Cardinal *param_count;      /* unused */
 {
-    register GtermWidget w = (GtermWidget)widget;
+    GtermWidget w = (GtermWidget)widget;
     XMotionEvent *ev = &event->xmotion;
     gmSelection what;
     Marker gm;
@@ -1862,8 +1862,8 @@ static void HandleEnterWindow (widget, event, params, param_count)
     String *params;             /* unused */
     Cardinal *param_count;      /* unused */
 {
-    register GtermWidget w = (GtermWidget)widget;
-    register XEnterWindowEvent *ev = (XEnterWindowEvent *) event;
+    GtermWidget w = (GtermWidget)widget;
+    XEnterWindowEvent *ev = (XEnterWindowEvent *) event;
 
     /* Deep Frame */
     if (!w->gterm.useDefaultCM && w->gterm.haveColormap &&
@@ -1894,8 +1894,8 @@ static void HandleLeaveWindow (widget, event, params, param_count)
     String *params;             /* unused */
     Cardinal *param_count;      /* unused */
 {
-    register GtermWidget w = (GtermWidget)widget;
-    register XLeaveWindowEvent *ev = (XLeaveWindowEvent *) event;
+    GtermWidget w = (GtermWidget)widget;
+    XLeaveWindowEvent *ev = (XLeaveWindowEvent *) event;
 
 /*printf ("HandleLeaveWindow....");*/
     if (!w->gterm.useDefaultCM && w->gterm.haveColormap) {
@@ -1925,8 +1925,8 @@ static void HandleSoftReset (widget, event, params, param_count)
     String *params;             /* unused */
     Cardinal *param_count;      /* unused */
 {
-    register GtermWidget w = (GtermWidget)widget;
-    register GtCallback *cb;
+    GtermWidget w = (GtermWidget)widget;
+    GtCallback *cb;
     GtCallback cbl[128];
     int ncb, i;
 

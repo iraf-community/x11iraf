@@ -162,8 +162,8 @@ static	XtPointer GmCopy(Marker);
 void
 MarkerClassInit (ObmContext obm, ObjClassRec classrec)
 {
-	register MsgContext msg;
-	register Tcl_Interp *tcl;
+	MsgContext msg;
+	Tcl_Interp *tcl;
 
 	/* Install the class methods. */
 	classrec->ClassDestroy = MarkerClassDestroy;
@@ -237,7 +237,7 @@ MarkerClassInit (ObmContext obm, ObjClassRec classrec)
 static void
 MarkerClassDestroy (ObmContext obm, ObjClassRec classrec)
 {
-	register MsgContext msg = (MsgContext) classrec->class_data;
+	MsgContext msg = (MsgContext) classrec->class_data;
 
 	if (msg) {
 	    if (msg->tcl)
@@ -259,8 +259,8 @@ MarkerCreate (
   ArgList args,
   int nargs)
 {
-	register MarkerObject obj;
-	register Widget gt;
+	MarkerObject obj;
+	Widget gt;
 	ObmObject gterm_obj;
 	int type, interactive;
 	int erase, visible, i;
@@ -349,8 +349,8 @@ static void
 MarkerDestroy (ObmObject object)
 {
 	MarkerObject obj = (MarkerObject) object;
-	register ObmContext obm = obj->marker.obm;
-        register ObmCallback cb, next;
+	ObmContext obm = obj->marker.obm;
+        ObmCallback cb, next;
 
 	/* Destroy the object in the second final call to Destroy. */
 	if (!obj->core.being_destroyed++)
@@ -381,9 +381,9 @@ MarkerDestroy (ObmObject object)
 static int
 MarkerEvaluate (ObmObject object, char *command)
 {
-	register MarkerObject obj = (MarkerObject) object;
-	register MsgContext msg = (MsgContext) obj->core.classrec->class_data;
-	register ObmContext obm = obj->marker.obm;
+	MarkerObject obj = (MarkerObject) object;
+	MsgContext msg = (MsgContext) obj->core.classrec->class_data;
+	ObmContext obm = obj->marker.obm;
 	int status;
 
 	/* Since the class wide interpreter is used to evaluate the message
@@ -432,8 +432,8 @@ static int
 markerMakeCopy (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmContext obm = mp->obm;
+	MarkerPrivate mp = &obj->marker;
+	ObmContext obm = mp->obm;
 	XtPointer gm;
 	Arg args[10];
 	char *name;
@@ -461,9 +461,9 @@ static int
 markerAddCallback (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
+	MarkerPrivate mp = &obj->marker;
 	ObmContext obm = mp->obm;
-	register ObmCallback cb, new_cb;
+	ObmCallback cb, new_cb;
 	char *procedure;
 	int events=0, i;
 
@@ -513,8 +513,8 @@ static int
 markerDeleteCallback (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmCallback cb, prev;
+	MarkerPrivate mp = &obj->marker;
+	ObmCallback cb, prev;
 	char *procedure;
 
 	if (argc < 2)
@@ -553,7 +553,7 @@ markerCallbackProc (
 	MarkerPrivate mp = &obj->marker;
 	ObmContext obm = mp->obm;
 	char message_data[SZ_MESSAGE];
-	register char *op;
+	char *op;
 	int status = 0;
 
 	/* Call the user callback procedure.  The callback procedure is called
@@ -635,7 +635,7 @@ markerCallbackProc (
 	    case KeyPress:
 	    case KeyRelease:
 		{   XKeyPressedEvent *ev = (XKeyPressedEvent *) event;
-		    register char *ip, *op = message_data;
+		    char *ip, *op = message_data;
 		    char buf[SZ_MESSAGE];
 		    int n;
 
@@ -671,7 +671,7 @@ markerCallbackProc (
 	    case ButtonPress:
 	    case ButtonRelease:
 		{   XButtonPressedEvent *ev = (XButtonPressedEvent *) event;
-		    register char *op = message_data;
+		    char *op = message_data;
 
 		    if (event->type == ButtonPress)
 			strcpy (op, "buttonPress ");
@@ -815,8 +815,8 @@ static int
 markerNotify (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmContext obm = mp->obm;
+	MarkerPrivate mp = &obj->marker;
+	ObmContext obm = mp->obm;
 	char *event_type;
 	int first_param;
 	XEvent event;
@@ -841,7 +841,7 @@ static int
 markerDestroy (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
+	MarkerPrivate mp = &obj->marker;
 
 	GmDestroy (mp->gm);
 	return (TCL_OK);
@@ -907,8 +907,8 @@ static int
 markerMarkpos (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmContext obm = mp->obm;
+	MarkerPrivate mp = &obj->marker;
+	ObmContext obm = mp->obm;
 	int erase;
 
 	GmMarkpos (mp->gm);
@@ -937,8 +937,8 @@ static int
 markerRedraw (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmContext obm = mp->obm;
+	MarkerPrivate mp = &obj->marker;
+	ObmContext obm = mp->obm;
 	Boolean markpos = False;
 	Boolean erase = True;
 	int function = GXcopy;
@@ -980,8 +980,8 @@ static int
 markerRaise (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmContext obm = mp->obm;
+	MarkerPrivate mp = &obj->marker;
+	ObmContext obm = mp->obm;
 	XtPointer ref_gm = NULL;
 	MarkerObject ref;
 
@@ -1011,8 +1011,8 @@ static int
 markerLower (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmContext obm = mp->obm;
+	MarkerPrivate mp = &obj->marker;
+	ObmContext obm = mp->obm;
 	XtPointer ref_gm = NULL;
 	MarkerObject ref;
 
@@ -1040,8 +1040,8 @@ static int
 markerMove (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmContext obm = mp->obm;
+	MarkerPrivate mp = &obj->marker;
+	ObmContext obm = mp->obm;
 	Arg args[10];
 	int erase;
 
@@ -1072,8 +1072,8 @@ static int
 markerResize (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmContext obm = mp->obm;
+	MarkerPrivate mp = &obj->marker;
+	ObmContext obm = mp->obm;
 	Arg args[10];
 	int erase;
 
@@ -1102,8 +1102,8 @@ static int
 markerRotate (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmContext obm = mp->obm;
+	MarkerPrivate mp = &obj->marker;
+	ObmContext obm = mp->obm;
 	Arg args[10];
 	int erase;
 
@@ -1128,8 +1128,8 @@ static int
 markerGetAttribute (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmContext obm = mp->obm;
+	MarkerPrivate mp = &obj->marker;
+	ObmContext obm = mp->obm;
 	char *name, value[SZ_COMMAND];
 
 	if (argc < 2)
@@ -1154,8 +1154,8 @@ static int
 markerSetAttribute (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmContext obm = mp->obm;
+	MarkerPrivate mp = &obj->marker;
+	ObmContext obm = mp->obm;
 	char *name, *value;
 
 	if (argc < 3)
@@ -1184,8 +1184,8 @@ static int
 markerGetAttributes (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmContext obm = mp->obm;
+	MarkerPrivate mp = &obj->marker;
+	ObmContext obm = mp->obm;
 	char *name, *variable, value[SZ_COMMAND];
 	int i, status = 0;
 	char **items;
@@ -1236,8 +1236,8 @@ static int
 markerSetAttributes (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmContext obm = mp->obm;
+	MarkerPrivate mp = &obj->marker;
+	ObmContext obm = mp->obm;
 	char *name, *value;
 	Arg args[MAX_ARGS];
 	int status, argno, i;
@@ -1295,9 +1295,9 @@ markerGetVertices (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	MarkerPrivate mp = &obj->marker;
 	ObmContext obm = mp->obm;
 
-	register int i;
-	register char *op;
-	register DPoint *pv;
+	int i;
+	char *op;
+	DPoint *pv;
 	int first, maxpts, npts, ngot;
 	int nchars, status, buflen;
 	char *points, *buf;
@@ -1383,9 +1383,9 @@ markerSetVertices (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	MarkerPrivate mp = &obj->marker;
 	ObmContext obm = mp->obm;
 
-	register int i;
-	register char *ip;
-	register DPoint *pv;
+	int i;
+	char *ip;
+	DPoint *pv;
 	int first, maxpts, npts, ngot;
 	char *ipp, *points, *ip_save;
 
@@ -1468,9 +1468,9 @@ markerGetRegion (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
 	MarkerPrivate mp = &obj->marker;
 	ObmContext obm = mp->obm;
-	register DPoint *pv, *vv;
-	register char *op;
-	register int i;
+	DPoint *pv, *vv;
+	char *op;
+	int i;
 
 	Boolean unmap = False;
 	int ctype_out = GtPixel;
@@ -1725,8 +1725,8 @@ static int
 markerGetRect (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmContext obm = mp->obm;
+	MarkerPrivate mp = &obj->marker;
+	ObmContext obm = mp->obm;
 	char *dx_out, *dy_out, *dnx_out, *dny_out;
 	int marker_type, x, y, width, height, status;
 	int dx, dy, dnx, dny;

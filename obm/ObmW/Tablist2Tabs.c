@@ -10,8 +10,8 @@ int *
 XfwfTablist2Tabs(tablist)
 char *tablist;
 {
-	register int	*tabs;
-	register int	ntabs = 0;
+	int	*tabs;
+	int	ntabs = 0;
 
 	if (!tablist)
 		return NULL;

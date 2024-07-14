@@ -642,7 +642,7 @@ static NormalReverseGC*  GetNormalGC(w, fore, back, font)
      Pixel back;
      Font font;
 {
-  register XawTableWidget tw = (XawTableWidget)w;
+  XawTableWidget tw = (XawTableWidget)w;
   int i = NORMAL_INDEX(fore, back);
 
   while (GET_NORMAL(tw,i)->used > 0)
@@ -700,7 +700,7 @@ static ShadowGC* GetShadowGC(w, back)
      Widget w;
      Pixel back;
 {
-  register XawTableWidget tw = (XawTableWidget)w;
+  XawTableWidget tw = (XawTableWidget)w;
   int i = SHADOW_INDEX(back);
   
   while (GET_SHADOW(tw,i)->used > 0)
@@ -741,7 +741,7 @@ static void ReleaseNormalGC(w, fore, back)
      Pixel fore;
      Pixel back;
 {
-  register XawTableWidget tw = (XawTableWidget)w;
+  XawTableWidget tw = (XawTableWidget)w;
   int i = NORMAL_INDEX(fore, back);
   
   while (GET_NORMAL(tw,i)->used > 0)
@@ -763,7 +763,7 @@ static void ReleaseShadowGC(w, back)
      Widget w;
      Pixel back;
 {
-  register XawTableWidget tw = (XawTableWidget)w;
+  XawTableWidget tw = (XawTableWidget)w;
   int i = SHADOW_INDEX(back);
   
   while (GET_SHADOW(tw,i)->used > 0)
@@ -849,9 +849,9 @@ static void CalculatePreferredSize(w, width, height)
      Dimension *width;
      Dimension *height;
 {
-  register XawTableWidget tw = (XawTableWidget)w;
-  register int wid;
-  register int hei;
+  XawTableWidget tw = (XawTableWidget)w;
+  int wid;
+  int hei;
   int i;
   
   /*
@@ -883,18 +883,18 @@ static void CalculatePreferredSize(w, width, height)
 }
 
 static Position GetX(tw,j)
-     register XawTableWidget tw;
+     XawTableWidget tw;
      int j;
 {
-  register TablePart* table = (TablePart*)&tw->table;
-  register Position x;
+  TablePart* table = (TablePart*)&tw->table;
+  Position x;
 
   x = j * (table->col_margin + 2 * table->label_shadow_thickness) +
           (table->tab_margin + tw->container.shadow_thickness);
 
   for(; j > 0 ; j--)
   {
-    register int tmp = j - 1;
+    int tmp = j - 1;
     x += (Position)COLUMN_WIDTH(tw, tmp);
   }
   return x;
@@ -917,7 +917,7 @@ static Position GetY(tw,i)
 static void SetLabelHeight(tw)
      XawTableWidget tw;
 {
-  register XFontStruct *fs = tw->table.font;
+  XFontStruct *fs = tw->table.font;
   int row_height = tw->table.row_height;
 
   if (tw->table.row_height < 1)
@@ -955,7 +955,7 @@ static void SetLabelWidth(tw,i,j)
      XawTableWidget tw;
      int i,j;
 {
-  register XFontStruct *fs = tw->table.font;
+  XFontStruct *fs = tw->table.font;
   XawTableCell cell;
 
   cell = (XawTableCell)get_cell(STUFF(tw),i,j);
@@ -1094,7 +1094,7 @@ static void DrawCage(tw, b_row, e_row, b_column, e_column)
 }
 
 static void Reposition(tw, cell, i, j)
-     register XawTableWidget tw;
+     XawTableWidget tw;
      XawTableCell  cell;
      int i,j;
 {
@@ -1274,7 +1274,7 @@ static void Initialize(request, new, args, num_args)
      ArgList   args;
      Cardinal *num_args;
 {
-  register XawTableWidget tw = (XawTableWidget) new;
+  XawTableWidget tw = (XawTableWidget) new;
   Dimension   width;
   Dimension   height;
   int         i;
@@ -1508,7 +1508,7 @@ static void PaintLabel(w, i, j, x, y, cell)
   if (CELL(label_len) > 0)
   {
     GC gc;
-    register XFontStruct *fs = tw->table.font;
+    XFontStruct *fs = tw->table.font;
 
     if (CELL(special_colour))
       gc = CELL(highlight) ? CELL(reverse) : CELL(normal);
@@ -1570,7 +1570,7 @@ static Boolean PaintCell(p, i, j, call_data, client_data)
 static void WhatCellsToBeDraw(tw, rect, b_row, e_row, b_column , e_column)
      XawTableWidget tw;
      XRectangle  rect;
-     register int *b_row, *e_row, *b_column , *e_column;
+     int *b_row, *e_row, *b_column , *e_column;
 {
   Position    x1 = (Position)rect.x,
               y1 = (Position)rect.y,
@@ -1711,7 +1711,7 @@ static Boolean SetValues(current, request, new, args, num_args)
 {
     XawTableWidget curtw = (XawTableWidget) current;
     XawTableWidget newtw = (XawTableWidget) new;
-    register int    i;
+    int    i;
     int             j;
     Boolean    resize = False;
     Boolean redisplay = False;
@@ -3230,7 +3230,7 @@ XawTableSetLabel(w, row, column, raw_label)
      const char  *raw_label;
 #endif
 {
-  register XawTableWidget tw = (XawTableWidget)w;
+  XawTableWidget tw = (XawTableWidget)w;
   XawTableCallbackStruct callback_str;
   XawTableCell cell;
   char* label = NULL;
@@ -3879,7 +3879,7 @@ XawTableSetColumnWidth(w, column, width)
 {
   XawTableWidget tw = (XawTableWidget)w;
   XawTableCallbackStruct callback_str;
-  register int row;
+  int row;
 
   if (column != InRange (column, 0, COLUMNS(tw)-1)) 
     return;
@@ -3921,7 +3921,7 @@ XawTableSetMultiColumnWidths (w, columns, widths, ncols)
 {
   XawTableWidget tw = (XawTableWidget)w;
   XawTableCallbackStruct callback_str;
-  register int i, row, col, width;
+  int i, row, col, width;
 
   for (i=0; i < ncols; i++ ) {
     if (columns[i] != InRange (columns[i], 0, COLUMNS(tw)-1)) 
@@ -4568,7 +4568,7 @@ static void InsertSelection(w, event, params, num_params)
 
 
 static int GetCutBufferNumber(atom)
-     register Atom atom;
+     Atom atom;
 {
   if (atom == XA_CUT_BUFFER0) return(0);
   if (atom == XA_CUT_BUFFER1) return(1);

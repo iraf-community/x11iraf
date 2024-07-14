@@ -30,9 +30,9 @@ Commercial  usage is  also  possible  with  participation of the author.
 #define FREE(t) if((t) != null)XtFree((char*)(t))
 
 static void vert_tab_node_insert(f,s,p)
-     register XawTableNode f; /* insert after   */
-     register XawTableNode s; /* insert before  */
-     register XawTableNode p; /* to be inserted */
+     XawTableNode f; /* insert after   */
+     XawTableNode s; /* insert before  */
+     XawTableNode p; /* to be inserted */
 {
   if (f != null) f->b = p;
   if (s != null) s->t = p;
@@ -40,9 +40,9 @@ static void vert_tab_node_insert(f,s,p)
 }
 
 static void horiz_tab_node_insert(f,s,p)
-     register XawTableNode f; /* insert after   */
-     register XawTableNode s; /* insert before  */
-     register XawTableNode p; /* to be inserted */
+     XawTableNode f; /* insert after   */
+     XawTableNode s; /* insert before  */
+     XawTableNode p; /* to be inserted */
 {
   if (f != null) f->r = p;
   if (s != null) s->l = p;
@@ -50,7 +50,7 @@ static void horiz_tab_node_insert(f,s,p)
 }
 
 static void vert_tab_node_reject(p)
-     register XawTableNode p;
+     XawTableNode p;
 {
   if (p == null) return;
   
@@ -59,7 +59,7 @@ static void vert_tab_node_reject(p)
 }
 
 static void horiz_tab_node_reject(p)
-     register XawTableNode p;
+     XawTableNode p;
 {
   if (p == null) return;
   
@@ -95,7 +95,7 @@ row_delete(f)
      XtPointer f;
 #endif
 {
-  register XawTableNode p = (XawTableNode) f;
+  XawTableNode p = (XawTableNode) f;
 
   if (p == null)
     return;
@@ -137,7 +137,7 @@ column_delete(f)
      XtPointer f;
 #endif
 {
-  register XawTableNode p = (XawTableNode) f;
+  XawTableNode p = (XawTableNode) f;
 
   if (p == null)
     return;
@@ -182,8 +182,8 @@ row_insert_after(d, node_size)
      int node_size;
 #endif
 {
-  register XawTableNode f = (XawTableNode) d;
-  register XawTableNode p;
+  XawTableNode f = (XawTableNode) d;
+  XawTableNode p;
   XawTableNode          left;
   
   if (f == null)
@@ -254,8 +254,8 @@ row_insert_before(d, node_size)
      int node_size;
 #endif
 {
-  register XawTableNode f = (XawTableNode) d;
-  register XawTableNode p;
+  XawTableNode f = (XawTableNode) d;
+  XawTableNode p;
   XawTableNode          left;
   
   if (f == null)
@@ -326,8 +326,8 @@ column_insert_after(d, node_size)
      int node_size;
 #endif
 {
-  register XawTableNode f = (XawTableNode) d;
-  register XawTableNode p;
+  XawTableNode f = (XawTableNode) d;
+  XawTableNode p;
   XawTableNode          top;
   
   if (f == null)
@@ -399,8 +399,8 @@ column_insert_before(d, node_size)
      int node_size;
 #endif
 {
-  register XawTableNode f = (XawTableNode)d;
-  register XawTableNode p;
+  XawTableNode f = (XawTableNode)d;
+  XawTableNode p;
   XawTableNode top;
   
   if (f == null)
@@ -470,7 +470,7 @@ get_table(f)
      XtPointer f;
 #endif
 {
-  register XawTableNode p = (XawTableNode) f;
+  XawTableNode p = (XawTableNode) f;
 
   if (p == null)
     return (XtPointer)NULL;
@@ -494,15 +494,15 @@ get_table(f)
 
 XtPointer
 #if NeedFunctionPrototypes
-get_cell (XtPointer f, register int i, register int j)
+get_cell (XtPointer f, int i, int j)
 #else
 get_cell (f, i, j)
      XtPointer    f;
-     register int i;
-     register int j;
+     int i;
+     int j;
 #endif
 {
-  register XawTableNode p = (XawTableNode) f;
+  XawTableNode p = (XawTableNode) f;
   
   if (p == null)
     return (XtPointer)NULL;
@@ -574,8 +574,8 @@ go_table (
 	  int  begin_column,
 	  int  end_column,
 	  int  direction,
-	  register int *i,            /* returned */
-	  register int *j,            /* returned */
+	  int *i,            /* returned */
+	  int *j,            /* returned */
 	  XtPointer   client_data)
 #else
 go_table(w, proc, table, begin_row, end_row, begin_column, end_column,
@@ -588,13 +588,13 @@ go_table(w, proc, table, begin_row, end_row, begin_column, end_column,
      int  begin_column;
      int  end_column;
      int direction;
-     register int *i;               /* returned */
-     register int *j;               /* returned */
+     int *i;               /* returned */
+     int *j;               /* returned */
      XtPointer   client_data;
 #endif
 {
-  register XawTableNode p;
-  register XawTableNode n;
+  XawTableNode p;
+  XawTableNode n;
 
   table = get_table(table);
 
@@ -604,12 +604,12 @@ go_table(w, proc, table, begin_row, end_row, begin_column, end_column,
     
     for (*j = begin_column; *j <= end_column && p != null; (*j)++) 
     {
-      register XawTableNode sp = p;  /* protect against deallocated node !! */
+      XawTableNode sp = p;  /* protect against deallocated node !! */
       p = p->r;
       
       for (*i = begin_row, n = sp; *i <= end_row && n != null; (*i)++) 
       {
-	register XawTableNode sn = n; /* protect against deallocated node !! */
+	XawTableNode sn = n; /* protect against deallocated node !! */
 	n = n->b;
 	
 	if (proc(w, *i, *j, (XtPointer)sn, client_data))
@@ -623,12 +623,12 @@ go_table(w, proc, table, begin_row, end_row, begin_column, end_column,
     
     for (*i = begin_row; *i <= end_row && p != null; (*i)++) 
     {
-      register XawTableNode sp = p;  /* protect against deallocated node !! */
+      XawTableNode sp = p;  /* protect against deallocated node !! */
       p = p->b;
       
       for (*j = begin_column, n = sp; *j <= end_column && n != null; (*j)++) 
       {
-	register XawTableNode sn = n; /* protect against deallocated node !! */
+	XawTableNode sn = n; /* protect against deallocated node !! */
 	n = n->r;
 	
 	if (proc(w, *i, *j, (XtPointer)sn, client_data))
@@ -651,16 +651,16 @@ go_table(w, proc, table, begin_row, end_row, begin_column, end_column,
 void
 #if NeedFunctionPrototypes
 get_table_size (XtPointer f,
-		register int *i,   /* returned */
-		register int *j)   /* returned */
+		int *i,   /* returned */
+		int *j)   /* returned */
 #else
 get_table_size(f,i,j)
      XtPointer f;
-     register int *i;   /* returned */
-     register int *j;   /* returned */
+     int *i;   /* returned */
+     int *j;   /* returned */
 #endif
 {
-  register XawTableNode p = (XawTableNode)f;
+  XawTableNode p = (XawTableNode)f;
   if (p == null){
     *i = 0;
     *j = 0;
@@ -691,7 +691,7 @@ delete_table(f)
      XtPointer f;
 #endif
 {
-  register XawTableNode p = (XawTableNode)f;
+  XawTableNode p = (XawTableNode)f;
   int i,j;
   int end_row, end_column;
 
@@ -717,16 +717,16 @@ delete_table(f)
 void 
 #if NeedFunctionPrototypes
 get_cell_positions (XtPointer f,
-                    register int *i,   /* returned */
-                    register int *j)   /* returned */
+                    int *i,   /* returned */
+                    int *j)   /* returned */
 #else
 get_cell_positions(f, i, j)
      XtPointer          f;
-     register int *i;  /* returned */
-     register int *j;  /* returned */
+     int *i;  /* returned */
+     int *j;  /* returned */
 #endif
 {
-  register XawTableNode p = (XawTableNode)f;
+  XawTableNode p = (XawTableNode)f;
   if ( p == null )
     return;
   
@@ -759,15 +759,15 @@ create_table(rows, columns, node_size)
      int node_size;
 #endif
 {
-  register XawTableNode *area;
-  register XawTableNode  p;
-  register int i,j;
+  XawTableNode *area;
+  XawTableNode  p;
+  int i,j;
   XawTableNode           table;
   
   if (rows == 0 || columns == 0)
     return (XtPointer)NULL;
   else{
-    register XawTableNode *s;
+    XawTableNode *s;
 
     /* allocate temporary two-dimension array to make first node's binding */
     if ( (s = area = (XawTableNode*)
@@ -827,7 +827,7 @@ static Boolean check_cell (w, row, column, call_data, client_data)
      XtPointer call_data;
      XtPointer client_data;
 {
-  register XawTableNode p = (XawTableNode)call_data;
+  XawTableNode p = (XawTableNode)call_data;
   int real_row, real_column;
   char *halt = NULL;;
   
@@ -879,9 +879,9 @@ _check_table (f, rows, columns)
      int columns;
 #endif
 {
-  register XawTableNode table = (XawTableNode)f;
+  XawTableNode table = (XawTableNode)f;
   int real_rows, real_columns;
-  register int i,j;
+  int i,j;
   char *halt = NULL;
 
   if (f == NULL && (rows == 0 || columns == 0))

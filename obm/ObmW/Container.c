@@ -63,7 +63,7 @@ static void InsPixel(w, off, value)
      int off;
      XrmValue *value;
 {
-  register ContainerWidget p = (ContainerWidget) w;
+  ContainerWidget p = (ContainerWidget) w;
   static Pixel pixel;
   
   if (off == offset(top_shadow_color))
@@ -205,7 +205,7 @@ static void initialize(request, new, args, num_args)
 static void destroy(w)
      Widget w;
 {
-  register ContainerWidget c = (ContainerWidget)w;
+  ContainerWidget c = (ContainerWidget)w;
 
   XtReleaseGC(w, c->container.top_shadow_GC);
   XtReleaseGC(w, c->container.bottom_shadow_GC);
@@ -280,7 +280,7 @@ static void Redisplay(gw, event, region)
     XEvent *event;		/* unused */
     Region region;		/* unused */
 {
-  register ContainerWidget c = (ContainerWidget) gw;
+  ContainerWidget c = (ContainerWidget) gw;
   
   XClearWindow (XtDisplay(gw), XtWindow(gw));
 

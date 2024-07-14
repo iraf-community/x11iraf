@@ -198,7 +198,7 @@ int	width, height, depth;
 int	sx, sy, dnx, dny;
 int     bpl, bpp, border;
 {
-    register int i, j, npix = (width * height);
+    int i, j, npix = (width * height);
     uint32_t  *lp, xcol, lval;
     int    nbytes = ((depth == ColormapDepth) ? 1 : 4);
     uchar  *ip = in, pv;
@@ -258,7 +258,7 @@ int     bpl, bpp, border;
 static int
 init_lut (int bpp, int border)
 {
-    register int i;
+    int i;
     unsigned long  rmask, gmask, bmask, rpix, gpix, bpix, xcol, lval;
     int    rshift, gshift, bshift, nbytes;
     uchar  *op, pv;
@@ -350,7 +350,7 @@ init_lut (int bpp, int border)
 */
 int highbit(unsigned long i)
 {
-    register int h = 1;
+    int h = 1;
     if (i == 0)
         return (0);
 #ifdef _LP64
@@ -372,7 +372,7 @@ int highbit(unsigned long i)
 */
 int lowbit(unsigned long i)
 {
-    register int h = 1;
+    int h = 1;
 
     if (i == 0)
         return (0);
@@ -466,7 +466,7 @@ dbg_printMappings (GtermWidget w)
 static void
 dbg_printRasters (GtermWidget w)
 {
-    register int i;
+    int i;
     Raster   rp;
 
 

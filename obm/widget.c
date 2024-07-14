@@ -291,8 +291,8 @@ static	int widgetGetRowAttr(MsgContext, Tcl_Interp *, int, char **);
 void
 WidgetClassInit (ObmContext obm, ObjClassRec classrec)
 {
-	register int hashval, n;
-	register char *ip;
+	int hashval, n;
+	char *ip;
 	ObjClassRec widgetclass;
 	static int hashed = 0;
 	Tcl_Interp *tcl;
@@ -491,7 +491,7 @@ WidgetClassInit (ObmContext obm, ObjClassRec classrec)
 void
 WidgetClassDestroy (ObmContext obm, ObjClassRec classrec)
 {
-	register MsgContext msg = (MsgContext) classrec->class_data;
+	MsgContext msg = (MsgContext) classrec->class_data;
 
 	if (msg) {
 	    if (msg->tcl)
@@ -513,7 +513,7 @@ WidgetCreate (
   ArgList args,
   int nargs)
 {
-	register WidgetObject obj, pobj;
+	WidgetObject obj, pobj;
 	Widget w, pw;
 
 	/* Create the widget object descriptor. */
@@ -624,9 +624,9 @@ WidgetCreate (
 void
 WidgetDestroy (ObmObject object)
 {
-	register WidgetObject obj = (WidgetObject) object;
-	register WidgetPrivate wp = &obj->widget;
-	register ObmCallback cb, next;
+	WidgetObject obj = (WidgetObject) object;
+	WidgetPrivate wp = &obj->widget;
+	ObmCallback cb, next;
 
 	/* Ignore the second call to Destroy. */
 	if (obj->core.being_destroyed++)
@@ -669,7 +669,7 @@ WidgetDestroy (ObmObject object)
 static void
 widgetSetDestroy (ObmObject obj)
 {
-	register int i;
+	int i;
 	ObmObject child;
 	int object_type;
 
@@ -692,7 +692,7 @@ widgetSetDestroy (ObmObject obj)
 static void
 widgetDestroy (ObmObject obj)
 {
-	register int i;
+	int i;
 	WidgetObject wobj = (WidgetObject) obj;
 	WidgetClass *widget_class;
 	ObmObject child;
@@ -715,8 +715,8 @@ widgetDestroy (ObmObject obj)
 int
 WidgetEvaluate (ObmObject object, char *command)
 {
-	register WidgetObject obj = (WidgetObject) object;
-	register Tcl_Interp *tcl, *server = obj->widget.obm->tcl;
+	WidgetObject obj = (WidgetObject) object;
+	Tcl_Interp *tcl, *server = obj->widget.obm->tcl;
 	MsgContext omsg = (MsgContext) obj->core.classrec->class_data;
 	MsgContext pmsg = (MsgContext) obj->core.superclass->class_data;
 
@@ -783,7 +783,7 @@ error:
 Widget
 widgetGetPointer (ObmObject object)
 {
-	register WidgetObject obj = (WidgetObject) object;
+	WidgetObject obj = (WidgetObject) object;
 	return (obj->widget.w);
 }
 
@@ -793,8 +793,8 @@ widgetGetPointer (ObmObject object)
 WidgetObject
 widgetToObject (ObmContext obm, Widget w)
 {
-	register int i;
-	register WidgetPrivate wp;
+	int i;
+	WidgetPrivate wp;
         ObmObject objs[256];
 	int nobjs;
 
@@ -820,8 +820,8 @@ widgetToObject (ObmContext obm, Widget w)
 static int 
 widgetAddCallback (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register WidgetObject obj = (WidgetObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
+	WidgetObject obj = (WidgetObject) msg->object[msg->level];
+	WidgetPrivate wp = &obj->widget;
 	ObmCallback cb, new_cb;
 	char *s_proc, *s_type;
 	int callback_type, i;
@@ -889,8 +889,8 @@ widgetAddCallback (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 static int 
 widgetDeleteCallback (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register WidgetObject obj = (WidgetObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
+	WidgetObject obj = (WidgetObject) msg->object[msg->level];
+	WidgetPrivate wp = &obj->widget;
 	ObmCallback cb, prev;
 
 	/* Locate and delete procedure entry in callback list. */
@@ -916,8 +916,8 @@ widgetDeleteCallback (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 static void
 widgetCallback (Widget w, WidgetObject obj, caddr_t call_data)
 {
-	register WidgetPrivate wp = &obj->widget;
-	register ObjClassRec classrec = obj->core.classrec;
+	WidgetPrivate wp = &obj->widget;
+	ObjClassRec classrec = obj->core.classrec;
 	char buffer[SZ_COMMAND];
 	char *message = buffer;
 	int callback_type, i;
@@ -962,7 +962,7 @@ widgetCallback (Widget w, WidgetObject obj, caddr_t call_data)
 	    XfwfMultiListReturnStruct *list =
 		(XfwfMultiListReturnStruct *) call_data;
 	    Boolean state, sensitive;
-	    register char *ip, *op;
+	    char *ip, *op;
 	    int buflen, need, i;
 	    char *string;
 
@@ -1057,10 +1057,10 @@ widgetCallback (Widget w, WidgetObject obj, caddr_t call_data)
 static void
 widgetRGCallback (Widget w, WidgetObject obj, caddr_t call_data)
 {
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 	long selection = (long) call_data;
-	register char *op;
-	register int i;
+	char *op;
+	int i;
 
 	char message[SZ_COMMAND];
 	SelectionType selectionType;
@@ -1114,7 +1114,7 @@ widgetLTHCallback (Widget w, WidgetObject obj, caddr_t call_data)
 	ListTreeMultiReturnStruct *list;
 	ListTreeItem *item;
 	char message[SZ_COMMAND], buf[SZ_LINE];
-	register int i;
+	int i;
 
 	list = (ListTreeMultiReturnStruct *) call_data;
 	if (!list->items)
@@ -1182,7 +1182,7 @@ widgetLTACallback (Widget w, WidgetObject obj, caddr_t call_data)
 static void
 widgetSBCallback (Widget w, WidgetObject obj, caddr_t call_data)
 {
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 	call_callbacks (obj, CtstartCallback, NULL);
 }
 
@@ -1192,7 +1192,7 @@ widgetSBCallback (Widget w, WidgetObject obj, caddr_t call_data)
 static void
 widgetSECallback (Widget w, WidgetObject obj, caddr_t call_data)
 {
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 	call_callbacks (obj, CtstopCallback, NULL);
 }
 
@@ -1204,8 +1204,8 @@ widgetSECallback (Widget w, WidgetObject obj, caddr_t call_data)
 static void
 widgetRPCallback (Widget w, WidgetObject obj, caddr_t call_data)
 {
-	register WidgetPrivate wp = &obj->widget;
-	register XawPannerReport *rp = (XawPannerReport *) call_data;
+	WidgetPrivate wp = &obj->widget;
+	XawPannerReport *rp = (XawPannerReport *) call_data;
 	char message[100];
 
 	/* Return args: changed x y w h cw ch */
@@ -1223,10 +1223,10 @@ widgetRPCallback (Widget w, WidgetObject obj, caddr_t call_data)
 static void
 widgetJPCallback (Widget w, WidgetObject obj, caddr_t call_data)
 {
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 	XfwfScrollInfo *info = (XfwfScrollInfo *) call_data;
 	XfwfScrollInfo update_info;
-	register int flags = info->flags;
+	int flags = info->flags;
 	char message[100];
 
 	if (obmClass (obj->core.classrec, WtScrollbar)) {
@@ -1269,7 +1269,7 @@ widgetJPCallback (Widget w, WidgetObject obj, caddr_t call_data)
 static void
 widgetSPCallback (Widget w, WidgetObject obj, caddr_t call_data)
 {
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 	char message[100];
 
 	if (obmClass (obj->core.classrec, WtScrollbar)) {
@@ -1285,7 +1285,7 @@ widgetSPCallback (Widget w, WidgetObject obj, caddr_t call_data)
 	     */
 	    XfwfScrollInfo *info = (XfwfScrollInfo *) call_data;
 	    XfwfScrollInfo update_info;
-	    register int flags = info->flags;
+	    int flags = info->flags;
 
 	    /* Slider2d callback:   widget-name x y 
 	     * Scrollbar2 callback: widget-name fraction
@@ -1323,8 +1323,8 @@ widgetSPCallback (Widget w, WidgetObject obj, caddr_t call_data)
 static void
 widgetSCCallback (Widget w, WidgetObject obj, caddr_t call_data)
 {
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
 	char *callback_name;
 	ObmCallback cb;
 	int status, i;
@@ -1369,7 +1369,7 @@ widgetSCCallback (Widget w, WidgetObject obj, caddr_t call_data)
 static void
 widgetPUCallback (Widget w, WidgetObject obj, caddr_t call_data)
 {
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 	call_callbacks (obj, CtpopupCallback, NULL);
 }
 
@@ -1380,7 +1380,7 @@ widgetPUCallback (Widget w, WidgetObject obj, caddr_t call_data)
 static void
 widgetPDCallback (Widget w, WidgetObject obj, caddr_t call_data)
 {
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 	call_callbacks (obj, CtpopdownCallback, NULL);
 }
 
@@ -1391,9 +1391,9 @@ widgetPDCallback (Widget w, WidgetObject obj, caddr_t call_data)
 static void
 call_callbacks (WidgetObject obj, int callback_type, char *message)
 {
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register ObmCallback cb;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	ObmCallback cb;
 	char *callback_name;
 	int status, i;
 
@@ -1492,7 +1492,7 @@ do_text (Widget w, XEvent *event, String *params, Cardinal *num_params)
 static void
 do_userproc (Widget w, XEvent *event, String *params, Cardinal *num_params)
 {
-	register char *ip, *op;
+	char *ip, *op;
 	ObmContext obm = global_obm_handle;
 	char cmd[SZ_COMMAND], *param;
 	int x, y, x_root, y_root;
@@ -1620,8 +1620,8 @@ do_userproc (Widget w, XEvent *event, String *params, Cardinal *num_params)
 static int 
 widgetSetTTName (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register WidgetObject obj = (WidgetObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
+	WidgetObject obj = (WidgetObject) msg->object[msg->level];
+	WidgetPrivate wp = &obj->widget;
 
 	if (argc < 2)
 	    return (TCL_ERROR);
@@ -1633,7 +1633,7 @@ widgetSetTTName (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 void
 widget_setTTName (WidgetObject obj, char *name)
 {
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 	strncpy (wp->translation_table_name, name, SZ_NAME);
 	wp->translation_table_name[SZ_NAME-1] = '\0';
 }
@@ -1646,8 +1646,8 @@ widget_setTTName (WidgetObject obj, char *name)
 static int 
 widgetGetTTName (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register WidgetObject obj = (WidgetObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
+	WidgetObject obj = (WidgetObject) msg->object[msg->level];
+	WidgetPrivate wp = &obj->widget;
 
 	Tcl_SetResult (wp->obm->tcl, widget_getTTName(obj), TCL_VOLATILE);
 	return (TCL_OK);
@@ -1656,7 +1656,7 @@ widgetGetTTName (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 char *
 widget_getTTName (WidgetObject obj)
 {
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 	return (wp->translation_table_name);
 }
 
@@ -1669,7 +1669,7 @@ widget_getTTName (WidgetObject obj)
 static void
 do_popup (Widget w, XEvent *event, String *params, Cardinal *num_params)
 {
-	register char *ip, *op;
+	char *ip, *op;
 	ObmContext obm = global_obm_handle;
 	XKeyEvent *ev = (XKeyEvent *) event;
 	Boolean spring_loaded;
@@ -1754,7 +1754,7 @@ do_popup (Widget w, XEvent *event, String *params, Cardinal *num_params)
 static void
 do_popdown (Widget w, XEvent *event, String *params, Cardinal *num_params)
 {
-	register char *ip, *op;
+	char *ip, *op;
 	ObmContext obm = global_obm_handle;
 	XKeyEvent *ev = (XKeyEvent *) event;
 	char *menu_name;
@@ -1782,9 +1782,9 @@ widgetSet (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
-	register char *ip;
-	register int hashval, n;
-	register Rtype rp;
+	char *ip;
+	int hashval, n;
+	Rtype rp;
 	XrmValue from, to;
 	Arg args[1];
 
@@ -1822,7 +1822,7 @@ widgetSet (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 
 	    /* The following is for text widgets. */
 	    if (obmClass (obj->core.classrec, WtAsciiText)) {
-		register ObmCallback cb;
+		ObmCallback cb;
 
 		wp->text_newline = 0;
 		wp->text_pos = strlen (argv[2]);
@@ -2016,9 +2016,9 @@ widgetGet (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	WidgetPrivate wp = &obj->widget;
 	char rbuf[SZ_MESSAGE];
 	char *result = rbuf;
-	register char *ip;
-	register int hashval, n;
-	register Rtype rp;
+	char *ip;
+	int hashval, n;
+	Rtype rp;
 
 	if (argc < 2)
 	    return (TCL_ERROR);
@@ -2134,7 +2134,7 @@ widgetAppend (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
 
-	register char *ip, *op;
+	char *ip, *op;
 	char buf[SZ_COMMAND];
 	XawTextBlock tx;
 	char *text;
@@ -2250,9 +2250,9 @@ widgetGetItem (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
 
-	register int nelem;
-	register String *list;
-	register char *ip, *op;
+	int nelem;
+	String *list;
+	char *ip, *op;
 	XawListReturnStruct *itemp;
 	char *s_itemno, *s_item;
 	char buf[SZ_NUMBER];
@@ -2443,7 +2443,7 @@ static int
 get_itemno (WidgetObject obj, char *itemstr)
 {
 	WidgetPrivate wp = &obj->widget;
-	register int i;
+	int i;
 
 	if (isdigit (*itemstr))
 	    return (atoi(itemstr));
@@ -3169,7 +3169,7 @@ widgetSetTable (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
         WidgetPrivate wp = &obj->widget;
         ObmContext obm = wp->obm;
 
-	register int i, j;
+	int i, j;
 	int	nrows, ncols, ndrows=0, ndcols=0, onrows, oncols;
 	const char	*list = NULL, **rows = NULL, **cols = NULL;
 
@@ -4087,7 +4087,7 @@ widgetParseGeometry (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
 
-	register int uflags, dflags;
+	int uflags, dflags;
 	Dimension winWidth, winHeight;
 	int need, x, y, width, height;
 	char *user_geom, *def_geom;
@@ -4181,7 +4181,7 @@ widgetGetGeometry (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
 
-	register char *op;
+	char *op;
 	Dimension winWidth, winHeight;
 	int dist, gravity, x, y, width, height;
 	char buf[128];
@@ -4357,8 +4357,8 @@ static int
 widgetAddEventHandler (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
 	ObmCallback cb, new_cb;
 	int event_mask, i, j;
 	Boolean nonmaskable;
@@ -4411,9 +4411,9 @@ static int
 widgetRemoveEventHandler (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register ObmCallback cb, pcb;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	ObmCallback cb, pcb;
 	Boolean nonmaskable;
 	char *procname;
 
@@ -4458,8 +4458,8 @@ widgetEvent (Widget w, ObmCallback cb, XEvent *event, Boolean *continue_to_dispa
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
 	char cmd[SZ_COMMAND];
-	register char *ip, *op;
-	register int i, j;
+	char *ip, *op;
+	int i, j;
 	int status;
 
 	/* Our job is to translate the X event into a call to a widget server
@@ -4705,7 +4705,7 @@ widgetEventState (char *op, unsigned int state)
 static char *
 widgetGetFontName (Display *display, XFontStruct *fs) /* MF016 */
 {
-        register int i;
+        int i;
         unsigned long val;
 	char *name = (char *) malloc (SZ_FONT_NAME), *str, *lp;
 

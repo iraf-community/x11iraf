@@ -3561,7 +3561,7 @@ Scroll (w, event, params, num_params)
 	String *params;
 	Cardinal *num_params;
 {
-	register HTMLWidget hw = (HTMLWidget)XtParent(w);
+	HTMLWidget hw = (HTMLWidget)XtParent(w);
 #ifdef MOTIF
 	int val, size, inc, pageinc;
 #endif
