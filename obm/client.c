@@ -91,11 +91,11 @@ ClientCreate (
 
 	/* client-object actions.  */
 	Tcl_CreateCommand (tcl,
-	    "gcmd", clientGcmd, (ClientData)obj, NULL);
+	    "gcmd", (Tcl_CmdProc *) clientGcmd, (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "gkey", clientGkey, (ClientData)obj, NULL);
+	    "gkey", (Tcl_CmdProc *) clientGkey, (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "literal", clientLiteral, (ClientData)obj, NULL);
+	    "literal", (Tcl_CmdProc *) clientLiteral, (ClientData)obj, NULL);
 
 	return ((ObmObject) obj);
 }

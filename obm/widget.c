@@ -322,142 +322,142 @@ WidgetClassInit (ObmContext obm, ObjClassRec classrec)
 
 	    /* Register widget-object actions. */
 	    Tcl_CreateCommand (tcl,
-		"addCallback", widgetAddCallback, (ClientData)msg, NULL);
+		"addCallback", (Tcl_CmdProc *) widgetAddCallback, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"deleteCallback", widgetDeleteCallback, (ClientData)msg,
+		"deleteCallback", (Tcl_CmdProc *) widgetDeleteCallback, (ClientData)msg,
 		NULL);
 	    Tcl_CreateCommand (tcl,
-		"addEventHandler", widgetAddEventHandler, (ClientData)msg,
+		"addEventHandler", (Tcl_CmdProc *) widgetAddEventHandler, (ClientData)msg,
 		NULL);
 	    Tcl_CreateCommand (tcl,
-		"removeEventHandler", widgetRemoveEventHandler,
+		"removeEventHandler", (Tcl_CmdProc *) widgetRemoveEventHandler,
 		(ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"set", widgetSet, (ClientData)msg, NULL);
+		"set", (Tcl_CmdProc *) widgetSet, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"get", widgetGet, (ClientData)msg, NULL);
+		"get", (Tcl_CmdProc *) widgetGet, (ClientData)msg, NULL);
 
 	    /* Text Widget Callbacks */
 	    Tcl_CreateCommand (tcl,
-		"append", widgetAppend, (ClientData)msg, NULL);
+		"append", (Tcl_CmdProc *) widgetAppend, (ClientData)msg, NULL);
 
 	    /* List Widget Callbacks */
 	    Tcl_CreateCommand (tcl,
-		"setList", widgetSetList, (ClientData)msg, NULL);
+		"setList", (Tcl_CmdProc *) widgetSetList, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getItem", widgetGetItem, (ClientData)msg, NULL);
+		"getItem", (Tcl_CmdProc *) widgetGetItem, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"highlight", widgetHighlight, (ClientData)msg, NULL);
+		"highlight", (Tcl_CmdProc *) widgetHighlight, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"unhighlight", widgetUnhighlight, (ClientData)msg, NULL);
+		"unhighlight", (Tcl_CmdProc *) widgetUnhighlight, (ClientData)msg, NULL);
 
 	    /* Dialog Widget Callbacks */
 	    Tcl_CreateCommand (tcl,
-		"getValue", widgetGetValue, (ClientData)msg, NULL);
+		"getValue", (Tcl_CmdProc *) widgetGetValue, (ClientData)msg, NULL);
 
 	    /* Slider Widget Callbacks */
 	    Tcl_CreateCommand (tcl,
-		"getThumb", widgetGetThumb, (ClientData)msg, NULL);
+		"getThumb", (Tcl_CmdProc *) widgetGetThumb, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"moveThumb", widgetMoveThumb, (ClientData)msg, NULL);
+		"moveThumb", (Tcl_CmdProc *) widgetMoveThumb, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"resizeThumb", widgetResizeThumb, (ClientData)msg, NULL);
+		"resizeThumb", (Tcl_CmdProc *) widgetResizeThumb, (ClientData)msg, NULL);
 
 	    /* Scrollbar Widget Callbacks */
 	    Tcl_CreateCommand (tcl,
-		"setScrollbar", widgetSetScrollbar, (ClientData)msg, NULL);
+		"setScrollbar", (Tcl_CmdProc *) widgetSetScrollbar, (ClientData)msg, NULL);
 
 	    /* Viewport Widget Callbacks */
 	    Tcl_CreateCommand (tcl,
-		"setLocation", widgetSetLocation, (ClientData)msg, NULL);
+		"setLocation", (Tcl_CmdProc *) widgetSetLocation, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setCoordinates", widgetSetCoordinates, (ClientData)msg, NULL);
+		"setCoordinates", (Tcl_CmdProc *) widgetSetCoordinates, (ClientData)msg, NULL);
 
 	    /* Tabs Widget Callbacks */
 	    Tcl_CreateCommand (tcl,
-		"setTop", widgetSetTop, (ClientData)msg, NULL);
+		"setTop", (Tcl_CmdProc *) widgetSetTop, (ClientData)msg, NULL);
 
 	    /* Tree Widget Callbacks */
 	    Tcl_CreateCommand (tcl,
-		"setListTree", widgetSetListTree, (ClientData)msg, NULL);
+		"setListTree", (Tcl_CmdProc *) widgetSetListTree, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"listTreeSelect", widgetListTreeSelect, (ClientData)msg, NULL);
+		"listTreeSelect", (Tcl_CmdProc *) widgetListTreeSelect, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"listTreeDelete", widgetListTreeDelete, (ClientData)msg, NULL);
+		"listTreeDelete", (Tcl_CmdProc *) widgetListTreeDelete, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"listTreeHighlight", widgetListTreeHighlight,
+		"listTreeHighlight", (Tcl_CmdProc *) widgetListTreeHighlight,
 		(ClientData)msg, NULL);
 
 #ifndef OSI_COMPLIANT
 	    /* Table Widget Callbacks */
 	    Tcl_CreateCommand (tcl,
-		"setTable", widgetSetTable, (ClientData)msg, NULL);
+		"setTable", (Tcl_CmdProc *) widgetSetTable, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getCellAttr", widgetGetCellAttr, (ClientData)msg, NULL);
+		"getCellAttr", (Tcl_CmdProc *) widgetGetCellAttr, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setCellAttr", widgetSetCellAttr, (ClientData)msg, NULL);
+		"setCellAttr", (Tcl_CmdProc *) widgetSetCellAttr, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setColAttr", widgetSetColAttr, (ClientData)msg, NULL);
+		"setColAttr", (Tcl_CmdProc *) widgetSetColAttr, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getColAttr", widgetGetColAttr, (ClientData)msg, NULL);
+		"getColAttr", (Tcl_CmdProc *) widgetGetColAttr, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setRowAttr", widgetSetRowAttr, (ClientData)msg, NULL);
+		"setRowAttr", (Tcl_CmdProc *) widgetSetRowAttr, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getRowAttr", widgetGetRowAttr, (ClientData)msg, NULL);
+		"getRowAttr", (Tcl_CmdProc *) widgetGetRowAttr, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"deleteCol", widgetDeleteCol, (ClientData)msg, NULL);
+		"deleteCol", (Tcl_CmdProc *) widgetDeleteCol, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"deleteRow", widgetDeleteRow, (ClientData)msg, NULL);
+		"deleteRow", (Tcl_CmdProc *) widgetDeleteRow, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"addCol", widgetAddCol, (ClientData)msg, NULL);
+		"addCol", (Tcl_CmdProc *) widgetAddCol, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"addRow", widgetAddRow, (ClientData)msg, NULL);
+		"addRow", (Tcl_CmdProc *) widgetAddRow, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setTableSize", widgetSetTableSize, (ClientData)msg, NULL);
+		"setTableSize", (Tcl_CmdProc *) widgetSetTableSize, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getTableSize", widgetGetTableSize, (ClientData)msg, NULL);
+		"getTableSize", (Tcl_CmdProc *) widgetGetTableSize, (ClientData)msg, NULL);
 #endif
 
 	    Tcl_CreateCommand (tcl,
-		"realize", widgetRealize, (ClientData)msg, NULL);
+		"realize", (Tcl_CmdProc *) widgetRealize, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"unrealize", widgetUnrealize, (ClientData)msg, NULL);
+		"unrealize", (Tcl_CmdProc *) widgetUnrealize, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"isRealized", widgetIsRealized, (ClientData)msg, NULL);
+		"isRealized", (Tcl_CmdProc *) widgetIsRealized, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"map", widgetMap, (ClientData)msg, NULL);
+		"map", (Tcl_CmdProc *) widgetMap, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"unmap", widgetUnmap, (ClientData)msg, NULL);
+		"unmap", (Tcl_CmdProc *) widgetUnmap, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"manage", widgetManage, (ClientData)msg, NULL);
+		"manage", (Tcl_CmdProc *) widgetManage, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"unmanage", widgetUnmanage, (ClientData)msg, NULL);
+		"unmanage", (Tcl_CmdProc *) widgetUnmanage, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"popup", widgetPopup, (ClientData)msg, NULL);
+		"popup", (Tcl_CmdProc *) widgetPopup, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"popupSpringLoaded", widgetPopupSpringLoaded,
+		"popupSpringLoaded", (Tcl_CmdProc *) widgetPopupSpringLoaded,
 		(ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"popdown", widgetPopdown, (ClientData)msg, NULL);
+		"popdown", (Tcl_CmdProc *) widgetPopdown, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setSensitive", widgetSetSensitive, (ClientData)msg, NULL);
+		"setSensitive", (Tcl_CmdProc *) widgetSetSensitive, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"isSensitive", widgetIsSensitive, (ClientData)msg, NULL);
+		"isSensitive", (Tcl_CmdProc *) widgetIsSensitive, (ClientData)msg, NULL);
 
 	    Tcl_CreateCommand (tcl,
-		"move", widgetMove, (ClientData)msg, NULL);
+		"move", (Tcl_CmdProc *) widgetMove, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"resize", widgetResize, (ClientData)msg, NULL);
+		"resize", (Tcl_CmdProc *) widgetResize, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"configure", widgetConfigure, (ClientData)msg, NULL);
+		"configure", (Tcl_CmdProc *) widgetConfigure, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"parseGeometry", widgetParseGeometry, (ClientData)msg, NULL);
+		"parseGeometry", (Tcl_CmdProc *) widgetParseGeometry, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getGeometry", widgetGetGeometry, (ClientData)msg, NULL);
+		"getGeometry", (Tcl_CmdProc *) widgetGetGeometry, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setTTName", widgetSetTTName, (ClientData)msg, NULL);
+		"setTTName", (Tcl_CmdProc *) widgetSetTTName, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getTTName", widgetGetTTName, (ClientData)msg, NULL);
+		"getTTName", (Tcl_CmdProc *) widgetGetTTName, (ClientData)msg, NULL);
 
 	    /* Register any actions. */
 	    XtAppAddActions (obm->app_context, widget_actions,

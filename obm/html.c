@@ -150,39 +150,39 @@ HTMLClassInit (ObmContext obm, ObjClassRec classrec)
 	    gcd->level = 0;
 
 	    Tcl_CreateCommand (tcl,
-		"addCallback", htmlAddCallback, c_gcd, NULL);
+		"addCallback", (Tcl_CmdProc *) htmlAddCallback, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"deleteCallback", htmlDeleteCallback, c_gcd, NULL);
+		"deleteCallback", (Tcl_CmdProc *) htmlDeleteCallback, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setText", htmlSetText, c_gcd, NULL);
+		"setText", (Tcl_CmdProc *) htmlSetText, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getText", htmlGetText, c_gcd, NULL);
+		"getText", (Tcl_CmdProc *) htmlGetText, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"positionToId", htmlPositionToId, c_gcd, NULL);
+		"positionToId", (Tcl_CmdProc *) htmlPositionToId, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"idToPosition", htmlIdToPosition, c_gcd, NULL);
+		"idToPosition", (Tcl_CmdProc *) htmlIdToPosition, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"anchorToPosition", htmlAnchorToPosition, c_gcd, NULL);
+		"anchorToPosition", (Tcl_CmdProc *) htmlAnchorToPosition, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"anchorToId", htmlAnchorToId, c_gcd, NULL);
+		"anchorToId", (Tcl_CmdProc *) htmlAnchorToId, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"gotoId", htmlGotoId, c_gcd, NULL);
+		"gotoId", (Tcl_CmdProc *) htmlGotoId, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getHRefs", htmlGetHRefs, c_gcd, NULL);
+		"getHRefs", (Tcl_CmdProc *) htmlGetHRefs, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getImageSrcs", htmlGetImageSrcs, c_gcd, NULL);
+		"getImageSrcs", (Tcl_CmdProc *) htmlGetImageSrcs, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getLinks", htmlGetLinks, c_gcd, NULL);
+		"getLinks", (Tcl_CmdProc *) htmlGetLinks, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"retestAnchors", htmlRetestAnchors, c_gcd, NULL);
+		"retestAnchors", (Tcl_CmdProc *) htmlRetestAnchors, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setSelection", htmlSetSelection, c_gcd, NULL);
+		"setSelection", (Tcl_CmdProc *) htmlSetSelection, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getSelection", htmlGetSelection, c_gcd, NULL);
+		"getSelection", (Tcl_CmdProc *) htmlGetSelection, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"clearSelection", htmlClearSelection, c_gcd, NULL);
+		"clearSelection", (Tcl_CmdProc *) htmlClearSelection, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"searchText", htmlSearchText, c_gcd, NULL);
+		"searchText", (Tcl_CmdProc *) htmlSearchText, c_gcd, NULL);
 	}
 }
 

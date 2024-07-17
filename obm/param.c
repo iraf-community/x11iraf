@@ -112,15 +112,15 @@ ParameterClassInit (ObmContext obm, ObjClassRec classrec)
 
 	/* Register parameter-object actions.  */
 	Tcl_CreateCommand (tcl, "setValue",
-	    parameterSetValue, (ClientData)msg, NULL);
+	    (Tcl_CmdProc *) parameterSetValue, (ClientData)msg, NULL);
 	Tcl_CreateCommand (tcl, "getValue",
-	    parameterGetValue, (ClientData)msg, NULL);
+	    (Tcl_CmdProc *) parameterGetValue, (ClientData)msg, NULL);
 	Tcl_CreateCommand (tcl, "addCallback",
-	    parameterAddCallback, (ClientData)msg, NULL);
+	    (Tcl_CmdProc *) parameterAddCallback, (ClientData)msg, NULL);
 	Tcl_CreateCommand (tcl, "deleteCallback",
-	    parameterDeleteCallback, (ClientData)msg, NULL);
+	    (Tcl_CmdProc *) parameterDeleteCallback, (ClientData)msg, NULL);
 	Tcl_CreateCommand (tcl, "notify",
-	    parameterNotify, (ClientData)msg, NULL);
+	    (Tcl_CmdProc *) parameterNotify, (ClientData)msg, NULL);
 }
 
 

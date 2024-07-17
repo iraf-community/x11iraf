@@ -310,153 +310,153 @@ GtermClassInit (ObmContext obm, ObjClassRec classrec)
 	    gcd->level = 0;
 
 	    Tcl_CreateCommand (tcl,
-		"activate", gtermActivate, c_gcd, NULL);
+		"activate", (Tcl_CmdProc *) gtermActivate, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"activeMapping", gtermActiveMapping, c_gcd, NULL);
+		"activeMapping", (Tcl_CmdProc *) gtermActiveMapping, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"activeRasters", gtermActiveRasters, c_gcd, NULL);
+		"activeRasters", (Tcl_CmdProc *) gtermActiveRasters, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"addCallback", gtermAddCallback, c_gcd, NULL);
+		"addCallback", (Tcl_CmdProc *) gtermAddCallback, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"deleteCallback", gtermDeleteCallback, c_gcd, NULL);
+		"deleteCallback", (Tcl_CmdProc *) gtermDeleteCallback, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"assignRaster", gtermAssignRaster, c_gcd, NULL);
+		"assignRaster", (Tcl_CmdProc *) gtermAssignRaster, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"bell", gtermBell, c_gcd, NULL);
+		"bell", (Tcl_CmdProc *) gtermBell, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"clearScreen", gtermClearScreen, c_gcd, NULL);
+		"clearScreen", (Tcl_CmdProc *) gtermClearScreen, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"clientPixel", gtermClientPixel, c_gcd, NULL);
+		"clientPixel", (Tcl_CmdProc *) gtermClientPixel, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"copyRaster", gtermCopyRaster, c_gcd, NULL);
+		"copyRaster", (Tcl_CmdProc *) gtermCopyRaster, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"createMarker", gtermCreateMarker, c_gcd, NULL);
+		"createMarker", (Tcl_CmdProc *) gtermCreateMarker, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"createRaster", gtermCreateRaster, c_gcd, NULL);
+		"createRaster", (Tcl_CmdProc *) gtermCreateRaster, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"deactivate", gtermDeactivate, c_gcd, NULL);
+		"deactivate", (Tcl_CmdProc *) gtermDeactivate, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"destroyRaster", gtermDestroyRaster, c_gcd, NULL);
+		"destroyRaster", (Tcl_CmdProc *) gtermDestroyRaster, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"disableMapping", gtermDisableMapping, c_gcd, NULL);
+		"disableMapping", (Tcl_CmdProc *) gtermDisableMapping, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"drawAlphaText", gtermDrawAlphaText, c_gcd, NULL);
+		"drawAlphaText", (Tcl_CmdProc *) gtermDrawAlphaText, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"drawDialogText", gtermDrawDialogText, c_gcd, NULL);
+		"drawDialogText", (Tcl_CmdProc *) gtermDrawDialogText, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"drawMarker", gtermDrawMarker, c_gcd, NULL);
+		"drawMarker", (Tcl_CmdProc *) gtermDrawMarker, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"drawPolygon", gtermDrawPolygon, c_gcd, NULL);
+		"drawPolygon", (Tcl_CmdProc *) gtermDrawPolygon, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"drawPolyline", gtermDrawPolyline, c_gcd, NULL);
+		"drawPolyline", (Tcl_CmdProc *) gtermDrawPolyline, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"drawPolymarker", gtermDrawPolymarker, c_gcd, NULL);
+		"drawPolymarker", (Tcl_CmdProc *) gtermDrawPolymarker, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"enableMapping", gtermEnableMapping, c_gcd, NULL);
+		"enableMapping", (Tcl_CmdProc *) gtermEnableMapping, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"endDialog", gtermEndDialog, c_gcd, NULL);
+		"endDialog", (Tcl_CmdProc *) gtermEndDialog, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"eraseDialog", gtermEraseDialog, c_gcd, NULL);
+		"eraseDialog", (Tcl_CmdProc *) gtermEraseDialog, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"extractPixmap", gtermExtractPixmap, c_gcd, NULL);
+		"extractPixmap", (Tcl_CmdProc *) gtermExtractPixmap, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"flip", gtermFlip, c_gcd, NULL);
+		"flip", (Tcl_CmdProc *) gtermFlip, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"flush", gtermFlush, c_gcd, NULL);
+		"flush", (Tcl_CmdProc *) gtermFlush, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"freeColormap", gtermFreeColormap, c_gcd, NULL);
+		"freeColormap", (Tcl_CmdProc *) gtermFreeColormap, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"freeMapping", gtermFreeMapping, c_gcd, NULL);
+		"freeMapping", (Tcl_CmdProc *) gtermFreeMapping, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"raiseMapping", gtermRaiseMapping, c_gcd, NULL);
+		"raiseMapping", (Tcl_CmdProc *) gtermRaiseMapping, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"lowerMapping", gtermLowerMapping, c_gcd, NULL);
+		"lowerMapping", (Tcl_CmdProc *) gtermLowerMapping, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getAlphaTextSize", gtermGetAlphaTextSize, c_gcd, NULL);
+		"getAlphaTextSize", (Tcl_CmdProc *) gtermGetAlphaTextSize, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getBias", gtermGetBias, c_gcd, NULL);
+		"getBias", (Tcl_CmdProc *) gtermGetBias, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getCursorPos", gtermGetCursorPos, c_gcd, NULL);
+		"getCursorPos", (Tcl_CmdProc *) gtermGetCursorPos, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getDialogTextSize", gtermGetDialogTextSize, c_gcd, NULL);
+		"getDialogTextSize", (Tcl_CmdProc *) gtermGetDialogTextSize, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getLogRes", gtermGetLogRes, c_gcd, NULL);
+		"getLogRes", (Tcl_CmdProc *) gtermGetLogRes, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getMapping", gtermGetMapping, c_gcd, NULL);
+		"getMapping", (Tcl_CmdProc *) gtermGetMapping, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getPhysRes", gtermGetPhysRes, c_gcd, NULL);
+		"getPhysRes", (Tcl_CmdProc *) gtermGetPhysRes, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getPixel", gtermGetPixel, c_gcd, NULL);
+		"getPixel", (Tcl_CmdProc *) gtermGetPixel, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getRaster", gtermGetRaster, c_gcd, NULL);
+		"getRaster", (Tcl_CmdProc *) gtermGetRaster, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"initMappings", gtermInitMappings, c_gcd, NULL);
+		"initMappings", (Tcl_CmdProc *) gtermInitMappings, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"insertPixmap", gtermInsertPixmap, c_gcd, NULL);
+		"insertPixmap", (Tcl_CmdProc *) gtermInsertPixmap, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"loadColormap", gtermLoadColormap, c_gcd, NULL);
+		"loadColormap", (Tcl_CmdProc *) gtermLoadColormap, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"markerInit", gtermMarkerInit, c_gcd, NULL);
+		"markerInit", (Tcl_CmdProc *) gtermMarkerInit, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"nextColormap", gtermNextColormap, c_gcd, NULL);
+		"nextColormap", (Tcl_CmdProc *) gtermNextColormap, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"nextMapping", gtermNextMapping, c_gcd, NULL);
+		"nextMapping", (Tcl_CmdProc *) gtermNextMapping, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"nextRaster", gtermNextRaster, c_gcd, NULL);
+		"nextRaster", (Tcl_CmdProc *) gtermNextRaster, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"queryRaster", gtermQueryRaster, c_gcd, NULL);
+		"queryRaster", (Tcl_CmdProc *) gtermQueryRaster, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"rasterInit", gtermRasterInit, c_gcd, NULL);
+		"rasterInit", (Tcl_CmdProc *) gtermRasterInit, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"readColormap", gtermReadColormap, c_gcd, NULL);
+		"readColormap", (Tcl_CmdProc *) gtermReadColormap, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"readPixels", gtermReadPixels, c_gcd, NULL);
+		"readPixels", (Tcl_CmdProc *) gtermReadPixels, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"refreshMapping", gtermRefreshMapping, c_gcd, NULL);
+		"refreshMapping", (Tcl_CmdProc *) gtermRefreshMapping, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"refreshPixels", gtermRefreshPixels, c_gcd, NULL);
+		"refreshPixels", (Tcl_CmdProc *) gtermRefreshPixels, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"reset", gtermReset, c_gcd, NULL);
+		"reset", (Tcl_CmdProc *) gtermReset, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"selectRaster", gtermSelectRaster, c_gcd, NULL);
+		"selectRaster", (Tcl_CmdProc *) gtermSelectRaster, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setColorIndex", gtermSetColorIndex, c_gcd, NULL);
+		"setColorIndex", (Tcl_CmdProc *) gtermSetColorIndex, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setCursorPos", gtermSetCursorPos, c_gcd, NULL);
+		"setCursorPos", (Tcl_CmdProc *) gtermSetCursorPos, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setCursorType", gtermSetCursorType, c_gcd, NULL);
+		"setCursorType", (Tcl_CmdProc *) gtermSetCursorType, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setDataLevel", gtermSetDataLevel, c_gcd, NULL);
+		"setDataLevel", (Tcl_CmdProc *) gtermSetDataLevel, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setFillType", gtermSetFillType, c_gcd, NULL);
+		"setFillType", (Tcl_CmdProc *) gtermSetFillType, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setGterm", gtermSetGterm, c_gcd, NULL);
+		"setGterm", (Tcl_CmdProc *) gtermSetGterm, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setLineStyle", gtermSetLineStyle, c_gcd, NULL);
+		"setLineStyle", (Tcl_CmdProc *) gtermSetLineStyle, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setLineWidth", gtermSetLineWidth, c_gcd, NULL);
+		"setLineWidth", (Tcl_CmdProc *) gtermSetLineWidth, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setLogRes", gtermSetLogRes, c_gcd, NULL);
+		"setLogRes", (Tcl_CmdProc *) gtermSetLogRes, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setMapping", gtermSetMapping, c_gcd, NULL);
+		"setMapping", (Tcl_CmdProc *) gtermSetMapping, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setPhysRes", gtermSetPhysRes, c_gcd, NULL);
+		"setPhysRes", (Tcl_CmdProc *) gtermSetPhysRes, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setPixel", gtermSetPixel, c_gcd, NULL);
+		"setPixel", (Tcl_CmdProc *) gtermSetPixel, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setPixels", gtermSetPixels, c_gcd, NULL);
+		"setPixels", (Tcl_CmdProc *) gtermSetPixels, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setRaster", gtermSetRaster, c_gcd, NULL);
+		"setRaster", (Tcl_CmdProc *) gtermSetRaster, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setTextRes", gtermSetTextRes, c_gcd, NULL);
+		"setTextRes", (Tcl_CmdProc *) gtermSetTextRes, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"startDialog", gtermStartDialog, c_gcd, NULL);
+		"startDialog", (Tcl_CmdProc *) gtermStartDialog, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"unmapPixel", gtermUnmapPixel, c_gcd, NULL);
+		"unmapPixel", (Tcl_CmdProc *) gtermUnmapPixel, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"writeColormap", gtermWriteColormap, c_gcd, NULL);
+		"writeColormap", (Tcl_CmdProc *) gtermWriteColormap, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"writePixels", gtermWritePixels, c_gcd, NULL);
+		"writePixels", (Tcl_CmdProc *) gtermWritePixels, c_gcd, NULL);
 	}
 }
 

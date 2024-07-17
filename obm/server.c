@@ -180,63 +180,63 @@ ServerCreate (
 
 	/* Register server actions.  */
 	Tcl_CreateCommand (tcl,
-	    "reset-server", serverReset, (ClientData)obj, NULL);
+	    "reset-server", (Tcl_CmdProc *) serverReset, (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "activate", serverActivate, (ClientData)obj, NULL);
+	    "activate", (Tcl_CmdProc *) serverActivate, (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "deactivate", serverDeactivate, (ClientData)obj, NULL);
+	    "deactivate", (Tcl_CmdProc *) serverDeactivate, (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "synchronize", serverSynchronize, (ClientData)obj, NULL);
+	    "synchronize", (Tcl_CmdProc *) serverSynchronize, (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "flush", serverFlush, (ClientData)obj, NULL);
+	    "flush", (Tcl_CmdProc *) serverFlush, (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "postActivateCallback", serverPostActivateCallback,
+	    "postActivateCallback", (Tcl_CmdProc *) serverPostActivateCallback,
 	    (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "postDeactivateCallback", serverPostDeactivateCallback,
+	    "postDeactivateCallback", (Tcl_CmdProc *) serverPostDeactivateCallback,
 	    (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "appInitialize", serverAppInitialize, (ClientData)obj, NULL);
+	    "appInitialize", (Tcl_CmdProc *) serverAppInitialize, (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "appExtend", serverAppExtend, (ClientData)obj, NULL);
+	    "appExtend", (Tcl_CmdProc *) serverAppExtend, (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "createObjects", serverCreateObjects, (ClientData)obj, NULL);
+	    "createObjects", (Tcl_CmdProc *) serverCreateObjects, (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "destroyObject", serverDestroyObject, (ClientData)obj, NULL);
+	    "destroyObject", (Tcl_CmdProc *) serverDestroyObject, (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "queryObject", serverQueryObject, (ClientData)obj, NULL);
+	    "queryObject", (Tcl_CmdProc *) serverQueryObject, (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "send", serverSend, (ClientData)obj, NULL);
+	    "send", (Tcl_CmdProc *) serverSend, (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "print", serverPrint, (ClientData)obj, NULL);
+	    "print", (Tcl_CmdProc *) serverPrint, (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "getResource", serverGetResource, (ClientData)obj, NULL);
+	    "getResource", (Tcl_CmdProc *) serverGetResource, (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "getResources", serverGetResources, (ClientData)obj, NULL);
+	    "getResources", (Tcl_CmdProc *) serverGetResources, (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "postTimedCallback", serverPostTimedCallback,
+	    "postTimedCallback", (Tcl_CmdProc *) serverPostTimedCallback,
 	    (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "deleteTimedCallback", serverDeleteTimedCallback,
+	    "deleteTimedCallback", (Tcl_CmdProc *) serverDeleteTimedCallback,
 	    (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "postWorkProc", serverPostWorkProc, (ClientData)obj, NULL);
+	    "postWorkProc", (Tcl_CmdProc *) serverPostWorkProc, (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "deleteWorkProc", serverDeleteWorkProc, (ClientData)obj, NULL);
+	    "deleteWorkProc", (Tcl_CmdProc *) serverDeleteWorkProc, (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "createBitmap", serverCreateBitmap, (ClientData)obj, NULL);
+	    "createBitmap", (Tcl_CmdProc *) serverCreateBitmap, (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "createPixmap", serverCreatePixmap, (ClientData)obj, NULL);
+	    "createPixmap", (Tcl_CmdProc *) serverCreatePixmap, (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "createXPixmap", serverCreateXPixmap, (ClientData)obj, NULL);
+	    "createXPixmap", (Tcl_CmdProc *) serverCreateXPixmap, (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "createCursor", serverCreateCursor, (ClientData)obj, NULL);
+	    "createCursor", (Tcl_CmdProc *) serverCreateCursor, (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "createMenu", serverCreateMenu, (ClientData)obj, NULL);
+	    "createMenu", (Tcl_CmdProc *) serverCreateMenu, (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "editMenu", serverCreateMenu, (ClientData)obj, NULL);
+	    "editMenu", (Tcl_CmdProc *) serverCreateMenu, (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "destroyMenu", serverDestroyMenu, (ClientData)obj, NULL);
+	    "destroyMenu", (Tcl_CmdProc *) serverDestroyMenu, (ClientData)obj, NULL);
 
 	return ((ObmObject) obj);
 }

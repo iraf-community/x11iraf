@@ -183,51 +183,51 @@ MarkerClassInit (ObmContext obm, ObjClassRec classrec)
 	    msg->level = 0;
 
 	    Tcl_CreateCommand (tcl,
-		"makeCopy", markerMakeCopy, (ClientData)msg, NULL);
+		"makeCopy", (Tcl_CmdProc *) markerMakeCopy, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"addCallback", markerAddCallback, (ClientData)msg, NULL);
+		"addCallback", (Tcl_CmdProc *) markerAddCallback, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"deleteCallback", markerDeleteCallback, (ClientData)msg, NULL);
+		"deleteCallback", (Tcl_CmdProc *) markerDeleteCallback, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"callbackProc", markerCallbackProc, (ClientData)msg, NULL);
+		"callbackProc", (Tcl_CmdProc *) markerCallbackProc, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"notify", markerNotify, (ClientData)msg, NULL);
+		"notify", (Tcl_CmdProc *) markerNotify, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"destroy", markerDestroy, (ClientData)msg, NULL);
+		"destroy", (Tcl_CmdProc *) markerDestroy, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"markpos", markerMarkpos, (ClientData)msg, NULL);
+		"markpos", (Tcl_CmdProc *) markerMarkpos, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"redraw", markerRedraw, (ClientData)msg, NULL);
+		"redraw", (Tcl_CmdProc *) markerRedraw, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"raise", markerRaise, (ClientData)msg, NULL);
+		"raise", (Tcl_CmdProc *) markerRaise, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"lower", markerLower, (ClientData)msg, NULL);
+		"lower", (Tcl_CmdProc *) markerLower, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"move", markerMove, (ClientData)msg, NULL);
+		"move", (Tcl_CmdProc *) markerMove, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"resize", markerResize, (ClientData)msg, NULL);
+		"resize", (Tcl_CmdProc *) markerResize, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"rotate", markerRotate, (ClientData)msg, NULL);
+		"rotate", (Tcl_CmdProc *) markerRotate, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"set", markerSetAttribute, (ClientData)msg, NULL);
+		"set", (Tcl_CmdProc *) markerSetAttribute, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"get", markerGetAttribute, (ClientData)msg, NULL);
+		"get", (Tcl_CmdProc *) markerGetAttribute, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setAttribute", markerSetAttribute, (ClientData)msg, NULL);
+		"setAttribute", (Tcl_CmdProc *) markerSetAttribute, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getAttribute", markerGetAttribute, (ClientData)msg, NULL);
+		"getAttribute", (Tcl_CmdProc *) markerGetAttribute, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setAttributes", markerSetAttributes, (ClientData)msg, NULL);
+		"setAttributes", (Tcl_CmdProc *) markerSetAttributes, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getAttributes", markerGetAttributes, (ClientData)msg, NULL);
+		"getAttributes", (Tcl_CmdProc *) markerGetAttributes, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setVertices", markerSetVertices, (ClientData)msg, NULL);
+		"setVertices", (Tcl_CmdProc *) markerSetVertices, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getVertices", markerGetVertices, (ClientData)msg, NULL);
+		"getVertices", (Tcl_CmdProc *) markerGetVertices, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getRegion", markerGetRegion, (ClientData)msg, NULL);
+		"getRegion", (Tcl_CmdProc *) markerGetRegion, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getRect", markerGetRect, (ClientData)msg, NULL);
+		"getRect", (Tcl_CmdProc *) markerGetRect, (ClientData)msg, NULL);
 	}
 }
 

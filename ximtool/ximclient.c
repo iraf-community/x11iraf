@@ -115,74 +115,74 @@ XimDataPtr xim;
 	    xim_clientExecute, (XtPointer)xc);
 
 	Tcl_CreateCommand (tcl,
-	    "Quit", Quit, (ClientData)xc, NULL);
+	    "Quit", (Tcl_CmdProc *) Quit, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "Reset", Reset, (ClientData)xc, NULL);
+	    "Reset", (Tcl_CmdProc *) Reset, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "initialize", initialize, (ClientData)xc, NULL);
+	    "initialize", (Tcl_CmdProc *) initialize, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "setFrame", setFrame, (ClientData)xc, NULL);
+	    "setFrame", (Tcl_CmdProc *) setFrame, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "getFrame", getFrame, (ClientData)xc, NULL);
+	    "getFrame", (Tcl_CmdProc *) getFrame, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "getRaster", getRaster, (ClientData)xc, NULL);
+	    "getRaster", (Tcl_CmdProc *) getRaster, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "getSource", getSource, (ClientData)xc, NULL);
+	    "getSource", (Tcl_CmdProc *) getSource, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "nextFrame", nextFrame, (ClientData)xc, NULL);
+	    "nextFrame", (Tcl_CmdProc *) nextFrame, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "prevFrame", prevFrame, (ClientData)xc, NULL);
+	    "prevFrame", (Tcl_CmdProc *) prevFrame, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "fitFrame", fitFrame, (ClientData)xc, NULL);
+	    "fitFrame", (Tcl_CmdProc *) fitFrame, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "matchFrames", matchFrames, (ClientData)xc, NULL);
+	    "matchFrames", (Tcl_CmdProc *) matchFrames, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "registerFrames", registerFrames, (ClientData)xc, NULL);
+	    "registerFrames", (Tcl_CmdProc *) registerFrames, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "offsetRegister", registerFrames, (ClientData)xc, NULL);
+	    "offsetRegister", (Tcl_CmdProc *) registerFrames, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "clearFrame", clearFrame, (ClientData)xc, NULL);
+	    "clearFrame", (Tcl_CmdProc *) clearFrame, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "setOption", setOption, (ClientData)xc, NULL);
+	    "setOption", (Tcl_CmdProc *) setOption, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "setColormap", setColormap, (ClientData)xc, NULL);
+	    "setColormap", (Tcl_CmdProc *) setColormap, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "setOffset", setOffset, (ClientData)xc, NULL);
+	    "setOffset", (Tcl_CmdProc *) setOffset, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "windowColormap", windowColormap, (ClientData)xc, NULL);
+	    "windowColormap", (Tcl_CmdProc *) windowColormap, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "updateColormap", updateColormap, (ClientData)xc, NULL);
+	    "updateColormap", (Tcl_CmdProc *) updateColormap, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "zoom", zoom, (ClientData)xc, NULL);
+	    "zoom", (Tcl_CmdProc *) zoom, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "zoomAbs", zoom, (ClientData)xc, NULL);
+	    "zoomAbs", (Tcl_CmdProc *) zoom, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "centroid", centroid, (ClientData)xc, NULL);
+	    "centroid", (Tcl_CmdProc *) centroid, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "getPixels", getPixels, (ClientData)xc, NULL);
+	    "getPixels", (Tcl_CmdProc *) getPixels, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "pan", pan, (ClientData)xc, NULL);
+	    "pan", (Tcl_CmdProc *) pan, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "flip", flip, (ClientData)xc, NULL);
+	    "flip", (Tcl_CmdProc *) flip, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "retCursorVal", retCursorVal, (ClientData)xc, NULL);
+	    "retCursorVal", (Tcl_CmdProc *) retCursorVal, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "encodewcs", encodewcs, (ClientData)xc, NULL);
+	    "encodewcs", (Tcl_CmdProc *) encodewcs, (ClientData)xc, NULL);
 
 	Tcl_CreateCommand (tcl,
-	    "setPrintOption", setPrintOption, (ClientData)xc, NULL);
+	    "setPrintOption", (Tcl_CmdProc *) setPrintOption, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "print", print, (ClientData)xc, NULL);
+	    "print", (Tcl_CmdProc *) print, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "setSaveOption", setSaveOption, (ClientData)xc, NULL);
+	    "setSaveOption", (Tcl_CmdProc *) setSaveOption, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "save", save, (ClientData)xc, NULL);
+	    "save", (Tcl_CmdProc *) save, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "setLoadOption", setLoadOption, (ClientData)xc, NULL);
+	    "setLoadOption", (Tcl_CmdProc *) setLoadOption, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "load", load, (ClientData)xc, NULL);
+	    "load", (Tcl_CmdProc *) load, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "help", help, (ClientData)xc, NULL);
+	    "help", (Tcl_CmdProc *) help, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
 	    "info", info, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
@@ -190,11 +190,11 @@ XimDataPtr xim;
 
 	/* ISM module callbacks. */
         Tcl_CreateCommand (tcl,
-            "ism_start", ism_start, (ClientData)xc, NULL);
+            "ism_start", (Tcl_CmdProc *) ism_start, (ClientData)xc, NULL);
         Tcl_CreateCommand (tcl,
-            "ism_stop", ism_stop, (ClientData)xc, NULL);
+            "ism_stop", (Tcl_CmdProc *) ism_stop, (ClientData)xc, NULL);
         Tcl_CreateCommand (tcl,
-            "ism_cmd", ism_cmd, (ClientData)xc, NULL);
+            "ism_cmd", (Tcl_CmdProc *) ism_cmd, (ClientData)xc, NULL);
 
 	Tcl_Preserve(tcl);
 }
