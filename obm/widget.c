@@ -563,54 +563,54 @@ WidgetCreate (
 	    obmClass (classrec, WtToggle) ||
 	    obmClass (classrec, WtArrow)) {
 
-	    XtAddCallback (w, XtNcallback, widgetCallback, obj);
+	  XtAddCallback (w, XtNcallback, (XtCallbackProc) widgetCallback, obj);
 
 	} else if (obmClass (classrec, WtListTree)) {
-	    XtAddCallback (w, XtNhighlightCallback, widgetLTHCallback, obj);
-	    XtAddCallback (w, XtNactivateCallback, widgetLTACallback, obj);
+	    XtAddCallback (w, XtNhighlightCallback, (XtCallbackProc) widgetLTHCallback, obj);
+	    XtAddCallback (w, XtNactivateCallback, (XtCallbackProc) widgetLTACallback, obj);
 
 	} else if (obmClass (classrec, WtRepeater)) {
-	    XtAddCallback (w, XtNcallback, widgetCallback, obj);
-	    XtAddCallback (w, XtNstartCallback, widgetSBCallback, obj);
-	    XtAddCallback (w, XtNstopCallback, widgetSECallback, obj);
+	    XtAddCallback (w, XtNcallback, (XtCallbackProc) widgetCallback, obj);
+	    XtAddCallback (w, XtNstartCallback, (XtCallbackProc) widgetSBCallback, obj);
+	    XtAddCallback (w, XtNstopCallback, (XtCallbackProc) widgetSECallback, obj);
 
 	} else if (obmClass (classrec, WtStripChart)) {
-	    XtAddCallback (w, XtNgetValue, widgetSCCallback, obj);
+	    XtAddCallback (w, XtNgetValue, (XtCallbackProc) widgetSCCallback, obj);
 
 	} else if (obmClass (classrec, WtScrollbar)) {
-	    XtAddCallback (w, XtNjumpProc, widgetJPCallback, obj);
-	    XtAddCallback (w, XtNscrollProc, widgetSPCallback, obj);
+	    XtAddCallback (w, XtNjumpProc, (XtCallbackProc) widgetJPCallback, obj);
+	    XtAddCallback (w, XtNscrollProc, (XtCallbackProc) widgetSPCallback, obj);
 
 	} else if (obmClass (classrec, WtShell) ||
 		   obmClass (classrec, WtSimpleMenu)) {
 
-	    XtAddCallback (w, XtNpopupCallback, widgetPUCallback, obj);
-	    XtAddCallback (w, XtNpopdownCallback, widgetPDCallback, obj);
+	    XtAddCallback (w, XtNpopupCallback, (XtCallbackProc) widgetPUCallback, obj);
+	    XtAddCallback (w, XtNpopdownCallback, (XtCallbackProc) widgetPDCallback, obj);
 
 	} else if (obmClass (classrec, WtPanner) ||
 		   obmClass (classrec, WtPorthole) ||
 		   obmClass (classrec, WtViewport)) {
 
-	    XtAddCallback (w, XtNreportCallback, widgetRPCallback, obj);
+	    XtAddCallback (w, XtNreportCallback, (XtCallbackProc) widgetRPCallback, obj);
 
 	} else if (obmClass (classrec, WtTextButton) ||
 		   obmClass (classrec, WtIcon)) {
-	    XtAddCallback (w, XtNactivate, widgetCallback, obj);
+	    XtAddCallback (w, XtNactivate, (XtCallbackProc) widgetCallback, obj);
 
 	} else if (obmClass (classrec, WtGroup) ||
 		   obmClass (classrec, WtRadioGroup)) {
-	    XtAddCallback (w, XtNactivate, widgetRGCallback, obj);
+	    XtAddCallback (w, XtNactivate, (XtCallbackProc) widgetRGCallback, obj);
 
 	} else if (obmClass (classrec, WtTextToggle)) {
-	    XtAddCallback (w, XtNonCallback, widgetCallback, obj);
-	    XtAddCallback (w, XtNoffCallback, widgetCallback, obj);
+	    XtAddCallback (w, XtNonCallback, (XtCallbackProc) widgetCallback, obj);
+	    XtAddCallback (w, XtNoffCallback, (XtCallbackProc) widgetCallback, obj);
 
 	} else if (obmClass (classrec, WtSlider2d) ||
 		   obmClass (classrec, WtScrollbar2)) {
 
 	    XtVaGetValues (w, "scrollResponse", &obj->widget.response_cb, NULL);
-	    XtAddCallback (w, XtNscrollCallback, widgetJPCallback, obj);
-	    XtAddCallback (w, XtNscrollCallback, widgetSPCallback, obj);
+	    XtAddCallback (w, XtNscrollCallback, (XtCallbackProc) widgetJPCallback, obj);
+	    XtAddCallback (w, XtNscrollCallback, (XtCallbackProc) widgetSPCallback, obj);
 	}
 
 	obj->widget.w = w;
@@ -861,7 +861,7 @@ widgetAddCallback (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 		XtOverrideTranslations (wp->w, translations);
 	    } else {
 		XtAddCallback (XawTextGetSource(wp->w), XtNcallback,
-		    widgetCallback, obj);
+		    (XtCallbackProc) widgetCallback, obj);
 	    }
 
 	/* Create callback record. */

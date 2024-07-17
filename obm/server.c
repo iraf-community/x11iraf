@@ -2281,8 +2281,8 @@ createMenu (
 	mp->menuShell = menu = widgetGetPointer (mp->obj);
 	mp->obm = (XtPointer) obm;
 
-	XtAddCallback (menu, XtNpopupCallback, menu_popup, (XtPointer)mp);
-	XtAddCallback (menu, XtNpopdownCallback, menu_popdown, (XtPointer)mp);
+	XtAddCallback (menu, XtNpopupCallback, (XtCallbackProc) menu_popup, (XtPointer)mp);
+	XtAddCallback (menu, XtNpopdownCallback, (XtCallbackProc) menu_popdown, (XtPointer)mp);
 
 	ip = &mp->items[0];
 	itemno = menuno = lineno = spaceno = 1;
@@ -2297,7 +2297,7 @@ createMenu (
 		sprintf (name, "item%d", itemno++);
 		obmNewObject (obm, name, "SmeBSB", menu_name, NULL, 0);
 		entry = XtNameToWidget (menu, name);
-		XtAddCallback (entry, XtNcallback, menuSelect, (XtPointer)mp);
+		XtAddCallback (entry, XtNcallback, (XtCallbackProc) menuSelect, (XtPointer)mp);
 		break;
 
 	    case MI_LINE:
@@ -2321,10 +2321,10 @@ createMenu (
 		sprintf (name, "menu%d", menuno++);
 		obmNewObject (obm, name, "SmeBSB", menu_name, NULL, 0);
 		entry = XtNameToWidget (menu, name);
-		XtAddCallback (entry, XtNcallback, menuSelect, (XtPointer)mp);
+		XtAddCallback (entry, XtNcallback, (XtCallbackProc) menuSelect, (XtPointer)mp);
 
 		menu_addEntry (entry, menu_name, ip->data, obm);
-		XtAddCallback (entry, XtNdestroyCallback, menu_delEntry,
+		XtAddCallback (entry, XtNdestroyCallback, (XtCallbackProc) menu_delEntry,
 		    (XtPointer)NULL);
 		break;
 

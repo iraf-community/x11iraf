@@ -365,8 +365,8 @@ WidgetClass class;
     xfwfRowColClassRec.composite_class.insert_child(child);
     if (((XfwfGroupWidget)self)->xfwfGroup.selectionStyle != XfwfNoSelection
 	&& XtIsSubclass(child, xfwfToggleWidgetClass)) {
-	XtAddCallback(child, XtNonCallback, on_cb, (XtPointer) ((XfwfGroupWidget)self)->xfwfGroup.toggle_ord);
-	XtAddCallback(child, XtNoffCallback, off_cb, (XtPointer) ((XfwfGroupWidget)self)->xfwfGroup.toggle_ord);
+	XtAddCallback(child, XtNonCallback, (XtCallbackProc) on_cb, (XtPointer) ((XfwfGroupWidget)self)->xfwfGroup.toggle_ord);
+	XtAddCallback(child, XtNoffCallback, (XtCallbackProc) off_cb, (XtPointer) ((XfwfGroupWidget)self)->xfwfGroup.toggle_ord);
 	switch (((XfwfGroupWidget)self)->xfwfGroup.selectionStyle) {
 	case XfwfOneSelection:
 	case XfwfSingleSelection:
