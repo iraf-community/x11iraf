@@ -1127,7 +1127,7 @@ widgetLTHCallback (Widget w, WidgetObject obj, caddr_t call_data)
 	sprintf (message, "{%s %d} ",
 	    list->items[0]->text, list->items[0]->open);
 
-	strncat (message, "{ ", 2);
+	strcat (message, "{ ");
 	for (i=0; i < list->count; i++) {
 	    item = list->items[i];
 	    sprintf (buf, "{ %s } ", item->text);
@@ -1138,7 +1138,7 @@ widgetLTHCallback (Widget w, WidgetObject obj, caddr_t call_data)
 		strcat (message, buf);
 	    }
 	}
-	strncat (message, "}", 1);
+	strcat (message, "}");
 
 	call_callbacks (obj, Ctcallback, message);
 }
@@ -1162,7 +1162,7 @@ widgetLTACallback (Widget w, WidgetObject obj, caddr_t call_data)
 	 */
 	sprintf (message, "{%s %d} ", ret->item->text, ret->item->open);
 
-	strncat (message, "{ ", 2);
+	strcat (message, "{ ");
 	item = ret->item;
 	sprintf (buf, "{ %s } ", item->text);
 	strcat (message, buf);
@@ -1171,7 +1171,7 @@ widgetLTACallback (Widget w, WidgetObject obj, caddr_t call_data)
 	    sprintf (buf, "{ %s } ", item->text);
 	    strcat (message, buf);
         }
-	strncat (message, "}", 1);
+	strcat (message, "}");
 
 	call_callbacks (obj, Ctcallback, message);
 }
@@ -2969,7 +2969,7 @@ widgetListTreeSelect (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	     */
 	    sprintf (message, "{%s %d} ", item->text, item->open);
 
-	    strncat (message, "{ ", 2);
+	    strcat (message, "{ ");
 	    sprintf (buf, "{ %s } ", item->text);
 	    strcat (message, buf);
 	    while (item->parent) {
@@ -2978,7 +2978,7 @@ widgetListTreeSelect (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	        strcat (message, buf);
             }
 
-	    strncat (message, "}", 1);
+	    strcat (message, "}");
 
 	}
 
@@ -3053,7 +3053,7 @@ widgetListTreeHighlight (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	 */
 	sprintf (message, "{%s %d} ", item->text, item->open);
 
-	strncat (message, "{ ", 2);
+	strcat (message, "{ ");
 	sprintf (buf, "{ %s } ", item->text);
 	strcat (message, buf);
 	while (item->parent) {
@@ -3061,7 +3061,7 @@ widgetListTreeHighlight (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	    sprintf (buf, "{ %s } ", item->text);
 	    strcat (message, buf);
         }
-	strncat (message, "}", 1);
+	strcat (message, "}");
 
 	/* Call all the callbacks with the message. */
 	call_callbacks (obj, Ctcallback, message);
