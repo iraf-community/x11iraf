@@ -439,7 +439,7 @@ ObmGetInterp (ObmContext obm)
 /* ObmDeliverMsg -- Deliver a message to a UI object.
  */
 int
-ObmDeliverMsg (ObmContext obm, char *object, char *message)
+ObmDeliverMsg (ObmContext obm, const char *object, const char *message)
 {
 	ObmEvaluateFunc evaluate;
 	ObmObject obj;
@@ -555,10 +555,11 @@ ObmRemoveCallback (ObmContext obm, ObmCallback callback)
  * may be given to specify which object to use.
  */
 ObmObject
-obmFindObject (ObmContext obm, char *object)
+obmFindObject (ObmContext obm, const char *object)
 {
 	int hashval, n;
-	char *ip, *op;
+	const char *ip;
+	char *op;
 	ObmObject objlist1[MAXOBJ], objlist2[MAXOBJ];
 	ObmObject obj, *otemp, *objs, *pobjs;
 	char name[SZ_NAME];
@@ -660,13 +661,13 @@ obm_nameToObjectList (
 void
 obmNewObject (
   ObmContext obm,
-  char *name,			/* name of new object */
-  char *class,			/* name of class to which object belongs */
-  char *parent,			/* name of parent widget, for widget objects */
+  const char *name,		/* name of new object */
+  const char *class,		/* name of class to which object belongs */
+  const char *parent,		/* name of parent widget, for widget objects */
   ArgList args,			/* optional argument list */
   int nargs)			/* optional argument list */
 {
-	char *ip;
+	const char *ip;
 	int hashval, n;
 	ObmObject newobj, obj, pobj;
 	ObjClassRec classrec;

@@ -38,10 +38,11 @@ struct msgContext {
 };
 typedef struct msgContext *MsgContext;
 
-extern	int WidgetEvaluate(ObmObject, char *);
+extern	int WidgetEvaluate(ObmObject, const char *);
 extern	void WidgetDestroy(ObmObject);
 extern	void WidgetClassDestroy(ObmContext, ObjClassRec);
-extern	ObmObject WidgetCreate(ObmContext, char *, ObjClassRec, char *, ArgList, int);
+extern	ObmObject WidgetCreate(ObmContext, const char *, ObjClassRec,
+			       const char *, ArgList, int);
 extern	WidgetObject widgetToObject(ObmContext, Widget);
 extern	int coordType(char *);
 extern	char *widgetEventState(char *, unsigned int);

@@ -128,8 +128,9 @@ typedef	struct obmContext *ObmContext;
 typedef struct objClassRec *ObjClassRec;
 
 typedef	int (*ObmFunc)();
-typedef	int (*ObmEvaluateFunc)(ObmObject, char *);
-typedef	ObmObject (*ObmCreateFunc)(ObmContext, char *, ObjClassRec, char *, ArgList, int);
+typedef	int (*ObmEvaluateFunc)(ObmObject, const char *);
+typedef	ObmObject (*ObmCreateFunc)(ObmContext, const char *, ObjClassRec,
+				   const char *, ArgList, int);
 typedef	void (*ObmMethod)(ObmContext, ObjClassRec);
 typedef void (*ObmDestroyFunc)(ObmObject);
 

@@ -51,11 +51,12 @@ struct clientObject  {
 typedef	struct clientObject *ClientObject;
 
 static	void ClientDestroy(ObmObject);
-static	int ClientEvaluate(ObmObject, char *);
-static	ObmObject ClientCreate(ObmContext, char *, ObjClassRec, char *, ArgList, int);
-static	int clientGcmd(ObmObject, Tcl_Interp *, int, char **);
+static	int ClientEvaluate(ObmObject, const char *);
+static	ObmObject ClientCreate(ObmContext, const char *, ObjClassRec,
+			       const char *, ArgList, int);
+static	int clientGcmd(ObmObject, Tcl_Interp *, int, const char **);
 static	int clientGkey(ObmObject, Tcl_Interp *, int, char **);
-static	int clientLiteral(ObmObject, Tcl_Interp *, int, char **);
+static	int clientLiteral(ObmObject, Tcl_Interp *, int, const char **);
 static	int client_output(ObmContext, char *, int, char *);
 
 
@@ -76,9 +77,9 @@ ClientClassInit (ObmContext obm, ObjClassRec classrec)
 static ObmObject
 ClientCreate (
   ObmContext obm,
-  char *name,
+  const char *name,
   ObjClassRec classrec,
-  char *parent,
+  const char *parent,
   ArgList args,
   int nargs)
 {
@@ -116,18 +117,18 @@ ClientDestroy (ObmObject object)
 /* ClientEvaluate -- Evaluate a client command or message.
  */
 static int
-ClientEvaluate (ObmObject object, char *command)
+ClientEvaluate (ObmObject object, const char *command)
 {
 	ClientObject obj = (ClientObject) object;
 	Tcl_Interp *tcl = obj->client.tcl;
 	int status, argc, i;
-	char *argv[MAX_ARGS];
-	char **argvp;
+	const char *argv[MAX_ARGS];
+	const char **argvp;
 
 	if (!obmClientCommand (tcl, command))
 	    goto literal;
 
-	/* If the command is unrecognized pass it on to the client as a
+	/* If the command is unrecognized pass it on to the client as a^
 	 * literal to be processed by the client.
 	 */
 	if ((status = Tcl_Eval (tcl, command)) != TCL_OK) {
@@ -156,7 +157,7 @@ literal:    if (Tcl_SplitList (tcl, command, &argc, &argvp) == TCL_OK) {
  *  Usage:	gcmd <command-string>
  */
 static int 
-clientGcmd (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
+clientGcmd (ObmObject object, Tcl_Interp *tcl, int argc, const char **argv)
 {
 	ClientObject obj = (ClientObject) object;
 	ObmContext obm = obj->client.obm;
@@ -200,7 +201,7 @@ clientGkey (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
  *  Usage:	literal <command>
  */
 static int 
-clientLiteral (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
+clientLiteral (ObmObject object, Tcl_Interp *tcl, int argc, const char **argv)
 {
 	ClientObject obj = (ClientObject) object;
 	ObmContext obm = obj->client.obm;

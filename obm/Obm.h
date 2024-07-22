@@ -22,11 +22,11 @@ void ObmDeactivate (ObmContext, Boolean);
 int ObmActivated (ObmContext);
 int ObmStatus (ObmContext, char *, char *);
 XtPointer ObmGetInterp (ObmContext);
-int ObmDeliverMsg (ObmContext, char *, char *);
+int ObmDeliverMsg (ObmContext, const char *, const char *);
 int ObmDeliverMsgFromFile (ObmContext, char *, char *);
 void ObmAddCallback (ObmContext, int, ObmFunc, XtPointer);
 void ObmRemoveCallback (ObmContext, ObmCallback);
-void obmNewObject(ObmContext, char *, char *, char *, ArgList, int);
+void obmNewObject(ObmContext, const char *, const char *, const char *, ArgList, int);
 
 
 /* Callback type flags. */

@@ -126,8 +126,9 @@ typedef struct {
 
 static void MarkerDestroy(ObmObject);
 static void MarkerClassDestroy(ObmContext, ObjClassRec);
-static ObmObject MarkerCreate(ObmContext, char *, ObjClassRec, char *, ArgList, int);
-static int MarkerEvaluate(ObmObject, char *);
+static ObmObject MarkerCreate(ObmContext, const char *, ObjClassRec,
+			      const char *, ArgList, int);
+static int MarkerEvaluate(ObmObject, const char *);
 static int markerDestroyCallback(MarkerObject, XtPointer, int, XEvent *, String *, Cardinal);
 static int markerFocusCallback(MarkerObject, XtPointer, int, XEvent *, String *, Cardinal);
 
@@ -146,8 +147,8 @@ static	int markerResize(MsgContext, Tcl_Interp *, int, char **);
 static	int markerRotate(MsgContext, Tcl_Interp *, int, char **);
 static	int markerGetAttribute(MsgContext, Tcl_Interp *, int, char **);
 static	int markerSetAttribute(MsgContext, Tcl_Interp *, int, char **);
-static	int markerGetAttributes(MsgContext, Tcl_Interp *, int, char **);
-static	int markerSetAttributes(MsgContext, Tcl_Interp *, int, char **);
+static	int markerGetAttributes(MsgContext, Tcl_Interp *, int, const char **);
+static	int markerSetAttributes(MsgContext, Tcl_Interp *, int, const char **);
 static	int markerGetVertices(MsgContext, Tcl_Interp *, int, char **);
 static	int markerSetVertices(MsgContext, Tcl_Interp *, int, char **);
 static	int markerGetRegion(MsgContext, Tcl_Interp *, int, char **);
@@ -253,9 +254,9 @@ MarkerClassDestroy (ObmContext obm, ObjClassRec classrec)
 static ObmObject
 MarkerCreate (
   ObmContext obm,
-  char *name,
+  const char *name,
   ObjClassRec classrec,
-  char *parent,
+  const char *parent,
   ArgList args,
   int nargs)
 {
@@ -379,7 +380,7 @@ MarkerDestroy (ObmObject object)
 /* MarkerEvaluate -- Evaluate a marker command or message.
  */
 static int
-MarkerEvaluate (ObmObject object, char *command)
+MarkerEvaluate (ObmObject object, const char *command)
 {
 	MarkerObject obj = (MarkerObject) object;
 	MsgContext msg = (MsgContext) obj->core.classrec->class_data;
@@ -401,7 +402,8 @@ MarkerEvaluate (ObmObject object, char *command)
 	    status = Tcl_Eval (msg->tcl, command);
 	    if (status == TCL_ERROR) {
 		if (*Tcl_GetStringResult (msg->tcl))
-		    Tcl_SetResult (obm->tcl, Tcl_GetStringResult (msg->tcl), TCL_VOLATILE);
+		    Tcl_SetResult (obm->tcl, (char *) Tcl_GetStringResult (msg->tcl),
+				   TCL_VOLATILE);
 		else {
 		    /* Supply a default error message if none was returned. */
 		    Tcl_SetResult (obm->tcl, "evaluation error", TCL_VOLATILE);
@@ -409,7 +411,8 @@ MarkerEvaluate (ObmObject object, char *command)
 		Tcl_SetErrorLine (obm->tcl, Tcl_GetErrorLine (msg->tcl));
 
 	    } else if (*Tcl_GetStringResult (msg->tcl))
-		Tcl_SetResult (obm->tcl, Tcl_GetStringResult (msg->tcl), TCL_VOLATILE);
+	        Tcl_SetResult (obm->tcl, (char *) Tcl_GetStringResult (msg->tcl),
+			       TCL_VOLATILE);
 	}
 
 	msg->level--;
@@ -1181,14 +1184,15 @@ markerSetAttribute (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
  * is to be stored.
  */
 static int
-markerGetAttributes (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
+markerGetAttributes (MsgContext msg, Tcl_Interp *tcl, int argc, const char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
 	MarkerPrivate mp = &obj->marker;
 	ObmContext obm = mp->obm;
-	char *name, *variable, value[SZ_COMMAND];
+	const char *name, *variable;
+	char value[SZ_COMMAND];
 	int i, status = 0;
-	char **items;
+	const char **items;
 	int nitems;
 
 	if (argc < 2)
@@ -1201,7 +1205,7 @@ markerGetAttributes (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	} else if (argc > 2) {
 	    /* Attribute list passed as separate arguments. */
 	    nitems = argc - 1;
-	    items = (char **) Tcl_Alloc (nitems * sizeof(char *));
+	    items = (const char **) Tcl_Alloc (nitems * sizeof(char *));
 	    if (items == NULL)
 		return (TCL_ERROR);
 	    for (i=0;  i < nitems;  i++)
@@ -1233,15 +1237,15 @@ markerGetAttributes (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
  * where "value" is the new value of the associated marker attribute.
  */
 static int
-markerSetAttributes (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
+markerSetAttributes (MsgContext msg, Tcl_Interp *tcl, int argc, const char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
 	MarkerPrivate mp = &obj->marker;
 	ObmContext obm = mp->obm;
-	char *name, *value;
+	const char *name, *value;
 	Arg args[MAX_ARGS];
 	int status, argno, i;
-	char **items;
+	const char **items;
 	int nitems;
 
 	if (argc < 2)
@@ -1254,7 +1258,7 @@ markerSetAttributes (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	} else if (argc > 2) {
 	    /* Attribute list passed as separate arguments. */
 	    nitems = argc - 1;
-	    items = (char **) Tcl_Alloc (nitems * sizeof(char *));
+	    items = (const char **) Tcl_Alloc (nitems * sizeof(char *));
 	    if (items == NULL)
 		return (TCL_ERROR);
 	    for (i=0;  i < nitems;  i++)

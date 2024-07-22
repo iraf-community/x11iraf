@@ -77,8 +77,9 @@ struct msgContext {
 typedef struct msgContext *MsgContext;
 
 static	void ParameterDestroy(ObmObject);
-static	int ParameterEvaluate(ObmObject, char *);
-static	ObmObject ParameterCreate(ObmContext, char *, ObjClassRec, char *, ArgList, int);
+static	int ParameterEvaluate(ObmObject, const char *);
+static	ObmObject ParameterCreate(ObmContext, const char *, ObjClassRec,
+				  const char *, ArgList, int);
 static	void ParameterClassDestroy(ObmContext, ObjClassRec);
 static	int parameterSetValue(MsgContext, Tcl_Interp *, int, char **);
 static	int parameterGetValue(MsgContext, Tcl_Interp *, int, char **);
@@ -146,9 +147,9 @@ ParameterClassDestroy (ObmContext obm, ObjClassRec classrec)
 static ObmObject
 ParameterCreate (
   ObmContext obm,
-  char *name,
+  const char *name,
   ObjClassRec classrec,
-  char *parent,
+  const char *parent,
   ArgList args,
   int nargs)
 {
@@ -184,7 +185,7 @@ ParameterDestroy (ObmObject object)
 /* ParameterEvaluate -- Evaluate a parameter command or message.
  */
 static int
-ParameterEvaluate (ObmObject object, char *command)
+ParameterEvaluate (ObmObject object, const char *command)
 {
 	ParameterObject obj = (ParameterObject) object;
 	MsgContext msg = (MsgContext) obj->core.classrec->class_data;
@@ -206,7 +207,8 @@ ParameterEvaluate (ObmObject object, char *command)
 	    status = Tcl_Eval (msg->tcl, command);
 	    if (status == TCL_ERROR) {
 		if (*Tcl_GetStringResult (msg->tcl))
-		    Tcl_SetResult (obm->tcl, Tcl_GetStringResult (msg->tcl), TCL_VOLATILE);
+		  Tcl_SetResult (obm->tcl, (char *) Tcl_GetStringResult (msg->tcl),
+				 TCL_VOLATILE);
 		else {
 		    /* Supply a default error message if none was returned. */
 		    Tcl_SetResult (obm->tcl, "evaluation error", TCL_VOLATILE);
@@ -214,7 +216,8 @@ ParameterEvaluate (ObmObject object, char *command)
 		Tcl_SetErrorLine (obm->tcl, Tcl_GetErrorLine (msg->tcl));
 
 	    } else if (*Tcl_GetStringResult (msg->tcl))
-		Tcl_SetResult (obm->tcl, Tcl_GetStringResult (msg->tcl), TCL_VOLATILE);
+	      Tcl_SetResult (obm->tcl, (char *) Tcl_GetStringResult (msg->tcl),
+			     TCL_VOLATILE);
 	}
 
 	msg->level--;

@@ -86,17 +86,18 @@ struct serverObject {
 
 typedef	struct serverObject *ServerObject;
 
-static	ObmObject ServerCreate(ObmContext, char *, ObjClassRec, char *, ArgList, int);
+static	ObmObject ServerCreate(ObmContext, const char *, ObjClassRec,
+			       const char *, ArgList, int);
 static	void ServerDestroy(ObmObject);
-static	int ServerEvaluate(ObmObject, char *);
+static	int ServerEvaluate(ObmObject, const char *);
 static	int serverQueryObject(ObmObject, Tcl_Interp *, int, char **);
-static	int serverCreateMenu(ObmObject, Tcl_Interp *, int, char **);
+static	int serverCreateMenu(ObmObject, Tcl_Interp *, int, const char **);
 static	int serverDestroyMenu(ObmObject, Tcl_Interp *, int, char **);
 static	int serverAppInitialize(ObmObject, Tcl_Interp *, int, char **);
 static	int serverAppExtend(ObmObject, Tcl_Interp *, int, char **);
 static	int serverCreateObjects(ObmObject, Tcl_Interp *, int, char **);
-static	int serverSend(ObmObject, Tcl_Interp *, int, char **);
-static	int serverPrint(ObmObject, Tcl_Interp *, int, char **);
+static	int serverSend(ObmObject, Tcl_Interp *, int, const char **);
+static	int serverPrint(ObmObject, Tcl_Interp *, int, const char **);
 static	int serverDestroyObject(ObmObject, Tcl_Interp *, int, char **);
 static	int serverReset(ObmObject, Tcl_Interp *, int, char **);
 static	int serverActivate(ObmObject, Tcl_Interp *, int, char **);
@@ -124,11 +125,11 @@ static	int editMenu(MenuPtr, MenuPtr);
 static	void menu_popup(Widget, XtPointer, XtPointer);
 static	void menu_popdown(Widget, XtPointer, XtPointer);
 static	void menu_popdown_msgHandler(String, String, String, String, String*, Cardinal*);
-static	void createMenu(ObmContext, MenuPtr, char *, char *, Widget);
+static	void createMenu(ObmContext, MenuPtr, const char *, const char *, Widget);
 static	void menuSelect(Widget, XtPointer, XtPointer);
 static	void build_colorlist(Widget, XpmColorSymbol *, Cardinal, Cardinal *);
 static	void menu_classInit(void);
-static	void menu_addEntry(Widget, char *, char *, ObmContext);
+static	void menu_addEntry(Widget, const char *, const char *, ObmContext);
 static	void menu_delEntry(Widget);
 static	void menu_highlight(Widget);
 static	void menu_unhighlight(Widget);
@@ -165,9 +166,9 @@ ServerClassInit (ObmContext obm, ObjClassRec classrec)
 static ObmObject
 ServerCreate (
   ObmContext obm,
-  char *name,
+  const char *name,
   ObjClassRec classrec,
-  char *parent,
+  const char *parent,
   ArgList args,
   int nargs)
 {
@@ -283,12 +284,12 @@ ServerDestroy (ObmObject object)
 /* ServerEvaluate -- Evaluate a server command or message.
  */
 static int
-ServerEvaluate (ObmObject object, char *command)
+ServerEvaluate (ObmObject object, const char *command)
 {
 	ServerObject obj = (ServerObject) object;
 	ObmContext obm = obj->server.obm;
 	static char reset[] = "reset-server";
-	char *ip;
+	const char *ip;
 
 	/* The command "reset-server" is a special case.  This destroys the
 	 * current user interface including all objects and widgets.  One
@@ -787,7 +788,7 @@ serverPostDeactivateCallback (ObmObject object, Tcl_Interp *tcl, int argc, char 
  *  Usage:	send <object> <message>
  */
 static int 
-serverSend (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
+serverSend (ObmObject object, Tcl_Interp *tcl, int argc, const char **argv)
 {
 	ServerObject obj = (ServerObject) object;
 	ObmContext obm = obj->server.obm;
@@ -814,7 +815,7 @@ serverSend (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
  *  Usage:	print arg [arg ...]
  */
 static int 
-serverPrint (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
+serverPrint (ObmObject object, Tcl_Interp *tcl, int argc, const char **argv)
 {
 	ServerObject obj = (ServerObject) object;
 	ObmContext obm = obj->server.obm;
@@ -931,9 +932,9 @@ serverGetResources (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 	ObmContext obm = obj->server.obm;
 	XtResource *r;
         XtResource resources[MAX_RESOURCES];
-	char *resource_name, *class_name, *default_value;
-	char *resource_list, *variable;
-	char **items, **fields;
+	const char *resource_name, *class_name, *default_value;
+	const char *resource_list, *variable;
+	const char **items, **fields;
 	int nitems, nfields;
 	char buf[SZ_NUMBER];
 	int item, i;
@@ -975,15 +976,15 @@ err:		sprintf (buf, "bad item '%d' in resource list", item + 1);
 	    default_value = (nfields > 3) ? fields[3] : "";
 
 	    r = &resources[item];
-	    r->resource_name   = resource_name;
-	    r->resource_class  = class_name;
+	    r->resource_name   = (char *) resource_name;
+	    r->resource_class  = (char *) class_name;
 	    r->resource_type   = XtRString;
 	    r->resource_size   = sizeof (char *);
 	    r->resource_offset = (unsigned int) &(((Value *)NULL)[item].value);
 	    r->default_type    = XtRString;
 	    r->default_addr    = (caddr_t) default_value;
 
-	    values[item].variable = variable;
+	    values[item].variable = (char *) variable;
 	    values[item].item_list = (char *) fields;
 	}
 
@@ -1383,7 +1384,7 @@ serverCreateBitmap (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
  * cache.
  */
 Pixmap
-findBitmap (ObmContext obm, char *name)
+findBitmap (ObmContext obm, const char *name)
 {
 	return (findPixmap (obm, name));
 }
@@ -1765,7 +1766,7 @@ build_colorlist (Widget w, XpmColorSymbol *table, Cardinal size, Cardinal *n)
 /* findPixmap -- Search the pixmap cache for the named pixmap.
  */
 Pixmap
-findPixmap (ObmContext obm, char *name)
+findPixmap (ObmContext obm, const char *name)
 {
 	ObjList lp;
 
@@ -1995,16 +1996,16 @@ findCursor (ObmContext obm, char *name)
  * detailed changes to the widgets used to implement the menu.
  */
 static int 
-serverCreateMenu (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
+serverCreateMenu (ObmObject object, Tcl_Interp *tcl, int argc, const char **argv)
 {
 	ServerObject obj = (ServerObject) object;
 	ObmContext obm = (ObmContext) obj->server.obm;
 	MenuPtr mp, o_mp;
 	MenuItem ip;
 	ObjList lp, newobj;
-	char *menu_name, *menu_label;
-	char *parent, *item_list;
-	char **items, **fields;
+	const char *menu_name, *menu_label;
+	const char *parent, *item_list;
+	const char **items, **fields;
 	int nitems, nfields;
 	int field, item;
 	ObmObject pobj;
@@ -2065,7 +2066,7 @@ serverCreateMenu (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 		const char *cp = fields[field++];
 
 		if (Tcl_ExprString (tcl, cp) != TCL_OK)
-		    ip->label = cp;
+		  ip->label = (char *) cp;
 		else {
 		    ip->label = XtMalloc (strlen(Tcl_GetStringResult (tcl)) + 1);
 		    strcpy (ip->label, Tcl_GetStringResult (tcl));
@@ -2076,7 +2077,7 @@ serverCreateMenu (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 	    /* Determine menu item type. */
 	    if (strcmp (fields[field], "f.exec") == 0) {
 		ip->type = MI_EXEC;
-		ip->data = fields[++field];
+		ip->data = (char *) fields[++field];
 	    } else if (strcmp (fields[field], "f.line") == 0) {
 		ip->type = MI_LINE;
 		ip->data = NULL;
@@ -2085,10 +2086,10 @@ serverCreateMenu (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 		ip->data = NULL;
 	    } else if (strcmp (fields[field], "f.menu") == 0) {
 		ip->type = MI_MENU;
-		ip->data = fields[++field];
+		ip->data = (char *) fields[++field];
 	    } else if (strcmp (fields[field], "f.space") == 0) {
 		ip->type = MI_SPACE;
-		ip->data = fields[++field];
+		ip->data = (char *) fields[++field];
 	    } else if (strcmp (fields[field], "f.title") == 0) {
 		ip->type = MI_TITLE;
 		ip->data = NULL;
@@ -2103,10 +2104,10 @@ serverCreateMenu (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 	    /* Process any optional menu item attributes. */
 	    for (  ;  field < nfields;  field++) {
 		if (strcmp (fields[field], "background") == 0) {
-		    ip->background = fields[++field];
+		    ip->background = (char *) fields[++field];
 
 		} else if (strcmp (fields[field], "foreground") == 0) {
-		    ip->foreground = fields[++field];
+		    ip->foreground = (char *) fields[++field];
 
 		} else if (strcmp (fields[field], "bitmap") == 0) {
 		    const char *cp = fields[++field];
@@ -2144,7 +2145,7 @@ serverCreateMenu (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 		    }
 
 		} else if (strncmp (fields[field], "accelerator", 5) == 0) {
-		    ip->accelerator = fields[++field];
+		    ip->accelerator = (char *) fields[++field];
 
 		} else {
 		    fprintf (stderr, "obm: bad menu item parameter `%s'\n",
@@ -2253,8 +2254,8 @@ static void
 createMenu (
   ObmContext obm,
   MenuPtr mp,
-  char *menu_name,
-  char *parent,
+  const char *menu_name,
+  const char *parent,
   Widget pw)
 {
 	MenuItem ip;
@@ -2736,8 +2737,8 @@ menu_pullrightBitmap (ObmContext obm, int state)
 static void
 menu_addEntry (
   Widget w,			/* menu entry which calls submenu */
-  char *name,			/* name of menu containing this widget */
-  char *child,			/* name of submenu shell widget */
+  const char *name,		/* name of menu containing this widget */
+  const char *child,	       	/* name of submenu shell widget */
   ObmContext obm)
 {
 	MenuEntry mw, new;

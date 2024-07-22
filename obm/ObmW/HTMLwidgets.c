@@ -3486,7 +3486,7 @@ MakeWidget(hw, text, x, y, id, fptr)
 				XtAddCallback(w, XtNdestroyCallback,
 					CBListDestroy, NULL);
 
-				XawListChange(w, string_list, list_cnt,
+				XawListChange(w, (const char **) string_list, list_cnt,
 					0, True);
 
 				if (vlist_cnt > 0)

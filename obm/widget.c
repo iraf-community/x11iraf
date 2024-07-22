@@ -282,7 +282,7 @@ static	int widgetAddCol(MsgContext, Tcl_Interp *, int, char **);
 static	int widgetSetTableSize(MsgContext, Tcl_Interp *, int, char **);
 #endif
 static	int get_itemno(WidgetObject, char *);
-static	int buildTreeList(Widget, Tcl_Interp *, ListTreeItem *, char *);
+static	int buildTreeList(Widget, Tcl_Interp *, ListTreeItem *, const char *);
 static	int widgetGetRowAttr(MsgContext, Tcl_Interp *, int, char **);
 
 
@@ -507,9 +507,9 @@ WidgetClassDestroy (ObmContext obm, ObjClassRec classrec)
 ObmObject
 WidgetCreate (
   ObmContext obm,
-  char *name,
+  const char *name,
   ObjClassRec classrec,
-  char *parent,
+  const char *parent,
   ArgList args,
   int nargs)
 {
@@ -713,7 +713,7 @@ widgetDestroy (ObmObject obj)
 /* WidgetEvaluate -- Evaluate a widget command or message.
  */
 int
-WidgetEvaluate (ObmObject object, char *command)
+WidgetEvaluate (ObmObject object, const char *command)
 {
 	WidgetObject obj = (WidgetObject) object;
 	Tcl_Interp *tcl, *server = obj->widget.obm->tcl;
@@ -732,7 +732,8 @@ WidgetEvaluate (ObmObject object, char *command)
 	    omsg->object[++omsg->level] = object;
 	    if (Tcl_Eval (tcl, command) == TCL_OK) {
 		if (*Tcl_GetStringResult (tcl))
-		    Tcl_SetResult (server, Tcl_GetStringResult (tcl), TCL_VOLATILE);
+		  Tcl_SetResult (server, (char *) Tcl_GetStringResult (tcl),
+				 TCL_VOLATILE);
 		omsg->level--;
 		return (TCL_OK);
 
@@ -756,7 +757,8 @@ WidgetEvaluate (ObmObject object, char *command)
 	    pmsg->object[++pmsg->level] = object;
 	    if (Tcl_Eval (tcl, command) == TCL_OK) {
 	    	if (*Tcl_GetStringResult (tcl))
-		    Tcl_SetResult (server, Tcl_GetStringResult (tcl), TCL_VOLATILE);
+		    Tcl_SetResult (server, (char *) Tcl_GetStringResult (tcl),
+				   TCL_VOLATILE);
 		pmsg->level--;
 		return (TCL_OK);
 	    } else
@@ -765,7 +767,7 @@ WidgetEvaluate (ObmObject object, char *command)
 
 error:
 	if (*Tcl_GetStringResult (tcl))
-	    Tcl_SetResult (server, Tcl_GetStringResult (tcl), TCL_VOLATILE);
+	    Tcl_SetResult (server, (char *) Tcl_GetStringResult (tcl), TCL_VOLATILE);
 	else {
 	    /* Supply a default error message if none was returned. */
 	    Tcl_SetResult (server, obmClientCommand (tcl, command) ?
@@ -2195,7 +2197,7 @@ widgetSetList (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
 	Boolean resize;
-	String *items;
+	const char **items;
 	int nitems;
 	char *list;
 
@@ -2217,10 +2219,10 @@ widgetSetList (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	    return (TCL_ERROR);
 
 	if ((obmClass (obj->core.classrec, WtList)))
-	    XawListChange (wp->w, items, nitems, 0, resize);
+	  XawListChange (wp->w, items, nitems, 0, resize);
 	else if ((obmClass (obj->core.classrec, WtMultiList)))
 	    XfwfMultiListSetNewData ((XfwfMultiListWidget)wp->w,
-		items, nitems, 0, resize, NULL);
+				     (String *) items, nitems, 0, resize, NULL);
 
 	if (wp->data)
 	    Tcl_Free (wp->data);
@@ -2843,7 +2845,7 @@ ret:	Tcl_Free ((char *) items);
  * lists.  This is used to fill out the ListTree widget values.
  */
 static int
-buildTreeList (Widget w, Tcl_Interp *tcl, ListTreeItem *parent, char *item)
+buildTreeList (Widget w, Tcl_Interp *tcl, ListTreeItem *parent, const char *item)
 {
 	const char **fields, **entry;
 	int i, nentries, nfields, field;

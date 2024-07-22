@@ -190,7 +190,8 @@ typedef struct {
 
 void GtermDestroy(ObmObject);
 void GtermClassDestroy(ObmContext, ObjClassRec);
-ObmObject GtermCreate(ObmContext,  char *, ObjClassRec, char *, ArgList, int nargs);
+ObmObject GtermCreate(ObmContext, const char *, ObjClassRec,
+		      const char *, ArgList, int nargs);
 
 static	int gtermActivate(MsgContext, Tcl_Interp *, int, char **);
 static	int gtermActiveMapping(MsgContext, Tcl_Interp *, int, char **);
@@ -252,7 +253,7 @@ static	int gtermSetCursorPos(MsgContext, Tcl_Interp *, int, char **);
 static	int gtermSetCursorType(MsgContext, Tcl_Interp *, int, char **);
 static	int gtermSetDataLevel(MsgContext, Tcl_Interp *, int, char **);
 static	int gtermSetFillType(MsgContext, Tcl_Interp *, int, char **);
-static	int gtermSetGterm(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermSetGterm(MsgContext, Tcl_Interp *, int, const char **);
 static	int gtermSetLineStyle(MsgContext, Tcl_Interp *, int, char **);
 static	int gtermSetLineWidth(MsgContext, Tcl_Interp *, int, char **);
 static	int gtermSetLogRes(MsgContext, Tcl_Interp *, int, char **);
@@ -482,9 +483,9 @@ GtermClassDestroy (ObmContext obm, ObjClassRec classrec)
 ObmObject
 GtermCreate (
   ObmContext obm,
-  char *name,
+  const char *name,
   ObjClassRec classrec,
-  char *parent,
+  const char *parent,
   ArgList args,
   int nargs)
 {
@@ -575,7 +576,7 @@ GtermDestroy (ObmObject object)
  * to the client code so that it can talk directly to the gterm widget.
  */
 static int 
-gtermSetGterm (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
+gtermSetGterm (MsgContext msg, Tcl_Interp *tcl, int argc, const char **argv)
 {
 	GtermClassData gcd = (GtermClassData) msg;
 	GtermObject obj = (GtermObject) gcd->object[gcd->level];
@@ -3845,7 +3846,7 @@ gtermCreateMarker (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	ObmContext obm = wp->obm;
 	Arg args[MAX_ARGS];
 	int nargs, i;
-	char **items;
+	const char **items;
 	int nitems;
 	char *name;
 
@@ -3861,7 +3862,7 @@ gtermCreateMarker (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	} else if (argc > 3) {
 	    /* Attribute list passed as separate arguments. */
 	    nitems = argc - 2;
-	    items = (char **) Tcl_Alloc (nitems * sizeof(char *));
+	    items = (const char **) Tcl_Alloc (nitems * sizeof(char *));
 	    if (items == NULL)
 		return (TCL_ERROR);
 	    for (i=0;  i < nitems;  i++)

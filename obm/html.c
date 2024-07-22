@@ -91,7 +91,7 @@ typedef struct {
 
 void HTMLDestroy(ObmObject);
 void HTMLClassDestroy(ObmContext, ObjClassRec);
-ObmObject HTMLCreate(ObmContext, char *, ObjClassRec, char *, ArgList, int);
+ObmObject HTMLCreate(ObmContext, const char *, ObjClassRec, const char *, ArgList, int);
 
 static int htmlSetText(MsgContext, Tcl_Interp *, int, char **);
 static	int htmlGetText(MsgContext, Tcl_Interp *, int, char **);
@@ -208,9 +208,9 @@ HTMLClassDestroy (ObmContext obm, ObjClassRec classrec)
 ObmObject
 HTMLCreate (
   ObmContext obm,
-  char *name,
+  const char *name,
   ObjClassRec classrec,
-  char *parent,
+  const char *parent,
   ArgList a_args,
   int a_nargs)
 {
