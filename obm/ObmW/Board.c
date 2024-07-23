@@ -150,7 +150,6 @@ Widget
     Position n;
     char *t;
     Boolean minus;
-    extern double strtod();
 
     *absval = 0;
     *relval = 0.0;

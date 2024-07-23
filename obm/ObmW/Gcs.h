@@ -92,12 +92,6 @@ extern	Pixel	AllocGreyPixel(Widget, Pixel fg, Pixel bg, int scale) ;
 extern	Pixel	AllocGreyPixelC(Widget, XColor *fg, XColor *bg, int scale) ;
 extern	void	Draw3dBox(Widget w, int  x, int y, int wid, int hgt, int s,
 			GC topgc, GC botgc) ;
-
-#if XtSpecificationRelease < 5
-extern	GC	XtAllocateGC(Widget, int depth, u_long mask,
-			XGCValues *, u_long dynamic, u_long dontcare) ;
-#endif
-
 #else
 
 extern	GC	AllocFgGC() ;
@@ -111,10 +105,6 @@ extern	Pixel	AllocShadowPixel() ;
 extern	Pixel	AllocGreyPixel() ;
 extern	Pixel	AllocGreyPixelC() ;
 extern	void	Draw3dBox() ;
-
-#if XtSpecificationRelease < 5
-extern	GC	XtAllocateGC() ;
-#endif
 
 #endif
 

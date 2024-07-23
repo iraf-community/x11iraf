@@ -544,5 +544,3 @@ extern	char *get_geometry();
 #define Obm_Private
 #include "Obm.h"
 #undef Obm_Private
-
-extern  char *getenv();

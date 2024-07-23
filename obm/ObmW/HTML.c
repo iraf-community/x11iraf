@@ -3573,7 +3573,6 @@ Scroll (w, event, params, num_params)
 	if (*num_params > 0) {
 	    char *s = params[0];
 	    double fraction;
-	    double atof();
 	    int ch;
 
 	    if (strcmp (s + strlen(s) - 2, "ch") == 0) {
