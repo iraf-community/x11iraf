@@ -5,21 +5,9 @@
 #include <X11/StringDefs.h>
 #include "Converters.h"
 #include "ToggleP.h"
-static void toggle(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void switch_on(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void switch_off(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
+static void toggle(Widget,XEvent*,String*,Cardinal*);
+static void switch_on(Widget,XEvent*,String*,Cardinal*);
+static void switch_off(Widget,XEvent*,String*,Cardinal*);
 
 static XtActionsRec actionsList[] = {
 {"toggle", toggle},
@@ -32,36 +20,13 @@ static char defaultTranslations[] = "\
 <Btn1Up>: toggle() set_shadow() \n\
 <Key>Return: toggle() \n\
 ";
-static void _resolve_inheritance(
-#if NeedFunctionPrototypes
-WidgetClass
-#endif
-);
-static void initialize(
-#if NeedFunctionPrototypes
-Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static Boolean  set_values(
-#if NeedFunctionPrototypes
-Widget ,Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static void expose(
-#if NeedFunctionPrototypes
-Widget,XEvent *,Region 
-#endif
-);
-static void create_on_gc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void create_off_gc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
+static void _resolve_inheritance(WidgetClass);
+static void initialize(Widget ,Widget,ArgList ,Cardinal *);
+static Boolean  set_values(Widget ,Widget ,Widget,ArgList ,Cardinal *);
+static void expose(Widget,XEvent *,Region );
+static void create_on_gc(Widget);
+static void create_off_gc(Widget);
+
 /*ARGSUSED*/static void create_on_gc(self)Widget self;
 {
     XtGCMask mask = GCFillStyle;

@@ -67,7 +67,7 @@ typedef struct _CMY {
 	unsigned short c, m, y;
 } CMY;
 
-extern void HSVToRGB Xraw_PROTO((HSV *, RGB *));
-extern void RGBToHSV Xraw_PROTO((RGB *, HSV *));
+extern void HSVToRGB (HSV *, RGB *);
+extern void RGBToHSV (RGB *, HSV *);
 
 #endif /* _color_h_ */

@@ -100,39 +100,6 @@ extern void XawInitializeWidgetSet();
 
  *===========================================================================*/
 
-#if (!NeedFunctionPrototypes)
-
-static void			Initialize();
-static void			Redisplay();
-static XtGeometryResult		PreferredGeometry();
-static void			Resize();
-static Boolean			SetValues();
-
-static void			DestroyOldData();
-static void			InitializeNewData();
-static void			CreateNewGCs();
-
-static void			RecalcCoords();
-static void			NegotiateSizeChange();
-static Boolean			Layout();
-
-static void			RedrawAll();
-static void			RedrawItem();
-static void			RedrawRowColumn();
-
-static void			PixelToRowColumn();
-static void			RowColumnToPixels();
-static Boolean			RowColumnToItem();
-static Boolean			ItemToRowColumn();
-
-static void			Select();
-static void			Unselect();
-static void			Toggle();
-static void			Extend();
-static void			Notify();
-
-#else
-
 static void		Initialize(Widget request, Widget new);
 static void 		Redisplay(XfwfMultiListWidget mlw,
 				XEvent *event, Region rectangle_union);
@@ -177,7 +144,6 @@ static void		Extend(XfwfMultiListWidget mlw, XEvent *event,
 				String *params, Cardinal *num_params);
 static void		Notify(XfwfMultiListWidget mlw, XEvent *event,
 				String *params, Cardinal *num_params);
-#endif
 
 /*===========================================================================*
 
@@ -781,16 +747,9 @@ XfwfMultiListWidget mlw;
 
  *---------------------------------------------------------------------------*/
 
-#if NeedFunctionPrototypes
 static void
 RecalcCoords(XfwfMultiListWidget mlw,
 	     Boolean width_changeable, Boolean height_changeable)
-#else
-static void
-RecalcCoords(mlw,width_changeable,height_changeable)
-XfwfMultiListWidget mlw;
-Boolean width_changeable,height_changeable;
-#endif
 {
 	String str;
 	Dimension width,height;
@@ -826,15 +785,8 @@ Boolean width_changeable,height_changeable;
 
  *---------------------------------------------------------------------------*/
 
-#if NeedFunctionPrototypes
 static void
 NegotiateSizeChange(XfwfMultiListWidget mlw, Dimension width, Dimension height)
-#else
-static void
-NegotiateSizeChange(mlw,width,height)
-XfwfMultiListWidget mlw;
-Dimension width,height;
-#endif
 {
 	int attempt_number;
 	Boolean w_fixed,h_fixed;
@@ -897,17 +849,9 @@ Dimension width,height;
 
  *---------------------------------------------------------------------------*/
 
-#if NeedFunctionPrototypes
 static Boolean
 Layout(XfwfMultiListWidget mlw, Boolean w_changeable, Boolean h_changeable,
        Dimension *w_ptr, Dimension *h_ptr)
-#else
-static Boolean
-Layout(mlw,w_changeable,h_changeable,w_ptr,h_ptr)
-XfwfMultiListWidget mlw;
-Boolean w_changeable,h_changeable;
-Dimension *w_ptr,*h_ptr;
-#endif
 {
 	Boolean size_changed = False;
 
@@ -1768,20 +1712,10 @@ Boolean *h_ptr,*s_ptr;
 
  *---------------------------------------------------------------------------*/
 
-#if NeedFunctionPrototypes
 void
 XfwfMultiListSetNewData(XfwfMultiListWidget mlw, String *list,
 			int nitems, int longest, Boolean resize,
 			Boolean *sensitivity_array)
-#else
-void
-XfwfMultiListSetNewData(mlw,list,nitems,longest,resize,sensitivity_array)
-XfwfMultiListWidget mlw;
-String *list;
-int nitems,longest;
-int resize;
-Boolean *sensitivity_array;
-#endif
 {
 	DestroyOldData(mlw);
 	MultiListList(mlw) = list;

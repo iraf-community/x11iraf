@@ -214,13 +214,9 @@ static void MixHSV(r, alpha, s, beta, t)
  */
 
 void
-#ifdef Xraw_NEED_PROTO
-HSVToRGB(HSV *hsv, RGB *rgb)
-#else
 HSVToRGB(hsv, rgb)
      HSV *hsv;
      RGB *rgb;
-#endif
 {
 	float	p, q, t, f;
 	float   h = hsv->h;
@@ -265,13 +261,9 @@ HSVToRGB(hsv, rgb)
  */
 
 void
-#ifdef Xraw_NEED_PROTO
-RGBToHSV(RGB *rgb, HSV *hsv)
-#else
 RGBToHSV(rgb, hsv)
      RGB *rgb;
      HSV *hsv;
-#endif
 {
 	float	rr, gg, bb;
 	float	min, max;

@@ -165,21 +165,8 @@ typedef struct _TabsRec      *TabsWidget;
 
 _XFUNCPROTOBEGIN
 
-extern	void
-XawTabsSetTop(
-#if NeedFunctionPrototypes
-	Widget	w,
-	Bool	callCallbacks
-#endif
-) ;
-
-extern	void
-XawTabsSetHighlight(
-#if NeedFunctionPrototypes
-	Widget	tabs,
-	Widget	w
-#endif
-) ;
+extern	void XawTabsSetTop(Widget, Bool);
+extern	void XawTabsSetHighlight(Widget, Widget) ;
 
 _XFUNCPROTOEND
 

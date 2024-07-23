@@ -299,11 +299,11 @@ typedef struct _XawTableColumnRec *XawTableColumn;  /* opaque to outside */
 /*#                           Bypass Routine and Direction Types          #*/
 /*#                                                                       #*/
 /*#########################################################################*/
-typedef Boolean (*XawTableProc)     Xraw_PROTO((Widget, 
-						int, 
-						int, 
-						XawTableCell, 
-						XtPointer));
+typedef Boolean (*XawTableProc)     (Widget, 
+				     int, 
+				     int, 
+				     XawTableCell, 
+				     XtPointer);
 enum XawTableBypassDirection{
   XawTABLE_RIGHT_DOWN,
   XawTABLE_DOWN_RIGHT
@@ -357,8 +357,8 @@ typedef struct {
 /*#                           Layout Control Routine                      #*/
 /*#                                                                       #*/
 /*#########################################################################*/
-extern void XawTableDoLayout            Xraw_PROTO((Widget w,
-						    Boolean do_layout));
+extern void XawTableDoLayout            (Widget w,
+					 Boolean do_layout);
 
 
 /*#########################################################################*/
@@ -366,13 +366,13 @@ extern void XawTableDoLayout            Xraw_PROTO((Widget w,
 /*#                           Stuff Routines                              #*/
 /*#                                                                       #*/
 /*#########################################################################*/
-extern int XawTableSetNewSize 		Xraw_PROTO((Widget w, 
-						    int  rows,
-						    int  columns));
+extern int XawTableSetNewSize 		(Widget w, 
+					 int  rows,
+					 int  columns);
 
-extern void XawTableGetSize             Xraw_PROTO((Widget w,
-						    int *rows,
-						    int *columns));
+extern void XawTableGetSize             (Widget w,
+					 int *rows,
+					 int *columns);
 
      
 /*#########################################################################*/
@@ -380,13 +380,13 @@ extern void XawTableGetSize             Xraw_PROTO((Widget w,
 /*#                           Row Routines                                #*/
 /*#                                                                       #*/
 /*#########################################################################*/
-extern int XawTablePrependRow           Xraw_PROTO((Widget w));
+extern int XawTablePrependRow           (Widget w);
      
-extern int XawTableAppendRow 		Xraw_PROTO((Widget w));
+extern int XawTableAppendRow 		(Widget w);
      
-extern int XawTableInsertRow            Xraw_PROTO((Widget w, int row));
+extern int XawTableInsertRow            (Widget w, int row);
      
-extern int XawTableDeleteRow            Xraw_PROTO((Widget w, int row));
+extern int XawTableDeleteRow            (Widget w, int row);
      
 
 /*#########################################################################*/
@@ -394,15 +394,15 @@ extern int XawTableDeleteRow            Xraw_PROTO((Widget w, int row));
 /*#                           Column Routines                             #*/
 /*#                                                                       #*/
 /*#########################################################################*/
-extern int XawTablePrependColumn        Xraw_PROTO((Widget w, int width));
+extern int XawTablePrependColumn        (Widget w, int width);
      
-extern int XawTableAppendColumn         Xraw_PROTO((Widget w, int width));
+extern int XawTableAppendColumn         (Widget w, int width);
      
-extern int XawTableInsertColumn         Xraw_PROTO((Widget w, 
-						    int column,
-						    int width));
+extern int XawTableInsertColumn         (Widget w, 
+					 int column,
+					 int width);
      
-extern int XawTableDeleteColumn 	Xraw_PROTO((Widget w, int column));
+extern int XawTableDeleteColumn 	(Widget w, int column);
 
 
 /*#########################################################################*/
@@ -410,16 +410,16 @@ extern int XawTableDeleteColumn 	Xraw_PROTO((Widget w, int column));
 /*#                           Set Label Routines                          #*/
 /*#                                                                       #*/
 /*#########################################################################*/
-extern char *XawTableGetLabelByCell 	Xraw_PROTO((XawTableCell cell));
+extern char *XawTableGetLabelByCell 	(XawTableCell cell);
      
-extern char *XawTableGetLabelByPosition Xraw_PROTO((Widget w,
-						     int row,
-						     int column));
+extern char *XawTableGetLabelByPosition (Widget w,
+					 int row,
+					 int column);
      
-extern int XawTableSetLabel 		Xraw_PROTO((Widget w,
-						     int row,
-						     int column,
-						     const char *label));
+extern int XawTableSetLabel 		(Widget w,
+					 int row,
+					 int column,
+					 const char *label);
      
 
 /*#########################################################################*/
@@ -427,20 +427,20 @@ extern int XawTableSetLabel 		Xraw_PROTO((Widget w,
 /*#                           Bypass Routines                             #*/
 /*#                                                                       #*/
 /*#########################################################################*/
-extern Boolean XawTableWalk 		Xraw_PROTO((Widget w,
-						     XawTableProc proc,
-						     int b_row,
-						     int e_row,
-						     int b_column,
-						     int e_column,
-						     int direction,
-						     int *row, int *column,
-						     XtPointer client_data));
+extern Boolean XawTableWalk 		(Widget w,
+					 XawTableProc proc,
+					 int b_row,
+					 int e_row,
+					 int b_column,
+					 int e_column,
+					 int direction,
+					 int *row, int *column,
+					 XtPointer client_data);
      
-extern Boolean XawTableSearchLabel 	Xraw_PROTO((Widget w,
-						     char *name,
-						     int *row,
-						     int *column));
+extern Boolean XawTableSearchLabel 	(Widget w,
+					 char *name,
+					 int *row,
+					 int *column);
 
      
 /*#########################################################################*/
@@ -448,17 +448,17 @@ extern Boolean XawTableSearchLabel 	Xraw_PROTO((Widget w,
 /*#                           Edit Cell Routines                          #*/
 /*#                                                                       #*/
 /*#########################################################################*/
-extern Boolean XawTableIsEditManaged 	Xraw_PROTO((Widget w));
+extern Boolean XawTableIsEditManaged 	(Widget w);
 
-extern void XawTableGetEditPosition 	Xraw_PROTO((Widget w,
-						     int *row,
-						     int *column));
+extern void XawTableGetEditPosition 	(Widget w,
+					 int *row,
+					 int *column);
      
-extern void XawTableUnsetEdit 		Xraw_PROTO((Widget w));
+extern void XawTableUnsetEdit 		(Widget w);
 
-extern void XawTableSetEdit 		Xraw_PROTO((Widget w,
-						     int row,
-						     int column));
+extern void XawTableSetEdit 		(Widget w,
+					 int row,
+					 int column);
 
 
 /*#########################################################################*/
@@ -466,37 +466,37 @@ extern void XawTableSetEdit 		Xraw_PROTO((Widget w,
 /*#                           Set Colour Routines                         #*/
 /*#                                                                       #*/
 /*#########################################################################*/
-extern int XawTableSetCellBackground 	Xraw_PROTO((Widget w,
-						     int   row,
-						     int   column,
-						     Pixel background));
+extern int XawTableSetCellBackground 	(Widget w,
+					 int   row,
+					 int   column,
+					 Pixel background);
      
-extern int XawTableSetCellForeground 	Xraw_PROTO((Widget w,
-						     int   row,
-						     int   column,
-						     Pixel foreground));
+extern int XawTableSetCellForeground 	(Widget w,
+					 int   row,
+					 int   column,
+					 Pixel foreground);
 
-extern int XawTableSetCellDefaultColours 	Xraw_PROTO((Widget w,
-						     int   row,
-						     int   column));
+extern int XawTableSetCellDefaultColours 	(Widget w,
+						 int   row,
+						 int   column);
 
-extern int XawTableSetCellColours 	Xraw_PROTO((Widget w,
-						     int   row,
-						     int   column,
-						     Pixel foreground,
-						     Pixel background));
+extern int XawTableSetCellColours 	(Widget w,
+					 int   row,
+					 int   column,
+					 Pixel foreground,
+					 Pixel background);
      
 
-extern void XawTableGetCellColours    	Xraw_PROTO((Widget w,
-						     int   row,
-						     int   column,
-						     Pixel *foreground,
-						     Pixel *background));
+extern void XawTableGetCellColours    	(Widget w,
+					 int   row,
+					 int   column,
+					 Pixel *foreground,
+					 Pixel *background);
      
-extern void XawTableGetCellColoursByCell 	Xraw_PROTO((Widget w,
-						     XawTableCell cell,
-						     Pixel *foreground,
-						     Pixel *background));
+extern void XawTableGetCellColoursByCell 	(Widget w,
+						 XawTableCell cell,
+						 Pixel *foreground,
+						 Pixel *background);
      
 
 /*#########################################################################*/
@@ -504,27 +504,27 @@ extern void XawTableGetCellColoursByCell 	Xraw_PROTO((Widget w,
 /*#                           Column Deta                                 #*/
 /*#                                                                       #*/
 /*#########################################################################*/
-extern void XawTableSetColumnJustify       Xraw_PROTO((Widget w,
-						        int   column,
-						        XtJustify justify));
+extern void XawTableSetColumnJustify       (Widget w,
+					    int   column,
+					    XtJustify justify);
 
-extern XtJustify XawTableGetColumnJustify  Xraw_PROTO((Widget w,
-						        int   column));
+extern XtJustify XawTableGetColumnJustify  (Widget w,
+					    int   column);
 
-extern void XawTableSetColumnWidth         Xraw_PROTO((Widget w,
-						        int   column,
-						        int   width));
+extern void XawTableSetColumnWidth         (Widget w,
+					    int   column,
+					    int   width);
 
-extern int XawTableGetColumnWidth          Xraw_PROTO((Widget w,
-						        int   column));
+extern int XawTableGetColumnWidth          (Widget w,
+					    int   column);
 
-extern int XawTableGetColumnPixelWidth          Xraw_PROTO((Widget w,
-						        int   column));
+extern int XawTableGetColumnPixelWidth          (Widget w,
+						 int   column);
 
-extern void XawTableSetMultiColumnWidths	Xraw_PROTO((Widget w,
-							int *columns,
-							int *widths,
-							int ncols));
+extern void XawTableSetMultiColumnWidths	(Widget w,
+						 int *columns,
+						 int *widths,
+						 int ncols);
 
 
 /*#########################################################################*/

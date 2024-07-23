@@ -7,16 +7,8 @@
 #include <stdio.h>
 #include <assert.h>
 #include "ArrowP.h"
-static void activate_and_start_timer(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void stop_timer(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
+static void activate_and_start_timer(Widget,XEvent*,String*,Cardinal*);
+static void stop_timer(Widget,XEvent*,String*,Cardinal*);
 
 static XtActionsRec actionsList[] = {
 {"activate_and_start_timer", activate_and_start_timer},
@@ -27,46 +19,15 @@ static char defaultTranslations[] = "\
 <Btn1Down>: activate_and_start_timer() \n\
 <Btn1Up>: stop_timer() \n\
 ";
-static void _resolve_inheritance(
-#if NeedFunctionPrototypes
-WidgetClass
-#endif
-);
-static void initialize(
-#if NeedFunctionPrototypes
-Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static Boolean  set_values(
-#if NeedFunctionPrototypes
-Widget ,Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static void expose(
-#if NeedFunctionPrototypes
-Widget,XEvent *,Region 
-#endif
-);
-static void timer_callback(
-#if NeedFunctionPrototypes
-XtPointer ,XtIntervalId *
-#endif
-);
-static void create_arrowgc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void create_arrowlightgc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void create_arrowdarkgc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
+static void _resolve_inheritance(WidgetClass);
+static void initialize(Widget ,Widget,ArgList ,Cardinal *);
+static Boolean  set_values(Widget ,Widget ,Widget,ArgList ,Cardinal *);
+static void expose(Widget,XEvent *,Region );
+static void timer_callback(XtPointer ,XtIntervalId *);
+static void create_arrowgc(Widget);
+static void create_arrowlightgc(Widget);
+static void create_arrowdarkgc(Widget);
+
 /*ARGSUSED*/static void timer_callback(client_data,timer)XtPointer  client_data;XtIntervalId * timer;
 {
     Widget self = (Widget) client_data;

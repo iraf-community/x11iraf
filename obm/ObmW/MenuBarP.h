@@ -5,11 +5,7 @@
 #define _XfwfMenuBarP_H_
 #include "RowColP.h"
 #include "MenuBar.h"
-typedef void (*process_menu_Proc)(
-#if NeedFunctionPrototypes
-Widget,Widget ,Cursor 
-#endif
-);
+typedef void (*process_menu_Proc)(Widget,Widget ,Cursor );
 #define XtInherit_process_menu ((process_menu_Proc) _XtInherit)
 typedef struct {
 /* methods */

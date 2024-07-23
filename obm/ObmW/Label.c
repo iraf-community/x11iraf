@@ -7,46 +7,15 @@
 #include <stdio.h>
 #include "TabString.h"
 #include "LabelP.h"
-static void _resolve_inheritance(
-#if NeedFunctionPrototypes
-WidgetClass
-#endif
-);
-static void set_label(
-#if NeedFunctionPrototypes
-Widget,String 
-#endif
-);
-static Boolean  set_values(
-#if NeedFunctionPrototypes
-Widget ,Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static void initialize(
-#if NeedFunctionPrototypes
-Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static void expose(
-#if NeedFunctionPrototypes
-Widget,XEvent *,Region 
-#endif
-);
-static void make_gc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void make_graygc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void count_lines(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
+static void _resolve_inheritance(WidgetClass);
+static void set_label(Widget,String );
+static Boolean  set_values(Widget ,Widget ,Widget,ArgList ,Cardinal *);
+static void initialize(Widget ,Widget,ArgList ,Cardinal *);
+static void expose(Widget,XEvent *,Region );
+static void make_gc(Widget);
+static void make_graygc(Widget);
+static void count_lines(Widget);
+
 /*ARGSUSED*/static void make_gc(self)Widget self;
 {
     XtGCMask mask;

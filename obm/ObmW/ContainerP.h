@@ -65,7 +65,7 @@ typedef struct _ContainerConstraintRec {
 extern ContainerClassRec containerClassRec;
 
 
-extern void _XawQueryGeometry  Xraw_PROTO((Widget widget, 
-					   XtWidgetGeometry *reply_return));
+extern void _XawQueryGeometry  (Widget widget, 
+				XtWidgetGeometry *reply_return);
 
 #endif /* _CONTEINER_P_H_ */

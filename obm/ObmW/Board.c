@@ -8,77 +8,26 @@
 #include <ctype.h>
 #include <X11/Shell.h>
 #include "BoardP.h"
-static void _resolve_inheritance(
-#if NeedFunctionPrototypes
-WidgetClass
-#endif
-);
-static Boolean  set_values(
-#if NeedFunctionPrototypes
-Widget ,Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static void initialize(
-#if NeedFunctionPrototypes
-Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static void set_abs_location(
-#if NeedFunctionPrototypes
-Widget,unsigned  int ,int ,int ,int ,int 
-#endif
-);
-static void resize(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static XtGeometryResult  query_geometry(
-#if NeedFunctionPrototypes
-Widget,XtWidgetGeometry *,XtWidgetGeometry *
-#endif
-);
-static XtGeometryResult  geometry_manager(
-#if NeedFunctionPrototypes
-Widget ,XtWidgetGeometry *,XtWidgetGeometry *
-#endif
-);
-static void change_managed(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
+static void _resolve_inheritance(WidgetClass);
+static Boolean  set_values(Widget ,Widget ,Widget,ArgList ,Cardinal *);
+static void initialize(Widget ,Widget,ArgList ,Cardinal *);
+static void set_abs_location(Widget,unsigned  int ,int ,int ,int ,int );
+static void resize(Widget);
+static XtGeometryResult  query_geometry(Widget,XtWidgetGeometry *,XtWidgetGeometry *);
+static XtGeometryResult  geometry_manager(Widget ,XtWidgetGeometry *,XtWidgetGeometry *);
+static void change_managed(Widget);
 #define ceil(r) (-(int )(-(r )))
 
 
-static void generate_location(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void get_core_geometry(
-#if NeedFunctionPrototypes
-Widget,Position *,Position *,Dimension *,Dimension *
-#endif
-);
-static void set_location(
-#if NeedFunctionPrototypes
-Widget,unsigned  int 
-#endif
-);
+static void generate_location(Widget);
+static void get_core_geometry(Widget,Position *,Position *,Dimension *,Dimension *);
+static void set_location(Widget,unsigned  int );
 #define skip_blanks(s) while (isspace (*s ))s ++
 
 
-static char * scan(
-#if NeedFunctionPrototypes
-char *,Position *,float *
-#endif
-);
-static void interpret_location(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
+static char * scan(char *,Position *,float *);
+static void interpret_location(Widget);
+
 /*ARGSUSED*/static void generate_location(self)Widget self;
 {
     char tmp[100];

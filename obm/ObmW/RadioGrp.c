@@ -5,31 +5,11 @@
 #include <X11/StringDefs.h>
 #include "Toggle.h"
 #include "RadioGrpP.h"
-static void _resolve_inheritance(
-#if NeedFunctionPrototypes
-WidgetClass
-#endif
-);
-static void class_initialize(
-#if NeedFunctionPrototypes
-void
-#endif
-);
-static void initialize(
-#if NeedFunctionPrototypes
-Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static Boolean  set_values(
-#if NeedFunctionPrototypes
-Widget ,Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static void create_toggles(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
+static void _resolve_inheritance(WidgetClass);
+static void class_initialize(void);
+static void initialize(Widget ,Widget,ArgList ,Cardinal *);
+static Boolean  set_values(Widget ,Widget ,Widget,ArgList ,Cardinal *);
+static void create_toggles(Widget);
 #define done(type, value) do {\
 	if (to->addr != NULL) {\
 	    if (to->size < sizeof(type)) {\
@@ -47,21 +27,10 @@ Widget
     }while (0 )
 
 
-static Boolean  cvtStringToStringArray(
-#if NeedFunctionPrototypes
-Display *,XrmValuePtr ,Cardinal *,XrmValuePtr ,XrmValuePtr ,XtPointer *
-#endif
-);
-static StringArray  newStringArray(
-#if NeedFunctionPrototypes
-StringArray 
-#endif
-);
-static void freeStringArray(
-#if NeedFunctionPrototypes
-StringArray 
-#endif
-);
+static Boolean  cvtStringToStringArray(Display *,XrmValuePtr ,Cardinal *,XrmValuePtr ,XrmValuePtr ,XtPointer *);
+static StringArray  newStringArray(StringArray );
+static void freeStringArray(StringArray );
+
 /*ARGSUSED*/static void create_toggles(self)Widget self;
 {
     Cardinal i;

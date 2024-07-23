@@ -4,47 +4,16 @@
 #include <X11/IntrinsicP.h>
 #include <X11/StringDefs.h>
 #include "RowColP.h"
-static void _resolve_inheritance(
-#if NeedFunctionPrototypes
-WidgetClass
-#endif
-);
-static void change_managed(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void layout(
-#if NeedFunctionPrototypes
-Widget,int 
-#endif
-);
-static XtGeometryResult  geometry_manager(
-#if NeedFunctionPrototypes
-Widget ,XtWidgetGeometry *,XtWidgetGeometry *
-#endif
-);
-static void resize(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void initialize(
-#if NeedFunctionPrototypes
-Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static Boolean  set_values(
-#if NeedFunctionPrototypes
-Widget ,Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
+static void _resolve_inheritance(WidgetClass);
+static void change_managed(Widget);
+static void layout(Widget,int );
+static XtGeometryResult  geometry_manager(Widget ,XtWidgetGeometry *,XtWidgetGeometry *);
+static void resize(Widget);
+static void initialize(Widget ,Widget,ArgList ,Cardinal *);
+static Boolean  set_values(Widget ,Widget ,Widget,ArgList ,Cardinal *);
 static char  rcsid[] = "$Header: RowCol.w,v 1.1 92/10/14 18:36:36 bert Exp $";
-static void align_child(
-#if NeedFunctionPrototypes
-Widget,int ,int ,int ,int ,Alignment 
-#endif
-);
+static void align_child(Widget,int ,int ,int ,int ,Alignment );
+
 /*ARGSUSED*/static void align_child(self,cx,cy,width,height,alignment)Widget self;int  cx;int  cy;int  width;int  height;Alignment  alignment;
 {
     Position x, y;

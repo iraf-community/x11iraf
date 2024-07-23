@@ -83,26 +83,6 @@ typedef struct link_rec {
 /*
  * Public functions
  */
-#ifdef _NO_PROTO
-extern char *HTMLGetText ();
-extern char *HTMLGetTextAndSelection ();
-extern char **HTMLGetHRefs ();
-extern char **HTMLGetImageSrcs ();
-extern void *HTMLGetWidgetInfo ();
-extern void HTMLFreeWidgetInfo ();
-extern void HTMLFreeImageInfo ();
-extern LinkInfo *HTMLGetLinks ();
-extern int HTMLPositionToId ();
-extern int HTMLIdToPosition ();
-extern int HTMLAnchorToPosition ();
-extern int HTMLAnchorToId ();
-extern void HTMLGotoId ();
-extern void HTMLRetestAnchors ();
-extern void HTMLClearSelection ();
-extern void HTMLSetSelection ();
-extern void HTMLSetText ();
-extern int HTMLSearchText ();
-#else
 extern char *HTMLGetText (Widget w, int pretty);
 extern char *HTMLGetTextAndSelection (Widget w, char **startp, char **endp,
 					char **insertp);
@@ -126,7 +106,6 @@ extern void HTMLSetText (Widget w, char *text, char *header_text,
 			char *target_anchor, void *ptr);
 extern int HTMLSearchText (Widget w, char *pattern,
 	ElementRef *m_start, ElementRef *m_end, int backward, int caseless);
-#endif /* _NO_PROTO */
 
 
 /*

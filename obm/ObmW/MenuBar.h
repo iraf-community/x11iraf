@@ -4,11 +4,7 @@
 #ifndef _XfwfMenuBar_H_
 #define _XfwfMenuBar_H_
 #include "RowCol.h"
-Boolean  XfwfCallProcessMenu(
-#if NeedFunctionPrototypes
-Widget,Widget ,Cursor 
-#endif
-);
+Boolean  XfwfCallProcessMenu(Widget,Widget ,Cursor );
 typedef struct _XfwfMenuBarClassRec *XfwfMenuBarWidgetClass;
 typedef struct _XfwfMenuBarRec *XfwfMenuBarWidget;
 externalref WidgetClass xfwfMenuBarWidgetClass;

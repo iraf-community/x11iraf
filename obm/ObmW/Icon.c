@@ -6,11 +6,7 @@
 #include <X11/extensions/shape.h>
 #include <stdio.h>
 #include "IconP.h"
-static void activate(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
+static void activate(Widget,XEvent*,String*,Cardinal*);
 
 static XtActionsRec actionsList[] = {
 {"activate", activate},
@@ -20,36 +16,13 @@ static char defaultTranslations[] = "\
 <Btn1Down>,<Btn1Up>: activate() \n\
 <Key>Return: activate() \n\
 ";
-static void _resolve_inheritance(
-#if NeedFunctionPrototypes
-WidgetClass
-#endif
-);
-static void initialize(
-#if NeedFunctionPrototypes
-Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static void expose(
-#if NeedFunctionPrototypes
-Widget,XEvent *,Region 
-#endif
-);
-static Boolean  set_values(
-#if NeedFunctionPrototypes
-Widget ,Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static void realize(
-#if NeedFunctionPrototypes
-Widget,XtValueMask *,XSetWindowAttributes *
-#endif
-);
-static void create_image_gc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
+static void _resolve_inheritance(WidgetClass);
+static void initialize(Widget ,Widget,ArgList ,Cardinal *);
+static void expose(Widget,XEvent *,Region );
+static Boolean  set_values(Widget ,Widget ,Widget,ArgList ,Cardinal *);
+static void realize(Widget,XtValueMask *,XSetWindowAttributes *);
+static void create_image_gc(Widget);
+
 /*ARGSUSED*/static void create_image_gc(self)Widget self;
 {
     Dimension wd, ht;

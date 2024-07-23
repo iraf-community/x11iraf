@@ -5,21 +5,9 @@
 #define _XfwfSlider2_H_
 #include "Label.h"
 #include "scroll.h"
-void XfwfGetThumb(
-#if NeedFunctionPrototypes
-Widget,XfwfScrollInfo *
-#endif
-);
-void XfwfMoveThumb(
-#if NeedFunctionPrototypes
-Widget,double ,double 
-#endif
-);
-void XfwfResizeThumb(
-#if NeedFunctionPrototypes
-Widget,double ,double 
-#endif
-);
+void XfwfGetThumb(Widget,XfwfScrollInfo *);
+void XfwfMoveThumb(Widget,double ,double );
+void XfwfResizeThumb(Widget,double ,double );
 #ifndef XtNthumbColor
 #define XtNthumbColor "thumbColor"
 #endif

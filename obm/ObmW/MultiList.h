@@ -241,21 +241,6 @@ typedef struct _XfwfMultiListReturnStruct
 
  *---------------------------------------------------------------------------*/
 
-#if (!NeedFunctionPrototypes)
-
-extern Boolean		XfwfMultiListHighlightItem();
-extern void		XfwfMultiListHighlightAll();
-extern void		XfwfMultiListUnhighlightItem();
-extern void		XfwfMultiListUnhighlightAll();
-extern int		XfwfMultiListToggleItem();
-extern XfwfMultiListReturnStruct *
-			XfwfMultiListGetHighlighted();
-extern Boolean		XfwfMultiListIsHighlighted();
-extern Boolean		XfwfMultiListGetItemInfo();
-extern void		XfwfMultiListSetNewData();
-
-#else
-
 extern Boolean		XfwfMultiListHighlightItem(XfwfMultiListWidget mlw,
 				int item_index);
 extern void		XfwfMultiListHighlightAll(XfwfMultiListWidget mlw);
@@ -275,5 +260,4 @@ extern void		XfwfMultiListSetNewData(XfwfMultiListWidget mlw,
 				String *list, int nitems, int longest,
 				Boolean resize, Boolean *sensitivity_array);
 
-#endif
 #endif

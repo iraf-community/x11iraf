@@ -7,11 +7,7 @@
 #include <X11/Shell.h>
 #include <stdio.h>
 #include "MenuBarP.h"
-static void menu_popdown(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
+static void menu_popdown(Widget,XEvent*,String*,Cardinal*);
 
 static XtActionsRec actionsList[] = {
 {"menu_popdown", menu_popdown},
@@ -20,26 +16,11 @@ static XtActionsRec actionsList[] = {
 static char defaultTranslations[] = "\
 <Btn1Up>: menu_popdown() \n\
 ";
-static void _resolve_inheritance(
-#if NeedFunctionPrototypes
-WidgetClass
-#endif
-);
-static void initialize(
-#if NeedFunctionPrototypes
-Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static void process_menu(
-#if NeedFunctionPrototypes
-Widget,Widget ,Cursor 
-#endif
-);
-static void popdown_cb(
-#if NeedFunctionPrototypes
-Widget ,XtPointer ,XtPointer 
-#endif
-);
+static void _resolve_inheritance(WidgetClass);
+static void initialize(Widget ,Widget,ArgList ,Cardinal *);
+static void process_menu(Widget,Widget ,Cursor );
+static void popdown_cb(Widget ,XtPointer ,XtPointer );
+
 /*ARGSUSED*/static void popdown_cb(menu,client_data,call_data)Widget  menu;XtPointer  client_data;XtPointer  call_data;
 {
     Widget self = (Widget) client_data;

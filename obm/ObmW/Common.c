@@ -12,61 +12,17 @@
 #define focus_detail(detail) (detail ==NotifyAncestor ?"NotifyAncestor":detail ==NotifyVirtual ?"NotifyVirtual":detail ==NotifyInferior ?"NotifyInferior":detail ==NotifyNonlinear ?"NotifyNonlinear":detail ==NotifyNonlinearVirtual ?"NotifyNonlinearVirtual":detail ==NotifyPointer ?"NotifyPointer":detail ==NotifyPointerRoot ?"NotifyPointerRoot":detail ==NotifyDetailNone ?"NotifyDetailNone":"???")
 
 
-static void focusIn(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void focusOut(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void traverseDown(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void traverseUp(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void traverseLeft(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void traverseRight(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void traverseNext(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void traversePrev(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void traverseNextTop(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void traverseHome(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void traverseCurrent(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
+static void focusIn(Widget,XEvent*,String*,Cardinal*);
+static void focusOut(Widget,XEvent*,String*,Cardinal*);
+static void traverseDown(Widget,XEvent*,String*,Cardinal*);
+static void traverseUp(Widget,XEvent*,String*,Cardinal*);
+static void traverseLeft(Widget,XEvent*,String*,Cardinal*);
+static void traverseRight(Widget,XEvent*,String*,Cardinal*);
+static void traverseNext(Widget,XEvent*,String*,Cardinal*);
+static void traversePrev(Widget,XEvent*,String*,Cardinal*);
+static void traverseNextTop(Widget,XEvent*,String*,Cardinal*);
+static void traverseHome(Widget,XEvent*,String*,Cardinal*);
+static void traverseCurrent(Widget,XEvent*,String*,Cardinal*);
 
 static XtActionsRec actionsList[] = {
 {"focusIn", focusIn},
@@ -81,81 +37,21 @@ static XtActionsRec actionsList[] = {
 {"traverseHome", traverseHome},
 {"traverseCurrent", traverseCurrent},
 };
-static void _resolve_inheritance(
-#if NeedFunctionPrototypes
-WidgetClass
-#endif
-);
-static void class_initialize(
-#if NeedFunctionPrototypes
-void
-#endif
-);
-static void initialize(
-#if NeedFunctionPrototypes
-Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static Boolean  set_values(
-#if NeedFunctionPrototypes
-Widget ,Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static void compute_inside(
-#if NeedFunctionPrototypes
-Widget,Position *,Position *,Dimension *,Dimension *
-#endif
-);
-static void expose(
-#if NeedFunctionPrototypes
-Widget,XEvent *,Region 
-#endif
-);
-static void destroy(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void highlight_border(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void unhighlight_border(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static Boolean  accept_focus(
-#if NeedFunctionPrototypes
-Widget,Time *
-#endif
-);
-static Boolean  would_accept_focus(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void traverse(
-#if NeedFunctionPrototypes
-Widget,TraversalDirection ,Widget ,Time *
-#endif
-);
-static Boolean  choose_color(
-#if NeedFunctionPrototypes
-Widget,double ,Pixel ,Pixel *
-#endif
-);
-static Boolean  lighter_color(
-#if NeedFunctionPrototypes
-Widget,Pixel ,Pixel *
-#endif
-);
-static Boolean  darker_color(
-#if NeedFunctionPrototypes
-Widget,Pixel ,Pixel *
-#endif
-);
+static void _resolve_inheritance(WidgetClass);
+static void class_initialize(void);
+static void initialize(Widget ,Widget,ArgList ,Cardinal *);
+static Boolean  set_values(Widget ,Widget ,Widget,ArgList ,Cardinal *);
+static void compute_inside(Widget,Position *,Position *,Dimension *,Dimension *);
+static void expose(Widget,XEvent *,Region );
+static void destroy(Widget);
+static void highlight_border(Widget);
+static void unhighlight_border(Widget);
+static Boolean  accept_focus(Widget,Time *);
+static Boolean  would_accept_focus(Widget);
+static void traverse(Widget,TraversalDirection ,Widget ,Time *);
+static Boolean  choose_color(Widget,double ,Pixel ,Pixel *);
+static Boolean  lighter_color(Widget,Pixel ,Pixel *);
+static Boolean  darker_color(Widget,Pixel ,Pixel *);
 #define done(type, value) do {\
 	if (to->addr != NULL) {\
 	    if (to->size < sizeof(type)) {\
@@ -173,16 +69,8 @@ Widget,Pixel ,Pixel *
     }while (0 )
 
 
-static Boolean  cvtStringToAlignment(
-#if NeedFunctionPrototypes
-Display *,XrmValuePtr ,Cardinal *,XrmValuePtr ,XrmValuePtr ,XtPointer *
-#endif
-);
-static Boolean  cvtAlignmentToString(
-#if NeedFunctionPrototypes
-Display *,XrmValuePtr ,Cardinal *,XrmValuePtr ,XrmValuePtr ,XtPointer *
-#endif
-);
+static Boolean  cvtStringToAlignment(Display *,XrmValuePtr ,Cardinal *,XrmValuePtr ,XrmValuePtr ,XtPointer *);
+static Boolean  cvtAlignmentToString(Display *,XrmValuePtr ,Cardinal *,XrmValuePtr ,XrmValuePtr ,XtPointer *);
 static char  extraTranslations[] = "\
 	<FocusIn>: focusIn()\n\
 	<FocusOut>: focusOut()\n\
@@ -196,31 +84,12 @@ static char  extraTranslations[] = "\
 	Shift<Key>Tab: traversePrev()\n\
 	<Key>KP_Enter: traverseNextTop()\n\
 	<Key>Home: traverseHome()";
-static void create_bordergc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static Boolean  traverse_to_direction(
-#if NeedFunctionPrototypes
-Widget,TraversalDirection ,int ,int ,Widget *,int *
-#endif
-);
-static void traverse_to_next(
-#if NeedFunctionPrototypes
-Widget,Widget ,Time *
-#endif
-);
-static void traverse_to_prev(
-#if NeedFunctionPrototypes
-Widget,Widget ,Time *
-#endif
-);
-static void traverse_to_next_top(
-#if NeedFunctionPrototypes
-Widget,Widget ,Time *
-#endif
-);
+static void create_bordergc(Widget);
+static Boolean  traverse_to_direction(Widget,TraversalDirection ,int ,int ,Widget *,int *);
+static void traverse_to_next(Widget,Widget ,Time *);
+static void traverse_to_prev(Widget,Widget ,Time *);
+static void traverse_to_next_top(Widget,Widget ,Time *);
+
 /*ARGSUSED*/static Boolean  cvtStringToAlignment(display,args,num_args,from,to,converter_data)Display * display;XrmValuePtr  args;Cardinal * num_args;XrmValuePtr  from;XrmValuePtr  to;XtPointer * converter_data;
 {
     Alignment a = 0;

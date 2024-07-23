@@ -9,56 +9,16 @@
 #include <X11/Xmu/CharSet.h>
 #include "Converters.h"
 #include "GroupP.h"
-static void _resolve_inheritance(
-#if NeedFunctionPrototypes
-WidgetClass
-#endif
-);
-static void class_initialize(
-#if NeedFunctionPrototypes
-void
-#endif
-);
-static void initialize(
-#if NeedFunctionPrototypes
-Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static Boolean  set_values(
-#if NeedFunctionPrototypes
-Widget ,Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static void expose(
-#if NeedFunctionPrototypes
-Widget,XEvent *,Region 
-#endif
-);
-static void insert_child(
-#if NeedFunctionPrototypes
-Widget 
-#endif
-);
-static void make_textgc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void on_cb(
-#if NeedFunctionPrototypes
-Widget ,XtPointer ,XtPointer 
-#endif
-);
-static void off_cb(
-#if NeedFunctionPrototypes
-Widget ,XtPointer ,XtPointer 
-#endif
-);
-static void set_toggles(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
+static void _resolve_inheritance(WidgetClass);
+static void class_initialize(void);
+static void initialize(Widget ,Widget,ArgList ,Cardinal *);
+static Boolean  set_values(Widget ,Widget ,Widget,ArgList ,Cardinal *);
+static void expose(Widget,XEvent *,Region );
+static void insert_child(Widget );
+static void make_textgc(Widget);
+static void on_cb(Widget ,XtPointer ,XtPointer );
+static void off_cb(Widget ,XtPointer ,XtPointer );
+static void set_toggles(Widget);
 #define done(type, value) do {\
       if (to->addr != NULL) {\
 	  if (to->size < sizeof(type)) {\
@@ -76,16 +36,9 @@ Widget
   }while (0 )
 
 
-static Boolean  cvtStringToSelectionType(
-#if NeedFunctionPrototypes
-Display *,XrmValuePtr ,Cardinal *,XrmValuePtr ,XrmValuePtr ,XtPointer *
-#endif
-);
-static Boolean  cvtSelectionTypeToString(
-#if NeedFunctionPrototypes
-Display *,XrmValuePtr ,Cardinal *,XrmValuePtr ,XrmValuePtr ,XtPointer *
-#endif
-);
+static Boolean  cvtStringToSelectionType(Display *,XrmValuePtr ,Cardinal *,XrmValuePtr ,XrmValuePtr ,XtPointer *);
+static Boolean  cvtSelectionTypeToString(Display *,XrmValuePtr ,Cardinal *,XrmValuePtr ,XrmValuePtr ,XtPointer *);
+
 /*ARGSUSED*/static void make_textgc(self)Widget self;
 {
     XtGCMask mask;

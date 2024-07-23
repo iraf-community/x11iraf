@@ -178,11 +178,7 @@ static	GC	XtAllocateGC(Widget, int, u_long, XGCValues *, u_long, u_long) ;
 #endif
 
 
-#if	NeedFunctionPrototypes
 static	Pixmap	getDitherPixmap(Widget, int contrast) ;
-#else
-static	Pixmap	getDitherPixmap() ;
-#endif
 
 
 	/* return a GC with the specified foreground and optional font */

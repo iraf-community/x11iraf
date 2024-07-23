@@ -5,11 +5,7 @@
 #define _XfwfRowColP_H_
 #include "BoardP.h"
 #include "RowCol.h"
-typedef void (*layout_Proc)(
-#if NeedFunctionPrototypes
-Widget,int 
-#endif
-);
+typedef void (*layout_Proc)(Widget,int );
 #define XtInherit_layout ((layout_Proc) _XtInherit)
 typedef struct {
 /* methods */

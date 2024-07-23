@@ -77,8 +77,6 @@
  *	draw a 3-d box.
  */
 
-#if	NeedFunctionPrototypes
-
 extern	GC	AllocFgGC( Widget w, Pixel fg, Font font) ;
 extern	GC	AllocBackgroundGC( Widget w, Font font) ;
 extern	GC	AllocShadeGC( Widget w, Pixel fg, Pixel bg, Font,
@@ -92,20 +90,4 @@ extern	Pixel	AllocGreyPixel(Widget, Pixel fg, Pixel bg, int scale) ;
 extern	Pixel	AllocGreyPixelC(Widget, XColor *fg, XColor *bg, int scale) ;
 extern	void	Draw3dBox(Widget w, int  x, int y, int wid, int hgt, int s,
 			GC topgc, GC botgc) ;
-#else
-
-extern	GC	AllocFgGC() ;
-extern	GC	AllocBackgroundGC() ;
-extern	GC	AllocShadeGC() ;
-extern	GC	AllocGreyGC() ;
-extern	GC	AllocTopShadowGC() ;
-extern	GC	AllocBotShadowGC() ;
-extern	GC	AllocArmGC() ;
-extern	Pixel	AllocShadowPixel() ;
-extern	Pixel	AllocGreyPixel() ;
-extern	Pixel	AllocGreyPixelC() ;
-extern	void	Draw3dBox() ;
-
-#endif
-
 #endif	/* GCS_H */

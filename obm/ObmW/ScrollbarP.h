@@ -5,11 +5,7 @@
 #define _XfwfScrollbarP_H_
 #include "BoardP.h"
 #include "Scrollbar.h"
-typedef void (*scroll_response_Proc)(
-#if NeedFunctionPrototypes
-Widget ,XtPointer ,XtPointer 
-#endif
-);
+typedef void (*scroll_response_Proc)(Widget ,XtPointer ,XtPointer );
 #define XtInherit_scroll_response ((scroll_response_Proc) _XtInherit)
 typedef struct {
 /* methods */

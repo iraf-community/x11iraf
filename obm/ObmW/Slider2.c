@@ -6,21 +6,9 @@
 #include "stip4.bm"
 #include <stdio.h>
 #include "Slider2P.h"
-static void start(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void finish(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void drag(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
+static void start(Widget,XEvent*,String*,Cardinal*);
+static void finish(Widget,XEvent*,String*,Cardinal*);
+static void drag(Widget,XEvent*,String*,Cardinal*);
 
 static XtActionsRec actionsList[] = {
 {"start", start},
@@ -33,76 +21,21 @@ static char defaultTranslations[] = "\
 <Btn1Motion>: drag() \n\
 <Btn1Up>: finish() \n\
 ";
-static void _resolve_inheritance(
-#if NeedFunctionPrototypes
-WidgetClass
-#endif
-);
-static void compute_thumb(
-#if NeedFunctionPrototypes
-Widget,Position *,Position *,Dimension *,Dimension *
-#endif
-);
-static void compute_inside(
-#if NeedFunctionPrototypes
-Widget,Position *,Position *,Dimension *,Dimension *
-#endif
-);
-static void expose(
-#if NeedFunctionPrototypes
-Widget,XEvent *,Region 
-#endif
-);
-static void initialize(
-#if NeedFunctionPrototypes
-Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static void move_thumb(
-#if NeedFunctionPrototypes
-Widget,int ,int ,int ,int ,int ,int 
-#endif
-);
-static void compute_info(
-#if NeedFunctionPrototypes
-Widget,Position *,Position *,Dimension *,Dimension *,float *,float *,float *,float *
-#endif
-);
-static Boolean  set_values(
-#if NeedFunctionPrototypes
-Widget ,Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static void scroll_response(
-#if NeedFunctionPrototypes
-Widget ,XtPointer ,XtPointer 
-#endif
-);
-static void create_gc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void create_graygc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void create_thumbgc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void create_thumblightgc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void create_thumbdarkgc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
+static void _resolve_inheritance(WidgetClass);
+static void compute_thumb(Widget,Position *,Position *,Dimension *,Dimension *);
+static void compute_inside(Widget,Position *,Position *,Dimension *,Dimension *);
+static void expose(Widget,XEvent *,Region );
+static void initialize(Widget ,Widget,ArgList ,Cardinal *);
+static void move_thumb(Widget,int ,int ,int ,int ,int ,int );
+static void compute_info(Widget,Position *,Position *,Dimension *,Dimension *,float *,float *,float *,float *);
+static Boolean  set_values(Widget ,Widget ,Widget,ArgList ,Cardinal *);
+static void scroll_response(Widget ,XtPointer ,XtPointer );
+static void create_gc(Widget);
+static void create_graygc(Widget);
+static void create_thumbgc(Widget);
+static void create_thumblightgc(Widget);
+static void create_thumbdarkgc(Widget);
+
 /*ARGSUSED*/static void create_gc(self)Widget self;
 {
     XtGCMask mask;

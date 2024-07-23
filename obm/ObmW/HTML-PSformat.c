@@ -88,24 +88,6 @@ extern int SwapElements();
 #define B_SLASH		'\\'
 #define MAX_ASCII	'\177'
 
-#ifdef _NO_PROTO
-# define ARG0(v0)			()
-# define ARG1(t1,v1)			(v1) t1 v1;
-# define ARG2(t1,v1,t2,v2)		(v1,v2) t1 v1;t2 v2;
-# define ARG3(t1,v1,t2,v2,t3,v3)	(v1,v2,v3) t1 v1;t2 v2;t3 v3;
-# define ARG4(t1,v1,t2,v2,t3,v3,t4,v4)	(v1,v2,v3,v4) t1 v1;t2 v2;t3 v3;t4 v4;
-# define ARG5(t1,v1,t2,v2,t3,v3,t4,v4,t5,v5)	(v1,v2,v3,v4,v5) t1 v1;t2 v2;t3 v3;t4 v4; t5 v5;
-# define ARG1V(t1,v1,e2)		(v1) t1 v1;
-#else
-# define ARG0(v0)			(v0)
-# define ARG1(t1,v1)			(t1 v1)
-# define ARG2(t1,v1,t2,v2)		(t1 v1, t2 v2)
-# define ARG3(t1,v1,t2,v2,t3,v3)	(t1 v1, t2 v2, t3 v3)
-# define ARG4(t1,v1,t2,v2,t3,v3,t4,v4)	(t1 v1, t2 v2, t3 v3, t4 v4)
-# define ARG5(t1,v1,t2,v2,t3,v3,t4,v4,t5,v5)	(t1 v1, t2 v2, t3 v3, t4 v4, t5 v5)
-# define ARG1V(t1,v1,e2)		(t1 v1, e2)
-#endif /* _NO_PROTO */
-
 /* MONO returns total intensity of r,g,b components .33R+ .5G+ .17B */
 #define MONO(rd,gn,bl) (((rd)*11 + (gn)*16 + (bl)*5) >> 13)
 
@@ -145,7 +127,7 @@ static XColor fg_color, bg_color;
  |
 */
 
-static float GetDpi ARG1(HTMLWidget, hw) {
+static float GetDpi (HTMLWidget hw) {
 	Screen *s = XtScreen(hw);
 	float dpi;
 
@@ -209,7 +191,7 @@ static int PSprintf (char *format, ... )
  |
 */
 
-static int PShex ARG2(unsigned char,val, int,flush) {
+static int PShex (unsigned char val, int flush) {
 
 	static unsigned char hexline[80];
 	static char digit[] = "0123456789abcdef";
@@ -241,7 +223,7 @@ static int PShex ARG2(unsigned char,val, int,flush) {
  |
 */
 
-static void PSfont ARG3( HTMLWidget,hw, XFontStruct *,font, int,fontfamily) {
+static void PSfont ( HTMLWidget hw, XFontStruct * font, int fontfamily) {
 
 	PS_fontstyle fn;
 	int style, size;
@@ -409,7 +391,7 @@ static void PSfont ARG3( HTMLWidget,hw, XFontStruct *,font, int,fontfamily) {
  | 
 */
 
-static void PSshowpage ARG0(void) {
+static void PSshowpage (void) {
 
 	PSprintf("showpage restore\n");
 }
@@ -424,7 +406,7 @@ static void PSshowpage ARG0(void) {
  |
 */
 
-static void PSnewpage ARG0(void) {
+static void PSnewpage (void) {
 
 	PS_curr_page++;
 
@@ -447,7 +429,7 @@ static void PSnewpage ARG0(void) {
  |
 */
 
-static void PSinit_latin1 ARG0(void) {
+static void PSinit_latin1 (void) {
 
 	static char *txt[] = {
 
@@ -503,7 +485,7 @@ static void PSinit_latin1 ARG0(void) {
  |
 */
 
-static void PSinit ARG0(void) {
+static void PSinit (void) {
 	PS_size = PS_len = PS_offset = PS_hexi = PS_page_offset = 0;
 	PS_start_y = 0;
 	PS_string = (char *) malloc(1);
@@ -521,7 +503,7 @@ static void PSinit ARG0(void) {
  |
 */
 
-static void PSheader ARG2(char *,title, int,font) {
+static void PSheader (char * title, int font) {
 
 	static char *fontname[] = {
 		/* in order: regular, bold, italic */
@@ -597,7 +579,7 @@ static void PSheader ARG2(char *,title, int,font) {
  |
 */
 
-static void PStrailer ARG0(void) {
+static void PStrailer (void) {
 
 	PSprintf("%%%%Trailer\n");
 	PSprintf("restore\n");
@@ -614,7 +596,7 @@ static void PStrailer ARG0(void) {
  |
 */
 
-static void PStext ARG2(String,t, int,underline) {
+static void PStext (String t, int underline) {
 	String	tp, t2;
 	int	nspecial=0, nisochar=0;
 
@@ -676,7 +658,7 @@ static void PStext ARG2(String,t, int,underline) {
  |
 */
 
-static void PSbullet ARG2( int, level, int, size) {
+static void PSbullet ( int level, int size) {
 	
 	if (size < 6) size = 6;
 	
@@ -697,7 +679,7 @@ static void PSbullet ARG2( int, level, int, size) {
  |
 */
 
-static void PShrule ARG1(int, length) {
+static void PShrule (int length) {
 	
 	PSprintf("%d HR\n", length);
 }
@@ -712,7 +694,7 @@ static void PShrule ARG1(int, length) {
  |
 */
 
-static void PSmoveto ARG2( int,x, int,y) {
+static void PSmoveto ( int x, int y) {
 
 	if (y > PS_start_y + Pixels_Page) {
 		PS_start_y = y;
@@ -732,7 +714,7 @@ static void PSmoveto ARG2( int,x, int,y) {
  |
 */
 	
-static void PSmove_offset ARG1( int, offset) {
+static void PSmove_offset ( int offset) {
 
 	if (offset != PS_offset) {
 		PSprintf("0 %d R\n", PS_offset - offset );
@@ -758,9 +740,9 @@ static void PSmove_offset ARG1( int, offset) {
  |
 */ 
 
-static int PSrle_encode ARG3(unsigned char *, scanline, 
-			     unsigned char *,rleline,
-			     int,wide) 
+static int PSrle_encode (unsigned char * scanline, 
+			 unsigned char * rleline,
+			 int wide) 
 {
 	int  i, j, blocklen, isrun, rlen;
 	unsigned char block[256], pix;
@@ -863,7 +845,7 @@ static int PSrle_encode ARG3(unsigned char *, scanline,
  |
 */
 
-static void PScolor_image ARG0(void) {
+static void PScolor_image (void) {
 
 	static char *txt[] = {
 
@@ -923,12 +905,12 @@ static void PScolor_image ARG0(void) {
  | 
 */
 
-static void PScolormap ARG5(int,color, 
-			    int,nc, 
-			    int *,rmap, 
-			    int *,gmap, 
-			    int *,bmap) {
-
+static void PScolormap (int color, 
+			int nc, 
+			int * rmap, 
+			int * gmap, 
+			int * bmap) {
+  
 	int i;
 
 	/*  define the colormap */
@@ -957,7 +939,7 @@ static void PScolormap ARG5(int,color,
  | 
 */
 
-static void PSrle_cmapimage ARG1(int,color) {
+static void PSrle_cmapimage (int color) {
 
 	static char *txt[] = {
 
@@ -1028,7 +1010,7 @@ static void PSrle_cmapimage ARG1(int,color) {
  |
 */
 
-static int PSwrite_bw ARG4(unsigned char *,pic, int,w, int,h, int,flipbw) {
+static int PSwrite_bw (unsigned char * pic, int w, int h, int flipbw) {
 	
 	int	i, j;
 	int	err=0;
@@ -1073,7 +1055,7 @@ static int PSwrite_bw ARG4(unsigned char *,pic, int,w, int,h, int,flipbw) {
  | 
 */
 
-static void PSimage ARG2( ImageInfo *,img , int, anchor) {
+static void PSimage ( ImageInfo *img , int anchor) {
 	
 	int ncolors = img->num_colors;
 	int i, j;

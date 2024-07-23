@@ -264,63 +264,6 @@ static XtResource tabsConstraintResources[] = {
 } ;
 #undef	offset
 
-
-
-
-#if	!NeedFunctionPrototypes
-
-	/* FORWARD REFERENCES: */
-
-	/* member functions */
-
-static	void	TabsClassInit();
-static	void	TabsInit();
-static	void	TabsResize();
-static	void	TabsExpose();
-static	void	TabsDestroy();
-static	void	TabsRealize();
-static	Boolean	TabsSetValues();
-static	Boolean	TabsAcceptFocus();
-static	XtGeometryResult	TabsQueryGeometry();
-static	XtGeometryResult	TabsGeometryManager();
-static	void	TabsChangeManaged();
-static	void	TabsConstraintInitialize() ;
-static	Boolean	TabsConstraintSetValues() ;
-
-	/* action procs */
-
-static	void	TabsSelect() ;
-static	void	TabsPage() ;
-static	void	TabsHighlight() ;
-static	void	TabsUnhighlight() ;
-
-	/* internal privates */
-
-static	void	TabsAllocGCs() ;	/* get rendering GCs */
-static	void	TabsFreeGCs() ;		/* return rendering GCs */
-static	void	DrawTabs() ;		/* draw all tabs */
-static	void	DrawTab() ;		/* draw one index tab */
-static	void	DrawFrame() ;		/* draw frame around contents */
-static	void	DrawTrim() ;		/* draw trim around a tab */
-static	void	DrawBorder() ;		/* draw border */
-static	void	DrawHighlight() ;	/* draw highlight */
-static	void	UndrawTab() ;		/* undraw interior of a tab */
-static	void	TabWidth() ;		/* recompute tab size */
-static	void	GetPreferredSizes() ;	/* query all children for their sizes */
-static	void	MaxChild() ;		/* find max preferred child size */
-static	int	PreferredSize() ;	/* compute preferred size */
-static	int	PreferredSize2() ;	/* compute preferred size */
-static	int	PreferredSize3() ;	/* compute preferred size */
-static	void	MakeSizeRequest() ;	/* try to change size */
-static	void	getBitmapInfo() ;
-static	int	TabLayout() ;		/* lay out tabs */
-static	void	TabsShuffleRows() ;	/* bring current tab to bottom row */
-
-static	void	TabsAllocFgGC() ;
-static	void	TabsAllocGreyGC() ;
-
-#else
-
 static	void	TabsClassInit(void) ;
 static	void	TabsInit( Widget req, Widget new, ArgList, Cardinal *nargs) ;
 static	void	TabsConstraintInitialize(Widget, Widget, ArgList, Cardinal *) ;
@@ -372,8 +315,6 @@ static	void	TabsFreeGCs(TabsWidget) ;
 static	void	getBitmapInfo( TabsWidget tw, TabsConstraints tab) ;
 static	void	TabsAllocFgGC( TabsWidget tw) ;
 static	void	TabsAllocGreyGC( TabsWidget tw) ;
-
-#endif
 
 #define	AddRect(i,xx,yy,w,h)	\
   do{rects[(i)].x=(xx); rects[i].y=(yy);	\

@@ -7,66 +7,23 @@
 #include "Slider2.h"
 #include <stdio.h>
 #include "ScrollbarP.h"
-static void Scroll(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
+static void Scroll(Widget,XEvent*,String*,Cardinal*);
 
 static XtActionsRec actionsList[] = {
 {"Scroll", Scroll},
 };
-static void _resolve_inheritance(
-#if NeedFunctionPrototypes
-WidgetClass
-#endif
-);
-static void initialize(
-#if NeedFunctionPrototypes
-Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static void resize(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void insert_child(
-#if NeedFunctionPrototypes
-Widget 
-#endif
-);
-static Boolean  set_values(
-#if NeedFunctionPrototypes
-Widget ,Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static void scroll_response(
-#if NeedFunctionPrototypes
-Widget ,XtPointer ,XtPointer 
-#endif
-);
+static void _resolve_inheritance(WidgetClass);
+static void initialize(Widget ,Widget,ArgList ,Cardinal *);
+static void resize(Widget);
+static void insert_child(Widget );
+static Boolean  set_values(Widget ,Widget ,Widget,ArgList ,Cardinal *);
+static void scroll_response(Widget ,XtPointer ,XtPointer );
 static char  rcsid[] = "$Header: Scrollbar.w,v 1.1 92/11/02 14:08:00 bert Exp $";
-static void up(
-#if NeedFunctionPrototypes
-Widget ,XtPointer ,XtPointer 
-#endif
-);
-static void down(
-#if NeedFunctionPrototypes
-Widget ,XtPointer ,XtPointer 
-#endif
-);
-static void thumbscroll(
-#if NeedFunctionPrototypes
-Widget ,XtPointer ,XtPointer 
-#endif
-);
-static void copy_background(
-#if NeedFunctionPrototypes
-Widget,int ,XrmValue *
-#endif
-);
+static void up(Widget ,XtPointer ,XtPointer );
+static void down(Widget ,XtPointer ,XtPointer );
+static void thumbscroll(Widget ,XtPointer ,XtPointer );
+static void copy_background(Widget,int ,XrmValue *);
+
 /*ARGSUSED*/static void up(arrow,client_data,call_data)Widget  arrow;XtPointer  client_data;XtPointer  call_data;
 {
     Widget self = (Widget) client_data;

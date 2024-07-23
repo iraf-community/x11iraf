@@ -9,70 +9,22 @@
 #include <X11/Xmu/CharSet.h>
 #include "stip4.bm"
 #include "FrameP.h"
-static void set_shadow(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
+static void set_shadow(Widget,XEvent*,String*,Cardinal*);
 
 static XtActionsRec actionsList[] = {
 {"set_shadow", set_shadow},
 };
-static void _resolve_inheritance(
-#if NeedFunctionPrototypes
-WidgetClass
-#endif
-);
-static void class_initialize(
-#if NeedFunctionPrototypes
-void
-#endif
-);
-static void initialize(
-#if NeedFunctionPrototypes
-Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static void realize(
-#if NeedFunctionPrototypes
-Widget,XtValueMask *,XSetWindowAttributes *
-#endif
-);
-static Boolean  set_values(
-#if NeedFunctionPrototypes
-Widget ,Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static void expose(
-#if NeedFunctionPrototypes
-Widget,XEvent *,Region 
-#endif
-);
-static void compute_inside(
-#if NeedFunctionPrototypes
-Widget,Position *,Position *,Dimension *,Dimension *
-#endif
-);
-static XtGeometryResult  query_geometry(
-#if NeedFunctionPrototypes
-Widget,XtWidgetGeometry *,XtWidgetGeometry *
-#endif
-);
-static XtGeometryResult  geometry_manager(
-#if NeedFunctionPrototypes
-Widget ,XtWidgetGeometry *,XtWidgetGeometry *
-#endif
-);
-static void resize(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void change_managed(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
+static void _resolve_inheritance(WidgetClass);
+static void class_initialize(void);
+static void initialize(Widget ,Widget,ArgList ,Cardinal *);
+static void realize(Widget,XtValueMask *,XSetWindowAttributes *);
+static Boolean  set_values(Widget ,Widget ,Widget,ArgList ,Cardinal *);
+static void expose(Widget,XEvent *,Region );
+static void compute_inside(Widget,Position *,Position *,Dimension *,Dimension *);
+static XtGeometryResult  query_geometry(Widget,XtWidgetGeometry *,XtWidgetGeometry *);
+static XtGeometryResult  geometry_manager(Widget ,XtWidgetGeometry *,XtWidgetGeometry *);
+static void resize(Widget);
+static void change_managed(Widget);
 #define done(type, value) do {\
       if (to->addr != NULL) {\
 	  if (to->size < sizeof(type)) {\
@@ -91,26 +43,12 @@ Widget
 
 
 static char  rcsid[] = "$Header: Frame.w,v 1.5 92/11/02 14:07:52 bert Exp $";
-static void create_darkgc(
-#if NeedFunctionPrototypes
-Widget
-#endif
+static void create_darkgc(Widget);
+static void create_lightgc(Widget);
+static void compute_topcolor(Widget,int ,XrmValue *);
+static void compute_bottomcolor(Widget,int ,XrmValue *
 );
-static void create_lightgc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void compute_topcolor(
-#if NeedFunctionPrototypes
-Widget,int ,XrmValue *
-#endif
-);
-static void compute_bottomcolor(
-#if NeedFunctionPrototypes
-Widget,int ,XrmValue *
-#endif
-);
+
 /*ARGSUSED*/static void create_darkgc(self)Widget self;
 {
     XtGCMask mask;
