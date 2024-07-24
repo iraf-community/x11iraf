@@ -655,7 +655,7 @@ WidgetDestroy (ObmObject object)
 	 */
 	if (!wp->widget_destroyed) {
 	    widgetSetDestroy (object);
-	    widgetDestroy (obj);
+	    widgetDestroy (object);
 	}
 }
 
@@ -2954,14 +2954,14 @@ widgetListTreeSelect (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	        titem = ListTreeFindSiblingName (wp->w, first, top);
 	        if (titem)
 		    ListTreeOpenAll (wp->w, titem, 0);
-	        item = ListTreeFindChildNameInTree (wp->w, titem, name);
+	        item = ListTreeFindChildNameInTree ((ListTreeWidget) wp->w, titem, name);
 	        item = (item ? item : titem);
 	    } else {
-	        titem = ListTreeFindSiblingName (wp->w, first, name);
+		titem = ListTreeFindSiblingName (wp->w, first, name);
 		if (strcmp (name, titem->text) == 0)
 		    item = titem;
 		else
-	            item = ListTreeFindChildNameInTree (wp->w, titem, name);
+	            item = ListTreeFindChildNameInTree ((ListTreeWidget) wp->w, titem, name);
 	    }
 	    ListTreeHighlightItem (wp->w, item);
 	    ListTreeOpenAll (wp->w, item, 0);
@@ -3029,7 +3029,7 @@ widgetListTreeHighlight (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	if (argc == 3) {
 	    top = argv[2];
 	    titem = ListTreeFindSiblingName (wp->w, first, top);
-	    item = ListTreeFindChildNameInTree (wp->w, titem, name);
+	    item = ListTreeFindChildNameInTree ((ListTreeWidget) wp->w, titem, name);
 	    item = (item ? item : titem);
 
 	    /* Now chain back up thru the parents and open the nodes.
@@ -3042,11 +3042,11 @@ widgetListTreeHighlight (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	} else {
 	    if (first->open == 0)
 	        ListTreeOpenAll (wp->w, first, 0);
-	    titem = ListTreeFindChildNameInTree (wp->w, first, name);
+	    titem = ListTreeFindChildNameInTree ((ListTreeWidget) wp->w, first, name);
 	    if (titem && strcmp (name, titem->text) == 0)
 		item = titem;
 	    else
-	        item = ListTreeFindChildNameInTree (wp->w, titem, name);
+	        item = ListTreeFindChildNameInTree ((ListTreeWidget) wp->w, titem, name);
 	}
 	ListTreeHighlightItem (wp->w, item);
 

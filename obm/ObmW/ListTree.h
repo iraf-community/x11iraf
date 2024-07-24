@@ -105,6 +105,7 @@ int ListTreeOrderSiblings (Widget w, ListTreeItem *item);
 int ListTreeOrderChildren (Widget w, ListTreeItem *item);
 ListTreeItem *ListTreeFindSiblingName (Widget w, ListTreeItem *item, char *name);
 ListTreeItem *ListTreeFindChildName (Widget w, ListTreeItem *item, char *name);
+ListTreeItem *ListTreeFindChildNameInTree(ListTreeWidget w, ListTreeItem *item, char *name);
 void ListTreeHighlightItem (Widget w, ListTreeItem *item);
 ListTreeItem *ListTreeFirstItem (Widget w);
 void ListTreeOpenAll (Widget w, ListTreeItem *start, int child_only);
