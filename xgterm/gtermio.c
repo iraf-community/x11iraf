@@ -100,7 +100,7 @@
 
 static	XtAppContext app_con;
 static	ObmContext obm;			/* object manager		*/
-static	Widget gw;			/* graphics widget		*/
+static	GtermWidget gw;			/* graphics widget		*/
 
 static	int gio_graphicsenabled = 0;	/* switch text/graphics output	*/
 static	int gio_enabled = 1;		/* enable graphics window	*/
@@ -212,14 +212,16 @@ typedef Request	*RequestPtr;
 static RequestPtr request_head = NULL;
 static RequestPtr request_tail = NULL;
 
-static	int gio_reset(), gio_setginmodeterm(), gio_output();
+static	int gio_reset(int, GtermWidget, char *);
+static	int gio_setginmodeterm();
+static	int gio_output();
 static	int gio_clear();
 static	int gio_retcursor(), gio_queue_output(), gio_queue_request();
 static	int gio_hardreset(), gio_activate(), gio_enable(), gio_tekmode();
 static	int gio_processdata(), gio_ptyinput(), gio_escape(), gio_status();
-static	void gio_activate_cb();
-static  void gio_connect_cb();
-static	void gio_deactivate_cb();
+static	int gio_activate_cb();
+static  int gio_connect_cb();
+static	int gio_deactivate_cb();
 static	void gio_keyinput(), gio_resize();
 static	void pl_decodepts(), gio_retenq();
 
@@ -262,11 +264,11 @@ static XtActionsRec actionsList[] = {
  * process startup to establish communications between the caller and gtermio.
  */
 void
-gio_setup (app_context, argc, argv, fd)
-XtAppContext app_context;	/* applications context of caller */
-int	argc;			/* argument count */
-char	*argv[];		/* argument vector */
-int	fd;			/* fd of pty for terminal i/o */
+gio_setup (
+   XtAppContext app_context,	/* applications context of caller */
+   int	argc,			/* argument count */
+   char	*argv[],		/* argument vector */
+   int	fd)			/* fd of pty for terminal i/o */
 {
 	app_con = app_context;
 	pty_fd = fd;
@@ -301,9 +303,7 @@ int	fd;			/* fd of pty for terminal i/o */
  * be called when the display connection is opened or close.
  */
 void
-gio_postconnectcallback (connect, client_data)
-void (*connect)();
-int client_data;
+gio_postconnectcallback (int (*connect)(), int client_data)
 {
 	if (obm) {
 	    ObmAddCallback (obm, OBMCB_connect|OBMCB_preserve,
@@ -316,9 +316,7 @@ int client_data;
  * disabled, all i/o is directed to the text window.
  */
 static int
-gio_enable (dummy, onoff)
-int	dummy;
-int	onoff;
+gio_enable (int	dummy, int onoff)
 {
 	switch (onoff) {
 	case 0:
@@ -338,9 +336,7 @@ int	onoff;
  * forcibly activate or deactivate the graphics UI.
  */
 static int
-gio_activate (dummy, state)
-int dummy;
-int state;
+gio_activate (int dummy, int state)
 {
 	register RequestPtr rp;
 
@@ -384,10 +380,7 @@ int state;
  * not a GUI has been loaded.
  */
 static int
-gio_status (dummy, app_name, app_class)
-int dummy;
-char *app_name;			/* can be NULL */
-char *app_class;		/* can be NULL */
+gio_status (int dummy, char *app_name, char *app_class)
 {
 	return (ObmStatus (obm, app_name, app_class));
 }
@@ -396,16 +389,13 @@ char *app_class;		/* can be NULL */
 /* GIO_ACTIVATE_CB -- Activate callback, called by the gterm widget when the
  * user interface is activated.
  */
-static void
-gio_activate_cb (dummy, w, state)
-int dummy;
-Widget w;
-int state;
+static int
+gio_activate_cb (int dummy, Widget w, int state)
 {
 	register RequestPtr rp;
 
 	if (!state)
-	    return;
+	    return 0;
 
 	/* Cancel any buffered command output. */
 	wait_cursor = 0;
@@ -424,6 +414,7 @@ int state;
 	wm_delete_window = XInternAtom (XtDisplay(w),
 	    "WM_DELETE_WINDOW", False);
 	XSetWMProtocols (XtDisplay(w), XtWindow(w), &wm_delete_window, 1);
+	return 0;
 }
 
 
@@ -432,24 +423,18 @@ int state;
  * to intercept a window close action in a GUI to keep from shutting down 
  * completely.
  */
-static void
-gio_deactivate_cb (dummy, w, state)
-int dummy;
-Widget w;
-int state;
+static int
+gio_deactivate_cb (int dummy, Widget w, int state)
 {
+	return 0;
 }
 
 
 /* GIO_CONNECT_CB -- Connect callback, called by the gterm widget when a new
  * application GUI is initialized or when the display connection is closed.
  */
-static void
-gio_connect_cb (dummy, display, toplevel, state)
-int dummy;
-Display *display;
-Widget toplevel;
-int state;
+static int
+gio_connect_cb (int dummy, Display *display, Widget toplevel, int state)
 {
 	if (state) {
 	    extern Widget term;
@@ -480,6 +465,7 @@ int state;
 		XtParseTranslationTable (gio_shellTrans));
 	} else
 	    memset (gterms, 0, sizeof(gterms));
+	return 0;
 }
 
 
@@ -488,9 +474,7 @@ int state;
  * can be called to manually switch the input to a window.
  */
 static int
-gio_tekmode (dummy, onoff)
-int dummy;
-int onoff;
+gio_tekmode (int dummy, int onoff)
 {
 	switch (onoff) {
 	case 0:
@@ -509,8 +493,7 @@ int onoff;
 /* GIO_CLEAR -- Clear the graphics window.
  */
 static int
-gio_clear (dummy)
-int dummy;
+gio_clear (int dummy)
 {
 	if (gw) {
 	    GtClearScreen (gw);
@@ -528,8 +511,7 @@ int dummy;
  * that may be in progress.
  */
 static int
-gio_hardreset (dummy)
-int dummy;
+gio_hardreset (int dummy)
 {
 	register RequestPtr rp;
 
@@ -592,10 +574,7 @@ int dummy;
  * window is resized.
  */
 static int
-gio_reset (notused, w, args)
-int notused;
-register Widget w;
-char *args;
+gio_reset (int notused, GtermWidget w, char *args)
 {
 	register int i;
 	int new_widget;
@@ -612,7 +591,7 @@ char *args;
 	 */
 	new_widget = 1;
 	for (i=0;  i < MAX_GTERM;  i++)
-	    if (gterms[i] == w) {
+	  if (gterms[i] == (Widget) w) {
 		new_widget = 0;
 		break;
 	    }
@@ -627,7 +606,7 @@ char *args;
 
 	    for (i=0;  i < MAX_GTERM;  i++)
 		if (!gterms[i]) {
-		    gterms[i] = w;
+		  gterms[i] = (Widget) w;
 		    break;
 		}
 	}
@@ -669,9 +648,7 @@ char *args;
  * expressed as octal constants in the input string argument.
  */
 static int
-gio_setginmodeterm (dummy, str)
-int	dummy;
-char	*str;
+gio_setginmodeterm (int dummy, char *str)
 {
 	register char	*ip;
 	register int	n;
@@ -708,14 +685,12 @@ char	*str;
  * drawing window is resized.
  */
 static void
-gio_resize (notused, w)
-XtPointer notused;
-Widget w;
+gio_resize (XtPointer notused, Widget w)
 {
 	/* Ignore the resize callback if the widget being resized is not the
 	 * active widget.
 	 */
-	if (w != gw)
+	if (w != (Widget) gw)
 	    return;
 
 	/* Always update the window size variables. */
@@ -743,7 +718,7 @@ Widget w;
 	 */
 	if (!g_havedata) {
 	    if (gw)
-		gio_reset (0, gw, NULL);
+		gio_reset (0, (GtermWidget) gw, NULL);
 
 	    /* If the client posted a resize escape sequence, send this
 	     * value to the client as a cursor read to signal the resize
@@ -768,12 +743,12 @@ Widget w;
  * read) pending, the request will be passed on immediately.
  */
 static int
-gio_queue_output (fd, tcl, objname, key, strval)
-int fd;				/* pty */
-XtPointer tcl;			/* not used */
-char *objname;			/* client object name (not used) */
-int key;			/* cursor keystroke or NULL */
-char *strval;			/* cursor strval or literal command */
+gio_queue_output (
+    int fd,			/* pty */
+    XtPointer tcl,		/* not used */
+    char *objname,		/* client object name (not used) */
+    int key,			/* cursor keystroke or NULL */
+    char *strval)		/* cursor strval or literal command */
 {
         int mapping, raster;
 	int sx, sy, rx, ry;
@@ -803,11 +778,7 @@ char *strval;			/* cursor strval or literal command */
 /* GIO_QUEUE_REQUEST -- Queue a request.
  */
 static int
-gio_queue_request (sx, sy, raster, rx, ry, key, strval)
-int sx, sy;
-int raster, rx, ry;
-int key;
-char *strval;
+gio_queue_request (int sx, int sy, int raster, int rx, int ry, int key, char *strval)
 {
 	register RequestPtr rp;
 	int buflen, nchars;
@@ -855,7 +826,7 @@ char *strval;
  * contains a field giving the length of the data string which follows.
  */
 static int
-gio_output()
+gio_output(void)
 {
 	register RequestPtr rp;
 
@@ -897,10 +868,10 @@ gio_output()
  * Sometime later the graphics drawing code will be called to process the data.
  */
 static int
-gio_ptyinput (notused, ttybuf, nchars)
-int	notused;
-char	*ttybuf;		/* raw data on input, tty data on output */
-int	nchars;			/* nchars of raw data */
+gio_ptyinput (
+  int notused, 
+  char	*ttybuf,		/* raw data on input, tty data on output */
+  int	nchars)			/* nchars of raw data */
 {
 	register char *itop = ttybuf + nchars;
 	register char *op, *ip = ttybuf, ch;
@@ -1045,7 +1016,7 @@ gstart:			g_putc (GS);
  * on, solid line type, and so on.
  */
 static int
-gio_processdata()
+gio_processdata(void)
 {
 	register int quota, ch;
 	unsigned char *save_ip, *ip_start;
@@ -1055,7 +1026,7 @@ gio_processdata()
 	 * before processing any further graphics input data.
 	 */
 	if (gio_delay) {
-	    gio_delay = gw ? !GtReady (gw) : 0;
+	    gio_delay = gw ? !GtReady ((GtermWidget) gw) : 0;
 	    if (gio_delay)
 		return (1);
 	}
@@ -1107,7 +1078,7 @@ again:
 				gio_activate (0, 1);
 			    }
 			    if (gw)
-				GtActivate (gw);
+				GtActivate ((GtermWidget) gw);
 			    workstation_open = 1;
 			    g_ungetc (ch);
 			    goto exit;
@@ -1567,7 +1538,7 @@ exit:
  * zero when the screen is cleared.
  */
 static void
-pl_decodepts()
+pl_decodepts(void)
 {
 	register char	*ip, *itop;
 	int	hiy, loy, hix, lox, type, data, nb;
@@ -1628,10 +1599,7 @@ pl_decodepts()
  * merely passed on.
  */
 static void
-gio_keyinput (notused, w, event)
-XtPointer notused;
-Widget	w;
-XEvent	*event;
+gio_keyinput (XtPointer notused, Widget	w, XEvent *event)
 {
         XKeyEvent *xkey = &event->xkey;
         char strbuf[SZ_STRBUF];
