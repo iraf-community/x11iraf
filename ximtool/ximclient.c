@@ -872,13 +872,14 @@ char **argv;
 		if (strncmp (cm->name, "Random", 6) == 0) {
 		    xim_setColormap (cm->name, NULL,
 			m_red, m_green, m_blue, xim->ncolors);
-		    GtWriteColormap (xim->gt, cm->mapno,
+		    GtWriteColormap ((GtermWidget) xim->gt, cm->mapno,
 			first_color, xim->ncolors, m_red, m_green, m_blue);
 		}
 
 		fb->colormap = i;
 	    	GtSetColormapFocus (-1);	/* force full update	*/
-		GtLoadColormap (xim->gt, cm->mapno, fb->offset, fb->scale);
+		GtLoadColormap ((GtermWidget) xim->gt, cm->mapno,
+				fb->offset, fb->scale);
 	    	GtSetColormapFocus (xim->cm_focus);
 		xim_enhancement (xim, fb);
 	    }
@@ -907,7 +908,8 @@ char **argv;
 	    cm = &colormaps[fb->colormap-1];
 	    fb->offset = atof(argv[1]);
 	    fb->scale = (argc > 2) ? (float)atof(argv[2]) : fb->scale;
-	    GtLoadColormap (xim->gt, cm->mapno, fb->offset, fb->scale);
+	    GtLoadColormap ((GtermWidget) xim->gt, cm->mapno,
+			    fb->offset, fb->scale);
 	    xim_enhancement (xim, fb);
 	}
 
@@ -935,7 +937,8 @@ char **argv;
 	    fb->offset = atof(argv[1]);
 	    fb->scale = (argc > 2) ? (float)atof(argv[2]) : fb->scale;
 	    GtSetColormapFocus (-1);	/* force full update	*/
-	    GtLoadColormap (xim->gt, cm->mapno, fb->offset, fb->scale);
+	    GtLoadColormap ((GtermWidget) xim->gt, cm->mapno,
+			    fb->offset, fb->scale);
 	    GtSetColormapFocus (xim->cm_focus);
 	    xim_enhancement (xim, fb);
 	}
@@ -1255,7 +1258,8 @@ char **argv;
 
 	/* Read the display raster. */
 	pix = (unsigned char *) XtMalloc (npix);
-        if (GtReadPixels (xim->gt, raster, pix, 8, x0, y0, nx, ny) < 0)
+        if (GtReadPixels ((GtermWidget) xim->gt, raster, pix, 8,
+			  x0, y0, nx, ny) < 0)
 	    return (TCL_ERROR);
 
 	/* Scale the data to the WCS pixel values for display.  We don't
@@ -2406,7 +2410,8 @@ char **argv;
 
 	    /* Query and read the current colormap. */
 	    GtQueryColormap (xim->gt, cm->mapno, &first, &nelem, &maxelem);
-	    GtReadColormap (xim->gt, cm->mapno, first, nelem, r,g,b);
+	    GtReadColormap ((GtermWidget) xim->gt, cm->mapno, first, nelem,
+			    r,g,b);
 
 	    /* compute the scaled colormap, scaling only the color we're
 	     * interested in.
@@ -2424,9 +2429,10 @@ char **argv;
 	    }
 
 	    /* Lastly, write it back to the widget. */
-	    GtWriteColormap (xim->gt, 0, first, nelem, r, g, b);
+	    GtWriteColormap ((GtermWidget) xim->gt, 0, first, nelem, r, g, b);
 	    if (save)
-	        GtWriteColormap (xim->gt, cm->mapno, first, nelem, r, g, b);
+	        GtWriteColormap ((GtermWidget) xim->gt, cm->mapno,
+				 first, nelem, r, g, b);
 	}
 
 	return (TCL_OK);

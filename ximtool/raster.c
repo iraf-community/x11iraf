@@ -108,7 +108,7 @@ static void xim_frameRegion();
 static void xim_colortables();
 static int xim_onScreen();
 static void xim_highlightFrame();
-static void hsv_to_rgb();
+static void hsv_to_rgb(float, float, float, float *, float *, float *);
 
 void xim_labelTiles();
 void xim_getScreen();
@@ -120,15 +120,11 @@ void xim_getScreen();
  * and create the frame buffers, mappings, and colormaps.
  */
 void
-xim_initialize (xim, config, nframes, hardreset)
-register XimDataPtr xim;
-int config;
-int nframes;
-int hardreset;
+xim_initialize (XimDataPtr xim, int config, int nframes, int hardreset)
 {
-	register Widget gt = xim->gt;
-	register FrameBufPtr fb;
-	register int i;
+	GtermWidget gt = (GtermWidget) xim->gt;
+	FrameBufPtr fb;
+	int i;
 
 	unsigned short m_red[MAX_COLORS];
 	unsigned short m_green[MAX_COLORS];
@@ -410,9 +406,7 @@ int hardreset;
 /* XIM_RESET -- Called when the active gterm widget is set or changed.
  */
 void
-xim_reset (xim, w)
-XimDataPtr xim;
-Widget w;
+xim_reset (XimDataPtr xim, Widget w)
 {
 	unsigned short iomap[MAX_COLORS];
 	int iomap_len;
@@ -428,12 +422,12 @@ Widget w;
 	if (xim->cb == NULL) {
 	    xim->cb = w;
 	    xim_iisiomap (w, iomap, &iomap_len);
-	    GtPostResizeProc (w, set_colorbar, xim);
+	    GtPostResizeProc ((GtermWidget) w, set_colorbar, xim);
 	    GtWriteIomap (w, iomap, 0, iomap_len);
 	} else {
 	    xim->gt = w;
 	    xim_iisiomap (w, iomap, &iomap_len);
-	    GtPostResizeProc (w, xim_resize, xim);
+	    GtPostResizeProc ((GtermWidget) w, xim_resize, xim);
 	    GtWriteIomap (w, iomap, 0, iomap_len);
 	}
 }
@@ -444,9 +438,7 @@ Widget w;
  * reflect the new window size.
  */
 void
-xim_resize (xim, w)
-XimDataPtr xim;
-Widget w;
+xim_resize (XimDataPtr xim, Widget w)
 {
 	register FrameBufPtr fb;
 	int junk, sx, sy, width, height, depth;
@@ -501,8 +493,10 @@ Widget w;
 	    active = xim_onScreen (xim, frame);
 
 	    if (fb->zoomras) {
-		GtQueryRaster (w, fb->zoomras, &zoomtype, &junk, &junk, &junk);
-		GtCreateRaster (w, fb->zoomras, zoomtype, width, height, depth);
+		GtQueryRaster ((GtermWidget) w, fb->zoomras, &zoomtype,
+			       &junk, &junk, &junk);
+		GtCreateRaster ((GtermWidget) w, fb->zoomras, zoomtype,
+				width, height, depth);
 		xim_setMapping (xim, NULL, frame, fb->dispmap,
 		    fb->zoomras, 0, M_FILL);
 		if (!active) {
@@ -534,8 +528,10 @@ Widget w;
 	    if (xim_onScreen (xim, frame)) {
 		int junk, width, height, depth;
 		fb = &xim->frames[frame-1];
-		GtQueryRaster (w, fb->raster, &junk, &width, &height, &depth);
-		GtRefreshPixels (w, fb->raster, GtPixel, 0, 0, width, height);
+		GtQueryRaster ((GtermWidget) w, fb->raster, &junk,
+			       &width, &height, &depth);
+		GtRefreshPixels ((GtermWidget) w, fb->raster, GtPixel,
+				 0, 0, width, height);
 	    }
 	}
 
@@ -550,22 +546,22 @@ Widget w;
 /* XIM_REFRESH -- Refresh the current display frame.
  */
 void
-xim_refresh (xim)
-XimDataPtr xim;
+xim_refresh (XimDataPtr xim)
 {
 	register FrameBufPtr fb = xim->df_p;
 	int junk, width, height, depth;
 
-	GtQueryRaster (xim->gt, fb->raster, &junk, &width, &height, &depth);
-	GtRefreshPixels (xim->gt, fb->raster, GtPixel, 0, 0, width, height);
+	GtQueryRaster ((GtermWidget) xim->gt, fb->raster, &junk,
+		       &width, &height, &depth);
+	GtRefreshPixels ((GtermWidget) xim->gt, fb->raster, GtPixel,
+			 0, 0, width, height);
 }
 
 
 /* XIM_CLOSE -- Free any raster specific resources.
  */
 void
-xim_close (xim)
-register XimDataPtr xim;
+xim_close (XimDataPtr xim)
 {
 }
 
@@ -574,9 +570,7 @@ register XimDataPtr xim;
  * frame.
  */
 void
-xim_setFrame (xim, frame)
-register XimDataPtr xim;
-int frame;
+xim_setFrame (XimDataPtr xim, int frame)
 {
 	xim_setDisplayFrame (xim, frame);
 }
@@ -585,9 +579,7 @@ int frame;
 /* XIM_SETREFERENCEFRAME -- Set the frame used for frame buffer i/o.
  */
 void
-xim_setReferenceFrame (chan, frame)
-register IoChanPtr chan;
-int frame;
+xim_setReferenceFrame (IoChanPtr chan, int frame)
 {
 	register XimDataPtr xim = (XimDataPtr) chan->xim;
 	register FrameBufPtr fb;
@@ -611,12 +603,10 @@ int frame;
 /* XIM_SETDISPLAYFRAME -- Set the frame which is displayed.
  */
 void
-xim_setDisplayFrame (xim, frame)
-register XimDataPtr xim;
-int frame;
+xim_setDisplayFrame (XimDataPtr xim, int frame)
 {
 	register FrameBufPtr fb;
-	register Widget gt = xim->gt;
+	GtermWidget gt = (GtermWidget) xim->gt;
 	FrameBufPtr old_fb = xim->df_p;
 	int frameno, old_frameno;
 	char buf[256];
@@ -700,14 +690,11 @@ int frame;
 /* XIM_INITFRAME -- Initialize a frame buffer.
  */
 void
-xim_initFrame (xim, frame, nframes, config, memModel)
-register XimDataPtr xim;
-int frame, nframes;
-FbConfigPtr config;
-char *memModel;
+xim_initFrame (XimDataPtr xim, int frame, int nframes, FbConfigPtr config,
+	       char *memModel)
 {
 	register FrameBufPtr fb = &xim->frames[frame-1];
-	register Widget gt = xim->gt;
+	GtermWidget gt = (GtermWidget) xim->gt;
 	int sx, sy, width, height, depth;
 
 	if (frame < 1 || frame > MAX_FRAMES)
@@ -834,12 +821,10 @@ small:	    fb->zoomras = 0;
 /* XIM_DELFRAME -- Delete a frame.
  */
 void
-xim_delFrame (xim, frame)
-register XimDataPtr xim;
-int frame;
+xim_delFrame (XimDataPtr xim, int frame)
 {
 	register FrameBufPtr fb = &xim->frames[frame-1];
-	register Widget gt = xim->gt;
+	GtermWidget gt = (GtermWidget) xim->gt;
 
 	if (frame < 1 || frame > MAX_FRAMES)
 	    return;
@@ -863,12 +848,10 @@ int frame;
 /* XIM_ERASEFRAME -- Erase a frame.
  */
 void
-xim_eraseFrame (xim, frame)
-register XimDataPtr xim;
-int frame;
+xim_eraseFrame (XimDataPtr xim, int frame)
 {
 	FrameBufPtr fb = &xim->frames[frame-1];
-	Widget gt = xim->gt;
+	GtermWidget gt = (GtermWidget) xim->gt;
 	int    Z = 0;
 
 	GtSetPixels (gt, fb->raster, GtPixel, Z,Z,Z,Z, CMS_BACKGROUND, 0);
@@ -879,10 +862,9 @@ int frame;
  * size as the frame buffer.
  */
 void
-xim_fitFrame (xim)
-register XimDataPtr xim;
+xim_fitFrame (XimDataPtr xim)
 {
-	register Widget gt = xim->gt;
+	GtermWidget gt = (GtermWidget) xim->gt;
 
 	GtCreateRaster (gt, 0, GtServer, xim->width, xim->height, 8);
 }
@@ -891,9 +873,7 @@ register XimDataPtr xim;
 /* XIM_TILEFRAMES -- Set or clear tile frame mode.
  */
 void
-xim_tileFrames (xim, frame_list)
-register XimDataPtr xim;
-int frame_list;
+xim_tileFrames (XimDataPtr xim, int frame_list)
 {
 	register int i;
 	register Widget w = xim->gt;
@@ -970,9 +950,7 @@ int frame_list;
  * by coloring the border of the frame.
  */
 static void
-xim_highlightFrame (xim, frame)
-register XimDataPtr xim;
-int frame;
+xim_highlightFrame (XimDataPtr xim, int frame)
 {
 	/* If we are tiling frames highlight the new display frame. */
 	if (xim->gm_border) {
@@ -1013,8 +991,7 @@ int frame;
 /* XIM_LABELTILES -- Label the tile with the frame number.
  */
 void
-xim_labelTiles (xim)
-register XimDataPtr xim;
+xim_labelTiles (XimDataPtr xim)
 {
 	FrameBufPtr  fb;
 	MappingPtr   mp;
@@ -1114,10 +1091,7 @@ register XimDataPtr xim;
  * that of the indicated frame.
  */
 void
-xim_matchFrames (xim, frames, reference_frame)
-XimDataPtr xim;
-int *frames;
-int reference_frame;
+xim_matchFrames (XimDataPtr xim, int *frames, int reference_frame)
 {
 	register FrameBufPtr fr, fb = &xim->frames[reference_frame-1];
 	register int *ip, i;
@@ -1153,11 +1127,8 @@ int reference_frame;
  * reference frame.
  */
 void
-xim_registerFrames (xim, frames, reference_frame, offsets)
-XimDataPtr xim;
-int *frames;
-int reference_frame;
-int offsets;
+xim_registerFrames (XimDataPtr xim, int *frames, int reference_frame,
+		    int offsets)
 {
 	register int *ip, i;
 	register FrameBufPtr fr, fb = &xim->frames[reference_frame-1];
@@ -1237,9 +1208,7 @@ int offsets;
  * cursor value when the cursor read finishes.
  */
 void
-xim_cursorMode (xim, state)
-register XimDataPtr xim;
-int state;
+xim_cursorMode (XimDataPtr xim, int state)
 {
 	/* The GUI is responsible for implementing cursor reads. */
 	xim_message (xim, "cursorMode", state ? "on" : "off");
@@ -1249,15 +1218,10 @@ int state;
 /* XIM_SETMAPPING -- Set up a mapping between two rasters.
  */
 void
-xim_setMapping (xim, fb, frame, mapping, src, dst, fill_mode)
-register FrameBufPtr fb;
-register XimDataPtr xim;
-int frame;
-int mapping;
-int src, dst;
-int fill_mode;
+xim_setMapping (FrameBufPtr fb, XimDataPtr xim, int frame, int mapping,
+		int src, int dst, int fill_mode)
 {
-	register Widget gt = xim->gt;
+	GtermWidget gt = (GtermWidget) xim->gt;
 	int src_type, src_width, src_height, src_depth;
 	int dst_type, dst_width, dst_height, dst_depth, dst_x, dst_y;
 	float xscale, yscale, scale;
@@ -1358,18 +1322,22 @@ int fill_mode;
  * view center and zoom factors.
  */
 void
-xim_setZoom (xim, fb, frame, mapping, src, dst, xcen,ycen,xmag,ymag, xoff,yoff, absolute)
-register XimDataPtr xim;
-register FrameBufPtr fb;
-int frame;
-int mapping;
-int src, dst;
-float xcen, ycen;	/* center of source raster region to be mapped */
-float xmag, ymag;	/* magnification in each axis */
-float xoff, yoff;	/* offset in each axis */
-Boolean absolute;	/* ignore xscale/yscale */
+xim_setZoom (
+    XimDataPtr xim,
+    FrameBufPtr fb,
+    int frame,
+    int mapping,
+    int src,
+    int dst,
+    float xcen,
+    float ycen,		/* center of source raster region to be mapped */
+    float xmag,
+    float ymag,		/* magnification in each axis */
+    float xoff,
+    float yoff,		/* offset in each axis */
+    Boolean absolute)	/* ignore xscale/yscale */
 {
-	register Widget gt = xim->gt;
+	GtermWidget gt = (GtermWidget) xim->gt;
 	int src_type, src_width, src_height, src_depth;
 	int dst_type, dst_width, dst_height, dst_depth, dst_x, dst_y;
 	int sx1, sx2, sy1, sy2, snx, sny;
@@ -1612,11 +1580,14 @@ src_recenter:
  * the given frame is mapped.
  */
 void
-xim_getScreen (xim, frame, sx, sy, width, height, depth)
-register XimDataPtr xim;
-int frame;
-int *sx, *sy;
-int *width, *height, *depth;
+xim_getScreen (
+    XimDataPtr xim,
+    int frame,
+    int *sx,
+    int *sy,
+    int *width,
+    int *height,
+    int *depth)
 {
 	register int i;
 	int border = xim->tileBorder;
@@ -1625,7 +1596,7 @@ int *width, *height, *depth;
 	int tilex, tiley;
 	int nrows = xim->tileRows, ncols = xim->tileCols;
 
-	if (GtQueryRaster (xim->gt, 0,
+	if (GtQueryRaster ((GtermWidget) xim->gt, 0,
 		&rtype, &scr_width, &scr_height, depth) == 0)
 	    return;
 
@@ -1678,9 +1649,7 @@ int *width, *height, *depth;
 /* XIM_ONSCREEN -- Test whether the given frame is visible onscreen.
  */
 static int
-xim_onScreen (xim, frame)
-register XimDataPtr xim;
-int frame;
+xim_onScreen (XimDataPtr xim, int frame)
 {
 	if (xim->tileFrames)
 	    return ((xim->tileFramesList & (1 << (frame-1))) != 0);
@@ -1692,10 +1661,7 @@ int frame;
 /* XIM_SETFLIP -- Modify a mapping to flip the frame in X and/or Y.
  */
 void
-xim_setFlip (xim, fb, flip_x, flip_y)
-register XimDataPtr xim;
-register FrameBufPtr fb;
-int flip_x, flip_y;
+xim_setFlip (XimDataPtr xim, FrameBufPtr fb, int flip_x, int flip_y)
 {
 	register Widget gt = xim->gt;
 	int src, st, sx, sy, snx, sny;
@@ -1729,10 +1695,7 @@ int flip_x, flip_y;
 /* XIM_SETROP -- Modify the rasterop portion of a mapping.
  */
 void
-xim_setRop (xim, fb, rop)
-register XimDataPtr xim;
-register FrameBufPtr fb;
-int rop;
+xim_setRop (XimDataPtr xim, FrameBufPtr fb, int rop)
 {
 	register Widget gt = xim->gt;
 	int src, st, sx, sy, snx, sny;
@@ -1750,9 +1713,7 @@ int rop;
 /* XIM_SETCURSORPOS -- Set the cursor position.
  */
 void
-xim_setCursorPos (xim, sx, sy)
-register XimDataPtr xim;
-float sx, sy;			/* raster coordinates */
+xim_setCursorPos (XimDataPtr xim, float sx, float sy)
 {
 	GtSetRaster (xim->gt, xim->df_p->frameno);
 	GtSetCursorPos (xim->gt, (int)sx, (int)sy);
@@ -1764,10 +1725,8 @@ float sx, sy;			/* raster coordinates */
  * pixel precision if the image is zoomed.
  */
 void
-xim_getCursorPos (xim, sx, sy, raster, frame)
-register XimDataPtr xim;
-float *sx, *sy;
-int *raster, *frame;
+xim_getCursorPos (XimDataPtr xim, float *sx, float *sy,
+		  int *raster, int *frame)
 {
 	register FrameBufPtr fb;
 	DPoint pv1, pv2;
@@ -1804,15 +1763,21 @@ int *raster, *frame;
  * 8 bit RGB colormap.
  */
 unsigned char *
-xim_readDisplay (xim, x0,y0,nx,ny, w,h, r,g,b, ncolors) 
-register XimDataPtr xim;
-int x0,y0,nx,ny;			/* region to extract (input) */
-int *w, *h;				/* size of output region (output). */
-unsigned char *r, *g, *b;		/* colortable (output) */
-int *ncolors;				/* size of colortable (output) */
+xim_readDisplay (
+    XimDataPtr xim,
+     int x0,
+     int y0,
+     int nx,
+     int ny,			/* region to extract (input) */
+     int *w,
+     int *h,			/* size of output region (output). */
+     unsigned char *r,
+     unsigned char *g,
+     unsigned char *b,		/* colortable (output) */
+     int *ncolors)		/* size of colortable (output) */
 {
-	register Widget gt = xim->gt;
-	register int i, j;
+	GtermWidget gt = (GtermWidget) xim->gt;
+	int i, j;
 
 	int raster, x1, y1, nc;
 	unsigned short *rs, *gs, *bs;
@@ -1967,18 +1932,21 @@ error:
  * be 8 bit pseudocolor.
  */
 int
-xim_writeDisplay (xim, frame, mapname, pixels, w,h, r,g,b, ncolors)
-register XimDataPtr xim;
-int frame;				/* display frame to be written */
-char *mapname;				/* colormap name to be written */
-unsigned char *pixels;
-int w, h;
-unsigned char *r, *g, *b;
-int ncolors;
+xim_writeDisplay (
+     XimDataPtr xim,
+     int frame,				/* display frame to be written */
+     char *mapname,			/* colormap name to be written */
+     unsigned char *pixels,
+     int w,
+     int h,
+     unsigned char *r,
+     unsigned char *g,
+     unsigned char *b,
+     int ncolors)
 {
-	register int i, j;
-	register FrameBufPtr fb;
-	register Widget gt = xim->gt;
+	int i, j;
+	FrameBufPtr fb;
+	GtermWidget gt = (GtermWidget) xim->gt;
 	unsigned short rs[MAX_COLORS], gs[MAX_COLORS], bs[MAX_COLORS];
 	unsigned short iomap[MAX_COLORS], sv_iomap[MAX_COLORS];
 	int nx, ny, sx0, sy0, dx0, dy0;
@@ -2227,10 +2195,7 @@ char *message;
 /* XIM_MSGI -- Like xim_message, but the message is an integer value.
  */
 void
-xim_msgi (xim, object, value)
-register XimDataPtr xim;
-char *object;
-int value;
+xim_msgi (XimDataPtr xim, char *object, int value)
 {
 	char msgbuf[SZ_LINE];
 	sprintf (msgbuf, "setValue {%d}", value);
@@ -2246,11 +2211,11 @@ int value;
  * proceed.  An alert with no actions is a warning.
  */
 void
-xim_alert (xim, text, ok_action, cancel_action)
-register XimDataPtr xim;
-char *text;			/* message text */
-char *ok_action;		/* command sent back to client for "ok" */
-char *cancel_action;		/* command sent back to client for "cancel" */
+xim_alert (
+    XimDataPtr xim,
+     char *text,		/* message text */
+     char *ok_action,		/* command sent back to client for "ok" */
+     char *cancel_action)	/* command sent back to client for "cancel" */
 {
 	char msgbuf[SZ_LINE];
 	sprintf (msgbuf, "setValue {{%s} {%s} {%s}}", text,
@@ -2268,9 +2233,7 @@ char *cancel_action;		/* command sent back to client for "cancel" */
  * needs to be updated.
  */
 static void
-xim_frameRegion (xim, fb)
-register XimDataPtr xim;
-register FrameBufPtr fb;
+xim_frameRegion (XimDataPtr xim, FrameBufPtr fb)
 {
 	int rop, src, dst;
 	int st, sx, sy, snx, sny;
@@ -2292,8 +2255,7 @@ register FrameBufPtr fb;
  * updated, i.e., when some change to the list of colormaps has occurred.
  */
 static void
-xim_colortables (xim)
-XimDataPtr xim;
+xim_colortables (XimDataPtr xim)
 {
 	register char *ip, *op;
 	char buf[MAX_COLORMAPS*40];
@@ -2316,9 +2278,7 @@ XimDataPtr xim;
  * be updated for a frame.
  */
 void
-xim_enhancement (xim, fb)
-register XimDataPtr xim;
-register FrameBufPtr fb;
+xim_enhancement (XimDataPtr xim, FrameBufPtr fb)
 {
 	char buf[SZ_LINE];
 
@@ -2344,8 +2304,7 @@ register FrameBufPtr fb;
  *				3  1 1024 1024		# comment
  */
 static void
-get_fbconfig (xim)
-register XimDataPtr xim;
+get_fbconfig (XimDataPtr xim)
 {
 	register char	*ip;
 	register FILE	*fp = NULL;
@@ -2456,9 +2415,7 @@ register XimDataPtr xim;
  * into a Gterm rasterop code.
  */
 int
-xim_getAntialias (xim, s)
-XimDataPtr xim;
-char *s;
+xim_getAntialias (XimDataPtr xim, char *s)
 {
     register char *ip, *op;
     char word[SZ_NAME];
@@ -2499,13 +2456,13 @@ char *s;
  * monochrome output of a frame buffer into the hardware colormap.
  */
 int
-xim_setColormap (function, dirs, m_red, m_green, m_blue, nelem)
-char *function;			/* type of colormap */
-String *dirs;
-unsigned short *m_red;
-unsigned short *m_green;
-unsigned short *m_blue;
-int nelem;
+xim_setColormap (
+    char *function,		/* type of colormap */
+    String *dirs,
+    unsigned short *m_red,
+    unsigned short *m_green,
+    unsigned short *m_blue,
+    int nelem)
 {
 	register int i, j;
 	register char *ip, *op;
@@ -2835,9 +2792,7 @@ int nelem;
 }
 
 void
-hsv_to_rgb (h, s, v, r, g, b)
-float h, s, v;
-float *r, *g, *b;
+hsv_to_rgb (float h, float s, float v, float *r, float *g, float *b)
 {
 	register int i;
 	float f, p, q, t;
@@ -2878,10 +2833,7 @@ float *r, *g, *b;
 /* GET_DIRFILE -- Get the next file name from an open directory file.
  */
 static int
-get_dirfile (dir, outstr, maxch)
-DIR     *dir;
-char    *outstr;
-int     maxch;
+get_dirfile (DIR *dir, char *outstr, int maxch)
 {
         register int    n;
         register struct dirent *dp;
@@ -2905,17 +2857,14 @@ int     maxch;
 /* LOAD_TESTPATTERN -- Load a test pattern into the given frame.
  */
 static void
-load_testpattern (xim, frame, type)
-XimDataPtr xim;
-int frame;
-int type;			/* not used */
+load_testpattern (XimDataPtr xim, int frame, int type)
 {
 	register FrameBufPtr fb = &xim->frames[frame];
 	register int i, j, ncolors;
 	int rtype, width, height, depth;
 	unsigned char *data;
 
-	if (GtQueryRaster (xim->gt, fb->raster,
+	if (GtQueryRaster ((GtermWidget) xim->gt, fb->raster,
 		&rtype, &width, &height, &depth) == 0)
 	    return;
 
@@ -2927,7 +2876,8 @@ int type;			/* not used */
 	for (j=0;  j < height;  j++) {
 	    for (i=0;  i < width;  i++)
 		data[i] = (((i + j) * 10) % ncolors);
-	    GtWritePixels (xim->gt, fb->raster, data, 8, 0, j, width, 1);
+	    GtWritePixels ((GtermWidget) xim->gt, fb->raster, data,
+			   8, 0, j, width, 1);
 	}
 
 	XtFree ((char *)data);
@@ -2937,9 +2887,7 @@ int type;			/* not used */
 /* SET_COLORBAR -- Write the colorbar pixels.
  */
 static void
-set_colorbar (xim, w)
-XimDataPtr xim;
-Widget w;
+set_colorbar (XimDataPtr xim, Widget w)
 {
 	register int i;
 	static int initialized = 0;
@@ -2957,7 +2905,8 @@ Widget w;
 	    fprintf (stderr, "SETTING COLORBAR PIXELS...... init = %d\n",
 		initialized);
 
-	if (GtQueryRaster (w, 0, &rtype, &width, &height, &depth) == 0)
+	if (GtQueryRaster ((GtermWidget) w, 0, &rtype,
+			   &width, &height, &depth) == 0)
 	    return;
 
 	data = (unsigned char *) XtMalloc (width * height);
@@ -2969,16 +2918,18 @@ Widget w;
 
 	if (!initialized) {
 	    xim_iiscolormap (w, m_red,m_green,m_blue, &first, &ngray, &rgb_len);
-	    GtWriteColormap (w, 0, first, rgb_len, m_red, m_green, m_blue);
+	    GtWriteColormap ((GtermWidget) w, 0, first, rgb_len,
+			     m_red, m_green, m_blue);
 
 	    xim_setColormap ("Grayscale", NULL, m_red, m_green, m_blue, ngray);
-	    GtWriteColormap (w, 0, first, ngray, m_red, m_green, m_blue);
+	    GtWriteColormap ((GtermWidget) w, 0, first, ngray,
+			     m_red, m_green, m_blue);
 
 	    xim->ncolors = ngray;
 	    initialized++;
 	}
 
-	GtWritePixels (w, 0, data, 8, 0, 0, width, height);
+	GtWritePixels ((GtermWidget) w, 0, data, 8, 0, 0, width, height);
 	XtFree ((char *)data);
 
 	if (DBG_RASTER)
@@ -2989,9 +2940,7 @@ Widget w;
 /* SET_NFRAMES -- Called when the number of frame buffers changes.
  */
 static void
-set_nframes (xim, nframes)
-XimDataPtr xim;
-int nframes;
+set_nframes (XimDataPtr xim, int nframes)
 {
 	xim->nframes = nframes;
 	xim_msgi (xim, "nframes", nframes);

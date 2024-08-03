@@ -674,7 +674,8 @@ XtInputId *id_addr;
 			nx = min (xim->width-x, nbytes);
 			ny = max (1, nbytes/xim->width);
 		    }
-		    GtReadPixels (xim->gt, chan->rf_p->raster, iobuf, 8, x, y,
+		    GtReadPixels ((GtermWidget) xim->gt, chan->rf_p->raster,
+				  iobuf, 8, x, y,
 			nx, ny);
 
 		    if (iis_debug)
@@ -753,7 +754,8 @@ XtInputId *id_addr;
 			nx = min (xim->width-x, nbytes);
 			ny = max (1, nbytes/xim->width);
 		    }
-		    GtWritePixels (xim->gt, chan->rf_p->raster, iobuf, 8,
+		    GtWritePixels ((GtermWidget) xim->gt, chan->rf_p->raster,
+				   iobuf, 8,
 			x, y, nx, ny);
 
 		    if (iis_debug)

@@ -710,8 +710,11 @@ void xim_initialize(), xim_reset(), xim_resize(), xim_refresh();
 int xim_shutdown ();
 void xim_close(), xim_initFrame(), xim_setFrame(), xim_setRop();
 void xim_setReferenceFrame(), xim_setDisplayFrame();
-void xim_delFrame(), xim_setMapping(), xim_setZoom();
-void xim_setCursorPos(), xim_getCursorPos(), xim_setFlip();
+void xim_delFrame(), xim_setMapping();
+void xim_setZoom(XimDataPtr, FrameBufPtr, int, int, int, int, float, float,
+		 float, float, float, float, Boolean);
+void xim_setCursorPos(XimDataPtr, float, float);
+void xim_getCursorPos(), xim_setFlip();
 void xim_matchFrames(), xim_registerFrames();
 void xim_readCursor(), xim_frameChanged();
 void xim_message(), xim_msgi(), xim_alert();
