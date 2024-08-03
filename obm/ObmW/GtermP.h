@@ -49,8 +49,6 @@
 
 typedef void (*GmVMethod)();
 typedef int  (*GmIMethod)();
-#define uchar	unsigned char
-#define ushort	unsigned short
 
 /* Raster definitions. */
 #define	ImageRaster		1
@@ -296,7 +294,6 @@ typedef struct markerSelection *GmSelection;
 
 /* Gterm callbacks.
 */
-typedef void (*GtCallbackProc)();
 struct gtCallback {
 	GtCallbackProc proc;
 	XtPointer client_data;

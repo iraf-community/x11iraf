@@ -4399,7 +4399,8 @@ widgetAddEventHandler (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	    wp->event_handler = new_cb;
 
 	/* Post event handler. */
-	XtAddEventHandler (wp->w, event_mask, nonmaskable, widgetEvent, new_cb);
+	XtAddEventHandler (wp->w, event_mask, nonmaskable, (XtEventHandler) widgetEvent,
+			   new_cb);
 
 	return (TCL_OK);
 }
@@ -4431,7 +4432,7 @@ widgetRemoveEventHandler (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv
 
 	if (cb) {
 	    XtRemoveEventHandler (wp->w, (int) cb->client_data, nonmaskable,
-		widgetEvent, cb);
+		(XtEventHandler) widgetEvent, cb);
 	    if (pcb)
 		pcb->next = cb->next;
 	    else

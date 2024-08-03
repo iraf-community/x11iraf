@@ -306,20 +306,24 @@ extern WidgetClass gtermWidgetClass;
 /*
  * Gterm function declarations
  */
-extern void GtActivate();
-extern void GtDeactivate();
-extern void GtReset();
-extern void GtFlush();
-extern int GtReady();
-extern void GtTimerInhibit();
-extern void GtSetDataLevel();
-extern void GtDeleteInputProc();
-extern void GtDeleteResizeProc();
-extern void GtDeleteResetProc();
-extern void GtPostInputProc();
-extern void GtPostResetProc();
-extern void GtPostResizeProc();
-extern int GtQueryRaster();
+typedef unsigned char	uchar;
+typedef void (*GtCallbackProc)();
+
+extern void GtActivate(GtermWidget w);
+extern void GtDeactivate(GtermWidget w);
+extern void GtReset(GtermWidget w);
+extern void GtFlush(GtermWidget w);
+extern int GtReady(GtermWidget w);
+extern void GtTimerInhibit(GtermWidget w, Boolean state);
+extern void GtSetDataLevel(GtermWidget w, int ival);
+extern void GtDeleteInputProc(GtermWidget w, GtCallbackProc userfcn, XtPointer client_data);
+extern void GtDeleteResizeProc(GtermWidget w, GtCallbackProc userfcn, XtPointer client_data);
+extern void GtDeleteResetProc(GtermWidget w, GtCallbackProc userfcn, XtPointer client_data);
+extern void GtPostInputProc(GtermWidget w, GtCallbackProc userfcn, XtPointer client_data);
+extern void GtPostResetProc(GtermWidget w, GtCallbackProc userfcn, XtPointer client_data);
+extern void GtPostResizeProc(GtermWidget w, GtCallbackProc userfcn, XtPointer client_data);
+extern int GtQueryRaster(GtermWidget w, int raster, int *type,
+			 int *width, int *height, int *depth);
 extern void GtSetRaster();
 extern int GtGetRaster();
 extern void GtSetCursorPos();
@@ -345,25 +349,34 @@ extern void GtEndDialog();
 extern void GtEraseDialog();
 extern void GtDrawDialogText();
 extern void GtGetDialogTextSize();
-extern void GtRasterInit();
+extern void GtRasterInit(GtermWidget w);
 extern void initialize_shadow_pixmap ();
-extern int GtAssignRaster();
-extern int GtCreateRaster();
-extern void GtDestroyRaster();
-extern int GtNextRaster();
-extern int GtNRasters();
-extern int GtWritePixels();
-extern int GtReadPixels();
-extern void GtRefreshPixels();
+extern int GtAssignRaster(GtermWidget w, int raster, XtPointer drawable, int type);
+extern int GtCreateRaster(GtermWidget w, int raster, int type,
+			  int width, int height, int depth);
+extern void GtDestroyRaster(GtermWidget w, int raster);
+extern int GtNextRaster(GtermWidget w);
+extern int GtNRasters(GtermWidget w);
+extern int GtWritePixels(GtermWidget w, int raster, uchar *pixels, int nbits,
+			 int x1, int y1, int nx, int ny);
+extern int GtReadPixels(GtermWidget w, int raster, uchar *pixels, int nbits,
+			int x1, int y1, int nx, int ny);
+extern void GtRefreshPixels(GtermWidget w, int raster, int ct,
+			    int x1, int y1, int nx, int ny);
 extern int GtGetClientPixel();
-extern int GtSetPixels();
-extern Pixmap GtExtractPixmap();
-extern int GtInsertPixmap();
+extern int GtSetPixels(GtermWidget w, int raster, int ct, int x1, int y1,
+		       int nx, int ny, int color, int rop);
+extern Pixmap GtExtractPixmap(GtermWidget w, int src, int ctype,
+			      int x, int y, int width, int height);
+extern int GtInsertPixmap(GtermWidget w, Pixmap pixmap, int dst, int ctype,
+			  int x, int y, int width, int height);
 extern int GtNextColormap();
 extern void GtFreeColormap();
-extern int GtWriteColormap();
-extern int GtReadColormap();
-extern int GtLoadColormap();
+extern int GtWriteColormap(GtermWidget w, int map, int first, int nelem,
+			   ushort *r, ushort *g, ushort *b);
+extern int GtReadColormap(GtermWidget w, int map, int first, int nelem,
+			  ushort *r, ushort *g, ushort *b);
+extern int GtLoadColormap(GtermWidget w, int map, float offset, float slope);
 extern int GtQueryColormap();
 extern void GtSetColormapFocus();
 extern void GtInitMappings();

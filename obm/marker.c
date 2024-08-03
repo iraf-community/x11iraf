@@ -155,7 +155,7 @@ static	int markerGetRegion(MsgContext, Tcl_Interp *, int, char **);
 static	int markerGetRect(MsgContext, Tcl_Interp *, int, char **);
 
 extern	XtPointer GmCreate(GtermWidget, int, int);
-static	XtPointer GmCopy(Marker);
+extern	XtPointer GmCopy(Marker);
 
 
 /* MarkerClassInit -- Initialize the class record for the marker widget class.
@@ -304,7 +304,7 @@ MarkerCreate (
 	    gm = marker;
 	else {
 	    gt = widgetGetPointer (gterm_obj);
-	    if ((gm = GmCreate (gt, type, interactive)) == NULL) {
+	    if ((gm = GmCreate ((GtermWidget) gt, type, interactive)) == NULL) {
 		XtFree ((char *)obj);
 		return (NULL);
 	    }
