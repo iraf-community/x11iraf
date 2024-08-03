@@ -54,10 +54,10 @@ void ScrollBarOn(), ScrollBarOff(), WindowScroll();
  */
 
 static void ResizeScreen(xw, min_width, min_height )
-	register XgtermWidget xw;
+	XgtermWidget xw;
 	int min_width, min_height;
 {
-	register TScreen *screen = &xw->screen;
+	TScreen *screen = &xw->screen;
 #ifndef nothack
 	XSizeHints sizehints;
 	long supp;
@@ -162,7 +162,7 @@ static void ResizeScreen(xw, min_width, min_height )
 }
 
 void DoResizeScreen (xw)
-    register XgtermWidget xw;
+    XgtermWidget xw;
 {
     int border = 2 * xw->screen.border;
     ResizeScreen (xw, border + xw->screen.scrollbar, border);
@@ -205,7 +205,7 @@ static void RealizeScrollBar (sbw, screen)
 
 
 ScrollBarReverseVideo(scrollWidget)
-	register Widget scrollWidget;
+	Widget scrollWidget;
 {
 	Arg args[4];
 	int nargs = XtNumber(args);
@@ -231,10 +231,10 @@ ScrollBarReverseVideo(scrollWidget)
 
 
 ScrollBarDrawThumb(scrollWidget)
-	register Widget scrollWidget;
+	Widget scrollWidget;
 {
-	register TScreen *screen = &term->screen;
-	register int thumbTop, thumbHeight, totalHeight;
+	TScreen *screen = &term->screen;
+	int thumbTop, thumbHeight, totalHeight;
 	
 	thumbTop    = screen->topline + screen->savedlines;
 	thumbHeight = screen->max_row + 1;
@@ -247,7 +247,7 @@ ScrollBarDrawThumb(scrollWidget)
 }
 
 ResizeScrollBar(scrollWidget, x, y, height)
-	register Widget scrollWidget;
+	Widget scrollWidget;
 	int x, y;
 	unsigned height;
 {
@@ -260,12 +260,12 @@ ResizeScrollBar(scrollWidget, x, y, height)
 
 void
 WindowScroll(screen, top)
-	register TScreen *screen;
+	TScreen *screen;
 	int top;
 {
-	register int i, lines;
-	register int scrolltop, scrollheight, refreshtop;
-	register int x = 0;
+	int i, lines;
+	int scrolltop, scrollheight, refreshtop;
+	int x = 0;
 
 	if (top < -screen->savedlines)
 		top = -screen->savedlines;
@@ -313,9 +313,9 @@ ScrollBarOn (xw, init, doalloc)
     XgtermWidget xw;
     int init, doalloc;
 {
-	register TScreen *screen = &xw->screen;
-	register int border = 2 * screen->border;
-	register int i;
+	TScreen *screen = &xw->screen;
+	int border = 2 * screen->border;
+	int i;
 
 	if(screen->scrollbar)
 		return;
@@ -385,7 +385,7 @@ ScrollBarOn (xw, init, doalloc)
 
 void
 ScrollBarOff(screen)
-	register TScreen *screen;
+	TScreen *screen;
 {
 	if(!screen->scrollbar)
 		return;
@@ -406,7 +406,7 @@ static void ScrollTextTo(scrollbarWidget, client_data, call_data)
 	XtPointer call_data;
 {
 	float *topPercent = (float *) call_data;
-	register TScreen *screen = &term->screen;
+	TScreen *screen = &term->screen;
 	int thumbTop;	/* relative to first saved line */
 	int newTopLine;
 
@@ -429,8 +429,8 @@ static void ScrollTextUpDownBy(scrollbarWidget, client_data, call_data)
 {
 	int pixels = (int) call_data;
 
-	register TScreen *screen = &term->screen;
-	register int rowOnScreen, newTopLine;
+	TScreen *screen = &term->screen;
+	int rowOnScreen, newTopLine;
 
 	rowOnScreen = pixels / FontHeight(screen);
 	if (rowOnScreen == 0) {
@@ -450,7 +450,7 @@ static void ScrollTextUpDownBy(scrollbarWidget, client_data, call_data)
 static int specialcmplowerwiths (a, b)
     char *a, *b;
 {
-    register char ca, cb;
+    char ca, cb;
 
     if (!a || !b) return 0;
 
@@ -478,8 +478,8 @@ static int params_to_pixels (screen, params, n)
     String *params;
     int n;
 {
-    register mult = 1;
-    register char *s;
+    int mult = 1;
+    char *s;
 
     switch (n > 2 ? 2 : n) {
       case 2:
@@ -513,7 +513,7 @@ void HandleScrollForward (gw, event, params, nparams)
     Cardinal *nparams;
 {
     XgtermWidget w = (XgtermWidget) gw;
-    register TScreen *screen = &w->screen;
+    TScreen *screen = &w->screen;
 
     ScrollTextUpDownBy (gw, (XtPointer) NULL,
 			(XtPointer)params_to_pixels (screen, params, (int) *nparams));
@@ -529,7 +529,7 @@ void HandleScrollBack (gw, event, params, nparams)
     Cardinal *nparams;
 {
     XgtermWidget w = (XgtermWidget) gw;
-    register TScreen *screen = &w->screen;
+    TScreen *screen = &w->screen;
 
     ScrollTextUpDownBy (gw, (XtPointer) NULL,
 			(XtPointer)-params_to_pixels (screen, params, (int) *nparams));

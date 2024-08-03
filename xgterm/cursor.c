@@ -30,7 +30,7 @@
 #include "ptyx.h"		/* also gets Xlib.h */
 
 static void _CheckSelection(screen)
-register TScreen *screen;
+TScreen *screen;
 {
     extern XgtermWidget term;	/* %%% gross */
 
@@ -49,11 +49,11 @@ register TScreen *screen;
  * The origin is considered to be 0, 0 for this procedure.
  */
 CursorSet(screen, row, col, flags)
-register TScreen	*screen;
-register int	row, col;
+TScreen	*screen;
+int	row, col;
 unsigned	flags;
 {
-	register int maxr;
+	int maxr;
 
 	col = (col < 0 ? 0 : col);
 	screen->cur_col = (col <= screen->max_col ? col : screen->max_col);
@@ -72,10 +72,10 @@ unsigned	flags;
  * moves the cursor left n, no wrap around
  */
 CursorBack(screen, n)
-register TScreen	*screen;
+TScreen	*screen;
 int		n;
 {
-	register int i, j, k, rev;
+	int i, j, k, rev;
 	extern XgtermWidget term;
 
 	if((rev = (term->flags & (REVERSEWRAP | WRAPAROUND)) ==
@@ -101,7 +101,7 @@ int		n;
  * moves the cursor forward n, no wraparound
  */
 CursorForward(screen, n)
-register TScreen	*screen;
+TScreen	*screen;
 int		n;
 {
 	screen->cur_col += n;
@@ -116,10 +116,10 @@ int		n;
  * Won't pass bottom margin or bottom of screen.
  */
 CursorDown(screen, n)
-register TScreen	*screen;
+TScreen	*screen;
 int		n;
 {
-	register int max;
+	int max;
 
 	max = (screen->cur_row > screen->bot_marg ?
 		screen->max_row : screen->bot_marg);
@@ -136,10 +136,10 @@ int		n;
  * Won't pass top margin or top of screen.
  */
 CursorUp(screen, n)
-register TScreen	*screen;
+TScreen	*screen;
 int		n;
 {
-	register int min;
+	int min;
 
 	min = (screen->cur_row < screen->top_marg ?
 		0 : screen->top_marg);
@@ -157,10 +157,10 @@ int		n;
  */
 void
 Index(screen, amount)
-register TScreen	*screen;
-register int	amount;
+TScreen	*screen;
+int	amount;
 {
-	register int j;
+	int j;
 
 	/* 
 	 * indexing when below scrolling region is cursor down.
@@ -182,8 +182,8 @@ register int	amount;
  */
 void
 RevIndex(screen, amount)
-register TScreen	*screen;
-register int	amount;
+TScreen	*screen;
+int	amount;
 {
 	/*
 	 * reverse indexing when above scrolling region is cursor up.
@@ -203,7 +203,7 @@ register int	amount;
  * Moves Cursor To First Column In Line
  */
 CarriageReturn(screen)
-register TScreen *screen;
+TScreen *screen;
 {
 	screen->cur_col = 0;
 	screen->do_wrap = 0;
@@ -214,10 +214,10 @@ register TScreen *screen;
  * Save Cursor and Attributes
  */
 CursorSave(term, sc)
-register XgtermWidget term;
-register SavedCursor *sc;
+XgtermWidget term;
+SavedCursor *sc;
 {
-	register TScreen *screen = &term->screen;
+	TScreen *screen = &term->screen;
 
 	sc->row = screen->cur_row;
 	sc->col = screen->cur_col;
@@ -231,10 +231,10 @@ register SavedCursor *sc;
  * Restore Cursor and Attributes
  */
 CursorRestore(term, sc)
-register XgtermWidget term;
-register SavedCursor *sc;
+XgtermWidget term;
+SavedCursor *sc;
 {
-	register TScreen *screen = &term->screen;
+	TScreen *screen = &term->screen;
 
 	memmove( screen->gsets, sc->gsets, sizeof(screen->gsets));
 	screen->curgl = sc->curgl;

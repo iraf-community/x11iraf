@@ -71,7 +71,7 @@ xevents()
 {
         XEvent event;
         XtInputMask input_mask;
-        register TScreen *screen = &term->screen;
+        TScreen *screen = &term->screen;
 
         if(screen->scroll_amt)
                 FlushScroll(screen);
@@ -120,9 +120,9 @@ Cursor make_colored_cursor (cursorindex, fg, bg)
 	int cursorindex;			/* index into font */
 	unsigned long fg, bg;			/* pixel value */
 {
-	register TScreen *screen = &term->screen;
+	TScreen *screen = &term->screen;
 	Cursor c;
-	register Display *dpy = screen->display;
+	Display *dpy = screen->display;
 	
 	c = XCreateFontCursor (dpy, cursorindex);
 	if (c == (Cursor) 0) return (c);
@@ -138,7 +138,7 @@ void HandleKeyPressed(w, event, params, nparams)
     String *params;
     Cardinal *nparams;
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
 #ifdef ACTIVEWINDOWINPUTONLY
     if (w == (Widget)term)
@@ -152,7 +152,7 @@ void HandleEightBitKeyPressed(w, event, params, nparams)
     String *params;
     Cardinal *nparams;
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
 #ifdef ACTIVEWINDOWINPUTONLY
     if (w == (Widget)term)
@@ -167,7 +167,7 @@ void HandleStringEvent(w, event, params, nparams)
     String *params;
     Cardinal *nparams;
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
 #ifdef ACTIVEWINDOWINPUTONLY
     if (w != (Widget)term)
@@ -197,9 +197,9 @@ void HandleStringEvent(w, event, params, nparams)
 }
 
 static void DoSpecialEnterNotify (ev)
-    register XEnterWindowEvent *ev;
+    XEnterWindowEvent *ev;
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
 #ifdef ACTIVEWINDOWINPUTONLY
     if (ev->window == (Widget)term)
@@ -213,7 +213,7 @@ static void DoSpecialEnterNotify (ev)
 /*ARGSUSED*/
 void HandleEnterWindow(w, eventdata, event)
 Widget w;
-register XEnterWindowEvent *event;
+XEnterWindowEvent *event;
 caddr_t eventdata;
 {
     /* This code is necessary as xevent does not see all events anymore. */
@@ -225,9 +225,9 @@ caddr_t eventdata;
 
 
 static void DoSpecialLeaveNotify (ev)
-    register XEnterWindowEvent *ev;
+    XEnterWindowEvent *ev;
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
 #ifdef ACTIVEWINDOWINPUTONLY
     if (ev->window == (Widget)term)
@@ -242,7 +242,7 @@ static void DoSpecialLeaveNotify (ev)
 /*ARGSUSED*/
 void HandleLeaveWindow(w, eventdata, event)
 Widget w;
-register XEnterWindowEvent *event;
+XEnterWindowEvent *event;
 caddr_t eventdata;
 {
     /* This code is necessary as xevent does not see all events anymore. */
@@ -256,10 +256,10 @@ caddr_t eventdata;
 /*ARGSUSED*/
 void HandleFocusChange(w, eventdata, event)
 Widget w;
-register XFocusChangeEvent *event;
+XFocusChangeEvent *event;
 caddr_t eventdata;
 {
-        register TScreen *screen = &term->screen;
+        TScreen *screen = &term->screen;
 
         if(event->type == FocusIn)
                 selectwindow(screen,
@@ -281,8 +281,8 @@ caddr_t eventdata;
 
 void
 selectwindow(screen, flag)
-register TScreen *screen;
-register int flag;
+TScreen *screen;
+int flag;
 {
 #ifdef I18N
         if (screen->xic)
@@ -300,8 +300,8 @@ register int flag;
 
 void
 unselectwindow(screen, flag)
-register TScreen *screen;
-register int flag;
+TScreen *screen;
+int flag;
 {
 	if (screen->always_highlight) return;
 
@@ -324,7 +324,7 @@ void
 Bell()
 {
     extern XgtermWidget term;
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
     struct timeval curtime;
     long now_msecs;
 
@@ -373,8 +373,8 @@ void
 VisualBell()
 {
     extern XgtermWidget term;
-    register TScreen *screen = &term->screen;
-    register Pixel xorPixel = screen->foreground ^ term->core.background_pixel;
+    TScreen *screen = &term->screen;
+    Pixel xorPixel = screen->foreground ^ term->core.background_pixel;
     XGCValues gcval;
     GC visualGC;
 
@@ -405,7 +405,7 @@ void HandleBellPropertyChange(w, data, ev, more)
     XEvent *ev;
     Boolean *more;
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
     if (ev->xproperty.atom == XA_NOTICE) {
 	screen->bellInProgress = FALSE;
@@ -416,7 +416,7 @@ void
 Redraw()
 {
 	extern XgtermWidget term;
-	register TScreen *screen = &term->screen;
+	TScreen *screen = &term->screen;
 	XExposeEvent event;
 
 	event.type = Expose;
@@ -507,10 +507,10 @@ creat_as(uid, gid, pathname, mode)
  */ 
 void
 StartLog(screen)
-register TScreen *screen;
+TScreen *screen;
 {
-	register char *cp;
-	register int i;
+	char *cp;
+	int i;
 	static char *log_default;
 #ifdef ALLOWLOGFILEEXEC
 	void logpipe();
@@ -563,7 +563,7 @@ register TScreen *screen;
 			close(ConnectionNumber(screen->display));
 			close(screen->respond);
 			if(!shell) {
-				register struct passwd *pw;
+				struct passwd *pw;
 				struct passwd *getpwuid();
 
 				if(((cp = getenv("SHELL")) == NULL || *cp == 0)
@@ -614,7 +614,7 @@ register TScreen *screen;
 
 void
 CloseLog(screen)
-register TScreen *screen;
+TScreen *screen;
 {
 	if(!screen->logging || (screen->inhibit & I_LOG))
 		return;
@@ -626,10 +626,10 @@ register TScreen *screen;
 
 void
 FlushLog(screen)
-register TScreen *screen;
+TScreen *screen;
 {
-	register Char *cp;
-	register int i;
+	Char *cp;
+	int i;
 
 /*
  * With xgterm pty input is read only in one place, hence logging is done
@@ -645,7 +645,7 @@ register TScreen *screen;
 #ifdef ALLOWLOGFILEEXEC
 void logpipe()
 {
-	register TScreen *screen = &term->screen;
+	TScreen *screen = &term->screen;
 
 #ifdef SYSV
 	(void) signal(SIGPIPE, SIG_IGN);
@@ -660,8 +660,8 @@ void logpipe()
 do_osc(func)
 int (*func)();
 {
-	register int mode, c;
-	register char *cp;
+	int mode, c;
+	char *cp;
 	char buf[512];
 	char *bufend = &buf[(sizeof buf) - 1];	/* leave room for null */
 	Bool okay = True;
@@ -747,13 +747,13 @@ static ChangeGroup(attribute, value)
 }
 
 Changename(name)
-register char *name;
+char *name;
 {
     ChangeGroup( XtNiconName, (XtArgVal)name );
 }
 
 Changetitle(name)
-register char *name;
+char *name;
 {
     ChangeGroup( XtNtitle, (XtArgVal)name );
 }
@@ -815,7 +815,7 @@ int     i;
 void
 ReverseOldColors()
 {
-register ScrnColors     *pOld= pOldColors;
+ScrnColors     *pOld= pOldColors;
 Pixel    tmpPix;
 char    *tmpName;
 
@@ -871,7 +871,7 @@ int              ndx;
 char            *name;
 {
 XColor                   def;
-register TScreen        *screen=        &pTerm->screen;
+TScreen        *screen=        &pTerm->screen;
 Colormap                 cmap=          pTerm->core.colormap;
 char                    *newName;
 
@@ -892,7 +892,7 @@ Boolean
 ChangeColorsRequest(pTerm,start,names)
 XgtermWidget     pTerm;
 int              start;
-register char   *names;
+char   *names;
 {
 char            *thisName;
 ScrnColors      newColors;
@@ -995,7 +995,7 @@ Cleanup (code)
 int code;
 {
 	extern XgtermWidget term;
-	register TScreen *screen;
+	TScreen *screen;
 
 	screen = &term->screen;
 	if (screen->pid > 1) {
@@ -1013,11 +1013,11 @@ int code;
  */
 void
 Setenv (var, value)
-register char *var, *value;
+char *var, *value;
 {
 	extern char **environ;
-	register int envindex = 0;
-	register int len = strlen(var);
+	int envindex = 0;
+	int len = strlen(var);
 
 	while (environ [envindex] != NULL) {
 	    if (strncmp (environ [envindex], var, len) == 0) {
@@ -1045,9 +1045,9 @@ register char *var, *value;
  * or NULL if there are none.
  */
 char *strindex (s1, s2)
-register char	*s1, *s2;
+char	*s1, *s2;
 {
-	register char	*s3;
+	char	*s3;
 	int s2len = strlen (s2);
 
 	while ((s3=strchr(s1, *s2)) != NULL) {
@@ -1066,7 +1066,7 @@ register char	*s1, *s2;
 /*ARGSUSED*/
 xerror (display, event)
 Display *display;
-register XErrorEvent *event;
+XErrorEvent *event;
 {
 	static char *envvar = "XGXERROR";
 	static char *env_maxerrs = "XGMAXERROR";
@@ -1176,7 +1176,7 @@ static void withdraw_window (dpy, w, scr)
 void set_vt_visibility (on)
     Boolean on;
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
     if (on) {
         if (!screen->Vshow && term) {
@@ -1206,7 +1206,7 @@ extern Atom wm_delete_window;	/* for ICCCM delete window */
 void set_tek_visibility (on)
 Boolean on;
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
     if (on) {
 	if (!gt_activated())
 	    gt_activate();
@@ -1225,7 +1225,7 @@ Boolean on;
 
 void end_tek_mode ()
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
     if (gt_tekmode (2)) {
 #ifdef ALLOWLOGGING
@@ -1241,7 +1241,7 @@ void end_tek_mode ()
 
 void end_vt_mode ()
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
     if (!gt_tekmode (2)) {
 #ifdef ALLOWLOGGING
@@ -1277,7 +1277,7 @@ void switch_modes (tovt)
 
 void hide_vt_window ()
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
     set_vt_visibility (FALSE);
     switch_modes (False);
@@ -1285,7 +1285,7 @@ void hide_vt_window ()
 
 void hide_tek_window ()
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
     set_tek_visibility (FALSE);
     switch_modes (True);
@@ -1328,7 +1328,7 @@ int state;			/* 1=open, 0=close */
 static void
 set_workstation_state (state)
 {
-	register TScreen *screen = &term->screen;
+	TScreen *screen = &term->screen;
 
 	screen->Tshow = state;
 	set_tekhide_sensitivity();
@@ -1366,8 +1366,8 @@ gtermio_register (functions, nfunc)
 struct GT_function *functions;
 int nfunc;
 {
-	register struct GT_function *fp;
-	register int i;
+	struct GT_function *fp;
+	int i;
 
 	for (i=0;  i < nfunc;  i++) {
 	    fp = &functions[i];
@@ -1531,7 +1531,7 @@ int
 gt_tekmode (state)
 int state;
 {
-	register TScreen *screen = &term->screen;
+	TScreen *screen = &term->screen;
 	int tekEmu;
 
 	if (gtermio_tekmode) {

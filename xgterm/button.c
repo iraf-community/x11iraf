@@ -114,7 +114,7 @@ Boolean SendMousePosition(w, event)
 Widget w;
 XEvent* event;
 {
-    register TScreen *screen = &((XgtermWidget)w)->screen;
+    TScreen *screen = &((XgtermWidget)w)->screen;
     
     if (screen->send_mouse_pos == 0) return False;
 
@@ -174,10 +174,10 @@ XEvent *event;                  /* must be XButtonEvent */
 String *params;                 /* selections */
 Cardinal *num_params;
 {       /* ^XM-G<line+' '><col+' '> */
-        register TScreen *screen = &term->screen;
+        TScreen *screen = &term->screen;
         int pty = screen->respond;
         char Line[ 6 ];
-        register unsigned line, col;
+        unsigned line, col;
 
     if (event->type != ButtonPress && event->type != ButtonRelease)
         return;
@@ -201,10 +201,10 @@ XEvent *event;                  /* must be XButtonEvent */
 String *params;                 /* selections */
 Cardinal *num_params;
 {       /* ^XM-G<line+' '><col+' '> */
-        register TScreen *screen = &term->screen;
+        TScreen *screen = &term->screen;
         int pty = screen->respond;
         char Line[ 6 ];
-        register int line, col;
+        int line, col;
 
     if (event->type != ButtonPress && event->type != ButtonRelease)
         return;
@@ -233,7 +233,7 @@ XEvent *event;			/* must be XMotionEvent */
 String *params;			/* unused */
 Cardinal *num_params;		/* unused */
 {
-	register TScreen *screen = &((XgtermWidget)w)->screen;
+	TScreen *screen = &((XgtermWidget)w)->screen;
 	int row, col;
 
 	screen->selection_time = event->xmotion.time;
@@ -323,7 +323,7 @@ Cardinal num_params;
       default:	       cutbuffer = -1;
     }
     if (cutbuffer >= 0) {
-	register TScreen *screen = &((XgtermWidget)w)->screen;
+	TScreen *screen = &((XgtermWidget)w)->screen;
 	int inbytes;
 	unsigned long nbytes;
 	int fmt8 = 8;
@@ -361,7 +361,7 @@ unsigned long *length;
 int *format;
 {
     int pty = ((XgtermWidget)w)->screen.respond;	/* file descriptor of pty */
-    register char *lag, *cp, *end;
+    char *lag, *cp, *end;
     char *line = (char*)value;
 				  
     if (*type == 0 /*XT_CONVERT_FAIL*/ || *length == 0 || value == NULL) {
@@ -442,7 +442,7 @@ XEvent *event;			/* must be XButtonEvent* */
 String *params;			/* unused */
 Cardinal *num_params;		/* unused */
 {
-	register TScreen *screen = &((XgtermWidget)w)->screen;
+	TScreen *screen = &((XgtermWidget)w)->screen;
 	int startrow, startcol;
 
 	firstValidRow = 0;
@@ -460,7 +460,7 @@ XEvent *event;			/* must be XButtonEvent* */
 String *params;			/* unused */
 Cardinal *num_params;		/* unused */
 {
-	register TScreen *screen = &((XgtermWidget)w)->screen;
+	TScreen *screen = &((XgtermWidget)w)->screen;
 
 	do_select_start (w, event, screen->cursor_row, screen->cursor_col);
 }
@@ -468,7 +468,7 @@ Cardinal *num_params;		/* unused */
 
 static void
 TrackDown(event)
-    register XButtonEvent *event;
+    XButtonEvent *event;
 {
 	int startrow, startcol;
 
@@ -724,12 +724,12 @@ Cardinal *num_params;		/* unused */
 
 void
 ScrollSelection(screen, amount)
-register TScreen* screen;
-register int amount;
+TScreen* screen;
+int amount;
 {
-    register int minrow = -screen->savedlines - screen->topline;
-    register int maxrow = screen->max_row - screen->topline;
-    register int maxcol = screen->max_col;
+    int minrow = -screen->savedlines - screen->topline;
+    int maxrow = screen->max_row - screen->topline;
+    int maxcol = screen->max_col;
 
 #define scroll_update_one(row, col) \
     	row += amount; \
@@ -781,15 +781,15 @@ ResizeSelection (screen, rows, cols)
 
 static void
 PointToRowCol(y, x, r, c)
-    register int y, x;
+    int y, x;
     int *r, *c;
 /* Convert pixel coordinates to character coordinates.
    Rows are clipped between firstValidRow and lastValidRow.
    Columns are clipped between to be 0 or greater, but are not clipped to some
        maximum value. */
 {
-	register TScreen *screen = &term->screen;
-	register int row, col;
+	TScreen *screen = &term->screen;
+	int row, col;
 
 	row = (y - screen->border) / FontHeight(screen);
 	if(row < firstValidRow)
@@ -811,11 +811,11 @@ PointToRowCol(y, x, r, c)
 
 static int
 LastTextCol(row)
-    register int row;
+    int row;
 {
-	register TScreen *screen =  &term->screen;
-	register int i;
-	register Char *ch;
+	TScreen *screen =  &term->screen;
+	int i;
+	Char *ch;
 
 	for ( i = screen->max_col,
 	        ch = screen->buf[4 * (row + screen->topline) + 1] + i ;
@@ -902,8 +902,8 @@ static int charClass[256] = {
     48,  48,  48,  48,  48,  48,  48,  48};
 
 int SetCharacterClassRange (low, high, value)
-    register int low, high;		/* in range of [0..255] */
-    register int value;			/* arbitrary */
+    int low, high;		/* in range of [0..255] */
+    int value;			/* arbitrary */
 {
 
     if (low < 0 || high > 255 || high < low) return (-1);
@@ -923,10 +923,10 @@ ComputeSelect(startRow, startCol, endRow, endCol, extend)
     int startRow, startCol, endRow, endCol;
     Bool extend;
 {
-	register TScreen *screen = &term->screen;
-	register Char *ptr;
-	register int length;
-	register int class;
+	TScreen *screen = &term->screen;
+	Char *ptr;
+	int length;
+	int class;
 	int osc = startSCol;
 
 	if (Coordinate(startRow, startCol) <= Coordinate(endRow, endCol)) {
@@ -1010,11 +1010,11 @@ ComputeSelect(startRow, startCol, endRow, endCol, extend)
 }
 void
 TrackText(frow, fcol, trow, tcol)
-    register int frow, fcol, trow, tcol;
+    int frow, fcol, trow, tcol;
     /* Guaranteed (frow, fcol) <= (trow, tcol) */
 {
-	register int from, to;
-	register TScreen *screen = &term->screen;
+	int from, to;
+	TScreen *screen = &term->screen;
 	int old_startrow, old_startcol, old_endrow, old_endcol;
 
 	old_startrow = screen->startHRow;
@@ -1055,11 +1055,11 @@ TrackText(frow, fcol, trow, tcol)
 
 static void
 ReHiliteText(frow, fcol, trow, tcol)
-    register int frow, fcol, trow, tcol;
+    int frow, fcol, trow, tcol;
     /* Guaranteed that (frow, fcol) <= (trow, tcol) */
 {
-	register TScreen *screen = &term->screen;
-	register int i;
+	TScreen *screen = &term->screen;
+	int i;
 
 	if (frow < 0)
 	    frow = fcol = 0;
@@ -1100,8 +1100,8 @@ SaltTextAway(crow, ccol, row, col, params, num_params)
     /* Guaranteed that (crow, ccol) <= (row, col), and that both points are valid
        (may have row = screen->max_row+1, col = 0) */
 {
-	register TScreen *screen = &term->screen;
-	register int i, j = 0;
+	TScreen *screen = &term->screen;
+	int i, j = 0;
 	int eol;
 	char *line, *lp;
 
@@ -1244,8 +1244,8 @@ static void LoseSelection(w, selection)
   Widget w;
   Atom *selection;
 {
-    register TScreen* screen = &((XgtermWidget)w)->screen;
-    register Atom* atomP;
+    TScreen* screen = &((XgtermWidget)w)->screen;
+    Atom* atomP;
     int i;
     for (i = 0, atomP = screen->selection_atoms;
 	 i < screen->selection_count; i++, atomP++)
@@ -1291,7 +1291,7 @@ Atom *selection, *target;
 
 
 static void _OwnSelection(termw, selections, count)
-    register XgtermWidget termw;
+    XgtermWidget termw;
     String *selections;
     Cardinal count;
 {
@@ -1345,7 +1345,7 @@ static void _OwnSelection(termw, selections, count)
 
 void
 DisownSelection(termw)
-    register XgtermWidget termw;
+    XgtermWidget termw;
 {
     Atom* atoms = termw->screen.selection_atoms;
     Cardinal count = termw->screen.selection_count;
@@ -1378,10 +1378,10 @@ DisownSelection(termw)
 /* ARGSUSED */
 static int
 Length(screen, row, scol, ecol)
-    register int row, scol, ecol;
-    register TScreen *screen;
+    int row, scol, ecol;
+    TScreen *screen;
 {
-        register int lastcol = LastTextCol(row);
+        int lastcol = LastTextCol(row);
 
 	if (ecol > lastcol)
 	    ecol = lastcol;
@@ -1394,13 +1394,13 @@ SaveText(screen, row, scol, ecol, lp, eol)
     int row;
     int scol, ecol;
     TScreen *screen;
-    register char *lp;		/* pointer to where to put the text */
+    char *lp;		/* pointer to where to put the text */
     int *eol;
 {
-	register int i = 0;
-	register Char *ch = screen->buf[4 * (row + screen->topline)];
+	int i = 0;
+	Char *ch = screen->buf[4 * (row + screen->topline)];
 	Char attr;
-	register int c;
+	int c;
 
 	*eol = 0;
 	i = Length(screen, row, scol, ecol);
@@ -1434,12 +1434,12 @@ SaveText(screen, row, scol, ecol, lp, eol)
 
 static void
 EditorButton(event)
-    register XButtonEvent *event;
+    XButtonEvent *event;
 {
-	register TScreen *screen = &term->screen;
+	TScreen *screen = &term->screen;
 	int pty = screen->respond;
 	char line[6];
-	register unsigned row, col;
+	unsigned row, col;
 	int button; 
 
 	button = event->button - 1; 

@@ -36,8 +36,8 @@ bswap2 (a, b, nbytes)
 char    *a, *b;         	/* input array                  */
 int     nbytes;         	/* number of bytes to swap      */
 {
-        register char *ip=a, *op=b, *otop;
-        register unsigned temp;
+        char *ip=a, *op=b, *otop;
+        unsigned temp;
 
         /* Swap successive pairs of bytes.
          */
@@ -66,8 +66,8 @@ char	*b;			/* output array			*/
 int	boff;			/* first byte in output array	*/
 int	nbytes;			/* number of bytes to swap	*/
 {
-	register char	*ip, *op, *tp;
-	register int	n;
+	char	*ip, *op, *tp;
+	int	n;
 	static	char temp[4];
 
 	tp = temp;
@@ -108,8 +108,8 @@ char	*b;			/* output array			*/
 int	boff;			/* first byte in output array	*/
 int	nbytes;		/* number of bytes to swap	*/
 {
-	register char	*ip, *op, *tp;
-	register int	n;
+	char	*ip, *op, *tp;
+	int	n;
 	static	char temp[8];
 
 	tp = temp;
@@ -170,7 +170,7 @@ int	npts;
 int	bitpix;
 float	*min, *max;
 {
-	register int i;
+	int i;
 
 	*min =  32768.0, *max = -32768.0;
 
@@ -240,8 +240,8 @@ uchar *buffer;
 int  nx, ny;
 {
         int     i;
-        register int    j, v;
-        register uchar *buff1, *buff2;
+        int    j, v;
+        uchar *buff1, *buff2;
 
         for (i = 0; i < ny / 2; i++) {
             buff1 = &buffer[i*nx];

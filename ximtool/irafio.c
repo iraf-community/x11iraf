@@ -216,7 +216,7 @@ int
 isIRAF (fname)
 char	*fname;				/* input filename */
 {
-	register FILE *fp;
+	FILE *fp;
 	int value = 0;
 	char magic[24];
 
@@ -401,8 +401,8 @@ float   *z1, *z2;
 int	nsample;
 {
 	FILE *fd;
-	register int i, j, npix, stdline;
-	register float scale;
+	int i, j, npix, stdline;
+	float scale;
 	unsigned short  *uspix, *usline;
 	short  *spix, *sline;
 	int    *ipix, *iline;

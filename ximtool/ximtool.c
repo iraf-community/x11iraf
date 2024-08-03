@@ -46,9 +46,9 @@ main (argc, argv)
 int argc;
 char *argv[];
 {
-	register XimDataPtr xim = &ximtool_data;
-	register int i;
-        register IsmModule ism;
+	XimDataPtr xim = &ximtool_data;
+	int i;
+        IsmModule ism;
 
 	Widget toplevel;
 	XtPointer obm;
@@ -74,7 +74,7 @@ char *argv[];
       	        exit (1);
 
     	    } else if (strcmp (argv[1], "-defgui") == 0) {
-	        register int i;
+	        int i;
 	        for (i=0;  defgui_text[i];  i++)
 		    printf ("%s\n", defgui_text[i]);
 	        exit (0);
@@ -321,7 +321,7 @@ char *argv[];
 	if (strcmp (xim->gui, "default") == 0 ||
 	    (ObmDeliverMsgFromFile (obm, server, xim->gui) != 0)) {
 
-	    register char *ip, *op;
+	    char *ip, *op;
 	    char *message;
 	    int i;
 
@@ -387,7 +387,7 @@ char *argv[];
  */
 int
 xim_shutdown (xim)
-register XimDataPtr xim;
+XimDataPtr xim;
 {
 	eps_close (xim->psim);
 	xim_loadClose (xim);
@@ -407,7 +407,7 @@ register XimDataPtr xim;
  */
 XtInputId
 xim_addInput (xim, input, proc, client_data)
-register XimDataPtr xim;
+XimDataPtr xim;
 int input;
 void (*proc)();
 XtPointer client_data;
@@ -421,7 +421,7 @@ XtPointer client_data;
  */
 void
 xim_removeInput (xim, id)
-register XimDataPtr xim;
+XimDataPtr xim;
 XtPointer id;
 {
 	XtRemoveInput ((XtInputId)id);
@@ -543,7 +543,7 @@ int	class;
 int
 xerror (display, event)
 Display *display;
-register XErrorEvent *event;
+XErrorEvent *event;
 {
         static char *envvar = "XGXERROR";
         static int nerrs = 0;

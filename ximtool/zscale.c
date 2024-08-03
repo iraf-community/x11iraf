@@ -66,7 +66,7 @@ float	contrast;		/* adj. to slope of transfer function	*/
 int	opt_size;		/* desired number of pixels in sample	*/
 int	len_stdline;		/* optimal number of pixels per line	*/
 {
-	register int npix, minpix, ngoodpix, center_pixel, ngrow;
+	int npix, minpix, ngoodpix, center_pixel, ngrow;
 	float	zmin, zmax, median;
 	float	zstart, zslope;
 	float 	*sample, *left;
@@ -139,7 +139,7 @@ int	nx, ny;			/* image dimensions			*/
 int	optimal_size;		/* desired number of pixels in sample	*/
 int	len_stdline;		/* optimal number of pixels per line	*/
 {
-	register int i;
+	int i;
 	int ncols, nlines, col_step, line_step, maxpix, line;
 	int opt_npix_per_line, npix_per_line, npix = 0;
 	int opt_nlines_in_sample, min_nlines_in_sample, max_nlines_in_sample;
@@ -238,7 +238,7 @@ float	*a;
 float	*b;
 int	npix, step;
 {
-	register int ip, i;
+	int ip, i;
 
 	if (step <= 1)
 	    memmove (b, a, npix);
@@ -399,7 +399,7 @@ float	*x;			/* x value of each pixel		*/
 int	npix;			/* number of pixels			*/
 double	z0, dz;			/* z-intercept, dz/dx of fitted line	*/
 {
-	register int i;
+	int i;
 
 	for (i=0; i < npix; i++) 
 	    flat[i] = data[i] - (x[i] * dz + z0);

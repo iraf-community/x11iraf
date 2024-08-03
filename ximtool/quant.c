@@ -121,9 +121,9 @@ int  	nx, ny;				/* image dimensions                 */
 int	ncolors;			/* current number of colors         */
 int	newcolors;			/* requested number of colors       */
 {
-	register pixel *pP;
-	register long	sr, sg, sb, err;
-	register int	i, col, limitcol, index = 0;
+	pixel *pP;
+	long	sr, sg, sb, err;
+	int	i, col, limitcol, index = 0;
 	byte	 *pix = image;
 	pixel    **pixels;
 	pixval   maxval = 255, newmaxval;
@@ -240,8 +240,8 @@ int	newcolors;			/* requested number of colors       */
 		 */
 	    	index = lookupColor (cht, pP) ;
 	    	if  (index == -1) { /* No; search colormap for closest match. */
-	    	    register int	i, r1, g1, b1, r2, g2, b2;
-	    	    register long	dist, newdist;
+	    	    int	i, r1, g1, b1, r2, g2, b2;
+	    	    long	dist, newdist;
 	    	    r1 = PPM_GETR (*pP) ;
 	    	    g1 = PPM_GETG (*pP) ;
 	    	    b1 = PPM_GETB (*pP) ;
@@ -364,7 +364,7 @@ pixval maxval;
 {
 	colorhist_vector colormap;
 	box_vector bv;
-	register int	bi, i;
+	int	bi, i;
 	int	boxes;
 
 	bv = (box_vector) malloc (sizeof(struct box)  * newcolors) ;
@@ -387,9 +387,9 @@ pixval maxval;
     	** Main loop: split boxes until we have enough.
     	*/
 	while  (boxes < newcolors)  {
-	    register int	indx, clrs;
+	    int	indx, clrs;
 	    int	sm;
-	    register int	minr, maxr, ming, maxg, minb, maxb, v;
+	    int	minr, maxr, ming, maxg, minb, maxb, v;
 	    int	halfsum, lowersum;
 
 	    /*
@@ -501,9 +501,9 @@ pixval maxval;
 	for  (bi = 0; bi < boxes; ++bi)  {
     	    /* REP_AVERAGE_PIXELS version */
 
-	    register int	indx = bv[bi].ind;
-	    register int	clrs = bv[bi].colors;
-	    register long	r = 0, g = 0, b = 0, sum = 0;
+	    int	indx = bv[bi].ind;
+	    int	clrs = bv[bi].colors;
+	    long	r = 0, g = 0, b = 0, sum = 0;
 
 	    for  (i = 0; i < clrs; ++i)  {
 	    	r += PPM_GETR (chv[indx + i].color)  * chv[indx + i].value;
@@ -620,7 +620,7 @@ int	cols, rows, maxcolors;
 int*colorsP;
 {
 	colorhash_table cht;
-	register pixel*pP;
+	pixel*pP;
 	colorhist_list chl;
 	int	col, row, hash;
 
@@ -680,8 +680,8 @@ colorhash_table cht;
 pixel*colorP;
 int	value;
 {
-	register int	hash;
-	register colorhist_list chl;
+	int	hash;
+	colorhist_list chl;
 
 	chl = (colorhist_list) malloc (sizeof(struct colorhist_list_item) ) ;
 	if  (chl == 0) 

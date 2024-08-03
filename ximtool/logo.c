@@ -14,9 +14,9 @@
 
 void
 xim_displayLogo (xim)
-register XimDataPtr xim;
+XimDataPtr xim;
 {
-    register int i;
+    int i;
     unsigned char r[256], g[256], b[256];
 
 

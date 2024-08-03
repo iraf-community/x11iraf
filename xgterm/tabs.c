@@ -40,7 +40,7 @@
 TabReset(tabs)
 Tabs	tabs;
 {
-	register int i;
+	int i;
 
 	for (i=0; i<TAB_ARRAY_SIZE; ++i)
 		tabs[i] = 0;
@@ -80,7 +80,7 @@ TabNext (tabs, col)
     int		col;
 {
 	extern XgtermWidget term;
-	register TScreen *screen = &term->screen;
+	TScreen *screen = &term->screen;
 
 	if(screen->curses && screen->do_wrap && (term->flags & WRAPAROUND)) {
 		Index(screen, 1);
@@ -99,7 +99,7 @@ TabNext (tabs, col)
 TabZonk (tabs)
 Tabs	tabs;
 {
-	register int i;
+	int i;
 
 	for (i=0; i<TAB_ARRAY_SIZE; ++i)
 		tabs[i] = 0;

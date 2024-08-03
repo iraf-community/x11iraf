@@ -32,9 +32,9 @@ static void savestat(), savetext();
  */
 void
 xim_initSave (xim)
-register XimDataPtr xim;
+XimDataPtr xim;
 {
-	register fileSavePtr fsp;
+	fileSavePtr fsp;
 	extern char *getcwd(), *getenv();
 	char buf[SZ_LINE];
 
@@ -60,9 +60,9 @@ register XimDataPtr xim;
  */
 void
 xim_saveClose (xim)
-register XimDataPtr xim;
+XimDataPtr xim;
 {
-	register fileSavePtr fsp = xim->fsp;
+	fileSavePtr fsp = xim->fsp;
 
 	if (fsp)
 	    free ((char *) fsp);
@@ -74,13 +74,13 @@ register XimDataPtr xim;
  */
 int
 xim_saveFile (xim, template, fileformat, x0,y0, nx,ny)
-register XimDataPtr xim;
+XimDataPtr xim;
 char *template;			/* file name or printf format */
 int fileformat;			/* output raster file format/type */
 int x0, y0, nx, ny;		/* region of display to be saved */
 {
-	register int i, j;
-	register fileSavePtr fsp = xim->fsp;
+	int i, j;
+	fileSavePtr fsp = xim->fsp;
         int w, h, ncols;
         char text[SZ_LINE], fname[SZ_FNAME];
         unsigned char r[256], g[256], b[256];
@@ -102,7 +102,7 @@ int x0, y0, nx, ny;		/* region of display to be saved */
             goto done;
 
 	if (debug) {
-	    register int cpix, val;
+	    int cpix, val;
 	    fprintf (stderr, "saveFile: %s -> %dx%d at %d colors\n", 
 		fname, w, h, ncols);
 	    cpix = (w/2+(h/2)*w);
@@ -189,7 +189,7 @@ done:
  */
 static int
 xims_write (xim, fp, fileformat, pixels, w,h,d, r,g,b, ncolors)
-register XimDataPtr xim;
+XimDataPtr xim;
 FILE *fp;
 int fileformat;
 unsigned char *pixels;
@@ -197,11 +197,11 @@ int w, h, d;
 unsigned char *r, *g, *b;
 int ncolors;
 {
-        register PSImagePtr psim = xim->psim;
-        register FrameBufPtr fb = xim->df_p;
-        register ColorMapPtr cm = &colormaps[fb->colormap-1];
-	register int sv_annotate = psim->annotate;
-	register int sv_colorClass = psim->colorClass;
+        PSImagePtr psim = xim->psim;
+        FrameBufPtr fb = xim->df_p;
+        ColorMapPtr cm = &colormaps[fb->colormap-1];
+	int sv_annotate = psim->annotate;
+	int sv_colorClass = psim->colorClass;
 	int gray=0, status=0;
 	extern int writeSunRas();
 	extern int writeFITS();
@@ -283,10 +283,10 @@ int ncolors;
  */
 void
 xims_rename (xim, old, new)
-register XimDataPtr xim;
+XimDataPtr xim;
 char *old, *new;
 {
-	register fileSavePtr fsp = xim->fsp;
+	fileSavePtr fsp = xim->fsp;
 	char text[SZ_LINE];
 	struct stat fs;
 
@@ -305,7 +305,7 @@ char *old, *new;
 
 void
 xims_cancel (xim, fname)
-register XimDataPtr xim;
+XimDataPtr xim;
 char *fname;
 {
 	savestat (xim, "Save cancelled.");
@@ -317,7 +317,7 @@ char *fname;
  */
 static void
 savestat (xim, message)
-register XimDataPtr xim;
+XimDataPtr xim;
 char *message;
 {
 	char text[SZ_LINE];
@@ -330,14 +330,14 @@ char *message;
  */
 static void
 savetext (xim, seqno, fullname, fileformat, filesize, w,h,d)
-register XimDataPtr xim;
+XimDataPtr xim;
 int seqno;
 char *fullname;
 int fileformat;
 int filesize;
 int w, h, d;
 {
-	register char *ip;
+	char *ip;
 	char *fmt, *fname, text[SZ_LINE];
 
 	for (ip=fname=fullname;  *ip;  ip++)

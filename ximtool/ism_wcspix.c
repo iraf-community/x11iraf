@@ -31,13 +31,13 @@ void  wcspix_connect(), wcspix_disconnect(), wcspix_command(), wcspix_message();
  */
 void
 wcspix_connect (xim, ism)
-register XimDataPtr xim;
-register IsmModule ism;
+XimDataPtr xim;
+IsmModule ism;
 
 {
         MappingPtr mp;
 	FrameBufPtr fr;
-        register int i, j;
+        int i, j;
 	char buf[SZ_LINE];
 
 	if (wcspix_debug) printf ("ConnectCB for '%s' ....\n", ism->name);
@@ -69,12 +69,12 @@ register IsmModule ism;
  */
 void
 wcspix_disconnect (xim, ism)
-register XimDataPtr xim;
-register IsmModule ism;
+XimDataPtr xim;
+IsmModule ism;
 {
         MappingPtr mp;
 	FrameBufPtr fr;
-        register int i, j;
+        int i, j;
 	char buf[SZ_LINE];
 
 	if (wcspix_debug) printf ("DisconnectCB for '%s' ....\n", ism->name);
@@ -109,12 +109,12 @@ register IsmModule ism;
  */
 void
 wcspix_command (xim, ism, argc, argv)
-register XimDataPtr xim;
-register IsmModule ism;
+XimDataPtr xim;
+IsmModule ism;
 int	argc;
 char	**argv;
 {
-	register int i;
+	int i;
 
 	if (wcspix_debug) printf ("CommandCB....\n");
 
@@ -129,7 +129,7 @@ char	**argv;
  */
 void
 wcspix_message (xim, message)
-register XimDataPtr xim;
+XimDataPtr xim;
 char *message;
 {
         char msgbuf[SZ_MSGBUF];

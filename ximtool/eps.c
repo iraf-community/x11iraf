@@ -128,8 +128,8 @@ static int 	debug = 0;
 PSImage *
 eps_init()
 {
-	register int i;
-	register PSImage *ps;
+	int i;
+	PSImage *ps;
 
 
         /* Allocate the structure. */
@@ -340,7 +340,7 @@ PSImage *psim;				/* EPS image structure 		     */
 uchar *r, *g, *b;			/* color components 		     */
 int ncolors;				/* number of colors in colormap      */
 {
-	register int i = 0;
+	int i = 0;
 
 	/* Load the colormap. */
 	psim->cmap.ncolors = ncolors;
@@ -402,10 +402,10 @@ int	color_class;			/* output color class 		     */
 */
 void
 eps_setLabel (psim, label)
-register PSImage *psim;			/* EPS image structure 		     */
+PSImage *psim;			/* EPS image structure 		     */
 char	*label;				/* Label string 		     */
 {
-	register int maxlen = MAX_LENLABEL;
+	int maxlen = MAX_LENLABEL;
 
 	if (!psim->label)
 	    psim->label = (char *) malloc (maxlen);
@@ -666,7 +666,7 @@ int     npix;
 int     xdim;
 int     pad;
 {
-        register int i, min, max;
+        int i, min, max;
 
 
 	min = *pix;
@@ -709,8 +709,8 @@ int 	npix;
 int	xdim;
 int	pad;
 {
-	register int i, min, max;
-	register uchar pval;
+	int i, min, max;
+	uchar pval;
 
 	min = *pix;
 	max = *pix;
@@ -755,8 +755,8 @@ int     xdim;
 int     depth;
 int     pad;
 {
-        register int i;
-	register uchar pval;
+        int i;
+	uchar pval;
 
 
         while (npix > 0) {
@@ -804,8 +804,8 @@ int     xdim;
 int     depth;
 int     pad;
 {
-        register int i, min, max;
-	register uchar val;
+        int i, min, max;
+	uchar val;
 
 
         min = *pix;
@@ -864,7 +864,7 @@ eps_writeCmap (cmap, fp)
 PSCmap 	*cmap;
 FILE	*fp;
 {
-	register int i, j;
+	int i, j;
 
 	/* Dump number of colors and colormap used. */
        	fprintf (fp, "256\n");
@@ -921,7 +921,7 @@ eps_simpleHeader (psim, fp)
 PSImagePtr psim;
 FILE	   *fp;
 {
-        register char **line;
+        char **line;
         int 	icols=0, irows=0, scols=0, srows=0, turnflag=0;
         float 	llx = 0.0, lly = 0.0;
         time_t  timer;
@@ -1360,7 +1360,7 @@ int	scols, srows;
 float	llx, lly;
 int	turnflag;
 {
-	register int i, j, cbar_size;
+	int i, j, cbar_size;
         int     ncolors, nlabels, pos, step, cmel, cmstep, val;
 
 
@@ -1738,7 +1738,7 @@ eps_colorHeader (psim, fp)
 PSImagePtr psim;
 FILE	   *fp;
 {
-	register char **line;
+	char **line;
 	int icols=0, irows=0, scols=0, srows=0, turnflag=0;
 	float   llx = 0.0, lly = 0.0;
  	time_t  timer;

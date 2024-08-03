@@ -139,8 +139,8 @@ uchar   *r, *g, *b;                     /* colormap             */
 int     *ncolors;                       /* number of colors     */
 int	gray;				/* read as a grayscale? */
 {
-	register FILE *fd;
-	register int i, imageNumber = 1;
+	FILE *fd;
+	int i, imageNumber = 1;
 
         if ((fd = fopen(fname, "rb")) == NULL)
             return "Unable to open FITS file";
@@ -172,7 +172,7 @@ byte 	*rmap, *gmap, *bmap;		/* colormap		  */
 int	numcols;			/* number of colors       */
 int	gray;				/* save as grayscale?	  */
 {
-	register int	i, bpp, npix;
+	int	i, bpp, npix;
 	int	 r[MAXCOLORS], g[MAXCOLORS], b[MAXCOLORS];
 
 	/* Change type of the colormap. */
@@ -209,7 +209,7 @@ int
 isGIF (fname)
 char	*fname;	    	    /* input filename */
 {
-	register FILE *fp;
+	FILE *fp;
 	int	value = 0;
 	char	tag[5];
 
@@ -545,7 +545,7 @@ int	input_code_size;
 	static int	clear_code, end_code;
 	static int	table[2][(1<< GIFBITS)];
 	static int	stack[(1<<(GIFBITS))*2], *sp;
-	register int	i;
+	int	i;
 
 	if (flag) {
 	    set_code_size = input_code_size;
@@ -1048,13 +1048,13 @@ compress (init_bits, outfile)
 int	init_bits;
 FILE*outfile;
 {
-	register long	fcode;
-	register code_int i /* = 0 */;
-	register int	c;
-	register code_int ent;
-	register code_int disp;
-	register code_int hsize_reg;
-	register int	hshift;
+	long	fcode;
+	code_int i /* = 0 */;
+	int	c;
+	code_int ent;
+	code_int disp;
+	code_int hsize_reg;
+	int	hshift;
 
 	/*
          * Set up the globals:  g_init_bits - initial number of bits
@@ -1227,13 +1227,13 @@ cl_block ()             /* table clear for block compress */
 
 static void
 cl_hash(hsize)          /* reset code table */
-register count_int hsize;
+count_int hsize;
 {
 
-	register count_int *htab_p = htab + hsize;
+	count_int *htab_p = htab + hsize;
 
-	register long	i;
-	register long	m1 = -1;
+	long	i;
+	long	m1 = -1;
 
 	i = hsize - 16;
 	do {                            /* might use Sys V memset(3) here */
@@ -1279,7 +1279,7 @@ writeerr()
 static void
 char_init()
 {
-	register int i;
+	int i;
 
 	a_count = 0;
 	for (i=0; i<256; i++)

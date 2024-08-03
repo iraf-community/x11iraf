@@ -96,8 +96,8 @@ unsigned char *r, *g, *b;		/* colormap                          */
 int 	*ncolors;			/* number of colors                  */
 int	colorstyle;			/* return color (0) or grayscale (1) */
 {
-	register FILE *fp;
-	register int i, j;
+	FILE *fp;
+	int i, j;
 	int linesize, lsize, csize, isize, w, h, d, nc, ct;
 	unsigned char *image, *line, p;
 	struct rasterfile sunhdr;
@@ -432,7 +432,7 @@ int
 isSunRas (fname)
 char *fname;				/* input filename */
 {
-	register FILE *fp;
+	FILE *fp;
 	struct rasterfile sunhdr;
 	int value = 0;
 
@@ -494,7 +494,7 @@ char    *fname;
 
 static int
 rle_read (ptr, size, nitems, fp, init)
-register unsigned char *ptr;
+unsigned char *ptr;
 int size, nitems, init;
 FILE *fp;
 {
@@ -551,7 +551,7 @@ SunRas1to8 (dest, src, len)
 unsigned char *dest, *src;
 int len;
 {
-	register int i, b;
+	int i, b;
 	int c = 0;
 
 	for (i = 0, b = -1; i < len; i++) {

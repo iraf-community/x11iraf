@@ -39,13 +39,13 @@ static void xim_initPrinterList();
 */
 int
 xim_print (xim, x0,y0, nx,ny)
-register XimDataPtr xim;
+XimDataPtr xim;
 int x0,y0, nx,ny;				/* region of source raster */
 {
-	register PSImagePtr psim = xim->psim;
-	register PrintCfgPtr pcp = xim->pcp;
-        register FrameBufPtr fb = xim->df_p;
-	register ColorMapPtr cm = &colormaps[fb->colormap-1];
+	PSImagePtr psim = xim->psim;
+	PrintCfgPtr pcp = xim->pcp;
+        FrameBufPtr fb = xim->df_p;
+	ColorMapPtr cm = &colormaps[fb->colormap-1];
 	unsigned char r[256], g[256], b[256];
 	unsigned char *pixels = NULL;
 	static char tmpfile[SZ_FNAME];
@@ -189,7 +189,7 @@ int x0,y0, nx,ny;				/* region of source raster */
 
 void
 ximp_rename (xim, old, new)
-register XimDataPtr xim;
+XimDataPtr xim;
 char *old, *new;
 {
 	char text[SZ_LINE];
@@ -209,7 +209,7 @@ char *old, *new;
 
 void
 ximp_cancel (xim, fname)
-register XimDataPtr xim;
+XimDataPtr xim;
 char *fname;
 {
 	printstat (xim, "Print cancelled.");
@@ -221,9 +221,9 @@ char *fname;
 */
 void
 xim_initPrinterOps (xim)
-register XimDataPtr xim;
+XimDataPtr xim;
 {
-        register PrintCfgPtr pcp;
+        PrintCfgPtr pcp;
 	char buf[SZ_LINE];
 	PSImagePtr eps_init();
 
@@ -269,10 +269,10 @@ register XimDataPtr xim;
 
 static void
 xim_initPrinterList (xim)
-register XimDataPtr xim;
+XimDataPtr xim;
 {
-	register int i;
-	register FILE *fp;
+	int i;
+	FILE *fp;
 	char 	 buf[SZ_LINE], plist[MAX_PRINTERS*20];
 	char  	 *ip, *pn, *pc, *pl;
 
@@ -352,11 +352,11 @@ register XimDataPtr xim;
 
 int
 xim_getPrinterInfo (xim, printer)
-register XimDataPtr xim;
+XimDataPtr xim;
 char *printer;
 {
-	register int i;
-        register PrintCfgPtr pcp = xim->pcp;
+	int i;
+        PrintCfgPtr pcp = xim->pcp;
 
 	/* Scan down the printer list until we find the requested device. */
 	for (i=0; strcmp(printer_list[i].printerName, printer) != 0; i++)
@@ -372,7 +372,7 @@ char *printer;
 
 static void
 printstat (xim, message)
-register XimDataPtr xim;
+XimDataPtr xim;
 char *message;
 {
 	char text[SZ_LINE];

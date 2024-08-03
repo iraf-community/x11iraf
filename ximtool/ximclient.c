@@ -103,8 +103,8 @@ void
 xim_clientOpen (xim)
 XimDataPtr xim;
 {
-	register XimClientPtr xc;
-	register Tcl_Interp *tcl;
+	XimClientPtr xc;
+	Tcl_Interp *tcl;
 
 	xc = (XimClientPtr) XtCalloc (1, sizeof(XimClient));
 	xim->clientPrivate = (int *)xc;
@@ -206,7 +206,7 @@ void
 xim_clientClose (xim)
 XimDataPtr xim;
 {
-	register XimClientPtr xc = (XimClientPtr) xim->clientPrivate;
+	XimClientPtr xc = (XimClientPtr) xim->clientPrivate;
 	Tcl_Eval(xc->tcl, "exit");
 	if (!Tcl_InterpDeleted(xc->tcl))
 	    Tcl_DeleteInterp (xc->tcl);
@@ -219,13 +219,13 @@ XimDataPtr xim;
  */
 int
 xim_clientExecute (xc, tcl, objname, key, command)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;		/* caller's Tcl */
 char *objname;			/* object name */
 int key;			/* notused */
 char *command;
 {
-	register XimDataPtr xim = xc->xim;
+	XimDataPtr xim = xc->xim;
 
 	xc->server = tcl;
 	if (strcmp (objname, "client") == 0)
@@ -248,12 +248,12 @@ char *command;
  */
 static int
 Quit (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-	register XimDataPtr xim = xc->xim;
+	XimDataPtr xim = xc->xim;
 	return xim_shutdown (xim);
 }
 
@@ -266,12 +266,12 @@ char **argv;
  */
 static int
 Reset (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-	register XimDataPtr xim = xc->xim;
+	XimDataPtr xim = xc->xim;
 	xim_initialize (xim, xim->fb_configno, xim->nframes, 1);
 	return 0;
 }
@@ -286,12 +286,12 @@ char **argv;
  */
 static int
 initialize (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-	register XimDataPtr xim = xc->xim;
+	XimDataPtr xim = xc->xim;
 	xim_initialize (xim, xim->fb_configno, xim->nframes, 0);
 	return 0;
 }
@@ -303,7 +303,7 @@ char **argv;
  */
 static int 
 setFrame (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
@@ -329,10 +329,10 @@ Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-	register XimDataPtr xim = xc->xim;
-	register FrameBufPtr fb;
+	XimDataPtr xim = xc->xim;
+	FrameBufPtr fb;
 	char frameno[SZ_NAME];
-	register int i;
+	int i;
 	int raster;
 
 	if (argc == 1)
@@ -370,10 +370,10 @@ Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-	register XimDataPtr xim = xc->xim;
-	register FrameBufPtr fb;
+	XimDataPtr xim = xc->xim;
+	FrameBufPtr fb;
 	char buf[SZ_NAME];
-	register int i;
+	int i;
 	int frameno;
 
 	if (argc == 1)
@@ -411,8 +411,8 @@ Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-	register XimDataPtr xim = xc->xim;
-	register FrameBufPtr fb = xim->df_p;
+	XimDataPtr xim = xc->xim;
+	FrameBufPtr fb = xim->df_p;
 	int src, st, sx, sy, snx, sny;
 	int dst, dt, dx, dy, dnx, dny;
 	char buf[SZ_NAME];
@@ -449,12 +449,12 @@ char **argv;
  */
 static int 
 nextFrame (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-	register XimDataPtr xim = xc->xim;
+	XimDataPtr xim = xc->xim;
 	int frame;
 
 	if (xim->display_frame < xim->nframes)
@@ -473,12 +473,12 @@ char **argv;
  */
 static int 
 prevFrame (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-	register XimDataPtr xim = xc->xim;
+	XimDataPtr xim = xc->xim;
 	int frame;
 
 	if (xim->display_frame > 1)
@@ -500,12 +500,12 @@ char **argv;
  */
 static int 
 matchFrames (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-	register XimDataPtr xim = xc->xim;
+	XimDataPtr xim = xc->xim;
 	int *frames, frame_list[32], reference_frame;
 	int nitems, i;
 	const char **items;
@@ -542,12 +542,12 @@ nolist:	    frames = NULL;
  */
 static int 
 registerFrames (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-	register XimDataPtr xim = xc->xim;
+	XimDataPtr xim = xc->xim;
 	int *frames, frame_list[32], reference_frame;
 	int nitems, i, offsets;
 	const char **items;
@@ -581,13 +581,13 @@ nolist:	    frames = NULL;
  */
 static int 
 setOffset (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-	register XimDataPtr xim = xc->xim;
-        register FrameBufPtr fb = xim->df_p;
+	XimDataPtr xim = xc->xim;
+        FrameBufPtr fb = xim->df_p;
 	float	 xcen, ycen;
 	float	 xmag, ymag;
 	float	 xoff, yoff;
@@ -629,12 +629,12 @@ char **argv;
  */
 static int 
 clearFrame (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-	register XimDataPtr xim = xc->xim;
+	XimDataPtr xim = xc->xim;
 	int frame;
 
 	if (argc > 1)
@@ -654,7 +654,7 @@ char **argv;
  */
 static int 
 fitFrame (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
@@ -686,13 +686,13 @@ char *v_orient[] = {
 
 static int 
 setOption (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-	register XimDataPtr xim = xc->xim;
-	register FrameBufPtr fb = xim->df_p;
+	XimDataPtr xim = xc->xim;
+	FrameBufPtr fb = xim->df_p;
 	char *option, *strval;
 	const char **items;
 	char buf[SZ_LINE];
@@ -844,13 +844,13 @@ vorient:	if (nitems >= 13)
  */
 static int 
 setColormap (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-	register XimDataPtr xim = xc->xim;
-	register FrameBufPtr fb = xim->df_p;
+	XimDataPtr xim = xc->xim;
+	FrameBufPtr fb = xim->df_p;
 	unsigned short m_red[MAX_COLORS];
 	unsigned short m_green[MAX_COLORS];
 	unsigned short m_blue[MAX_COLORS];
@@ -895,14 +895,14 @@ char **argv;
  */
 static int 
 windowColormap (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-	register XimDataPtr xim = xc->xim;
-	register FrameBufPtr fb = xim->df_p;
-	register ColorMapPtr cm;
+	XimDataPtr xim = xc->xim;
+	FrameBufPtr fb = xim->df_p;
+	ColorMapPtr cm;
 
 	if (argc > 1) {
 	    cm = &colormaps[fb->colormap-1];
@@ -923,14 +923,14 @@ char **argv;
  */
 static int 
 updateColormap (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-	register XimDataPtr xim = xc->xim;
-	register FrameBufPtr fb = xim->df_p;
-	register ColorMapPtr cm;
+	XimDataPtr xim = xc->xim;
+	FrameBufPtr fb = xim->df_p;
+	ColorMapPtr cm;
 
 	if (argc > 1) {
 	    cm = &colormaps[fb->colormap-1];
@@ -962,13 +962,13 @@ char **argv;
  */
 static int 
 zoom (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-	register XimDataPtr xim = xc->xim;
-	register FrameBufPtr fb = xim->df_p;
+	XimDataPtr xim = xc->xim;
+	FrameBufPtr fb = xim->df_p;
 	float xmag, ymag;
 	float xcen, ycen;
 	float xoff, yoff;
@@ -1014,13 +1014,13 @@ char **argv;
  */
 static int 
 pan (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-	register XimDataPtr xim = xc->xim;
-	register FrameBufPtr fb = xim->df_p;
+	XimDataPtr xim = xc->xim;
+	FrameBufPtr fb = xim->df_p;
 	Boolean absolute = False;
 	float xmag, ymag;
 	float xcen, ycen;
@@ -1052,14 +1052,14 @@ char **argv;
  */
 static int 
 centroid (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-	register XimDataPtr  xim = xc->xim;
-	register FrameBufPtr fb  = xim->df_p;
-        register CtranPtr    ct  = (CtranPtr) &fb->ctran;
+	XimDataPtr  xim = xc->xim;
+	FrameBufPtr fb  = xim->df_p;
+        CtranPtr    ct  = (CtranPtr) &fb->ctran;
         unsigned char junk[MAX_COLORS];
 	unsigned char *pix = NULL;
 	float 	 *data=NULL, *xm=NULL, *ym=NULL;
@@ -1215,15 +1215,15 @@ char **argv;
 
 static int 
 getPixels (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-	register XimDataPtr  xim = xc->xim;
-	register FrameBufPtr fb  = xim->df_p;
-        register CtranPtr    ct  = (CtranPtr) &fb->ctran;
-	register int	 i;
+	XimDataPtr  xim = xc->xim;
+	FrameBufPtr fb  = xim->df_p;
+        CtranPtr    ct  = (CtranPtr) &fb->ctran;
+	int	 i;
 	unsigned char *pix = NULL;
 	char 	 *buf = NULL, ch, val[32];
 	float 	 *data = NULL;
@@ -1331,13 +1331,13 @@ char **argv;
  */
 static int 
 flip (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-	register XimDataPtr xim = xc->xim;
-	register FrameBufPtr fb = xim->df_p;
+	XimDataPtr xim = xc->xim;
+	FrameBufPtr fb = xim->df_p;
 	int flip_x = 0, flip_y = 0;
 	int ch, i;
 
@@ -1361,12 +1361,12 @@ char **argv;
  */
 static int 
 retCursorVal (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-	register XimDataPtr xim = xc->xim;
+	XimDataPtr xim = xc->xim;
 	int frame, wcs, key;
 	float sx, sy;
 	char *s, *strval;
@@ -1405,7 +1405,7 @@ char **argv;
  */
 static int 
 encodewcs (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
@@ -1459,16 +1459,16 @@ char **argv;
  */
 static int 
 setPrintOption (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-	register XimDataPtr xim = xc->xim;
-	register FrameBufPtr fb = xim->df_p;
-	register PSImagePtr psim = xim->psim;
-	register PrintCfgPtr pcp = xim->pcp;
-	register int i;
+	XimDataPtr xim = xc->xim;
+	FrameBufPtr fb = xim->df_p;
+	PSImagePtr psim = xim->psim;
+	PrintCfgPtr pcp = xim->pcp;
+	int i;
 	int	 llx, lly, urx, ury;
 	char *option, strval[SZ_LINE];
 	char buf[SZ_LINE];
@@ -1674,14 +1674,14 @@ char **argv;
  */
 static int
 setSaveOption (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-        register XimDataPtr xim = xc->xim;
-	register fileSavePtr fsp = xim->fsp;
-	register int i;
+        XimDataPtr xim = xc->xim;
+	fileSavePtr fsp = xim->fsp;
+	int i;
         char *option, strval[SZ_LINE];
         char buf[SZ_LINE];
         int ch;
@@ -1779,14 +1779,14 @@ char **argv;
  */
 static int
 setLoadOption (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-	register int i;
-        register XimDataPtr xim = xc->xim;
-	register fileLoadPtr flp = xim->flp;
+	int i;
+        XimDataPtr xim = xc->xim;
+	fileLoadPtr flp = xim->flp;
         char *option, *strval;
         char buf[SZ_LINE];
 
@@ -1884,12 +1884,12 @@ char **argv;
  */
 static int
 print (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-        register XimDataPtr xim = xc->xim;
+        XimDataPtr xim = xc->xim;
         int x0, y0, nx, ny;
 
         /* Handle the special cases first. */
@@ -1931,13 +1931,13 @@ char **argv;
  */
 static int
 save (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-        register XimDataPtr xim = xc->xim;
-	register fileSavePtr fsp = xim->fsp;
+        XimDataPtr xim = xc->xim;
+	fileSavePtr fsp = xim->fsp;
         int x0, y0, nx, ny;
 
         /* Handle the special cases first. */
@@ -1973,13 +1973,13 @@ char **argv;
  */
 static int
 load (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-        register XimDataPtr xim = xc->xim;
-	register fileLoadPtr flp = xim->flp;
+        XimDataPtr xim = xc->xim;
+	fileLoadPtr flp = xim->flp;
         char *fname;
         char buf[SZ_LINE];
 	struct stat file_info;
@@ -2046,14 +2046,14 @@ static char *help_text[] = {
 
 static int
 help (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-        register XimDataPtr xim = xc->xim;
-        register char *ip, *op, *helptxt;
-        register int i;
+        XimDataPtr xim = xc->xim;
+        char *ip, *op, *helptxt;
+        int i;
 
         helptxt = (char *) XtMalloc (1024000);
         for (i=0, op=helptxt;  (ip = help_text[i]);  i++) {
@@ -2079,12 +2079,12 @@ char **argv;
  */
 int
 info (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-        register XimDataPtr xim = xc->xim;
+        XimDataPtr xim = xc->xim;
         char *option, *message;
 
         if (argc < 2)
@@ -2125,7 +2125,7 @@ char **argv;
  */
 static void
 info_server (xim, argc, argv, text)
-register XimDataPtr xim;
+XimDataPtr xim;
 int	argc;
 char	**argv;
 char	*text;
@@ -2176,11 +2176,11 @@ char	*text;
  */
 void
 info_clients (xim, text)
-register XimDataPtr xim;
+XimDataPtr xim;
 char	*text;
 {
-        register IsmModule ism;
-	register int i;
+        IsmModule ism;
+	int i;
         char line[SZ_LINE], path[80];
 	extern ismModule ism_modules[];
 	extern int ism_nmodules;
@@ -2237,12 +2237,12 @@ char	*text;
  */
 void
 info_wcs (xim, text)
-register XimDataPtr xim;
+XimDataPtr xim;
 char	*text;
 {
-        register FrameBufPtr fr = xim->df_p;
-        register CtranPtr ct = &fr->ctran;
-	register int i;
+        FrameBufPtr fr = xim->df_p;
+        CtranPtr ct = &fr->ctran;
+	int i;
         MappingPtr mp = (MappingPtr) NULL;
 	char	 line[SZ_LINE];
 
@@ -2329,11 +2329,11 @@ char	*text;
  */
 void
 info_imtoolrc (xim, text)
-register XimDataPtr xim;
+XimDataPtr xim;
 char	*text;
 {
-	register int last_fb_used = MAX_FBCONFIG;
-	register int i, w, h, nf, fb_config = xim->fb_configno;
+	int last_fb_used = MAX_FBCONFIG;
+	int i, w, h, nf, fb_config = xim->fb_configno;
 	char	 line[SZ_LINE];
 
 	strcpy (text, "    Frame Buffer Configuration Table\n");
@@ -2387,14 +2387,14 @@ char	*text;
 
 static int 
 windowRGB (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-	register XimDataPtr xim = xc->xim;
-	register FrameBufPtr fb = xim->df_p;
-	register ColorMapPtr cm;
+	XimDataPtr xim = xc->xim;
+	FrameBufPtr fb = xim->df_p;
+	ColorMapPtr cm;
 	int color, first, nelem, maxelem, save = 0;
 	unsigned short r[MAX_COLORS];
 	unsigned short g[MAX_COLORS];
@@ -2448,8 +2448,8 @@ unsigned short map[MAX_COLORS];
 int ncells, first;
 float offset, slope;
 {
-	register int i, c1, c2;
-	register float x, y, z, frac;
+	int i, c1, c2;
+	float x, y, z, frac;
 	unsigned short val, out[MAX_COLORS];
 
         for (i=0;  i < ncells;  i++) {
@@ -2484,12 +2484,12 @@ float offset, slope;
  */
 static int
 ism_start (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-	register IsmModule ism;
+	IsmModule ism;
 
         if (argc < 2)
             return (TCL_ERROR);
@@ -2515,13 +2515,13 @@ char **argv;
  */
 static int
 ism_stop (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-	register XimDataPtr xim = xc->xim;
-	register IsmModule ism;
+	XimDataPtr xim = xc->xim;
+	IsmModule ism;
 
         if (argc < 2)
             return (TCL_ERROR);
@@ -2546,13 +2546,13 @@ char **argv;
  */
 static int
 ism_cmd (xc, tcl, argc, argv)
-register XimClientPtr xc;
+XimClientPtr xc;
 Tcl_Interp *tcl;
 int argc;
 char **argv;
 {
-	register XimDataPtr xim = xc->xim;
-	register IsmModule ism;
+	XimDataPtr xim = xc->xim;
+	IsmModule ism;
 	char 	 **cmd_argv;
 	int  	 cmd_argc;
 

@@ -338,7 +338,7 @@ gio_enable (int	dummy, int onoff)
 static int
 gio_activate (int dummy, int state)
 {
-	register RequestPtr rp;
+	RequestPtr rp;
 
 	/* Cancel any buffered command output. */
 	wait_cursor = 0;
@@ -392,7 +392,7 @@ gio_status (int dummy, char *app_name, char *app_class)
 static int
 gio_activate_cb (int dummy, Widget w, int state)
 {
-	register RequestPtr rp;
+	RequestPtr rp;
 
 	if (!state)
 	    return 0;
@@ -513,7 +513,7 @@ gio_clear (int dummy)
 static int
 gio_hardreset (int dummy)
 {
-	register RequestPtr rp;
+	RequestPtr rp;
 
 	/* If a cusor read is currently in progress send the application EOF
 	 * to indicate that it should exit graphics mode.
@@ -576,7 +576,7 @@ gio_hardreset (int dummy)
 static int
 gio_reset (int notused, GtermWidget w, char *args)
 {
-	register int i;
+	int i;
 	int new_widget;
 
 	/* Make this the active graphics widget. */
@@ -650,8 +650,8 @@ gio_reset (int notused, GtermWidget w, char *args)
 static int
 gio_setginmodeterm (int dummy, char *str)
 {
-	register char	*ip;
-	register int	n;
+	char	*ip;
+	int	n;
 
 	trailer1 = trailer2 = -1;
 
@@ -780,7 +780,7 @@ gio_queue_output (
 static int
 gio_queue_request (int sx, int sy, int raster, int rx, int ry, int key, char *strval)
 {
-	register RequestPtr rp;
+	RequestPtr rp;
 	int buflen, nchars;
 	char *buf;
 
@@ -828,7 +828,7 @@ gio_queue_request (int sx, int sy, int raster, int rx, int ry, int key, char *st
 static int
 gio_output(void)
 {
-	register RequestPtr rp;
+	RequestPtr rp;
 
 	if (!(rp = request_head))
 	    return (-1);
@@ -873,8 +873,8 @@ gio_ptyinput (
   char	*ttybuf,		/* raw data on input, tty data on output */
   int	nchars)			/* nchars of raw data */
 {
-	register char *itop = ttybuf + nchars;
-	register char *op, *ip = ttybuf, ch;
+	char *itop = ttybuf + nchars;
+	char *op, *ip = ttybuf, ch;
 
 	if (!gio_enabled || nchars <= 0)
 	    return (nchars);
@@ -1018,7 +1018,7 @@ gstart:			g_putc (GS);
 static int
 gio_processdata(void)
 {
-	register int quota, ch;
+	int quota, ch;
 	unsigned char *save_ip, *ip_start;
 	int textwidth;
 
@@ -1197,8 +1197,8 @@ again:
 		    }
 		    msgbuf[msg_op++] = ch;
 		} else {
-		    register int i, j, v;
-		    register char *ip = msgbuf;
+		    int i, j, v;
+		    char *ip = msgbuf;
 		    unsigned short r[MAX_COLORS], g[MAX_COLORS], b[MAX_COLORS];
 		    int b1, b2;
 
@@ -1242,8 +1242,8 @@ again:
 		    }
 		    msgbuf[msg_op++] = ch;
 		} else {
-		    register int b1, b2, i;
-		    register char *ip = msgbuf;
+		    int b1, b2, i;
+		    char *ip = msgbuf;
 		    unsigned short iomap[MAX_COLORS];
 
 		    msgbuf[msg_op++] = 0;
@@ -1540,7 +1540,7 @@ exit:
 static void
 pl_decodepts(void)
 {
-	register char	*ip, *itop;
+	char	*ip, *itop;
 	int	hiy, loy, hix, lox, type, data, nb;
 	char	*ip_save;
 
@@ -1644,7 +1644,7 @@ int	raster;			/* raster number */
 int	rx, ry;			/* raster coords of event */
 int	datalen;		/* nchars of data following cursor value */
 {
-	register int n=0, mc_x, mc_y;
+	int n=0, mc_x, mc_y;
 	char curval[20];
 
 	/* Ignore cursor events unless requested via program control.
@@ -1703,7 +1703,7 @@ int	datalen;		/* nchars of data following cursor value */
 static void
 gio_retenq()
 {
-	register int	mc_x, mc_y;
+	int	mc_x, mc_y;
 	char	curval[7];
 	int	len;
 
@@ -1777,8 +1777,8 @@ static	struct _esc e_table[] = {
 static int
 gio_escape()
 {
-	register struct	_esc *esc;
-	register int ch, i, j;
+	struct	_esc *esc;
+	int ch, i, j;
 	struct	_esc **e_temp;
 	int tag;
 
@@ -2103,9 +2103,9 @@ action:
 	case ESC_READPIXELS:
 	    {	/* parameters: RN EC X1 Y1 NX NY BP (return NX*NY pixels) */
 		int raster, encoding, x1, y1, nx, ny, nbits, npix=0;
-		register unsigned char *data, *op;
+		unsigned char *data, *op;
 		unsigned char obuf[128];
-		register int i;
+		int i;
 
 		if (startscan())
 		    return (-1);
@@ -2209,8 +2209,8 @@ action:
 		int map, first, ncolors, buflen;
 		unsigned short *buf, *r, *g, *b, v[3];
 		unsigned char obuf[128];
-		register unsigned char *op;
-		register int i, j;
+		unsigned char *op;
+		int i, j;
 
 		if (startscan() || getint(&map) || getint(&first) ||
 			getint(&ncolors) || endscan())
@@ -2304,8 +2304,8 @@ action:
 		int first, ncolors, buflen;
 		unsigned short *iomap, v;
 		unsigned char obuf[128];
-		register unsigned char *op;
-		register int i;
+		unsigned char *op;
+		int i;
 
 		if (startscan() || getint(&first) ||
 			getint(&ncolors) || endscan())
@@ -2507,7 +2507,7 @@ action:
 static int
 startscan()
 {
-	register int ch;
+	int ch;
 
 	/* Skip forward to the '[' preceeding the first argument. */
 	while (g_getc (ch) >= 0)
@@ -2529,8 +2529,8 @@ static int
 getint (value)
 int *value;
 {
-	register int ch;
-	register int v;
+	int ch;
+	int v;
 	int	neg = 0;
 
 	if (scanok) {
@@ -2582,8 +2582,8 @@ static int
 getstr (value)
 char *value;
 {
-	register int ch;
-	register char *op = value;
+	int ch;
+	char *op = value;
 
 	if (scanok) {
 	    /* Skip to the next string token. */
@@ -2617,7 +2617,7 @@ char *value;
 static int
 endscan()
 {
-	register int ch;
+	int ch;
 
 	/* Skip to the ']' delimiter. */
 	for (;;) {

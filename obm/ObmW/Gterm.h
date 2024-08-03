@@ -300,6 +300,7 @@ typedef struct dPoint DPoint;
 
 typedef struct _GtermRec *GtermWidget;
 typedef struct _GtermClassRec *GtermWidgetClass;
+typedef struct marker *Marker;
 
 extern WidgetClass gtermWidgetClass;
 

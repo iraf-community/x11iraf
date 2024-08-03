@@ -440,7 +440,7 @@ xim_reset (XimDataPtr xim, Widget w)
 void
 xim_resize (XimDataPtr xim, Widget w)
 {
-	register FrameBufPtr fb;
+	FrameBufPtr fb;
 	int junk, sx, sy, width, height, depth;
 	int i, active, frame, mapping, zoomtype;
 	float xscale, yscale, scale;
@@ -548,7 +548,7 @@ xim_resize (XimDataPtr xim, Widget w)
 void
 xim_refresh (XimDataPtr xim)
 {
-	register FrameBufPtr fb = xim->df_p;
+	FrameBufPtr fb = xim->df_p;
 	int junk, width, height, depth;
 
 	GtQueryRaster ((GtermWidget) xim->gt, fb->raster, &junk,
@@ -581,8 +581,8 @@ xim_setFrame (XimDataPtr xim, int frame)
 void
 xim_setReferenceFrame (IoChanPtr chan, int frame)
 {
-	register XimDataPtr xim = (XimDataPtr) chan->xim;
-	register FrameBufPtr fb;
+	XimDataPtr xim = (XimDataPtr) chan->xim;
+	FrameBufPtr fb;
 	int frameno;
 
 	/* Ignore request if channel not active. */
@@ -605,7 +605,7 @@ xim_setReferenceFrame (IoChanPtr chan, int frame)
 void
 xim_setDisplayFrame (XimDataPtr xim, int frame)
 {
-	register FrameBufPtr fb;
+	FrameBufPtr fb;
 	GtermWidget gt = (GtermWidget) xim->gt;
 	FrameBufPtr old_fb = xim->df_p;
 	int frameno, old_frameno;
@@ -693,7 +693,7 @@ void
 xim_initFrame (XimDataPtr xim, int frame, int nframes, FbConfigPtr config,
 	       char *memModel)
 {
-	register FrameBufPtr fb = &xim->frames[frame-1];
+	FrameBufPtr fb = &xim->frames[frame-1];
 	GtermWidget gt = (GtermWidget) xim->gt;
 	int sx, sy, width, height, depth;
 
@@ -823,7 +823,7 @@ small:	    fb->zoomras = 0;
 void
 xim_delFrame (XimDataPtr xim, int frame)
 {
-	register FrameBufPtr fb = &xim->frames[frame-1];
+	FrameBufPtr fb = &xim->frames[frame-1];
 	GtermWidget gt = (GtermWidget) xim->gt;
 
 	if (frame < 1 || frame > MAX_FRAMES)
@@ -875,9 +875,9 @@ xim_fitFrame (XimDataPtr xim)
 void
 xim_tileFrames (XimDataPtr xim, int frame_list)
 {
-	register int i;
-	register Widget w = xim->gt;
-	register FrameBufPtr fb;
+	int i;
+	Widget w = xim->gt;
+	FrameBufPtr fb;
 	char buf[SZ_LINE];
 	int mapping;
 
@@ -998,7 +998,7 @@ xim_labelTiles (XimDataPtr xim)
 	XtPointer    gm;
 	Arg 	     args[10];
 	char	     text[256], tw[16];
-	register int i, j, len;
+	int i, j, len;
 	int 	     sx, sy, width, height, depth, nargs=0;
 
 	static XtPointer labels[MAX_FRAMES];
@@ -1093,8 +1093,8 @@ xim_labelTiles (XimDataPtr xim)
 void
 xim_matchFrames (XimDataPtr xim, int *frames, int reference_frame)
 {
-	register FrameBufPtr fr, fb = &xim->frames[reference_frame-1];
-	register int *ip, i;
+	FrameBufPtr fr, fb = &xim->frames[reference_frame-1];
+	int *ip, i;
 	int bits;
 
 	/* If frames is NULL match all frames.  Set one bit in BITS for
@@ -1130,8 +1130,8 @@ void
 xim_registerFrames (XimDataPtr xim, int *frames, int reference_frame,
 		    int offsets)
 {
-	register int *ip, i;
-	register FrameBufPtr fr, fb = &xim->frames[reference_frame-1];
+	int *ip, i;
+	FrameBufPtr fr, fb = &xim->frames[reference_frame-1];
 	int src, st, sx, sy, snx, sny;
 	int dst, dt, dx, dy, dnx, dny;
 	Widget gt = xim->gt;
@@ -1589,7 +1589,7 @@ xim_getScreen (
     int *height,
     int *depth)
 {
-	register int i;
+	int i;
 	int border = xim->tileBorder;
 	int rtype, scr_width, scr_height;
 	int twidth, theight, tileno, frameno;
@@ -1663,7 +1663,7 @@ xim_onScreen (XimDataPtr xim, int frame)
 void
 xim_setFlip (XimDataPtr xim, FrameBufPtr fb, int flip_x, int flip_y)
 {
-	register Widget gt = xim->gt;
+	Widget gt = xim->gt;
 	int src, st, sx, sy, snx, sny;
 	int dst, dt, dx, dy, dnx, dny;
 	int rop;
@@ -1697,7 +1697,7 @@ xim_setFlip (XimDataPtr xim, FrameBufPtr fb, int flip_x, int flip_y)
 void
 xim_setRop (XimDataPtr xim, FrameBufPtr fb, int rop)
 {
-	register Widget gt = xim->gt;
+	Widget gt = xim->gt;
 	int src, st, sx, sy, snx, sny;
 	int dst, dt, dx, dy, dnx, dny;
 	int oldrop;
@@ -1728,7 +1728,7 @@ void
 xim_getCursorPos (XimDataPtr xim, float *sx, float *sy,
 		  int *raster, int *frame)
 {
-	register FrameBufPtr fb;
+	FrameBufPtr fb;
 	DPoint pv1, pv2;
 	int rx, ry, rmap;
 	int src, x, y, i;
@@ -1850,7 +1850,7 @@ xim_readDisplay (
 	    GtReadIomap (gt, iomap, 0, MAX_COLORS);
 
 	    if (debug) {
-	        register short pmin = MAX_COLORS, pmax = 0, i, j;
+	        short pmin = MAX_COLORS, pmax = 0, i, j;
                 fprintf (stderr, "iomap\n");
 	        for (i=0; i < MAX_COLORS; ) {
                     for (j=0; j < 8 && i < MAX_COLORS; j++) {
@@ -2181,7 +2181,7 @@ xim_writeDisplay (
  */
 void
 xim_message (xim, object, message)
-register XimDataPtr xim;
+XimDataPtr xim;
 char *object;
 char *message;
 {
@@ -2257,7 +2257,7 @@ xim_frameRegion (XimDataPtr xim, FrameBufPtr fb)
 static void
 xim_colortables (XimDataPtr xim)
 {
-	register char *ip, *op;
+	char *ip, *op;
 	char buf[MAX_COLORMAPS*40];
 	int i;
 
@@ -2306,8 +2306,8 @@ xim_enhancement (XimDataPtr xim, FrameBufPtr fb)
 static void
 get_fbconfig (XimDataPtr xim)
 {
-	register char	*ip;
-	register FILE	*fp = NULL;
+	char	*ip;
+	FILE	*fp = NULL;
 	int	config, nframes, width, height, i;
 	char	lbuf[SZ_LINE+1], *fname;
 	static char *fb_paths[] = {
@@ -2417,7 +2417,7 @@ get_fbconfig (XimDataPtr xim)
 int
 xim_getAntialias (XimDataPtr xim, char *s)
 {
-    register char *ip, *op;
+    char *ip, *op;
     char word[SZ_NAME];
     int rop = 0;
 
@@ -2464,8 +2464,8 @@ xim_setColormap (
     unsigned short *m_blue,
     int nelem)
 {
-	register int i, j;
-	register char *ip, *op;
+	int i, j;
+	char *ip, *op;
 	static int seed = 0;
 	int v, vsat, step;
 	int knot[7];
@@ -2794,7 +2794,7 @@ xim_setColormap (
 void
 hsv_to_rgb (float h, float s, float v, float *r, float *g, float *b)
 {
-	register int i;
+	int i;
 	float f, p, q, t;
 
 	while (h >= 360.0)
@@ -2835,9 +2835,9 @@ hsv_to_rgb (float h, float s, float v, float *r, float *g, float *b)
 static int
 get_dirfile (DIR *dir, char *outstr, int maxch)
 {
-        register int    n;
-        register struct dirent *dp;
-        register char   *ip, *op;
+        int    n;
+        struct dirent *dp;
+        char   *ip, *op;
         int     status;
 
         for (dp = readdir(dir);  dp != NULL;  dp = readdir(dir))
@@ -2859,8 +2859,8 @@ get_dirfile (DIR *dir, char *outstr, int maxch)
 static void
 load_testpattern (XimDataPtr xim, int frame, int type)
 {
-	register FrameBufPtr fb = &xim->frames[frame];
-	register int i, j, ncolors;
+	FrameBufPtr fb = &xim->frames[frame];
+	int i, j, ncolors;
 	int rtype, width, height, depth;
 	unsigned char *data;
 
@@ -2889,7 +2889,7 @@ load_testpattern (XimDataPtr xim, int frame, int type)
 static void
 set_colorbar (XimDataPtr xim, Widget w)
 {
-	register int i;
+	int i;
 	static int initialized = 0;
 	int first, ngray, rgb_len, rtype, width, height, depth;
 	unsigned short m_red[MAX_COLORS];

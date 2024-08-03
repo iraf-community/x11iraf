@@ -48,9 +48,9 @@ static int debug = False;
  */
 void
 xim_initLoad (xim)
-register XimDataPtr xim;
+XimDataPtr xim;
 {
-	register fileLoadPtr flp;
+	fileLoadPtr flp;
 	char buf[SZ_LINE];
 
 	xim->flp = flp = (fileLoadPtr) calloc (1, sizeof (fileLoad));
@@ -94,8 +94,8 @@ void
 xim_loadClose (xim)
 XimDataPtr xim;
 {
-	register fileLoadPtr flp = xim->flp;
-	register int i;
+	fileLoadPtr flp = xim->flp;
+	int i;
 
 	if (flp->FileList)
 	    for (i=0;  i < flp->nfiles;  i++)
@@ -110,16 +110,16 @@ XimDataPtr xim;
  */
 int
 xim_loadFile (xim, fname, frame)
-register XimDataPtr xim;
+XimDataPtr xim;
 char *fname;
 int frame;
 {
-	register int i, new_config=-1;
-	register char *ip;
-	register fileLoadPtr flp = xim->flp;
-	register FrameBufPtr fr;
-	register MappingPtr mp;
-	register FbConfigPtr cf;
+	int i, new_config=-1;
+	char *ip;
+	fileLoadPtr flp = xim->flp;
+	FrameBufPtr fr;
+	MappingPtr mp;
+	FbConfigPtr cf;
 
 	float	 z1=0.0, z2=0.0;
 	int status = 0, has_private_cmap = 0, pixtype, w, h, ncolors;
@@ -245,7 +245,7 @@ int frame;
 	 */
 	if (w > xim->width || h > xim->height) {
 
-	    register int width, height, tmin = 100000, edges;
+	    int width, height, tmin = 100000, edges;
 
 	    loadstat (xim, "Initializing frame buffer...");
 
@@ -413,11 +413,11 @@ int frame;
  */
 void
 xim_dirRescan (xim)
-register XimDataPtr xim;
+XimDataPtr xim;
 {
-        register fileLoadPtr flp = xim->flp;
-	register char *ip, *op, *flist;
-	register int i;
+        fileLoadPtr flp = xim->flp;
+	char *ip, *op, *flist;
+	int i;
 
 	if (flp->FileList) {
 	    for (i=0;  i < flp->nfiles;  i++)
@@ -451,12 +451,12 @@ register XimDataPtr xim;
  */
 void
 xim_scanHeaders (xim)
-register XimDataPtr xim;
+XimDataPtr xim;
 {
-        register fileLoadPtr flp = xim->flp;
-	register char *ip, *op;
-	register char *entry = (char *)NULL, *flist = (char *)NULL;
-	register int i;
+        fileLoadPtr flp = xim->flp;
+	char *ip, *op;
+	char *entry = (char *)NULL, *flist = (char *)NULL;
+	int i;
 	extern char *getFITSHdr(), *getIRAFHdr();
 	extern char *getSunRasHdr(), *getGIFHdr();
 
@@ -559,7 +559,7 @@ int files_only;				/* list only files, not dirs	   */
 	struct dirent *entry;
 	struct stat file_info;
 	unsigned int max_entries;
-	register int i=0, npatterns = 0;
+	int i=0, npatterns = 0;
 	int status, pattern_matches;
 
 	/* Open directory.  */
@@ -659,7 +659,7 @@ static int
 fileCompare (x, y)
 void *x, *y;
 {
-	register char	*p, *q;
+	char	*p, *q;
 
 	p = (char *) * ((char **) x);
 	q = (char *) * ((char **) y);
@@ -679,8 +679,8 @@ globExpression (expression, pattern)
 char *expression; 				/* file name 		*/
 char *pattern; 					/* matching pattern 	*/
 {
-	register int done, match, status;
-	register char c, *p;
+	int done, match, status;
+	char c, *p;
 
 
 	if (pattern == (char *) NULL)
@@ -836,8 +836,8 @@ amapc (a, b, npix, a1, a2, b1, b2)
 char   	*a, *b;
 int	npix, a1, a2, b1, b2;
 {
-	register int     i, minout, maxout, aoff, boff, pixval;
-	register double  scalar;
+	int     i, minout, maxout, aoff, boff, pixval;
+	double  scalar;
 
         scalar = ((double) b2 - (double) b1) / ((double) a2 - (double) a1);
 
@@ -862,8 +862,8 @@ unsigned char *a, *b;
 unsigned char *red, *green, *blue;
 int	npix, ncols;
 {
-	register int	i, pmin=0, pmax=255;
-	register float scale;
+	int	i, pmin=0, pmax=255;
+	float scale;
 
 	/* Reset the pixels so they are the final grayscale values. */
 	scale = 255.0 / (float) (ncols - 1);
@@ -894,7 +894,7 @@ unsigned char *i, *j;
  */
 static void
 loadstat (xim, message)
-register XimDataPtr xim;
+XimDataPtr xim;
 char *message;
 {
         char text[SZ_LINE];

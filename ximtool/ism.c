@@ -85,10 +85,10 @@ ismModule ism_modules[] = {
  */
 void
 xim_ismOpen (xim)
-register XimDataPtr xim;
+XimDataPtr xim;
 {
-        register int s = 0;
-        register IsmIoChanPtr chan = &(xim->ism_chan);
+        int s = 0;
+        IsmIoChanPtr chan = &(xim->ism_chan);
         char path[SZ_FNAME], *ism_path;
 
 
@@ -149,10 +149,10 @@ register XimDataPtr xim;
  */
 void
 xim_ismClose (xim)
-register XimDataPtr xim;
+XimDataPtr xim;
 {
-	register IsmIoChanPtr chan = &(xim->ism_chan);
-	register int i;
+	IsmIoChanPtr chan = &(xim->ism_chan);
+	int i;
 
 	/* Send a 'quit' message to all connected clients. */
 	for (i=0, chan=NULL; i < XtNumber(xim->ism_client); i++) {
@@ -187,7 +187,7 @@ ismNameToPtr (name)
 char	*name;
 {
         IsmModule ism;
-        register int i;
+        int i;
 
         for (i=0; i < ism_nmodules; i++) {
             ism = &ism_modules[i];
@@ -213,8 +213,8 @@ IsmIoChanPtr chan;
 int *source;
 XtPointer id;
 {
-	register XimDataPtr xim = (XimDataPtr) chan->xim;
-	register int s;
+	XimDataPtr xim = (XimDataPtr) chan->xim;
+	int s;
 
 	/* Accept connection. */
 	if ((s = accept ((int)*source, (struct sockaddr *)0, (int *)0)) < 0)
@@ -239,7 +239,7 @@ XtPointer id;
  */
 static void
 ism_disconnectClient (chan)
-register IsmIoChanPtr chan;
+IsmIoChanPtr chan;
 {
 	close (chan->datain);
 	if (chan->id) {
@@ -259,8 +259,8 @@ IsmIoChanPtr chan;
 int *fd_addr;
 XtInputId *id_addr;
 {
-    register XimDataPtr xim = (XimDataPtr) chan->xim;
-    register IsmModule ism;
+    XimDataPtr xim = (XimDataPtr) chan->xim;
+    IsmModule ism;
     IsmIoChanPtr new_chan;
     int     datain = *fd_addr;
     int     dataout = chan->dataout;
@@ -435,7 +435,7 @@ int	*ip;
 int	*incomplete;
 int	maxch;
 {
-	register int j, i = *ip;
+	int j, i = *ip;
 	char	text[SZ_ISMBUF+1];
 
 	if (msg[*ip] == '\0') {
@@ -477,7 +477,7 @@ static int
 ism_type (message)
 char	*message;
 {
-	register char *ip;
+	char *ip;
 
 	for (ip=message; isspace(*ip); ip++) ;		/* skip whitespace */
 
@@ -502,7 +502,7 @@ char	*msg;
 char	*object;
 char	*text;
 {
-	register int i=0, ip=4, count=0;
+	int i=0, ip=4, count=0;
 
 	/* skip leading whitespace */
 	for ( ; isspace(msg[ip]) && msg[ip]; ip++) ;	
@@ -537,13 +537,13 @@ char	*text;
  */
 void
 ism_evaluate (xim, object, command)
-register XimDataPtr xim;
+XimDataPtr xim;
 char	*object;
 char	*command;
 {
-	register IsmIoChanPtr chan;
-	register int i=0;
-	register int len = strlen(command) + 1;
+	IsmIoChanPtr chan;
+	int i=0;
+	int len = strlen(command) + 1;
 	char *buf = XtCalloc (len+1, sizeof(char));
 
 	for (i=0; i < XtNumber (xim->ism_client); i++) {
@@ -565,7 +565,7 @@ char	*command;
  */
 int
 ism_message (xim, object, command)
-register XimDataPtr xim;
+XimDataPtr xim;
 char	*object, *command;
 {
 	ism_evaluate (xim, object, command);
@@ -614,9 +614,9 @@ err: 	    fprintf (stderr, "ximtool: can't open ISM socket on %s, errno=%d\n",
  */
 static IsmIoChanPtr
 ism_getChannel (xim)
-register XimDataPtr xim;
+XimDataPtr xim;
 {
-        register int i;
+        int i;
 
         for (i=0;  i < XtNumber(xim->ism_client); i++) {
             if (!xim->ism_client[i].connected) {

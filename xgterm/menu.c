@@ -371,8 +371,8 @@ static Widget create_menu (w, toplevelw, name, entries, nentries)
 init_menu (menu)
     char *menu;
 {
-    register TScreen *screen = &term->screen;
-    register int i;
+    TScreen *screen = &term->screen;
+    int i;
 
     switch (menu[0]) {
     case 'f':
@@ -403,7 +403,7 @@ static void handle_send_signal (gw, sig)
     Widget gw;
     int sig;
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
     if (screen->pid > 1) kill_process_group (screen->pid, sig);
 }
@@ -424,7 +424,7 @@ static void do_securekbd (gw, closure, data)
     Widget gw;
     caddr_t closure, data;
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
     Time time = CurrentTime;		/* XXX - wrong */
 
     if (screen->grabbedKbd) {
@@ -449,7 +449,7 @@ static void do_allowsends (gw, closure, data)
     Widget gw;
     caddr_t closure, data;
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
     /*
     screen->allowSendEvents = !screen->allowSendEvents;
@@ -461,7 +461,7 @@ static void do_visualbell (gw, closure, data)
     Widget gw;
     caddr_t closure, data;
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
     screen->visualbell = !screen->visualbell;
     update_visualbell();
@@ -472,7 +472,7 @@ static void do_logging (gw, closure, data)
     Widget gw;
     caddr_t closure, data;
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
     if (screen->logging) {
 	CloseLog (screen);
@@ -566,7 +566,7 @@ static void do_scrollbar (gw, closure, data)
     Widget gw;
     caddr_t closure, data;
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
     if (screen->scrollbar) {
 	ScrollBarOff (screen);
@@ -581,7 +581,7 @@ static void do_jumpscroll (gw, closure, data)
     Widget gw;
     caddr_t closure, data;
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
     term->flags ^= SMOOTHSCROLL;
     if (term->flags & SMOOTHSCROLL) {
@@ -663,7 +663,7 @@ static void do_scrollkey (gw, closure, data)
     Widget gw;
     caddr_t closure, data;
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
     screen->scrollkey = !screen->scrollkey;
     update_scrollkey();
@@ -674,7 +674,7 @@ static void do_scrollttyoutput (gw, closure, data)
     Widget gw;
     caddr_t closure, data;
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
     screen->scrollttyoutput = !screen->scrollttyoutput;
     update_scrollttyoutput();
@@ -685,7 +685,7 @@ static void do_allow132 (gw, closure, data)
     Widget gw;
     caddr_t closure, data;
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
     screen->c132 = !screen->c132;
     update_allow132();
@@ -696,7 +696,7 @@ static void do_cursesemul (gw, closure, data)
     Widget gw;
     caddr_t closure, data;
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
     screen->curses = !screen->curses;
     update_cursesemul();
@@ -707,7 +707,7 @@ static void do_marginbell (gw, closure, data)
     Widget gw;
     caddr_t closure, data;
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
     if (!(screen->marginbell = !screen->marginbell)) screen->bellarmed = -1;
     update_marginbell();
@@ -743,7 +743,7 @@ static void do_clearsavedlines (gw, closure, data)
     Widget gw;
     caddr_t closure, data;
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
     screen->savedlines = 0;
     ScrollBarDrawThumb(screen->scrollWidget);
@@ -771,7 +771,7 @@ static void handle_tekshow (gw, allowswitch)
     Widget gw;
     Bool allowswitch;
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
     if (!gt_activated()) {               /* not showing, turn on */
         set_tek_visibility (TRUE);
@@ -868,7 +868,7 @@ static void handle_vtshow (gw, allowswitch)
     Widget gw;
     Bool allowswitch;
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
     if (!screen->Vshow) {		/* not showing, turn on */
 	set_vt_visibility (TRUE);
@@ -897,7 +897,7 @@ static void do_vtmode (gw, closure, data)
     Widget gw;
     caddr_t closure, data;
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
     switch_modes (gt_activated());	/* switch to vt, or from */
 }

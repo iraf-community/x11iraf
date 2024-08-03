@@ -62,7 +62,7 @@ extern Boolean sunFunctionKeys;
 
 static void
 AdjustAfterInput (screen)
-register TScreen *screen;
+TScreen *screen;
 {
 	if(screen->scrollkey && screen->topline != 0)
 		WindowScroll(screen, 0);
@@ -84,9 +84,9 @@ register TScreen *screen;
 
 void
 Input (keyboard, screen, event, eightbit)
-    register TKeyboard	*keyboard;
-    register TScreen	*screen;
-    register XKeyEvent *event;
+    TKeyboard	*keyboard;
+    TScreen	*screen;
+    XKeyEvent *event;
     Bool eightbit;
 {
 
@@ -97,8 +97,8 @@ Input (keyboard, screen, event, eightbit)
 #endif
 
 	char strbuf[STRBUFSIZE];
-	register char *string;
-	register int key = FALSE;
+	char *string;
+	int key = FALSE;
 	int	pty	= screen->respond;
 	int	nbytes;
 	KeySym  keysym = 0;
@@ -187,8 +187,8 @@ Input (keyboard, screen, event, eightbit)
 }
 
 StringInput (screen, string, nbytes)
-    register TScreen	*screen;
-    register char *string;
+    TScreen	*screen;
+    char *string;
     int nbytes;
 {
 	int	pty	= screen->respond;

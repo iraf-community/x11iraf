@@ -682,11 +682,11 @@ WidgetClass xgtermWidgetClass = (WidgetClass)&xgtermClassRec;
 
 static void VTparse()
 {
-	register TScreen *screen = &term->screen;
-	register int *parsestate = groundtable;
-	register unsigned int c;
-	register unsigned char *cp;
-	register int row, col, top, bot, scstype;
+	TScreen *screen = &term->screen;
+	int *parsestate = groundtable;
+	unsigned int c;
+	unsigned char *cp;
+	int row, col, top, bot, scstype;
 	extern int TrackMouse();
 
 	if(setjmp(vtjmpbuf))
@@ -1563,8 +1563,8 @@ v_write(f, d, len)
 static int
 in_put()
 {
-    register TScreen *screen = &term->screen;
-    register XtInputMask mask;
+    TScreen *screen = &term->screen;
+    XtInputMask mask;
 
     /* Enable pty input. */
     if (!input_handler)
@@ -1633,7 +1633,7 @@ do_read (w, fd, id)
     int *fd;
     XtInputId *id;
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
     /* Don't read any more data until the input buffer is empty. */
     if (bcnt > 0)
@@ -1669,8 +1669,8 @@ do_read (w, fd, id)
 	}
 
 	if (!screen->output_eight_bits) {
-	    register int bc = bcnt;
-	    register Char *b = bptr;
+	    int bc = bcnt;
+	    Char *b = bptr;
 
 	    for (; bc > 0; bc--, b++) {
 		*b &= (Char) 0x7f;
@@ -1720,16 +1720,16 @@ init_ttyio (pty)
  */
 static void
 dotext(screen, flags, charset, buf, ptr, fg, bg)
-    register TScreen	*screen;
+    TScreen	*screen;
     unsigned	flags, fg, bg;
     char	charset;
     char	*buf;		/* start of characters to process */
     char	*ptr;		/* end */
 {
-	register char	*s;
-	register int	len;
-	register int	n;
-	register int	next_col;
+	char	*s;
+	int	len;
+	int	n;
+	int	next_col;
 
 	switch (charset) {
 	case 'A':	/* United Kingdom set			*/
@@ -1788,14 +1788,14 @@ dotext(screen, flags, charset, buf, ptr, fg, bg)
  */
 static void
 WriteText(screen, str, len, flags, fg, bg)
-    register TScreen	*screen;
-    register char	*str;
-    register int	len;
+    TScreen	*screen;
+    char	*str;
+    int	len;
     unsigned		flags, fg, bg;
 {
-	register int cx, cy;
-	register unsigned fgs = flags;
-        register Pixel fg_pix, bg_pix;
+	int cx, cy;
+	unsigned fgs = flags;
+        Pixel fg_pix, bg_pix;
 	GC	currentGC;
 
         fg_pix = (fgs & FG_COLOR) ? screen->colors[fg] : 
@@ -1874,7 +1874,7 @@ ansi_modes(termw, func)
     XgtermWidget	termw;
     int		(*func)();
 {
-	register int	i;
+	int	i;
 
 	for (i=0; i<nparam; ++i) {
 		switch (param[i]) {
@@ -1897,8 +1897,8 @@ dpmodes(termw, func)
     XgtermWidget	termw;
     void (*func)();
 {
-	register TScreen	*screen	= &termw->screen;
-	register int	i, j;
+	TScreen	*screen	= &termw->screen;
+	int	i, j;
 
 	for (i=0; i<nparam; ++i) {
 		switch (param[i]) {
@@ -2078,8 +2078,8 @@ dpmodes(termw, func)
 savemodes(termw)
     XgtermWidget termw;
 {
-	register TScreen	*screen	= &termw->screen;
-	register int i;
+	TScreen	*screen	= &termw->screen;
+	int i;
 
 	for (i = 0; i < nparam; i++) {
 		switch (param[i]) {
@@ -2144,8 +2144,8 @@ savemodes(termw)
 restoremodes(termw)
     XgtermWidget termw;
 {
-	register TScreen	*screen	= &termw->screen;
-	register int i, j;
+	TScreen	*screen	= &termw->screen;
+	int i, j;
 
 	for (i = 0; i < nparam; i++) {
 		switch (param[i]) {
@@ -2290,12 +2290,12 @@ static void bitclr(p, mask)
 }
 
 unparseseq(ap, fd)
-    register ANSI *ap;
+    ANSI *ap;
     int fd;
 {
-	register int	c;
-	register int	i;
-	register int	inters;
+	int	c;
+	int	i;
+	int	inters;
 
 	c = ap->a_type;
 	if (c>=0x80 && c<=0x9F) {
@@ -2339,7 +2339,7 @@ char c;
 int fd;
 {
 	char	buf[2];
-	register i = 1;
+	int i = 1;
 	extern XgtermWidget term;
 
 	if((buf[0] = c) == '\r' && (term->flags & LINEFEED)) {
@@ -2350,7 +2350,7 @@ int fd;
 }
 
 unparsefputs (s, fd)
-    register char *s;
+    char *s;
     int fd;
 {
     if (s) {
@@ -2362,7 +2362,7 @@ static void SwitchBufs();
 
 static void
 ToAlternate(screen)
-register TScreen *screen;
+TScreen *screen;
 {
 	extern ScrnBuf Allocate();
 
@@ -2378,7 +2378,7 @@ register TScreen *screen;
 
 static void
 FromAlternate(screen)
-register TScreen *screen;
+TScreen *screen;
 {
 	if(!screen->alternate)
 		return;
@@ -2389,9 +2389,9 @@ register TScreen *screen;
 
 static void
 SwitchBufs(screen)
-    register TScreen *screen;
+    TScreen *screen;
 {
-	register int rows, top;
+	int rows, top;
 
 	if(screen->cursor_state)
 		HideCursor();
@@ -2432,9 +2432,9 @@ SwitchBufs(screen)
 /* swap buffer line pointers between alt and regular screens */
 
 SwitchBufPtrs(screen)
-    register TScreen *screen;
+    TScreen *screen;
 {
-    register int rows = screen->max_row + 1;
+    int rows = screen->max_row + 1;
     char *save [4 * MAX_ROWS];
 
     memmove( (char *)save, (char *)screen->buf, 4 * sizeof(char *) * rows);
@@ -2445,8 +2445,8 @@ SwitchBufPtrs(screen)
 
 VTRun()
 {
-	register TScreen *screen = &term->screen;
-	register int i;
+	TScreen *screen = &term->screen;
+	int i;
 	
 	XtRealizeWidget (term->core.parent);
 	if (!screen->TekEmu)
@@ -2488,7 +2488,7 @@ static void VTExpose(w, event, region)
     XEvent *event;
     Region region;
 {
-	register TScreen *screen = &term->screen;
+	TScreen *screen = &term->screen;
 
 #ifdef DEBUG
 	if(debug)
@@ -2501,7 +2501,7 @@ static void VTExpose(w, event, region)
 static void VTGraphicsOrNoExpose (event)
     XEvent *event;
 {
-	register TScreen *screen = &term->screen;
+	TScreen *screen = &term->screen;
 	if (screen->incopy <= 0) {
 		screen->incopy = 1;
 		if (screen->scrolls > 0)
@@ -2555,7 +2555,7 @@ static String xgterm_trans =
 
 int VTInit ()
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
     Widget vtparent = term->core.parent;
 
     XtRealizeWidget (vtparent);
@@ -2569,7 +2569,7 @@ int VTInit ()
 
 static void VTallocbuf ()
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
     int nrows = screen->max_row + 1;
     extern ScrnBuf Allocate();
 
@@ -2718,7 +2718,7 @@ static void VTRealize (w, valuemask, values)
     XSetWindowAttributes *values;
 {
 	unsigned int width, height;
-	register TScreen *screen = &term->screen;
+	TScreen *screen = &term->screen;
 	int xpos, ypos, pr;
 	XSizeHints		sizehints;
 	int scrollbar_width;
@@ -3076,8 +3076,8 @@ static Boolean VTSetValues (cur, request, new, args, num_args)
 void
 ShowCursor()
 {
-	register TScreen *screen = &term->screen;
-	register int x, y, flags;
+	TScreen *screen = &term->screen;
+	int x, y, flags;
 	Char c;
 	GC	currentGC;
 	Boolean	in_selection;
@@ -3195,10 +3195,10 @@ ShowCursor()
 void
 HideCursor()
 {
-	register TScreen *screen = &term->screen;
+	TScreen *screen = &term->screen;
 	GC	currentGC;
-	register int x, y, flags, fg, bg;
-	register Pixel fg_pix, bg_pix;
+	int x, y, flags, fg, bg;
+	Pixel fg_pix, bg_pix;
 	char c;
 	Boolean	in_selection;
 
@@ -3265,7 +3265,7 @@ HideCursor()
 VTReset(full)
     Boolean full;
 {
-	register TScreen *screen = &term->screen;
+	TScreen *screen = &term->screen;
 
 	/* reset scrolling region */
 	screen->top_marg = 0;
@@ -3336,9 +3336,9 @@ VTReset(full)
  */
 
 int set_character_class (s)
-    register char *s;
+    char *s;
 {
-    register int i;			/* iterator, index into s */
+    int i;			/* iterator, index into s */
     int len;				/* length of s */
     int acc;				/* accumulator */
     int low, high;			/* bounds of range [0..127] */

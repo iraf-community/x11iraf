@@ -867,7 +867,7 @@ NULL};
 static Boolean
 get_termcap(char *name, char *buffer, char *resized)
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
     *buffer = 0;        /* initialize, in case we're using terminfo's tgetent */
 
@@ -1017,8 +1017,8 @@ main (argc, argv)
 int argc;
 char **argv;
 {
-	register TScreen *screen;
-	register int pty;
+	TScreen *screen;
+	int pty;
 	int Xsocket, mode;
 	char *base_name();
 	int xerror(), xioerror();
@@ -1505,7 +1505,7 @@ char **argv;
 char *base_name(name)
 char *name;
 {
-	register char *cp;
+	char *cp;
 
 	cp = strrchr(name, '/');
 	return(cp ? cp + 1 : name);
@@ -1906,7 +1906,7 @@ get_terminal ()
  * sets up X and initializes the terminal structure except for term.buf.fildes.
  */
 {
-	register TScreen *screen = &term->screen;
+	TScreen *screen = &term->screen;
 	
 	screen->arrow = make_colored_cursor (XC_left_ptr, 
 					     screen->mousecolor,
@@ -2015,7 +2015,7 @@ static int cp_pipe[2];	/* this pipe is used for child to parent transfer */
 void first_map_occurred ()
 {
     handshake_t handshake;
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
     handshake.status = PTY_EXEC;
     handshake.rows = screen->max_row;
@@ -2077,10 +2077,10 @@ set_owner(char *device, int uid, int gid, int mode)
  * to have to do a realloc().
  */
 void
-xtermSetenv(register char *var, register char *value)
+xtermSetenv(char *var, char *value)
 {
-    register int envindex = 0;
-    register size_t len = strlen(var);
+    int envindex = 0;
+    size_t len = strlen(var);
 
     while (environ[envindex] != NULL) {
         if (strncmp(environ[envindex], var, len) == 0) {
@@ -2175,7 +2175,7 @@ spawn(void)
  *  If slave, the pty named in passedPty is already open for use
  */
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 #if OPT_PTY_HANDSHAKE
     handshake_t handshake;
     int done;
@@ -3738,7 +3738,7 @@ spawn ()
  */
 {
 	extern char *SysErrorMsg();
-	register TScreen *screen = &term->screen;
+	TScreen *screen = &term->screen;
 	int Xsocket = ConnectionNumber(screen->display);
 #ifdef USE_HANDSHAKE
 	handshake_t handshake;
@@ -4960,7 +4960,7 @@ SIGNAL_T
 Exit(n)
 	int n;
 {
-	register TScreen *screen = &term->screen;
+	TScreen *screen = &term->screen;
         int pty = term->screen.respond;  /* file descriptor of pty */
 #ifdef UTMP
 #ifdef USE_SYSV_UTMP
@@ -5020,8 +5020,8 @@ Exit(n)
 	    (void) endutent();
 	}
 #else	/* not USE_SYSV_UTMP */
-	register int wfd;
-	register int i;
+	int wfd;
+	int i;
 	struct utmp utmp;
 
 	if (!resource.utmpInhibit && added_utmp_entry &&
@@ -5071,13 +5071,13 @@ void
 resize(screen, TermName, oldtc, newtc)
 TScreen *screen;
 char *TermName;
-register char *oldtc, *newtc;
+char *oldtc, *newtc;
 {
 #ifndef USE_SYSV_ENVVARS
-	register char *ptr1, *ptr2;
-	register int i;
-	register int li_first = 0;
-	register char *temp;
+	char *ptr1, *ptr2;
+	int i;
+	int li_first = 0;
+	char *temp;
 
 	if ((ptr1 = strindex (oldtc, "co#")) == NULL){
 		strcat (oldtc, "co#80:");
@@ -5128,7 +5128,7 @@ nonblocking_wait()
 	int pid = 0;
 #else	/* defined(USE_SYSV_SIGNALS) && (defined(CRAY) || !defined(SIGTSTP)) */
 	/* union wait status; */ int status;
-	register int pid;
+	int pid;
 
 	pid = wait3 (&status, WNOHANG, (struct rusage *)NULL);
 #endif /* defined(USE_SYSV_SIGNALS) && !defined(SIGTSTP) */
@@ -5169,11 +5169,11 @@ remove_termcap_entry (buf, str)
     char *buf;
     char *str;
 {
-    register char *strinbuf;
+    char *strinbuf;
 
     strinbuf = strindex (buf, str);
     if (strinbuf) {
-        register char *colonPtr = strchr(strinbuf+1, ':');
+        char *colonPtr = strchr(strinbuf+1, ':');
         if (colonPtr) {
             while (*colonPtr) {
                 *strinbuf++ = *colonPtr++;      /* copy down */

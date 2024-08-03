@@ -61,12 +61,12 @@ ScrnBuf Allocate (nrow, ncol, addr)
 >    character array, the second one is the attributes, the third is the
 >    foreground color, and the fourth is the background color.
  */
-register int nrow, ncol;
+int nrow, ncol;
 Char **addr;
 {
-	register ScrnBuf base;
-	register Char *tmp;
-	register int i;
+	ScrnBuf base;
+	Char *tmp;
+	int i;
 
 	if ((base = (ScrnBuf) calloc ((unsigned)(nrow *= 4), sizeof (char *))) == 0)
 		SysError (ERROR_SCALLOC);
@@ -92,9 +92,9 @@ Reallocate(sbuf, sbufaddr, nrow, ncol, oldrow, oldcol)
     Char **sbufaddr;
     int nrow, ncol, oldrow, oldcol;
 {
-	register ScrnBuf base;
-	register Char *tmp;
-	register int i, minrows, mincols;
+	ScrnBuf base;
+	Char *tmp;
+	int i, minrows, mincols;
 	Char *oldbuf;
 	int move_down = 0, move_up = 0;
 	
@@ -170,14 +170,14 @@ ScreenWrite (screen, str, flags, cur_fg, cur_bg, length)
  */
 TScreen *screen;
 char *str;
-register unsigned flags;
-register unsigned cur_fg, cur_bg;
-register int length;		/* length of string */
+unsigned flags;
+unsigned cur_fg, cur_bg;
+int length;		/* length of string */
 {
-	register Char *attrs, *attrs0, *fgs, *bgs;
-	register int avail  = screen->max_col - screen->cur_col + 1;
-	register Char *col;
-	register int wrappedbit;
+	Char *attrs, *attrs0, *fgs, *bgs;
+	int avail  = screen->max_col - screen->cur_col + 1;
+	Char *col;
+	int wrappedbit;
 
 	if (length > avail)
 	    length = avail;
@@ -210,11 +210,11 @@ ScrnInsertLine (sb, last, where, n, size)
    Requires: 0 <= where < where + n <= last
    	     n <= MAX_ROWS
  */
-register ScrnBuf sb;
+ScrnBuf sb;
 int last;
-register int where, n, size;
+int where, n, size;
 {
-	register int i;
+	int i;
 	char *save [4 * MAX_ROWS];
 
 
@@ -250,11 +250,11 @@ ScrnDeleteLine (sb, last, where, n, size)
    Requires 0 <= where < where + n < = last
    	    n <= MAX_ROWS
  */
-register ScrnBuf sb;
-register int n, last, size;
+ScrnBuf sb;
+int n, last, size;
 int where;
 {
-	register int i;
+	int i;
 	char *save [4 * MAX_ROWS];
 
 	/* save n lines at where */
@@ -280,11 +280,11 @@ ScrnInsertChar (sb, row, col, n, size)
       */
     ScrnBuf sb;
     int row, size;
-    register int col, n;
+    int col, n;
 {
-	register int i, j;
-	register Char *ptr = sb [4 * row];
-	register Char *attrs = sb [4 * row + 1];
+	int i, j;
+	Char *ptr = sb [4 * row];
+	Char *attrs = sb [4 * row + 1];
 	int wrappedbit = attrs[0]&LINEWRAPPED;
 
 	attrs[0] &= ~LINEWRAPPED; /* make sure the bit isn't moved */
@@ -308,12 +308,12 @@ ScrnDeleteChar (sb, row, col, n, size)
       Deletes n characters in sb at row, col. Size is the size of each row.
       */
     ScrnBuf sb;
-    register int row, size;
-    register int n, col;
+    int row, size;
+    int n, col;
 {
-	register Char *ptr = sb[4 * row];
-	register Char *attrs = sb[4 * row + 1];
-	register nbytes = (size - n - col);
+	Char *ptr = sb[4 * row];
+	Char *attrs = sb[4 * row + 1];
+	int nbytes = (size - n - col);
 	int wrappedbit = attrs[0]&LINEWRAPPED;
 
 	memmove( ptr + col, ptr + col + n, nbytes);
@@ -332,14 +332,14 @@ ScrnRefresh (screen, toprow, leftcol, nrows, ncols, force)
    	     coordinates of characters in screen;
 	     nrows and ncols positive.
  */
-register TScreen *screen;
+TScreen *screen;
 int toprow, leftcol, nrows, ncols;
 Boolean force;			/* ... leading/trailing spaces */
 {
 	int y = toprow * FontHeight(screen) + screen->border +
 		screen->fnt_norm->ascent;
-	register int row;
-	register int topline = screen->topline;
+	int row;
+	int topline = screen->topline;
 	int maxrow = toprow + nrows - 1;
 	int scrollamt = screen->scroll_amt;
 	int max = screen->max_row;
@@ -349,10 +349,10 @@ Boolean force;			/* ... leading/trailing spaces */
 	 screen->cursor_row <= maxrow + topline)
 		screen->cursor_state = OFF;
 	for (row = toprow; row <= maxrow; y += FontHeight(screen), row++) {
-	   register Char *chars;
-	   register Char *attrs;
-	   register Char *fgs, *bgs;
-	   register int col = leftcol;
+	   Char *chars;
+	   Char *attrs;
+	   Char *fgs, *bgs;
+	   int col = leftcol;
 	   int maxcol = leftcol + ncols - 1;
 	   int lastind;
 	   int flags;
@@ -530,8 +530,8 @@ ClearBufRows (screen, first, last)
    Sets the rows first though last of the buffer of screen to spaces.
    Requires first <= last; first, last are rows of screen->buf.
  */
-register TScreen *screen;
-register int first, last;
+TScreen *screen;
+int first, last;
 {
 	first *= 4;
 	last = 4 * last + 3;
@@ -556,7 +556,7 @@ register int first, last;
   8. Returns 0
   */
 ScreenResize (screen, width, height, flags)
-    register TScreen *screen;
+    TScreen *screen;
     int width, height;
     unsigned *flags;
 {
@@ -596,7 +596,7 @@ ScreenResize (screen, width, height, flags)
 
 	/* update buffers if the screen has changed size */
 	if (screen->max_row != rows - 1 || screen->max_col != cols - 1) {
-		register int savelines = screen->scrollWidget ?
+		int savelines = screen->scrollWidget ?
 		 screen->savelines : 0;
 		int delta_rows = rows - (screen->max_row + 1);
 		
@@ -711,10 +711,10 @@ ScrnSetAttributes(screen, row, col, mask, value, length)
 TScreen *screen;
 int row, col;
 unsigned mask, value;
-register int length;		/* length of string */
+int length;		/* length of string */
 {
-	register Char *attrs;
-	register int avail  = screen->max_col - col + 1;
+	Char *attrs;
+	int avail  = screen->max_col - col + 1;
 
 	if (length > avail)
 	    length = avail;
@@ -740,10 +740,10 @@ ScrnGetAttributes(screen, row, col, str, length)
 TScreen *screen;
 int row, col;
 Char *str;
-register int length;		/* length of string */
+int length;		/* length of string */
 {
-	register Char *attrs;
-	register int avail  = screen->max_col - col + 1;
+	Char *attrs;
+	int avail  = screen->max_col - col + 1;
 	int ret;
 
 	if (length > avail)
@@ -760,10 +760,10 @@ register int length;		/* length of string */
 Bool
 non_blank_line(sb, row, col, len)
 ScrnBuf sb;
-register int row, col, len;
+int row, col, len;
 {
-	register int	i;
-	register Char *ptr = sb [4 * row];
+	int	i;
+	Char *ptr = sb [4 * row];
 
 	for (i = col; i < len; i++)	{
 		if (ptr[i])

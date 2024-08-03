@@ -161,8 +161,8 @@ int	w, h;
 byte 	*rmap, *gmap, *bmap;
 int	numcols;
 {
-	register int	i, j, np, nend;
-	register byte *ptr;
+	int	i, j, np, nend;
+	byte *ptr;
 	char	*error;
 	byte rgb[256];
 
@@ -200,7 +200,7 @@ int
 isFITS (fname)
 char	*fname;				/* input filename */
 {
-	register FILE *fp;
+	FILE *fp;
 	int value = 0;
 	char keyw[8], val;
 
@@ -659,8 +659,8 @@ FITS 	*fs;
 void 	*buffer;
 int	nelem;
 {
-	register int	i, n = nelem;
-	register uchar	*ptr = buffer;
+	int	i, n = nelem;
+	uchar	*ptr = buffer;
 
 	/* conversions. Although the data may be signed, reverse using unsigned 
          * variables.  Convert from big-endian two-byte signed integer to
@@ -680,7 +680,7 @@ int	nelem;
 
 	/* convert from IEE 754 single precision to native form */
 	else if (fs->bitpix == -32) {
-	    register int	j, k, expo;
+	    int	j, k, expo;
 	    static float	*exps = NULL;
 
 	    if (exps == NULL) {
@@ -709,8 +709,8 @@ int	nelem;
 
 	/* convert from IEE 754 double precision to native form */
 	} else if (fs->bitpix == -64) {
-	    register int	expo, k, l;
-	    register unsigned int	j;
+	    int	expo, k, l;
+	    unsigned int	j;
 	    static double	*exps = NULL;
 
 	    if (exps == NULL) {
@@ -764,7 +764,7 @@ float 	*z1, *z2;
 int	nsample;
 {
 	char * voidbuff;
-	register int	i, n = nelem;
+	int	i, n = nelem;
 	char	*error;
 	int	pmin = 0, pmax = 255;
 	int	npts, stdline;
@@ -801,7 +801,7 @@ int	nsample;
 	npts = fs->axes[0] * fs->axes[1];
 	stdline = (int)((float)fs->axes[1] / sqrt((float)npts/(float)nsample));
 	if (fs->bscale != 1.0 || fs->bzero != 0.0) {
-	    register float *buf;
+	    float *buf;
 
 	    buf = (float *)voidbuff;
 
@@ -809,26 +809,26 @@ int	nsample;
 	        for (i=(nelem-1); i >= 0; i--)
 		    buf[i] = (float) voidbuff[i] * fs->bscale + fs->bzero;
 	    } else if (fs->bitpix ==  16) {
-	        register short *old;
+	        short *old;
 	        for (i=(nelem-1); i >= 0; i--) {
 		    old = (short *) &voidbuff[i * 2];
 		    buf[i] = (float) *old * fs->bscale + fs->bzero;
 	        }
 	    } else if (fs->bitpix ==  32) {
-	        register int *old;
+	        int *old;
 	        for (i=(nelem-1); i >= 0; i--) {
 		    old = (int *) &voidbuff[i * 4];
 		    buf[i] = (float) *old * fs->bscale + fs->bzero;
 	        }
 	    } else if (fs->bitpix ==  -32) {
-	        register float *old;
+	        float *old;
 	        for (i=(nelem-1); i >= 0; i--) {
 		    old = (float *) &voidbuff[i * 4];
 		    buf[i] = (float) *old * fs->bscale + fs->bzero;
 	        }
 	    } else if (fs->bitpix ==  -64) {
-	        register double *old, *dbuf;
-		register float *fpix;
+	        double *old, *dbuf;
+		float *fpix;
 
 	 	dbuf = (double *) malloc (nelem * sizeof(double));
 	        for (i=(nelem-1); i >= 0; i--) {
@@ -862,9 +862,9 @@ int	nsample;
 
 	/* convert short int to uchar */
 	if (fs->bitpix == 16) {
-	    register short int	*buffer = (short *)voidbuff;
-	    register int	max, min;
-	    register float	scale;
+	    short int	*buffer = (short *)voidbuff;
+	    int	max, min;
+	    float	scale;
 
 	    min = (int) *z1;
 	    max = (int) *z2;
@@ -877,9 +877,9 @@ int	nsample;
 
 	/* convert long int to uchar */
 	} else if (fs->bitpix == 32) {
-	    register int	*buffer = (int *)voidbuff;
-	    register int	max, min;
-	    register float	scale;
+	    int	*buffer = (int *)voidbuff;
+	    int	max, min;
+	    float	scale;
 
 	    min = (int) *z1;
 	    max = (int) *z2;
@@ -892,8 +892,8 @@ int	nsample;
 
 	/* convert float to uchar */
 	} else if (fs->bitpix == -32) {
-	    register float	*buffer = (float *)voidbuff;
-	    register float	max, min, scale;
+	    float	*buffer = (float *)voidbuff;
+	    float	max, min, scale;
 
 	    min = *z1;
 	    max = *z2;
@@ -906,8 +906,8 @@ int	nsample;
 
 	/* convert double to uchar */
 	} else if (fs->bitpix == -64) {
-	    register double	*buffer = (double *)voidbuff;
-	    register double	max, min, scale;
+	    double	*buffer = (double *)voidbuff;
+	    double	max, min, scale;
 
 	    min = (double) *z1;
 	    max = (double) *z2;

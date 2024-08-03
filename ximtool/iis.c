@@ -95,7 +95,7 @@ static MappingPtr xim_getMapping();
  */
 int
 xim_iisOpen (xim)
-register XimDataPtr xim;
+XimDataPtr xim;
 {
     int port, last_port = (xim->port + xim->nports - 1);
     int nopen = 0;
@@ -119,10 +119,10 @@ register XimDataPtr xim;
  */
 void
 xim_iisClose (xim)
-register XimDataPtr xim;
+XimDataPtr xim;
 {
-	register IoChanPtr chan;
-	register int i;
+	IoChanPtr chan;
+	int i;
 
 	for (i=0, chan=NULL;  i < XtNumber(xim->chan);  i++) {
 	    chan = &xim->chan[i];
@@ -163,9 +163,9 @@ register XimDataPtr xim;
  */
 static IoChanPtr
 open_fifo (xim)
-register XimDataPtr xim;
+XimDataPtr xim;
 {
-	register IoChanPtr chan;
+	IoChanPtr chan;
 	int datain, dataout;
 	int keepalive;
 
@@ -251,11 +251,11 @@ done:
  */
 static IoChanPtr
 open_inet (xim, portnum)
-register XimDataPtr xim;
+XimDataPtr xim;
 int     portnum;
 {
-	register int s = 0;
-	register IoChanPtr chan;
+	int s = 0;
+	IoChanPtr chan;
 	struct sockaddr_in sockaddr;
 	int	reuse = 1;
 
@@ -320,10 +320,10 @@ err:
  */
 static IoChanPtr
 open_unix (xim)
-register XimDataPtr xim;
+XimDataPtr xim;
 {
-	register int s = 0;
-	register IoChanPtr chan;
+	int s = 0;
+	IoChanPtr chan;
 	struct sockaddr_un sockaddr;
 	int	addrlen;
 	char path[256];
@@ -395,9 +395,9 @@ IoChanPtr chan_port;
 int *source;
 XtPointer id;
 {
-	register XimDataPtr xim = (XimDataPtr) chan_port->xim;
-	register IoChanPtr chan;
-	register int s;
+	XimDataPtr xim = (XimDataPtr) chan_port->xim;
+	IoChanPtr chan;
+	int s;
 
 	/* Accept connection. */
 	if ((s = accept ((int)*source, (struct sockaddr *)0, (int *)0)) < 0)
@@ -429,7 +429,7 @@ XtPointer id;
  */
 static void
 xim_disconnectClient (chan)
-register IoChanPtr chan;
+IoChanPtr chan;
 {
 	switch (chan->type) {
 	case IO_INET:
@@ -451,9 +451,9 @@ register IoChanPtr chan;
  */
 static IoChanPtr
 get_iochan (xim)
-register XimDataPtr xim;
+XimDataPtr xim;
 {
-	register int i;
+	int i;
 
 	for (i=0;  i < XtNumber(xim->chan);  i++)
 	    if (!xim->chan[i].type)
@@ -472,11 +472,11 @@ IoChanPtr chan;
 int *fd_addr;
 XtInputId *id_addr;
 {
-	register XimDataPtr xim = (XimDataPtr) chan->xim;
-	register MappingPtr mp = (MappingPtr) NULL;
-	register FrameBufPtr fb;
-	register int sum, i;
-	register short *p;
+	XimDataPtr xim = (XimDataPtr) chan->xim;
+	MappingPtr mp = (MappingPtr) NULL;
+	FrameBufPtr fb;
+	int sum, i;
+	short *p;
 	int	datain = *fd_addr;
 	int	dataout = chan->dataout;
 	int	ndatabytes, nbytes, n, newframe, ntrys=0;
@@ -802,7 +802,7 @@ XtInputId *id_addr;
 		    CtranPtr ct = (CtranPtr) NULL;
 		    FrameBufPtr fr = (FrameBufPtr) NULL;
 		    int    wcsnum = (iis.t & 017777);
-		    register int i, j;
+		    int i, j;
 
 
 		    /* Decode the requested wcs number. */
@@ -871,7 +871,7 @@ map_found:	    if (ct) {
 	    } else {
 		/* Set the WCS for the referenced frame.
 		 */
-		register CtranPtr ct;
+		CtranPtr ct;
 		int fb_config, frame, new_wcs = 0;
 
 		frame = decode_frameno (iis.z & 0177777);
@@ -965,7 +965,7 @@ map_found:	    if (ct) {
 
 	    } else {
 		/* Write (set) the logical image cursor position. */
-		register CtranPtr ct;
+		CtranPtr ct;
 		int sx = iis.x, sy = iis.y;
 		float wx = sx, wy = sy;
 		int wcs = iis.z;
@@ -1055,11 +1055,11 @@ map_found:	    if (ct) {
  */
 void
 xim_iisiomap (w, iomap, iomap_len)
-register XtPointer w;
+XtPointer w;
 unsigned short *iomap;
 int *iomap_len;
 {
-	register int i;
+	int i;
 	int first, nelem, maxelem;
 	int delta;
 
@@ -1087,11 +1087,11 @@ int *iomap_len;
  */
 void
 xim_iiscolormap (w, r, g, b, first, ngray, rgb_len)
-register XtPointer w;
+XtPointer w;
 unsigned short *r, *g, *b;
 int *first, *ngray, *rgb_len;
 {
-	register int i, j;
+	int i, j;
 	int nelem, maxelem;
 	int delta;
 
@@ -1135,9 +1135,9 @@ IoChanPtr chan;
 int config;
 int frame;
 {
-	register XimDataPtr xim = (XimDataPtr) chan->xim;
-	register FrameBufPtr fb = &xim->frames[frame-1];
-	register int i;
+	XimDataPtr xim = (XimDataPtr) chan->xim;
+	FrameBufPtr fb = &xim->frames[frame-1];
+	int i;
 
 	if (config != xim->fb_configno) {
 	    /* Change the frame buffer configuration. */
@@ -1183,9 +1183,9 @@ int frame;
  */
 static int
 decode_frameno (z)
-register int	z;
+int	z;
 {
-	register int	n;
+	int	n;
 
 	/* Get the frame number, encoded with a bit for each frame, 01 is
 	 * frame 1, 02 is frame 2, 04 is frame 3, and so on.
@@ -1203,15 +1203,15 @@ register int	z;
  */
 void
 xim_retCursorVal (xim, sx, sy, frame, wcs, key, strval)
-register XimDataPtr xim;
+XimDataPtr xim;
 float	sx, sy;			/* cursor screen coordinates */
 int	frame;			/* frame number */
 int	wcs;			/* nonzero if WCS coords desired */
 int	key;			/* keystroke used as trigger */
 char	*strval;		/* optional string value */
 {
-	register CtranPtr ct;
-	register MappingPtr mp = (MappingPtr) NULL;
+	CtranPtr ct;
+	MappingPtr mp = (MappingPtr) NULL;
 	int dataout, wcscode;
 	char curval[SZ_IMCURVAL];
 	char keystr[20];
@@ -1285,15 +1285,15 @@ char	*strval;		/* optional string value */
  */
 void
 xim_encodewcs (xim, sx, sy, sz, obuf)
-register XimDataPtr xim;
+XimDataPtr xim;
 float sx, sy;			/* screen (raster) pixel coordinates */
 int sz;				/* screen pixel value */
 char *obuf;			/* receives encoded string */
 {
-	register CtranPtr ct;
+	CtranPtr ct;
 	MappingPtr  mp = (MappingPtr) NULL;
 	float 	wx, wy, wz;
-	register int i=0, ch, map_found = 0;
+	int i=0, ch, map_found = 0;
 	char buf[SZ_LINE];
 
 
@@ -1302,7 +1302,7 @@ char *obuf;			/* receives encoded string */
          * or real-image values.
          */
         if (wcspix_enabled == NULL) {
-            register IsmModule ism;
+            IsmModule ism;
             extern ismModule ism_modules[];
             extern int ism_nmodules;
 
@@ -1397,15 +1397,15 @@ printf ("wx: %f   wy: %f\n", wx, wy);
  */
 static MappingPtr
 xim_getMapping (xim, sx, sy, frame)
-register XimDataPtr xim;
+XimDataPtr xim;
 float 	sx, sy;			/* screen (raster) pixel coordinates */
 int	frame;
 {
 	FrameBufPtr fb = (FrameBufPtr) NULL;
 	MappingPtr mp = (MappingPtr) NULL;
-	register int j=0, i=0;
+	int j=0, i=0;
 	float y = xim->height - sy;
-	register int map_debug = 0;
+	int map_debug = 0;
 
 
 	/* Loop through the frame buffers until we find the current one.
@@ -1447,9 +1447,9 @@ int	frame;
  */
 char *
 xim_frameLabel (xim)
-register XimDataPtr xim;
+XimDataPtr xim;
 {
-	register FrameBufPtr df_p = xim->df_p;
+	FrameBufPtr df_p = xim->df_p;
 
 	sprintf (df_p->label, "[%d] %s", df_p->frameno, df_p->ctran.imtitle);
 	return (df_p->label);
@@ -1470,10 +1470,10 @@ register XimDataPtr xim;
  */
 static CtranPtr 
 wcs_update (xim, fr)
-register XimDataPtr xim;
+XimDataPtr xim;
 FrameBufPtr fr;
 {
-	register CtranPtr ct = &fr->ctran;
+	CtranPtr ct = &fr->ctran;
 	char buf[1024], *format;
 
 
@@ -1542,14 +1542,14 @@ FrameBufPtr fr;
 
 static void
 add_mapping (xim, ctran, wcsbuf, fr)
-register XimDataPtr xim;
+XimDataPtr xim;
 CtranPtr ctran;
 char	*wcsbuf;
 FrameBufPtr fr;
 {
-	register MappingPtr mp = &fr->mapping[fr->nmaps];
-        register CtranPtr   ct = &mp->ctran;
-	register int  i, j, frame = fr->frameno;
+	MappingPtr mp = &fr->mapping[fr->nmaps];
+        CtranPtr   ct = &mp->ctran;
+	int  i, j, frame = fr->frameno;
 	char buf[SZ_WCSBUF];
 
         /* Attempt to read the WCS and set up a unitary transformation
@@ -1636,7 +1636,7 @@ print_mappings (fr)
 FrameBufPtr fr;
 {
 	MappingPtr mp;
-	register int i;
+	int i;
 
 	if (fr->nmaps == 0) printf ("No mappings for frame %d\n", fr->frameno);
 	for (i=0; i < fr->nmaps; i++) {
