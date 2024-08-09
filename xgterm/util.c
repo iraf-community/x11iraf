@@ -34,20 +34,19 @@
 
 #include <stdio.h>
 
-static void horizontal_copy_area();
-static void vertical_copy_area();
-void scrolling_copy_area();
+static void horizontal_copy_area(TScreen *screen, int firstchar, int nchars, int amount);
+static void vertical_copy_area(TScreen *screen, int firstline, int nlines, int amount);
+void scrolling_copy_area(TScreen *screen, int firstline, int nlines, int amount);
 
-void Scroll(), InsertLine(), DeleteLine(), CopyWait(), recolor_cursor();
-void ShowCursor(), HideCursor();
-void ClearScreen(), ClearLeft(), ClearRight();
+void Scroll(TScreen *screen, int amount), InsertLine(TScreen *screen, int n), DeleteLine(TScreen *screen, int n), CopyWait(TScreen *screen), recolor_cursor(Cursor cursor, long unsigned int fg, long unsigned int bg);
+void ShowCursor(void), HideCursor(void);
+void ClearScreen(TScreen *screen), ClearLeft(TScreen *screen), ClearRight(TScreen *screen);
 
 /*
  * These routines are used for the jump scroll feature
  */
 void
-FlushScroll(screen)
-TScreen *screen;
+FlushScroll(TScreen *screen)
 {
 	int i;
 	int shift = -screen->topline;
@@ -130,8 +129,7 @@ TScreen *screen;
 }
 
 int
-AddToRefresh(screen)
-TScreen *screen;
+AddToRefresh(TScreen *screen)
 {
 	int amount = screen->refresh_amt;
 	int row = screen->cur_row;
@@ -165,9 +163,7 @@ TScreen *screen;
  * requires: amount > 0
  */
 void
-Scroll(screen, amount)
-TScreen *screen;
-int amount;
+Scroll(TScreen *screen, int amount)
 {
 	int i = screen->bot_marg - screen->top_marg + 1;
 	int shift;
@@ -271,9 +267,7 @@ int amount;
  * Requires: amount > 0
  */
 void
-RevScroll(screen, amount)
-TScreen *screen;
-int amount;
+RevScroll(TScreen *screen, int amount)
 {
 	int i = screen->bot_marg - screen->top_marg + 1;
 	int shift;
@@ -342,9 +336,7 @@ int amount;
  * bottom margin are lost.
  */
 void
-InsertLine (screen, n)
-TScreen *screen;
-int n;
+InsertLine (TScreen *screen, int n)
 {
 	int i;
 	int shift;
@@ -406,9 +398,7 @@ int n;
  * at the cursor's position, lines added at bottom margin are blank.
  */
 void
-DeleteLine(screen, n)
-TScreen *screen;
-int n;
+DeleteLine(TScreen *screen, int n)
 {
 	int i;
 	int shift;
@@ -489,9 +479,7 @@ int n;
  * Insert n blanks at the cursor's position, no wraparound
  */
 void
-InsertChar (screen, n)
-    TScreen *screen;
-    int n;
+InsertChar (TScreen *screen, int n)
 {
         int cx, cy;
 
@@ -533,9 +521,7 @@ InsertChar (screen, n)
  * Deletes n chars at the cursor's position, no wraparound.
  */
 void
-DeleteChar (screen, n)
-    TScreen *screen;
-    int	n;
+DeleteChar (TScreen *screen, int n)
 {
 	int width;
 
@@ -575,8 +561,7 @@ DeleteChar (screen, n)
  * Clear from cursor position to beginning of display, inclusive.
  */
 void
-ClearAbove (screen)
-TScreen *screen;
+ClearAbove (TScreen *screen)
 {
 	int top, height;
 
@@ -605,8 +590,7 @@ TScreen *screen;
  * Clear from cursor position to end of display, inclusive.
  */
 void
-ClearBelow (screen)
-TScreen *screen;
+ClearBelow (TScreen *screen)
 {
 	int top;
 
@@ -630,8 +614,7 @@ TScreen *screen;
  * Clear last part of cursor's line, inclusive.
  */
 void
-ClearRight (screen)
-TScreen *screen;
+ClearRight (TScreen *screen)
 {
 	if(screen->cursor_state)
 		HideCursor();
@@ -664,8 +647,7 @@ TScreen *screen;
  * Clear first part of cursor's line, inclusive.
  */
 void
-ClearLeft (screen)
-    TScreen *screen;
+ClearLeft (TScreen *screen)
 {
         int i;
 	Char *cp;
@@ -704,8 +686,7 @@ ClearLeft (screen)
  * Erase the cursor's line.
  */
 void
-ClearLine(screen)
-TScreen *screen;
+ClearLine(TScreen *screen)
 {
 	if(screen->cursor_state)
 		HideCursor();
@@ -730,8 +711,7 @@ TScreen *screen;
 }
 
 void
-ClearScreen(screen)
-TScreen *screen;
+ClearScreen(TScreen *screen)
 {
 	int top;
 
@@ -756,8 +736,7 @@ TScreen *screen;
 }
 
 void
-CopyWait(screen)
-TScreen *screen;
+CopyWait(TScreen *screen)
 {
 	XEvent reply;
 	XEvent *rep = &reply;
@@ -798,11 +777,7 @@ TScreen *screen;
  * used by vertical_copy_area and and horizontal_copy_area
  */
 static void
-copy_area(screen, src_x, src_y, width, height, dest_x, dest_y)
-    TScreen *screen;
-    int src_x, src_y;
-    unsigned int width, height;
-    int dest_x, dest_y;
+copy_area(TScreen *screen, int src_x, int src_y, unsigned int width, unsigned int height, int dest_x, int dest_y)
 {
     /* wait for previous CopyArea to complete unless
        multiscroll is enabled and active */
@@ -828,11 +803,11 @@ copy_area(screen, src_x, src_y, width, height, dest_x, dest_y)
  * use when inserting or deleting characters on the current line
  */
 static void
-horizontal_copy_area(screen, firstchar, nchars, amount)
-    TScreen *screen;
-    int firstchar;		/* char pos on screen to start copying at */
-    int nchars;
-    int amount;			/* number of characters to move right */
+horizontal_copy_area(TScreen *screen, int firstchar, int nchars, int amount)
+                    
+                  		/* char pos on screen to start copying at */
+               
+               			/* number of characters to move right */
 {
     int src_x = CursorX(screen, firstchar);
     int src_y = CursorY(screen, screen->cur_row);
@@ -846,11 +821,11 @@ horizontal_copy_area(screen, firstchar, nchars, amount)
  * use when inserting or deleting lines from the screen
  */
 static void
-vertical_copy_area(screen, firstline, nlines, amount)
-    TScreen *screen;
-    int firstline;		/* line on screen to start copying at */
-    int nlines;
-    int amount;			/* number of lines to move up (neg=down) */
+vertical_copy_area(TScreen *screen, int firstline, int nlines, int amount)
+                    
+                  		/* line on screen to start copying at */
+               
+               			/* number of lines to move up (neg=down) */
 {
     if(nlines > 0) {
 	int src_x, src_y;
@@ -870,11 +845,11 @@ vertical_copy_area(screen, firstline, nlines, amount)
  * use when scrolling the entire screen
  */
 void
-scrolling_copy_area(screen, firstline, nlines, amount)
-    TScreen *screen;
-    int firstline;		/* line on screen to start copying at */
-    int nlines;
-    int amount;			/* number of lines to move up (neg=down) */
+scrolling_copy_area(TScreen *screen, int firstline, int nlines, int amount)
+                    
+                  		/* line on screen to start copying at */
+               
+               			/* number of lines to move up (neg=down) */
 {
 
     if(nlines > 0) {
@@ -887,9 +862,7 @@ scrolling_copy_area(screen, firstline, nlines, amount)
  * Returns 1 iff the area where the cursor was got refreshed.
  */
 int
-HandleExposure (screen, event)
-    TScreen *screen;
-    XEvent *event;
+HandleExposure (TScreen *screen, XEvent *event)
 {
     XExposeEvent *reply = (XExposeEvent *)event;
 
@@ -933,10 +906,7 @@ HandleExposure (screen, event)
  * The rectangle passed in is pixel coordinates.
  */
 int
-handle_translated_exposure (screen, rect_x, rect_y, rect_width, rect_height)
-    TScreen *screen;
-    int rect_x, rect_y;
-    unsigned int rect_width, rect_height;
+handle_translated_exposure (TScreen *screen, int rect_x, int rect_y, unsigned int rect_width, unsigned int rect_height)
 {
 	int toprow, leftcol, nrows, ncols;
 	extern Bool waiting_for_initial_map;
@@ -988,8 +958,7 @@ handle_translated_exposure (screen, rect_x, rect_y, rect_width, rect_height)
 }
 
 void
-ReverseVideo (termw)
-	XgtermWidget termw;
+ReverseVideo (XgtermWidget termw)
 {
 	TScreen *screen = &termw->screen;
 	GC tmpGC;
@@ -1034,9 +1003,9 @@ ReverseVideo (termw)
 
 
 void
-recolor_cursor (cursor, fg, bg)
-    Cursor cursor;			/* X cursor ID to set */
-    unsigned long fg, bg;		/* pixel indexes to look up */
+recolor_cursor (Cursor cursor, long unsigned int fg, long unsigned int bg)
+                  			/* X cursor ID to set */
+                         		/* pixel indexes to look up */
 {
     TScreen *screen = &term->screen;
     Display *dpy = screen->display;
@@ -1053,9 +1022,7 @@ recolor_cursor (cursor, fg, bg)
 
 
 void
-GetColors(term,pColors)
-        XgtermWidget term;
-        ScrnColors *pColors;
+GetColors(XgtermWidget term, ScrnColors *pColors)
 {
         TScreen *screen = &term->screen;
         GC tmpGC;
@@ -1072,9 +1039,7 @@ GetColors(term,pColors)
 
 
 void
-ChangeColors(term,pNew)
-        XgtermWidget term;
-        ScrnColors *pNew;
+ChangeColors(XgtermWidget term, ScrnColors *pNew)
 {
         TScreen *screen = &term->screen;
         GC tmpGC;

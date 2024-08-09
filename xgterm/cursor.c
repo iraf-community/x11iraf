@@ -29,8 +29,7 @@
 
 #include "ptyx.h"		/* also gets Xlib.h */
 
-static void _CheckSelection(screen)
-TScreen *screen;
+static void _CheckSelection(TScreen *screen)
 {
     extern XgtermWidget term;	/* %%% gross */
 
@@ -48,10 +47,7 @@ TScreen *screen;
  * (this includes scrolling regions)
  * The origin is considered to be 0, 0 for this procedure.
  */
-CursorSet(screen, row, col, flags)
-TScreen	*screen;
-int	row, col;
-unsigned	flags;
+CursorSet(TScreen *screen, int row, int col, unsigned int flags)
 {
 	int maxr;
 
@@ -71,9 +67,7 @@ unsigned	flags;
 /*
  * moves the cursor left n, no wrap around
  */
-CursorBack(screen, n)
-TScreen	*screen;
-int		n;
+CursorBack(TScreen *screen, int n)
 {
 	int i, j, k, rev;
 	extern XgtermWidget term;
@@ -100,9 +94,7 @@ int		n;
 /*
  * moves the cursor forward n, no wraparound
  */
-CursorForward(screen, n)
-TScreen	*screen;
-int		n;
+CursorForward(TScreen *screen, int n)
 {
 	screen->cur_col += n;
 	if (screen->cur_col > screen->max_col)
@@ -115,9 +107,7 @@ int		n;
  * moves the cursor down n, no scrolling.
  * Won't pass bottom margin or bottom of screen.
  */
-CursorDown(screen, n)
-TScreen	*screen;
-int		n;
+CursorDown(TScreen *screen, int n)
 {
 	int max;
 
@@ -135,9 +125,7 @@ int		n;
  * moves the cursor up n, no linestarving.
  * Won't pass top margin or top of screen.
  */
-CursorUp(screen, n)
-TScreen	*screen;
-int		n;
+CursorUp(TScreen *screen, int n)
 {
 	int min;
 
@@ -156,9 +144,7 @@ int		n;
  * Won't leave scrolling region. No carriage return.
  */
 void
-Index(screen, amount)
-TScreen	*screen;
-int	amount;
+Index(TScreen *screen, int amount)
 {
 	int j;
 
@@ -181,9 +167,7 @@ int	amount;
  * Won't leave scrolling region. No carriage return.
  */
 void
-RevIndex(screen, amount)
-TScreen	*screen;
-int	amount;
+RevIndex(TScreen *screen, int amount)
 {
 	/*
 	 * reverse indexing when above scrolling region is cursor up.
@@ -202,8 +186,7 @@ int	amount;
 /*
  * Moves Cursor To First Column In Line
  */
-CarriageReturn(screen)
-TScreen *screen;
+CarriageReturn(TScreen *screen)
 {
 	screen->cur_col = 0;
 	screen->do_wrap = 0;
@@ -213,9 +196,7 @@ TScreen *screen;
 /*
  * Save Cursor and Attributes
  */
-CursorSave(term, sc)
-XgtermWidget term;
-SavedCursor *sc;
+CursorSave(XgtermWidget term, SavedCursor *sc)
 {
 	TScreen *screen = &term->screen;
 
@@ -230,9 +211,7 @@ SavedCursor *sc;
 /*
  * Restore Cursor and Attributes
  */
-CursorRestore(term, sc)
-XgtermWidget term;
-SavedCursor *sc;
+CursorRestore(XgtermWidget term, SavedCursor *sc)
 {
 	TScreen *screen = &term->screen;
 

@@ -37,8 +37,7 @@
 /*
  * places tabstops at only every 8 columns
  */
-TabReset(tabs)
-Tabs	tabs;
+TabReset(unsigned int *tabs)
 {
 	int i;
 
@@ -53,9 +52,7 @@ Tabs	tabs;
 /*
  * places a tabstop at col
  */
-TabSet(tabs, col)
-    Tabs	tabs;
-    int		col;
+TabSet(unsigned int *tabs, int col)
 {
 	tabs[col >> 5] |= (1 << (col & 31));
 }
@@ -63,9 +60,7 @@ TabSet(tabs, col)
 /*
  * clears a tabstop at col
  */
-TabClear(tabs, col)
-    Tabs	tabs;
-    int		col;
+TabClear(unsigned int *tabs, int col)
 {
 	tabs[col >> 5] &= ~(1 << (col & 31));
 }
@@ -75,9 +70,7 @@ TabClear(tabs, col)
  * (or MAX_TABS - 1 if there are no more).
  * A tabstop at col is ignored.
  */
-TabNext (tabs, col)
-    Tabs	tabs;
-    int		col;
+TabNext (unsigned int *tabs, int col)
 {
 	extern XgtermWidget term;
 	TScreen *screen = &term->screen;
@@ -96,8 +89,7 @@ TabNext (tabs, col)
 /*
  * clears all tabs
  */
-TabZonk (tabs)
-Tabs	tabs;
+TabZonk (unsigned int *tabs)
 {
 	int i;
 

@@ -42,7 +42,7 @@ button.c	Handles button events in the terminal emulator.
 #include "menu.h"
 
 
-extern void DoSecureKeyboard();
+extern void DoSecureKeyboard(Time time);
 
 #define KeyState(x) (((x) & (ShiftMask|ControlMask)) + (((x) & Mod1Mask) ? 2 : 0))
     /* adds together the bits:
@@ -60,19 +60,19 @@ extern void DoSecureKeyboard();
 
 extern char *xgterm_name;
 
-static void PointToRowCol();
-static void SelectionReceived();
-static void TrackDown();
-static void ComputeSelect();
-static void EditorButton();
-static void ExtendExtend();
-static void ReHiliteText();
-static void SelectSet();
-static void StartSelect();
-static int Length();
-static char *SaveText();
-void DisownSelection();
-void TrackText();
+static void PointToRowCol(int y, int x, int *r, int *c);
+static void SelectionReceived(Widget w, XtPointer client_data, Atom *selection, Atom *type, XtPointer value, long unsigned int *length, int *format);
+static void TrackDown(XButtonEvent *event);
+static void ComputeSelect(int startRow, int startCol, int endRow, int endCol, int extend);
+static void EditorButton(XButtonEvent *event);
+static void ExtendExtend(int row, int col);
+static void ReHiliteText(int frow, int fcol, int trow, int tcol);
+static void SelectSet(Widget w, XEvent *event, String *params, Cardinal num_params);
+static void StartSelect(int startrow, int startcol);
+static int Length(TScreen *screen, int row, int scol, int ecol);
+static char *SaveText(TScreen *screen, int row, int scol, int ecol, char *lp, int *eol);
+void DisownSelection(XgtermWidget termw);
+void TrackText(int frow, int fcol, int trow, int tcol);
 
 extern XgtermWidget term;
 
@@ -110,9 +110,7 @@ static SelectUnit selectUnit;
 static int replyToEmacs;
 
 
-Boolean SendMousePosition(w, event)
-Widget w;
-XEvent* event;
+Boolean SendMousePosition(Widget w, XEvent *event)
 {
     TScreen *screen = &((XgtermWidget)w)->screen;
     
@@ -168,11 +166,11 @@ XEvent* event;
 
 
 void
-DiredButton(w, event, params, num_params)
-Widget w;
-XEvent *event;                  /* must be XButtonEvent */
-String *params;                 /* selections */
-Cardinal *num_params;
+DiredButton(Widget w, XEvent *event, String *params, Cardinal *num_params)
+         
+                                /* must be XButtonEvent */
+                                /* selections */
+                     
 {       /* ^XM-G<line+' '><col+' '> */
         TScreen *screen = &term->screen;
         int pty = screen->respond;
@@ -195,11 +193,11 @@ Cardinal *num_params;
 }
 
 void
-ViButton(w, event, params, num_params)
-Widget w;
-XEvent *event;                  /* must be XButtonEvent */
-String *params;                 /* selections */
-Cardinal *num_params;
+ViButton(Widget w, XEvent *event, String *params, Cardinal *num_params)
+         
+                                /* must be XButtonEvent */
+                                /* selections */
+                     
 {       /* ^XM-G<line+' '><col+' '> */
         TScreen *screen = &term->screen;
         int pty = screen->respond;
@@ -227,11 +225,11 @@ Cardinal *num_params;
 }
 
 /*ARGSUSED*/
-void HandleSelectExtend(w, event, params, num_params)
-Widget w;
-XEvent *event;			/* must be XMotionEvent */
-String *params;			/* unused */
-Cardinal *num_params;		/* unused */
+void HandleSelectExtend(Widget w, XEvent *event, String *params, Cardinal *num_params)
+         
+              			/* must be XMotionEvent */
+               			/* unused */
+                     		/* unused */
 {
 	TScreen *screen = &((XgtermWidget)w)->screen;
 	int row, col;
@@ -250,14 +248,14 @@ Cardinal *num_params;		/* unused */
 	}
 }
 
-static void EndExtend();
+static void EndExtend(Widget w, XEvent *event, String *params, Cardinal num_params, int use_cursor_loc);
 
-static void do_select_end (w, event, params, num_params, use_cursor_loc)
-Widget w;
-XEvent *event;			/* must be XButtonEvent */
-String *params;			/* selections */
-Cardinal *num_params;
-Bool use_cursor_loc;
+static void do_select_end (Widget w, XEvent *event, String *params, Cardinal *num_params, int use_cursor_loc)
+         
+              			/* must be XButtonEvent */
+               			/* selections */
+                     
+                    
 {
 	((XgtermWidget)w)->screen.selection_time = event->xbutton.time;
 	switch (eventMode) {
@@ -272,21 +270,21 @@ Bool use_cursor_loc;
 }
 
 
-void HandleSelectEnd(w, event, params, num_params)
-Widget w;
-XEvent *event;			/* must be XButtonEvent */
-String *params;			/* selections */
-Cardinal *num_params;
+void HandleSelectEnd(Widget w, XEvent *event, String *params, Cardinal *num_params)
+         
+              			/* must be XButtonEvent */
+               			/* selections */
+                     
 {
 	do_select_end (w, event, params, num_params, False);
 }
 
 
-void HandleKeyboardSelectEnd(w, event, params, num_params)
-Widget w;
-XEvent *event;			/* must be XButtonEvent */
-String *params;			/* selections */
-Cardinal *num_params;
+void HandleKeyboardSelectEnd(Widget w, XEvent *event, String *params, Cardinal *num_params)
+         
+              			/* must be XButtonEvent */
+               			/* selections */
+                     
 {
 	do_select_end (w, event, params, num_params, True);
 }
@@ -301,11 +299,11 @@ struct _SelectionList {
 };
 
 
-static void _GetSelection(w, time, params, num_params)
-Widget w;
-Time time;
-String *params;			/* selections in precedence order */
-Cardinal num_params;
+static void _GetSelection(Widget w, Time time, String *params, Cardinal num_params)
+         
+          
+               			/* selections in precedence order */
+                    
 {
     Atom selection;
     int cutbuffer;
@@ -396,11 +394,11 @@ int *format;
 
 
 void
-HandleInsertSelection(w, event, params, num_params)
-Widget w;
-XEvent *event;			/* assumed to be XButtonEvent* */
-String *params;			/* selections in precedence order */
-Cardinal *num_params;
+HandleInsertSelection(Widget w, XEvent *event, String *params, Cardinal *num_params)
+         
+              			/* assumed to be XButtonEvent* */
+               			/* selections in precedence order */
+                     
 {
     if (SendMousePosition(w, event)) return;
     _GetSelection(w, event->xbutton.time, params, *num_params);
@@ -408,9 +406,7 @@ Cardinal *num_params;
 
 
 static void
-SetSelectUnit(buttonDownTime, defaultUnit)
-    Time buttonDownTime;
-    SelectUnit defaultUnit;
+SetSelectUnit(Time buttonDownTime, SelectUnit defaultUnit)
 {
 /* Do arithmetic as integers, but compare as unsigned solves clock wraparound */
 	if ((long unsigned)((long int)buttonDownTime - lastButtonUpTime)
@@ -423,10 +419,10 @@ SetSelectUnit(buttonDownTime, defaultUnit)
 	}
 }
 
-static void do_select_start (w, event, startrow, startcol)
-Widget w;
-XEvent *event;			/* must be XButtonEvent* */
-int startrow, startcol;
+static void do_select_start (Widget w, XEvent *event, int startrow, int startcol)
+         
+              			/* must be XButtonEvent* */
+                       
 {
 	if (SendMousePosition(w, event)) return;
 	SetSelectUnit(event->xbutton.time, SELECTCHAR);
@@ -436,11 +432,11 @@ int startrow, startcol;
 
 /* ARGSUSED */
 void
-HandleSelectStart(w, event, params, num_params)
-Widget w;
-XEvent *event;			/* must be XButtonEvent* */
-String *params;			/* unused */
-Cardinal *num_params;		/* unused */
+HandleSelectStart(Widget w, XEvent *event, String *params, Cardinal *num_params)
+         
+              			/* must be XButtonEvent* */
+               			/* unused */
+                     		/* unused */
 {
 	TScreen *screen = &((XgtermWidget)w)->screen;
 	int startrow, startcol;
@@ -454,11 +450,11 @@ Cardinal *num_params;		/* unused */
 
 /* ARGSUSED */
 void
-HandleKeyboardSelectStart(w, event, params, num_params)
-Widget w;
-XEvent *event;			/* must be XButtonEvent* */
-String *params;			/* unused */
-Cardinal *num_params;		/* unused */
+HandleKeyboardSelectStart(Widget w, XEvent *event, String *params, Cardinal *num_params)
+         
+              			/* must be XButtonEvent* */
+               			/* unused */
+                     		/* unused */
 {
 	TScreen *screen = &((XgtermWidget)w)->screen;
 
@@ -467,8 +463,7 @@ Cardinal *num_params;		/* unused */
 
 
 static void
-TrackDown(event)
-    XButtonEvent *event;
+TrackDown(XButtonEvent *event)
 {
 	int startrow, startcol;
 
@@ -490,8 +485,7 @@ TrackDown(event)
 			    x = screen->max_row;
 
 void
-TrackMouse(func, startrow, startcol, firstrow, lastrow)
-    int func, startrow, startcol, firstrow, lastrow;
+TrackMouse(int func, int startrow, int startcol, int firstrow, int lastrow)
 {
 	TScreen *screen = &term->screen;
 
@@ -510,8 +504,7 @@ TrackMouse(func, startrow, startcol, firstrow, lastrow)
 }
 
 static void
-StartSelect(startrow, startcol)
-    int startrow, startcol;
+StartSelect(int startrow, int startcol)
 {
 	TScreen *screen = &term->screen;
 
@@ -542,12 +535,12 @@ StartSelect(startrow, startcol)
 }
 
 static void
-EndExtend(w, event, params, num_params, use_cursor_loc)
-    Widget w;
-    XEvent *event;			/* must be XButtonEvent */
-    String *params;			/* selections */
-    Cardinal num_params;
-    Bool use_cursor_loc;
+EndExtend(Widget w, XEvent *event, String *params, Cardinal num_params, int use_cursor_loc)
+             
+                  			/* must be XButtonEvent */
+                   			/* selections */
+                        
+                        
 {
 	int	row, col;
 	TScreen *screen = &term->screen;
@@ -589,24 +582,16 @@ EndExtend(w, event, params, num_params, use_cursor_loc)
 }
 
 void
-HandleSelectSet(w, event, params, num_params)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *num_params;
+HandleSelectSet(Widget w, XEvent *event, String *params, Cardinal *num_params)
 {
 	SelectSet (w, event, params, *num_params);
 }
 
-static void SaltTextAway();
+static void SaltTextAway(int crow, int ccol, int row, int col, String *params, Cardinal num_params);
 
 /* ARGSUSED */
 static void
-SelectSet (w, event, params, num_params)
-    Widget	w;
-    XEvent	*event;
-    String	*params;
-    Cardinal    num_params;
+SelectSet (Widget w, XEvent *event, String *params, Cardinal num_params)
 {
 	/* Only do select stuff if non-null select */
 	if (startSRow != endSRow || startSCol != endSCol) {
@@ -619,12 +604,12 @@ SelectSet (w, event, params, num_params)
 #define Abs(x)		((x) < 0 ? -(x) : (x))
 
 /* ARGSUSED */
-static void do_start_extend (w, event, params, num_params, use_cursor_loc)
-Widget w;
-XEvent *event;			/* must be XButtonEvent* */
-String *params;			/* unused */
-Cardinal *num_params;		/* unused */
-Bool use_cursor_loc;
+static void do_start_extend (Widget w, XEvent *event, String *params, Cardinal *num_params, int use_cursor_loc)
+         
+              			/* must be XButtonEvent* */
+               			/* unused */
+                     		/* unused */
+                    
 {
 	TScreen *screen = &((XgtermWidget)w)->screen;
 	int row, col, coord;
@@ -675,8 +660,7 @@ Bool use_cursor_loc;
 }
 
 static void
-ExtendExtend (row, col)
-    int row, col;
+ExtendExtend (int row, int col)
 {
 	int coord = Coordinate(row, col);
 	
@@ -704,28 +688,26 @@ ExtendExtend (row, col)
 }
 
 
-void HandleStartExtend(w, event, params, num_params)
-Widget w;
-XEvent *event;			/* must be XButtonEvent* */
-String *params;			/* unused */
-Cardinal *num_params;		/* unused */
+void HandleStartExtend(Widget w, XEvent *event, String *params, Cardinal *num_params)
+         
+              			/* must be XButtonEvent* */
+               			/* unused */
+                     		/* unused */
 {
     do_start_extend (w, event, params, num_params, False);
 }
 
-void HandleKeyboardStartExtend(w, event, params, num_params)
-Widget w;
-XEvent *event;			/* must be XButtonEvent* */
-String *params;			/* unused */
-Cardinal *num_params;		/* unused */
+void HandleKeyboardStartExtend(Widget w, XEvent *event, String *params, Cardinal *num_params)
+         
+              			/* must be XButtonEvent* */
+               			/* unused */
+                     		/* unused */
 {
     do_start_extend (w, event, params, num_params, True);
 }
 
 void
-ScrollSelection(screen, amount)
-TScreen* screen;
-int amount;
+ScrollSelection(TScreen *screen, int amount)
 {
     int minrow = -screen->savedlines - screen->topline;
     int maxrow = screen->max_row - screen->topline;
@@ -759,9 +741,7 @@ int amount;
 
 /*ARGSUSED*/
 void
-ResizeSelection (screen, rows, cols)
-    TScreen *screen;
-    int rows, cols;
+ResizeSelection (TScreen *screen, int rows, int cols)
 {
     rows--;				/* decr to get 0-max */
     cols--;
@@ -780,9 +760,9 @@ ResizeSelection (screen, rows, cols)
 }
 
 static void
-PointToRowCol(y, x, r, c)
-    int y, x;
-    int *r, *c;
+PointToRowCol(int y, int x, int *r, int *c)
+             
+               
 /* Convert pixel coordinates to character coordinates.
    Rows are clipped between firstValidRow and lastValidRow.
    Columns are clipped between to be 0 or greater, but are not clipped to some
@@ -810,8 +790,7 @@ PointToRowCol(y, x, r, c)
 }
 
 static int
-LastTextCol(row)
-    int row;
+LastTextCol(int row)
 {
 	TScreen *screen =  &term->screen;
 	int i;
@@ -901,9 +880,9 @@ static int charClass[256] = {
 /*  o/   u`   u'   u^   u:   y'    P   y: */
     48,  48,  48,  48,  48,  48,  48,  48};
 
-int SetCharacterClassRange (low, high, value)
-    int low, high;		/* in range of [0..255] */
-    int value;			/* arbitrary */
+int SetCharacterClassRange (int low, int high, int value)
+                  		/* in range of [0..255] */
+              			/* arbitrary */
 {
 
     if (low < 0 || high > 255 || high < low) return (-1);
@@ -919,9 +898,7 @@ int SetCharacterClassRange (low, high, value)
  */
 
 static void
-ComputeSelect(startRow, startCol, endRow, endCol, extend)
-    int startRow, startCol, endRow, endCol;
-    Bool extend;
+ComputeSelect(int startRow, int startCol, int endRow, int endCol, int extend)
 {
 	TScreen *screen = &term->screen;
 	Char *ptr;
@@ -1009,8 +986,8 @@ ComputeSelect(startRow, startCol, endRow, endCol, extend)
 	return;
 }
 void
-TrackText(frow, fcol, trow, tcol)
-    int frow, fcol, trow, tcol;
+TrackText(int frow, int fcol, int trow, int tcol)
+                               
     /* Guaranteed (frow, fcol) <= (trow, tcol) */
 {
 	int from, to;
@@ -1054,8 +1031,8 @@ TrackText(frow, fcol, trow, tcol)
 }
 
 static void
-ReHiliteText(frow, fcol, trow, tcol)
-    int frow, fcol, trow, tcol;
+ReHiliteText(int frow, int fcol, int trow, int tcol)
+                               
     /* Guaranteed that (frow, fcol) <= (trow, tcol) */
 {
 	TScreen *screen = &term->screen;
@@ -1090,13 +1067,13 @@ ReHiliteText(frow, fcol, trow, tcol)
 	}
 }
 
-static void _OwnSelection();
+static void _OwnSelection(XgtermWidget termw, String *selections, Cardinal count);
 
 static void
-SaltTextAway(crow, ccol, row, col, params, num_params)
-    /*register*/ int crow, ccol, row, col;
-    String *params;			/* selections */
-    Cardinal num_params;
+SaltTextAway(int crow, int ccol, int row, int col, String *params, Cardinal num_params)
+    /*register*/                          
+                   			/* selections */
+                        
     /* Guaranteed that (crow, ccol) <= (row, col), and that both points are valid
        (may have row = screen->max_row+1, col = 0) */
 {
@@ -1240,9 +1217,7 @@ int *format;
 }
 
 
-static void LoseSelection(w, selection)
-  Widget w;
-  Atom *selection;
+static void LoseSelection(Widget w, Atom *selection)
 {
     TScreen* screen = &((XgtermWidget)w)->screen;
     Atom* atomP;
@@ -1282,18 +1257,13 @@ static void LoseSelection(w, selection)
 
 
 /* ARGSUSED */
-static void SelectionDone(w, selection, target)
-Widget w;
-Atom *selection, *target;
+static void SelectionDone(Widget w, Atom *selection, Atom *target)
 {
     /* empty proc so Intrinsics know we want to keep storage */
 }
 
 
-static void _OwnSelection(termw, selections, count)
-    XgtermWidget termw;
-    String *selections;
-    Cardinal count;
+static void _OwnSelection(XgtermWidget termw, String *selections, Cardinal count)
 {
     Atom* atoms = termw->screen.selection_atoms;
     int i;
@@ -1344,8 +1314,7 @@ static void _OwnSelection(termw, selections, count)
 }
 
 void
-DisownSelection(termw)
-    XgtermWidget termw;
+DisownSelection(XgtermWidget termw)
 {
     Atom* atoms = termw->screen.selection_atoms;
     Cardinal count = termw->screen.selection_count;
@@ -1377,9 +1346,7 @@ DisownSelection(termw)
 /* returns number of chars in line from scol to ecol out */
 /* ARGSUSED */
 static int
-Length(screen, row, scol, ecol)
-    int row, scol, ecol;
-    TScreen *screen;
+Length(TScreen *screen, int row, int scol, int ecol)
 {
         int lastcol = LastTextCol(row);
 
@@ -1390,12 +1357,12 @@ Length(screen, row, scol, ecol)
 
 /* copies text into line, preallocated */
 static char *
-SaveText(screen, row, scol, ecol, lp, eol)
-    int row;
-    int scol, ecol;
-    TScreen *screen;
-    char *lp;		/* pointer to where to put the text */
-    int *eol;
+SaveText(TScreen *screen, int row, int scol, int ecol, char *lp, int *eol)
+            
+                   
+                    
+             		/* pointer to where to put the text */
+             
 {
 	int i = 0;
 	Char *ch = screen->buf[4 * (row + screen->topline)];
@@ -1433,8 +1400,7 @@ SaveText(screen, row, scol, ecol, lp, eol)
 }
 
 static void
-EditorButton(event)
-    XButtonEvent *event;
+EditorButton(XButtonEvent *event)
 {
 	TScreen *screen = &term->screen;
 	int pty = screen->respond;
@@ -1464,11 +1430,11 @@ EditorButton(event)
 
 
 /* ARGSUSED */
-void HandleSecure(w, event, params, param_count)
-    Widget w;
-    XEvent *event;		/* unused */
-    String *params;		/* [0] = volume */
-    Cardinal *param_count;	/* 0 or 1 */
+void HandleSecure(Widget w, XEvent *event, String *params, Cardinal *param_count)
+             
+                  		/* unused */
+                   		/* [0] = volume */
+                          	/* 0 or 1 */
 {
     Time time = CurrentTime;
 

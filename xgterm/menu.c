@@ -39,26 +39,26 @@ in this Software without prior written authorization from the X Consortium.
 #include <stdio.h>
 #include <signal.h>
 
-extern void FindFontSelection();
+extern void FindFontSelection(char *atom_name, int justprobe);
 
 Arg menuArgs[2] = {{ XtNleftBitmap, (XtArgVal) 0 },
 		   { XtNsensitive, (XtArgVal) 0 }};
 
-void do_hangup();
+void do_hangup(Widget gw, caddr_t closure, caddr_t data);
 
-static void do_securekbd(), do_allowsends(), do_visualbell(),
+static void do_securekbd(Widget gw, caddr_t closure, caddr_t data), do_allowsends(Widget gw, caddr_t closure, caddr_t data), do_visualbell(Widget gw, caddr_t closure, caddr_t data),
 #ifdef ALLOWLOGGING
-    do_logging(),
+    do_logging(Widget gw, caddr_t closure, caddr_t data),
 #endif
-    do_redraw(), do_suspend(), do_continue(), do_interrupt(), 
-    do_terminate(), do_kill(), do_quit(), do_scrollbar(), do_jumpscroll(),
-    do_reversevideo(), do_autowrap(), do_reversewrap(), do_autolinefeed(),
-    do_appcursor(), do_appkeypad(), do_scrollkey(), do_scrollttyoutput(),
-    do_allow132(), do_cursesemul(), do_marginbell(), do_altscreen(),
-    do_softreset(), do_hardreset(), do_clearsavedlines(),
-    do_vthide(), do_vtshow(), do_vtmode(), do_vtfont(),
-    do_gioenable(), do_tekshow(), do_tekmode(), do_tekpage(),
-    do_tekreset(), do_tekcopy(), do_tekhide(), do_colortext();
+    do_redraw(Widget gw, caddr_t closure, caddr_t data), do_suspend(Widget gw, caddr_t closure, caddr_t data), do_continue(Widget gw, caddr_t closure, caddr_t data), do_interrupt(Widget gw, caddr_t closure, caddr_t data), 
+    do_terminate(Widget gw, caddr_t closure, caddr_t data), do_kill(Widget gw, caddr_t closure, caddr_t data), do_quit(Widget gw, caddr_t closure, caddr_t data), do_scrollbar(Widget gw, caddr_t closure, caddr_t data), do_jumpscroll(Widget gw, caddr_t closure, caddr_t data),
+    do_reversevideo(Widget gw, caddr_t closure, caddr_t data), do_autowrap(Widget gw, caddr_t closure, caddr_t data), do_reversewrap(Widget gw, caddr_t closure, caddr_t data), do_autolinefeed(Widget gw, caddr_t closure, caddr_t data),
+    do_appcursor(Widget gw, caddr_t closure, caddr_t data), do_appkeypad(Widget gw, caddr_t closure, caddr_t data), do_scrollkey(Widget gw, caddr_t closure, caddr_t data), do_scrollttyoutput(Widget gw, caddr_t closure, caddr_t data),
+    do_allow132(Widget gw, caddr_t closure, caddr_t data), do_cursesemul(Widget gw, caddr_t closure, caddr_t data), do_marginbell(Widget gw, caddr_t closure, caddr_t data), do_altscreen(Widget gw, caddr_t closure, caddr_t data),
+    do_softreset(Widget gw, caddr_t closure, caddr_t data), do_hardreset(Widget gw, caddr_t closure, caddr_t data), do_clearsavedlines(Widget gw, caddr_t closure, caddr_t data),
+    do_vthide(Widget gw, caddr_t closure, caddr_t data), do_vtshow(Widget gw, caddr_t closure, caddr_t data), do_vtmode(Widget gw, caddr_t closure, caddr_t data), do_vtfont(Widget gw, caddr_t closure, caddr_t data),
+    do_gioenable(Widget gw, caddr_t closure, caddr_t data), do_tekshow(Widget gw, caddr_t closure, caddr_t data), do_tekmode(Widget gw, caddr_t closure, caddr_t data), do_tekpage(Widget gw, caddr_t closure, caddr_t data),
+    do_tekreset(Widget gw, caddr_t closure, caddr_t data), do_tekcopy(Widget gw, caddr_t closure, caddr_t data), do_tekhide(Widget gw, caddr_t closure, caddr_t data), do_colortext(Widget gw, caddr_t closure, caddr_t data);
 
 
 /*
@@ -128,7 +128,7 @@ MenuEntry tekMenuEntries[] = {
     { "vtshow",         do_vtshow, NULL },		/*  2 */
     { "tekreset",       do_tekreset, NULL }};		/*  3 */
 
-static Widget create_menu();
+static Widget create_menu(Widget w, Widget toplevelw, char *name, struct _MenuEntry *entries, int nentries);
 extern Widget toplevel;
 
 /*
@@ -147,11 +147,11 @@ static unsigned char check_bits[] = {
  */
 
 /* ARGSUSED */
-static Bool domenu (w, event, params, param_count)
-    Widget w;
-    XEvent *event;              /* unused */
-    String *params;             /* mainMenu, vtMenu, or tekMenu */
-    Cardinal *param_count;      /* 0 or 1 */
+static Bool domenu (Widget w, XEvent *event, String *params, Cardinal *param_count)
+             
+                                /* unused */
+                                /* mainMenu, vtMenu, or tekMenu */
+                                /* 0 or 1 */
 {
     TScreen *screen = &term->screen;
     Widget ww;
@@ -282,20 +282,20 @@ static Bool domenu (w, event, params, param_count)
     return True;
 }
 
-void HandleCreateMenu (w, event, params, param_count)
-    Widget w;
-    XEvent *event;              /* unused */
-    String *params;             /* mainMenu, vtMenu, or tekMenu */
-    Cardinal *param_count;      /* 0 or 1 */
+void HandleCreateMenu (Widget w, XEvent *event, String *params, Cardinal *param_count)
+             
+                                /* unused */
+                                /* mainMenu, vtMenu, or tekMenu */
+                                /* 0 or 1 */
 {
     (void) domenu (w, event, params, param_count);
 }
 
-void HandlePopupMenu (w, event, params, param_count)
-    Widget w;
-    XEvent *event;              /* unused */
-    String *params;             /* mainMenu, vtMenu, or tekMenu */
-    Cardinal *param_count;      /* 0 or 1 */
+void HandlePopupMenu (Widget w, XEvent *event, String *params, Cardinal *param_count)
+             
+                                /* unused */
+                                /* mainMenu, vtMenu, or tekMenu */
+                                /* 0 or 1 */
 {
     if (domenu (w, event, params, param_count)) {
 	XtCallActionProc (w, "XawPositionSimpleMenu", event, params, 1);
@@ -312,12 +312,7 @@ void HandlePopupMenu (w, event, params, param_count)
  * create_menu - create a popup shell and stuff the menu into it.
  */
 
-static Widget create_menu (w, toplevelw, name, entries, nentries)
-    Widget w;
-    Widget toplevelw;
-    char *name;
-    struct _MenuEntry *entries;
-    int nentries;
+static Widget create_menu (Widget w, Widget toplevelw, char *name, struct _MenuEntry *entries, int nentries)
 {
     TScreen *screen = &term->screen;
     static XtCallbackRec cb[2] = { { NULL, NULL }, { NULL, NULL }};
@@ -368,8 +363,7 @@ static Widget create_menu (w, toplevelw, name, entries, nentries)
     return m;
 }
 
-init_menu (menu)
-    char *menu;
+init_menu (char *menu)
 {
     TScreen *screen = &term->screen;
     int i;
@@ -399,9 +393,7 @@ init_menu (menu)
 }
 
 /* ARGSUSED */
-static void handle_send_signal (gw, sig)
-    Widget gw;
-    int sig;
+static void handle_send_signal (Widget gw, int sig)
 {
     TScreen *screen = &term->screen;
 
@@ -414,15 +406,12 @@ static void handle_send_signal (gw, sig)
  */
 
 /* ARGSUSED */
-void DoSecureKeyboard (time)
-    Time time;
+void DoSecureKeyboard (Time time)
 {
     do_securekbd (term->screen.mainMenu, NULL, NULL);
 }
 
-static void do_securekbd (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_securekbd (Widget gw, caddr_t closure, caddr_t data)
 {
     TScreen *screen = &term->screen;
     Time time = CurrentTime;		/* XXX - wrong */
@@ -445,9 +434,7 @@ static void do_securekbd (gw, closure, data)
 }
 
 
-static void do_allowsends (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_allowsends (Widget gw, caddr_t closure, caddr_t data)
 {
     TScreen *screen = &term->screen;
 
@@ -457,9 +444,7 @@ static void do_allowsends (gw, closure, data)
      */
 }
 
-static void do_visualbell (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_visualbell (Widget gw, caddr_t closure, caddr_t data)
 {
     TScreen *screen = &term->screen;
 
@@ -468,9 +453,7 @@ static void do_visualbell (gw, closure, data)
 }
 
 #ifdef ALLOWLOGGING
-static void do_logging (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_logging (Widget gw, caddr_t closure, caddr_t data)
 {
     TScreen *screen = &term->screen;
 
@@ -483,9 +466,7 @@ static void do_logging (gw, closure, data)
 }
 #endif
 
-static void do_redraw (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_redraw (Widget gw, caddr_t closure, caddr_t data)
 {
     Redraw ();
 }
@@ -498,9 +479,7 @@ static void do_redraw (gw, closure, data)
 
 
 /* ARGSUSED */
-static void do_suspend (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_suspend (Widget gw, caddr_t closure, caddr_t data)
 {
 #ifdef SIGTSTP
     handle_send_signal (gw, SIGTSTP);
@@ -508,9 +487,7 @@ static void do_suspend (gw, closure, data)
 }
 
 /* ARGSUSED */
-static void do_continue (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_continue (Widget gw, caddr_t closure, caddr_t data)
 {
 #ifdef SIGCONT
     handle_send_signal (gw, SIGCONT);
@@ -518,40 +495,30 @@ static void do_continue (gw, closure, data)
 }
 
 /* ARGSUSED */
-static void do_interrupt (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_interrupt (Widget gw, caddr_t closure, caddr_t data)
 {
     handle_send_signal (gw, SIGINT);
 }
 
 /* ARGSUSED */
-void do_hangup (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+void do_hangup (Widget gw, caddr_t closure, caddr_t data)
 {
     handle_send_signal (gw, SIGHUP);
 }
 
 /* ARGSUSED */
-static void do_terminate (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_terminate (Widget gw, caddr_t closure, caddr_t data)
 {
     handle_send_signal (gw, SIGTERM);
 }
 
 /* ARGSUSED */
-static void do_kill (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_kill (Widget gw, caddr_t closure, caddr_t data)
 {
     handle_send_signal (gw, SIGKILL);
 }
 
-static void do_quit (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_quit (Widget gw, caddr_t closure, caddr_t data)
 {
     Cleanup (0);
 }
@@ -562,9 +529,7 @@ static void do_quit (gw, closure, data)
  * vt menu callbacks
  */
 
-static void do_scrollbar (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_scrollbar (Widget gw, caddr_t closure, caddr_t data)
 {
     TScreen *screen = &term->screen;
 
@@ -577,9 +542,7 @@ static void do_scrollbar (gw, closure, data)
 }
 
 
-static void do_jumpscroll (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_jumpscroll (Widget gw, caddr_t closure, caddr_t data)
 {
     TScreen *screen = &term->screen;
 
@@ -594,9 +557,7 @@ static void do_jumpscroll (gw, closure, data)
 }
 
 
-static void do_reversevideo (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_reversevideo (Widget gw, caddr_t closure, caddr_t data)
 {
     term->flags ^= REVERSE_VIDEO;
     ReverseVideo (term);
@@ -604,9 +565,7 @@ static void do_reversevideo (gw, closure, data)
 }
 
 
-static void do_colortext (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_colortext (Widget gw, caddr_t closure, caddr_t data)
 {
     term->misc.dynamicColors = !term->misc.dynamicColors;
     update_colortext ();
@@ -614,54 +573,42 @@ static void do_colortext (gw, closure, data)
 }
 
 
-static void do_autowrap (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_autowrap (Widget gw, caddr_t closure, caddr_t data)
 {
     term->flags ^= WRAPAROUND;
     update_autowrap();
 }
 
 
-static void do_reversewrap (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_reversewrap (Widget gw, caddr_t closure, caddr_t data)
 {
     term->flags ^= REVERSEWRAP;
     update_reversewrap();
 }
 
 
-static void do_autolinefeed (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_autolinefeed (Widget gw, caddr_t closure, caddr_t data)
 {
     term->flags ^= LINEFEED;
     update_autolinefeed();
 }
 
 
-static void do_appcursor (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_appcursor (Widget gw, caddr_t closure, caddr_t data)
 {
     term->keyboard.flags ^= CURSOR_APL;
     update_appcursor();
 }
 
 
-static void do_appkeypad (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_appkeypad (Widget gw, caddr_t closure, caddr_t data)
 {
     term->keyboard.flags ^= KYPD_APL;
     update_appkeypad();
 }
 
 
-static void do_scrollkey (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_scrollkey (Widget gw, caddr_t closure, caddr_t data)
 {
     TScreen *screen = &term->screen;
 
@@ -670,9 +617,7 @@ static void do_scrollkey (gw, closure, data)
 }
 
 
-static void do_scrollttyoutput (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_scrollttyoutput (Widget gw, caddr_t closure, caddr_t data)
 {
     TScreen *screen = &term->screen;
 
@@ -681,9 +626,7 @@ static void do_scrollttyoutput (gw, closure, data)
 }
 
 
-static void do_allow132 (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_allow132 (Widget gw, caddr_t closure, caddr_t data)
 {
     TScreen *screen = &term->screen;
 
@@ -692,9 +635,7 @@ static void do_allow132 (gw, closure, data)
 }
 
 
-static void do_cursesemul (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_cursesemul (Widget gw, caddr_t closure, caddr_t data)
 {
     TScreen *screen = &term->screen;
 
@@ -703,9 +644,7 @@ static void do_cursesemul (gw, closure, data)
 }
 
 
-static void do_marginbell (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_marginbell (Widget gw, caddr_t closure, caddr_t data)
 {
     TScreen *screen = &term->screen;
 
@@ -714,34 +653,26 @@ static void do_marginbell (gw, closure, data)
 }
 
 
-static void do_altscreen (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_altscreen (Widget gw, caddr_t closure, caddr_t data)
 {
     /* do nothing for now; eventually, will want to flip screen */
 }
 
 
-static void do_softreset (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_softreset (Widget gw, caddr_t closure, caddr_t data)
 {
     VTReset (FALSE);
 }
 
 
-static void do_hardreset (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_hardreset (Widget gw, caddr_t closure, caddr_t data)
 {
     gt_reset();
     VTReset (TRUE);		/* does a longjmp */
 }
 
 
-static void do_clearsavedlines (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_clearsavedlines (Widget gw, caddr_t closure, caddr_t data)
 {
     TScreen *screen = &term->screen;
 
@@ -751,25 +682,19 @@ static void do_clearsavedlines (gw, closure, data)
 }
 
 /* ARGSUSED */
-static void do_gioenable (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_gioenable (Widget gw, caddr_t closure, caddr_t data)
 {
     gt_enable (!gt_enable(2));
     update_gioenable();
 }
 
 /* ARGSUSED */
-static void do_tekmode (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_tekmode (Widget gw, caddr_t closure, caddr_t data)
 {
     switch_modes (gt_tekmode(2));	/* switch to tek mode */
 }
 
-static void handle_tekshow (gw, allowswitch)
-    Widget gw;
-    Bool allowswitch;
+static void handle_tekshow (Widget gw, int allowswitch)
 {
     TScreen *screen = &term->screen;
 
@@ -782,26 +707,20 @@ static void handle_tekshow (gw, allowswitch)
 }
 
 /* ARGSUSED */
-static void do_tekshow (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_tekshow (Widget gw, caddr_t closure, caddr_t data)
 {
     handle_tekshow (gw, True);
 }
 
 /* ARGSUSED */
-static void do_tekonoff (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_tekonoff (Widget gw, caddr_t closure, caddr_t data)
 {
     handle_tekshow (gw, False);
 }
 
 
 /* ARGSUSED */
-static void do_vthide (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_vthide (Widget gw, caddr_t closure, caddr_t data)
 {
     hide_vt_window();
 }
@@ -811,9 +730,7 @@ static void do_vthide (gw, closure, data)
  * vtfont menu
  */
 
-static void do_vtfont (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_vtfont (Widget gw, caddr_t closure, caddr_t data)
 {
     char *entryname = (char *) closure;
     int i;
@@ -833,17 +750,13 @@ static void do_vtfont (gw, closure, data)
  */
 
 
-static void do_tekpage (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_tekpage (Widget gw, caddr_t closure, caddr_t data)
 {
     gt_clear();
 }
 
 
-static void do_tekreset (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_tekreset (Widget gw, caddr_t closure, caddr_t data)
 {
     gt_reset();
     set_vthide_sensitivity();
@@ -856,17 +769,13 @@ static void do_tekreset (gw, closure, data)
 }
 
 
-static void do_tekcopy (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_tekcopy (Widget gw, caddr_t closure, caddr_t data)
 {
     /* TekCopy (); */
 }
 
 
-static void handle_vtshow (gw, allowswitch)
-    Widget gw;
-    Bool allowswitch;
+static void handle_vtshow (Widget gw, int allowswitch)
 {
     TScreen *screen = &term->screen;
 
@@ -879,23 +788,17 @@ static void handle_vtshow (gw, allowswitch)
 	Bell();
 }
 
-static void do_vtshow (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_vtshow (Widget gw, caddr_t closure, caddr_t data)
 {
     handle_vtshow (gw, True);
 }
 
-static void do_vtonoff (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_vtonoff (Widget gw, caddr_t closure, caddr_t data)
 {
     handle_vtshow (gw, False);
 }
 
-static void do_vtmode (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_vtmode (Widget gw, caddr_t closure, caddr_t data)
 {
     TScreen *screen = &term->screen;
 
@@ -904,9 +807,7 @@ static void do_vtmode (gw, closure, data)
 
 
 /* ARGSUSED */
-static void do_tekhide (gw, closure, data)
-    Widget gw;
-    caddr_t closure, data;
+static void do_tekhide (Widget gw, caddr_t closure, caddr_t data)
 {
     gt_deactivate();
     set_vthide_sensitivity();
@@ -924,13 +825,7 @@ static void do_tekhide (gw, closure, data)
  * public handler routines
  */
 
-static void handle_toggle (proc, var, params, nparams, w, closure, data)
-    void (*proc)();
-    int var;
-    String *params;
-    Cardinal nparams;
-    Widget w;
-    caddr_t closure, data;
+static void handle_toggle (void (*proc) (/* ??? */), int var, String *params, Cardinal nparams, Widget w, caddr_t closure, caddr_t data)
 {
     int dir = -2;
 
@@ -967,11 +862,7 @@ static void handle_toggle (proc, var, params, nparams, w, closure, data)
     return;
 }
 
-void HandleAllowSends(w, event, params, param_count)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *param_count;
+void HandleAllowSends(Widget w, XEvent *event, String *params, Cardinal *param_count)
 {
     /* Currently since we use Xt event processing we cannot easily disable
      * sendevents as is done in xevent().
@@ -981,22 +872,14 @@ void HandleAllowSends(w, event, params, param_count)
      */
 }
 
-void HandleSetVisualBell(w, event, params, param_count)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *param_count;
+void HandleSetVisualBell(Widget w, XEvent *event, String *params, Cardinal *param_count)
 {
     handle_toggle (do_visualbell, (int) term->screen.visualbell,
 		   params, *param_count, w, NULL, NULL);
 }
 
 #ifdef ALLOWLOGGING
-void HandleLogging(w, event, params, param_count)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *param_count;
+void HandleLogging(Widget w, XEvent *event, String *params, Cardinal *param_count)
 {
     handle_toggle (do_logging, (int) term->screen.logging,
 		   params, *param_count, w, NULL, NULL);
@@ -1004,21 +887,17 @@ void HandleLogging(w, event, params, param_count)
 #endif
 
 /* ARGSUSED */
-void HandleRedraw(w, event, params, param_count)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *param_count;
+void HandleRedraw(Widget w, XEvent *event, String *params, Cardinal *param_count)
 {
     do_redraw(w, NULL, NULL);
 }
 
 /* ARGSUSED */
-void HandleSendSignal(w, event, params, param_count)
-    Widget w;
-    XEvent *event;		/* unused */
-    String *params;
-    Cardinal *param_count;
+void HandleSendSignal(Widget w, XEvent *event, String *params, Cardinal *param_count)
+             
+                  		/* unused */
+                   
+                          
 {
     static struct sigtab {
 	char *name;
@@ -1057,150 +936,90 @@ void HandleSendSignal(w, event, params, param_count)
 }
 
 /* ARGSUSED */
-void HandleQuit(w, event, params, param_count)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *param_count;
+void HandleQuit(Widget w, XEvent *event, String *params, Cardinal *param_count)
 {
     do_quit(w, NULL, NULL);
 }
 
-void HandleScrollbar(w, event, params, param_count)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *param_count;
+void HandleScrollbar(Widget w, XEvent *event, String *params, Cardinal *param_count)
 {
     handle_toggle (do_scrollbar, (int) term->screen.scrollbar,
 		   params, *param_count, w, NULL, NULL);
 }
 
-void HandleJumpscroll(w, event, params, param_count)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *param_count;
+void HandleJumpscroll(Widget w, XEvent *event, String *params, Cardinal *param_count)
 {
     handle_toggle (do_jumpscroll, (int) term->screen.jumpscroll,
 		   params, *param_count, w, NULL, NULL);
 }
 
-void HandleReverseVideo(w, event, params, param_count)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *param_count;
+void HandleReverseVideo(Widget w, XEvent *event, String *params, Cardinal *param_count)
 {
     handle_toggle (do_reversevideo, (int) (term->flags & REVERSE_VIDEO),
 		   params, *param_count, w, NULL, NULL);
 }
 
-void HandleAutoWrap(w, event, params, param_count)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *param_count;
+void HandleAutoWrap(Widget w, XEvent *event, String *params, Cardinal *param_count)
 {
     handle_toggle (do_autowrap, (int) (term->flags & WRAPAROUND),
 		   params, *param_count, w, NULL, NULL);
 }
 
-void HandleReverseWrap(w, event, params, param_count)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *param_count;
+void HandleReverseWrap(Widget w, XEvent *event, String *params, Cardinal *param_count)
 {
     handle_toggle (do_reversewrap, (int) (term->flags & REVERSEWRAP),
 		   params, *param_count, w, NULL, NULL);
 }
 
-void HandleAutoLineFeed(w, event, params, param_count)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *param_count;
+void HandleAutoLineFeed(Widget w, XEvent *event, String *params, Cardinal *param_count)
 {
     handle_toggle (do_autolinefeed, (int) (term->flags & LINEFEED),
 		   params, *param_count, w, NULL, NULL);
 }
 
-void HandleAppCursor(w, event, params, param_count)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *param_count;
+void HandleAppCursor(Widget w, XEvent *event, String *params, Cardinal *param_count)
 {
     handle_toggle (do_appcursor, (int) (term->keyboard.flags & CURSOR_APL),
 		   params, *param_count, w, NULL, NULL);
 }
 
-void HandleAppKeypad(w, event, params, param_count)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *param_count;
+void HandleAppKeypad(Widget w, XEvent *event, String *params, Cardinal *param_count)
 {
     handle_toggle (do_appkeypad, (int) (term->keyboard.flags & KYPD_APL),
 		   params, *param_count, w, NULL, NULL);
 }
 
-void HandleScrollKey(w, event, params, param_count)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *param_count;
+void HandleScrollKey(Widget w, XEvent *event, String *params, Cardinal *param_count)
 {
     handle_toggle (do_scrollkey, (int) term->screen.scrollkey,
 		   params, *param_count, w, NULL, NULL);
 }
 
-void HandleScrollTtyOutput(w, event, params, param_count)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *param_count;
+void HandleScrollTtyOutput(Widget w, XEvent *event, String *params, Cardinal *param_count)
 {
     handle_toggle (do_scrollttyoutput, (int) term->screen.scrollttyoutput,
 		   params, *param_count, w, NULL, NULL);
 }
 
-void HandleAllow132(w, event, params, param_count)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *param_count;
+void HandleAllow132(Widget w, XEvent *event, String *params, Cardinal *param_count)
 {
     handle_toggle (do_allow132, (int) term->screen.c132,
 		   params, *param_count, w, NULL, NULL);
 }
 
-void HandleCursesEmul(w, event, params, param_count)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *param_count;
+void HandleCursesEmul(Widget w, XEvent *event, String *params, Cardinal *param_count)
 {
     handle_toggle (do_cursesemul, (int) term->screen.curses,
 		   params, *param_count, w, NULL, NULL);
 }
 
-void HandleMarginBell(w, event, params, param_count)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *param_count;
+void HandleMarginBell(Widget w, XEvent *event, String *params, Cardinal *param_count)
 {
     handle_toggle (do_marginbell, (int) term->screen.marginbell,
 		   params, *param_count, w, NULL, NULL);
 }
 
-void HandleAltScreen(w, event, params, param_count)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *param_count;
+void HandleAltScreen(Widget w, XEvent *event, String *params, Cardinal *param_count)
 {
     /* eventually want to see if sensitive or not */
     handle_toggle (do_altscreen, (int) term->screen.alternate,
@@ -1208,40 +1027,24 @@ void HandleAltScreen(w, event, params, param_count)
 }
 
 /* ARGSUSED */
-void HandleSoftReset(w, event, params, param_count)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *param_count;
+void HandleSoftReset(Widget w, XEvent *event, String *params, Cardinal *param_count)
 {
     do_softreset(w, NULL, NULL);
 }
 
 /* ARGSUSED */
-void HandleHardReset(w, event, params, param_count)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *param_count;
+void HandleHardReset(Widget w, XEvent *event, String *params, Cardinal *param_count)
 {
     do_hardreset(w, NULL, NULL);
 }
 
 /* ARGSUSED */
-void HandleClearSavedLines(w, event, params, param_count)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *param_count;
+void HandleClearSavedLines(Widget w, XEvent *event, String *params, Cardinal *param_count)
 {
     do_clearsavedlines(w, NULL, NULL);
 }
 
-void HandleSetTerminalType(w, event, params, param_count)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *param_count;
+void HandleSetTerminalType(Widget w, XEvent *event, String *params, Cardinal *param_count)
 {
     if (*param_count == 1) {
 	switch (params[0][0]) {
@@ -1259,11 +1062,7 @@ void HandleSetTerminalType(w, event, params, param_count)
     }
 }
 
-void HandleVisibility(w, event, params, param_count)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *param_count;
+void HandleVisibility(Widget w, XEvent *event, String *params, Cardinal *param_count)
 {
     if (*param_count == 2) {
 	switch (params[0][0]) {
@@ -1284,31 +1083,19 @@ void HandleVisibility(w, event, params, param_count)
 }
 
 /* ARGSUSED */
-void HandleTekPage(w, event, params, param_count)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *param_count;
+void HandleTekPage(Widget w, XEvent *event, String *params, Cardinal *param_count)
 {
     do_tekpage(w, NULL, NULL);
 }
 
 /* ARGSUSED */
-void HandleTekReset(w, event, params, param_count)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *param_count;
+void HandleTekReset(Widget w, XEvent *event, String *params, Cardinal *param_count)
 {
     do_tekreset(w, NULL, NULL);
 }
 
 /* ARGSUSED */
-void HandleTekCopy(w, event, params, param_count)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *param_count;
+void HandleTekCopy(Widget w, XEvent *event, String *params, Cardinal *param_count)
 {
     do_tekcopy(w, NULL, NULL);
 }

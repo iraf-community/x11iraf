@@ -51,7 +51,7 @@
 #endif
 
 
-ScrnBuf Allocate (nrow, ncol, addr)
+ScrnBuf Allocate (int nrow, int ncol, Char **addr)
 /*
    allocates memory for a 2-dimensional array of chars and returns a pointer
    thereto
@@ -61,8 +61,8 @@ ScrnBuf Allocate (nrow, ncol, addr)
 >    character array, the second one is the attributes, the third is the
 >    foreground color, and the fourth is the background color.
  */
-int nrow, ncol;
-Char **addr;
+               
+            
 {
 	ScrnBuf base;
 	Char *tmp;
@@ -87,10 +87,7 @@ Char **addr;
  *  (Return value only necessary with SouthWestGravity.)
  */
 static
-Reallocate(sbuf, sbufaddr, nrow, ncol, oldrow, oldcol)
-    ScrnBuf *sbuf;
-    Char **sbufaddr;
-    int nrow, ncol, oldrow, oldcol;
+Reallocate(ScrnBuf *sbuf, Char **sbufaddr, int nrow, int ncol, int oldrow, int oldcol)
 {
 	ScrnBuf base;
 	Char *tmp;
@@ -163,16 +160,16 @@ Reallocate(sbuf, sbufaddr, nrow, ncol, oldrow, oldcol)
 }
 
 void
-ScreenWrite (screen, str, flags, cur_fg, cur_bg, length)
+ScreenWrite (TScreen *screen, char *str, unsigned int flags, unsigned int cur_fg, unsigned int cur_bg, int length)
 /*
    Writes str into buf at row row and column col.  Characters are set to match
    flags.
  */
-TScreen *screen;
-char *str;
-unsigned flags;
-unsigned cur_fg, cur_bg;
-int length;		/* length of string */
+                
+          
+               
+                        
+           		/* length of string */
 {
 	Char *attrs, *attrs0, *fgs, *bgs;
 	int avail  = screen->max_col - screen->cur_col + 1;
@@ -203,16 +200,16 @@ int length;		/* length of string */
 	    *attrs0 |= LINEWRAPPED;
 }
 
-ScrnInsertLine (sb, last, where, n, size)
+ScrnInsertLine (ScrnBuf sb, int last, int where, int n, int size)
 /*
    Inserts n blank lines at sb + where, treating last as a bottom margin.
    Size is the size of each entry in sb.
    Requires: 0 <= where < where + n <= last
    	     n <= MAX_ROWS
  */
-ScrnBuf sb;
-int last;
-int where, n, size;
+           
+         
+                   
 {
 	int i;
 	char *save [4 * MAX_ROWS];
@@ -243,16 +240,16 @@ int where, n, size;
 }
 
 
-ScrnDeleteLine (sb, last, where, n, size)
+ScrnDeleteLine (ScrnBuf sb, int last, int where, int n, int size)
 /*
    Deletes n lines at sb + where, treating last as a bottom margin.
    Size is the size of each entry in sb.
    Requires 0 <= where < where + n < = last
    	    n <= MAX_ROWS
  */
-ScrnBuf sb;
-int n, last, size;
-int where;
+           
+                  
+          
 {
 	int i;
 	char *save [4 * MAX_ROWS];
@@ -274,13 +271,13 @@ int where;
 }
 
 
-ScrnInsertChar (sb, row, col, n, size)
+ScrnInsertChar (ScrnBuf sb, int row, int col, int n, int size)
     /*
       Inserts n blanks in sb at row, col.  Size is the size of each row.
       */
-    ScrnBuf sb;
-    int row, size;
-    int col, n;
+               
+                  
+               
 {
 	int i, j;
 	Char *ptr = sb [4 * row];
@@ -303,13 +300,13 @@ ScrnInsertChar (sb, row, col, n, size)
 }
 
 
-ScrnDeleteChar (sb, row, col, n, size)
+ScrnDeleteChar (ScrnBuf sb, int row, int col, int n, int size)
     /*
       Deletes n characters in sb at row, col. Size is the size of each row.
       */
-    ScrnBuf sb;
-    int row, size;
-    int n, col;
+               
+                  
+               
 {
 	Char *ptr = sb[4 * row];
 	Char *attrs = sb[4 * row + 1];
@@ -325,16 +322,16 @@ ScrnDeleteChar (sb, row, col, n, size)
 }
 
 
-ScrnRefresh (screen, toprow, leftcol, nrows, ncols, force)
+ScrnRefresh (TScreen *screen, int toprow, int leftcol, int nrows, int ncols, Boolean force)
 /*
    Repaints the area enclosed by the parameters.
    Requires: (toprow, leftcol), (toprow + nrows, leftcol + ncols) are
    	     coordinates of characters in screen;
 	     nrows and ncols positive.
  */
-TScreen *screen;
-int toprow, leftcol, nrows, ncols;
-Boolean force;			/* ... leading/trailing spaces */
+                
+                                  
+              			/* ... leading/trailing spaces */
 {
 	int y = toprow * FontHeight(screen) + screen->border +
 		screen->fnt_norm->ascent;
@@ -525,13 +522,13 @@ Boolean force;			/* ... leading/trailing spaces */
 	}
 }
 
-ClearBufRows (screen, first, last)
+ClearBufRows (TScreen *screen, int first, int last)
 /*
    Sets the rows first though last of the buffer of screen to spaces.
    Requires first <= last; first, last are rows of screen->buf.
  */
-TScreen *screen;
-int first, last;
+                
+                
 {
 	first *= 4;
 	last = 4 * last + 3;
@@ -555,10 +552,7 @@ int first, last;
   7. Clears origin mode and sets scrolling region to be entire screen.
   8. Returns 0
   */
-ScreenResize (screen, width, height, flags)
-    TScreen *screen;
-    int width, height;
-    unsigned *flags;
+ScreenResize (TScreen *screen, int width, int height, unsigned int *flags)
 {
 	int rows, cols;
 	int border = 2 * screen->border;
@@ -707,11 +701,11 @@ ScreenResize (screen, width, height, flags)
  * over the end of the line, it stops at the end of the line.
  */
 void
-ScrnSetAttributes(screen, row, col, mask, value, length)
-TScreen *screen;
-int row, col;
-unsigned mask, value;
-int length;		/* length of string */
+ScrnSetAttributes(TScreen *screen, int row, int col, unsigned int mask, unsigned int value, int length)
+                
+             
+                     
+           		/* length of string */
 {
 	Char *attrs;
 	int avail  = screen->max_col - col + 1;
@@ -736,11 +730,11 @@ int length;		/* length of string */
  * the number of bytes of attributes (<= length)
  */
 int
-ScrnGetAttributes(screen, row, col, str, length)
-TScreen *screen;
-int row, col;
-Char *str;
-int length;		/* length of string */
+ScrnGetAttributes(TScreen *screen, int row, int col, Char *str, int length)
+                
+             
+          
+           		/* length of string */
 {
 	Char *attrs;
 	int avail  = screen->max_col - col + 1;
@@ -758,9 +752,7 @@ int length;		/* length of string */
 	return ret;
 }
 Bool
-non_blank_line(sb, row, col, len)
-ScrnBuf sb;
-int row, col, len;
+non_blank_line(ScrnBuf sb, int row, int col, int len)
 {
 	int	i;
 	Char *ptr = sb [4 * row];

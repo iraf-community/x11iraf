@@ -7,12 +7,12 @@ struct GT_function {
 	XtPointer data;		/* callback data */
 };
 
-void gt_deactivate();
-void gt_activate();
-int gt_flush();
-int gt_tekmode();
-int gt_activated();
-int gt_status();
-void gtermio_register();
-void gtermio_open_workstation();
-void gtermio_close_workstation();
+void gt_deactivate(void);
+void gt_activate(void);
+int gt_flush(void);
+int gt_tekmode(int state);
+int gt_activated(void);
+int gt_status(void);
+void gtermio_register(struct GT_function *functions, int nfunc);
+void gtermio_open_workstation(void);
+void gtermio_close_workstation(void);

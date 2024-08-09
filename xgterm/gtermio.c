@@ -212,18 +212,18 @@ typedef Request	*RequestPtr;
 static RequestPtr request_head = NULL;
 static RequestPtr request_tail = NULL;
 
-static	int gio_reset(int, GtermWidget, char *);
-static	int gio_setginmodeterm();
-static	int gio_output();
-static	int gio_clear();
-static	int gio_retcursor(), gio_queue_output(), gio_queue_request();
-static	int gio_hardreset(), gio_activate(), gio_enable(), gio_tekmode();
-static	int gio_processdata(), gio_ptyinput(), gio_escape(), gio_status();
-static	int gio_activate_cb();
-static  int gio_connect_cb();
-static	int gio_deactivate_cb();
-static	void gio_keyinput(), gio_resize();
-static	void pl_decodepts(), gio_retenq();
+static	void gio_reset(int, GtermWidget, char *);
+static	int gio_setginmodeterm(int dummy, char *str);
+static	int gio_output(void);
+static	int gio_clear(int dummy);
+static	int gio_retcursor(int key, int sx, int sy, int raster, int rx, int ry, int datalen), gio_queue_output(int fd, XtPointer tcl, char *objname, int key, char *strval), gio_queue_request(int sx, int sy, int raster, int rx, int ry, int key, char *strval);
+static	int gio_hardreset(int dummy), gio_activate(int dummy, int state), gio_enable(int dummy, int onoff), gio_tekmode(int dummy, int onoff);
+static	int gio_processdata(void), gio_ptyinput(int notused, char *ttybuf, int nchars), gio_escape(void), gio_status(int dummy, char *app_name, char *app_class);
+static	int gio_activate_cb(int dummy, Widget w, int state);
+static  int gio_connect_cb(int dummy, Display *display, Widget toplevel, int state);
+static	int gio_deactivate_cb(int dummy, Widget w, int state);
+static	void gio_keyinput(XtPointer notused, Widget w, XEvent *event), gio_resize(XtPointer notused, Widget w);
+static	void pl_decodepts(void), gio_retenq(void);
 
 /* Externally callable routines. */
 static struct GT_function gio_functions[] = {
@@ -240,9 +240,9 @@ static struct GT_function gio_functions[] = {
 
 
 /* Translation to hook Tek menu to gterm widget. */
-extern void HandlePopupMenu();
-extern void DeleteWindow();
-extern char *gtermio_getResource();
+extern void HandlePopupMenu(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void DeleteWindow(Widget w, XEvent *event, String *params, Cardinal *num_params);
+extern char *gtermio_getResource(char *name);
 static Atom wm_delete_window = 0;   /* for ICCCM delete window */
 
 static char *gio_shellTrans =
@@ -438,7 +438,7 @@ gio_connect_cb (int dummy, Display *display, Widget toplevel, int state)
 {
 	if (state) {
 	    extern Widget term;
-	    extern char *mktemp();
+	    extern char *mktemp(char *);
 	    XrmDatabase db1, db2;
 	    char *fname, buf[256];
 
@@ -1637,12 +1637,12 @@ gio_keyinput (XtPointer notused, Widget	w, XEvent *event)
  * processing routine.
  */
 static int
-gio_retcursor (key, sx, sy, raster, rx, ry, datalen)
-int	key;			/* key (or whatever) typed to trigger read */
-int	sx, sy;			/* screen coords of event */
-int	raster;			/* raster number */
-int	rx, ry;			/* raster coords of event */
-int	datalen;		/* nchars of data following cursor value */
+gio_retcursor (int key, int sx, int sy, int raster, int rx, int ry, int datalen)
+   	    			/* key (or whatever) typed to trigger read */
+   	       			/* screen coords of event */
+   	       			/* raster number */
+   	       			/* raster coords of event */
+   	        		/* nchars of data following cursor value */
 {
 	int n=0, mc_x, mc_y;
 	char curval[20];
@@ -1701,7 +1701,7 @@ int	datalen;		/* nchars of data following cursor value */
 /* GIO_RETENQ -- Respond to the ESC ENQ request.
  */
 static void
-gio_retenq()
+gio_retenq(void)
 {
 	int	mc_x, mc_y;
 	char	curval[7];
@@ -1751,7 +1751,7 @@ static	struct	_esc **e_pcand, **e_acand;	/* candidates arrays	*/
 static	int	e_npcand, e_nacand;		/* number of candidates	*/
 static	int	e_charno;			/* char being examined	*/
 static	int	scanok;				/* clr if decode fails  */
-static	int	startscan(), getint(), getstr(), endscan();
+static	int	startscan(void), getint(int *value), getstr(char *value), endscan(void);
 
 static	struct _esc e_table[] = {
 #include "gtermio.esc"			/* Gterm escape sequence table	*/
@@ -1775,7 +1775,7 @@ static	struct _esc e_table[] = {
  * screen.
  */
 static int
-gio_escape()
+gio_escape(void)
 {
 	struct	_esc *esc;
 	int ch, i, j;
@@ -2505,7 +2505,7 @@ action:
 /* STARTSCAN -- Reset the scanok flag at the start of a scan.
  */
 static int
-startscan()
+startscan(void)
 {
 	int ch;
 
@@ -2526,8 +2526,7 @@ startscan()
  * if a decode error occurs.
  */
 static int
-getint (value)
-int *value;
+getint (int *value)
 {
 	int ch;
 	int v;
@@ -2579,8 +2578,7 @@ int *value;
  * if a decode error occurs.
  */
 static int
-getstr (value)
-char *value;
+getstr (char *value)
 {
 	int ch;
 	char *op = value;
@@ -2615,7 +2613,7 @@ char *value;
 /* ENDSCAN -- Scan forward to the ']' input argument list delimiter.
  */
 static int
-endscan()
+endscan(void)
 {
 	int ch;
 
