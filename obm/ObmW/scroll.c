@@ -3,8 +3,7 @@
 #include <X11/Xmu/CharSet.h>
 #include "scroll.h"
 
-void XfwfConnectScrollingWidgets(w1, w2)
-    Widget w1, w2;
+void XfwfConnectScrollingWidgets(Widget w1, Widget w2)
 {
     XtCallbackProc response_cb_1 = NULL, response_cb_2 = NULL;
 
@@ -17,8 +16,7 @@ void XfwfConnectScrollingWidgets(w1, w2)
     XtAddCallback(w2, "scrollCallback", response_cb_1, (XtPointer)w1);
 }
 
-XfwfSReason XfwfCvtStringToScrollReason(s)
-    String s;
+XfwfSReason XfwfCvtStringToScrollReason(String s)
 {
     if (XmuCompareISOLatin1(s, "Notify") == 0) return XfwfSNotify;
     if (XmuCompareISOLatin1(s, "Move") == 0) return XfwfSMove;

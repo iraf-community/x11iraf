@@ -13,13 +13,7 @@
 #include "done.h"
 
 
-Boolean XfwfCvtLongToString(display, args, num_args, from, to, converter_data)
-    Display *display;
-    XrmValuePtr args;
-    Cardinal *num_args;
-    XrmValuePtr from;
-    XrmValuePtr to;
-    XtPointer *converter_data;
+Boolean XfwfCvtLongToString(Display *display, XrmValuePtr args, Cardinal *num_args, XrmValuePtr from, XrmValuePtr to, XtPointer *converter_data)
 {
     char s[30];
 

@@ -91,7 +91,7 @@
  */
 
 #define	MAXOBJ	512
-static void obm_call_activate_callbacks();
+static void obm_call_activate_callbacks(struct obmContext *obm, int state);
 
 
 #if (TCL_MAJOR_VERSION < 8)

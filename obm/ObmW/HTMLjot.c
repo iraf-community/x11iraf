@@ -88,9 +88,7 @@ static JotInfo *JotCurrent = NULL;
 
 
 void
-NewJot(w, width, height)
-	Widget w;
-	int width, height;
+NewJot(Widget w, int width, int height)
 {
 	if (JotCurrent == NULL)
 	{
@@ -132,8 +130,7 @@ NewJot(w, width, height)
 
 
 JotInfo *
-GetJot(w)
-	Widget w;
+GetJot(Widget w)
 {
 	JotInfo *jptr;
 
@@ -151,8 +148,7 @@ GetJot(w)
 
 
 void
-FreeStrokes(sptr)
-	Stroke *sptr;
+FreeStrokes(Stroke *sptr)
 {
 	Stroke *tptr;
 
@@ -167,10 +163,7 @@ FreeStrokes(sptr)
 
 
 void
-ClearJot(hw, w, width, height)
-	HTMLWidget hw;
-	Widget w;
-	int width, height;
+ClearJot(HTMLWidget hw, Widget w, int width, int height)
 {
 	JotInfo *jptr;
 
@@ -205,10 +198,7 @@ ClearJot(hw, w, width, height)
 
 
 void
-AddStroke(jptr, sptr, drawing)
-	JotInfo *jptr;
-	Stroke *sptr;
-	Boolean drawing;
+AddStroke(JotInfo *jptr, Stroke *sptr, Boolean drawing)
 {
 	if (jptr->strokes == NULL)
 	{
@@ -246,10 +236,7 @@ AddStroke(jptr, sptr, drawing)
 
 
 void
-EVJotExpose(w, data, event)
-	Widget w;
-	XtPointer data;
-	XEvent *event;
+EVJotExpose(Widget w, XtPointer data, XEvent *event)
 {
 	XExposeEvent *ExEvent = (XExposeEvent *)event;
 	HTMLWidget hw = (HTMLWidget)data;
@@ -286,10 +273,7 @@ EVJotExpose(w, data, event)
 
 
 void
-EVJotPress(w, data, event)
-	Widget w;
-	XtPointer data;
-	XEvent *event;
+EVJotPress(Widget w, XtPointer data, XEvent *event)
 {
 	XButtonPressedEvent *BuEvent = (XButtonPressedEvent *)event;
 	HTMLWidget hw = (HTMLWidget)data;
@@ -335,10 +319,7 @@ EVJotPress(w, data, event)
 
 
 void
-EVJotMove(w, data, event)
-	Widget w;
-	XtPointer data;
-	XEvent *event;
+EVJotMove(Widget w, XtPointer data, XEvent *event)
 {
 	XPointerMovedEvent *MoEvent = (XPointerMovedEvent *)event;
 	HTMLWidget hw = (HTMLWidget)data;
@@ -389,10 +370,7 @@ EVJotMove(w, data, event)
 
 
 void
-EVJotRelease(w, data, event)
-	Widget w;
-	XtPointer data;
-	XEvent *event;
+EVJotRelease(Widget w, XtPointer data, XEvent *event)
 {
 	XButtonReleasedEvent *BuEvent = (XButtonReleasedEvent *)event;
 	HTMLWidget hw = (HTMLWidget)data;
@@ -443,8 +421,7 @@ EVJotRelease(w, data, event)
 
 
 char *
-EJB_JOTfromJot(w)
-	Widget w;
+EJB_JOTfromJot(Widget w)
 {
 	int i, cnt;
 	int dlen, total;
@@ -553,9 +530,7 @@ typedef struct my_INK_POINT {
 
 
 unsigned char *
-JOTfromJot(w, buffer_len)
-	Widget w;
-	int *buffer_len;
+JOTfromJot(Widget w, int *buffer_len)
 {
 	int i, cnt;
 	int dlen, total;

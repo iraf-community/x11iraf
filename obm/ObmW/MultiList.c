@@ -67,8 +67,8 @@
 
  *===========================================================================*/
 
-Pixmap XmuCreateStippledPixmap();
-extern void XawInitializeWidgetSet();
+Pixmap XmuCreateStippledPixmap(Screen *, Pixel, Pixel, unsigned int);
+extern void XawInitializeWidgetSet(void);
 
 #define	SUPERCLASS	&(simpleClassRec)
 
@@ -300,8 +300,7 @@ WidgetClass xfwfMultiListWidgetClass = (WidgetClass)&xfwfMultiListClassRec;
  *---------------------------------------------------------------------------*/
 
 /* ARGSUSED */
-static void Initialize(request,new)
-Widget request,new;
+static void Initialize(Widget request, Widget new)
 {
 	XfwfMultiListWidget mlw;
 
@@ -324,10 +323,7 @@ Widget request,new;
  *---------------------------------------------------------------------------*/
 
 /* ARGSUSED */
-static void Redisplay(mlw,event,rectangle_union)
-XfwfMultiListWidget mlw;
-XEvent *event;
-Region rectangle_union;
+static void Redisplay(XfwfMultiListWidget mlw, XEvent *event, Region rectangle_union)
 {
 	GC shade_gc;
 	int i,x1,y1,w,h,x2,y2,row,col,ul_row,ul_col,lr_row,lr_col;
@@ -378,9 +374,7 @@ Region rectangle_union;
 
  *---------------------------------------------------------------------------*/
 
-static XtGeometryResult PreferredGeometry(mlw,parent_idea,our_idea)
-XfwfMultiListWidget mlw;
-XtWidgetGeometry *parent_idea,*our_idea;
+static XtGeometryResult PreferredGeometry(XfwfMultiListWidget mlw, XtWidgetGeometry *parent_idea, XtWidgetGeometry *our_idea)
 {
 	Dimension nw,nh;
 	Boolean parent_wants_w,parent_wants_h,we_changed_size;
@@ -422,8 +416,7 @@ XtWidgetGeometry *parent_idea,*our_idea;
 
  *---------------------------------------------------------------------------*/
 
-static void Resize(mlw)
-XfwfMultiListWidget mlw;
+static void Resize(XfwfMultiListWidget mlw)
 {
 	Dimension width,height;
 
@@ -446,8 +439,7 @@ XfwfMultiListWidget mlw;
  *---------------------------------------------------------------------------*/
 
 /*ARGSUSED*/
-static Boolean SetValues(cpl,rpl,npl)
-XfwfMultiListWidget cpl,rpl,npl;
+static Boolean SetValues(XfwfMultiListWidget cpl, XfwfMultiListWidget rpl, XfwfMultiListWidget npl)
 {
 	Boolean redraw,recalc;
 
@@ -561,8 +553,7 @@ XfwfMultiListWidget cpl,rpl,npl;
 
  *---------------------------------------------------------------------------*/
 
-static void DestroyOldData(mlw)
-XfwfMultiListWidget mlw;
+static void DestroyOldData(XfwfMultiListWidget mlw)
 {
 	int i;
 
@@ -601,8 +592,7 @@ XfwfMultiListWidget mlw;
 
  *---------------------------------------------------------------------------*/
 
-static void InitializeNewData(mlw)
-XfwfMultiListWidget mlw;
+static void InitializeNewData(XfwfMultiListWidget mlw)
 {
 	int i;
 	XfwfMultiListItem *item;
@@ -675,8 +665,7 @@ XfwfMultiListWidget mlw;
 
  *---------------------------------------------------------------------------*/
 
-static void CreateNewGCs(mlw)
-XfwfMultiListWidget mlw;
+static void CreateNewGCs(XfwfMultiListWidget mlw)
 {
 	XGCValues values;
 	unsigned int attribs;
@@ -962,8 +951,7 @@ Layout(XfwfMultiListWidget mlw, Boolean w_changeable, Boolean h_changeable,
 
  *---------------------------------------------------------------------------*/
 
-static void RedrawAll(mlw)
-XfwfMultiListWidget mlw;
+static void RedrawAll(XfwfMultiListWidget mlw)
 {
 	Redisplay(mlw,NULL,NULL);
 } /* End RedrawAll */
@@ -978,9 +966,7 @@ XfwfMultiListWidget mlw;
 
  *---------------------------------------------------------------------------*/
 
-static void RedrawItem(mlw,item_index)
-XfwfMultiListWidget mlw;
-int item_index;
+static void RedrawItem(XfwfMultiListWidget mlw, int item_index)
 {
 	int row,column;
 
@@ -1002,9 +988,7 @@ int item_index;
 
  *---------------------------------------------------------------------------*/
 
-static void RedrawRowColumn(mlw,row,column)
-XfwfMultiListWidget mlw;
-int row,column;
+static void RedrawRowColumn(XfwfMultiListWidget mlw, int row, int column)
 {
 	GC bg_gc,fg_gc;
 	XfwfMultiListItem *item;
@@ -1089,9 +1073,7 @@ int row,column;
 
  *---------------------------------------------------------------------------*/
 
-static void PixelToRowColumn(mlw,x,y,row_ptr,column_ptr)
-XfwfMultiListWidget mlw;
-int x,y,*row_ptr,*column_ptr;
+static void PixelToRowColumn(XfwfMultiListWidget mlw, int x, int y, int *row_ptr, int *column_ptr)
 {
 	*row_ptr = y / (int)MultiListRowHeight(mlw);
 	*column_ptr = x / (int)MultiListColWidth(mlw);
@@ -1106,9 +1088,7 @@ int x,y,*row_ptr,*column_ptr;
 
  *---------------------------------------------------------------------------*/
 
-static void RowColumnToPixels(mlw,row,col,x_ptr,y_ptr,w_ptr,h_ptr)
-XfwfMultiListWidget mlw;
-int row,col,*x_ptr,*y_ptr,*w_ptr,*h_ptr;
+static void RowColumnToPixels(XfwfMultiListWidget mlw, int row, int col, int *x_ptr, int *y_ptr, int *w_ptr, int *h_ptr)
 {
 	*x_ptr = col * MultiListColWidth(mlw);
 	*y_ptr = row * MultiListRowHeight(mlw);
@@ -1128,9 +1108,7 @@ int row,col,*x_ptr,*y_ptr,*w_ptr,*h_ptr;
 
  *---------------------------------------------------------------------------*/
 
-static Boolean RowColumnToItem(mlw,row,column,item_ptr)
-XfwfMultiListWidget mlw;
-int row,column,*item_ptr;
+static Boolean RowColumnToItem(XfwfMultiListWidget mlw, int row, int column, int *item_ptr)
 {
 	int x_stride,y_stride;
 
@@ -1169,9 +1147,7 @@ int row,column,*item_ptr;
 
  *---------------------------------------------------------------------------*/
 
-static Boolean ItemToRowColumn(mlw,item_index,row_ptr,column_ptr)
-XfwfMultiListWidget mlw;
-int item_index,*row_ptr,*column_ptr;
+static Boolean ItemToRowColumn(XfwfMultiListWidget mlw, int item_index, int *row_ptr, int *column_ptr)
 {
 	if (item_index < 0 || item_index >= MultiListNumItems(mlw))
 	{
@@ -1213,11 +1189,7 @@ int item_index,*row_ptr,*column_ptr;
  *---------------------------------------------------------------------------*/
 
 /* ARGSUSED */
-static void Select(mlw,event,params,num_params)
-XfwfMultiListWidget mlw;
-XEvent *event;
-String *params;
-Cardinal *num_params;
+static void Select(XfwfMultiListWidget mlw, XEvent *event, String *params, Cardinal *num_params)
 {
 	int click_x,click_y;
 	int status,item_index,row,column;
@@ -1256,11 +1228,7 @@ Cardinal *num_params;
  *---------------------------------------------------------------------------*/
 
 /* ARGSUSED */
-static void Unselect(mlw,event,params,num_params)
-XfwfMultiListWidget mlw;
-XEvent *event;
-String *params;
-Cardinal *num_params;
+static void Unselect(XfwfMultiListWidget mlw, XEvent *event, String *params, Cardinal *num_params)
 {
 	int click_x,click_y;
 	int status,item_index,row,column;
@@ -1302,11 +1270,7 @@ Cardinal *num_params;
  *---------------------------------------------------------------------------*/
 
 /* ARGSUSED */
-static void Toggle(mlw,event,params,num_params)
-XfwfMultiListWidget mlw;
-XEvent *event;
-String *params;
-Cardinal *num_params;
+static void Toggle(XfwfMultiListWidget mlw, XEvent *event, String *params, Cardinal *num_params)
 {
 	int click_x,click_y;
 	int status,item_index,row,column;
@@ -1344,11 +1308,7 @@ Cardinal *num_params;
  *---------------------------------------------------------------------------*/
 
 /* ARGSUSED */
-static void Extend(mlw,event,params,num_params)
-XfwfMultiListWidget mlw;
-XEvent *event;
-String *params;
-Cardinal *num_params;
+static void Extend(XfwfMultiListWidget mlw, XEvent *event, String *params, Cardinal *num_params)
 {
 	int click_x,click_y;
 	int status,item_index,row,column;
@@ -1385,11 +1345,7 @@ Cardinal *num_params;
  *---------------------------------------------------------------------------*/
 
 /* ARGSUSED */
-static void Notify(mlw,event,params,num_params)
-XfwfMultiListWidget mlw;
-XEvent *event;
-String *params;
-Cardinal *num_params;
+static void Notify(XfwfMultiListWidget mlw, XEvent *event, String *params, Cardinal *num_params)
 {
 	char *buffer;
 	String string;
@@ -1453,9 +1409,7 @@ Cardinal *num_params;
 
  *---------------------------------------------------------------------------*/
 
-Boolean XfwfMultiListHighlightItem(mlw,item_index)
-XfwfMultiListWidget mlw;
-int item_index;
+Boolean XfwfMultiListHighlightItem(XfwfMultiListWidget mlw, int item_index)
 {
 	XfwfMultiListItem *item;
 
@@ -1491,8 +1445,7 @@ int item_index;
 
  *---------------------------------------------------------------------------*/
 
-void XfwfMultiListHighlightAll(mlw)
-XfwfMultiListWidget mlw;
+void XfwfMultiListHighlightAll(XfwfMultiListWidget mlw)
 {
 	int i;
 	XfwfMultiListItem *item;
@@ -1528,9 +1481,7 @@ XfwfMultiListWidget mlw;
 
  *---------------------------------------------------------------------------*/
 
-void XfwfMultiListUnhighlightItem(mlw,item_index)
-XfwfMultiListWidget mlw;
-int item_index;
+void XfwfMultiListUnhighlightItem(XfwfMultiListWidget mlw, int item_index)
 {
 	int i;
 	XfwfMultiListItem *item;
@@ -1559,8 +1510,7 @@ int item_index;
 
  *---------------------------------------------------------------------------*/
 
-void XfwfMultiListUnhighlightAll(mlw)
-XfwfMultiListWidget mlw;
+void XfwfMultiListUnhighlightAll(XfwfMultiListWidget mlw)
 {
 	int i;
 	XfwfMultiListItem *item;
@@ -1586,9 +1536,7 @@ XfwfMultiListWidget mlw;
 
  *---------------------------------------------------------------------------*/
 
-int XfwfMultiListToggleItem(mlw,item_index)
-XfwfMultiListWidget mlw;
-int item_index;
+int XfwfMultiListToggleItem(XfwfMultiListWidget mlw, int item_index)
 {
 	XfwfMultiListItem *item;
 
@@ -1624,8 +1572,7 @@ int item_index;
 
  *---------------------------------------------------------------------------*/
 
-XfwfMultiListReturnStruct *XfwfMultiListGetHighlighted(mlw)
-XfwfMultiListWidget mlw;
+XfwfMultiListReturnStruct *XfwfMultiListGetHighlighted(XfwfMultiListWidget mlw)
 {
 	XfwfMultiListItem *item;
 	static XfwfMultiListReturnStruct ret_value;
@@ -1659,9 +1606,7 @@ XfwfMultiListWidget mlw;
 
  *---------------------------------------------------------------------------*/
 
-Boolean XfwfMultiListIsHighlighted(mlw,item_index)
-XfwfMultiListWidget mlw;
-int item_index;
+Boolean XfwfMultiListIsHighlighted(XfwfMultiListWidget mlw, int item_index)
 {
 	XfwfMultiListItem *item;
 
@@ -1683,11 +1628,7 @@ int item_index;
 
  *---------------------------------------------------------------------------*/
 
-Boolean XfwfMultiListGetItemInfo(mlw,item_index,str_ptr,h_ptr,s_ptr)
-XfwfMultiListWidget mlw;
-int item_index;
-String *str_ptr;
-Boolean *h_ptr,*s_ptr;
+Boolean XfwfMultiListGetItemInfo(XfwfMultiListWidget mlw, int item_index, String *str_ptr, Boolean *h_ptr, Boolean *s_ptr)
 {
 	XfwfMultiListItem *item;
 

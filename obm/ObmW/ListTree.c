@@ -125,20 +125,20 @@ static XtResource resources[] =
 
 #undef offset
 
-static void Initialize();
-static void Destroy();
-static void Redisplay();
-static void Resize();
-static void ChangeSize();
-static XtGeometryResult QueryGeometry();
-static Boolean SetValues();
-static void Draw();
-static void DrawAll();
-static void DrawItemHighlight(), DrawItemHighlightClear();
-static ListTreeItem *GetItem();
-static void Select(), Notify(), Unset(), Extend();
-static void DeleteChildren();
-static Boolean Layout();
+static void Initialize(Widget treq, Widget tnew, ArgList args, Cardinal *num);
+static void Destroy(ListTreeWidget w);
+static void Redisplay(Widget w, XExposeEvent *event, Region region);
+static void Resize(Widget w);
+static void ChangeSize(ListTreeWidget w);
+static XtGeometryResult QueryGeometry(ListTreeWidget lw, XtWidgetGeometry *parent_idea, XtWidgetGeometry *our_idea);
+static Boolean SetValues(Widget current, Widget request, Widget new, ArgList args, Cardinal *nargs);
+static void Draw(ListTreeWidget w, Boolean draw, int yevent, int hevent);
+static void DrawAll(ListTreeWidget w);
+static void DrawItemHighlight(ListTreeWidget w, ListTreeItem *item), DrawItemHighlightClear(ListTreeWidget w, ListTreeItem *item);
+static ListTreeItem *GetItem(ListTreeWidget w, int findy);
+static void Select(Widget aw, XEvent *event, String *params, Cardinal *num_params), Notify(Widget aw, XEvent *event, String *params, Cardinal *num_params), Unset(Widget aw, XEvent *event, String *params, Cardinal *num_params), Extend(Widget aw, XEvent *event, String *params, Cardinal *num_params);
+static void DeleteChildren(ListTreeWidget w, ListTreeItem *item);
+static Boolean Layout(Widget w, Boolean xfree, Boolean yfree, Dimension *width, Dimension *height);
 
 #ifdef USE_RDD
 static void StartDrag(), EndDrag(), Drop();
@@ -219,9 +219,7 @@ ListTreeClassRec listtreeClassRec =
 WidgetClass listtreeWidgetClass = (WidgetClass) & listtreeClassRec;
 
 static void
-MakePixmap(w, pix)
-ListTreeWidget w;
-Pixinfo *pix;
+MakePixmap(ListTreeWidget w, Pixinfo *pix)
 {
   Window root;
   int x, y;
@@ -249,9 +247,7 @@ Pixinfo *pix;
 }
 
 static void
-FreePixmap(w, pix)
-ListTreeWidget w;
-Pixinfo *pix;
+FreePixmap(ListTreeWidget w, Pixinfo *pix)
 {
   if (pix->pix)
     XFreePixmap(XtDisplay((Widget) w), pix->pix);
@@ -259,10 +255,7 @@ Pixinfo *pix;
 
 
 static void
-Initialize(treq, tnew, args, num)
-Widget treq, tnew;
-ArgList args;
-Cardinal *num;
+Initialize(Widget treq, Widget tnew, ArgList args, Cardinal *num)
 {
   ListTreeWidget new;
   XGCValues values;
@@ -342,8 +335,7 @@ Cardinal *num;
 }
 
 static void
-Destroy(w)
-ListTreeWidget w;
+Destroy(ListTreeWidget w)
 {
   ListTreeItem *item, *sibling;
 
@@ -366,10 +358,7 @@ ListTreeWidget w;
 }
 
 static void
-Redisplay(w, event, region)
-Widget w;
-XExposeEvent *event;
-Region region;
+Redisplay(Widget w, XExposeEvent *event, Region region)
 {
   ListTreeWidget lw = (ListTreeWidget) w;
 
@@ -385,10 +374,7 @@ Region region;
 }
 
 static Boolean 
-SetValues(current, request, new, args, nargs)
-Widget current, request, new;
-ArgList args;
-Cardinal *nargs;
+SetValues(Widget current, Widget request, Widget new, ArgList args, Cardinal *nargs)
 {
   if (!XtIsRealized(current))
     return False;
@@ -398,8 +384,7 @@ Cardinal *nargs;
 
 
 static void 
-Resize(w)
-Widget w;
+Resize(Widget w)
 {
   ListTreeWidget lw = (ListTreeWidget) w;
   Dimension width, height;
@@ -425,9 +410,7 @@ Widget w;
 #define FontTextWidth(f,c) (int)XTextWidth(f, c, strlen(c))
 
 static void
-PreferredSize(lw, w, h)
-ListTreeWidget lw;
-Dimension *w, *h;
+PreferredSize(ListTreeWidget lw, Dimension *w, Dimension *h)
 {
   *w = (Dimension) lw->list.preferredWidth;
   *h = (Dimension) lw->list.preferredHeight;
@@ -435,8 +418,7 @@ Dimension *w, *h;
 
 /* #define DEBUG_GEOM */
 static void
-ChangeSize(w)
-ListTreeWidget w;
+ChangeSize(ListTreeWidget w)
 {
   XtWidgetGeometry request, reply;
 
@@ -533,10 +515,7 @@ XtWidgetGeometry *intended, *reply;
 #endif
 
 static Boolean
-Layout(w, xfree, yfree, width, height)
-Widget w;
-Boolean xfree, yfree;
-Dimension *width, *height;
+Layout(Widget w, Boolean xfree, Boolean yfree, Dimension *width, Dimension *height)
 {
   ListTreeWidget lw = (ListTreeWidget) w;
   Boolean change = FALSE;
@@ -582,9 +561,7 @@ Dimension *width, *height;
 }
 
 static XtGeometryResult
-QueryGeometry(lw, parent_idea, our_idea)
-ListTreeWidget lw;
-XtWidgetGeometry *parent_idea, *our_idea;
+QueryGeometry(ListTreeWidget lw, XtWidgetGeometry *parent_idea, XtWidgetGeometry *our_idea)
 {
   Dimension nw, nh;
   Boolean parent_wants_w, parent_wants_h, we_changed_size;
@@ -829,9 +806,7 @@ HighlightDoCallback(ListTreeWidget w)
 
 
 static ListTreeReturnStruct *
-MakeV1CallbackStruct(w, item)
-ListTreeWidget w;
-ListTreeItem *item;
+MakeV1CallbackStruct(ListTreeWidget w, ListTreeItem *item)
 {
   ListTreeItem *parent;
   ListTreeReturnStruct *ret;
@@ -974,11 +949,7 @@ SelectSingle(XtPointer client_data, XtIntervalId * idp)
 
 /* ARGSUSED */
 static void
-Select(aw, event, params, num_params)
-Widget aw;
-XEvent *event;
-String *params;
-Cardinal *num_params;
+Select(Widget aw, XEvent *event, String *params, Cardinal *num_params)
 {
   ListTreeWidget w = (ListTreeWidget) aw;
 
@@ -1011,11 +982,7 @@ Cardinal *num_params;
 
 /* ARGSUSED */
 static void
-Extend(aw, event, params, num_params)
-Widget aw;
-XEvent *event;
-String *params;
-Cardinal *num_params;
+Extend(Widget aw, XEvent *event, String *params, Cardinal *num_params)
 {
   ListTreeItem *item;
   ListTreeWidget w = (ListTreeWidget) aw;
@@ -1056,11 +1023,7 @@ Cardinal *num_params;
 
 /* ARGSUSED */
 static void
-Unset(aw, event, params, num_params)
-Widget aw;
-XEvent *event;
-String *params;
-Cardinal *num_params;
+Unset(Widget aw, XEvent *event, String *params, Cardinal *num_params)
 {
   ListTreeItem *item;
   ListTreeWidget w = (ListTreeWidget) aw;
@@ -1076,11 +1039,7 @@ Cardinal *num_params;
 
 /* ARGSUSED */
 static void
-Notify(aw, event, params, num_params)
-Widget aw;
-XEvent *event;
-String *params;
-Cardinal *num_params;
+Notify(Widget aw, XEvent *event, String *params, Cardinal *num_params)
 {
   ListTreeWidget w = (ListTreeWidget) aw;
   ListTreeItem *item;
@@ -1105,9 +1064,7 @@ Cardinal *num_params;
 /* ListTree private drawing functions */
 
 static void
-DrawItemHighlight(w, item)
-ListTreeWidget w;
-ListTreeItem *item;
+DrawItemHighlight(ListTreeWidget w, ListTreeItem *item)
 {
   int width;
 
@@ -1129,9 +1086,7 @@ ListTreeItem *item;
 }
 
 static void
-DrawItemHighlightClear(w, item)
-ListTreeWidget w;
-ListTreeItem *item;
+DrawItemHighlightClear(ListTreeWidget w, ListTreeItem *item)
 {
   int width;
 
@@ -1157,12 +1112,7 @@ ListTreeItem *item;
 }
 
 static void
-DrawItem(w, draw, item, x, y, xroot, yroot, retwidth, retheight)
-ListTreeWidget w;
-Boolean draw;
-ListTreeItem *item;
-int x, y;
-int *xroot, *yroot, *retwidth, *retheight;
+DrawItem(ListTreeWidget w, Boolean draw, ListTreeItem *item, int x, int y, int *xroot, int *yroot, int *retwidth, int *retheight)
 {
   int height, xpix, ypix, xbranch, ybranch, xtext, ytext, yline;
   Pixinfo *pix;
@@ -1253,11 +1203,7 @@ int *xroot, *yroot, *retwidth, *retheight;
 }
 
 static int
-DrawChildren(w, draw, item, x, y, xroot, yroot)
-ListTreeWidget w;
-Boolean draw;
-ListTreeItem *item;
-int x, y, xroot, yroot;
+DrawChildren(ListTreeWidget w, Boolean draw, ListTreeItem *item, int x, int y, int xroot, int yroot)
 {
   int width, height;
   int xbranch, ybranch;
@@ -1284,10 +1230,7 @@ int x, y, xroot, yroot;
 }
 
 static void
-Draw(w, draw, yevent, hevent)
-ListTreeWidget w;
-Boolean draw;
-int yevent, hevent;
+Draw(ListTreeWidget w, Boolean draw, int yevent, int hevent)
 {
   int x, y, height, width;
   int xbranch, ybranch;
@@ -1333,8 +1276,7 @@ int yevent, hevent;
 
 
 static void
-DrawAll(w)
-ListTreeWidget w;
+DrawAll(ListTreeWidget w)
 {
   XClearWindow(XtDisplay((Widget) w), XtWindow((Widget) w));
   Draw(w, (Boolean) True, 0, (int) w->core.height);
@@ -1347,9 +1289,7 @@ ListTreeWidget w;
 /* This function removes the specified item from the linked list.  It does */
 /* not do anything with the data contained in the item, though. */
 static void
-RemoveReference(w, item)
-ListTreeWidget w;
-ListTreeItem *item;
+RemoveReference(ListTreeWidget w, ListTreeItem *item)
 {
 
 /* If there exists a previous sibling, just skip over item to be dereferenced */
@@ -1370,9 +1310,7 @@ ListTreeItem *item;
 }
 
 static void
-DeleteChildren(w, item)
-ListTreeWidget w;
-ListTreeItem *item;
+DeleteChildren(ListTreeWidget w, ListTreeItem *item)
 {
   ListTreeItem *sibling;
 
@@ -1389,10 +1327,7 @@ ListTreeItem *item;
 }
 
 static void
-InsertChild(w, parent, item)
-ListTreeWidget w;
-ListTreeItem *parent;
-ListTreeItem *item;
+InsertChild(ListTreeWidget w, ListTreeItem *parent, ListTreeItem *item)
 {
   ListTreeItem *i;
 
@@ -1429,10 +1364,7 @@ ListTreeItem *item;
 
 /* Insert a list of ALREADY LINKED children into another list */
 static void
-InsertChildren(w, parent, item)
-ListTreeWidget w;
-ListTreeItem *parent;
-ListTreeItem *item;
+InsertChildren(ListTreeWidget w, ListTreeItem *parent, ListTreeItem *item)
 {
   ListTreeItem *next, *newnext;
 
@@ -1472,11 +1404,7 @@ ListTreeItem *item;
 }
 
 static int
-SearchChildren(w, item, y, findy, finditem)
-ListTreeWidget w;
-ListTreeItem *item;
-ListTreeItem **finditem;
-int y, findy;
+SearchChildren(ListTreeWidget w, ListTreeItem *item, int y, int findy, ListTreeItem **finditem)
 {
   int height;
   Pixinfo *pix;
@@ -1518,9 +1446,7 @@ int y, findy;
 }
 
 static ListTreeItem *
-GetItem(w, findy)
-ListTreeWidget w;
-int findy;
+GetItem(ListTreeWidget w, int findy)
 {
   int y, height;
   ListTreeItem *item, *finditem;
@@ -1565,11 +1491,7 @@ int findy;
 }
 
 static int
-SearchPosition(w, item, y, finditem, found)
-ListTreeWidget w;
-ListTreeItem *item, *finditem;
-int y;
-Boolean *found;
+SearchPosition(ListTreeWidget w, ListTreeItem *item, int y, ListTreeItem *finditem, Boolean *found)
 {
   int height;
   Pixinfo *pix;
@@ -1612,9 +1534,7 @@ Boolean *found;
 }
 
 static Position
-GetPosition(w, finditem)
-ListTreeWidget w;
-ListTreeItem *finditem;
+GetPosition(ListTreeWidget w, ListTreeItem *finditem)
 {
   int y, height;
   ListTreeItem *item;
@@ -2223,8 +2143,7 @@ ListTreeSetHighlighted(ListTreeWidget w,ListTreeItem **items,int count,Boolean c
 }
 
 ListTreeItem *
-ListTreeFirstItem(w)
-ListTreeWidget w;
+ListTreeFirstItem(ListTreeWidget w)
 {
   ListTreeItem *first;
 

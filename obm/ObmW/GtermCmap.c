@@ -27,8 +27,7 @@
  * when the custom colormap is installed.
  */
 static Colormap
-get_colormap (w)
-    GtermWidget w;
+get_colormap (GtermWidget w)
 {
     int i, j;
     Display *display = w->gterm.display;
@@ -271,8 +270,7 @@ use_default:
  * level window.
  */
 static void
-request_colormap_focus (w)
-    GtermWidget w;
+request_colormap_focus (GtermWidget w)
 {
     Widget p;
 
@@ -323,8 +321,7 @@ request_colormap_focus (w)
  * should follow a prior call to request_colormap_focus.
  */
 static void
-restore_colormap_focus (w)
-    GtermWidget w;
+restore_colormap_focus (GtermWidget w)
 {
     int nw, n_nw, i;
     Window *wl, n_wl[MAX_WMWIN+1], old;
@@ -357,8 +354,7 @@ restore_colormap_focus (w)
  * the colormap (which is usually where X allocates its colors).
  */
 static void
-inherit_default_colormap (w)
-    GtermWidget w;
+inherit_default_colormap (GtermWidget w)
 {
     XColor *cp, *ap;
     int ncolors, i;
@@ -441,8 +437,7 @@ inherit_default_colormap (w)
  * colormap focus changes.
  */
 static void
-update_default_colormap (w)
-    GtermWidget w;
+update_default_colormap (GtermWidget w)
 {
     XColor *ip, *op;
     int j, n;
@@ -535,8 +530,7 @@ done:
 
 /* Global Colormap routines.
  */
-static int SetGlobalCmap(w)
-     GtermWidget w;
+static int SetGlobalCmap(GtermWidget w)
 {
   static int init=0;
 
@@ -561,8 +555,7 @@ static int SetGlobalCmap(w)
 }
 
 
-static int ParseGlobalCmap(w)
-     GtermWidget w;
+static int ParseGlobalCmap(GtermWidget w)
 {
   char *s;
   char *t;
@@ -626,8 +619,7 @@ static int ParseGlobalCmap(w)
  * the actually-allocated colormap -- very ugly ...
  *
  */
-static int GetMaxCmapColors(w)
-     GtermWidget w;
+static int GetMaxCmapColors(GtermWidget w)
 {
   int n;
   unsigned long plane_masks[1];
@@ -682,15 +674,14 @@ static int GetMaxCmapColors(w)
 
 
 static int
-GetGlobalColors()
+GetGlobalColors(void)
 {
   return (global_ncolors);
 }
 
 
 static void
-SetGlobalColors(n)
-     int n;
+SetGlobalColors(int n)
 {
   global_ncolors = n;
 }
@@ -703,9 +694,7 @@ SetGlobalColors(n)
  */
 
 static Pixel
-ColorNameToPixel (w, str)
-GtermWidget     w;
-String          str;
+ColorNameToPixel (GtermWidget w, String str)
 {
     int i;
     XColor color;

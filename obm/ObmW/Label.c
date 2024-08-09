@@ -16,7 +16,7 @@ static void make_gc(Widget);
 static void make_graygc(Widget);
 static void count_lines(Widget);
 
-/*ARGSUSED*/static void make_gc(self)Widget self;
+/*ARGSUSED*/static void make_gc(Widget self)
 {
     XtGCMask mask;
     XGCValues values;
@@ -35,7 +35,7 @@ static void count_lines(Widget);
     mask = GCFont | GCBackground | GCForeground;
     ((XfwfLabelWidget)self)->xfwfLabel.rv_gc = XtGetGC(self, mask, &values);
 }
-/*ARGSUSED*/static void make_graygc(self)Widget self;
+/*ARGSUSED*/static void make_graygc(Widget self)
 {
     XtGCMask mask;
     XGCValues values;
@@ -50,7 +50,7 @@ static void count_lines(Widget);
     mask = GCForeground | GCStipple | GCFillStyle;
     ((XfwfLabelWidget)self)->xfwfLabel.graygc = XtGetGC(self, mask, &values);
 }
-/*ARGSUSED*/static void count_lines(self)Widget self;
+/*ARGSUSED*/static void count_lines(Widget self)
 {
     String p, s;
     int w;
@@ -154,8 +154,7 @@ set_label,
 },
 };
 WidgetClass xfwfLabelWidgetClass = (WidgetClass) &xfwfLabelClassRec;
-static void _resolve_inheritance(class)
-WidgetClass class;
+static void _resolve_inheritance(WidgetClass class)
 {
   XfwfLabelWidgetClass c = (XfwfLabelWidgetClass) class;
   XfwfLabelWidgetClass super;
@@ -172,7 +171,7 @@ WidgetClass class;
   if (c->xfwfLabel_class.set_label == XtInherit_set_label)
     c->xfwfLabel_class.set_label = super->xfwfLabel_class.set_label;
 }
-/*ARGSUSED*/static void set_label(self,newlabel)Widget self;String  newlabel;
+/*ARGSUSED*/static void set_label(Widget self, String newlabel)
 {
     Position x, y;
     Dimension w, h;
@@ -186,7 +185,7 @@ WidgetClass class;
 	/* $expose($, NULL, NULL); */
     }
 }
-/*ARGSUSED*/static Boolean  set_values(old,request,self,args,num_args)Widget  old;Widget  request;Widget self;ArgList  args;Cardinal * num_args;
+/*ARGSUSED*/static Boolean  set_values(Widget old, Widget request, Widget self, ArgList args, Cardinal *num_args)
 {
     Boolean need_redisplay = False, need_count = False;
     Position x, y;
@@ -242,7 +241,7 @@ WidgetClass class;
     }
     return need_redisplay;
 }
-/*ARGSUSED*/static void initialize(request,self,args,num_args)Widget  request;Widget self;ArgList  args;Cardinal * num_args;
+/*ARGSUSED*/static void initialize(Widget request, Widget self, ArgList args, Cardinal *num_args)
 {
     char *s;
     Position x, y;
@@ -263,7 +262,7 @@ WidgetClass class;
 	((XfwfLabelWidgetClass)self->core.widget_class)->xfwfBoard_class.set_abs_location(self, CWWidth | CWHeight, 0, 0, wd, ht);
     }
 }
-/*ARGSUSED*/static void expose(self,event,region)Widget self;XEvent * event;Region  region;
+/*ARGSUSED*/static void expose(Widget self, XEvent *event, Region region)
 {
     Region reg;
     XRectangle rect;

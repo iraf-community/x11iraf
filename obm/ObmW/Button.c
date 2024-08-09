@@ -92,13 +92,12 @@ XtInherit_set_label,
 };
 WidgetClass xfwfButtonWidgetClass = (WidgetClass) &xfwfButtonClassRec;
 /*ARGSUSED*/
-static void activate(self,event,params,num_params)Widget self;XEvent*event;String*params;Cardinal*num_params;
+static void activate(Widget self, XEvent *event, String *params, Cardinal *num_params)
 {
     XtCallCallbackList(self, ((XfwfButtonWidget)self)->xfwfButton.activate, event);
 }
 
-static void _resolve_inheritance(class)
-WidgetClass class;
+static void _resolve_inheritance(WidgetClass class)
 {
   XfwfButtonWidgetClass c = (XfwfButtonWidgetClass) class;
   XfwfButtonWidgetClass super;

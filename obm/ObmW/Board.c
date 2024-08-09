@@ -28,7 +28,7 @@ static void set_location(Widget,unsigned  int );
 static char * scan(char *,Position *,float *);
 static void interpret_location(Widget);
 
-/*ARGSUSED*/static void generate_location(self)Widget self;
+/*ARGSUSED*/static void generate_location(Widget self)
 {
     char tmp[100];
 
@@ -38,7 +38,7 @@ static void interpret_location(Widget);
     XtFree(((XfwfBoardWidget)self)->xfwfBoard.location);
     ((XfwfBoardWidget)self)->xfwfBoard.location = XtNewString(tmp);
 }
-/*ARGSUSED*/static void get_core_geometry(self,x,y,width,height)Widget self;Position * x;Position * y;Dimension * width;Dimension * height;
+/*ARGSUSED*/static void get_core_geometry(Widget self, Position *x, Position *y, Dimension *width, Dimension *height)
 {
     Widget parent;
     Position px, py;
@@ -62,7 +62,7 @@ static void interpret_location(Widget);
     h = ceil(((XfwfBoardWidget)self)->xfwfBoard.rel_height * ph + ((XfwfBoardWidget)self)->xfwfBoard.abs_height * ((XfwfBoardWidget)self)->xfwfBoard.vunit);
     *height = h < 1.0 ? 1 : h;
 }
-/*ARGSUSED*/static void set_location(self,flags)Widget self;unsigned  int  flags;
+/*ARGSUSED*/static void set_location(Widget self, unsigned int flags)
 {
     Widget parent;
     Position px, py;
@@ -94,7 +94,7 @@ static void interpret_location(Widget);
         ((XfwfBoardWidget)self)->xfwfBoard.abs_height = ceil(((XfwfBoardWidget)self)->core.height/((XfwfBoardWidget)self)->xfwfBoard.vunit);
     }
 }
-/*ARGSUSED*/static char * scan(s,absval,relval)char * s;Position * absval;float * relval;
+/*ARGSUSED*/static char * scan(char *s, Position *absval, float *relval)
 {
     Position n;
     char *t;
@@ -124,7 +124,7 @@ static void interpret_location(Widget);
 	return t;
     }
 }
-/*ARGSUSED*/static void interpret_location(self)Widget self;
+/*ARGSUSED*/static void interpret_location(Widget self)
 {
     char *s, *t;
 
@@ -214,8 +214,7 @@ set_abs_location,
 },
 };
 WidgetClass xfwfBoardWidgetClass = (WidgetClass) &xfwfBoardClassRec;
-static void _resolve_inheritance(class)
-WidgetClass class;
+static void _resolve_inheritance(WidgetClass class)
 {
   XfwfBoardWidgetClass c = (XfwfBoardWidgetClass) class;
   XfwfBoardWidgetClass super;
@@ -232,7 +231,7 @@ WidgetClass class;
   if (c->xfwfBoard_class.set_abs_location == XtInherit_set_abs_location)
     c->xfwfBoard_class.set_abs_location = super->xfwfBoard_class.set_abs_location;
 }
-/*ARGSUSED*/static Boolean  set_values(old,request,self,args,num_args)Widget  old;Widget  request;Widget self;ArgList  args;Cardinal * num_args;
+/*ARGSUSED*/static Boolean  set_values(Widget old, Widget request, Widget self, ArgList args, Cardinal *num_args)
 {
     XtWidgetGeometry reply;
     int i;
@@ -270,7 +269,7 @@ WidgetClass class;
     }
     return False;
 }
-/*ARGSUSED*/static void initialize(request,self,args,num_args)Widget  request;Widget self;ArgList  args;Cardinal * num_args;
+/*ARGSUSED*/static void initialize(Widget request, Widget self, ArgList args, Cardinal *num_args)
 {
     if (((XfwfBoardWidget)self)->xfwfBoard.location != NULL) {
 	((XfwfBoardWidget)self)->xfwfBoard.location = XtNewString(((XfwfBoardWidget)self)->xfwfBoard.location);
@@ -285,7 +284,7 @@ WidgetClass class;
 	get_core_geometry(self, &((XfwfBoardWidget)self)->core.x, &((XfwfBoardWidget)self)->core.y, &((XfwfBoardWidget)self)->core.width, &((XfwfBoardWidget)self)->core.height);
     }
 }
-/*ARGSUSED*/static void set_abs_location(self,flags,x,y,w,h)Widget self;unsigned  int  flags;int  x;int  y;int  w;int  h;
+/*ARGSUSED*/static void set_abs_location(Widget self, unsigned int flags, int x, int y, int w, int h)
 {
     if (flags & ((CWX | CWY | CWWidth | CWHeight) == 0)) return;
     if (flags & CWX) ((XfwfBoardWidget)self)->core.x = x;
@@ -295,7 +294,7 @@ WidgetClass class;
     set_location(self, flags);
     generate_location(self);
 }
-/*ARGSUSED*/static void resize(self)Widget self;
+/*ARGSUSED*/static void resize(Widget self)
 {
     int i;
     XtWidgetGeometry reply;
@@ -308,14 +307,14 @@ WidgetClass class;
 			  reply.height, reply.border_width);
     }
 }
-/*ARGSUSED*/static XtGeometryResult  query_geometry(self,request,reply)Widget self;XtWidgetGeometry * request;XtWidgetGeometry * reply;
+/*ARGSUSED*/static XtGeometryResult  query_geometry(Widget self, XtWidgetGeometry *request, XtWidgetGeometry *reply)
 {
     reply->request_mode = CWX | CWY | CWWidth | CWHeight;
     get_core_geometry(self, &reply->x, &reply->y,
 		      &reply->width, &reply->height);
     return XtGeometryAlmost;
 }
-/*ARGSUSED*/static XtGeometryResult  geometry_manager(child,request,reply)Widget  child;XtWidgetGeometry * request;XtWidgetGeometry * reply;
+/*ARGSUSED*/static XtGeometryResult  geometry_manager(Widget child, XtWidgetGeometry *request, XtWidgetGeometry *reply)
 { Widget self = XtParent(child); {
     Widget self = XtParent(child);
     Dimension wd, ht, bw;
@@ -333,7 +332,7 @@ WidgetClass class;
     return XtGeometryDone;
 }
 }
-/*ARGSUSED*/static void change_managed(self)Widget self;
+/*ARGSUSED*/static void change_managed(Widget self)
 {
     Widget top = self, w;
 

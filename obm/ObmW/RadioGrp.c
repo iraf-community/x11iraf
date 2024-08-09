@@ -31,7 +31,7 @@ static Boolean  cvtStringToStringArray(Display *,XrmValuePtr ,Cardinal *,XrmValu
 static StringArray  newStringArray(StringArray );
 static void freeStringArray(StringArray );
 
-/*ARGSUSED*/static void create_toggles(self)Widget self;
+/*ARGSUSED*/static void create_toggles(Widget self)
 {
     Cardinal i;
     StringArray s;
@@ -47,7 +47,7 @@ static void freeStringArray(StringArray );
 	     True, XtNborderWidth, 0, XtNframeWidth, 0, NULL);
     }
 }
-/*ARGSUSED*/static Boolean  cvtStringToStringArray(display,args,num_args,from,to,converter_data)Display * display;XrmValuePtr  args;Cardinal * num_args;XrmValuePtr  from;XrmValuePtr  to;XtPointer * converter_data;
+/*ARGSUSED*/static Boolean  cvtStringToStringArray(Display *display, XrmValuePtr args, Cardinal *num_args, XrmValuePtr from, XrmValuePtr to, XtPointer *converter_data)
 {
     String t, s;
     StringArray a = NULL;
@@ -76,7 +76,7 @@ static void freeStringArray(StringArray );
     a[i] = NULL;
     done(StringArray, a);
 }
-/*ARGSUSED*/static StringArray  newStringArray(a)StringArray  a;
+/*ARGSUSED*/static StringArray  newStringArray(StringArray a)
 {
     Cardinal n, i;
     StringArray s;
@@ -88,7 +88,7 @@ static void freeStringArray(StringArray );
     s[n] = NULL;
     return s;
 }
-/*ARGSUSED*/static void freeStringArray(a)StringArray  a;
+/*ARGSUSED*/static void freeStringArray(StringArray a)
 {
     Cardinal i;
 
@@ -171,8 +171,7 @@ XtInherit_layout,
 },
 };
 WidgetClass xfwfRadioGroupWidgetClass = (WidgetClass) &xfwfRadioGroupClassRec;
-static void _resolve_inheritance(class)
-WidgetClass class;
+static void _resolve_inheritance(WidgetClass class)
 {
   XfwfRadioGroupWidgetClass c = (XfwfRadioGroupWidgetClass) class;
   XfwfRadioGroupWidgetClass super;
@@ -187,17 +186,17 @@ WidgetClass class;
   if (class == xfwfRadioGroupWidgetClass) return;
   super = (XfwfRadioGroupWidgetClass)class->core_class.superclass;
 }
-/*ARGSUSED*/static void class_initialize()
+/*ARGSUSED*/static void class_initialize(void)
 {
     XtSetTypeConverter(XtRString, "StringArray", cvtStringToStringArray,
 		       NULL, 0, XtCacheNone, NULL);
 }
-/*ARGSUSED*/static void initialize(request,self,args,num_args)Widget  request;Widget self;ArgList  args;Cardinal * num_args;
+/*ARGSUSED*/static void initialize(Widget request, Widget self, ArgList args, Cardinal *num_args)
 {
     ((XfwfRadioGroupWidget)self)->xfwfRadioGroup.labels = newStringArray(((XfwfRadioGroupWidget)self)->xfwfRadioGroup.labels);
     create_toggles(self);
 }
-/*ARGSUSED*/static Boolean  set_values(old,request,self,args,num_args)Widget  old;Widget  request;Widget self;ArgList  args;Cardinal * num_args;
+/*ARGSUSED*/static Boolean  set_values(Widget old, Widget request, Widget self, ArgList args, Cardinal *num_args)
 {
     if (((XfwfRadioGroupWidget)old)->xfwfRadioGroup.labels != ((XfwfRadioGroupWidget)self)->xfwfRadioGroup.labels) {
 	freeStringArray(((XfwfRadioGroupWidget)old)->xfwfRadioGroup.labels);

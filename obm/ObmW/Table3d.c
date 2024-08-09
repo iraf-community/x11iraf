@@ -37,12 +37,10 @@ typedef struct _ColorCashRec {
 }ColorCashRec, *ColorCash;
 
 static ColorCashRec* color_cash = NULL;
-static void GetTopShadow();
+static void GetTopShadow(XColor *trom, XColor *to);
 
 
-static void GetTopShadow(trom ,to)
-     XColor* trom;
-     XColor* to;
+static void GetTopShadow(XColor *trom, XColor *to)
 {
   ColorCashRec* cash;
   float         save;
@@ -106,9 +104,7 @@ static void GetTopShadow(trom ,to)
   color_cash = cash;
 }
 
-static void GetBotShadow(trom ,to)
-     XColor* trom;
-     XColor* to;
+static void GetBotShadow(XColor *trom, XColor *to)
 {
   ColorCashRec* cash;
   float         save;
@@ -170,9 +166,7 @@ static void GetBotShadow(trom ,to)
   color_cash = cash;
 }
 
-static void GetArmShadow(trom ,to)
-     XColor* trom;
-     XColor* to;
+static void GetArmShadow(XColor *trom, XColor *to)
 {
   ColorCashRec* cash;
   float         save;
@@ -270,9 +264,7 @@ AllocGCFromPixel (Widget w, Pixel fore)
   return XtGetGC(w, GCForeground, &values);
 }
 
-static Pixmap Depth_1_ShadowPixmap (w, top_or_bottom)
-     Widget w;
-     int top_or_bottom;
+static Pixmap Depth_1_ShadowPixmap (Widget w, int top_or_bottom)
 {
   Screen  *scn = XtScreen (w);
 
@@ -289,10 +281,7 @@ static Pixmap Depth_1_ShadowPixmap (w, top_or_bottom)
     return None;
 }
 
-static Pixmap Depth_NOT_1_ShadowPixmap (w, colour, top_or_bottom)
-     Widget w;
-     Pixel colour;
-     int top_or_bottom;
+static Pixmap Depth_NOT_1_ShadowPixmap (Widget w, Pixel colour, int top_or_bottom)
 {
   Display *dpy = XtDisplay (w);
   Screen  *scn = XtScreen (w);

@@ -29,28 +29,27 @@ Commercial  usage is  also  possible  with  participation of the author.
 #define null (XawTableNode)NULL
 #define FREE(t) if((t) != null)XtFree((char*)(t))
 
-static void vert_tab_node_insert(f,s,p)
-     XawTableNode f; /* insert after   */
-     XawTableNode s; /* insert before  */
-     XawTableNode p; /* to be inserted */
+static void vert_tab_node_insert(XawTableNode f, XawTableNode s, XawTableNode p)
+                     /* insert after   */
+                     /* insert before  */
+                     /* to be inserted */
 {
   if (f != null) f->b = p;
   if (s != null) s->t = p;
   if (p != null) {p->t = f;  p->b = s;}
 }
 
-static void horiz_tab_node_insert(f,s,p)
-     XawTableNode f; /* insert after   */
-     XawTableNode s; /* insert before  */
-     XawTableNode p; /* to be inserted */
+static void horiz_tab_node_insert(XawTableNode f, XawTableNode s, XawTableNode p)
+                     /* insert after   */
+                     /* insert before  */
+                     /* to be inserted */
 {
   if (f != null) f->r = p;
   if (s != null) s->l = p;
   if (p != null) {p->l = f;  p->r = s;}
 }
 
-static void vert_tab_node_reject(p)
-     XawTableNode p;
+static void vert_tab_node_reject(XawTableNode p)
 {
   if (p == null) return;
   
@@ -58,8 +57,7 @@ static void vert_tab_node_reject(p)
   if (p->b != null) p->b->t = p->t;
 }
 
-static void horiz_tab_node_reject(p)
-     XawTableNode p;
+static void horiz_tab_node_reject(XawTableNode p)
 {
   if (p == null) return;
   
@@ -68,12 +66,7 @@ static void horiz_tab_node_reject(p)
 }
 
 /* ARGSUSED */
-static XawTableProc del_cell (w, i, j, call_data, client_data)
-     XtPointer w;   
-     int i;
-     int j;  
-     XtPointer call_data;
-     XtPointer client_data;
+static XawTableProc del_cell (XtPointer w, int i, int j, XtPointer call_data, XtPointer client_data)
 {
   XtFree((char*)call_data);
   return False;

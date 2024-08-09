@@ -10,11 +10,7 @@
  *	counterpart.
  */
 int
-XfwfTextWidth(font, str, length, tabs)
-     XFontStruct *font;
-     String str;
-     int length;
-     int *tabs;
+XfwfTextWidth(XFontStruct *font, String str, int length, int *tabs)
 {
 	char	*p, *ep;
 	int	tx, tab, rc;

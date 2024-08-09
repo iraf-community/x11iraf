@@ -507,55 +507,93 @@ static int num_static_colors	= 27;
 static int colormap_focus	= 512;
 
 
-/* extern void HandlePopupMenu(); */
-static Boolean SetValues();
-static void Initialize(), Realize(), Destroy(), Redisplay(), Resize();
-static void HandleIgnore(), HandleGraphicsInput(), HandleDisplayCrosshair();
-static void HandleSoftReset(), HandleGraphicsContext();
-static void HandleEnterWindow(), HandleLeaveWindow();
-static void color_crosshair(), color_ginmodeCursor();
-static void HandleTrackCursor();
-static void savepos(), blink_cursor();
-static void mp_linkafter(), mp_unlink();
+static Boolean SetValues(Widget current, Widget request, Widget set);
+static void Initialize(Widget request, Widget new);
+static void Realize(Widget gw, XtValueMask *valueMask, XSetWindowAttributes *attrs);
+static void Destroy(Widget gw);
+static void Redisplay(Widget gw, XEvent *event, Region region);
+static void Resize(Widget gw);
+static void HandleIgnore(Widget widget, XEvent *event, String *params, Cardinal *param_count);
+static void HandleGraphicsInput(Widget widget, XEvent *event, String *params, Cardinal *param_count);
+static void HandleDisplayCrosshair(Widget widget, XEvent *event, String *params, Cardinal *nparams);
+static void HandleSoftReset(Widget widget, XEvent *event, String *params, Cardinal *param_count);
+static void HandleEnterWindow(Widget widget, XEvent *event, String *params, Cardinal *param_count);
+static void HandleLeaveWindow(Widget widget, XEvent *event, String *params, Cardinal *param_count);
+static void color_crosshair(GtermWidget w);
+static void color_ginmodeCursor(GtermWidget w);
+static void HandleTrackCursor(Widget widget, XEvent *event, String *params, Cardinal *param_count);
+static void savepos(GtermWidget w, XEvent *event);
+static void blink_cursor(GtermWidget w, XtIntervalId *id);
+static void mp_linkafter(GtermWidget w, Mapping mp, Mapping ref_mp);
+static void mp_unlink(GtermWidget w, Mapping mp);
 
-Marker GmSelect();
-void GmRedisplay(), GmRaise(), GmLower(), GmSetVertices();
-void GtReadIomap(), GtClearScreen(), GtSetCursorPos(), GtSetCursorType();
-void GtRasterInit(), GtDestroyRaster();
-static void draw_crosshair();
-void initialize_shadow_pixmap();
-static void M_create(), GtMarkerFree();
-static void gm_focusin(), gm_focusout(), gm_refocus();
-static void gm_request_translations(), gm_load_translations();
-static int gm_curpos();
+Marker GmSelect(GtermWidget w, int x, int y, GmSelection what);
+void GmRedisplay(GtermWidget w, Region region);
+void GmRaise(struct marker *gm, struct marker *ref_gm);
+void GmLower(struct marker *gm, struct marker *ref_gm);
+void GmSetVertices(struct marker *gm, DPoint *points, int first, int npts);
+void GtReadIomap(GtermWidget w, ushort *iomap, int first, int nelem);
+void GtClearScreen(GtermWidget w);
+void GtSetCursorPos(GtermWidget w, int x, int y);
+void GtSetCursorType(GtermWidget w, int type);
+void GtRasterInit(GtermWidget w);
+void GtDestroyRaster(GtermWidget w, int raster);
+void initialize_shadow_pixmap(GtermWidget w, int dst);
+static void M_create(Widget widget, XEvent *event, String *params, Cardinal *nparams);
+static void GtMarkerFree(GtermWidget w);
+static void gm_focusin(GtermWidget w, struct marker *gm, GmSelection what);
+static void gm_focusout(GtermWidget w, int enableSetTrans);
+static void gm_refocus(GtermWidget w);
+static void gm_request_translations(GtermWidget w, struct marker *gm);
+static void gm_load_translations(GtermWidget w, XtIntervalId id);
 
-static void set_default_color_index();
-static void inherit_default_colormap();
-static void update_default_colormap();
-static void update_transients(), update_cursor();
-static void request_colormap_focus(), restore_colormap_focus();
-static int refresh_source(), refresh_destination();
-static int get_regions();
-static int get_rects();
-static void scale_zoom(), scale_intzoom(), scale_boxcar();
-static void lw_convolve();
-static void bx_boxcar(), bx_extract(), bx_interp();
-static void mf_getpixel(), mf_getinten();
-static void scale_lowpass(), scale_nearest(), scale_bilinear();
-static void save_mapping(), load_mapping(), get_pixel_mapping();
-static void update_mapping(), free_mapping();
-static int valid_mapping(), rect_intersect();
-static void initialize_mapping(), draw_crosshair(), erase_crosshair();
-static DrawContext get_draw_context();
-static void invalidate_draw_context();
-static XPoint *mapVector();
-static Colormap get_colormap();
-static Cursor get_cursor();
-static void init_iomap(), init_global_cmap(), invalidate_cmap();
-static void initColorResources ();
-static void gm_rotate_indicator();				/* MF020 */
-static Pixel get_pixel(), *get_cmap_in(), *get_cmap_out();
-static Pixel ColorNameToPixel ();
+static void set_default_color_index(GtermWidget w);
+static void inherit_default_colormap(GtermWidget w);
+static void update_default_colormap(GtermWidget w);
+static void update_transients(GtermWidget w, Region region);
+static void update_cursor(GtermWidget w);
+static void request_colormap_focus(GtermWidget w);
+static void restore_colormap_focus(GtermWidget w);
+static int refresh_source(GtermWidget w, Mapping mp, int x1, int y1, int nx, int ny);
+static int refresh_destination(GtermWidget w, Mapping mp, int x1, int y1, int nx, int ny);
+static int get_regions(int *xs, int *xe, int *xv, int max_regions, int dx, int dnx, int *xmap, int alt_dx, int alt_dnx, int *alt_xmap);
+static int get_rects(XRectangle *o_rl, int max_rects, int *xs, int *xe, int *xv, int nx, int *ys, int *ye, int *yv, int ny, int xcond, int ycond);
+static void scale_zoom(uchar *idata, int ibpl, uchar *odata, int obpl, int *xmap, int *ymap, int dx, int dy, int dnx, int dny, Region clip_region);
+static void scale_intzoom(uchar *idata, int ibpl, uchar *odata, int obpl, int sx, int sy, int dx, int dy, int dnx, int dny, int xflip, int yflip, int nx, int ny);
+static void scale_boxcar(uchar *idata, int inx, int iny, int ibpl, uchar  *odata, int onx, int ony, int obpl, float *x_src, float *y_src, int sx, int sy, int snx, int sny, int dx, int dy, int dnx, int dny, float xscale, float yscale, int interp, Region clip_region);
+static void lw_convolve(uchar *idata, int inx, int iny, int ix, int iy, int ibpl, uchar *odata, int onx, int ony, int ox, int oy, int obpl, int nx, int ny, float xscale, float yscale);
+static void bx_boxcar(uchar *idata, int inx, int iny, int ibpl, int x1, int y1, int x2, int y2, uchar *obuf, int xblock, int yblock);
+static void bx_extract(uchar *idata, int inx, int iny, int ibpl, uchar *odata, int onx, int ony, int obpl, float *x_src, float *y_src, int dx, int dy, int dnx, int dny, int xoff, int yoff, float xstep, float ystep, Region clip_region);
+static void bx_interp(uchar *idata, int inx, int iny, int ibpl, uchar *odata, int onx, int ony, int obpl, float *x_src, float *y_src, int xoff, int yoff, float xstep, float ystep, int dx, int dy, int dnx, int dny, Region clip_region);
+static void mf_getpixel(GtermWidget w, uchar *idata, int inx, int iny, int ibpl, int sx, int sy, uchar *odata, int onx, int ony, int obpl, int dx, int dy, int nx, int ny);
+static void mf_getinten(GtermWidget w, uchar *idata, int inx, int iny, int ibpl, int sx, int sy, uchar *odata, int onx, int ony, int obpl, int dx, int dy, int nx, int ny);
+static void scale_lowpass(uchar *idata, int inx, int iny, int ibpl, uchar *odata, int onx, int ony, int obpl, float *x_src, float *y_src, int sx, int sy, int snx, int sny, int dx, int dy, int dnx, int dny, float xscale, float yscale, Region clip_region);
+static void scale_nearest(uchar *idata, int inx, int iny, int ibpl, uchar *odata, int onx, int ony, int obpl, float *x_src, float *y_src, int dx, int dy, int dnx, int dny, Region clip_region);
+static void scale_bilinear(uchar *idata, int inx, int iny, int ibpl, uchar *odata, int onx, int ony, int obpl, float *x_src, float *y_src, int dx, int dy, int dnx, int dny, Region clip_region);
+static void save_mapping(Mapping mp, int mapping, int rop, int src, int st, int sx, int sy, int sw, int sh, int dst, int dt, int dx, int dy, int dw, int dh);
+static void load_mapping(Mapping mp, int *mapping, int *rop, int *src, int *st, int *sx, int *sy, int *sw, int *sh, int *dst, int *dt, int *dx, int *dy, int *dw, int *dh);
+static void get_pixel_mapping(GtermWidget w, Mapping mp1, Mapping mp2, int update);
+static void update_mapping(GtermWidget w, Mapping mp);
+static void free_mapping(GtermWidget w, Mapping mp);
+static int valid_mapping(GtermWidget w, Mapping mp);
+static int rect_intersect(XRectangle *in, XRectangle *r1, XRectangle *r2);
+static void initialize_mapping(Mapping mp);
+static void draw_crosshair(GtermWidget w, int x, int y);
+static void erase_crosshair(GtermWidget w);
+static DrawContext get_draw_context(GtermWidget w);
+static void invalidate_draw_context(GtermWidget w);
+static XPoint *mapVector(MappingContext mx, XPoint *pv1, XPoint *pv2, int npts);
+static Colormap get_colormap(GtermWidget w);
+static Cursor get_cursor(GtermWidget w, String cursor_name);
+static void init_iomap(GtermWidget w);
+static void init_global_cmap(void);
+static void invalidate_cmap(GtermWidget w);
+static void initColorResources (GtermWidget w);
+static void gm_rotate_indicator(struct marker *gm, int function); /* MF020 */
+static Pixel get_pixel(GtermWidget w, int client_pixel);
+static Pixel *get_cmap_in(GtermWidget w);
+static Pixel *get_cmap_out(GtermWidget w);
+static Pixel ColorNameToPixel (GtermWidget w, String str);
 
 
 /* Global Colormap declarations.
@@ -572,23 +610,23 @@ static int    	      global_noverlay     = SZ_OVERLAY_CMAP;
 static int    	      global_mincolors    = 0;
 static int	      valid_lut           = 0;
 
-static int    SetGlobalCmap();
-static int    ParseGlobalCmap();
-static int    GetMaxCmapColors();
-static int    GetGlobalColors();
-static void   SetGlobalColors();
+static int    SetGlobalCmap(GtermWidget w);
+static int    ParseGlobalCmap(GtermWidget w);
+static int    GetMaxCmapColors(GtermWidget w);
+static int    GetGlobalColors(void);
+static void   SetGlobalColors(int n);
 
 
-static void NewCachedXImage();					/* MF004 */
-static void DestroyCachedXImage();				/* MF004 */
-static XImage *GetCachedXImage();				/* MF004 */
+static void NewCachedXImage(GtermWidget w, XImage *xin, Pixmap pixmap, int width, int height);
+static void DestroyCachedXImage(void);
+static XImage *GetCachedXImage(GtermWidget w, Pixmap pixmap, int width, int height);
 
 
-static char 	*dbg_wSize();			/* debug utils		 */
-static char 	*dbg_visStr();
-static void dbg_printCmaps();
-static void dbg_printMappings();
-static void dbg_printRasters();
+static char 	*dbg_wSize(GtermWidget w);	/* debug utils		 */
+static char 	*dbg_visStr(int class);
+static void dbg_printCmaps(GtermWidget w);
+static void dbg_printMappings(GtermWidget w);
+static void dbg_printRasters(GtermWidget w);
 
 
 
@@ -656,8 +694,7 @@ WidgetClass gtermWidgetClass = (WidgetClass) &gtermClassRec;
 
 /* ARGSUSED */
 static void
-Initialize (request, new)
-    Widget request, new;
+Initialize (Widget request, Widget new)
 {
     GtermWidget w = (GtermWidget)new;
     GC gc;
@@ -1162,8 +1199,7 @@ Initialize (request, new)
 
 
 static void
-initColorResources (w)
-    GtermWidget w;
+initColorResources (GtermWidget w)
 {
     w->gterm.color0 = ColorNameToPixel (w, w->gterm.color0Str);
     w->gterm.color1 = ColorNameToPixel (w, w->gterm.color1Str);
@@ -1252,10 +1288,7 @@ initColorResources (w)
 
 
 static void
-Realize (gw, valueMask, attrs)
-    Widget gw;
-    XtValueMask *valueMask;
-    XSetWindowAttributes *attrs;
+Realize (Widget gw, XtValueMask *valueMask, XSetWindowAttributes *attrs)
 {
     GtermWidget w = (GtermWidget) gw;
     GC gc;
@@ -1365,8 +1398,7 @@ Realize (gw, valueMask, attrs)
 }
 
 static void
-Destroy (gw)
-    Widget gw;
+Destroy (Widget gw)
 {
     GtermWidget w = (GtermWidget) gw;
     GtCallback *cb, *cb_next;
@@ -1444,8 +1476,7 @@ Destroy (gw)
 }
 
 static void
-Resize (gw)
-    Widget gw;
+Resize (Widget gw)
 {
     GtermWidget w = (GtermWidget) gw;
     GtCallback *cb;
@@ -1599,10 +1630,7 @@ Resize (gw)
 
 /* ARGSUSED */
 static void
-Redisplay (gw, event, region)
-    Widget gw;
-    XEvent *event;
-    Region region;
+Redisplay (Widget gw, XEvent *event, Region region)
 {
     GtermWidget w = (GtermWidget) gw;
     XExposeEvent *ev = (XExposeEvent *)event;
@@ -1656,8 +1684,7 @@ Redisplay (gw, event, region)
 
 /* ARGSUSED */
 static Boolean
-SetValues (current, request, set)
-    Widget current, request, set;
+SetValues (Widget current, Widget request, Widget set)
 {
     GtermWidget old = (GtermWidget) current;
     GtermWidget req = (GtermWidget) request;
@@ -1712,8 +1739,7 @@ SetValues (current, request, set)
 }
 
 static void
-color_crosshair (w)
-    GtermWidget w;
+color_crosshair (GtermWidget w)
 {
     Display *display = w->gterm.display;
     XColor fg_color, bg_color;
@@ -1738,8 +1764,7 @@ color_crosshair (w)
 }
 
 static void
-color_ginmodeCursor (w)
-    GtermWidget w;
+color_ginmodeCursor (GtermWidget w)
 {
     Display *display = w->gterm.display;
     XColor fg_color, bg_color;
@@ -1762,21 +1787,21 @@ color_ginmodeCursor (w)
  */
 
 /* ARGSUSED */
-static void HandleIgnore (widget, event, params, param_count)
-    Widget widget;
-    XEvent *event;              /* unused */
-    String *params;             /* unused */
-    Cardinal *param_count;      /* unused */
+static void HandleIgnore (Widget widget, XEvent *event, String *params, Cardinal *param_count)
+                  
+                                /* unused */
+                                /* unused */
+                                /* unused */
 {
     /* ignore an event */
 }
 
 /* ARGSUSED */
-static void HandleGraphicsInput (widget, event, params, param_count)
-    Widget widget;
-    XEvent *event;              /* unused */
-    String *params;             /* unused */
-    Cardinal *param_count;      /* unused */
+static void HandleGraphicsInput (Widget widget, XEvent *event, String *params, Cardinal *param_count)
+                  
+                                /* unused */
+                                /* unused */
+                                /* unused */
 {
     GtermWidget w = (GtermWidget)widget;
     XKeyEvent *ev = (XKeyEvent *) event;
@@ -1794,11 +1819,11 @@ static void HandleGraphicsInput (widget, event, params, param_count)
 }
 
 /* ARGSUSED */
-static void HandleDisplayCrosshair (widget, event, params, nparams)
-    Widget widget;
-    XEvent *event;              /* unused */
-    String *params;             /* unused */
-    Cardinal *nparams;      /* unused */
+static void HandleDisplayCrosshair (Widget widget, XEvent *event, String *params, Cardinal *nparams)
+                  
+                                /* unused */
+                                /* unused */
+                            /* unused */
 {
     GtermWidget w = (GtermWidget)widget;
     XButtonEvent *ev = &event->xbutton;
@@ -1819,11 +1844,11 @@ static void HandleDisplayCrosshair (widget, event, params, nparams)
 }
 
 /* ARGSUSED */
-static void HandleTrackCursor (widget, event, params, param_count)
-    Widget widget;
-    XEvent *event;              /* unused */
-    String *params;             /* unused */
-    Cardinal *param_count;      /* unused */
+static void HandleTrackCursor (Widget widget, XEvent *event, String *params, Cardinal *param_count)
+                  
+                                /* unused */
+                                /* unused */
+                                /* unused */
 {
     GtermWidget w = (GtermWidget)widget;
     XMotionEvent *ev = &event->xmotion;
@@ -1856,11 +1881,11 @@ static void HandleTrackCursor (widget, event, params, param_count)
 }
 
 /* ARGSUSED */
-static void HandleEnterWindow (widget, event, params, param_count)
-    Widget widget;
-    XEvent *event;              /* unused */
-    String *params;             /* unused */
-    Cardinal *param_count;      /* unused */
+static void HandleEnterWindow (Widget widget, XEvent *event, String *params, Cardinal *param_count)
+                  
+                                /* unused */
+                                /* unused */
+                                /* unused */
 {
     GtermWidget w = (GtermWidget)widget;
     XEnterWindowEvent *ev = (XEnterWindowEvent *) event;
@@ -1888,11 +1913,11 @@ static void HandleEnterWindow (widget, event, params, param_count)
 }
 
 /* ARGSUSED */
-static void HandleLeaveWindow (widget, event, params, param_count)
-    Widget widget;
-    XEvent *event;              /* unused */
-    String *params;             /* unused */
-    Cardinal *param_count;      /* unused */
+static void HandleLeaveWindow (Widget widget, XEvent *event, String *params, Cardinal *param_count)
+                  
+                                /* unused */
+                                /* unused */
+                                /* unused */
 {
     GtermWidget w = (GtermWidget)widget;
     XLeaveWindowEvent *ev = (XLeaveWindowEvent *) event;
@@ -1919,11 +1944,11 @@ static void HandleLeaveWindow (widget, event, params, param_count)
 }
 
 /* ARGSUSED */
-static void HandleSoftReset (widget, event, params, param_count)
-    Widget widget;
-    XEvent *event;              /* unused */
-    String *params;             /* unused */
-    Cardinal *param_count;      /* unused */
+static void HandleSoftReset (Widget widget, XEvent *event, String *params, Cardinal *param_count)
+                  
+                                /* unused */
+                                /* unused */
+                                /* unused */
 {
     GtermWidget w = (GtermWidget)widget;
     GtCallback *cb;

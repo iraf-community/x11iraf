@@ -1566,7 +1566,7 @@ createXPixmap (ObmContext obm, char *name, char *widget, char *description)
 
 	/* Get reference widget if any. */
 	w = NULL;
-	if ((obj = obmFindObject (obm, widget, obm->toplevel)))
+	if ((obj = obmFindObject (obm, widget)))
 	    w = widgetGetPointer (obj);
 
 	/* Create the pixmap (actually icon).

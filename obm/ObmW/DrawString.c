@@ -10,15 +10,7 @@
  *	counterpart.
  */
 void
-XfwfDrawString(display, drawable, gc, x, y, string, length, tabs)
-     Display *display;
-     Drawable drawable;
-     GC gc;
-     int x;
-     int y;
-     String string;
-     int length;
-     int *tabs;
+XfwfDrawString(Display *display, Drawable drawable, GC gc, int x, int y, String string, int length, int *tabs)
 {
 	char	*p, *ep;
 	int	tx, tab;

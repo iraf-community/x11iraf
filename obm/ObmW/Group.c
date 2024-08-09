@@ -39,7 +39,7 @@ static void set_toggles(Widget);
 static Boolean  cvtStringToSelectionType(Display *,XrmValuePtr ,Cardinal *,XrmValuePtr ,XrmValuePtr ,XtPointer *);
 static Boolean  cvtSelectionTypeToString(Display *,XrmValuePtr ,Cardinal *,XrmValuePtr ,XrmValuePtr ,XtPointer *);
 
-/*ARGSUSED*/static void make_textgc(self)Widget self;
+/*ARGSUSED*/static void make_textgc(Widget self)
 {
     XtGCMask mask;
     XGCValues values;
@@ -51,7 +51,7 @@ static Boolean  cvtSelectionTypeToString(Display *,XrmValuePtr ,Cardinal *,XrmVa
     mask = GCFont | GCBackground | GCForeground;
     ((XfwfGroupWidget)self)->xfwfGroup.textgc = XtGetGC(self, mask, &values);
 }
-/*ARGSUSED*/static void on_cb(toggle,client_data,call_data)Widget  toggle;XtPointer  client_data;XtPointer  call_data;
+/*ARGSUSED*/static void on_cb(Widget toggle, XtPointer client_data, XtPointer call_data)
 {
     Widget self = XtParent(toggle);
     Cardinal toggle_ord = (Cardinal) client_data;
@@ -78,7 +78,7 @@ static Boolean  cvtSelectionTypeToString(Display *,XrmValuePtr ,Cardinal *,XrmVa
     }
     XtCallCallbackList(self, ((XfwfGroupWidget)self)->xfwfGroup.activate, (XtPointer) ((XfwfGroupWidget)self)->xfwfGroup.selection);
 }
-/*ARGSUSED*/static void off_cb(toggle,client_data,call_data)Widget  toggle;XtPointer  client_data;XtPointer  call_data;
+/*ARGSUSED*/static void off_cb(Widget toggle, XtPointer client_data, XtPointer call_data)
 {
     Widget self = XtParent(toggle);
     Cardinal toggle_ord = (Cardinal) client_data;
@@ -98,7 +98,7 @@ static Boolean  cvtSelectionTypeToString(Display *,XrmValuePtr ,Cardinal *,XrmVa
     }
     XtCallCallbackList(self, ((XfwfGroupWidget)self)->xfwfGroup.activate, (XtPointer) ((XfwfGroupWidget)self)->xfwfGroup.selection);
 }
-/*ARGSUSED*/static void set_toggles(self)Widget self;
+/*ARGSUSED*/static void set_toggles(Widget self)
 {
     Cardinal i, t;
 
@@ -119,7 +119,7 @@ static Boolean  cvtSelectionTypeToString(Display *,XrmValuePtr ,Cardinal *,XrmVa
 	    t++;
 	}
 }
-/*ARGSUSED*/static Boolean  cvtStringToSelectionType(display,args,num_args,from,to,converter_data)Display * display;XrmValuePtr  args;Cardinal * num_args;XrmValuePtr  from;XrmValuePtr  to;XtPointer * converter_data;
+/*ARGSUSED*/static Boolean  cvtStringToSelectionType(Display *display, XrmValuePtr args, Cardinal *num_args, XrmValuePtr from, XrmValuePtr to, XtPointer *converter_data)
 {
     String s = (String) from->addr;
 
@@ -146,7 +146,7 @@ static Boolean  cvtSelectionTypeToString(Display *,XrmValuePtr ,Cardinal *,XrmVa
     XtDisplayStringConversionWarning(display, s, XtRSelectionType);
     done(SelectionType, XfwfSingleSelection);
 }
-/*ARGSUSED*/static Boolean  cvtSelectionTypeToString(display,args,num_args,from,to,converter_data)Display * display;XrmValuePtr  args;Cardinal * num_args;XrmValuePtr  from;XrmValuePtr  to;XtPointer * converter_data;
+/*ARGSUSED*/static Boolean  cvtSelectionTypeToString(Display *display, XrmValuePtr args, Cardinal *num_args, XrmValuePtr from, XrmValuePtr to, XtPointer *converter_data)
 {
     char s[30];
 
@@ -244,8 +244,7 @@ XtInherit_layout,
 },
 };
 WidgetClass xfwfGroupWidgetClass = (WidgetClass) &xfwfGroupClassRec;
-static void _resolve_inheritance(class)
-WidgetClass class;
+static void _resolve_inheritance(WidgetClass class)
 {
   XfwfGroupWidgetClass c = (XfwfGroupWidgetClass) class;
   XfwfGroupWidgetClass super;
@@ -260,7 +259,7 @@ WidgetClass class;
   if (class == xfwfGroupWidgetClass) return;
   super = (XfwfGroupWidgetClass)class->core_class.superclass;
 }
-/*ARGSUSED*/static void class_initialize()
+/*ARGSUSED*/static void class_initialize(void)
 {
     XtAddConverter(XtRString, XtRLong, XmuCvtStringToLong, NULL, 0);
     XtSetTypeConverter(XtRLong, XtRString, XfwfCvtLongToString,
@@ -270,7 +269,7 @@ WidgetClass class;
     XtSetTypeConverter(XtRSelectionType, XtRString, cvtSelectionTypeToString,
 		       NULL, 0, XtCacheNone, NULL);
 }
-/*ARGSUSED*/static void initialize(request,self,args,num_args)Widget  request;Widget self;ArgList  args;Cardinal * num_args;
+/*ARGSUSED*/static void initialize(Widget request, Widget self, ArgList args, Cardinal *num_args)
 {
     ((XfwfGroupWidget)self)->xfwfGroup.toggle_ord = 0;
     ((XfwfGroupWidget)self)->xfwfGroup.textgc = NULL;
@@ -281,7 +280,7 @@ WidgetClass class;
 	((XfwfGroupWidget)self)->xfwfGroup.selection = 0;
     }
 }
-/*ARGSUSED*/static Boolean  set_values(old,request,self,args,num_args)Widget  old;Widget  request;Widget self;ArgList  args;Cardinal * num_args;
+/*ARGSUSED*/static Boolean  set_values(Widget old, Widget request, Widget self, ArgList args, Cardinal *num_args)
 {
     Boolean need_redraw = False;
 
@@ -302,7 +301,7 @@ WidgetClass class;
     }
     return need_redraw;
 }
-/*ARGSUSED*/static void expose(self,event,region)Widget self;XEvent * event;Region  region;
+/*ARGSUSED*/static void expose(Widget self, XEvent *event, Region region)
 {
     Dimension w, h;
     Position x, y;
@@ -313,7 +312,7 @@ WidgetClass class;
     XDrawImageString(XtDisplay(self), XtWindow(self), ((XfwfGroupWidget)self)->xfwfGroup.textgc, x + 3,
 		     y - ((XfwfGroupWidget)self)->xfwfFrame.innerOffset, ((XfwfGroupWidget)self)->xfwfGroup.label, strlen(((XfwfGroupWidget)self)->xfwfGroup.label));
 }
-/*ARGSUSED*/static void insert_child(child)Widget  child;
+/*ARGSUSED*/static void insert_child(Widget child)
 { Widget self = XtParent(child); {
     xfwfRowColClassRec.composite_class.insert_child(child);
     if (((XfwfGroupWidget)self)->xfwfGroup.selectionStyle != XfwfNoSelection

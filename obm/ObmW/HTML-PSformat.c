@@ -66,7 +66,7 @@
 #define CR '\015'
 #define LF '\012'
 
-extern int SwapElements();
+extern int SwapElements(struct ele_rec *start, struct ele_rec *end, int start_pos, int end_pos);
 
 /* the next page sizes are a compromise between letter sized paper
  * (215.9 x 279.4 mm) and european standard A4 sized paper (210.0 x 297.0 mm).

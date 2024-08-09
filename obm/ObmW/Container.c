@@ -12,7 +12,7 @@
 #define UnspecifiedPixmap (Pixmap)2
 #define UndefinedGC       (GC)2
   
-static void InsPixel();
+static void InsPixel(Widget w, int off, XrmValue *value);
 
 static XtResource resources[] = {
 #define offset(field) XtOffsetOf(ContainerRec, container.field)
@@ -58,10 +58,7 @@ static XtResource resources[] = {
   }
 
 };
-static void InsPixel(w, off, value)
-     Widget w;
-     int off;
-     XrmValue *value;
+static void InsPixel(Widget w, int off, XrmValue *value)
 {
   ContainerWidget p = (ContainerWidget) w;
   static Pixel pixel;
@@ -80,14 +77,14 @@ static void InsPixel(w, off, value)
 #undef offset
 
 
-static void ClassInitialize();
-static void ClassPartInitialize();
-static void initialize();
-static void realize();
-static void destroy();
-static void Redisplay();
+static void ClassInitialize(void);
+static void ClassPartInitialize(WidgetClass widget_class);
+static void initialize(Widget request, Widget new, ArgList args, Cardinal *num_args);
+static void realize(Widget w, Mask *valueMask, XSetWindowAttributes *attributes);
+static void destroy(Widget w);
+static void Redisplay(Widget gw, XEvent *event, Region region);
 
-static Boolean SetValues();
+static Boolean SetValues(Widget current, Widget request, Widget new, ArgList args, Cardinal *num_args);
 
 /*static XtGeometryResult query_geometry();*/
 /*static XtGeometryResult geometry_manager();*/
@@ -156,21 +153,17 @@ ContainerClassRec containerClassRec = {
 WidgetClass containerWidgetClass = (WidgetClass)&containerClassRec;
 
 static void 
-ClassInitialize()
+ClassInitialize(void)
 {
 }
 
 static void
-ClassPartInitialize(widget_class)
-     WidgetClass widget_class;
+ClassPartInitialize(WidgetClass widget_class)
 {
 }
 
 /* ARGSUSED */
-static void initialize(request, new, args, num_args)
-     Widget request, new;
-     ArgList args;
-     Cardinal *num_args;
+static void initialize(Widget request, Widget new, ArgList args, Cardinal *num_args)
 {
   ContainerWidget sw = (ContainerWidget)new;
   ContainerPart*  cp = (ContainerPart*)&(sw->container);
@@ -202,8 +195,7 @@ static void initialize(request, new, args, num_args)
   cp->background_GC = AllocGCFromPixel (new, new->core.background_pixel);
 }
 
-static void destroy(w)
-     Widget w;
+static void destroy(Widget w)
 {
   ContainerWidget c = (ContainerWidget)w;
 
@@ -213,19 +205,13 @@ static void destroy(w)
 
 }
 
-static void realize(w, valueMask, attributes)
-    Widget w;
-    Mask *valueMask;
-    XSetWindowAttributes *attributes;
+static void realize(Widget w, Mask *valueMask, XSetWindowAttributes *attributes)
 {
   (*coreClassRec.core_class.realize) (w, valueMask, attributes);
 }
 
 /* ARGSUSED */
-static Boolean SetValues(current, request, new, args, num_args)
-     Widget   current, request, new;
-     ArgList  args;
-     Cardinal *num_args;
+static Boolean SetValues(Widget current, Widget request, Widget new, ArgList args, Cardinal *num_args)
 {
   ContainerWidget s_old  = (ContainerWidget) current;
   ContainerWidget s_new  = (ContainerWidget) new;
@@ -275,10 +261,10 @@ static Boolean SetValues(current, request, new, args, num_args)
 
 
 /* ARGSUSED */
-static void Redisplay(gw, event, region)
-    Widget gw;
-    XEvent *event;		/* unused */
-    Region region;		/* unused */
+static void Redisplay(Widget gw, XEvent *event, Region region)
+              
+                  		/* unused */
+                  		/* unused */
 {
   ContainerWidget c = (ContainerWidget) gw;
   
@@ -296,9 +282,7 @@ static void Redisplay(gw, event, region)
 
 }
 
-void _XawQueryGeometry (widget, reply_return)
-     Widget widget;
-     XtWidgetGeometry *reply_return;
+void _XawQueryGeometry (Widget widget, XtWidgetGeometry *reply_return)
 {
   XtGeometryResult result;
   String subs[1];

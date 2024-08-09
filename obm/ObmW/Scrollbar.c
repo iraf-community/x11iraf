@@ -24,7 +24,7 @@ static void down(Widget ,XtPointer ,XtPointer );
 static void thumbscroll(Widget ,XtPointer ,XtPointer );
 static void copy_background(Widget,int ,XrmValue *);
 
-/*ARGSUSED*/static void up(arrow,client_data,call_data)Widget  arrow;XtPointer  client_data;XtPointer  call_data;
+/*ARGSUSED*/static void up(Widget arrow, XtPointer client_data, XtPointer call_data)
 {
     Widget self = (Widget) client_data;
     XfwfScrollInfo info;
@@ -41,7 +41,7 @@ static void copy_background(Widget,int ,XrmValue *);
     }
     XtCallCallbackList(self, ((XfwfScrollbarWidget)self)->xfwfScrollbar.scrollCallback, &info);
 }
-/*ARGSUSED*/static void down(arrow,client_data,call_data)Widget  arrow;XtPointer  client_data;XtPointer  call_data;
+/*ARGSUSED*/static void down(Widget arrow, XtPointer client_data, XtPointer call_data)
 {
     Widget self = (Widget) client_data;
     XfwfScrollInfo info;
@@ -58,7 +58,7 @@ static void copy_background(Widget,int ,XrmValue *);
     }
     XtCallCallbackList(self, ((XfwfScrollbarWidget)self)->xfwfScrollbar.scrollCallback, &info);
 }
-/*ARGSUSED*/static void thumbscroll(w,client_data,call_data)Widget  w;XtPointer  client_data;XtPointer  call_data;
+/*ARGSUSED*/static void thumbscroll(Widget w, XtPointer client_data, XtPointer call_data)
 {
     Widget self = (Widget) client_data;
     XfwfScrollInfo *info = (XfwfScrollInfo*) call_data;
@@ -69,7 +69,7 @@ static void copy_background(Widget,int ,XrmValue *);
 	info->flags &= XFWF_HPOS;
     XtCallCallbackList(self, ((XfwfScrollbarWidget)self)->xfwfScrollbar.scrollCallback, info);
 }
-/*ARGSUSED*/static void copy_background(self,offset,value)Widget self;int  offset;XrmValue * value;
+/*ARGSUSED*/static void copy_background(Widget self, int offset, XrmValue *value)
 {
     value->addr = (XtPointer) &((XfwfScrollbarWidget)self)->core.background_pixel;
 }
@@ -153,7 +153,7 @@ scroll_response,
 };
 WidgetClass xfwfScrollbarWidgetClass = (WidgetClass) &xfwfScrollbarClassRec;
 /*ARGSUSED*/
-static void Scroll(self,event,params,num_params)Widget self;XEvent*event;String*params;Cardinal*num_params;
+static void Scroll(Widget self, XEvent *event, String *params, Cardinal *num_params)
 {
     XfwfScrollInfo info;
 
@@ -213,8 +213,7 @@ static void Scroll(self,event,params,num_params)Widget self;XEvent*event;String*
     XtCallCallbackList(self, ((XfwfScrollbarWidget)self)->xfwfScrollbar.scrollCallback, &info);
 }
 
-static void _resolve_inheritance(class)
-WidgetClass class;
+static void _resolve_inheritance(WidgetClass class)
 {
   XfwfScrollbarWidgetClass c = (XfwfScrollbarWidgetClass) class;
   XfwfScrollbarWidgetClass super;
@@ -231,7 +230,7 @@ WidgetClass class;
   if (c->xfwfScrollbar_class.scroll_response == XtInherit_scroll_response)
     c->xfwfScrollbar_class.scroll_response = super->xfwfScrollbar_class.scroll_response;
 }
-/*ARGSUSED*/static void initialize(request,self,args,num_args)Widget  request;Widget self;ArgList  args;Cardinal * num_args;
+/*ARGSUSED*/static void initialize(Widget request, Widget self, ArgList args, Cardinal *num_args)
 {
     Position x, y, xa2, xslider, ya2, yslider;
     Dimension w, h, wa, ha, wslider, hslider;
@@ -304,7 +303,7 @@ WidgetClass class;
     XtVaGetValues(((XfwfScrollbarWidget)self)->xfwfScrollbar.slider, XtNscrollResponse, &((XfwfScrollbarWidget)self)->xfwfScrollbar.slider_scroll, NULL);
     ((XfwfScrollbarWidget)self)->xfwfScrollbar.initializing = False;
 }
-/*ARGSUSED*/static void resize(self)Widget self;
+/*ARGSUSED*/static void resize(Widget self)
 {
     Position x, y, xa2, xslider, ya2, yslider;
     Dimension w, h, wa, ha, wslider, hslider;
@@ -329,7 +328,7 @@ WidgetClass class;
     XtConfigureWidget(((XfwfScrollbarWidget)self)->xfwfScrollbar.arrow2, xa2, ya2, wa, ha, 0);
     XtConfigureWidget(((XfwfScrollbarWidget)self)->xfwfScrollbar.slider, xslider, yslider, wslider, hslider, 0);
 }
-/*ARGSUSED*/static void insert_child(child)Widget  child;
+/*ARGSUSED*/static void insert_child(Widget child)
 { Widget self = XtParent(child); {
     if (((XfwfScrollbarWidget)self)->xfwfScrollbar.initializing)
 	xfwfBoardClassRec.composite_class.insert_child(child);
@@ -341,7 +340,7 @@ WidgetClass class;
     }
 }
 }
-/*ARGSUSED*/static Boolean  set_values(old,request,self,args,num_args)Widget  old;Widget  request;Widget self;ArgList  args;Cardinal * num_args;
+/*ARGSUSED*/static Boolean  set_values(Widget old, Widget request, Widget self, ArgList args, Cardinal *num_args)
 {
     if (((XfwfScrollbarWidget)old)->xfwfScrollbar.vertical != ((XfwfScrollbarWidget)self)->xfwfScrollbar.vertical) {
 	XtWarning("Cannot change the \"vertical\" resource of a scrollbar\n");
@@ -362,13 +361,13 @@ WidgetClass class;
     }
     return False;
 }
-/*ARGSUSED*/static void scroll_response(wdg,client_data,call_data)Widget  wdg;XtPointer  client_data;XtPointer  call_data;
+/*ARGSUSED*/static void scroll_response(Widget wdg, XtPointer client_data, XtPointer call_data)
 {
     Widget self = (Widget) client_data;
 
     ((XfwfScrollbarWidget)self)->xfwfScrollbar.slider_scroll(wdg, ((XfwfScrollbarWidget)self)->xfwfScrollbar.slider, call_data);
 }
-/*ARGSUSED*/void XfwfSetScrollbar(self,pos,size)Widget self;double  pos;double  size;
+/*ARGSUSED*/void XfwfSetScrollbar(Widget self, double pos, double size)
 {
     if (! XtIsSubclass(self, xfwfScrollbarWidgetClass))
 	XtError("XfwfSetScrollbar called with incorrect widget type");

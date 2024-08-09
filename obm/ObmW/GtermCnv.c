@@ -99,7 +99,7 @@ Pixmap rasPM_to_gtermPM (Raster src, GtermWidget w)
 XImage *ximage_to_rasPM (GtermWidget w, XImage *xin, Raster dest, 
   	    int sx, int sy, int dnx, int dny)
 {
-    uchar *renderPixels ();
+    uchar *renderPixels (GtermWidget w, uchar *in, int width, int height, int depth, int sx, int sy, int dnx, int dny, int bpl, int bpp, int border);
     XImage *cnvImg  = (XImage *) NULL;
 
  
@@ -145,7 +145,7 @@ XImage *ximage_to_rasPM (GtermWidget w, XImage *xin, Raster dest,
 XImage *ximage_to_gtermPM (GtermWidget w, XImage *xin, 
   	    int sx, int sy, int dnx, int dny)
 {
-    uchar *renderPixels ();
+    uchar *renderPixels (GtermWidget w, uchar *in, int width, int height, int depth, int sx, int sy, int dnx, int dny, int bpl, int bpp, int border);
     XImage *cnvImg  = (XImage *) NULL;
 
  
@@ -191,12 +191,7 @@ XImage *ximage_to_gtermPM (GtermWidget w, XImage *xin,
 **  the pointer to the output pixels and assume the caller will free it.
 */
 uchar *
-renderPixels (w, in, width, height, depth, sx, sy, dnx, dny, bpl, bpp, border)
-GtermWidget w;
-uchar	*in;
-int	width, height, depth;
-int	sx, sy, dnx, dny;
-int     bpl, bpp, border;
+renderPixels (GtermWidget w, uchar *in, int width, int height, int depth, int sx, int sy, int dnx, int dny, int bpl, int bpp, int border)
 {
     int i, j, npix = (width * height);
     uint32_t  *lp, xcol, lval;

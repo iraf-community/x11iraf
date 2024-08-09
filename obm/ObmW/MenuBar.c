@@ -21,7 +21,7 @@ static void initialize(Widget ,Widget,ArgList ,Cardinal *);
 static void process_menu(Widget,Widget ,Cursor );
 static void popdown_cb(Widget ,XtPointer ,XtPointer );
 
-/*ARGSUSED*/static void popdown_cb(menu,client_data,call_data)Widget  menu;XtPointer  client_data;XtPointer  call_data;
+/*ARGSUSED*/static void popdown_cb(Widget menu, XtPointer client_data, XtPointer call_data)
 {
     Widget self = (Widget) client_data;
 
@@ -107,7 +107,7 @@ process_menu,
 };
 WidgetClass xfwfMenuBarWidgetClass = (WidgetClass) &xfwfMenuBarClassRec;
 /*ARGSUSED*/
-static void menu_popdown(self,event,params,num_params)Widget self;XEvent*event;String*params;Cardinal*num_params;
+static void menu_popdown(Widget self, XEvent *event, String *params, Cardinal *num_params)
 {
     if (((XfwfMenuBarWidget)self)->xfwfMenuBar.current_menu != NULL) {
 	XtPopdown(((XfwfMenuBarWidget)self)->xfwfMenuBar.current_menu);
@@ -115,8 +115,7 @@ static void menu_popdown(self,event,params,num_params)Widget self;XEvent*event;S
     }
 }
 
-static void _resolve_inheritance(class)
-WidgetClass class;
+static void _resolve_inheritance(WidgetClass class)
 {
   XfwfMenuBarWidgetClass c = (XfwfMenuBarWidgetClass) class;
   XfwfMenuBarWidgetClass super;
@@ -133,11 +132,11 @@ WidgetClass class;
   if (c->xfwfMenuBar_class.process_menu == XtInherit_process_menu)
     c->xfwfMenuBar_class.process_menu = super->xfwfMenuBar_class.process_menu;
 }
-/*ARGSUSED*/static void initialize(request,self,args,num_args)Widget  request;Widget self;ArgList  args;Cardinal * num_args;
+/*ARGSUSED*/static void initialize(Widget request, Widget self, ArgList args, Cardinal *num_args)
 {
     ((XfwfMenuBarWidget)self)->xfwfMenuBar.current_menu = NULL;
 }
-/*ARGSUSED*/static void process_menu(self,menu,cursor)Widget self;Widget  menu;Cursor  cursor;
+/*ARGSUSED*/static void process_menu(Widget self, Widget menu, Cursor cursor)
 {
     if (menu == ((XfwfMenuBarWidget)self)->xfwfMenuBar.current_menu) return;
     if (((XfwfMenuBarWidget)self)->xfwfMenuBar.current_menu) XtPopdown(((XfwfMenuBarWidget)self)->xfwfMenuBar.current_menu);
@@ -154,7 +153,7 @@ WidgetClass class;
     ((XfwfMenuBarWidget)self)->xfwfMenuBar.current_menu = menu;
     XtPopup(menu, XtGrabNonexclusive);
 }
-/*ARGSUSED*/Boolean  XfwfCallProcessMenu(self,menu,cursor)Widget self;Widget  menu;Cursor  cursor;
+/*ARGSUSED*/Boolean  XfwfCallProcessMenu(Widget self, Widget menu, Cursor cursor)
 {
     if (XtIsSubclass(self, xfwfMenuBarWidgetClass) && ((XfwfMenuBarWidgetClass)self->core.widget_class)->xfwfMenuBar_class.process_menu) {
 	((XfwfMenuBarWidgetClass)self->core.widget_class)->xfwfMenuBar_class.process_menu(self, menu, cursor);

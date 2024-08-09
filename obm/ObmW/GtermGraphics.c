@@ -1380,9 +1380,7 @@ mapVector (MappingContext mx, XPoint *pv1, XPoint *pv2, int npts)
 
 
 static void
-savepos (w, event)
-    GtermWidget w;
-    XEvent *event;
+savepos (GtermWidget w, XEvent *event)
 {
     if (event == NULL)
 	return;

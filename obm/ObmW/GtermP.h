@@ -48,7 +48,6 @@
 #define	NColors			8
 
 typedef void (*GmVMethod)();
-typedef int  (*GmIMethod)();
 
 /* Raster definitions. */
 #define	ImageRaster		1

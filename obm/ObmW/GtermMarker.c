@@ -60,20 +60,20 @@
  * itself directly calling the above procedures).
  */
 
-static void gm_text_init(), gm_line_init(), gm_plin_init(), gm_rect_init();
-static void gm_boxx_init(), gm_circ_init(), gm_elip_init(), gm_pgon_init();
-static int gm_putint(), gm_putfloat(), gm_do_callbacks();
-static void gm_constraint();
-static int gm_getint(), gm_getattribute(), gm_gettype();
-static double gm_getfloat();
-static char *gm_getstring();
+static void gm_text_init(struct marker *gm, int interactive), gm_line_init(struct marker *gm, int interactive), gm_plin_init(struct marker *gm, int interactive), gm_rect_init(struct marker *gm, int interactive);
+static void gm_boxx_init(struct marker *gm, int interactive), gm_circ_init(struct marker *gm, int interactive), gm_elip_init(struct marker *gm, int interactive), gm_pgon_init(struct marker *gm, int interactive);
+static int gm_putint(int ival, XtArgVal value, char *type), gm_putfloat(double fval, XtArgVal value, char *type), gm_do_callbacks(struct marker *gm, int events, XEvent *event, String *params, Cardinal nparams);
+static void gm_constraint(struct marker *gm, struct marker *new_gm, int what);
+static int gm_getint(XtArgVal value, char *type), gm_getattribute(char *attribute), gm_gettype(char *type);
+static double gm_getfloat(XtArgVal value, char *type);
+static char *gm_getstring(XtArgVal value, char *type);
 
-static void gm_markpos(), gm_erase(), gm_redraw(), gm_setCurRect();
-static void gm_linkafter(), gm_unlink();
-static double gm_niceAngle();
-static Pixel gm_getpixel();
-static int gm_select();
-static int gm_getfillstyle();
+static void gm_markpos(struct marker *gm), gm_erase(struct marker *gm), gm_redraw(struct marker *gm, int function), gm_setCurRect(struct marker *gm);
+static void gm_linkafter(struct marker *gm, struct marker *prev), gm_unlink(struct marker *gm);
+static double gm_niceAngle(double alpha);
+static Pixel gm_getpixel(GtermWidget w, XtArgVal value, char *type);
+static int gm_select(struct marker *gm, int x, int y, GmSelection what);
+static int gm_getfillstyle(GtermWidget w, XtArgVal value, char *type);
 
 static GmVMethod gm_classinit[] = {
     gm_text_init, gm_line_init, gm_plin_init, gm_rect_init,
@@ -88,13 +88,13 @@ static XRectangle null_rect = { 0, 0, 0, 0 };
 #define PI_4		0.78539816339744830962
 #define BORDER		5
 
-static void M_create(), M_destroy(), M_destroyNull(), M_set(), M_raise();
-static void M_lower(), M_notify(), M_markpos(), M_markposAdd(), M_redraw();
-static void M_addPt(), M_deletePt(), M_movePt(), M_deleteDestroy();
-static void M_move(), M_resize(), M_moveResize(), M_rotate();
-static void M_rotateResize(), M_input();
-static void gm_focusin(), gm_focusout();
-static int point_in_poly ();
+static void M_create(Widget widget, XEvent *event, String *params, Cardinal *nparams), M_destroy(Widget widget, XEvent *event, String *params, Cardinal *nparams), M_destroyNull(Widget widget, XEvent *event, String *params, Cardinal *nparams), M_set(Widget widget, XEvent *event, String *params, Cardinal *nparams), M_raise(Widget widget, XEvent *event, String *params, Cardinal *nparams);
+static void M_lower(Widget widget, XEvent *event, String *params, Cardinal *nparams), M_notify(Widget widget, XEvent *event, String *params, Cardinal *nparams), M_markpos(Widget widget, XEvent *event, String *params, Cardinal *nparams), M_markposAdd(Widget widget, XEvent *event, String *params, Cardinal *nparams), M_redraw(Widget widget, XEvent *event, String *params, Cardinal *nparams);
+static void M_addPt(Widget widget, XEvent *event, String *params, Cardinal *nparams), M_deletePt(Widget widget, XEvent *event, String *params, Cardinal *nparams), M_movePt(Widget widget, XEvent *event, String *params, Cardinal *nparams), M_deleteDestroy(Widget widget, XEvent *event, String *params, Cardinal *nparams);
+static void M_move(Widget widget, XEvent *event, String *params, Cardinal *nparams), M_resize(Widget widget, XEvent *event, String *params, Cardinal *nparams), M_moveResize(Widget widget, XEvent *event, String *params, Cardinal *nparams), M_rotate(Widget widget, XEvent *event, String *params, Cardinal *nparams);
+static void M_rotateResize(Widget widget, XEvent *event, String *params, Cardinal *nparams), M_input(Widget widget, XEvent *event, String *params, Cardinal *nparams);
+static void gm_focusin(GtermWidget w, struct marker *gm, GmSelection what), gm_focusout(GtermWidget w, int enableSetTrans);
+static int point_in_poly (int npol, float *xp, float *yp, float x, float y);
 
 static XtActionsRec markerActionsList[] = {
 	{ "m_create",		M_create },
@@ -123,8 +123,7 @@ static XtActionsRec markerActionsList[] = {
 /* GtMarkerInit -- Initialize the marker subsystem.
  */
 void
-GtMarkerInit (w)
-    GtermWidget w;
+GtMarkerInit (GtermWidget w)
 {
     Marker gm, prev;
     XColor fg_color, bg_color;
@@ -250,8 +249,7 @@ GtMarkerInit (w)
 /* GtMarkerFree -- Free any marker subsystem resources.
  */
 static void
-GtMarkerFree (w)
-    GtermWidget w;
+GtMarkerFree (GtermWidget w)
 {
     Display *display = w->gterm.display;
     Marker gm;
@@ -289,10 +287,7 @@ GtMarkerFree (w)
 /* gm_focusin -- Called when gterm window input is directed to a marker.
  */
 static void
-gm_focusin (w, gm, what)
-    GtermWidget w;
-    Marker gm;
-    GmSelection what;
+gm_focusin (GtermWidget w, struct marker *gm, GmSelection what)
 {
     Cursor cursor;
     int erase;
@@ -344,9 +339,9 @@ gm_focusin (w, gm, what)
  * pointer moves off a marker.
  */
 static void
-gm_focusout (w, enableSetTrans)
-    GtermWidget w;
-    int enableSetTrans;			/* replace translations */
+gm_focusout (GtermWidget w, int enableSetTrans)
+                  
+                       			/* replace translations */
 {
     Display *display = w->gterm.display;
     Marker gm = w->gterm.gm_active;
@@ -376,8 +371,7 @@ gm_focusout (w, enableSetTrans)
  * in some way.
  */
 static void 
-gm_refocus (w)
-    GtermWidget w;
+gm_refocus (GtermWidget w)
 {
     XMotionEvent event;
     int nparams = 0;
@@ -407,9 +401,7 @@ gm_refocus (w)
  * is already active then the most recent request supercedes any previous one.
  */
 static void
-gm_request_translations (w, gm)
-    GtermWidget w;
-    Marker gm;
+gm_request_translations (GtermWidget w, struct marker *gm)
 {
     w->gterm.gm_reqTranslations = gm;
 
@@ -427,9 +419,7 @@ gm_request_translations (w, gm)
  * a no-op if the requested translation table is already loaded.
  */
 static void
-gm_load_translations (w, id)
-    GtermWidget w;
-    XtIntervalId id;
+gm_load_translations (GtermWidget w, XtIntervalId id)
 {
     Marker am, gm;
     int i;
@@ -472,10 +462,10 @@ gm_load_translations (w, id)
 /* GmCreate -- Create a new marker.
  */
 XtPointer
-GmCreate (w, type, interactive)
-    GtermWidget w;
-    int type;			/* marker type */
-    int interactive;		/* use pointer to set position */
+GmCreate (GtermWidget w, int type, int interactive)
+                  
+             			/* marker type */
+                    		/* use pointer to set position */
 {
     Marker gm;
 
@@ -511,8 +501,7 @@ GmCreate (w, type, interactive)
 /* GmDestroy -- Destroy a marker.
  */
 int
-GmDestroy (gm)
-    Marker gm;
+GmDestroy (struct marker *gm)
 {
     GtermWidget w = gm->w;
     Region old_region, cur_region;
@@ -574,8 +563,7 @@ GmDestroy (gm)
 /* GmCopy -- Copy a marker.
  */
 Marker
-GmCopy (gm)
-    Marker gm;
+GmCopy (struct marker *gm)
 {
     GtermWidget w = gm->w;
     Marker nm;
@@ -644,11 +632,11 @@ fail:
 /* GmAddCallback -- Add a callback to a marker.
  */
 void
-GmAddCallback (gm, events, func, client_data)
-    Marker gm;
-    int events;			/* events callback is to receive */
-    GmIMethod func;		/* function to be called */
-    XtPointer client_data;	/* client data for above */
+GmAddCallback (struct marker *gm, int events, GmIMethod func, XtPointer client_data)
+              
+               			/* events callback is to receive */
+                   		/* function to be called */
+                          	/* client data for above */
 {
     struct markerCallback *cb;
     int i;
@@ -676,10 +664,10 @@ GmAddCallback (gm, events, func, client_data)
  * function pointer and client data passed when the callback was registered.
  */
 void
-GmDeleteCallback (gm, func, client_data)
-    Marker gm;
-    GmIMethod func;		/* callback function */
-    XtPointer client_data;	/* client data for above */
+GmDeleteCallback (struct marker *gm, GmIMethod func, XtPointer client_data)
+              
+                   		/* callback function */
+                          	/* client data for above */
 {
     struct markerCallback *cb;
     int i, n;
@@ -707,10 +695,7 @@ GmDeleteCallback (gm, func, client_data)
  * of the marker was selected.
  */
 Marker
-GmSelect (w, x, y, what)
-    GtermWidget w;
-    int x, y;
-    GmSelection what;
+GmSelect (GtermWidget w, int x, int y, GmSelection what)
 {
     int flags = (Gm_Activated|Gm_Visible|Gm_Sensitive);
     XRectangle *r;
@@ -736,8 +721,7 @@ GmSelect (w, x, y, what)
  * marker is later redrawn.
  */
 void
-GmMarkpos (gm)
-    Marker gm;
+GmMarkpos (struct marker *gm)
 {
     gm->markpos (gm);
 }
@@ -750,10 +734,7 @@ GmMarkpos (gm)
  * redrawn, and finally the current marker is redrawn at the new location.
  */
 void
-GmRedraw (gm, func, erase)
-    Marker gm;
-    int func;
-    int erase;
+GmRedraw (struct marker *gm, int func, int erase)
 {
     Marker mm;
     XRectangle *o, *n, *r;
@@ -867,9 +848,7 @@ GmRedraw (gm, func, erase)
  * the entire window if the region is given as (char *)NULL.
  */
 void
-GmRedisplay (w, region)
-    GtermWidget w;
-    Region region;
+GmRedisplay (GtermWidget w, Region region)
 {
     int flags = (Gm_Activated|Gm_Visible);
     XRectangle *r;
@@ -907,8 +886,7 @@ GmRedisplay (w, region)
  * marker, causing the first marker to be drawn above the second.
  */
 void
-GmRaise (gm, ref_gm)
-    Marker gm, ref_gm;
+GmRaise (struct marker *gm, struct marker *ref_gm)
 {
     GtermWidget w = gm->w;
     int erase;
@@ -931,8 +909,7 @@ GmRaise (gm, ref_gm)
  * marker, causing the first marker to be drawn below the second.
  */
 void
-GmLower (gm, ref_gm)
-    Marker gm, ref_gm;
+GmLower (struct marker *gm, struct marker *ref_gm)
 {
     GtermWidget w = gm->w;
     int erase;
@@ -964,12 +941,7 @@ GmLower (gm, ref_gm)
  * given marker events have occurred.
  */
 void
-GmNotify (gm, events, event, params, nparams)
-    Marker gm;
-    int events;
-    XEvent *event;
-    String *params;
-    Cardinal nparams;
+GmNotify (struct marker *gm, int events, XEvent *event, String *params, Cardinal nparams)
 {
     gm_do_callbacks (gm, events, event, params, nparams);
 }
@@ -978,9 +950,7 @@ GmNotify (gm, events, event, params, nparams)
 /* GmAddPt -- Add a point to a marker.
  */
 void
-GmAddPt (gm, x, y)
-    Marker gm;
-    int x, y;
+GmAddPt (struct marker *gm, int x, int y)
 {
     int erase;
     if (gm->addPt) {
@@ -995,9 +965,7 @@ GmAddPt (gm, x, y)
 /* GmDeletePt -- Delete a point from a marker.
  */
 void
-GmDeletePt (gm, x, y)
-    Marker gm;
-    int x, y;
+GmDeletePt (struct marker *gm, int x, int y)
 {
     int erase;
     if (gm->deletePt) {
@@ -1012,9 +980,7 @@ GmDeletePt (gm, x, y)
 /* GmMovePt -- Move a point within a marker.
  */
 void
-GmMovePt (gm, x, y)
-    Marker gm;
-    int x, y;
+GmMovePt (struct marker *gm, int x, int y)
 {
     int erase;
     if (gm->movePt) {
@@ -1028,9 +994,7 @@ GmMovePt (gm, x, y)
 /* GmMove -- Move a marker.
  */
 void
-GmMove (gm, x, y)
-    Marker gm;
-    int x, y;
+GmMove (struct marker *gm, int x, int y)
 {
     int erase;
     if (gm->move) {
@@ -1044,9 +1008,7 @@ GmMove (gm, x, y)
 /* GmResize -- Resize a marker.
  */
 void
-GmResize (gm, x, y)
-    Marker gm;
-    int x, y;
+GmResize (struct marker *gm, int x, int y)
 {
     int erase;
     if (gm->resize) {
@@ -1060,9 +1022,7 @@ GmResize (gm, x, y)
 /* GmRotate -- Rotate a marker.
  */
 void
-GmRotate (gm, x, y)
-    Marker gm;
-    int x, y;
+GmRotate (struct marker *gm, int x, int y)
 {
     int erase;
     if (gm->rotate) {
@@ -1078,11 +1038,7 @@ GmRotate (gm, x, y)
  * until all attributes have been changed.
  */
 int
-GmSetAttributes (gm, args, nargs, argtype)
-    Marker gm;
-    ArgList args;
-    int nargs;
-    char *argtype;
+GmSetAttributes (struct marker *gm, ArgList args, int nargs, char *argtype)
 {
     int i;
     int autoredraw, erase;
@@ -1111,11 +1067,7 @@ GmSetAttributes (gm, args, nargs, argtype)
 /* GmSetAttribute -- Set the value of a marker attribute.
  */
 int
-GmSetAttribute (gm, attribute, value, type)
-    Marker gm;
-    char *attribute;
-    XtArgVal value;
-    char *type;
+GmSetAttribute (struct marker *gm, char *attribute, XtArgVal value, char *type)
 {
     GtermWidget w = gm->w;
     int marker_type, atType;
@@ -1360,11 +1312,7 @@ GmSetAttribute (gm, attribute, value, type)
  * values be specified in the same type.
  */
 void
-GmGetAttributes (gm, args, nargs, argtype)
-    Marker gm;
-    ArgList args;
-    int nargs;
-    char *argtype;
+GmGetAttributes (struct marker *gm, ArgList args, int nargs, char *argtype)
 {
     int i;
 
@@ -1376,11 +1324,7 @@ GmGetAttributes (gm, args, nargs, argtype)
 /* GmGetAttribute -- Get the value of a marker attribute.
  */
 int
-GmGetAttribute (gm, attribute, value, type)
-    Marker gm;
-    char *attribute;
-    XtArgVal value;
-    char *type;
+GmGetAttribute (struct marker *gm, char *attribute, XtArgVal value, char *type)
 {
     GtermWidget w = gm->w;
     int i;
@@ -1601,11 +1545,11 @@ GmGetAttribute (gm, attribute, value, type)
 /* GmSetVertices -- Set the vertices of a "poly" type object.
  */
 void
-GmSetVertices (gm, points, first, npts)
-    Marker gm;
-    DPoint *points;		/* input array of points */
-    int first;			/* first point to be set */
-    int npts;			/* number of points to set */
+GmSetVertices (struct marker *gm, DPoint *points, int first, int npts)
+              
+                   		/* input array of points */
+              			/* first point to be set */
+             			/* number of points to set */
 {
     DPoint *ip, *pp;
     XPoint *op;
@@ -1678,11 +1622,11 @@ GmSetVertices (gm, points, first, npts)
  * number of points output is returned as the function value.
  */
 int
-GmGetVertices (gm, points, first, maxpts)
-    Marker gm;
-    DPoint *points;	/* output array of points */
-    int first;			/* first point to be returned */
-    int maxpts;			/* max number of points to return */
+GmGetVertices (struct marker *gm, DPoint *points, int first, int maxpts)
+              
+                   	/* output array of points */
+              			/* first point to be returned */
+               			/* max number of points to return */
 {
     XPoint *ip;
     DPoint *op;
@@ -1716,10 +1660,7 @@ GmGetVertices (gm, points, first, maxpts)
  * marker, regardless of its type or orientation.
  */
 void
-GmGetBoundingBox (gm, x, y, width, height)
-    Marker gm;
-    int *x, *y;
-    int *width, *height;
+GmGetBoundingBox (struct marker *gm, int *x, int *y, int *width, int *height)
 {
     XRectangle *r = &gm->cur_rect;
 
@@ -1733,8 +1674,7 @@ GmGetBoundingBox (gm, x, y, width, height)
 /* GmStrToType -- Convert a marker type string to a marker type code.
  */
 int
-GmStrToType (marker_type)
-char *marker_type;
+GmStrToType (char *marker_type)
 {
     int type;
 
@@ -1764,8 +1704,7 @@ char *marker_type;
 /* GmStrToEvent -- Convert a marker event type string to a marker event code.
  */
 int
-GmStrToEvent (event_type)
-char *event_type;
+GmStrToEvent (char *event_type)
 {
     int type;
 
@@ -1798,8 +1737,7 @@ char *event_type;
  * XLIB function code.
  */
 int
-GmStrToFunction (function)
-char *function;
+GmStrToFunction (char *function)
 {
     int code;
 
@@ -1847,9 +1785,7 @@ char *function;
  */
 
 static int
-gm_getint (value, type)
-    XtArgVal value;
-    char *type;
+gm_getint (XtArgVal value, char *type)
 {
     int ch;
 
@@ -1874,10 +1810,7 @@ gm_getint (value, type)
 
 
 static Pixel
-gm_getpixel (w, value, type)
-    GtermWidget w;
-    XtArgVal value;
-    char *type;
+gm_getpixel (GtermWidget w, XtArgVal value, char *type)
 {
     XrmValue from, to;
     Pixel pixel;
@@ -1949,10 +1882,7 @@ gm_getpixel (w, value, type)
 
 
 static int
-gm_getfillstyle (w, value, type)
-    GtermWidget w;
-    XtArgVal value;
-    char *type;
+gm_getfillstyle (GtermWidget w, XtArgVal value, char *type)
 {
     switch (gm_gettype (type)) {
     case Gt_String:
@@ -1974,9 +1904,7 @@ gm_getfillstyle (w, value, type)
 
 
 static double
-gm_getfloat (value, type)
-    XtArgVal value;
-    char *type;
+gm_getfloat (XtArgVal value, char *type)
 {
     switch (gm_gettype (type)) {
     case Gt_Bool:
@@ -1993,9 +1921,7 @@ gm_getfloat (value, type)
 
 
 static char *
-gm_getstring (value, type)
-    XtArgVal value;
-    char *type;
+gm_getstring (XtArgVal value, char *type)
 {
     if (strcmp (type, XtRString) == 0)
 	return ((char *)value);
@@ -2005,10 +1931,7 @@ gm_getstring (value, type)
 
 
 static int
-gm_putint (ival, value, type)
-    int ival;
-    XtArgVal value;
-    char *type;
+gm_putint (int ival, XtArgVal value, char *type)
 {
     switch (gm_gettype (type)) {
     case Gt_Bool:
@@ -2029,10 +1952,7 @@ gm_putint (ival, value, type)
 
 
 static int
-gm_putfloat (fval, value, type)
-    double fval;
-    XtArgVal value;
-    char *type;
+gm_putfloat (double fval, XtArgVal value, char *type)
 {
     switch (gm_gettype (type)) {
     case Gt_Bool:
@@ -2053,8 +1973,7 @@ gm_putfloat (fval, value, type)
 
 
 static int
-gm_gettype (type)
-    char *type;
+gm_gettype (char *type)
 {
     if (strcmp (type, XtRBool) == 0)
 	return (Gt_Int);
@@ -2072,8 +1991,7 @@ gm_gettype (type)
 
 
 static int
-gm_getattribute (attribute)
-    char *attribute;
+gm_getattribute (char *attribute)
 {
     if (strcmp (attribute, GmType) == 0)
 	return (Ga_Type);
@@ -2138,9 +2056,7 @@ gm_getattribute (attribute)
 }
 
 static void
-gm_linkafter (gm, prev)
-    Marker gm;
-    Marker prev;
+gm_linkafter (struct marker *gm, struct marker *prev)
 {
     GtermWidget w = gm->w;
 
@@ -2159,8 +2075,7 @@ gm_linkafter (gm, prev)
 
 
 static void
-gm_unlink (gm)
-    Marker gm;
+gm_unlink (struct marker *gm)
 {
     GtermWidget w = gm->w;
 
@@ -2183,12 +2098,7 @@ gm_unlink (gm)
  * event type.
  */
 static int
-gm_do_callbacks (gm, events, event, params, nparams)
-    Marker gm;
-    int events;
-    XEvent *event;
-    String *params;
-    Cardinal nparams;
+gm_do_callbacks (struct marker *gm, int events, XEvent *event, String *params, Cardinal nparams)
 {
     int n;
     struct markerCallback *cb;
@@ -2221,9 +2131,7 @@ gm_do_callbacks (gm, events, event, params, nparams)
  * certain area or range of sizes, to forbid rotation, and so on.
  */
 static void
-gm_constraint (gm, new_gm, what)
-    Marker gm, new_gm;
-    int what;
+gm_constraint (struct marker *gm, struct marker *new_gm, int what)
 {
     char *ip, *op;
     char argbuf[2048];
@@ -2298,8 +2206,7 @@ gm_constraint (gm, new_gm, what)
 
 
 static void
-gm_erase (gm)
-    Marker gm;
+gm_erase (struct marker *gm)
 {
     GtermWidget w = gm->w;
     XRectangle *r = &gm->old_rect;
@@ -2322,11 +2229,7 @@ gm_erase (gm)
 /* M_create -- Create a marker.
  */
 static void
-M_create (widget, event, params, nparams)
-    Widget widget;
-    XEvent *event;
-    String *params;
-    Cardinal *nparams;
+M_create (Widget widget, XEvent *event, String *params, Cardinal *nparams)
 {
     GtermWidget w = (GtermWidget)widget;
     XButtonEvent *ev = (XButtonEvent *) event;
@@ -2363,11 +2266,7 @@ M_create (widget, event, params, nparams)
 /* M_destroy -- Destroy a marker.
  */
 static void
-M_destroy (widget, event, params, nparams)
-    Widget widget;
-    XEvent *event;
-    String *params;
-    Cardinal *nparams;
+M_destroy (Widget widget, XEvent *event, String *params, Cardinal *nparams)
 {
     GtermWidget w = (GtermWidget)widget;
     XButtonEvent *ev = (XButtonEvent *) event;
@@ -2387,11 +2286,7 @@ M_destroy (widget, event, params, nparams)
 /* M_destroyNull -- Destroy a marker if it is null sized.
  */
 static void
-M_destroyNull (widget, event, params, nparams)
-    Widget widget;
-    XEvent *event;
-    String *params;
-    Cardinal *nparams;
+M_destroyNull (Widget widget, XEvent *event, String *params, Cardinal *nparams)
 {
     GtermWidget w = (GtermWidget)widget;
     XButtonEvent *ev = (XButtonEvent *) event;
@@ -2412,11 +2307,7 @@ M_destroyNull (widget, event, params, nparams)
 /* M_set -- Set a marker attribute.
  */
 static void
-M_set (widget, event, params, nparams)
-    Widget widget;
-    XEvent *event;
-    String *params;
-    Cardinal *nparams;
+M_set (Widget widget, XEvent *event, String *params, Cardinal *nparams)
 {
     GtermWidget w = (GtermWidget)widget;
     XButtonEvent *ev = (XButtonEvent *) event;
@@ -2438,11 +2329,7 @@ M_set (widget, event, params, nparams)
 /* M_raise -- Raise a marker to the top of the display list.
  */
 static void
-M_raise (widget, event, params, nparams)
-    Widget widget;
-    XEvent *event;
-    String *params;
-    Cardinal *nparams;
+M_raise (Widget widget, XEvent *event, String *params, Cardinal *nparams)
 {
     GtermWidget w = (GtermWidget)widget;
     XButtonEvent *ev = (XButtonEvent *) event;
@@ -2462,11 +2349,7 @@ M_raise (widget, event, params, nparams)
 /* M_lower -- Lower a marker to the bottom of the display list.
  */
 static void
-M_lower (widget, event, params, nparams)
-    Widget widget;
-    XEvent *event;
-    String *params;
-    Cardinal *nparams;
+M_lower (Widget widget, XEvent *event, String *params, Cardinal *nparams)
 {
     GtermWidget w = (GtermWidget)widget;
     XButtonEvent *ev = (XButtonEvent *) event;
@@ -2487,11 +2370,7 @@ M_lower (widget, event, params, nparams)
  * specified type of events.
  */
 static void
-M_notify (widget, event, params, nparams)
-    Widget widget;
-    XEvent *event;
-    String *params;
-    Cardinal *nparams;
+M_notify (Widget widget, XEvent *event, String *params, Cardinal *nparams)
 {
     GtermWidget w = (GtermWidget)widget;
     XButtonEvent *ev = (XButtonEvent *) event;
@@ -2530,11 +2409,7 @@ M_notify (widget, event, params, nparams)
  * that a input event has occurred.
  */
 static void
-M_input (widget, event, params, nparams)
-    Widget widget;
-    XEvent *event;
-    String *params;
-    Cardinal *nparams;
+M_input (Widget widget, XEvent *event, String *params, Cardinal *nparams)
 {
     GtermWidget w = (GtermWidget)widget;
     XKeyEvent *ev = (XKeyEvent *) event;
@@ -2554,11 +2429,7 @@ M_input (widget, event, params, nparams)
  * can later be erased.
  */
 static void
-M_markpos (widget, event, params, nparams)
-    Widget widget;
-    XEvent *event;
-    String *params;
-    Cardinal *nparams;
+M_markpos (Widget widget, XEvent *event, String *params, Cardinal *nparams)
 {
     GtermWidget w = (GtermWidget)widget;
     XButtonEvent *ev = (XButtonEvent *) event;
@@ -2581,11 +2452,7 @@ M_markpos (widget, event, params, nparams)
  * markpos action is executed.
  */
 static void
-M_markposAdd (widget, event, params, nparams)
-    Widget widget;
-    XEvent *event;
-    String *params;
-    Cardinal *nparams;
+M_markposAdd (Widget widget, XEvent *event, String *params, Cardinal *nparams)
 {
     GtermWidget w = (GtermWidget)widget;
     XButtonEvent *ev = (XButtonEvent *) event;
@@ -2612,11 +2479,7 @@ M_markposAdd (widget, event, params, nparams)
 /* M_redraw -- Redraw a marker.
  */
 static void
-M_redraw (widget, event, params, nparams)
-    Widget widget;
-    XEvent *event;
-    String *params;
-    Cardinal *nparams;
+M_redraw (Widget widget, XEvent *event, String *params, Cardinal *nparams)
 {
     GtermWidget w = (GtermWidget)widget;
     XButtonEvent *ev = (XButtonEvent *) event;
@@ -2641,11 +2504,7 @@ M_redraw (widget, event, params, nparams)
 /* M_addPt -- Add a point.
  */
 static void
-M_addPt (widget, event, params, nparams)
-    Widget widget;
-    XEvent *event;
-    String *params;
-    Cardinal *nparams;
+M_addPt (Widget widget, XEvent *event, String *params, Cardinal *nparams)
 {
     GtermWidget w = (GtermWidget)widget;
     XButtonEvent *ev = (XButtonEvent *) event;
@@ -2669,11 +2528,7 @@ M_addPt (widget, event, params, nparams)
 /* M_deletePt -- Delete a point.
  */
 static void
-M_deletePt (widget, event, params, nparams)
-    Widget widget;
-    XEvent *event;
-    String *params;
-    Cardinal *nparams;
+M_deletePt (Widget widget, XEvent *event, String *params, Cardinal *nparams)
 {
     GtermWidget w = (GtermWidget)widget;
     XButtonEvent *ev = (XButtonEvent *) event;
@@ -2695,11 +2550,7 @@ M_deletePt (widget, event, params, nparams)
 /* M_movePt -- Move a point.
  */
 static void
-M_movePt (widget, event, params, nparams)
-    Widget widget;
-    XEvent *event;
-    String *params;
-    Cardinal *nparams;
+M_movePt (Widget widget, XEvent *event, String *params, Cardinal *nparams)
 {
     GtermWidget w = (GtermWidget)widget;
     XButtonEvent *ev = (XButtonEvent *) event;
@@ -2724,11 +2575,7 @@ M_movePt (widget, event, params, nparams)
  * pointer position.
  */
 static void
-M_deleteDestroy (widget, event, params, nparams)
-    Widget widget;
-    XEvent *event;
-    String *params;
-    Cardinal *nparams;
+M_deleteDestroy (Widget widget, XEvent *event, String *params, Cardinal *nparams)
 {
     GtermWidget w = (GtermWidget)widget;
     XButtonEvent *ev = (XButtonEvent *) event;
@@ -2756,11 +2603,7 @@ M_deleteDestroy (widget, event, params, nparams)
 /* M_move -- Move a marker.
  */
 static void
-M_move (widget, event, params, nparams)
-    Widget widget;
-    XEvent *event;
-    String *params;
-    Cardinal *nparams;
+M_move (Widget widget, XEvent *event, String *params, Cardinal *nparams)
 {
     GtermWidget w = (GtermWidget)widget;
     XButtonEvent *ev = (XButtonEvent *) event;
@@ -2784,11 +2627,7 @@ M_move (widget, event, params, nparams)
 /* M_resize -- Resize a marker.
  */
 static void
-M_resize (widget, event, params, nparams)
-    Widget widget;
-    XEvent *event;
-    String *params;
-    Cardinal *nparams;
+M_resize (Widget widget, XEvent *event, String *params, Cardinal *nparams)
 {
     GtermWidget w = (GtermWidget)widget;
     XButtonEvent *ev = (XButtonEvent *) event;
@@ -2813,11 +2652,7 @@ M_resize (widget, event, params, nparams)
  * upon the pointer position.
  */
 static void
-M_moveResize (widget, event, params, nparams)
-    Widget widget;
-    XEvent *event;
-    String *params;
-    Cardinal *nparams;
+M_moveResize (Widget widget, XEvent *event, String *params, Cardinal *nparams)
 {
     GtermWidget w = (GtermWidget)widget;
     XButtonEvent *ev = (XButtonEvent *) event;
@@ -2855,11 +2690,7 @@ resize:	    GmResize (gm, ev->x, ev->y);
 /* M_rotate -- Rotate a marker.
  */
 static void
-M_rotate (widget, event, params, nparams)
-    Widget widget;
-    XEvent *event;
-    String *params;
-    Cardinal *nparams;
+M_rotate (Widget widget, XEvent *event, String *params, Cardinal *nparams)
 {
     GtermWidget w = (GtermWidget)widget;
     XButtonEvent *ev = (XButtonEvent *) event;
@@ -2883,11 +2714,7 @@ M_rotate (widget, event, params, nparams)
 /* M_rotateResize -- Rotate or resize a marker.
  */
 static void
-M_rotateResize (widget, event, params, nparams)
-    Widget widget;
-    XEvent *event;
-    String *params;
-    Cardinal *nparams;
+M_rotateResize (Widget widget, XEvent *event, String *params, Cardinal *nparams)
 {
     GtermWidget w = (GtermWidget)widget;
     XButtonEvent *ev = (XButtonEvent *) event;
@@ -2949,15 +2776,13 @@ M_rotateResize (widget, event, params, nparams)
 
 /* Marker class TEXT.
  */
-static int gm_text_select();
-static void gm_text_move(), gm_text_resize();
-static void gm_text_markpos(), gm_text_redraw();
-static void gm_text_update(), gm_text_updatePolygon();
+static int gm_text_select(struct marker *gm, int x, int y, GmSelection what);
+static void gm_text_move(struct marker *gm, int x, int y), gm_text_resize(struct marker *gm, int x, int y);
+static void gm_text_markpos(struct marker *gm), gm_text_redraw(struct marker *gm, int function);
+static void gm_text_update(struct marker *gm), gm_text_updatePolygon(struct marker *gm);
 
 static void
-gm_text_init (gm, interactive)
-    Marker gm;
-    int interactive;
+gm_text_init (struct marker *gm, int interactive)
 {
     GtermWidget w = gm->w;
 
@@ -3005,10 +2830,7 @@ gm_text_init (gm, interactive)
 }
 
 static int
-gm_text_select (gm, x, y, what)
-    Marker gm;
-    int x, y;
-    GmSelection what;
+gm_text_select (struct marker *gm, int x, int y, GmSelection what)
 {
     if (gm_select (gm, x, y, what)) {
 	if (what && what->type == Ge_Edge)
@@ -3020,17 +2842,14 @@ gm_text_select (gm, x, y, what)
 
 
 static void
-gm_text_markpos (gm)
-    Marker gm;
+gm_text_markpos (struct marker *gm)
 {
     gm_markpos (gm);
 }
 
 
 static void
-gm_text_redraw (gm, function)
-    Marker gm;
-    int function;
+gm_text_redraw (struct marker *gm, int function)
 {
     GtermWidget w = gm->w;
     int flags = (Gm_Activated|Gm_Visible);
@@ -3145,8 +2964,7 @@ gm_text_redraw (gm, function)
 
 
 static void
-gm_text_update (gm)
-    Marker gm;
+gm_text_update (struct marker *gm)
 {
     GtermWidget w = gm->w;
     int flags = (Gm_Activated|Gm_Visible);
@@ -3164,9 +2982,7 @@ gm_text_update (gm)
 }
 
 static void
-gm_text_move (gm, x, y)
-    Marker gm;
-    int x, y;
+gm_text_move (struct marker *gm, int x, int y)
 {
     struct marker new_gm;
     new_gm.x = max (0, x - gm->width / 2);
@@ -3180,9 +2996,7 @@ gm_text_move (gm, x, y)
 }
 
 static void
-gm_text_resize (gm, x, y)
-    Marker gm;
-    int x, y;
+gm_text_resize (struct marker *gm, int x, int y)
 {
     struct marker new_gm;
     new_gm.width = abs (x - gm->x);
@@ -3196,8 +3010,7 @@ gm_text_resize (gm, x, y)
 }
 
 static void
-gm_text_updatePolygon (gm)
-    Marker gm;
+gm_text_updatePolygon (struct marker *gm)
 {
     XPoint *p = gm->points;
     int xsize = gm->width;
@@ -3214,9 +3027,7 @@ gm_text_updatePolygon (gm)
 /* Marker class LINE.
  */
 static void
-gm_line_init (gm, interactive)
-    Marker gm;
-    int interactive;
+gm_line_init (struct marker *gm, int interactive)
 {
     gm->type = Gm_Line;
     /* stub out for now */
@@ -3226,9 +3037,7 @@ gm_line_init (gm, interactive)
 /* Marker class POLYLINE.
  */
 static void
-gm_plin_init (gm, interactive)
-    Marker gm;
-    int interactive;
+gm_plin_init (struct marker *gm, int interactive)
 {
     gm->type = Gm_Polyline;
     /* stub out for now */
@@ -3237,14 +3046,12 @@ gm_plin_init (gm, interactive)
 
 /* Marker class RECTANGLE.
  */
-static int gm_rect_select();
-static void gm_rect_move(), gm_rect_resize(), gm_rect_rotate();
-static void gm_rect_update(), gm_rect_updatePolygon();
+static int gm_rect_select(struct marker *gm, int x, int y, GmSelection what);
+static void gm_rect_move(struct marker *gm, int x, int y), gm_rect_resize(struct marker *gm, int x, int y), gm_rect_rotate(struct marker *gm, int x, int y);
+static void gm_rect_update(struct marker *gm), gm_rect_updatePolygon(struct marker *gm);
 
 static void
-gm_rect_init (gm, interactive)
-    Marker gm;
-    int interactive;
+gm_rect_init (struct marker *gm, int interactive)
 {
     GtermWidget w = gm->w;
 
@@ -3280,8 +3087,7 @@ gm_rect_init (gm, interactive)
 }
 
 static void
-gm_rect_update (gm)
-    Marker gm;
+gm_rect_update (struct marker *gm)
 {
     if (gm->flags & Gm_Modified) {
 	gm_rect_updatePolygon (gm);
@@ -3291,10 +3097,7 @@ gm_rect_update (gm)
 }
 
 static int
-gm_rect_select (gm, x, y, what)
-    Marker gm;
-    int x, y;
-    GmSelection what;
+gm_rect_select (struct marker *gm, int x, int y, GmSelection what)
 {
     if (gm_select (gm, x, y, what)) {
 	if (what && what->type == Ge_Edge)
@@ -3305,9 +3108,7 @@ gm_rect_select (gm, x, y, what)
 }
 
 static void
-gm_rect_move (gm, x, y)
-    Marker gm;
-    int x, y;
+gm_rect_move (struct marker *gm, int x, int y)
 {
     struct marker new_gm;
     new_gm.x = x;  new_gm.y = y;
@@ -3319,9 +3120,7 @@ gm_rect_move (gm, x, y)
 }
 
 static void
-gm_rect_resize (gm, x, y)
-    Marker gm;
-    int x, y;
+gm_rect_resize (struct marker *gm, int x, int y)
 {
 /*  double cos_rotangle = cos (-(gm->rotangle));
     double sin_rotangle = sin (-(gm->rotangle)); */
@@ -3364,9 +3163,7 @@ gm_rect_resize (gm, x, y)
 }
 
 static void
-gm_rect_rotate (gm, x, y)
-    Marker gm;
-    int x, y;
+gm_rect_rotate (struct marker *gm, int x, int y)
 {
     double alpha, theta;
     struct marker new_gm;
@@ -3396,8 +3193,7 @@ gm_rect_rotate (gm, x, y)
 }
 
 static void
-gm_rect_updatePolygon (gm)
-    Marker gm;
+gm_rect_updatePolygon (struct marker *gm)
 {
     int x, y;
     XPoint *p = gm->points;
@@ -3433,14 +3229,12 @@ gm_rect_updatePolygon (gm)
  * described and resized by the center and radius (width/height), like
  * the other "centered" marker types (circle, ellipse, etc.).
  */
-static int gm_boxx_select();
-static void gm_boxx_move(), gm_boxx_resize(), gm_boxx_rotate();
-static void gm_boxx_update(), gm_boxx_updatePolygon();
+static int gm_boxx_select(struct marker *gm, int x, int y, GmSelection what);
+static void gm_boxx_move(struct marker *gm, int x, int y), gm_boxx_resize(struct marker *gm, int x, int y), gm_boxx_rotate(struct marker *gm, int x, int y);
+static void gm_boxx_update(struct marker *gm), gm_boxx_updatePolygon(struct marker *gm);
 
 static void
-gm_boxx_init (gm, interactive)
-    Marker gm;
-    int interactive;
+gm_boxx_init (struct marker *gm, int interactive)
 {
     GtermWidget w = gm->w;
 
@@ -3476,8 +3270,7 @@ gm_boxx_init (gm, interactive)
 }
 
 static void
-gm_boxx_update (gm)
-    Marker gm;
+gm_boxx_update (struct marker *gm)
 {
     if (gm->flags & Gm_Modified) {
 	gm_boxx_updatePolygon (gm);
@@ -3487,10 +3280,7 @@ gm_boxx_update (gm)
 }
 
 static int
-gm_boxx_select (gm, x, y, what)
-    Marker gm;
-    int x, y;
-    GmSelection what;
+gm_boxx_select (struct marker *gm, int x, int y, GmSelection what)
 {
     if (gm_select (gm, x, y, what)) {
 	if (what && what->type == Ge_Edge)
@@ -3501,9 +3291,7 @@ gm_boxx_select (gm, x, y, what)
 }
 
 static void
-gm_boxx_move (gm, x, y)
-    Marker gm;
-    int x, y;
+gm_boxx_move (struct marker *gm, int x, int y)
 {
     struct marker new_gm;
     new_gm.x = x;  new_gm.y = y;
@@ -3515,9 +3303,7 @@ gm_boxx_move (gm, x, y)
 }
 
 static void
-gm_boxx_resize (gm, x, y)
-    Marker gm;
-    int x, y;
+gm_boxx_resize (struct marker *gm, int x, int y)
 {
 /*  double cos_rotangle = cos (-(gm->rotangle));
     double sin_rotangle = sin (-(gm->rotangle)); */
@@ -3546,9 +3332,7 @@ gm_boxx_resize (gm, x, y)
 }
 
 static void
-gm_boxx_rotate (gm, x, y)
-    Marker gm;
-    int x, y;
+gm_boxx_rotate (struct marker *gm, int x, int y)
 {
     double alpha, theta;
     struct marker new_gm;
@@ -3573,8 +3357,7 @@ gm_boxx_rotate (gm, x, y)
 }
 
 static void
-gm_boxx_updatePolygon (gm)
-    Marker gm;
+gm_boxx_updatePolygon (struct marker *gm)
 {
     int x, y;
     XPoint *p = gm->points;
@@ -3610,14 +3393,12 @@ gm_boxx_updatePolygon (gm)
 
 /* Marker class CIRCLE.
  */
-static int gm_circ_select();
-static void gm_circ_move(), gm_circ_resize(), gm_circ_rotate();
-static void gm_circ_update(), gm_circ_updatePolygon();
+static int gm_circ_select(struct marker *gm, int x, int y, GmSelection what);
+static void gm_circ_move(struct marker *gm, int x, int y), gm_circ_resize(struct marker *gm, int x, int y), gm_circ_rotate();
+static void gm_circ_update(struct marker *gm), gm_circ_updatePolygon(struct marker *gm);
 
 static void
-gm_circ_init (gm, interactive)
-    Marker gm;
-    int interactive;
+gm_circ_init (struct marker *gm, int interactive)
 {
     GtermWidget w = gm->w;
 
@@ -3656,8 +3437,7 @@ gm_circ_init (gm, interactive)
 }
 
 static void
-gm_circ_update (gm)
-    Marker gm;
+gm_circ_update (struct marker *gm)
 {
     if (gm->flags & Gm_Modified) {
 	gm_circ_updatePolygon (gm);
@@ -3667,10 +3447,7 @@ gm_circ_update (gm)
 }
 
 static int
-gm_circ_select (gm, x, y, what)
-    Marker gm;
-    int x, y;
-    GmSelection what;
+gm_circ_select (struct marker *gm, int x, int y, GmSelection what)
 {
     if (gm_select (gm, x, y, what)) {
 	if (what && what->type == Ge_Point)
@@ -3681,9 +3458,7 @@ gm_circ_select (gm, x, y, what)
 }
 
 static void
-gm_circ_move (gm, x, y)
-    Marker gm;
-    int x, y;
+gm_circ_move (struct marker *gm, int x, int y)
 {
     struct marker new_gm;
     new_gm.x = x;  new_gm.y = y;
@@ -3695,9 +3470,7 @@ gm_circ_move (gm, x, y)
 }
 
 static void
-gm_circ_resize (gm, x, y)
-    Marker gm;
-    int x, y;
+gm_circ_resize (struct marker *gm, int x, int y)
 {
     struct marker new_gm;
     new_gm.width = new_gm.height =
@@ -3710,8 +3483,7 @@ gm_circ_resize (gm, x, y)
 }
 
 static void
-gm_circ_updatePolygon (gm)
-    Marker gm;
+gm_circ_updatePolygon (struct marker *gm)
 {
     XPoint *p = gm->points;
     int npts, i, j;
@@ -3748,14 +3520,12 @@ gm_circ_updatePolygon (gm)
 
 /* Marker class ELLIPSE.
  */
-static int gm_elip_select();
-static void gm_elip_move(), gm_elip_resize(), gm_elip_rotate();
-static void gm_elip_update(), gm_elip_updatePolygon();
+static int gm_elip_select(struct marker *gm, int x, int y, GmSelection what);
+static void gm_elip_move(struct marker *gm, int x, int y), gm_elip_resize(struct marker *gm, int x, int y), gm_elip_rotate(struct marker *gm, int x, int y);
+static void gm_elip_update(struct marker *gm), gm_elip_updatePolygon(struct marker *gm);
 
 static void
-gm_elip_init (gm, interactive)
-    Marker gm;
-    int interactive;
+gm_elip_init (struct marker *gm, int interactive)
 {
     GtermWidget w = gm->w;
 
@@ -3793,8 +3563,7 @@ gm_elip_init (gm, interactive)
 }
 
 static void
-gm_elip_update (gm)
-    Marker gm;
+gm_elip_update (struct marker *gm)
 {
     if (gm->flags & Gm_Modified) {
 	gm_elip_updatePolygon (gm);
@@ -3804,10 +3573,7 @@ gm_elip_update (gm)
 }
 
 static int
-gm_elip_select (gm, x, y, what)
-    Marker gm;
-    int x, y;
-    GmSelection what;
+gm_elip_select (struct marker *gm, int x, int y, GmSelection what)
 {
     if (gm_select (gm, x, y, what)) {
 	if (what && what->type == Ge_Point)
@@ -3818,9 +3584,7 @@ gm_elip_select (gm, x, y, what)
 }
 
 static void
-gm_elip_move (gm, x, y)
-    Marker gm;
-    int x, y;
+gm_elip_move (struct marker *gm, int x, int y)
 {
     struct marker new_gm;
     new_gm.x = x;  new_gm.y = y;
@@ -3832,9 +3596,7 @@ gm_elip_move (gm, x, y)
 }
 
 static void
-gm_elip_resize (gm, x, y)
-    Marker gm;
-    int x, y;
+gm_elip_resize (struct marker *gm, int x, int y)
 {
     struct marker new_gm;
 /*  double theta = -(gm->rotangle);*/
@@ -3862,9 +3624,7 @@ gm_elip_resize (gm, x, y)
 }
 
 static void
-gm_elip_rotate (gm, x, y)
-    Marker gm;
-    int x, y;
+gm_elip_rotate (struct marker *gm, int x, int y)
 {
     struct marker new_gm;
     double theta;
@@ -3885,8 +3645,7 @@ gm_elip_rotate (gm, x, y)
 }
 
 static void
-gm_elip_updatePolygon (gm)
-    Marker gm;
+gm_elip_updatePolygon (struct marker *gm)
 {
     XPoint *p = gm->points;
     int npts, i, j;
@@ -3928,14 +3687,12 @@ gm_elip_updatePolygon (gm)
 /* Marker class POLYGON.
  */
 static int gm_pgon_select();
-static void gm_pgon_addPt(), gm_pgon_deletePt(), gm_pgon_movePt();
-static void gm_pgon_move(), gm_pgon_resize(), gm_pgon_rotate();
-static void gm_pgon_redraw(), gm_pgon_update(), gm_pgon_updatePolygon();
+static void gm_pgon_addPt(struct marker *gm, int x, int y), gm_pgon_deletePt(struct marker *gm, int x, int y), gm_pgon_movePt(struct marker *gm, int x, int y);
+static void gm_pgon_move(struct marker *gm, int x, int y), gm_pgon_resize(struct marker *gm, int x, int y), gm_pgon_rotate(struct marker *gm, int x, int y);
+static void gm_pgon_redraw(struct marker *gm, int function), gm_pgon_update(struct marker *gm), gm_pgon_updatePolygon(struct marker *gm);
 
 static void
-gm_pgon_init (gm, interactive)
-    Marker gm;
-    int interactive;
+gm_pgon_init (struct marker *gm, int interactive)
 {
     GtermWidget w = gm->w;
     DPoint *p;
@@ -4018,9 +3775,7 @@ gm_pgon_init (gm, interactive)
 }
 
 static void
-gm_pgon_redraw (gm, function)
-    Marker gm;
-    int function;
+gm_pgon_redraw (struct marker *gm, int function)
 {
     /* The PgonInit flag is set when a polygon marker is interactively created
      * to cause any pointer motion event to resize the marker.  The first
@@ -4033,8 +3788,7 @@ gm_pgon_redraw (gm, function)
 }
 
 static void
-gm_pgon_update (gm)
-    Marker gm;
+gm_pgon_update (struct marker *gm)
 {
     if (gm->flags & Gm_Modified) {
 	gm_pgon_updatePolygon (gm);
@@ -4044,9 +3798,7 @@ gm_pgon_update (gm)
 }
 
 static void
-gm_pgon_addPt (gm, x, y)
-    Marker gm;
-    int x, y;
+gm_pgon_addPt (struct marker *gm, int x, int y)
 {
     DPoint *pv;
     GtermWidget w = gm->w;
@@ -4100,9 +3852,7 @@ gm_pgon_addPt (gm, x, y)
 }
 
 static void
-gm_pgon_deletePt (gm, x, y)
-    Marker gm;
-    int x, y;
+gm_pgon_deletePt (struct marker *gm, int x, int y)
 {
     DPoint *pv;
     GtermWidget w = gm->w;
@@ -4141,9 +3891,7 @@ gm_pgon_deletePt (gm, x, y)
 }
 
 static void
-gm_pgon_movePt (gm, x, y)
-    Marker gm;
-    int x, y;
+gm_pgon_movePt (struct marker *gm, int x, int y)
 {
     DPoint *p;
     GtermWidget w = gm->w;
@@ -4182,9 +3930,7 @@ gm_pgon_movePt (gm, x, y)
 }
 
 static void
-gm_pgon_move (gm, x, y)
-    Marker gm;
-    int x, y;
+gm_pgon_move (struct marker *gm, int x, int y)
 {
     struct marker new_gm;
 
@@ -4201,9 +3947,7 @@ gm_pgon_move (gm, x, y)
 }
 
 static void
-gm_pgon_resize (gm, x, y)
-    Marker gm;
-    int x, y;
+gm_pgon_resize (struct marker *gm, int x, int y)
 {
     DPoint *p, *q;
     GtermWidget w = gm->w;
@@ -4261,9 +4005,7 @@ gm_pgon_resize (gm, x, y)
 }
 
 static void
-gm_pgon_rotate (gm, x, y)
-    Marker gm;
-    int x, y;
+gm_pgon_rotate (struct marker *gm, int x, int y)
 {
     DPoint *p;
     GtermWidget w = gm->w;
@@ -4314,8 +4056,7 @@ gm_pgon_rotate (gm, x, y)
 }
 
 static void
-gm_pgon_updatePolygon (gm)
-    Marker gm;
+gm_pgon_updatePolygon (struct marker *gm)
 {
     int npts, i;
     DPoint *ip = gm->pgon;
@@ -4364,10 +4105,7 @@ gm_pgon_updatePolygon (gm)
  * determine whether the point selects a vertex, edge, or the entire marker.
  */
 static int
-gm_select (gm, x, y, what)
-    Marker gm;
-    int x, y;
-    GmSelection what;
+gm_select (struct marker *gm, int x, int y, GmSelection what)
 {
     XPoint *p, *ptop;
     GtermWidget w = gm->w;
@@ -4486,9 +4224,7 @@ gm_select (gm, x, y, what)
 }
 
 static int
-point_in_poly (npol, xp, yp, x, y)
-int 	npol;
-float 	*xp, *yp, x, y;
+point_in_poly (int npol, float *xp, float *yp, float x, float y)
 {
       int i, j, c = 0;
 
@@ -4508,8 +4244,7 @@ float 	*xp, *yp, x, y;
 /* gm_markpos -- Mark the current position of a marker.
  */
 static void
-gm_markpos (gm)
-    Marker gm;
+gm_markpos (struct marker *gm)
 {
     gm->old_rect = gm->cur_rect;
     XUnionRegion (gm->cur_region, null_region, gm->old_region);
@@ -4519,9 +4254,7 @@ gm_markpos (gm)
 /* gm_redraw -- Redraw a marker expressed as a list of vertices.
  */
 static void
-gm_redraw (gm, function)
-    Marker gm;
-    int function;
+gm_redraw (struct marker *gm, int function)
 {
     GtermWidget w = gm->w;
     Display *display = w->gterm.display;
@@ -4614,9 +4347,9 @@ gm_redraw (gm, function)
 /* gm_rotate_indicator -- Draw a line indicating the rotation angle.
  */
 static void
-gm_rotate_indicator (gm, function)				/* MF020 */
-Marker gm;
-int    function;
+gm_rotate_indicator (struct marker *gm, int function)				/* MF020 */
+          
+                
 {
     GtermWidget w = gm->w;
     Display *display = w->gterm.display;
@@ -4655,8 +4388,7 @@ int    function;
  * a marker (assumes that the marker is expressed as list of points).
  */
 static void
-gm_setCurRect (gm)
-Marker gm;
+gm_setCurRect (struct marker *gm)
 {
     int border;
 
@@ -4678,8 +4410,7 @@ Marker gm;
 /* gm_niceAngle -- Round a rotation angle to a "nice" value.
  */
 static double
-gm_niceAngle (alpha)
-    double alpha;
+gm_niceAngle (double alpha)
 {
     double tol = 0.003;
     double beta;

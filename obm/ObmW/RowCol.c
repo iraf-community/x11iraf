@@ -14,7 +14,7 @@ static Boolean  set_values(Widget ,Widget ,Widget,ArgList ,Cardinal *);
 static char  rcsid[] = "$Header: RowCol.w,v 1.1 92/10/14 18:36:36 bert Exp $";
 static void align_child(Widget,int ,int ,int ,int ,Alignment );
 
-/*ARGSUSED*/static void align_child(self,cx,cy,width,height,alignment)Widget self;int  cx;int  cy;int  width;int  height;Alignment  alignment;
+/*ARGSUSED*/static void align_child(Widget self, int cx, int cy, int width, int height, Alignment alignment)
 {
     Position x, y;
 
@@ -101,8 +101,7 @@ layout,
 },
 };
 WidgetClass xfwfRowColWidgetClass = (WidgetClass) &xfwfRowColClassRec;
-static void _resolve_inheritance(class)
-WidgetClass class;
+static void _resolve_inheritance(WidgetClass class)
 {
   XfwfRowColWidgetClass c = (XfwfRowColWidgetClass) class;
   XfwfRowColWidgetClass super;
@@ -119,11 +118,11 @@ WidgetClass class;
   if (c->xfwfRowCol_class.layout == XtInherit_layout)
     c->xfwfRowCol_class.layout = super->xfwfRowCol_class.layout;
 }
-/*ARGSUSED*/static void change_managed(self)Widget self;
+/*ARGSUSED*/static void change_managed(Widget self)
 {
     ((XfwfRowColWidgetClass)self->core.widget_class)->xfwfRowCol_class.layout(self, ((XfwfRowColWidget)self)->xfwfRowCol.shrinkToFit);
 }
-/*ARGSUSED*/static void layout(self,shrink)Widget self;int  shrink;
+/*ARGSUSED*/static void layout(Widget self, int shrink)
 {
     int nrows, ncols, i, nchild, n;
     Position left, top, x, y;
@@ -235,10 +234,7 @@ do_shrink:
 
 
 /*ARGSUSED*/static XtGeometryResult
-geometry_manager (child,request,reply)
-Widget  child;
-XtWidgetGeometry * request;
-XtWidgetGeometry * reply;
+geometry_manager (Widget child, XtWidgetGeometry *request, XtWidgetGeometry *reply)
 {
     Widget self = XtParent(child);
     Dimension newwd, newht, newbd;
@@ -289,15 +285,15 @@ XtWidgetGeometry * reply;
     }
 }
 
-/*ARGSUSED*/static void resize(self)Widget self;
+/*ARGSUSED*/static void resize(Widget self)
 {
     if (((XfwfRowColWidget)self)->xfwfRowCol.rows == 0 && ((XfwfRowColWidget)self)->xfwfRowCol.columns == 0) ((XfwfRowColWidgetClass)self->core.widget_class)->xfwfRowCol_class.layout(self, False);
 }
-/*ARGSUSED*/static void initialize(request,self,args,num_args)Widget  request;Widget self;ArgList  args;Cardinal * num_args;
+/*ARGSUSED*/static void initialize(Widget request, Widget self, ArgList args, Cardinal *num_args)
 {
     ((XfwfRowColWidget)self)->xfwfRowCol.max_width = ((XfwfRowColWidget)self)->xfwfRowCol.max_height = 0;
 }
-/*ARGSUSED*/static Boolean  set_values(old,request,self,args,num_args)Widget  old;Widget  request;Widget self;ArgList  args;Cardinal * num_args;
+/*ARGSUSED*/static Boolean  set_values(Widget old, Widget request, Widget self, ArgList args, Cardinal *num_args)
 {
     Boolean need_layout = False;
     Boolean need_redisplay = False;
