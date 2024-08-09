@@ -3646,7 +3646,7 @@ TriggerMarkChanges(HTMLWidget hw, struct mark_up *mptr, int *x, int *y)
 				{
 					free(tptr);
 					WidgetId++;
-					(void)MakeWidget(hw, mptr->start, x, y,
+					MakeWidget(hw, mptr->start, *x, *y,
 						WidgetId, CurrentForm);
 				}
 				else
