@@ -30,17 +30,17 @@
 */
 
 
-static void printstat();
-static void xim_initPrinterList();
+static void printstat(XimDataPtr xim, char *message);
+static void xim_initPrinterList(XimDataPtr xim);
 
 
 /*  XIM_PRINT -- Print the indicated region of the current display frame to
 **  the printer device or to a file.
 */
 int
-xim_print (xim, x0,y0, nx,ny)
-XimDataPtr xim;
-int x0,y0, nx,ny;				/* region of source raster */
+xim_print (XimDataPtr xim, int x0, int y0, int nx, int ny)
+               
+                 				/* region of source raster */
 {
 	PSImagePtr psim = xim->psim;
 	PrintCfgPtr pcp = xim->pcp;
@@ -53,7 +53,7 @@ int x0,y0, nx,ny;				/* region of source raster */
 	static char text[SZ_LINE];
 	int w, h, ncolors;
 	FILE *fp;
-	char *mktemp();
+	char *mktemp(char *);
 
 
 	bzero (text, SZ_LINE);
@@ -188,9 +188,7 @@ int x0,y0, nx,ny;				/* region of source raster */
 */
 
 void
-ximp_rename (xim, old, new)
-XimDataPtr xim;
-char *old, *new;
+ximp_rename (XimDataPtr xim, char *old, char *new)
 {
 	char text[SZ_LINE];
 	struct stat fs;
@@ -208,9 +206,7 @@ char *old, *new;
 }
 
 void
-ximp_cancel (xim, fname)
-XimDataPtr xim;
-char *fname;
+ximp_cancel (XimDataPtr xim, char *fname)
 {
 	printstat (xim, "Print cancelled.");
 	unlink (fname);
@@ -220,12 +216,11 @@ char *fname;
 /* XIM_INITPRINTEROPS -- Initialize the printer operations.
 */
 void
-xim_initPrinterOps (xim)
-XimDataPtr xim;
+xim_initPrinterOps (XimDataPtr xim)
 {
         PrintCfgPtr pcp;
 	char buf[SZ_LINE];
-	PSImagePtr eps_init();
+	PSImagePtr eps_init(void);
 
 
 	/* Open a pointer to the EPS structure. */
@@ -268,8 +263,7 @@ XimDataPtr xim;
 */
 
 static void
-xim_initPrinterList (xim)
-XimDataPtr xim;
+xim_initPrinterList (XimDataPtr xim)
 {
 	int i;
 	FILE *fp;
@@ -351,9 +345,7 @@ XimDataPtr xim;
 */
 
 int
-xim_getPrinterInfo (xim, printer)
-XimDataPtr xim;
-char *printer;
+xim_getPrinterInfo (XimDataPtr xim, char *printer)
 {
 	int i;
         PrintCfgPtr pcp = xim->pcp;
@@ -371,9 +363,7 @@ char *printer;
 */
 
 static void
-printstat (xim, message)
-XimDataPtr xim;
-char *message;
+printstat (XimDataPtr xim, char *message)
 {
 	char text[SZ_LINE];
 

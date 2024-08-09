@@ -97,13 +97,13 @@ struct box {
 	int	sum;
 };
 
-static colorhist_vector medianCut (),  colorHashToColorHist ();
-static colorhist_vector computeColorHist ();
-static colorhash_table  computeColorHash (), colorHistToColorHash ();
-static colorhash_table  allocColorHash ();
-static int 		redCompare(), greenCompare(), blueCompare();
-static int 		lookupColor (), addToColorHash (), sumCompare();
-static void 		freeColorHash (), addToColorHist(),freeColorHist();
+static colorhist_vector medianCut (colorhist_vector chv, int colors, int sum, pixval maxval, int newcolors),  colorHashToColorHist (colorhash_table cht, int maxcolors);
+static colorhist_vector computeColorHist (pixel **pixels, int cols, int rows, int maxcolors, int *colorsP);
+static colorhash_table  computeColorHash (pixel **pixels, int cols, int rows, int maxcolors, int *colorsP), colorHistToColorHash (colorhist_vector chv, int colors);
+static colorhash_table  allocColorHash (void);
+static int 		redCompare(colorhist_vector ch1, colorhist_vector ch2), greenCompare(colorhist_vector ch1, colorhist_vector ch2), blueCompare(colorhist_vector ch1, colorhist_vector ch2);
+static int 		lookupColor (colorhash_table cht, pixel *colorP), addToColorHash (colorhash_table cht, pixel *colorP, int value), sumCompare(box_vector b1, box_vector b2);
+static void 		freeColorHash (colorhash_table cht), addToColorHist(colorhist_vector chv, int *colorsP, int maxcolors, pixel *colorP, int value, int position),freeColorHist(colorhist_vector chv);
 
 
 
@@ -114,12 +114,12 @@ static void 		freeColorHash (), addToColorHist(),freeColorHist();
  */
 
 int
-ppmquant (image, r, g, b, nx, ny, ncolors, newcolors)
-byte 	*image;				/* image pixels (i.e. cmap indices) */
-byte	*r, *g, *b;			/* colormap			    */
-int  	nx, ny;				/* image dimensions                 */
-int	ncolors;			/* current number of colors         */
-int	newcolors;			/* requested number of colors       */
+ppmquant (byte *image, byte *r, byte *g, byte *b, int nx, int ny, int ncolors, int newcolors)
+     	       				/* image pixels (i.e. cmap indices) */
+    	           			/* colormap			    */
+     	       				/* image dimensions                 */
+   	        			/* current number of colors         */
+   	          			/* requested number of colors       */
 {
 	pixel *pP;
 	long	sr, sg, sb, err;
@@ -357,10 +357,7 @@ int	newcolors;			/* requested number of colors       */
 */
 
 static colorhist_vector
-medianCut (chv, colors, sum, maxval, newcolors) 
-colorhist_vector chv;
-int	colors, sum, newcolors;
-pixval maxval;
+medianCut (colorhist_vector chv, int colors, int sum, pixval maxval, int newcolors)
 {
 	colorhist_vector colormap;
 	box_vector bv;
@@ -529,42 +526,35 @@ pixval maxval;
 
 
 static int	
-redCompare (ch1, ch2) 
-colorhist_vector ch1, ch2;
+redCompare (colorhist_vector ch1, colorhist_vector ch2)
 {
 	return (int) PPM_GETR (ch1->color)  - (int) PPM_GETR (ch2->color) ;
 }
 
 
 static int	
-greenCompare (ch1, ch2) 
-colorhist_vector ch1, ch2;
+greenCompare (colorhist_vector ch1, colorhist_vector ch2)
 {
 	return (int) PPM_GETG (ch1->color)  - (int) PPM_GETG (ch2->color) ;
 }
 
 
 static int	
-blueCompare (ch1, ch2) 
-colorhist_vector ch1, ch2;
+blueCompare (colorhist_vector ch1, colorhist_vector ch2)
 {
 	return (int) PPM_GETB (ch1->color)  - (int) PPM_GETB (ch2->color) ;
 }
 
 
 static int	
-sumCompare (b1, b2) 
-box_vector b1, b2;
+sumCompare (box_vector b1, box_vector b2)
 {
 	return b2->sum - b1->sum;
 }
 
 
 static colorhist_vector
-computeColorHist (pixels, cols, rows, maxcolors, colorsP) 
-pixel**pixels;
-int	cols, rows, maxcolors;
-int*colorsP;
+computeColorHist (pixel **pixels, int cols, int rows, int maxcolors, int *colorsP)
 {
 	colorhash_table cht;
 	colorhist_vector chv;
@@ -579,11 +569,7 @@ int*colorsP;
 
 
 static void
-addToColorHist (chv, colorsP, maxcolors, colorP, value, position) 
-colorhist_vector chv;
-pixel*colorP;
-int*colorsP;
-int	maxcolors, value, position;
+addToColorHist (colorhist_vector chv, int *colorsP, int maxcolors, pixel *colorP, int value, int position)
 {
 	int	i, j;
 
@@ -614,10 +600,7 @@ int	maxcolors, value, position;
 
 
 static colorhash_table
-computeColorHash (pixels, cols, rows, maxcolors, colorsP) 
-pixel**pixels;
-int	cols, rows, maxcolors;
-int*colorsP;
+computeColorHash (pixel **pixels, int cols, int rows, int maxcolors, int *colorsP)
 {
 	colorhash_table cht;
 	pixel*pP;
@@ -658,7 +641,7 @@ int*colorsP;
 
 
 static colorhash_table
-allocColorHash ()
+allocColorHash (void)
 {
 	colorhash_table cht;
 	int	i;
@@ -675,10 +658,7 @@ allocColorHash ()
 
 
 static int
-addToColorHash (cht, colorP, value) 
-colorhash_table cht;
-pixel*colorP;
-int	value;
+addToColorHash (colorhash_table cht, pixel *colorP, int value)
 {
 	int	hash;
 	colorhist_list chl;
@@ -696,9 +676,7 @@ int	value;
 
 
 static colorhist_vector
-colorHashToColorHist (cht, maxcolors) 
-colorhash_table cht;
-int	maxcolors;
+colorHashToColorHist (colorhash_table cht, int maxcolors)
 {
 	colorhist_vector chv;
 	colorhist_list chl;
@@ -725,9 +703,7 @@ int	maxcolors;
 
 
 static colorhash_table
-colorHistToColorHash (chv, colors) 
-colorhist_vector chv;
-int	colors;
+colorHistToColorHash (colorhist_vector chv, int colors)
 {
 	colorhash_table cht;
 	int	i, hash;
@@ -760,9 +736,7 @@ int	colors;
 
 
 static int
-lookupColor (cht, colorP) 
-colorhash_table cht;
-pixel*colorP;
+lookupColor (colorhash_table cht, pixel *colorP)
 {
 	int	hash;
 	colorhist_list chl;
@@ -777,16 +751,14 @@ pixel*colorP;
 
 
 static void
-freeColorHist (chv) 
-colorhist_vector chv;
+freeColorHist (colorhist_vector chv)
 {
 	free ((char *) chv) ;
 }
 
 
 static void
-freeColorHash (cht) 
-colorhash_table cht;
+freeColorHash (colorhash_table cht)
 {
 	int	i;
 	colorhist_list chl, chlnext;

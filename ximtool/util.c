@@ -32,9 +32,9 @@ typedef unsigned char uchar;
  * and overlapping.
  */
 void
-bswap2 (a, b, nbytes)
-char    *a, *b;         	/* input array                  */
-int     nbytes;         	/* number of bytes to swap      */
+bswap2 (char *a, char *b, int nbytes)
+                        	/* input array                  */
+                        	/* number of bytes to swap      */
 {
         char *ip=a, *op=b, *otop;
         unsigned temp;
@@ -59,12 +59,12 @@ int     nbytes;         	/* number of bytes to swap      */
  * The input and output arrays may be the same but may not partially overlap.
  */
 void
-bswap4 (a, aoff, b, boff, nbytes)
-char	*a;			/* input array			*/
-int	aoff;			/* first byte in input array	*/
-char	*b;			/* output array			*/
-int	boff;			/* first byte in output array	*/
-int	nbytes;			/* number of bytes to swap	*/
+bswap4 (char *a, int aoff, char *b, int boff, int nbytes)
+    	   			/* input array			*/
+   	     			/* first byte in input array	*/
+    	   			/* output array			*/
+   	     			/* first byte in output array	*/
+   	       			/* number of bytes to swap	*/
 {
 	char	*ip, *op, *tp;
 	int	n;
@@ -101,12 +101,12 @@ int	nbytes;			/* number of bytes to swap	*/
  * The input and output arrays may be the same but may not partially overlap.
  */
 void
-bswap8 (a, aoff, b, boff, nbytes)
-char	*a;			/* input array			*/
-int	aoff;			/* first byte in input array	*/
-char	*b;			/* output array			*/
-int	boff;			/* first byte in output array	*/
-int	nbytes;		/* number of bytes to swap	*/
+bswap8 (char *a, int aoff, char *b, int boff, int nbytes)
+    	   			/* input array			*/
+   	     			/* first byte in input array	*/
+    	   			/* output array			*/
+   	     			/* first byte in output array	*/
+   	       		/* number of bytes to swap	*/
 {
 	char	*ip, *op, *tp;
 	int	n;
@@ -149,7 +149,7 @@ int	nbytes;		/* number of bytes to swap	*/
 /* IS_SWAPPED -- See if this is a byte-swapped (relative to Sun) machine.
  */
 int
-is_swapped ()
+is_swapped (void)
 {
         union {
             char ch[4];
@@ -164,11 +164,7 @@ is_swapped ()
 /* MIN_MAX -- Get the min and max values of an array.
  */
 void
-min_max (a, npts, bitpix, min, max)
-char	*a;
-int	npts;
-int	bitpix;
-float	*min, *max;
+min_max (char *a, int npts, int bitpix, float *min, float *max)
 {
 	int i;
 
@@ -211,9 +207,7 @@ float	*min, *max;
 /* STRPAK -- Convert ASCII string from SPP char per short to C char per byte
  */
 void
-strpak (in, out, len)
-char	*in, *out;
-int	len;
+strpak (char *in, char *out, int len)
 {
 	int	i, j;
 
@@ -235,9 +229,7 @@ int	len;
  * for DISPLAY, even though the pixels are stored "flipped" in the pixfile.
  */
 void
-flip (buffer, nx, ny)
-uchar *buffer;
-int  nx, ny;
+flip (uchar *buffer, int nx, int ny)
 {
         int     i;
         int    j, v;

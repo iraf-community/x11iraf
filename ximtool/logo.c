@@ -13,8 +13,7 @@
 
 
 void
-xim_displayLogo (xim)
-XimDataPtr xim;
+xim_displayLogo (XimDataPtr xim)
 {
     int i;
     unsigned char r[256], g[256], b[256];

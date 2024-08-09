@@ -96,22 +96,22 @@ static char *ftfixdata ();
 /* loadFits - Load a simple FITS file.
  */
 char *
-loadFITS (fname, pix, nx, ny, r,g,b, ncolors, zsc, zr, z1, z2, nsample)
-char 	*fname;                		/* input filename 	*/
-uchar   **pix;                 		/* output pixels 	*/
-int 	*nx, *ny;                       /* dimensions 		*/
-uchar 	*r, *g, *b;               	/* colormap 		*/
-int 	*ncolors;                       /* number of colors 	*/
-int	zsc, zr;			/* z-scaling flags	*/
-float	*z1, *z2;			/* zscale values	*/
-int	nsample;			/* number of sample pts */
+loadFITS (char *fname, uchar **pix, int *nx, int *ny, uchar *r, uchar *g, uchar *b, int *ncolors, int zsc, int zr, float *z1, float *z2, int nsample)
+     	                       		/* input filename 	*/
+                               		/* output pixels 	*/
+    	                                /* dimensions 		*/
+      	                          	/* colormap 		*/
+    	                                /* number of colors 	*/
+   	        			/* z-scaling flags	*/
+     	         			/* zscale values	*/
+   	        			/* number of sample pts */
 
 {
 	FITS 	fs;
 	int	i, w = 0, h = 0, bitpix, np;
 	byte 	*image;
 	char	*error;
-	extern void flip();
+	extern void flip(uchar *buffer, int nx, int ny);
 
 	error = ftopen2d (&fs, fname, &w, &h, &bitpix);
 	if (error)
@@ -154,12 +154,7 @@ int	nsample;			/* number of sample pts */
  */
 
 char *
-writeFITS (fp, image, w, h, rmap, gmap, bmap, numcols)
-FILE 	*fp;
-byte 	*image;
-int	w, h;
-byte 	*rmap, *gmap, *bmap;
-int	numcols;
+writeFITS (FILE *fp, byte *image, int w, int h, byte *rmap, byte *gmap, byte *bmap, int numcols)
 {
 	int	i, j, np, nend;
 	byte *ptr;
@@ -197,8 +192,8 @@ int	numcols;
 /* IsFITS -- Test a file to see if it is a FITS file.
  */
 int 
-isFITS (fname)
-char	*fname;				/* input filename */
+isFITS (char *fname)
+    	       				/* input filename */
 {
 	FILE *fp;
 	int value = 0;
@@ -218,8 +213,7 @@ char	*fname;				/* input filename */
  */
 
 char *
-getFITSHdr (fname)
-char	*fname;
+getFITSHdr (char *fname)
 {
 	FITS 	fs;
 	char 	*error, *line;
@@ -255,9 +249,7 @@ char	*fname;
 
 /* Writes a minimalist FITS file header */
 static char
-*wrheader (fp, nx, ny)
-FILE 	*fp;
-int	nx, ny;
+*wrheader (FILE *fp, int nx, int ny)
 {
 	char	*block;
 	int	i;
@@ -289,10 +281,7 @@ int	nx, ny;
  * array.
  */
 static char	
-*ftopen2d(fs, file, nx, ny, bitpix)
-FITS 	*fs;
-char	*file;
-int	*nx, *ny, *bitpix;
+*ftopen2d(FITS *fs, char *file, int *nx, int *ny, int *bitpix)
 {
 	FILE 	*fp;
 	int	i;
@@ -330,8 +319,7 @@ int	*nx, *ny, *bitpix;
 
 /* closes a fits file */
 static void
-ftclose (fs)
-FITS 	*fs;
+ftclose (FITS *fs)
 {
 	if (fs == NULL) 
 	    return;
@@ -344,8 +332,7 @@ FITS 	*fs;
  * Returns NULL on success, or an error message otherwise.
  */
 static char *
-rdheader (fs)
-FITS 	*fs;
+rdheader (FITS *fs)
 {
 	int	i, j, res;
 	char	name[9];
@@ -494,10 +481,10 @@ FITS 	*fs;
  *         an integer is written, right justified in columns 11-30
  */
 static void
-wrcard (card, name, dtype, kvalue)
-char	*card, *name;
-enum 	datatype dtype;   /* type of value */
-int	kvalue;
+wrcard (char *card, char *name, enum datatype dtype, int kvalue)
+    	             
+     	                  /* type of value */
+   	       
 {
 	int	l;
 	memset(card, ' ', 80);
@@ -534,11 +521,11 @@ int	kvalue;
  * It returns NULL on success, or an error message otherwise.
  */
 static char *
-rdcard (card, name, dtype, kvalue, rvalue)
-char	*card, *name;
-enum 	datatype dtype;   			/* type of value */
-long 	int *kvalue;
-float 	*rvalue;
+rdcard (char *card, char *name, enum datatype dtype, long int *kvalue, float *rvalue)
+    	             
+     	                  			/* type of value */
+     	            
+      	        
 {
 	int	i, ptr;
 	char	namestr[9];
@@ -608,10 +595,7 @@ float 	*rvalue;
  * may be truncated, and should be padded out with zeros.
  */
 static char *
-ftgdata (fs, buffer, nelem)
-FITS 	*fs;
-void 	*buffer;
-int	nelem;
+ftgdata (FITS *fs, void *buffer, int nelem)
 {
 	int	res;
 
@@ -654,10 +638,7 @@ int	nelem;
  *  int       = 4 byte integer
  */
 static char *
-ftfixdata (fs, buffer, nelem)
-FITS 	*fs;
-void 	*buffer;
-int	nelem;
+ftfixdata (FITS *fs, void *buffer, int nelem)
 {
 	int	i, n = nelem;
 	uchar	*ptr = buffer;
@@ -755,21 +736,15 @@ int	nelem;
  * the maximum is stored as 255
  */
 static char *
-ftgbyte(fs, cbuff, nelem, zsc, zr, z1, z2, nsample)
-FITS 	*fs;
-uchar	*cbuff;
-int	nelem;
-int	zsc, zr;
-float 	*z1, *z2;
-int	nsample;
+ftgbyte(FITS *fs, uchar *cbuff, int nelem, int zsc, int zr, float *z1, float *z2, int nsample)
 {
 	char * voidbuff;
 	int	i, n = nelem;
 	char	*error;
 	int	pmin = 0, pmax = 255;
 	int	npts, stdline;
-	extern	void zscale();
-	extern void min_max();
+	extern	void zscale(char *im, int nx, int ny, int bitpix, float *z1, float *z2, float contrast, int opt_size, int len_stdline);
+	extern void min_max(char *a, int npts, int bitpix, float *min, float *max);
 
 	/* if the data is uchar, then read it directly */
 	if (fs->bitpix == 8 && (fs->bscale == 1.0 && fs->bzero == 0.0)) {

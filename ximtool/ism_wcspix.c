@@ -21,7 +21,7 @@ extern int errno;
 
 
 /* WCS/Pixel ISM client callbacks. */
-void  wcspix_connect(), wcspix_disconnect(), wcspix_command(), wcspix_message();
+void  wcspix_connect(XimDataPtr xim, IsmModule ism), wcspix_disconnect(XimDataPtr xim, IsmModule ism), wcspix_command(XimDataPtr xim, IsmModule ism, int argc, char **argv), wcspix_message(XimDataPtr xim, char *message);
 
 
 
@@ -30,10 +30,7 @@ void  wcspix_connect(), wcspix_disconnect(), wcspix_command(), wcspix_message();
  * the GUI that we are alive.
  */
 void
-wcspix_connect (xim, ism)
-XimDataPtr xim;
-IsmModule ism;
-
+wcspix_connect (XimDataPtr xim, IsmModule ism)
 {
         MappingPtr mp;
 	FrameBufPtr fr;
@@ -68,9 +65,7 @@ IsmModule ism;
  * command to the module and notify the GUI.
  */
 void
-wcspix_disconnect (xim, ism)
-XimDataPtr xim;
-IsmModule ism;
+wcspix_disconnect (XimDataPtr xim, IsmModule ism)
 {
         MappingPtr mp;
 	FrameBufPtr fr;
@@ -108,11 +103,7 @@ IsmModule ism;
  *
  */
 void
-wcspix_command (xim, ism, argc, argv)
-XimDataPtr xim;
-IsmModule ism;
-int	argc;
-char	**argv;
+wcspix_command (XimDataPtr xim, IsmModule ism, int argc, char **argv)
 {
 	int i;
 
@@ -128,9 +119,7 @@ char	**argv;
  * but format it so it's delivered to the WCSPIX callback procedures.
  */
 void
-wcspix_message (xim, message)
-XimDataPtr xim;
-char *message;
+wcspix_message (XimDataPtr xim, char *message)
 {
         char msgbuf[SZ_MSGBUF];
 

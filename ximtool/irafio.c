@@ -76,18 +76,18 @@ typedef unsigned char uchar;
 #include <stddef.h>
 #include <stdlib.h>
 
-extern int is_swapped();
-extern void bswap2(), bswap4(), bswap8();
-extern void strpak();
-extern void min_max();
-extern void flip();
-extern void zscale();
+extern int is_swapped(void);
+extern void bswap2(char *a, char *b, int nbytes), bswap4(char *a, int aoff, char *b, int boff, int nbytes), bswap8(char *a, int aoff, char *b, int boff, int nbytes);
+extern void strpak(char *in, char *out, int len);
+extern void min_max(char *a, int npts, int bitpix, float *min, float *max);
+extern void flip(uchar *buffer, int nx, int ny);
+extern void zscale(char *im, int nx, int ny, int bitpix, float *z1, float *z2, float contrast, int opt_size, int len_stdline);
 
-char 	*index();
-char 	*getIRAFHdr();
-int	isIRAF();
-static char 	*irafReadPixels();
-static void 	irafGetPixfile ();
+char 	*index(const char *, int);
+char 	*getIRAFHdr(char *fname);
+int	isIRAF(char *fname);
+static char 	*irafReadPixels(char *pixfile, int swap, int pix_offset, int pixtype, uchar **image, int nx, int ny, int px, int py, int zsc, int zr, float *z1, float *z2, int nsample);
+static void 	irafGetPixfile (char *fname, char *pfile);
 
 
 /* +------------------+
@@ -99,15 +99,15 @@ static void 	irafGetPixfile ();
 /* loadIRAF - Load a IRAF file.
  */
 char *
-loadIRAF  (fname, image, nx, ny, r,g,b, ncolors, zsc, zr, z1, z2, nsample)
-char    *fname;                         /* input filename       */
-uchar   **image;                        /* output pixels        */
-int     *nx, *ny;                       /* dimensions           */
-uchar   *r, *g, *b;                     /* colormap             */
-int     *ncolors;                       /* number of colors     */
-int	zsc, zr;			/* z-scaling flags	*/
-float   *z1, *z2;                       /* zscale values        */
-int	nsample;			/* nu,ber of sample pts */
+loadIRAF  (char *fname, uchar **image, int *nx, int *ny, uchar *r, uchar *g, uchar *b, int *ncolors, int zsc, int zr, float *z1, float *z2, int nsample)
+                                        /* input filename       */
+                                        /* output pixels        */
+                                        /* dimensions           */
+                                        /* colormap             */
+                                        /* number of colors     */
+   	        			/* z-scaling flags	*/
+                                        /* zscale values        */
+   	        			/* nu,ber of sample pts */
 {
 	FILE 	*hdr;
 	int 	i, px, py, version, swapped;
@@ -213,8 +213,8 @@ int	nsample;			/* nu,ber of sample pts */
 /* IsIRAF -- Test a file to see if it is a IRAF file.
  */
 int 
-isIRAF (fname)
-char	*fname;				/* input filename */
+isIRAF (char *fname)
+    	       				/* input filename */
 {
 	FILE *fp;
 	int value = 0;
@@ -243,8 +243,7 @@ char	*fname;				/* input filename */
  */
 
 char *
-getIRAFHdr (fname)
-char    *fname;
+getIRAFHdr (char *fname)
 {
 	FILE 	*hdr;
         char    *title, *line;
@@ -349,13 +348,11 @@ char    *fname;
  */
 
 static void
-irafGetPixfile (fname, pfile)
-char    *fname;
-char    *pfile;
+irafGetPixfile (char *fname, char *pfile)
 {
         char    temp[SZ_V1PIXFILE], *ip;
         int     len;
-        char    *index();
+        char    *index(const char *, int);
 
         if (strncmp (pfile, "HDR$", 4) == 0) {
             /* Handle the special case of a HDR$ pixfile path, prepend the

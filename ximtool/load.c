@@ -35,11 +35,11 @@
 #undef min
 #define min(a,b) ((a) < (b) ? (a) : (b)) 
 
-static char 	**listFiles();
-static int 	fileCompare(), globExpression(), fileType(), ucharCompare();
-static void 	amapc(), sortGraymap(), loadstat(), strsort();
+static char 	**listFiles(char *directory, char *pattern, int *number_entries, int files_only);
+static int 	fileCompare(void *x, void *y), globExpression(char *expression, char *pattern), fileType(char *fname), ucharCompare(unsigned char *i, unsigned char *j);
+static void 	amapc(char *a, char *b, int npix, int a1, int a2, int b1, int b2), sortGraymap(unsigned char *a, unsigned char *b, int npix, unsigned char *red, unsigned char *green, unsigned char *blue, int ncols), loadstat(XimDataPtr xim, char *message), strsort(char **array, int array_size);
 
-extern char 	*getcwd(), *getenv();
+extern char 	*getcwd(char *, size_t), *getenv(const char *);
 
 static int debug = False;
 
@@ -47,8 +47,7 @@ static int debug = False;
 /* XIM_INITLOAD -- Initialize the file load structure.
  */
 void
-xim_initLoad (xim)
-XimDataPtr xim;
+xim_initLoad (XimDataPtr xim)
 {
 	fileLoadPtr flp;
 	char buf[SZ_LINE];
@@ -91,8 +90,7 @@ XimDataPtr xim;
 /* XIM_LOADCLOSE -- Close the load struct.
  */
 void
-xim_loadClose (xim)
-XimDataPtr xim;
+xim_loadClose (XimDataPtr xim)
 {
 	fileLoadPtr flp = xim->flp;
 	int i;
@@ -109,10 +107,7 @@ XimDataPtr xim;
  * colormap.
  */
 int
-xim_loadFile (xim, fname, frame)
-XimDataPtr xim;
-char *fname;
-int frame;
+xim_loadFile (XimDataPtr xim, char *fname, int frame)
 {
 	int i, new_config=-1;
 	char *ip;
@@ -127,11 +122,11 @@ int frame;
 	unsigned char *pix=NULL, r[256], g[256], b[256];
 	char *mapname, *err, buf[SZ_LINE];
 
-	extern char *loadSunRas();
-	extern char *loadFITS();
-	extern char *loadGIF();
-	extern char *loadIRAF();
-	extern void ppmquant();
+	extern char *loadSunRas(char *fname, unsigned char **pixels, int *pixtype, int *o_w, int *o_h, unsigned char *r, unsigned char *g, unsigned char *b, int *ncolors, int colorstyle);
+	extern char *loadFITS(char *fname, uchar **pix, int *nx, int *ny, uchar *r, uchar *g, uchar *b, int *ncolors, int zsc, int zr, float *z1, float *z2, int nsample);
+	extern char *loadGIF(char *fname, uchar **pix, int *nx, int *ny, uchar *r, uchar *g, uchar *b, int *ncolors, int gray);
+	extern char *loadIRAF(char *fname, uchar **image, int *nx, int *ny, uchar *r, uchar *g, uchar *b, int *ncolors, int zsc, int zr, float *z1, float *z2, int nsample);
+	extern void ppmquant(byte *image, byte *r, byte *g, byte *b, int nx, int ny, int ncolors, int newcolors);
 	extern int objid[];
 
         /* Make sure the file exists. */
@@ -412,8 +407,7 @@ int frame;
  * list to the GUI.
  */
 void
-xim_dirRescan (xim)
-XimDataPtr xim;
+xim_dirRescan (XimDataPtr xim)
 {
         fileLoadPtr flp = xim->flp;
 	char *ip, *op, *flist;
@@ -450,15 +444,16 @@ XimDataPtr xim;
 /* XIM_SCANHEADERS --
  */
 void
-xim_scanHeaders (xim)
-XimDataPtr xim;
+xim_scanHeaders (XimDataPtr xim)
 {
         fileLoadPtr flp = xim->flp;
 	char *ip, *op;
 	char *entry = (char *)NULL, *flist = (char *)NULL;
 	int i;
-	extern char *getFITSHdr(), *getIRAFHdr();
-	extern char *getSunRasHdr(), *getGIFHdr();
+	extern char *getFITSHdr(char *fname);
+	extern char *getIRAFHdr(char *fname);
+	extern char *getSunRasHdr(char *fname);
+	extern char *getGIFHdr(char *fname);
 
 	if (flp->FileList) {
 	    for (i=0;  i < flp->nfiles;  i++)
@@ -512,14 +507,13 @@ XimDataPtr xim;
 /* fileType -- Given a filename return what type of file it is.
  */
 static int
-fileType (fname)
-char *fname;
+fileType (char *fname)
 {
 	int format;
-	extern int isSunRas();
-	extern int isFITS();
-	extern int isGIF();
-	extern int isIRAF();
+	extern int isSunRas(char *fname);
+	extern int isFITS(char *fname);
+	extern int isGIF(char *fname);
+	extern int isIRAF(char *fname);
 
 	if (isFITS (fname))
 	    format = XIM_FITS;
@@ -547,11 +541,11 @@ char *fname;
  * Adapted from the ImageMagick package originally developed by John Christy.
  */
 static char **
-listFiles (directory, pattern, number_entries, files_only)
-char *directory; 			/* directory to be listed 	   */
-char *pattern;				/* pattern to be matched 	   */
-int *number_entries;			/* number of filenames in the list */
-int files_only;				/* list only files, not dirs	   */
+listFiles (char *directory, char *pattern, int *number_entries, int files_only)
+                 			/* directory to be listed 	   */
+              				/* pattern to be matched 	   */
+                    			/* number of filenames in the list */
+               				/* list only files, not dirs	   */
 {
 	char **filelist, *ip;
 	char patterns[64][20];
@@ -656,8 +650,7 @@ int files_only;				/* list only files, not dirs	   */
  * Adapted from the ImageMagick package originally developed by John Christy.
  */
 static int	
-fileCompare (x, y)
-void *x, *y;
+fileCompare (void *x, void *y)
 {
 	char	*p, *q;
 
@@ -675,9 +668,9 @@ void *x, *y;
  * Adapted from the ImageMagick package originally developed by John Christy.
  */
 static int	
-globExpression (expression, pattern)
-char *expression; 				/* file name 		*/
-char *pattern; 					/* matching pattern 	*/
+globExpression (char *expression, char *pattern)
+                  				/* file name 		*/
+               					/* matching pattern 	*/
 {
 	int done, match, status;
 	char c, *p;
@@ -832,9 +825,7 @@ char *pattern; 					/* matching pattern 	*/
  */
 
 static void
-amapc (a, b, npix, a1, a2, b1, b2)
-char   	*a, *b;
-int	npix, a1, a2, b1, b2;
+amapc (char *a, char *b, int npix, int a1, int a2, int b1, int b2)
 {
 	int     i, minout, maxout, aoff, boff, pixval;
 	double  scalar;
@@ -857,10 +848,7 @@ int	npix, a1, a2, b1, b2;
  */
 
 static void
-sortGraymap (a, b, npix, red, green, blue, ncols)
-unsigned char *a, *b;
-unsigned char *red, *green, *blue;
-int	npix, ncols;
+sortGraymap (unsigned char *a, unsigned char *b, int npix, unsigned char *red, unsigned char *green, unsigned char *blue, int ncols)
 {
 	int	i, pmin=0, pmax=255;
 	float scale;
@@ -883,8 +871,7 @@ int	npix, ncols;
 }
 
 static int
-ucharCompare (i, j)
-unsigned char *i, *j;
+ucharCompare (unsigned char *i, unsigned char *j)
 {
 	return (*i - *j);
 }
@@ -893,9 +880,7 @@ unsigned char *i, *j;
 /* LOADSTAT -- Internal routine for load status messages.
  */
 static void
-loadstat (xim, message)
-XimDataPtr xim;
-char *message;
+loadstat (XimDataPtr xim, char *message)
 {
         char text[SZ_LINE];
         sprintf (text, "status {%s}", message);
@@ -906,9 +891,7 @@ char *message;
 /* STRSORT -- Shell sort an array of string pointers via strcmp()
  */
 static void
-strsort (array, array_size)
-char    **array;
-int     array_size;
+strsort (char **array, int array_size)
 {
       int       gap, i, j;
       char      **a, **b, *tmp;

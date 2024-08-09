@@ -108,16 +108,16 @@ static PSPageInfo  PageInfo[] = {	/* assumes 300 dpi */
 
 /* Private procedures. 
 */
-static void eps_simpleHeader(), eps_colorHeader();
-static void eps_pageParams(), eps_simpleTrailer();
-static void eps_writeCmap(), eps_writeTrailer();
-static void eps_writeMono(), eps_writePix();
-static void eps_writeMonoRGB(), eps_writeRGB();
-static void eps_flushPix();
-static void eps_annotate(), eps_portLabels(), eps_landLabels();
-static void eps_doColorbar();
-static float ticstep();
-static char *make_label();
+static void eps_simpleHeader(PSImagePtr psim, FILE *fp), eps_colorHeader(PSImagePtr psim, FILE *fp);
+static void eps_pageParams(PSImagePtr psim, float *llx, float *lly, int *icols, int *irows, int *scols, int *srows, int *turnflag), eps_simpleTrailer(FILE *fp);
+static void eps_writeCmap(PSCmap *cmap, FILE *fp), eps_writeTrailer(FILE *fp);
+static void eps_writeMono(FILE *fp, uchar *pix, PSCmap *cmap, int npix, int xdim, int pad), eps_writePix(FILE *fp, uchar *pix, PSCmap *cmap, int npix, int xdim, int pad);
+static void eps_writeMonoRGB(FILE *fp, uchar *pix, int npix, int xdim, int depth, int pad), eps_writeRGB(FILE *fp, uchar *pix, PSCmap *cmap, int npix, int xdim, int depth, int pad);
+static void eps_flushPix(FILE *fp);
+static void eps_annotate(PSImagePtr psim, FILE *fp), eps_portLabels(FILE *fp, PSImagePtr psim, int scols, int srows, int icols, int irows, float llx, float lly), eps_landLabels(FILE *fp, PSImagePtr psim, int scols, int srows, int icols, int irows, float llx, float lly);
+static void eps_doColorbar(FILE *fp, PSImagePtr psim, int scols, int srows, float llx, float lly, int turnflag);
+static float ticstep(float range, int nsteps);
+static char *make_label(void);
 
 static int 	debug = 0;
 
@@ -126,7 +126,7 @@ static int 	debug = 0;
 **  containing the default output setup.
 */
 PSImage *
-eps_init()
+eps_init(void)
 {
 	int i;
 	PSImage *ps;
@@ -170,13 +170,13 @@ eps_init()
 ** 32-bit RGBA pixels.  
 */
 void
-eps_print (psim, fp, data, xdim, ydim, depth, pad)
-PSImage *psim;				/* EPS image structure 		     */
-FILE	*fp;				/* output file descriptor 	     */
-uchar   *data;				/* array of image pixels 	     */
-int	xdim, ydim;			/* image dimensions 		     */
-int	depth;				/* bits / pixel, must be 8,24, or 32 */
-int	pad;				/* bytes per line of padding 	     */
+eps_print (PSImage *psim, FILE *fp, uchar *data, int xdim, int ydim, int depth, int pad)
+              				/* EPS image structure 		     */
+    	    				/* output file descriptor 	     */
+              				/* array of image pixels 	     */
+   	           			/* image dimensions 		     */
+   	      				/* bits / pixel, must be 8,24, or 32 */
+   	    				/* bytes per line of padding 	     */
 {
 	int npix = xdim * ydim;
         uchar *pix = data;
@@ -276,8 +276,8 @@ int	pad;				/* bytes per line of padding 	     */
 /* EPS_CLOSE -- Close down the EPS output structure.
 */
 void
-eps_close (psim)
-PSImage *psim;				/* EPS image structure */
+eps_close (PSImage *psim)
+              				/* EPS image structure */
 {
 	if (psim->label)
 	    (void) free ((char *) psim->label);
@@ -290,12 +290,12 @@ PSImage *psim;				/* EPS image structure */
 ** or scale options.
 */
 void
-eps_setPage (psim, orientation, paper_size, scale, flags)
-PSImage *psim;				/* EPS image structure 		     */
-int	orientation;			/* page orientation flag 	     */
-int	paper_size;			/* paper size flag 		     */
-int	scale;				/* image scale percentage 	     */
-int	flags;				/* option flags 		     */
+eps_setPage (PSImage *psim, int orientation, int paper_size, int scale, int flags)
+              				/* EPS image structure 		     */
+   	            			/* page orientation flag 	     */
+   	           			/* paper size flag 		     */
+   	      				/* image scale percentage 	     */
+   	      				/* option flags 		     */
 {
 	int NPageTypes = sizeof (PageInfo) / sizeof (PSPageInfo);
 
@@ -335,10 +335,10 @@ int	flags;				/* option flags 		     */
 /* EPS_SETCMAP -- Define a given colormap to be used on output.
 */
 void
-eps_setCmap (psim, r, g, b, ncolors)
-PSImage *psim;				/* EPS image structure 		     */
-uchar *r, *g, *b;			/* color components 		     */
-int ncolors;				/* number of colors in colormap      */
+eps_setCmap (PSImage *psim, uchar *r, uchar *g, uchar *b, int ncolors)
+              				/* EPS image structure 		     */
+                 			/* color components 		     */
+            				/* number of colors in colormap      */
 {
 	int i = 0;
 
@@ -358,9 +358,9 @@ int ncolors;				/* number of colors in colormap      */
 /* EPS_SETCOMPRESS -- Define the type of output compression to use.
 */
 void
-eps_setCompress (psim, compress)
-PSImage *psim;				/* EPS image structure 		     */
-int	compress;			/* compression type flag 	     */
+eps_setCompress (PSImage *psim, int compress)
+              				/* EPS image structure 		     */
+   	         			/* compression type flag 	     */
 {
 	/* Set the compression type to use. */
 	switch (compress) {
@@ -381,9 +381,9 @@ int	compress;			/* compression type flag 	     */
 ** a grayscale on output.
 */
 void
-eps_setColorType (psim, color_class)
-PSImage *psim;				/* EPS image structure 		     */
-int	color_class;			/* output color class 		     */
+eps_setColorType (PSImage *psim, int color_class)
+              				/* EPS image structure 		     */
+   	            			/* output color class 		     */
 {
 	/* Set the compression type to use. */
 	switch (color_class) {
@@ -401,9 +401,9 @@ int	color_class;			/* output color class 		     */
 /* EPS_SETLABEL -- Set the output label to be used in annotation.
 */
 void
-eps_setLabel (psim, label)
-PSImage *psim;			/* EPS image structure 		     */
-char	*label;				/* Label string 		     */
+eps_setLabel (PSImage *psim, char *label)
+              			/* EPS image structure 		     */
+    	       				/* Label string 		     */
 {
 	int maxlen = MAX_LENLABEL;
 
@@ -424,12 +424,12 @@ char	*label;				/* Label string 		     */
 ** the colorbar.
 */
 void
-eps_setTransform (psim, z1, z2, ztype, offset, scale, cmap_name)
-PSImage *psim;                          /* EPS image structure  	     */
-float	z1, z2;				/* zscale values 		     */
-int	ztype;				/* Transformation type  	     */
-float	offset, scale;			/* brightness/contrast values 	     */
-char	*cmap_name;			/* colormap name		     */
+eps_setTransform (PSImage *psim, float z1, float z2, int ztype, float offset, float scale, char *cmap_name)
+                                        /* EPS image structure  	     */
+     	       				/* zscale values 		     */
+   	      				/* Transformation type  	     */
+     	              			/* brightness/contrast values 	     */
+    	           			/* colormap name		     */
 {
         psim->z1 = z1;
         psim->z2 = z2;
@@ -453,9 +453,9 @@ char	*cmap_name;			/* colormap name		     */
 /* EPS_SETCORNERS -- Set the image corner values.
 */
 void
-eps_setCorners (psim, llx, lly, urx, ury)
-PSImage *psim;                          /* EPS image structure  	     */
-int	llx, lly, urx, ury;		/* image corners		     */
+eps_setCorners (PSImage *psim, int llx, int lly, int urx, int ury)
+                                        /* EPS image structure  	     */
+   	                   		/* image corners		     */
 {
 	psim->llx = llx;
 	psim->lly = lly;
@@ -468,10 +468,10 @@ int	llx, lly, urx, ury;		/* image corners		     */
 ** compute the size of the image (in inches) on the page.
 */       
 void
-eps_getImageSize (psim, xdim, ydim, width, height)
-PSImagePtr psim;			/* EPS image struct 		     */
-int	xdim, ydim;			/* image dimensions 		     */
-float	*width, *height;		/* width x height of image on page   */
+eps_getImageSize (PSImagePtr psim, int xdim, int ydim, float *width, float *height)
+                			/* EPS image struct 		     */
+   	           			/* image dimensions 		     */
+     	                		/* width x height of image on page   */
 {
         int icols, irows, scols, srows, turnflag;
 	float	llx, lly;
@@ -490,10 +490,10 @@ float	*width, *height;		/* width x height of image on page   */
 ** compute the position of the image (in pixels) on the page.
 */	        
 void
-eps_getImagePos (psim, xdim, ydim, llx, lly)
-PSImagePtr psim;			/* EPS image struct 		     */
-int	xdim, ydim;			/* image dimensions 		     */
-int	*llx, *lly;			/* LL coords for centered image      */
+eps_getImagePos (PSImagePtr psim, int xdim, int ydim, int *llx, int *lly)
+                			/* EPS image struct 		     */
+   	           			/* image dimensions 		     */
+   	           			/* LL coords for centered image      */
 {
         int icols, irows, scols, srows, turnflag;
 	float	lx, ly;
@@ -516,12 +516,12 @@ int	*llx, *lly;			/* LL coords for centered image      */
 /* EPS_PAGEPARAMS -- Compute the EPS page parameters.
 */
 static void 
-eps_pageParams (psim, llx, lly, icols, irows, scols, srows, turnflag)
-PSImagePtr psim;			/* EPS image struct 		     */
-float	*llx, *lly;			/* LL coords for centered image      */
-int	*icols, *irows;			/* final image rows/cols 	     */
-int	*scols, *srows;			/* scaled rows/cols 		     */
-int	*turnflag;			/* turn the image? 		     */
+eps_pageParams (PSImagePtr psim, float *llx, float *lly, int *icols, int *irows, int *scols, int *srows, int *turnflag)
+                			/* EPS image struct 		     */
+     	           			/* LL coords for centered image      */
+   	               			/* final image rows/cols 	     */
+   	               			/* scaled rows/cols 		     */
+   	          			/* turn the image? 		     */
 {
         int devpix, pwidth, pheight, cols=0, rows=0;
         float pixfac, scale = Scale(psim), margin;
@@ -658,13 +658,7 @@ int	*turnflag;			/* turn the image? 		     */
 /* EPS_WRITEPIX -- Write the pixels or color indices directly.
 */
 static void
-eps_writePix (fp, pix, cmap, npix, xdim, pad)
-FILE    *fp;
-uchar   *pix;
-PSCmap 	*cmap;
-int     npix;
-int     xdim;
-int     pad;
+eps_writePix (FILE *fp, uchar *pix, PSCmap *cmap, int npix, int xdim, int pad)
 {
         int i, min, max;
 
@@ -701,13 +695,7 @@ int     pad;
 /* EPS_WRITEMONO -- Write a pseudocolor image and convert to grayscale.
 */
 static void
-eps_writeMono (fp, pix, cmap, npix, xdim, pad)
-FILE	*fp;
-uchar   *pix;
-PSCmap 	*cmap;
-int 	npix;
-int	xdim;
-int	pad;
+eps_writeMono (FILE *fp, uchar *pix, PSCmap *cmap, int npix, int xdim, int pad)
 {
 	int i, min, max;
 	uchar pval;
@@ -747,13 +735,7 @@ int	pad;
 /* EPS_WRITEMONORGB --  Write RGB data converted to grayscale.
 */
 static void
-eps_writeMonoRGB (fp, pix, npix, xdim, depth, pad)
-FILE    *fp;
-uchar   *pix;
-int     npix;
-int     xdim;
-int     depth;
-int     pad;
+eps_writeMonoRGB (FILE *fp, uchar *pix, int npix, int xdim, int depth, int pad)
 {
         int i;
 	uchar pval;
@@ -795,14 +777,7 @@ int     pad;
 ** channel.
 */
 static void
-eps_writeRGB (fp, pix, cmap, npix, xdim, depth, pad)
-FILE    *fp;
-uchar   *pix;
-PSCmap 	*cmap;
-int     npix;
-int     xdim;
-int     depth;
-int     pad;
+eps_writeRGB (FILE *fp, uchar *pix, PSCmap *cmap, int npix, int xdim, int depth, int pad)
 {
         int i, min, max;
 	uchar val;
@@ -860,9 +835,7 @@ int     pad;
 /* EPS_WRITECMAP -- Output Postscript colormap.
 */
 static void
-eps_writeCmap (cmap, fp)
-PSCmap 	*cmap;
-FILE	*fp;
+eps_writeCmap (PSCmap *cmap, FILE *fp)
 {
 	int i, j;
 
@@ -917,9 +890,7 @@ static char *EPSSimpleRLEProlog[]= {
 };
 
 static void
-eps_simpleHeader (psim, fp)
-PSImagePtr psim;
-FILE	   *fp;
+eps_simpleHeader (PSImagePtr psim, FILE *fp)
 {
         char **line;
         int 	icols=0, irows=0, scols=0, srows=0, turnflag=0;
@@ -999,9 +970,7 @@ FILE	   *fp;
 */
 
 static void
-eps_annotate (psim, fp)
-PSImagePtr psim;
-FILE       *fp;
+eps_annotate (PSImagePtr psim, FILE *fp)
 {
         int     icols=0, irows=0, scols=0, srows=0, turnflag=0;
 	int	cbar_size;
@@ -1161,12 +1130,7 @@ FILE       *fp;
 */
 
 static void 
-eps_portLabels (fp, psim, scols, srows, icols, irows, llx, lly)
-FILE	*fp;
-PSImagePtr psim;
-int	scols, srows;
-int	icols, irows;
-float	llx, lly;
+eps_portLabels (FILE *fp, PSImagePtr psim, int scols, int srows, int icols, int irows, float llx, float lly)
 {
 	int	start, end, range;
 	float 	xpos, xstep, ypos, ystep;
@@ -1258,12 +1222,7 @@ float	llx, lly;
 ** mode image.
 */
 static void 
-eps_landLabels (fp, psim, scols, srows, icols, irows, llx, lly)
-FILE	*fp;
-PSImagePtr psim;
-int	scols, srows;
-int	icols, irows;
-float	llx, lly;
+eps_landLabels (FILE *fp, PSImagePtr psim, int scols, int srows, int icols, int irows, float llx, float lly)
 {
 	float	xpos, xstep, ypos, ystep;
 	int	start, end, range;
@@ -1353,12 +1312,7 @@ float	llx, lly;
 */
 
 static void 
-eps_doColorbar (fp, psim, scols, srows, llx, lly, turnflag)
-FILE	*fp;
-PSImagePtr psim;
-int	scols, srows;
-float	llx, lly;
-int	turnflag;
+eps_doColorbar (FILE *fp, PSImagePtr psim, int scols, int srows, float llx, float lly, int turnflag)
 {
 	int i, j, cbar_size;
         int     ncolors, nlabels, pos, step, cmel, cmstep, val;
@@ -1734,9 +1688,7 @@ static char *EPSColorProlog[]=
 
 
 static void
-eps_colorHeader (psim, fp)
-PSImagePtr psim;
-FILE	   *fp;
+eps_colorHeader (PSImagePtr psim, FILE *fp)
 {
 	char **line;
 	int icols=0, irows=0, scols=0, srows=0, turnflag=0;
@@ -1802,8 +1754,7 @@ FILE	   *fp;
 /* EPS_WRITETRAILER -- Output Postscript trailer blurb.
 */
 static void
-eps_writeTrailer (fp)
-FILE	*fp;
+eps_writeTrailer (FILE *fp)
 {
 	fprintf (fp, "\n");
 	fprintf (fp, "showpage\n");
@@ -1818,16 +1769,14 @@ FILE	*fp;
 /* EPS_SIMPLETRAILER -- Output Postscript trailer blurb.
 */
 static void
-eps_simpleTrailer (fp)
-FILE	*fp;
+eps_simpleTrailer (FILE *fp)
 {
 	fprintf (fp, "showpage\n");
 }
 
 
 static void 
-eps_flushPix (fp)
-FILE	*fp;
+eps_flushPix (FILE *fp)
 {
 	pixbuf[pixnum] = '\0';
 	fprintf (fp, "%s", pixbuf);
@@ -1842,9 +1791,7 @@ FILE	*fp;
 /* TICSTEP --  calculate nice intervals for the ticmarks.
 */
 static float
-ticstep (range,nsteps)
-float	range;
-int	nsteps;
+ticstep (float range, int nsteps)
 {
 	double df, t2, t5, p1, p2, p3;
 	float ticstep;
@@ -1886,7 +1833,7 @@ int	nsteps;
 /* MAKE_LABEL -- Generate the label for the output printer page.
 */
 static char *
-make_label()
+make_label(void)
 {
         static  char buf[128];
         char    hostname[32];

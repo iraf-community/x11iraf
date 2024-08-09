@@ -99,19 +99,19 @@ static Lut standard = {
 #include "data/standard.lut"
 };
 
-static void get_fbconfig();
-static void set_colorbar();
-static int get_dirfile();
-static void load_testpattern();
-static void set_nframes();
-static void xim_frameRegion();
-static void xim_colortables();
-static int xim_onScreen();
-static void xim_highlightFrame();
+static void get_fbconfig(XimDataPtr xim);
+static void set_colorbar(XimDataPtr xim, Widget w);
+static int get_dirfile(DIR *dir, char *outstr, int maxch);
+static void load_testpattern(XimDataPtr xim, int frame, int type);
+static void set_nframes(XimDataPtr xim, int nframes);
+static void xim_frameRegion(XimDataPtr xim, FrameBufPtr fb);
+static void xim_colortables(XimDataPtr xim);
+static int xim_onScreen(XimDataPtr xim, int frame);
+static void xim_highlightFrame(XimDataPtr xim, int frame);
 static void hsv_to_rgb(float, float, float, float *, float *, float *);
 
-void xim_labelTiles();
-void xim_getScreen();
+void xim_labelTiles(XimDataPtr xim);
+void xim_getScreen(XimDataPtr xim, int frame, int *sx, int *sy, int *width, int *height, int *depth);
 
 #define	TOL	0.0001
 
@@ -2180,10 +2180,7 @@ xim_writeDisplay (
 /* XIM_MESSAGE -- Send a message to the user interface.
  */
 void
-xim_message (xim, object, message)
-XimDataPtr xim;
-char *object;
-char *message;
+xim_message (XimDataPtr xim, char *object, char *message)
 {
 	char msgbuf[SZ_MSGBUF];
 
@@ -2591,7 +2588,7 @@ xim_setColormap (
 	     */
 	    for (i=0;  i < nelem;  i++) {
 		float h, s, v, r, g, b;
-		double pow(), sin();
+		double pow(double, double), sin(double);
 
 		frac = 1.0 - ((float)i / (float)(nelem - 1));
 		h = frac * 360.0 + 270.0;
