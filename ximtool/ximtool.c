@@ -182,7 +182,7 @@ main (int argc, char **argv)
 
 	/* Initialize the object manager. */
 	xim->obm = obm = (XtPointer) ObmOpen (app_context, argc, argv);
-	ObmAddCallback (obm, OBMCB_setGterm|OBMCB_preserve, xim_reset,
+	ObmAddCallback (obm, OBMCB_setGterm|OBMCB_preserve, (ObmFunc)xim_reset,
 	    (XtPointer)xim);
 
 

@@ -3655,7 +3655,7 @@ TriggerMarkChanges(HTMLWidget hw, struct mark_up *mptr, int *x, int *y)
 					{
 						free(tptr);
 					}
-					WidgetPlace(hw, mptr, x, y, Width);
+					WidgetPlace(hw, mptr, (int *)x, (int *)y, Width);
 				}
 			}
 			break;

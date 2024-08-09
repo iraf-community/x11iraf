@@ -307,7 +307,7 @@ gio_postconnectcallback (int (*connect)(), int client_data)
 {
 	if (obm) {
 	    ObmAddCallback (obm, OBMCB_connect|OBMCB_preserve,
-		connect, client_data);
+		connect, (XtPointer)client_data);
 	}
 }
 

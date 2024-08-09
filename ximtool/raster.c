@@ -983,7 +983,7 @@ xim_highlightFrame (XimDataPtr xim, int frame)
 		XtSetArg (args[nargs], GmActivated, True);            nargs++;
 
 		GmLower (gm, NULL);
-		GmSetAttribute (gm, GmLineColor, xim->borderColor, XtRString);
+		GmSetAttribute (gm, GmLineColor, (XtArgVal)xim->borderColor, XtRString);
 		GmSetAttributes (gm, args, nargs, XtRInt);
 
 		xim->gm_border = gm;
@@ -1077,11 +1077,11 @@ xim_labelTiles (XimDataPtr xim)
 		XtSetArg (args[nargs], GmActivated, True);       nargs++;
 		XtSetArg (args[nargs], GmImageText, True);       nargs++;
 
-		GmSetAttribute (gm, GmWidth, tw, XtRString);
-		GmSetAttribute (gm, GmHeight, "1ch", XtRString);
-		GmSetAttribute (gm, GmTextBgColor, "black", XtRString);
-		GmSetAttribute (gm, GmTextColor, "yellow", XtRString);
-		GmSetAttribute (gm, GmText, text, XtRString);
+		GmSetAttribute (gm, GmWidth, (XtArgVal)tw, XtRString);
+		GmSetAttribute (gm, GmHeight, (XtArgVal)"1ch", XtRString);
+		GmSetAttribute (gm, GmTextBgColor, (XtArgVal)"black", XtRString);
+		GmSetAttribute (gm, GmTextColor, (XtArgVal)"yellow", XtRString);
+		GmSetAttribute (gm, GmText, (XtArgVal)text, XtRString);
 		GmSetAttributes (gm, args, nargs, XtRInt);
         	GmMarkpos (gm);
         	GmRedraw (gm, GXcopy, True);

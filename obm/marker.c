@@ -1508,7 +1508,7 @@ markerGetRegion (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	XtSetArg (args[4], GmHeight, &height);
 	GmGetAttributes (mp->gm, args, 5, XtRInt);
 
-	if (GmGetAttribute (mp->gm, GmRotangle, &rotangle, XtRFloat) < 0)
+	if (GmGetAttribute (mp->gm, GmRotangle, (long)&rotangle, XtRFloat) < 0)
 	    return (TCL_ERROR);
 
 	/* Get the points array, needed for some markers. */
