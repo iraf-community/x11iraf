@@ -287,7 +287,7 @@ gio_setup (
 	ObmAddCallback (obm, OBMCB_clientOutput|OBMCB_preserve,
 	    gio_queue_output, NULL);
 	ObmAddCallback (obm, OBMCB_setGterm|OBMCB_preserve,
-	    gio_reset, NULL);
+	    (ObmFunc)gio_reset, NULL);
 
 	/* Register xgterm global actions. */
 	if (!actions_registered) {
@@ -573,7 +573,7 @@ gio_hardreset (int dummy)
  * whenever any important data structures change, e.g., if the graphics
  * window is resized.
  */
-static int
+static void
 gio_reset (int notused, GtermWidget w, char *args)
 {
 	int i;
@@ -581,7 +581,7 @@ gio_reset (int notused, GtermWidget w, char *args)
 
 	/* Make this the active graphics widget. */
 	if ((gw = w) == NULL)
-	    return (0);
+	    return;
 
 	GtReset (w);
 	GtActivate (w);
@@ -639,8 +639,6 @@ gio_reset (int notused, GtermWidget w, char *args)
 
 	cur_x = tx_leftmargin;
 	cur_y = tx_charbase;
-
-	return (0);
 }
 
 
@@ -1616,7 +1614,7 @@ gio_keyinput (XtPointer notused, Widget	w, XEvent *event)
 		 * cursor is in, in addition to the usual screen coordinates.
 		 */
                 if (wincursor) {
-		    raster = GtSelectRaster (w, 0, GtPixel, sx, sy, 
+		  raster = GtSelectRaster ((GtermWidget)w, 0, GtPixel, sx, sy, 
 			GtNDC, &rx, &ry, &mapping);
 		    ry = MAXNDC - ry;
 		} else
@@ -1624,7 +1622,7 @@ gio_keyinput (XtPointer notused, Widget	w, XEvent *event)
 
                 gio_retcursor (strbuf[0], sx, sy, raster, rx, ry, 0);
                 if (w)
-                    GtSetCursorType (w, GtBusyCursor);
+                    GtSetCursorType ((GtermWidget)w, GtBusyCursor);
             } else
                 v_write (pty_fd, strbuf, nbytes);
         }

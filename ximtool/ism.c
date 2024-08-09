@@ -156,7 +156,7 @@ xim_ismClose (XimDataPtr xim)
 	for (i=0, chan=NULL; i < XtNumber(xim->ism_client); i++) {
 	    chan = &xim->ism_client[i];
             if (chan->id) {
-                xim_removeInput (xim, chan->id);
+                xim_removeInput (xim, (XPointer)chan->id);
                 chan->id = 0;
 	    }
 
@@ -169,7 +169,7 @@ xim_ismClose (XimDataPtr xim)
 	/* Close the ISM request socket. */
 	chan = &(xim->ism_chan);
         if (chan->id) {
-            xim_removeInput (xim, chan->id);
+            xim_removeInput (xim, (XPointer)chan->id);
             chan->id = 0;
         }
         close (chan->datain);
@@ -236,7 +236,7 @@ ism_disconnectClient (IsmIoChanPtr chan)
 {
 	close (chan->datain);
 	if (chan->id) {
-	    xim_removeInput (chan->xim, chan->id);
+	    xim_removeInput (chan->xim, (XPointer)chan->id);
 	    chan->connected = 0;
 	    chan->id = 0;
 	}

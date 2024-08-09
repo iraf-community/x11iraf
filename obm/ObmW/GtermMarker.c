@@ -64,7 +64,7 @@ static void gm_text_init(struct marker *gm, int interactive), gm_line_init(struc
 static void gm_boxx_init(struct marker *gm, int interactive), gm_circ_init(struct marker *gm, int interactive), gm_elip_init(struct marker *gm, int interactive), gm_pgon_init(struct marker *gm, int interactive);
 static int gm_putint(int ival, XtArgVal value, char *type), gm_putfloat(double fval, XtArgVal value, char *type), gm_do_callbacks(struct marker *gm, int events, XEvent *event, String *params, Cardinal nparams);
 static void gm_constraint(struct marker *gm, struct marker *new_gm, int what);
-static int gm_getint(XtArgVal value, char *type), gm_getattribute(char *attribute), gm_gettype(char *type);
+static int gm_getint(XtArgVal value, char *type), gm_getattribute(const char *attribute), gm_gettype(char *type);
 static double gm_getfloat(XtArgVal value, char *type);
 static char *gm_getstring(XtArgVal value, char *type);
 
@@ -196,7 +196,7 @@ GtMarkerInit (GtermWidget w)
 	}
 
 	/* Set the default gterm window translations. */
-	gm_load_translations (w, NULL);
+	gm_load_translations (w, 0);
 
 	/* Get graphics drawing GC. */
 /*	gc = XCreateGC (display, w->gterm.root, 0, NULL); */
@@ -261,7 +261,7 @@ GtMarkerFree (GtermWidget w)
     }
 
     /* Set the default gterm window translations. */
-    gm_load_translations (w, NULL);
+    gm_load_translations (w, 0);
 
     for (gm = w->gterm.gm_tail;  gm;  gm = gm->prev)
         GmDestroy (gm);
@@ -373,12 +373,12 @@ gm_focusout (GtermWidget w, int enableSetTrans)
 static void 
 gm_refocus (GtermWidget w)
 {
-    XMotionEvent event;
+    XEvent event;
     int nparams = 0;
 
     event.type = MotionNotify;					/* MF009 */
-    event.x = w->gterm.last_x;
-    event.y = w->gterm.last_y;
+    event.xmotion.x = w->gterm.last_x;
+    event.xmotion.y = w->gterm.last_y;
     HandleTrackCursor ((Widget)w, &event, NULL, &nparams);
 }
 
@@ -406,11 +406,11 @@ gm_request_translations (GtermWidget w, struct marker *gm)
     w->gterm.gm_reqTranslations = gm;
 
     if (!w->gterm.useTimers)
-	gm_load_translations (w, NULL);
+	gm_load_translations (w, 0);
     else if (!w->gterm.gm_timer_id) {
 	w->gterm.gm_timer_id =
 	    XtAppAddTimeOut (XtWidgetToApplicationContext((Widget)w), 0,
-		gm_load_translations, (XtPointer)w);
+		(XtTimerCallbackProc)gm_load_translations, (XtPointer)w);
     }
 }
 
@@ -1324,7 +1324,7 @@ GmGetAttributes (struct marker *gm, ArgList args, int nargs, char *argtype)
 /* GmGetAttribute -- Get the value of a marker attribute.
  */
 int
-GmGetAttribute (struct marker *gm, char *attribute, XtArgVal value, char *type)
+GmGetAttribute (struct marker *gm, const char *attribute, XtArgVal value, char *type)
 {
     GtermWidget w = gm->w;
     int i;
@@ -1991,7 +1991,7 @@ gm_gettype (char *type)
 
 
 static int
-gm_getattribute (char *attribute)
+gm_getattribute (const char *attribute)
 {
     if (strcmp (attribute, GmType) == 0)
 	return (Ga_Type);

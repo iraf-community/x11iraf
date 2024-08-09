@@ -164,7 +164,7 @@ is_swapped (void)
 /* MIN_MAX -- Get the min and max values of an array.
  */
 void
-min_max (char *a, int npts, int bitpix, float *min, float *max)
+min_max (void *a, int npts, int bitpix, float *min, float *max)
 {
 	int i;
 

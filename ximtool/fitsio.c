@@ -87,6 +87,7 @@ static char *ftgdata ();
 static char *ftfixdata ();
 #endif
 
+extern void min_max(void *a, int npts, int bitpix, float *min, float *max);
 
 /* ----------------
  * Public routines.
@@ -744,7 +745,6 @@ ftgbyte(FITS *fs, uchar *cbuff, int nelem, int zsc, int zr, float *z1, float *z2
 	int	pmin = 0, pmax = 255;
 	int	npts, stdline;
 	extern	void zscale(char *im, int nx, int ny, int bitpix, float *z1, float *z2, float contrast, int opt_size, int len_stdline);
-	extern void min_max(char *a, int npts, int bitpix, float *min, float *max);
 
 	/* if the data is uchar, then read it directly */
 	if (fs->bitpix == 8 && (fs->bscale == 1.0 && fs->bzero == 0.0)) {
@@ -824,7 +824,7 @@ ftgbyte(FITS *fs, uchar *cbuff, int nelem, int zsc, int zr, float *z1, float *z2
 	        zscale ((char *)buf, fs->axes[0], fs->axes[1], fs->bitpix,
 	            z1, z2, CONTRAST, nsample, stdline); 
 	    else if (zr)
-		min_max ((float *)buf, nelem, fs->bitpix, z1, z2);
+		min_max (buf, nelem, fs->bitpix, z1, z2);
 
 	} else {
 	    /* compute the optimal zscale values */
@@ -832,7 +832,7 @@ ftgbyte(FITS *fs, uchar *cbuff, int nelem, int zsc, int zr, float *z1, float *z2
 	        zscale (voidbuff, fs->axes[0], fs->axes[1], fs->bitpix,
 	            z1, z2, CONTRAST, nsample, stdline); 
 	    else if (zr)
-		min_max ((float *)voidbuff, nelem, fs->bitpix, z1, z2);
+		min_max (voidbuff, nelem, fs->bitpix, z1, z2);
 	}
 
 	/* convert short int to uchar */

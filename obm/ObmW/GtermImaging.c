@@ -1901,7 +1901,7 @@ GtWriteIomap (GtermWidget w, ushort *iomap, int first, int nelem)
 /* GtReadIomap -- Read back the contents of the iomap.
  */
 void
-GtReadIomap (GtermWidget w, uchar *iomap, int first, int nelem)
+GtReadIomap (GtermWidget w, ushort *iomap, int first, int nelem)
 {
     int c1, c2;
 

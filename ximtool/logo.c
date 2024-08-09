@@ -29,7 +29,7 @@ xim_displayLogo (XimDataPtr xim)
 
     /* Set the logical resolution of the display.
     */
-    GtSetLogRes (xim->gt, LOGO_XDIM, LOGO_YDIM);
+    GtSetLogRes ((GtermWidget)xim->gt, LOGO_XDIM, LOGO_YDIM);
 
     if (xim_writeDisplay (xim, 1, "logo", logo_data,
 	LOGO_XDIM, LOGO_YDIM, r, g, b, LOGO_NCOLORS) < 0)

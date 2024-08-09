@@ -196,9 +196,9 @@ ListTreeClassRec listtreeClassRec =
 	/* compress_exposure     */ XtExposeCompressMultiple,
 	/* compress_enterleave   */ True,
 	/* visible_interest      */ True,
-	/* destroy               */ Destroy,
+	/* destroy               */ (XtWidgetProc)Destroy,
 	/* resize                */ Resize,
-	/* expose                */ Redisplay,
+	/* expose                */ (XtExposeProc)Redisplay,
 	/* set_values            */ SetValues,
 	/* set_values_hook       */ NULL,
 	/* set_values_almost     */ XtInheritSetValuesAlmost,
@@ -589,7 +589,7 @@ QueryGeometry(ListTreeWidget lw, XtWidgetGeometry *parent_idea, XtWidgetGeometry
   if (!parent_wants_w && !parent_wants_h)
     return (XtGeometryYes);
 
-  we_changed_size = Layout(lw, !parent_wants_w, !parent_wants_h, &nw, &nh);
+  we_changed_size = Layout((Widget)lw, !parent_wants_w, !parent_wants_h, &nw, &nh);
   our_idea->request_mode |= (CWWidth | CWHeight);
   our_idea->width = nw;
   our_idea->height = nh;

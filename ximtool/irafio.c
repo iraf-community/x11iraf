@@ -157,20 +157,20 @@ loadIRAF  (char *fname, uchar **image, int *nx, int *ny, uchar *r, uchar *g, uch
 
             /* Get the interesting stuff.  */
             if (is_swapped())
-                bswap4 (&header_v2[IM_V2SWAPPED], 1, &swapped, 1, sizeof(int));
+                bswap4 (&header_v2[IM_V2SWAPPED], 1, (char *)&swapped, 1, sizeof(int));
 	    else
                 bcopy ((char *)&header_v2[IM_V2SWAPPED], &swapped, sizeof(int));
 
             if (is_swapped()) {
-                bswap4 (&header_v2[IM_V2PHYSLEN], 1, &px, 1, sizeof(int));
-                bswap4 (&header_v2[IM_V2PHYSLEN+sizeof(int)], 1, &py, 1,
+                bswap4 (&header_v2[IM_V2PHYSLEN], 1, (char *)&px, 1, sizeof(int));
+                bswap4 (&header_v2[IM_V2PHYSLEN+sizeof(int)], 1, (char *)&py, 1,
                     sizeof(int));
-                bswap4 (&header_v2[IM_V2LEN], 1, nx, 1, sizeof(int));
-                bswap4 (&header_v2[IM_V2LEN+sizeof(int)], 1, ny, 1,
+                bswap4 (&header_v2[IM_V2LEN], 1, (char *)nx, 1, sizeof(int));
+                bswap4 (&header_v2[IM_V2LEN+sizeof(int)], 1, (char *)ny, 1,
                     sizeof(int));
-                bswap4 (&header_v2[IM_V2PIXTYPE], 1, &ptype, 1,
+                bswap4 (&header_v2[IM_V2PIXTYPE], 1, (char *)&ptype, 1,
                     sizeof(int));
-                bswap4 (&header_v2[IM_V2PIXOFF], 1, &offset, 1,
+                bswap4 (&header_v2[IM_V2PIXOFF], 1, (char *)&offset, 1,
                     sizeof(int));
             } else {
                 bcopy ((char *)&header_v2[IM_V2PHYSLEN], &px, sizeof(int));
@@ -285,15 +285,15 @@ getIRAFHdr (char *fname)
 
             /* Get the interesting stuff.  */
             if (is_swapped())
-                bswap4 (&header_v2[IM_V2SWAPPED], 1, &swapped, 1, sizeof(int));
+                bswap4 (&header_v2[IM_V2SWAPPED], 1, (char *)&swapped, 1, sizeof(int));
 	    else
                 bcopy ((char *)&header_v2[IM_V2SWAPPED], &swapped, sizeof(int));
 
             if (is_swapped()) {
-                bswap4 (&header_v2[IM_V2LEN], 1, &nx, 1, sizeof(int));
-                bswap4 (&header_v2[IM_V2LEN+sizeof(int)], 1, &ny, 1,
+                bswap4 (&header_v2[IM_V2LEN], 1, (char *)&nx, 1, sizeof(int));
+                bswap4 (&header_v2[IM_V2LEN+sizeof(int)], 1, (char *)&ny, 1,
                     sizeof(int));
-                bswap4 (&header_v2[IM_V2PIXTYPE], 1, &ptype, 1,
+                bswap4 (&header_v2[IM_V2PIXTYPE], 1, (char *)&ptype, 1,
                     sizeof(int));
             } else {
                 bcopy ((char *)&header_v2[IM_V2LEN], &nx, sizeof(int));

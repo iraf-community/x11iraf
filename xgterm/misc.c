@@ -1081,6 +1081,7 @@ xioerror(Display *dpy)
 	Exit(ERROR_XIOERROR);
 }
 
+__attribute__((noreturn))
 void xt_error(String message)
 {
     extern char *ProgramName;

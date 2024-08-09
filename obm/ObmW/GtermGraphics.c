@@ -757,7 +757,7 @@ GtSetCursorType (GtermWidget w, int type)
 	if ((interval = w->gterm.ginmodeBlinkInterval)) {
 	    XtAppContext appcon = XtWidgetToApplicationContext ((Widget) w);
 	    id = XtAppAddTimeOut (appcon,
-		interval, blink_cursor, (XtPointer)w);
+		interval, (XtTimerCallbackProc)blink_cursor, (XtPointer)w);
 	} else
 	    id = (XtIntervalId) NULL;
 	break;

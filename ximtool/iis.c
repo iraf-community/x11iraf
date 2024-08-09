@@ -125,7 +125,7 @@ xim_iisClose (XimDataPtr xim)
 	for (i=0, chan=NULL;  i < XtNumber(xim->chan);  i++) {
 	    chan = &xim->chan[i];
 	    if (chan->id) {
-		xim_removeInput (xim, chan->id);
+		xim_removeInput (xim, (XPointer)chan->id);
 		chan->id = 0;
 	    }
 
@@ -426,7 +426,7 @@ xim_disconnectClient (IoChanPtr chan)
 	case IO_UNIX:
 	    close (chan->datain);
 	    if (chan->id) {
-		xim_removeInput (chan->xim, chan->id);
+		xim_removeInput (chan->xim, (XPointer)chan->id);
 		chan->id = 0;
 	    }
 	    chan->type = 0;

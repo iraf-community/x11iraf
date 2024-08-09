@@ -520,10 +520,10 @@ typedef unsigned char	uchar;
 
 typedef struct widgetObject *WidgetObject;
 
-int obmClientCommand (Tcl_Interp *tcl, char *commmand);
+int obmClientCommand (Tcl_Interp *tcl, const char *commmand);
 extern int obmClass(struct objClassRec *classrec, long unsigned int flag1, long unsigned int flag2);
 extern ObmObject obmFindObject(struct obmContext *obm, const char *object);
-extern	ObjClassRec obmGetClassrec(char *classname);
+extern	ObjClassRec obmGetClassrec(const char *classname);
 extern	Widget widgetGetPointer(struct obmObject *object);
 extern	ObmCallback obmAddCallback(struct _obmCallback **callback_list);
 extern	void widget_setTTName(WidgetObject obj, char *name);

@@ -77,7 +77,7 @@ zscale (char *im, int nx, int ny, int bitpix, float *z1, float *z2, float contra
 	/* Sort the sample, compute the minimum, maximum, and median pixel
 	 * values.
 	 */
-	qsort (sample, npix, sizeof (float), floatCompare);
+	qsort (sample, npix, sizeof (float), (int(*)())floatCompare);
 	zmin = *sample;
 	zmax = *(sample+npix-1);
 

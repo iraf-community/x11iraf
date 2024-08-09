@@ -828,7 +828,7 @@ markerNotify (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	first_param = (argc > 1) ? 2 : 1;
 
 	GmNotify (mp->gm, GmStrToEvent(event_type), &event,
-	    argv[first_param], max (0, argc - first_param));
+	    &argv[first_param], max (0, argc - first_param));
 
 	return (TCL_OK);
 }
@@ -884,7 +884,7 @@ markerFocusCallback (
   Cardinal nparams)
 {
 	MarkerPrivate mp = &obj->marker;
-	ObmObject gtobj = mp->pobj;
+	WidgetObject gtobj = (WidgetObject)mp->pobj;
 	ObmContext obm = mp->obm;
 
 	if (events & GmEvFocusIn)
@@ -1549,11 +1549,11 @@ again:
 
 	if (unmap) {
 	    do {
-		src = GtSelectRaster (mp->gt, dst=src,
+		src = GtSelectRaster ((GtermWidget)mp->gt, dst=src,
 		    GtPixel, (int)(pv[0].x + 0.5), (int)(pv[0].y + 0.5),
 		    GtPixel, &x, &y, &mapping);
 		if (src != dst)
-		    GtMapVector (mp->gt, mapping, GtUnmap, pv, pv, pvlen);
+		    GtMapVector ((GtermWidget)mp->gt, mapping, GtUnmap, pv, pv, pvlen);
 	    } while (dst != src);
 	}
 
@@ -1562,7 +1562,7 @@ again:
 	 * level, which we scale to the range 0-1 floating at the GUI level.
 	 */
 	if (ctype_out == GtNDC) {
-	    GtPixelToNDC (mp->gt, src, pv, pv, pvlen);
+	    GtPixelToNDC ((GtermWidget)mp->gt, src, pv, pv, pvlen);
 	    for (i=0;  i < pvlen;  i++) {
 		pv[i].x /= (double)MAXNDC;
 		pv[i].y /= (double)MAXNDC;

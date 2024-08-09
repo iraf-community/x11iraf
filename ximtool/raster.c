@@ -423,12 +423,12 @@ xim_reset (XimDataPtr xim, Widget w)
 	    xim->cb = w;
 	    xim_iisiomap (w, iomap, &iomap_len);
 	    GtPostResizeProc ((GtermWidget) w, set_colorbar, xim);
-	    GtWriteIomap (w, iomap, 0, iomap_len);
+	    GtWriteIomap ((GtermWidget)w, iomap, 0, iomap_len);
 	} else {
 	    xim->gt = w;
 	    xim_iisiomap (w, iomap, &iomap_len);
 	    GtPostResizeProc ((GtermWidget) w, xim_resize, xim);
-	    GtWriteIomap (w, iomap, 0, iomap_len);
+	    GtWriteIomap ((GtermWidget)w, iomap, 0, iomap_len);
 	}
 }
 
@@ -497,20 +497,20 @@ xim_resize (XimDataPtr xim, Widget w)
 			       &junk, &junk, &junk);
 		GtCreateRaster ((GtermWidget) w, fb->zoomras, zoomtype,
 				width, height, depth);
-		xim_setMapping (xim, NULL, frame, fb->dispmap,
+		xim_setMapping ((FrameBufPtr)xim, NULL, frame, fb->dispmap,
 		    fb->zoomras, 0, M_FILL);
 		if (!active) {
-		    GtDisableMapping (w, fb->dispmap, 0);
-		    xim_setMapping (xim, NULL, frame, fb->zoommap,
+		    GtDisableMapping ((GtermWidget)w, fb->dispmap, 0);
+		    xim_setMapping ((FrameBufPtr)xim, NULL, frame, fb->zoommap,
 			fb->raster, fb->zoomras, M_FILL);
-		    GtDisableMapping (w, fb->zoommap, 0);
+		    GtDisableMapping ((GtermWidget)w, fb->zoommap, 0);
 		}
 	    } else {
 		if (active) {
-		    GtEnableMapping (w, fb->dispmap, 0);
-		    GtSetDisplayRaster (w, xim->display_frame);
+		    GtEnableMapping ((GtermWidget)w, fb->dispmap, 0);
+		    GtSetDisplayRaster ((GtermWidget)w, xim->display_frame);
 		} else
-		    GtDisableMapping (w, fb->dispmap, 0);
+		    GtDisableMapping ((GtermWidget)w, fb->dispmap, 0);
 	    }
 
 	    /* Set the new mapping. */
@@ -750,9 +750,11 @@ fast:	    fb->zoomras = GtNextRaster (gt);
 		    fb->zoomras, GtServer, width, height, depth) < 0)
 		goto nice;
 
-	    xim_setMapping (xim, fb, frame, fb->zoommap = GtNextMapping(gt),
+	    xim_setMapping ((FrameBufPtr)xim, (XimDataPtr)fb,
+		frame, fb->zoommap = GtNextMapping(gt),
 		fb->raster, fb->zoomras, xim->autoscale ? M_ASPECT : M_UNITARY);
-	    xim_setMapping (xim, fb, frame, fb->dispmap = GtNextMapping(gt),
+	    xim_setMapping ((FrameBufPtr)xim, (XimDataPtr)fb,
+		frame, fb->dispmap = GtNextMapping(gt),
 		fb->zoomras, 0, M_FILL);
 
 	} else if (strcmp (memModel, "beNiceToServer") == 0) {
@@ -770,9 +772,11 @@ nice: 	    fb->zoomras = GtNextRaster (gt);
 		    fb->zoomras, GtClient, width, height, depth) < 0)
 		goto small;
 
-	    xim_setMapping (xim, fb, frame, fb->zoommap = GtNextMapping(gt),
+	    xim_setMapping ((FrameBufPtr)xim, (XimDataPtr)fb,
+		frame, fb->zoommap = GtNextMapping(gt),
 		fb->raster, fb->zoomras, xim->autoscale ? M_ASPECT : M_UNITARY);
-	    xim_setMapping (xim, fb, frame, fb->dispmap = GtNextMapping(gt),
+	    xim_setMapping ((FrameBufPtr)xim, (XimDataPtr)fb,
+		frame, fb->dispmap = GtNextMapping(gt),
 		fb->zoomras, 0, M_FILL);
 
 	} else if (strcmp (memModel, "small") == 0) {
@@ -791,7 +795,8 @@ small:	    fb->zoomras = 0;
 		    "xim_initFrame: creating 'small' model (0x%x)\n", 
 		    fb->zoomras);
 
-	    xim_setMapping (xim, fb, frame, fb->zoommap = GtNextMapping(gt),
+	    xim_setMapping ((FrameBufPtr)xim, (XimDataPtr)fb,
+		frame, fb->zoommap = GtNextMapping(gt),
 		fb->raster, fb->zoomras, xim->autoscale ? M_ASPECT : M_UNITARY);
 	    fb->dispmap = fb->zoommap;
 
@@ -895,8 +900,8 @@ xim_tileFrames (XimDataPtr xim, int frame_list)
 	}
 
 	xim->tileFrames = (frame_list != 0);
-	GtClearScreen (w);
-	initialize_shadow_pixmap (w, 0);
+	GtClearScreen ((GtermWidget)w);
+	initialize_shadow_pixmap ((GtermWidget)w, 0);
 	xim_resize (xim, w);
 
 	/* Entering tile frame mode.
@@ -928,13 +933,13 @@ xim_tileFrames (XimDataPtr xim, int frame_list)
 		    fb = &xim->frames[i];
 		    if (!mapping)
 			mapping = fb->dispmap;
-		    else if (GtCompareMappings (w, mapping, fb->dispmap) < 0)
+		    else if (GtCompareMappings ((GtermWidget)w, mapping, fb->dispmap) < 0)
 			mapping = fb->dispmap;
 		}
 	    for (i=0;  i < xim->nframes;  i++)
 		if (!(xim->tileFramesList & (1 << i))) {
 		    fb = &xim->frames[i];
-		    GtRaiseMapping (w, fb->dispmap, mapping);
+		    GtRaiseMapping ((GtermWidget)w, fb->dispmap, mapping);
 		}
 	}
 
@@ -966,7 +971,7 @@ xim_highlightFrame (XimDataPtr xim, int frame)
 
 	    xim_getScreen (xim, frame, &sx, &sy, &width, &height, &depth);
 	    if (sx > 0 && sy > 0) {
-		gm = GmCreate (xim->gt, Gm_Box, False);
+		gm = GmCreate ((GtermWidget)xim->gt, Gm_Box, False);
 
 		XtSetArg (args[nargs], GmX, sx + (width-1)/2);        nargs++;
 		XtSetArg (args[nargs], GmY, sy + (height-1)/2);       nargs++;
@@ -1058,7 +1063,7 @@ xim_labelTiles (XimDataPtr xim)
 		 * and provide a background which lets them be read despite
 		 * whatever image scaling is in place.
 		 */
-		gm = GmCreate (xim->gt, Gm_Text, False);
+		gm = GmCreate ((GtermWidget)xim->gt, Gm_Text, False);
 
 		nargs = 0;			/* initialize		*/
 		len = strlen (text);
@@ -1150,7 +1155,7 @@ xim_registerFrames (XimDataPtr xim, int *frames, int reference_frame,
 		bits |= (1 << (i - 1));
 	}
 
-	GtGetMapping (gt, fb->zoommap,
+	GtGetMapping ((GtermWidget)gt, fb->zoommap,
 	    &rop, &src,&st,&sx,&sy,&snx,&sny, &dst,&dt,&dx,&dy,&dnx,&dny);
 
 	for (i=0;  i < xim->nframes;  i++) {
@@ -1163,7 +1168,7 @@ xim_registerFrames (XimDataPtr xim, int *frames, int reference_frame,
 		fr->xflip = fb->xflip;  fr->yflip = fb->yflip;
 
 		if (!xim_onScreen (xim, fb->frameno))
-		    GtDisableMapping (gt, fr->zoommap, 0);
+		    GtDisableMapping ((GtermWidget)gt, fr->zoommap, 0);
 
 		if (offsets) {
 		    /* fb is the current display buffer, fr is some other
@@ -1177,13 +1182,13 @@ xim_registerFrames (XimDataPtr xim, int *frames, int reference_frame,
 		    nsx = (int)(sx - fb->xoff + fr->xoff);
 		    nsy = (int)(sy - fb->yoff + fr->yoff);
 
-		    GtSetMapping (gt, fr->zoommap, xim->rop,
+		    GtSetMapping ((GtermWidget)gt, fr->zoommap, xim->rop,
 		        fr->raster, st,nsx,nsy, snx,sny, 
 		        fr->zoomras,dt,dx,dy,dnx,dny);
-		    GtRefreshMapping (gt, fr->zoommap);
+		    GtRefreshMapping ((GtermWidget)gt, fr->zoommap);
 
 		} else {
-		    GtSetMapping (gt, fr->zoommap, xim->rop,
+		    GtSetMapping ((GtermWidget)gt, fr->zoommap, xim->rop,
 		        fr->raster, st,sx,sy, snx,sny, 
 		        fr->zoomras,dt,dx,dy,dnx,dny);
 		}
@@ -1676,7 +1681,7 @@ xim_setFlip (XimDataPtr xim, FrameBufPtr fb, int flip_x, int flip_y)
 	if (flip_y)
 	    fb->yflip = !fb->yflip;
 
-	GtGetMapping (gt, fb->zoommap,
+	GtGetMapping ((GtermWidget)gt, fb->zoommap,
 	    &rop, &src,&st,&sx,&sy,&snx,&sny, &dst,&dt,&dx,&dy,&dnx,&dny);
 
 	dnx = abs (dnx);
@@ -1684,7 +1689,7 @@ xim_setFlip (XimDataPtr xim, FrameBufPtr fb, int flip_x, int flip_y)
 	dny = abs (dny);
 	dny = fb->yflip ? -dny : dny;
 
-	GtSetMapping (gt, fb->zoommap,
+	GtSetMapping ((GtermWidget)gt, fb->zoommap,
 	    rop, src,st,sx,sy,snx,sny, dst,dt,dx,dy,dnx,dny);
 
 	xim_message (xim, "xflip", fb->xflip ? "true" : "false");
@@ -1697,7 +1702,7 @@ xim_setFlip (XimDataPtr xim, FrameBufPtr fb, int flip_x, int flip_y)
 void
 xim_setRop (XimDataPtr xim, FrameBufPtr fb, int rop)
 {
-	Widget gt = xim->gt;
+	GtermWidget gt = (GtermWidget)xim->gt;
 	int src, st, sx, sy, snx, sny;
 	int dst, dt, dx, dy, dnx, dny;
 	int oldrop;
@@ -1715,9 +1720,9 @@ xim_setRop (XimDataPtr xim, FrameBufPtr fb, int rop)
 void
 xim_setCursorPos (XimDataPtr xim, float sx, float sy)
 {
-	GtSetRaster (xim->gt, xim->df_p->frameno);
-	GtSetCursorPos (xim->gt, (int)sx, (int)sy);
-	GtSetRaster (xim->gt, 0);
+	GtSetRaster ((GtermWidget)xim->gt, xim->df_p->frameno);
+	GtSetCursorPos ((GtermWidget)xim->gt, (int)sx, (int)sy);
+	GtSetRaster ((GtermWidget)xim->gt, 0);
 }
 
 
@@ -1733,11 +1738,11 @@ xim_getCursorPos (XimDataPtr xim, float *sx, float *sy,
 	int rx, ry, rmap;
 	int src, x, y, i;
 
-	GtGetCursorPos (xim->gt, &x, &y);
-	src = GtSelectRaster (xim->gt, 0, GtPixel, x,y, GtNDC, &rx, &ry, &rmap);
+	GtGetCursorPos ((GtermWidget)xim->gt, &x, &y);
+	src = GtSelectRaster ((GtermWidget)xim->gt, 0, GtPixel, x,y, GtNDC, &rx, &ry, &rmap);
 
 	pv1.x = rx;  pv1.y = ry;
-	GtNDCToPixel (xim->gt, src, &pv1, &pv2, 1);
+	GtNDCToPixel ((GtermWidget)xim->gt, src, &pv1, &pv2, 1);
 	*sx = pv2.x;
 	*sy = pv2.y;
 
@@ -2237,7 +2242,7 @@ xim_frameRegion (XimDataPtr xim, FrameBufPtr fb)
 	int dt, dx, dy, dnx, dny;
 	char buf[SZ_LINE];
 
-	if (GtGetMapping (xim->gt, fb->zoommap, &rop,
+	if (GtGetMapping ((GtermWidget)xim->gt, fb->zoommap, &rop,
 	    &src, &st, &sx, &sy, &snx, &sny,
 	    &dst, &dt, &dx, &dy, &dnx, &dny) == -1)
 		return;

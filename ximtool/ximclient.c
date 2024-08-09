@@ -71,15 +71,6 @@
  */
 
 
-/* Client callback struct. */
-typedef struct {
-        XimDataPtr xim;
-        Tcl_Interp *tcl;
-        Tcl_Interp *server;
-} XimClient, *XimClientPtr;
-
-
-
 static int initialize(XimClientPtr xc, Tcl_Interp *tcl, int argc, char **argv), Reset(XimClientPtr xc, Tcl_Interp *tcl, int argc, char **argv), Quit(XimClientPtr xc, Tcl_Interp *tcl, int argc, char **argv);
 static int setColormap(XimClientPtr xc, Tcl_Interp *tcl, int argc, char **argv), updateColormap(XimClientPtr xc, Tcl_Interp *tcl, int argc, char **argv), windowColormap(XimClientPtr xc, Tcl_Interp *tcl, int argc, char **argv);
 static int zoom(XimClientPtr xc, Tcl_Interp *tcl, int argc, char **argv), pan(XimClientPtr xc, Tcl_Interp *tcl, int argc, char **argv), getSource(XimClientPtr xc, Tcl_Interp *tcl, int argc, char **argv);
@@ -183,9 +174,9 @@ xim_clientOpen (XimDataPtr xim)
 	Tcl_CreateCommand (tcl,
 	    "help", (Tcl_CmdProc *) help, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "info", info, (ClientData)xc, NULL);
+	    "info", (Tcl_CmdProc *) info, (ClientData)xc, NULL);
 	Tcl_CreateCommand (tcl,
-	    "windowRGB", windowRGB, (ClientData)xc, NULL);
+	    "windowRGB", (Tcl_CmdProc *) windowRGB, (ClientData)xc, NULL);
 
 	/* ISM module callbacks. */
         Tcl_CreateCommand (tcl,
@@ -388,7 +379,7 @@ getSource (XimClientPtr xc, Tcl_Interp *tcl, int argc, char **argv)
 	char buf[SZ_NAME];
 	int rop;
 
-	GtGetMapping (xim->gt, fb->zoommap, &rop,
+	GtGetMapping ((GtermWidget)xim->gt, fb->zoommap, &rop,
 	    &src,&st,&sx,&sy,&snx,&sny, &dst,&dt,&dx,&dy,&dnx,&dny);
 
 	if (argc > 1) {
@@ -2261,7 +2252,7 @@ windowRGB (XimClientPtr xc, Tcl_Interp *tcl, int argc, char **argv)
 	    save = atoi(argv[4]);
 
 	    /* Query and read the current colormap. */
-	    GtQueryColormap (xim->gt, cm->mapno, &first, &nelem, &maxelem);
+	    GtQueryColormap ((GtermWidget)xim->gt, cm->mapno, &first, &nelem, &maxelem);
 	    GtReadColormap ((GtermWidget) xim->gt, cm->mapno, first, nelem,
 			    r,g,b);
 

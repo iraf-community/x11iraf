@@ -1003,16 +1003,16 @@ gtermSetCursorPos (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	raster = (argc > 3) ? atoi (argv[3]) : -1;
 
 	if (raster >= 0) {
-	    sv_raster = GtGetRaster (wp->w);
+	  sv_raster = GtGetRaster ((GtermWidget)wp->w);
 	    if (raster != sv_raster)
-		GtSetRaster (wp->w, raster);
+		GtSetRaster ((GtermWidget)wp->w, raster);
 	}
 
-	GtSetCursorPos (wp->w, x, y);
+	GtSetCursorPos ((GtermWidget)wp->w, x, y);
 
 	if (raster >= 0)
 	    if (raster != sv_raster)
-		GtSetRaster (wp->w, sv_raster);
+		GtSetRaster ((GtermWidget)wp->w, sv_raster);
 
 	return (TCL_OK);
 }
@@ -1037,7 +1037,7 @@ gtermGetCursorPos (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	xout = argv[1];
 	yout = argv[2];
 
-	GtGetCursorPos (wp->w, &x, &y);
+	GtGetCursorPos ((GtermWidget)wp->w, &x, &y);
 	sprintf (buf, "%d", x);
 	Tcl_SetVar (obm->tcl, xout, buf, 0);
 	sprintf (buf, "%d", y);
@@ -3704,7 +3704,7 @@ gtermUnmapPixel (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	src = 0;
 
 	do {
-	    src = GtSelectRaster (wp->w, dst=src,
+	    src = GtSelectRaster ((GtermWidget)wp->w, dst=src,
 		GtPixel, dx, dy, GtNDC, &sx, &sy, &mapping);
 	    if (src != dst) {
 		ndcToPixel (w, src, sx, sy, &fx, &fy);
@@ -3789,7 +3789,7 @@ gtermMarkerInit (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
 
-	GtMarkerInit (wp->w);
+	GtMarkerInit ((GtermWidget)wp->w);
 	return (TCL_OK);
 }
 

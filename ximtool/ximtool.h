@@ -2,6 +2,7 @@
  * XIMTOOL.H -- Global definitions for XImtool.
  */
 
+#include <tcl.h>
 #include "../version.h"
 #include "eps.h"
 
@@ -315,7 +316,12 @@ typedef struct {
 
 } XimData, *XimDataPtr;
 
-
+/* Client callback struct. */
+typedef struct {
+        XimDataPtr xim;
+        Tcl_Interp *tcl;
+        Tcl_Interp *server;
+} XimClient, *XimClientPtr;
 
 #ifdef XIMTOOL_MAIN
 XimData ximtool_data;

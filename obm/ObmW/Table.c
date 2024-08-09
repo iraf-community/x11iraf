@@ -1930,10 +1930,11 @@ static char* DummyString(void)
   return XtNewString("");
 }
 
-static char* CopyOnlyPrintable(char *raw)
+static char* CopyOnlyPrintable(const char *raw)
 {
   char* clear;
-  char *s,*h;
+  const char *s;
+  char *h;
   int lenght;
 
   for(s = raw, lenght = 0; (*s) != '\0';)
@@ -2479,7 +2480,7 @@ XawTableDeleteRow (Widget w, int row)
     Boolean have_find;
     int i, j;
     
-    have_find = go_table((XtPointer)w, CompareCells, STUFF(tw),
+    have_find = go_table((XtPointer)w, (XawTableProc)CompareCells, STUFF(tw),
 			 row, row, 0, COLUMNS(tw)-1, 
 			 XawTABLE_RIGHT_DOWN, &i, &j,
 			 (XtPointer)tw->table.cell_own);
@@ -2936,7 +2937,7 @@ XawTableDeleteColumn (Widget w, int column)
     Boolean have_find;
     int i, j;
     
-    have_find = go_table((XtPointer)w, CompareCells, STUFF(tw),
+    have_find = go_table((XtPointer)w, (XawTableProc)CompareCells, STUFF(tw),
 			 0, ROWS(tw)-1, column, column, 
 			 XawTABLE_RIGHT_DOWN, &i, &j,
 			 (XtPointer)tw->table.cell_own);
@@ -3572,7 +3573,7 @@ XawTableSetColumnJustify (Widget w, int column, XtJustify justify)
   if (XtIsRealized(w) && w->core.visible && 
       !tw->table.no_redraw && !tw->table.no_refigure) 
   {
-    (void)go_table((XtPointer)w, PaintCell, STUFF(tw),
+    (void)go_table((XtPointer)w, (XawTableProc)PaintCell, STUFF(tw),
 		   0, ROWS(tw)-1, column, column, 
 		   XawTABLE_DOWN_RIGHT,
 		   &i, &j, (XtPointer)NULL);

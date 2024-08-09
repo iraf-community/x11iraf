@@ -132,7 +132,7 @@ Boolean SendMousePosition(Widget w, XEvent *event)
 
 	if (KeyModifiers == 0) {
 	    if (event->type == ButtonPress)
-		EditorButton(event);
+		EditorButton((XButtonEvent *)event);
 	    return True;
 	}
 	return False;
@@ -140,7 +140,7 @@ Boolean SendMousePosition(Widget w, XEvent *event)
       case 2: /* DEC vt200 compatible */
 
 	if (KeyModifiers == 0 || KeyModifiers == ControlMask) {
-	    EditorButton(event);
+	    EditorButton((XButtonEvent *)event);
 	    return True;
 	}
 	return False;
@@ -149,11 +149,11 @@ Boolean SendMousePosition(Widget w, XEvent *event)
 	if (  event->type == ButtonPress &&
 	      KeyModifiers == 0 &&
 	      event->xbutton.button == Button1 ) {
-	    TrackDown(event);
+	    TrackDown((XButtonEvent *)event);
 	    return True;
 	}
 	if (KeyModifiers == 0 || KeyModifiers == ControlMask) {
-	    EditorButton(event);
+	    EditorButton((XButtonEvent *)event);
 	    return True;
 	}
 	/* fall through */

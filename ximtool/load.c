@@ -298,7 +298,7 @@ xim_loadFile (XimDataPtr xim, char *fname, int frame)
 
             xim->width = cf->width;
             xim->height = cf->height;
-            GtSetLogRes (xim->gt, cf->width, cf->height);
+            GtSetLogRes ((GtermWidget)xim->gt, cf->width, cf->height);
 
 	    /* Fit the frame.  */
             xim_message (xim, "frameFit", "init");
@@ -607,7 +607,7 @@ listFiles (char *directory, char *pattern, int *number_entries, int files_only)
 	    } else {
 	        /* Otherwise, check the filename against the pattern list. */
 	        for (i=0; i < npatterns; i++) {
-		    if (globExpression(entry->d_name, &patterns[i])) {
+		    if (globExpression(entry->d_name, patterns[i])) {
 			pattern_matches = 1;
 			break;
 		    }
@@ -859,7 +859,7 @@ sortGraymap (unsigned char *a, unsigned char *b, int npix, unsigned char *red, u
 	    b[i] = (unsigned char) ((float) red[a[i]] / scale);
 
 	/* Sort the input colormap. */
-	qsort (red, ncols, sizeof (unsigned char), ucharCompare);
+	qsort (red, ncols, sizeof (unsigned char), (int(*)())ucharCompare);
 
 	/* Set the new colormap.  0-ncols are the scaled colors in the desired
 	 * number of cells, everything above that we set to zero.

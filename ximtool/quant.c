@@ -450,15 +450,15 @@ medianCut (colorhist_vector chv, int colors, int sum, pixval maxval, int newcolo
 	    	if  (rl >= gl && rl >= bl) 
 	    	    qsort(
 	    	        (char *)&(chv[indx]),clrs,sizeof(struct colorhist_item),
-	    	        redCompare) ;
+	    	        (int(*)())redCompare) ;
 	    	else if  (gl >= bl) 
 	    	    qsort(
 	    	        (char *)&(chv[indx]),clrs,sizeof(struct colorhist_item),
-	    	        greenCompare) ;
+	    	        (int(*)())greenCompare) ;
 	    	else
 	    	    qsort(
 	    	        (char *)&(chv[indx]),clrs,sizeof(struct colorhist_item),
-	    	        blueCompare) ;
+	    	        (int(*)())blueCompare) ;
 	    }
 
 	    /*
@@ -482,7 +482,8 @@ medianCut (colorhist_vector chv, int colors, int sum, pixval maxval, int newcolo
 	    bv[boxes].colors = clrs - i;
 	    bv[boxes].sum = sm - lowersum;
 	    ++boxes;
-	    qsort ((char *) bv, boxes, sizeof(struct box) , sumCompare) ;
+	    qsort ((char *) bv, boxes, sizeof(struct box),
+		   (int(*)())sumCompare) ;
 	}
 
 	/*

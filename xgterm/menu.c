@@ -164,7 +164,7 @@ static Bool domenu (Widget w, XEvent *event, String *params, Cardinal *param_cou
     switch (params[0][0]) {
       case 'm':
 	if (!screen->mainMenu) {
-	    screen->mainMenu = create_menu (term, toplevel, "mainMenu",
+	    screen->mainMenu = create_menu ((Widget)term, toplevel, "mainMenu",
 					    mainMenuEntries,
 					    XtNumber(mainMenuEntries));
 	    update_securekbd();
@@ -185,7 +185,7 @@ static Bool domenu (Widget w, XEvent *event, String *params, Cardinal *param_cou
 
       case 'v':
 	if (!screen->vtMenu) {
-	    screen->vtMenu = create_menu (term, toplevel, "vtMenu",
+	    screen->vtMenu = create_menu ((Widget)term, toplevel, "vtMenu",
 					  vtMenuEntries,
 					  XtNumber(vtMenuEntries));
 	    /* and turn off the alternate screen entry */
@@ -243,7 +243,7 @@ static Bool domenu (Widget w, XEvent *event, String *params, Cardinal *param_cou
 
       case 'f':
 	if (!screen->fontMenu) {
-	    screen->fontMenu = create_menu (term, toplevel, "fontMenu",
+	    screen->fontMenu = create_menu ((Widget)term, toplevel, "fontMenu",
 					    fontMenuEntries,
 					    NMENUFONTS);  
 	    set_menu_font (True);

@@ -909,7 +909,7 @@ obmUndisplay (ObmContext obm, ObmObject obj)
 /* obmGetClassrec -- Get the class record for the named class.
  */
 ObjClassRec
-obmGetClassrec (char *classname)
+obmGetClassrec (const char *classname)
 {
 	ObjClassRec classrec;
 	int i;
@@ -995,9 +995,10 @@ obmRemoveCallback (ObmCallback *callback_list, ObmCallback callback)
  * the given Tcl interepter.
  */
 int
-obmClientCommand (Tcl_Interp *tcl, char *commmand)
+obmClientCommand (Tcl_Interp *tcl, const char *commmand)
 {
-	char *ip, *op;
+	const char *ip;
+	char *op;
 	char name[SZ_NAME];
 	Tcl_CmdInfo info;
 
