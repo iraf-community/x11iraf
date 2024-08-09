@@ -115,7 +115,13 @@ static void update_font_info(TScreen *screen, int doresize);
 
 static void bitset(unsigned int *p, int mask), bitclr(unsigned int *p, int mask);
 void ShowCursor(void), HideCursor(void);
-    
+
+void unparseseq(ANSI *ap, int fd);
+void unparseputn(unsigned int n, int fd);
+void unparseputc(char c, int fd);
+void unparsefputs (char *s, int fd);
+void VTReset(Boolean full);
+
 #define	DEFAULT		-1
 #define	TEXT_BUF_SIZE	1024
 #define TRACKTIMESEC	4L
@@ -2265,7 +2271,7 @@ static void bitclr(unsigned int *p, int mask)
 	*p &= ~mask;
 }
 
-unparseseq(ANSI *ap, int fd)
+void unparseseq(ANSI *ap, int fd)
 {
 	int	c;
 	int	i;
@@ -2296,7 +2302,7 @@ unparseseq(ANSI *ap, int fd)
 	}
 }
 
-unparseputn(unsigned int n, int fd)
+void unparseputn(unsigned int n, int fd)
 {
 	unsigned int	q;
 
@@ -2306,7 +2312,7 @@ unparseputn(unsigned int n, int fd)
 	unparseputc((char) ('0' + (n%10)), fd);
 }
 
-unparseputc(char c, int fd)
+void unparseputc(char c, int fd)
 {
 	char	buf[2];
 	int i = 1;
@@ -2319,7 +2325,7 @@ unparseputc(char c, int fd)
 	v_write(fd, buf, i);
 }
 
-unparsefputs (char *s, int fd)
+void unparsefputs (char *s, int fd)
 {
     if (s) {
 	while (*s) unparseputc (*s++, fd);
@@ -2336,8 +2342,8 @@ ToAlternate(TScreen *screen)
 	if(screen->alternate)
 		return;
 	if(!screen->altbuf)
-		screen->altbuf = Allocate(screen->max_row + 1, screen->max_col
-		 + 1, &screen->abuf_address);
+		screen->altbuf = Allocate(screen->max_row + 1, 
+		 screen->max_col + 1, (Char **)&screen->abuf_address);
 	SwitchBufs(screen);
 	screen->alternate = TRUE;
 	update_altscreen();
@@ -2536,7 +2542,7 @@ static void VTallocbuf (void)
     if (screen->scrollWidget)
       nrows += screen->savelines;
     screen->allbuf = Allocate (nrows, screen->max_col + 1,
-     &screen->sbuf_address);
+     (Char **)&screen->sbuf_address);
     if (screen->scrollWidget)
       screen->buf = &screen->allbuf[4 * screen->savelines];
     else
@@ -2628,17 +2634,17 @@ static void VTInitialize (Widget wrequest, Widget wnew, ArgList args, Cardinal *
     * to care about the shell's border being part of our focus.
     */
    XtAddEventHandler(XtParent(new), FocusChangeMask, FALSE,
-		HandleFocusChange, (Opaque)NULL);
+		(XtEventHandler)HandleFocusChange, (Opaque)NULL);
    XtAddEventHandler((Widget)new, 0L, TRUE,
 		VTNonMaskableEvent, (Opaque)NULL);
    XtAddEventHandler((Widget)new, PropertyChangeMask, FALSE,
 		     HandleBellPropertyChange, (Opaque)NULL);
 
    /* These apply to vt100 window events. */
-   XtAddEventHandler (wnew, EnterWindowMask, FALSE, HandleEnterWindow,
-       (Opaque)NULL);
-   XtAddEventHandler (wnew, LeaveWindowMask, FALSE, HandleLeaveWindow,
-       (Opaque)NULL);
+   XtAddEventHandler (wnew, EnterWindowMask, FALSE,
+       (XtEventHandler)HandleLeaveWindow, (Opaque)NULL);
+   XtAddEventHandler (wnew, LeaveWindowMask, FALSE, 
+       (XtEventHandler)HandleLeaveWindow, (Opaque)NULL);
 
    new->screen.bellInProgress = FALSE;
    set_character_class (new->screen.charClass);
@@ -3211,6 +3217,7 @@ HideCursor(void)
 	screen->cursor_state = OFF;
 }
 
+void
 VTReset(Boolean full)
 {
 	TScreen *screen = &term->screen;

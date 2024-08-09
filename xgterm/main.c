@@ -481,7 +481,7 @@ extern char *ptsname(int);
 extern char *strindex (char *s1, char *s2);
 extern void HandlePopupMenu(Widget w, XEvent *event, String *params, Cardinal *param_count);
 extern void gtermio_connect(int notused, Display *display, Widget toplevel, int state);
-extern void resize(TScreen *screen, char *TermName, char *oldtc, char *newtc);
+extern void resize(TScreen *screen, char *TermName, char *oldtc);
 
 int switchfb[] = {0, 2, 1, 3};
 
@@ -524,7 +524,6 @@ static struct jtchars d_jtc = {
 #endif /* sony */
 #endif /* USE_SYSV_TERMIO */
 
-static int parse_tty_modes (char *s, struct _xttymodes *modelist);
 /*
  * SYSV has the termio.c_cc[V] and ltchars; BSD has tchars and ltchars;
  * SVR4 has only termio.c_cc, but it includes everything from ltchars.
@@ -578,6 +577,8 @@ struct _xttymodes {
 #define XTTYMODE_eol2   18
 { NULL, 0, 0, '\0' },			/* end of data */
 };
+
+static int parse_tty_modes (char *s, struct _xttymodes *modelist);
 
 #ifdef USE_SYSV_UTMP
 #if defined(X_NOT_STDC_ENV) || defined(AIXV3)
@@ -971,12 +972,12 @@ DeleteWindow(Widget w, XEvent *event, String *params, Cardinal *num_params)
     if (term->screen.Tshow)
       hide_vt_window();
     else
-      do_hangup(w);
+      do_hangup(w, NULL, NULL);
   else
     if (term->screen.Vshow)
       hide_tek_window();
     else
-      do_hangup(w);
+      do_hangup(w, NULL, NULL);
 }
 
 /* ARGSUSED */
@@ -5046,10 +5047,12 @@ Exit(int n)
 
 /* ARGSUSED */
 void
-resize(TScreen *screen, char *TermName, char *oldtc, char *newtc)
+resize(TScreen *screen, char *TermName, char *oldtc)
 {
 #ifndef USE_SYSV_ENVVARS
 	char *ptr1, *ptr2;
+	char buf[1024];
+	char *newtc = buf;
 	int i;
 	int li_first = 0;
 	char *temp;
