@@ -903,12 +903,7 @@ Panic(char *s, int a)
 
 char *SysErrorMsg (int n)
 {
-#if __STDC__
     return strerror(n);
-#else
-
-    return((n >= 0) ? (char *)strerror(n) : "unknown error");
-#endif /* __STDC__ */
 }
 
 

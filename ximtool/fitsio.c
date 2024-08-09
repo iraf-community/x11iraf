@@ -61,8 +61,6 @@ typedef struct {
 } FITS;
 
 /* Function prototypes */
-#ifdef __STDC__
-
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -75,17 +73,6 @@ static char *rdcard (char *card, char *name, enum datatype dtype, long int *kval
 static void wrcard (char *card, char *name, enum datatype dtype, int kvalue);
 static char *ftgdata (FITS *fs, void *buffer, int nelem);
 static char *ftfixdata (FITS *fs, void *buffer, int nelem);
-#else
-static char *ftopen2d ();
-static void ftclose ();
-static char *ftgbyte ();
-static char *rdheader ();
-static char *wrheader ();
-static char *rdcard ();
-static void wrcard ();
-static char *ftgdata ();
-static char *ftfixdata ();
-#endif
 
 extern void min_max(void *a, int npts, int bitpix, float *min, float *max);
 

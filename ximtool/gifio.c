@@ -76,8 +76,6 @@ static struct {
 
 
 /* Function prototypes */
-#ifdef __STDC__
-
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -105,17 +103,6 @@ static int  GetCode (FILE *fd, int code_size, int flag );
 static int  LWZReadByte (FILE *fd, int flag, int input_code_size );
 static char *ReadImage (FILE *fd, int len, int height, 
 	int interlace, int ignore, uchar **image );
-
-#else
-static int	colorstobpp(), GIFNextPixel();
-static void 	BumpPixel (), GIFEncode (), Putword (), compress ();
-static void 	output (), cl_block (), cl_hash (), writeerr (), char_init ();
-static void 	char_out (), flush_char ();
-
-static char 	*ReadGIF (), *ReadImage ();
-static int  	ReadColorMap (), DoExtension (), GetDataBlock ();
-static int  	GetCode (), LWZReadByte ();
-#endif
 
 static byte	*pixels;
 static int	nrows, ncols;

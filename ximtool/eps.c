@@ -5,10 +5,8 @@
 #include <pwd.h>
 #include "eps.h"
 
-#ifdef __STDC__
 #include <stdlib.h>
 #include <string.h>
-#endif
 
 #ifdef SOLARIS
 #include <sys/systeminfo.h>

@@ -56,7 +56,6 @@ static char	errstr[128];
 #define RAS_RLE 0x80
 
 
-#ifdef __STDC__
 static char *sunRasError(char *, char *);
 static int  rle_read(unsigned char *, int, int, FILE *, int);
 static void SunRas1to8(unsigned char *, unsigned char *, int);
@@ -64,14 +63,6 @@ static void SunRas8to1(unsigned char *, unsigned char *, int, int);
 static int  read_sun_long(long *, FILE *);
 static int  write_sun_long(long, FILE *);
 static void fixBGR(unsigned char *, int, int);
-#else
-static char *sunRasError();
-static int  rle_read();
-static void SunRas1to8();
-static void SunRas8to1();
-static int  read_sun_long(), write_sun_long();
-static void fixBGR();
-#endif
 
 
 /*
