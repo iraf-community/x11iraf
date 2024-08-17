@@ -7,11 +7,10 @@
  *	Converts a string list of tabs to an array of tabs
  */
 int *
-XfwfTablist2Tabs(tablist)
-char *tablist;
+XfwfTablist2Tabs(char *tablist)
 {
-	register int	*tabs;
-	register int	ntabs = 0;
+	int	*tabs;
+	int	ntabs = 0;
 
 	if (!tablist)
 		return NULL;

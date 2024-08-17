@@ -11,19 +11,23 @@
 typedef	struct { int dummy; } *ObmContext;
 #endif
 
-ObmContext ObmOpen (/* app_context, argc, argv */);
-void ObmClose (/* obm */);
-void ObmInitialize (/* obm */);
-void ObmActivate (/* obm */);
-void ObmDeactivate (/* obm, unmap */);
-int ObmActivated (/* obm */);
-int ObmStatus (/* obm, app_name, app_class */);
-XtPointer ObmGetInterp (/* obm, object */);
-int ObmDeliverMsg (/* obm, object, message */);
-int ObmDeliverMsgFromFile (/* obm, object, filename */);
-void ObmAddCallback (/* obm, fcn, callback_type, client_data */);
-void ObmRemoveCallback (/* obm, callback_id */);
-void obmNewObject();
+typedef	int (*ObmFunc)();
+typedef struct _obmCallback *ObmCallback;
+
+ObmContext ObmOpen (XtAppContext app_context, int argc, char *argv[]);
+void ObmClose (ObmContext);
+void ObmInitialize (ObmContext);
+void ObmActivate (ObmContext);
+void ObmDeactivate (ObmContext, Boolean);
+int ObmActivated (ObmContext);
+int ObmStatus (ObmContext, char *, char *);
+XtPointer ObmGetInterp (ObmContext);
+int ObmDeliverMsg (ObmContext, const char *, const char *);
+int ObmDeliverMsgFromFile (ObmContext, char *, char *);
+void ObmAddCallback (ObmContext, int, ObmFunc, XtPointer);
+void ObmRemoveCallback (ObmContext, ObmCallback);
+void obmNewObject(ObmContext, const char *, const char *, const char *, ArgList, int);
+
 
 /* Callback type flags. */
 #define	OBMCB_preserve			0000001 /* preserve over ObmInit */

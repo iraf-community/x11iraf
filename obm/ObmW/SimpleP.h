@@ -8,8 +8,8 @@
 
 #define SIMPLE(w) ((SimpleWidget) w)->simple
 
-typedef Boolean (*XawDisplayRectProc) Xraw_PROTO((Widget, XRectangle * ));
-typedef Boolean (*XawChangeSensitive) Xraw_PROTO((Widget));
+typedef Boolean (*XawDisplayRectProc) (Widget, XRectangle * );
+typedef Boolean (*XawChangeSensitive) (Widget);
 
 typedef struct {
   XawChangeSensitive  change_sensitive;

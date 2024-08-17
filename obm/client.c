@@ -50,19 +50,20 @@ struct clientObject  {
 
 typedef	struct clientObject *ClientObject;
 
-static	void ClientDestroy();
-static	int ClientEvaluate();
-static	ObmObject ClientCreate();
-static	int clientGcmd(), clientGkey(), clientLiteral();
-static	int client_output();
+static	void ClientDestroy(ObmObject);
+static	int ClientEvaluate(ObmObject, const char *);
+static	ObmObject ClientCreate(ObmContext, const char *, ObjClassRec,
+			       const char *, ArgList, int);
+static	int clientGcmd(ObmObject, Tcl_Interp *, int, const char **);
+static	int clientGkey(ObmObject, Tcl_Interp *, int, char **);
+static	int clientLiteral(ObmObject, Tcl_Interp *, int, const char **);
+static	int client_output(ObmContext, char *, int, char *);
 
 
 /* ClientClassInit -- Initialize the class record for the client class.
  */
 void
-ClientClassInit (obm, classrec)
-ObmContext obm;
-register ObjClassRec classrec;
+ClientClassInit (ObmContext obm, ObjClassRec classrec)
 {
 	classrec->ClassDestroy = obmGenericClassDestroy;
 	classrec->Create = ClientCreate;
@@ -74,28 +75,28 @@ register ObjClassRec classrec;
 /* ClientCreate -- Create an instance of a client object.
  */
 static ObmObject
-ClientCreate (obm, name, classrec, parent, args, nargs)
-ObmContext obm;
-char *name;
-ObjClassRec classrec;
-char *parent;
-ArgList args;
-int nargs;
+ClientCreate (
+  ObmContext obm,
+  const char *name,
+  ObjClassRec classrec,
+  const char *parent,
+  ArgList args,
+  int nargs)
 {
-	register ClientObject obj;
-	register Tcl_Interp *tcl;
+	ClientObject obj;
+	Tcl_Interp *tcl;
 
 	obj = (ClientObject) XtCalloc (1, sizeof (struct clientObject));
 	obj->client.tcl = tcl = Tcl_CreateInterp();
 	obj->client.obm = obm;
 
-	/* Register client-object actions.  */
+	/* client-object actions.  */
 	Tcl_CreateCommand (tcl,
-	    "gcmd", clientGcmd, (ClientData)obj, NULL);
+	    "gcmd", (Tcl_CmdProc *) clientGcmd, (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "gkey", clientGkey, (ClientData)obj, NULL);
+	    "gkey", (Tcl_CmdProc *) clientGkey, (ClientData)obj, NULL);
 	Tcl_CreateCommand (tcl,
-	    "literal", clientLiteral, (ClientData)obj, NULL);
+	    "literal", (Tcl_CmdProc *) clientLiteral, (ClientData)obj, NULL);
 
 	return ((ObmObject) obj);
 }
@@ -104,10 +105,9 @@ int nargs;
 /* ClientDestroy -- Destroy an instance of a client object.
  */
 static void
-ClientDestroy (object)
-ObmObject object;
+ClientDestroy (ObmObject object)
 {
-	register ClientObject obj = (ClientObject) object;
+	ClientObject obj = (ClientObject) object;
 
 	if (obj->core.being_destroyed++)
 	    Tcl_DeleteInterp (obj->client.tcl);
@@ -117,20 +117,18 @@ ObmObject object;
 /* ClientEvaluate -- Evaluate a client command or message.
  */
 static int
-ClientEvaluate (object, command)
-ObmObject object;
-char *command;
+ClientEvaluate (ObmObject object, const char *command)
 {
-	register ClientObject obj = (ClientObject) object;
-	register Tcl_Interp *tcl = obj->client.tcl;
+	ClientObject obj = (ClientObject) object;
+	Tcl_Interp *tcl = obj->client.tcl;
 	int status, argc, i;
-	char *argv[MAX_ARGS];
-	char **argvp;
+	const char *argv[MAX_ARGS];
+	const char **argvp;
 
 	if (!obmClientCommand (tcl, command))
 	    goto literal;
 
-	/* If the command is unrecognized pass it on to the client as a
+	/* If the command is unrecognized pass it on to the client as a^
 	 * literal to be processed by the client.
 	 */
 	if ((status = Tcl_Eval (tcl, command)) != TCL_OK) {
@@ -159,14 +157,10 @@ literal:    if (Tcl_SplitList (tcl, command, &argc, &argvp) == TCL_OK) {
  *  Usage:	gcmd <command-string>
  */
 static int 
-clientGcmd (object, tcl, argc, argv)
-ObmObject object;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+clientGcmd (ObmObject object, Tcl_Interp *tcl, int argc, const char **argv)
 {
-	register ClientObject obj = (ClientObject) object;
-	register ObmContext obm = obj->client.obm;
+	ClientObject obj = (ClientObject) object;
+	ObmContext obm = obj->client.obm;
 	int stat;
 
 	if (argc >= 2) {
@@ -187,14 +181,10 @@ char **argv;
  *  Usage:	gkey <key>
  */
 static int 
-clientGkey (object, tcl, argc, argv)
-ObmObject object;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+clientGkey (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register ClientObject obj = (ClientObject) object;
-	register ObmContext obm = obj->client.obm;
+	ClientObject obj = (ClientObject) object;
+	ObmContext obm = obj->client.obm;
 	int stat;
 
 	if (argc >= 2)
@@ -211,14 +201,10 @@ char **argv;
  *  Usage:	literal <command>
  */
 static int 
-clientLiteral (object, tcl, argc, argv)
-ObmObject object;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+clientLiteral (ObmObject object, Tcl_Interp *tcl, int argc, const char **argv)
 {
-	register ClientObject obj = (ClientObject) object;
-	register ObmContext obm = obj->client.obm;
+	ClientObject obj = (ClientObject) object;
+	ObmContext obm = obj->client.obm;
 	int stat;
 
 	if (argc >= 2) {
@@ -235,14 +221,10 @@ char **argv;
 /* client_output -- Call the client output callbacks if any.
  */
 static int
-client_output (obm, objname, key, strval)
-register ObmContext obm;
-char *objname;
-int key;
-char *strval;
+client_output (ObmContext obm, char *objname, int key, char *strval)
 {
-	register ObmCallback cb;
-	register int stat = 0;
+	ObmCallback cb;
+	int stat = 0;
 
 	for (cb = obm->callback_list;  cb;  cb = cb->next)
 	    if ((cb->callback_type & OBMCB_clientOutput) && cb->u.fcn)

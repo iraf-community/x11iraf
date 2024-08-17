@@ -351,8 +351,8 @@ XtPointer client_data;
 int *source;
 XtInputId *id;
 {
-    register int fd = *source;
-    register char *ip, *op;
+    int fd = *source;
+    char *ip, *op;
     static char msg[SZ_MSGBUF];
     static int nleft, tapesize, blksize;
     char word[SZ_LINE], value[SZ_LINE];
@@ -511,7 +511,7 @@ static void
 appendText (text)
 char *text;
 {
-    register char *ip, *op;
+    char *ip, *op;
     static XawTextPosition pos = 0;
     static int newline = 0;
     XawTextBlock tx;

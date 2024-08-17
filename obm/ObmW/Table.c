@@ -188,11 +188,11 @@ typedef struct _XawTableColumnRec {
 
 /* Private Data */
 
-static void Def_pixel();
-static void Def_scroll();
-static void Def_column_default_width();
-static void Def_literal_width();
-static void Def_shadow_thickness();
+static void Def_pixel(Widget w, int offset, XrmValue *value);
+static void Def_scroll(Widget w, int offset, XrmValue *value);
+static void Def_column_default_width(Widget w, int offset, XrmValue *value);
+static void Def_literal_width(Widget w, int offset, XrmValue *value);
+static void Def_shadow_thickness(Widget w, int offset, XrmValue *value);
 
 #define Offset(field) XtOffsetOf(TableRec, field)
 
@@ -373,10 +373,7 @@ static XtResource resources[] = {
 #define PRINTF_BOOL(a) ((a) ? "TRUE":"FALSE")
 #define PRINTF_NULL(a) ((a)==NULL ? "NULL":"not NULL")
 
-static void Def_pixel(w, offset, value)
-     Widget    w;
-     int       offset;
-     XrmValue *value;
+static void Def_pixel(Widget w, int offset, XrmValue *value)
 {
   XawTableWidget tw = (XawTableWidget)w;
   static Pixel pix = 0;
@@ -396,10 +393,7 @@ static void Def_pixel(w, offset, value)
 }
 
 /* ARGSUSED */
-static void Def_scroll(w, offset, value)
-     Widget    w;
-     int       offset;
-     XrmValue *value;
+static void Def_scroll(Widget w, int offset, XrmValue *value)
 {
   static Widget view;
 
@@ -429,10 +423,7 @@ static void Def_scroll(w, offset, value)
 }
 
 /* ARGSUSED */
-static void Def_column_default_width(w, offset, value)
-     Widget    w;
-     int       offset;
-     XrmValue *value;
+static void Def_column_default_width(Widget w, int offset, XrmValue *value)
 {
   XawTableWidget tw = (XawTableWidget) w;
   static int column_default_width;
@@ -452,10 +443,7 @@ static void Def_column_default_width(w, offset, value)
 #endif
 
 /* ARGSUSED */
-static void Def_literal_width(w, offset, value)
-     Widget    w;
-     int       offset;
-     XrmValue *value;
+static void Def_literal_width(Widget w, int offset, XrmValue *value)
 {
   XawTableWidget tw = (XawTableWidget) w;
   static int literal_width;
@@ -471,10 +459,7 @@ static void Def_literal_width(w, offset, value)
 }
 
 /* ARGSUSED */
-static void Def_shadow_thickness(w, offset, value)
-     Widget    w;
-     int       offset;
-     XrmValue *value;
+static void Def_shadow_thickness(Widget w, int offset, XrmValue *value)
 {
   Widget parent = XtParent (w);
   static Dimension shadow_thickness;
@@ -494,33 +479,33 @@ static void Def_shadow_thickness(w, offset, value)
 
 #undef offset
 
-static void MultipleChangeGC();
-static void Initialize();
-static void Realize();
-static void Resize();
-static void Redisplay();
-static void Destroy();
+static void MultipleChangeGC(Widget w, Pixel *fore, Pixel *back, Font *font, GC *normal, GC *reverse);
+static void Initialize(Widget request, Widget new, ArgList args, Cardinal *num_args);
+static void Realize(Widget w, XtValueMask *valueMask, XSetWindowAttributes *attributes);
+static void Resize(Widget w);
+static void Redisplay(Widget w, XEvent *event, Region region);
+static void Destroy(Widget w);
 
-static Boolean SetValues();
+static Boolean SetValues(Widget current, Widget request, Widget new, ArgList args, Cardinal *num_args);
 
-static void WalkForCells();
-static void LoseSelection();
+static void WalkForCells(Widget w, XawTableProc proc, int b_r, int e_r, int b_c, int e_c);
+static void LoseSelection(Widget w, Atom *selection);
 
-static void CallEdit();
-static void InsertSelection();
-static void StoreBuffer();
-static void WhatCell();
-static void KeyReturn();
-static void HighlightCell();
-static void UnhighlightCell();
-static void DoingNothing();
+static void CallEdit(Widget w, XEvent *event, String *params, Cardinal *num_params);
+static void InsertSelection(Widget w, XEvent *event, String *params, Cardinal *num_params);
+static void StoreBuffer(Widget w, XEvent *event, String *params, Cardinal *num_params);
+static void WhatCell(Widget w, XEvent *event, String *params, Cardinal *num_params);
+static void KeyReturn(Widget w, XEvent *event, String *params, Cardinal *num_params);
+static void HighlightCell(Widget w, XEvent *event, String *params, Cardinal *num_params);
+static void UnhighlightCell(Widget w, XEvent *event, String *params, Cardinal *num_params);
+static void DoingNothing(Widget w, XEvent *event, String *params, Cardinal *num_params);
 
-static char* DummyString();
+static char* DummyString(void);
 
-static Boolean InitCell();
+static Boolean InitCell(XtPointer p, int i, int j, XtPointer call_data, XtPointer client_data);
 
-static XtGeometryResult QueryGeometry();
-static XtGeometryResult GeometryManager();
+static XtGeometryResult QueryGeometry(Widget w, XtWidgetGeometry *intended, XtWidgetGeometry *preferred);
+static XtGeometryResult GeometryManager(Widget w, XtWidgetGeometry *desired, XtWidgetGeometry *allowed);
 
 static XtActionsRec actions[] = {
   {"call-edit",        (XtActionProc)CallEdit       },
@@ -636,13 +621,9 @@ static int MaskStaticArray[] = {
 			     0x1FF, 0x3FF, 0x7FF, 0xFFF
 			  };
 
-static NormalReverseGC*  GetNormalGC(w, fore, back, font)
-     Widget w;
-     Pixel fore;
-     Pixel back;
-     Font font;
+static NormalReverseGC*  GetNormalGC(Widget w, Pixel fore, Pixel back, Font font)
 {
-  register XawTableWidget tw = (XawTableWidget)w;
+  XawTableWidget tw = (XawTableWidget)w;
   int i = NORMAL_INDEX(fore, back);
 
   while (GET_NORMAL(tw,i)->used > 0)
@@ -684,10 +665,7 @@ static NormalReverseGC*  GetNormalGC(w, fore, back, font)
   return (NormalReverseGC*)NULL;
 }
 
-static void GetGCByForeground(w, gc, fore)
-     Widget  w;
-     GC     *gc;
-     Pixel   fore;
+static void GetGCByForeground(Widget w, GC *gc, Pixel fore)
 {
   XGCValues values;
   
@@ -696,11 +674,9 @@ static void GetGCByForeground(w, gc, fore)
 }
 
 
-static ShadowGC* GetShadowGC(w, back)
-     Widget w;
-     Pixel back;
+static ShadowGC* GetShadowGC(Widget w, Pixel back)
 {
-  register XawTableWidget tw = (XawTableWidget)w;
+  XawTableWidget tw = (XawTableWidget)w;
   int i = SHADOW_INDEX(back);
   
   while (GET_SHADOW(tw,i)->used > 0)
@@ -736,12 +712,9 @@ static ShadowGC* GetShadowGC(w, back)
   return (ShadowGC*)NULL;
 }
 
-static void ReleaseNormalGC(w, fore, back)
-     Widget w;
-     Pixel fore;
-     Pixel back;
+static void ReleaseNormalGC(Widget w, Pixel fore, Pixel back)
 {
-  register XawTableWidget tw = (XawTableWidget)w;
+  XawTableWidget tw = (XawTableWidget)w;
   int i = NORMAL_INDEX(fore, back);
   
   while (GET_NORMAL(tw,i)->used > 0)
@@ -759,11 +732,9 @@ static void ReleaseNormalGC(w, fore, back)
   }
 }
 
-static void ReleaseShadowGC(w, back)
-     Widget w;
-     Pixel back;
+static void ReleaseShadowGC(Widget w, Pixel back)
 {
-  register XawTableWidget tw = (XawTableWidget)w;
+  XawTableWidget tw = (XawTableWidget)w;
   int i = SHADOW_INDEX(back);
   
   while (GET_SHADOW(tw,i)->used > 0)
@@ -781,13 +752,7 @@ static void ReleaseShadowGC(w, back)
   }
 }
 
-static void MultipleChangeGC(w, fore, back, font, normal, reverse)
-     Widget w;
-     Pixel *fore;
-     Pixel *back;
-     Font  *font;
-     GC    *normal;
-     GC    *reverse;
+static void MultipleChangeGC(Widget w, Pixel *fore, Pixel *back, Font *font, GC *normal, GC *reverse)
 {
   XtGCMask mask;
   XGCValues values;
@@ -844,14 +809,11 @@ static int buf2blen = 0;
 #endif /* WORD64 */
 
 
-static void CalculatePreferredSize(w, width, height)
-     Widget w;
-     Dimension *width;
-     Dimension *height;
+static void CalculatePreferredSize(Widget w, Dimension *width, Dimension *height)
 {
-  register XawTableWidget tw = (XawTableWidget)w;
-  register int wid;
-  register int hei;
+  XawTableWidget tw = (XawTableWidget)w;
+  int wid;
+  int hei;
   int i;
   
   /*
@@ -882,27 +844,23 @@ static void CalculatePreferredSize(w, width, height)
 
 }
 
-static Position GetX(tw,j)
-     register XawTableWidget tw;
-     int j;
+static Position GetX(XawTableWidget tw, int j)
 {
-  register TablePart* table = (TablePart*)&tw->table;
-  register Position x;
+  TablePart* table = (TablePart*)&tw->table;
+  Position x;
 
   x = j * (table->col_margin + 2 * table->label_shadow_thickness) +
           (table->tab_margin + tw->container.shadow_thickness);
 
   for(; j > 0 ; j--)
   {
-    register int tmp = j - 1;
+    int tmp = j - 1;
     x += (Position)COLUMN_WIDTH(tw, tmp);
   }
   return x;
 }
 
-static Position GetY(tw,i)
-     XawTableWidget tw;
-     int i;
+static Position GetY(XawTableWidget tw, int i)
 {
   return(i * (tw->table.row_margin + tw->table.row_height +
 	       2 * tw->table.label_shadow_thickness) +
@@ -914,10 +872,9 @@ static Position GetY(tw,i)
  * Calculate width and height of displayed text in pixels
  */
 
-static void SetLabelHeight(tw)
-     XawTableWidget tw;
+static void SetLabelHeight(XawTableWidget tw)
 {
-  register XFontStruct *fs = tw->table.font;
+  XFontStruct *fs = tw->table.font;
   int row_height = tw->table.row_height;
 
   if (tw->table.row_height < 1)
@@ -939,8 +896,7 @@ static void SetLabelHeight(tw)
   }
 }
 
-static void SetLiteralWidth(tw)
-     XawTableWidget tw;
+static void SetLiteralWidth(XawTableWidget tw)
 {
   if (tw->table.encoding)
     tw->table.literal_width = XTextWidth16(tw->table.font, (TXT16*)"mmm", 3);
@@ -951,11 +907,9 @@ static void SetLiteralWidth(tw)
 }
 
 
-static void SetLabelWidth(tw,i,j)
-     XawTableWidget tw;
-     int i,j;
+static void SetLabelWidth(XawTableWidget tw, int i, int j)
 {
-  register XFontStruct *fs = tw->table.font;
+  XFontStruct *fs = tw->table.font;
   XawTableCell cell;
 
   cell = (XawTableCell)get_cell(STUFF(tw),i,j);
@@ -975,8 +929,7 @@ static void SetLabelWidth(tw,i,j)
 }
 
 
-static void CreateTableCellGC(w)
-    Widget w;
+static void CreateTableCellGC(Widget w)
 {
   Display   *dpy = XtDisplay(w);
   Drawable     d = XtWindow(w);
@@ -994,9 +947,7 @@ static void CreateTableCellGC(w)
 
 }
 
-static void DrawColumns(tw, b_column, e_column)
-     XawTableWidget tw;
-     int b_column, e_column;
+static void DrawColumns(XawTableWidget tw, int b_column, int e_column)
 {
   int j,y;
 
@@ -1014,9 +965,7 @@ static void DrawColumns(tw, b_column, e_column)
   }
 }
 
-static void DrawRows(tw, b_row, e_row)
-     XawTableWidget tw;
-     int b_row, e_row;
+static void DrawRows(XawTableWidget tw, int b_row, int e_row)
 {
   int i,x;
 
@@ -1034,9 +983,7 @@ static void DrawRows(tw, b_row, e_row)
   }
 }
 
-static void DrawCage(tw, b_row, e_row, b_column, e_column)
-     XawTableWidget tw;
-     int b_row, e_row, b_column, e_column;
+static void DrawCage(XawTableWidget tw, int b_row, int e_row, int b_column, int e_column)
 {
   int i,j;
   Display* dpy = XtDisplay((Widget)tw);
@@ -1093,10 +1040,7 @@ static void DrawCage(tw, b_row, e_row, b_column, e_column)
   }
 }
 
-static void Reposition(tw, cell, i, j)
-     register XawTableWidget tw;
-     XawTableCell  cell;
-     int i,j;
+static void Reposition(XawTableWidget tw, XawTableCell cell, int i, int j)
 {
   Position newPos;
   XtJustify justify;
@@ -1126,12 +1070,12 @@ static void Reposition(tw, cell, i, j)
 }
 
 /* ARGSUSED */
-static Boolean DeleteCell(p, i, j, call_data, client_data)
-     XtPointer p;
-     int i;               /* unused */
-     int j;               /* unused */
-     XtPointer call_data;
-     XtPointer client_data; /* unused */
+static Boolean DeleteCell(XtPointer p, int i, int j, XtPointer call_data, XtPointer client_data)
+                 
+                          /* unused */
+                          /* unused */
+                         
+                            /* unused */
 {
   Widget w = (Widget) p;
   XawTableCell cell = (XawTableCell)call_data;
@@ -1149,8 +1093,7 @@ static Boolean DeleteCell(p, i, j, call_data, client_data)
 }
 
 
-static void UpdateTable(tw)
-     XawTableWidget tw;
+static void UpdateTable(XawTableWidget tw)
 {
   Dimension width;
   Dimension height;
@@ -1172,10 +1115,7 @@ static void UpdateTable(tw)
 }
 
 
-static int SetTableSize(w, rows, columns)
-     Widget w;
-     int    rows;
-     int    columns;
+static int SetTableSize(Widget w, int rows, int columns)
 {
   XawTableWidget tw = (XawTableWidget)w;
   XawTableCallbackStruct callback_str;
@@ -1268,13 +1208,9 @@ static int SetTableSize(w, rows, columns)
 
 
 /* ARGSUSED */
-static void Initialize(request, new, args, num_args)
-     Widget    request;
-     Widget    new;
-     ArgList   args;
-     Cardinal *num_args;
+static void Initialize(Widget request, Widget new, ArgList args, Cardinal *num_args)
 {
-  register XawTableWidget tw = (XawTableWidget) new;
+  XawTableWidget tw = (XawTableWidget) new;
   Dimension   width;
   Dimension   height;
   int         i;
@@ -1361,10 +1297,7 @@ static void Initialize(request, new, args, num_args)
 }
 
 
-static void Realize(w, valueMask, attributes)
-     Widget w;
-     XtValueMask *valueMask;
-     XSetWindowAttributes *attributes;
+static void Realize(Widget w, XtValueMask *valueMask, XSetWindowAttributes *attributes)
 {
   XawTableWidget tw = (XawTableWidget) w;
   ShadowGC *shadow;
@@ -1385,12 +1318,12 @@ static void Realize(w, valueMask, attributes)
 }
 
 /* ARGSUSED */
-static Boolean MatchLabel(w, i, j, call_data, client_data)
-     Widget w;            /* unused */
-     int i;               /* unused */
-     int j;               /* unused */
-     XtPointer call_data;
-     XtPointer client_data; 
+static Boolean MatchLabel(Widget w, int i, int j, XtPointer call_data, XtPointer client_data)
+                          /* unused */
+                          /* unused */
+                          /* unused */
+                         
+                            
 {
   XawTableCell cell = (XawTableCell)call_data;
   XrmQuark* templ = (XrmQuark*)client_data;
@@ -1399,12 +1332,12 @@ static Boolean MatchLabel(w, i, j, call_data, client_data)
 }
 
 /* ARGSUSED */
-static Boolean InitCell(p, i, j, call_data, client_data)
-     XtPointer p;         /* unused */
-     int i;               /* unused */
-     int j;               /* unused */
-     XtPointer call_data;
-     XtPointer client_data; /* unused */
+static Boolean InitCell(XtPointer p, int i, int j, XtPointer call_data, XtPointer client_data)
+                          /* unused */
+                          /* unused */
+                          /* unused */
+                         
+                            /* unused */
 {
   XawTableCell cell = (XawTableCell)call_data;
 
@@ -1426,13 +1359,7 @@ static Boolean InitCell(p, i, j, call_data, client_data)
  * Shadow drawing around cell
  *
  */
-static void PaintShadow(w, i, j, x, y, cell)
-     Widget   w;
-     int      i;      
-     int      j;      
-     Position x;
-     Position y;
-     XawTableCell  cell;
+static void PaintShadow(Widget w, int i, int j, Position x, Position y, XawTableCell cell)
 {
   XawTableWidget tw = (XawTableWidget) w;
   
@@ -1469,12 +1396,7 @@ static void PaintShadow(w, i, j, x, y, cell)
 }
 
 /* ARGSUSED */
-static void PaintLabel(w, i, j, x, y, cell)
-     Widget w;
-     int i;      
-     int j;      
-     Position x,y;
-     XawTableCell cell;
+static void PaintLabel(Widget w, int i, int j, Position x, Position y, XawTableCell cell)
 {
   XawTableWidget tw = (XawTableWidget) w;
   XRectangle rectangle[1];
@@ -1508,7 +1430,7 @@ static void PaintLabel(w, i, j, x, y, cell)
   if (CELL(label_len) > 0)
   {
     GC gc;
-    register XFontStruct *fs = tw->table.font;
+    XFontStruct *fs = tw->table.font;
 
     if (CELL(special_colour))
       gc = CELL(highlight) ? CELL(reverse) : CELL(normal);
@@ -1544,12 +1466,12 @@ static void PaintLabel(w, i, j, x, y, cell)
 }
 
 /* ARGSUSED */
-static Boolean PaintCell(p, i, j, call_data, client_data)
-     XtPointer p;   
-     int i;      
-     int j;      
-     XtPointer call_data;
-     XtPointer client_data; /* unused */
+static Boolean PaintCell(XtPointer p, int i, int j, XtPointer call_data, XtPointer client_data)
+                    
+                 
+                 
+                         
+                            /* unused */
 {
   Widget       w = (Widget) p;
   XawTableWidget tw = (XawTableWidget) w;
@@ -1567,10 +1489,7 @@ static Boolean PaintCell(p, i, j, call_data, client_data)
   return False;
 }
 
-static void WhatCellsToBeDraw(tw, rect, b_row, e_row, b_column , e_column)
-     XawTableWidget tw;
-     XRectangle  rect;
-     register int *b_row, *e_row, *b_column , *e_column;
+static void WhatCellsToBeDraw(XawTableWidget tw, XRectangle rect, int *b_row, int *e_row, int *b_column, int *e_column)
 {
   Position    x1 = (Position)rect.x,
               y1 = (Position)rect.y,
@@ -1612,10 +1531,7 @@ static void WhatCellsToBeDraw(tw, rect, b_row, e_row, b_column , e_column)
 }
        
 
-static void Redisplay(w, event, region)
-    Widget w;
-    XEvent *event;
-    Region region;
+static void Redisplay(Widget w, XEvent *event, Region region)
 {
   XawTableWidget  tw = (XawTableWidget) w;
   XRectangle   rect;
@@ -1702,16 +1618,16 @@ static void Redisplay(w, event, region)
 }
 
 /* ARGSUSED */
-static Boolean SetValues(current, request, new, args, num_args)
-     Widget    current;
-     Widget    request;    /* unused */
-     Widget    new;
-     ArgList   args;       /* unused */
-     Cardinal *num_args;   /* unused */
+static Boolean SetValues(Widget current, Widget request, Widget new, ArgList args, Cardinal *num_args)
+                       
+                           /* unused */
+                   
+                           /* unused */
+                           /* unused */
 {
     XawTableWidget curtw = (XawTableWidget) current;
     XawTableWidget newtw = (XawTableWidget) new;
-    register int    i;
+    int    i;
     int             j;
     Boolean    resize = False;
     Boolean redisplay = False;
@@ -1837,8 +1753,7 @@ static Boolean SetValues(current, request, new, args, num_args)
 }
 
 
-static void Destroy(w)
-    Widget w;
+static void Destroy(Widget w)
 {
   XawTableWidget tw = (XawTableWidget)w;
   XawTableCallbackStruct callback_str;
@@ -1890,8 +1805,7 @@ static void Destroy(w)
 }
 
 
-static void Resize(w)
-    Widget w;
+static void Resize(Widget w)
 {
   XawTableWidget tw = (XawTableWidget)w;
 
@@ -1906,9 +1820,7 @@ static void Resize(w)
 }   
 
 
-static XtGeometryResult QueryGeometry(w, intended, preferred)
-    Widget w;
-    XtWidgetGeometry *intended, *preferred;
+static XtGeometryResult QueryGeometry(Widget w, XtWidgetGeometry *intended, XtWidgetGeometry *preferred)
 {
   preferred->request_mode = CWWidth | CWHeight;
 
@@ -1932,20 +1844,17 @@ static XtGeometryResult QueryGeometry(w, intended, preferred)
 }
 
 /* ARGSUSED */
-static XtGeometryResult GeometryManager(w, desired, allowed)
-     Widget            w;
-     XtWidgetGeometry *desired;
-     XtWidgetGeometry *allowed;
+static XtGeometryResult GeometryManager(Widget w, XtWidgetGeometry *desired, XtWidgetGeometry *allowed)
 {
   return XtGeometryYes;
 }
 
 
 
-static void ExtractPosition(event, x, y , t)
-     XEvent *event;
-     Position *x, *y;		/* RETURN */
-     Time *t;                   /* RETURN */
+static void ExtractPosition(XEvent *event, Position *x, Position *y, Time *t)
+                   
+                     		/* RETURN */
+                                /* RETURN */
 {
   if (event == NULL)
     return;
@@ -1982,10 +1891,10 @@ static void ExtractPosition(event, x, y , t)
 }
 
 /* ARGSUSED */
-static Boolean ExtractCell(tw, px, py, row, column)
-     XawTableWidget tw;
-     Position px,py;
-     int *row, *column;              /* RETURN */
+static Boolean ExtractCell(XawTableWidget tw, Position px, Position py, int *row, int *column)
+                       
+                    
+                                     /* RETURN */
 {
   Position x;
   Position y;
@@ -2005,10 +1914,7 @@ static Boolean ExtractCell(tw, px, py, row, column)
 
 
 /* ARGSUSED */
-static void WalkForCells(w, proc, b_r, e_r, b_c, e_c)
-     Widget    w;
-     XawTableProc proc;
-     int       b_r, e_r, b_c, e_c;
+static void WalkForCells(Widget w, XawTableProc proc, int b_r, int e_r, int b_c, int e_c)
 {
   XawTableWidget tw = (XawTableWidget)w;
   int i,j;
@@ -2019,16 +1925,16 @@ static void WalkForCells(w, proc, b_r, e_r, b_c, e_c)
 		 &i, &j, (XtPointer)NULL);
 }
 
-static char* DummyString()
+static char* DummyString(void)
 {
   return XtNewString("");
 }
 
-static char* CopyOnlyPrintable(raw)
-     char* raw;
+static char* CopyOnlyPrintable(const char *raw)
 {
   char* clear;
-  char *s,*h;
+  const char *s;
+  char *h;
   int lenght;
 
   for(s = raw, lenght = 0; (*s) != '\0';)
@@ -2089,10 +1995,7 @@ static void CheckAllLabels(tw)
 }
 #endif
 
-static void MoveEditCell (tw, row, column)
-  XawTableWidget tw;
-  int row;
-  int column;
+static void MoveEditCell (XawTableWidget tw, int row, int column)
 {
   Position x,y;
 
@@ -2120,12 +2023,12 @@ static void MoveEditCell (tw, row, column)
 }  
 
 /* ARGSUSED */
-static Boolean CompareCells(p, i, j, call_data, client_data)
-     XtPointer p;
-     int i;               /* unused */
-     int j;               /* unused */
-     XtPointer call_data;
-     XtPointer client_data; /* unused */
+static Boolean CompareCells(XtPointer p, int i, int j, XtPointer call_data, XtPointer client_data)
+                 
+                          /* unused */
+                          /* unused */
+                         
+                            /* unused */
 {
   XawTableCell      cell = (XawTableCell)call_data;
   XawTableCell test_cell = (XawTableCell)client_data;
@@ -2141,16 +2044,9 @@ static Boolean CompareCells(p, i, j, call_data, client_data)
 
 
 void
-#ifdef Xraw_NEED_PROTO
 XawTableGetSize (Widget w, 
 		 int *rows,
 		 int *columns)
-#else
-XawTableGetSize (w, rows, columns)
-     Widget w;
-     int *rows;
-     int *columns;
-#endif
 {
   XawTableWidget tw = (XawTableWidget)w;
   
@@ -2159,14 +2055,8 @@ XawTableGetSize (w, rows, columns)
 }
 
 void
-#ifdef Xraw_NEED_PROTO
 XawTableDoLayout (Widget w, 
 		  Boolean do_layout)
-#else
-XawTableDoLayout (w, do_layout)
-     Widget w;
-     Boolean do_layout;
-#endif
 {
   XawTableWidget tw = (XawTableWidget)w;
 
@@ -2182,16 +2072,9 @@ XawTableDoLayout (w, do_layout)
 }
 
 int
-#ifdef Xraw_NEED_PROTO
 XawTableSetNewSize (Widget w,
 	     int rows,
 	     int columns)
-#else
-XawTableSetNewSize (w, rows, columns)
-     Widget w;
-     int  rows;
-     int  columns;
-#endif
 {
   if (REJECT == SetTableSize(w, rows, columns))
     return REJECT;
@@ -2201,25 +2084,13 @@ XawTableSetNewSize (w, rows, columns)
 }
 
 char *
-#ifdef Xraw_NEED_PROTO
 XawTableGetLabelByCell (XawTableCell cell)
-#else
-XawTableGetLabelByCell (cell)
-     XawTableCell cell;
-#endif
 {
   return GET_CELL_LABEL;
 }
 
 void 
-#ifdef Xraw_NEED_PROTO
 XawTableGetEditPosition (Widget w, int *row, int *column)
-#else
-XawTableGetEditPosition(w, row, column)
-     Widget w;
-     int *row;
-     int *column;
-#endif
 {
   XawTableWidget tw = (XawTableWidget)w;
 
@@ -2228,7 +2099,6 @@ XawTableGetEditPosition(w, row, column)
 }
      
 Boolean 
-#ifdef Xraw_NEED_PROTO
 XawTableWalk (
 	      Widget w,
 	      XawTableProc proc,
@@ -2240,17 +2110,6 @@ XawTableWalk (
 	      int *i,                              /* returned */
 	      int *j,                              /* returned */
 	      XtPointer client_data)
-#else
-XawTableWalk(w, proc, b_row, e_row, b_column, e_column, 
-	     direction, i, j, client_data)
-     Widget w;
-     XawTableProc proc;
-     int b_row, e_row, b_column, e_column;
-     int direction;
-     int *i;                              /* returned */
-     int *j;                              /* returned */
-     XtPointer client_data;
-#endif
 {
   return go_table((XtPointer)w, proc, STUFF(w),
 		  b_row, e_row, b_column, e_column, 
@@ -2259,14 +2118,7 @@ XawTableWalk(w, proc, b_row, e_row, b_column, e_column,
 }
 
 Boolean 
-#ifdef Xraw_NEED_PROTO
 XawTableSearchLabel (Widget w, char *name, int *row, int *column)
-#else
-XawTableSearchLabel (w, name, row, column)
-     Widget w;
-     char *name;
-     int *row, *column;
-#endif
 {
   int row_start    = *row;
   int column_start = *column;
@@ -2311,12 +2163,7 @@ XawTableSearchLabel (w, name, row, column)
  **************************************************************/
 
 int
-#ifdef Xraw_NEED_PROTO
 XawTablePrependRow (Widget w)
-#else
-XawTablePrependRow(w)
-     Widget w;
-#endif
 {
   XawTableWidget tw = (XawTableWidget)w;
   XawTableCell cell;
@@ -2392,12 +2239,7 @@ XawTablePrependRow(w)
 }
 
 int
-#ifdef Xraw_NEED_PROTO
 XawTableAppendRow (Widget w)
-#else
-XawTableAppendRow (w)
-     Widget w;
-#endif
 {
   XawTableWidget tw = (XawTableWidget)w;
   XawTableCell cell;
@@ -2471,13 +2313,7 @@ XawTableAppendRow (w)
 }
 
 int
-#ifdef Xraw_NEED_PROTO
 XawTableInsertRow (Widget w, int row)
-#else
-XawTableInsertRow (w, row)
-     Widget w;
-     int row;
-#endif
 {
   XawTableWidget tw = (XawTableWidget)w;
   XawTableCell cell;
@@ -2568,13 +2404,7 @@ XawTableInsertRow (w, row)
 }
 
 int
-#ifdef Xraw_NEED_PROTO
 XawTableDeleteRow (Widget w, int row)
-#else
-XawTableDeleteRow (w, row)
-     Widget w;
-     int    row;
-#endif
 {
   XawTableWidget         tw = (XawTableWidget)w;
   XawTableCell           cell;
@@ -2650,7 +2480,7 @@ XawTableDeleteRow (w, row)
     Boolean have_find;
     int i, j;
     
-    have_find = go_table((XtPointer)w, CompareCells, STUFF(tw),
+    have_find = go_table((XtPointer)w, (XawTableProc)CompareCells, STUFF(tw),
 			 row, row, 0, COLUMNS(tw)-1, 
 			 XawTABLE_RIGHT_DOWN, &i, &j,
 			 (XtPointer)tw->table.cell_own);
@@ -2710,13 +2540,7 @@ XawTableDeleteRow (w, row)
  **************************************************************/
 
 int 
-#ifdef Xraw_NEED_PROTO
 XawTablePrependColumn (Widget w, int width)
-#else
-XawTablePrependColumn (w, width)
-     Widget w;
-     int width;
-#endif
 {
   XawTableWidget tw = (XawTableWidget)w;
   int j;
@@ -2818,13 +2642,7 @@ XawTablePrependColumn (w, width)
 }
 
 int 
-#ifdef Xraw_NEED_PROTO
 XawTableAppendColumn (Widget w, int width)
-#else
-XawTableAppendColumn (w, width)
-     Widget w;
-     int width;
-#endif
 {
   XawTableWidget         tw = (XawTableWidget)w;
   int                    j;
@@ -2924,14 +2742,7 @@ XawTableAppendColumn (w, width)
 }
 
 int 
-#ifdef Xraw_NEED_PROTO
 XawTableInsertColumn (Widget w, int column, int width)
-#else
-XawTableInsertColumn(w, column, width)
-     Widget w;
-     int column;
-     int width;
-#endif
 {
   XawTableWidget         tw = (XawTableWidget)w;
   XawTableCell           cell;
@@ -3051,13 +2862,7 @@ XawTableInsertColumn(w, column, width)
 }
 
 int 
-#ifdef Xraw_NEED_PROTO
 XawTableDeleteColumn (Widget w, int column)
-#else
-XawTableDeleteColumn(w, column)
-     Widget w;
-     int    column;
-#endif
 {
   XawTableWidget         tw = (XawTableWidget)w;
   XawTableCell           cell;
@@ -3132,7 +2937,7 @@ XawTableDeleteColumn(w, column)
     Boolean have_find;
     int i, j;
     
-    have_find = go_table((XtPointer)w, CompareCells, STUFF(tw),
+    have_find = go_table((XtPointer)w, (XawTableProc)CompareCells, STUFF(tw),
 			 0, ROWS(tw)-1, column, column, 
 			 XawTABLE_RIGHT_DOWN, &i, &j,
 			 (XtPointer)tw->table.cell_own);
@@ -3207,12 +3012,7 @@ XawTableDeleteColumn(w, column)
 
 
 Boolean 
-#ifdef Xraw_NEED_PROTO
 XawTableIsEditManaged (Widget w)
-#else
-XawTableIsEditManaged (w)
-     Widget w;
-#endif
 {
   return XtIsManaged(((XawTableWidget)w)->table.edit);
 }
@@ -3220,17 +3020,9 @@ XawTableIsEditManaged (w)
 
 
 int
-#ifdef Xraw_NEED_PROTO
 XawTableSetLabel (Widget w, int row, int column, const char *raw_label)
-#else
-XawTableSetLabel(w, row, column, raw_label)
-     Widget w;
-     int    row;
-     int    column;
-     const char  *raw_label;
-#endif
 {
-  register XawTableWidget tw = (XawTableWidget)w;
+  XawTableWidget tw = (XawTableWidget)w;
   XawTableCallbackStruct callback_str;
   XawTableCell cell;
   char* label = NULL;
@@ -3312,17 +3104,8 @@ XawTableSetLabel(w, row, column, raw_label)
 
 
 int
-#ifdef Xraw_NEED_PROTO
 XawTableSetCellColours (Widget w, int row, int column, 
 			Pixel fore, Pixel back)
-#else
-XawTableSetCellColours (w, row, column, fore, back)
-     Widget w;
-     int row;
-     int column;
-     Pixel fore;
-     Pixel back;
-#endif
 {
   XawTableWidget tw = (XawTableWidget)w;
   XawTableCallbackStruct callback_str;
@@ -3421,14 +3204,7 @@ XawTableSetCellColours (w, row, column, fore, back)
 
 
 int
-#ifdef Xraw_NEED_PROTO
 XawTableSetCellDefaultColours (Widget w, int row, int column)
-#else
-XawTableSetCellDefaultColours (w, row, column)
-     Widget w;
-     int row;
-     int column;
-#endif
 {
   XawTableWidget tw = (XawTableWidget)w;
   XawTableCallbackStruct callback_str;
@@ -3507,15 +3283,7 @@ Incorrect value of row or column (%s,%s) in Table widget '%s'",
 }
 
 int
-#ifdef Xraw_NEED_PROTO
 XawTableSetCellBackground (Widget w, int row, int column, Pixel back)
-#else
-XawTableSetCellBackground (w, row, column, back)
-     Widget w;
-     int row;
-     int column;
-     Pixel back;
-#endif
 {
   XawTableWidget         tw = (XawTableWidget)w;
   XawTableCallbackStruct callback_str;
@@ -3615,15 +3383,7 @@ Incorrect value of row or column (%s,%s) in Table widget '%s'",
 }
 
 int
-#ifdef Xraw_NEED_PROTO
 XawTableSetCellForeground (Widget w, int row, int column, Pixel fore)
-#else
-XawTableSetCellForeground (w, row, column, fore)
-     Widget w;
-     int row;
-     int column;
-     Pixel fore;
-#endif
 {
   XawTableWidget         tw = (XawTableWidget)w;
   XawTableCallbackStruct callback_str;
@@ -3722,17 +3482,8 @@ Incorrect value of row or column (%s,%s) in Table widget '%s'",
 }
 
 void
-#ifdef Xraw_NEED_PROTO
 XawTableGetCellColours (Widget w, int row, int column, 
 			Pixel *fore, Pixel *back)
-#else
-XawTableGetCellColours (w, row, column, fore, back)
-     Widget w;
-     int row;
-     int column;
-     Pixel *fore;
-     Pixel *back;
-#endif
 {
   XawTableWidget tw = (XawTableWidget)w;
   XawTableCell   cell = (XawTableCell)get_cell(STUFF(tw), row, column);
@@ -3749,16 +3500,8 @@ XawTableGetCellColours (w, row, column, fore, back)
 }
 
 void
-#ifdef Xraw_NEED_PROTO
 XawTableGetCellColoursByCell (Widget w, XawTableCell cell, 
 			      Pixel *fore, Pixel *back)
-#else
-XawTableGetCellColoursByCell (w, cell, fore, back)
-     Widget w;
-     XawTableCell cell;
-     Pixel *fore;
-     Pixel *back;
-#endif
 {
   XawTableWidget tw = (XawTableWidget)w;
 
@@ -3813,14 +3556,7 @@ static Boolean PaintCellWithClear(p, i, j, call_data, client_data)
 #endif
 
 void
-#ifdef Xraw_NEED_PROTO
 XawTableSetColumnJustify (Widget w, int column, XtJustify justify)
-#else
-XawTableSetColumnJustify (w, column, justify)
-     Widget w;
-     int   column;
-     XtJustify justify;
-#endif
 {
   XawTableWidget tw = (XawTableWidget)w;
   int i, j;
@@ -3837,7 +3573,7 @@ XawTableSetColumnJustify (w, column, justify)
   if (XtIsRealized(w) && w->core.visible && 
       !tw->table.no_redraw && !tw->table.no_refigure) 
   {
-    (void)go_table((XtPointer)w, PaintCell, STUFF(tw),
+    (void)go_table((XtPointer)w, (XawTableProc)PaintCell, STUFF(tw),
 		   0, ROWS(tw)-1, column, column, 
 		   XawTABLE_DOWN_RIGHT,
 		   &i, &j, (XtPointer)NULL);
@@ -3847,13 +3583,7 @@ XawTableSetColumnJustify (w, column, justify)
 
 
 XtJustify
-#ifdef Xraw_NEED_PROTO
 XawTableGetColumnJustify (Widget w, int column)
-#else
-XawTableGetColumnJustify (w, column)
-     Widget w;
-     int   column;
-#endif
 {
   XawTableWidget tw = (XawTableWidget)w;
 
@@ -3868,18 +3598,11 @@ XawTableGetColumnJustify (w, column)
 
 
 void
-#ifdef Xraw_NEED_PROTO
 XawTableSetColumnWidth (Widget w, int column, int width)
-#else
-XawTableSetColumnWidth(w, column, width)
-     Widget w;
-     int   column;
-     int   width;
-#endif
 {
   XawTableWidget tw = (XawTableWidget)w;
   XawTableCallbackStruct callback_str;
-  register int row;
+  int row;
 
   if (column != InRange (column, 0, COLUMNS(tw)-1)) 
     return;
@@ -3909,19 +3632,11 @@ XawTableSetColumnWidth(w, column, width)
 
 
 void
-#ifdef Xraw_NEED_PROTO
 XawTableSetMultiColumnWidths (Widget w, int *columns, int *widths, int ncols)
-#else
-XawTableSetMultiColumnWidths (w, columns, widths, ncols)
-     Widget w;
-     int   *columns;
-     int   *widths;
-     int   ncols;
-#endif
 {
   XawTableWidget tw = (XawTableWidget)w;
   XawTableCallbackStruct callback_str;
-  register int i, row, col, width;
+  int i, row, col, width;
 
   for (i=0; i < ncols; i++ ) {
     if (columns[i] != InRange (columns[i], 0, COLUMNS(tw)-1)) 
@@ -3958,13 +3673,7 @@ XawTableSetMultiColumnWidths (w, columns, widths, ncols)
 
 
 int
-#ifdef Xraw_NEED_PROTO
 XawTableGetColumnWidth (Widget w, int column)
-#else
-XawTableGetColumnWidth(w, column)
-     Widget w;
-     int   column;
-#endif
 {
   XawTableWidget tw = (XawTableWidget)w;
 
@@ -3978,13 +3687,7 @@ XawTableGetColumnWidth(w, column)
 }
 
 int
-#ifdef Xraw_NEED_PROTO
 XawTableGetColumnPixelWidth (Widget w, int column)
-#else
-XawTableGetColumnPixelWidth(w, column)
-     Widget w;
-     int   column;
-#endif
 {
   XawTableWidget tw = (XawTableWidget)w;
   int width;
@@ -4004,13 +3707,7 @@ XawTableGetColumnPixelWidth(w, column)
 }
 
 char *
-#ifdef Xraw_NEED_PROTO
 XawTableGetLabelByPosition (Widget w, int i, int j)
-#else
-     XawTableGetLabelByPosition(w,i,j)
-     Widget w;
-     int i,j;
-#endif
 {
   XawTableWidget tw = (XawTableWidget)w;
   XawTableCell cell;
@@ -4037,12 +3734,7 @@ XawTableGetLabelByPosition (Widget w, int i, int j)
 }
 
 void
-#ifdef Xraw_NEED_PROTO
 XawTableUnsetEdit (Widget w)
-#else
-     XawTableUnsetEdit(w)
-     Widget w;
-#endif
 {
   XawTableWidget tw = (XawTableWidget)w;
   char* label;
@@ -4069,14 +3761,7 @@ XawTableUnsetEdit (Widget w)
 }
 
 void 
-#ifdef Xraw_NEED_PROTO
 XawTableSetEdit (Widget w, int row, int column)
-#else
-     XawTableSetEdit(w, row, column)
-     Widget w;
-     int    row;
-     int    column;
-#endif
 {
   XawTableWidget tw = (XawTableWidget)w;
   XawTableCell     cell;
@@ -4123,11 +3808,7 @@ XawTableSetEdit (Widget w, int row, int column)
  *
  ******************************************************************/
 
-static void HighlightCell(w,event,params,num_params)
-     Widget w;
-     XEvent *event;
-     String *params;         
-     Cardinal *num_params;
+static void HighlightCell(Widget w, XEvent *event, String *params, Cardinal *num_params)
 {
   XawTableWidget tw = (XawTableWidget)w;
   XawTableCell cell;
@@ -4169,11 +3850,11 @@ static void HighlightCell(w,event,params,num_params)
 }
 
 /* ARGSUSED */
-static void UnhighlightCell(w,event,params,num_params)
-     Widget w;
-     XEvent *event;
-     String *params;         /* unused */
-     Cardinal *num_params;
+static void UnhighlightCell(Widget w, XEvent *event, String *params, Cardinal *num_params)
+              
+                   
+                             /* unused */
+                          
 {
   XawTableWidget tw = (XawTableWidget)w;
   XawTableCell      cell;
@@ -4226,11 +3907,11 @@ static void UnhighlightCell(w,event,params,num_params)
 }
 
 /* ARGSUSED */
-static void WhatCell(w,event,params,num_params)
-     Widget w;
-     XEvent *event;
-     String *params;         /* unused */
-     Cardinal *num_params;
+static void WhatCell(Widget w, XEvent *event, String *params, Cardinal *num_params)
+              
+                   
+                             /* unused */
+                          
 {
   XawTableWidget tw = (XawTableWidget)w;
   Position x,y;
@@ -4261,11 +3942,11 @@ static void WhatCell(w,event,params,num_params)
 }
 
 /* ARGSUSED */
-static void KeyReturn(w, event, params, num_params)
-     Widget w;
-     XEvent *event;
-     String *params;           /* unused */
-     Cardinal *num_params;     /* unused */
+static void KeyReturn(Widget w, XEvent *event, String *params, Cardinal *num_params)
+              
+                   
+                               /* unused */
+                               /* unused */
 {
   Widget tw;
   KeySym  ksSymbol;
@@ -4280,9 +3961,7 @@ static void KeyReturn(w, event, params, num_params)
   
 }
 
-static Atom FetchAtom(w, name)
-    Widget w;
-    String name;
+static Atom FetchAtom(Widget w, String name)
 {
     Atom a;
     XrmValue source, dest;
@@ -4333,9 +4012,7 @@ static Boolean DeliverSelection(w, selection, target,
 }
 
 /* ARGSUSED */
-static void LoseSelection(w, selection)
-    Widget w;
-    Atom *selection;
+static void LoseSelection(Widget w, Atom *selection)
 {
   XawTableWidget tw = (XawTableWidget) w;
   XawTableCell cell;
@@ -4364,13 +4041,13 @@ static void LoseSelection(w, selection)
   XFlush(XtDisplay(w));
 }
 
-static int GetCutBufferNumber();
+static int GetCutBufferNumber(Atom atom);
 
-static void StoreBuffer(w, event, params, num_params)
-     Widget w;
-     XEvent *event;
-     String *params;        /* selections in precedence order */
-     Cardinal *num_params;
+static void StoreBuffer(Widget w, XEvent *event, String *params, Cardinal *num_params)
+              
+                   
+                            /* selections in precedence order */
+                          
 {
   XawTableWidget tw = (XawTableWidget)w;
   Position    x, y;
@@ -4435,11 +4112,11 @@ static void StoreBuffer(w, event, params, num_params)
 
 
 /* ARGSUSED */
-static void  CallEdit(w,event,params,num_params)
-     Widget w;
-     XEvent *event;
-     String *params;         /* unused */
-     Cardinal *num_params;
+static void  CallEdit(Widget w, XEvent *event, String *params, Cardinal *num_params)
+              
+                   
+                             /* unused */
+                          
 {
   XawTableWidget tw = (XawTableWidget)w;
   Position x,y;
@@ -4469,10 +4146,9 @@ typedef struct {
   int            num;
 }RowColumn;
 
-static void GetProc();
+static void GetProc(Widget w, XtPointer client_data, Atom *selection, Atom *type, XtPointer value, long unsigned int *length, int *format);
 
-static void GetSelection (rc)
-  RowColumn *rc;
+static void GetSelection (RowColumn *rc)
 {
   Atom selection;
   int buffer;
@@ -4521,11 +4197,11 @@ static void GetProc(w, client_data, selection,
 
 }
 
-static void InsertSelection(w, event, params, num_params)
-     Widget w;
-     XEvent *event;
-     String *params;        /* selections in precedence order */
-     Cardinal *num_params;
+static void InsertSelection(Widget w, XEvent *event, String *params, Cardinal *num_params)
+              
+                   
+                            /* selections in precedence order */
+                          
 {
   XawTableWidget tw = (XawTableWidget)w;
   Position    x,y;
@@ -4567,8 +4243,7 @@ static void InsertSelection(w, event, params, num_params)
 }
 
 
-static int GetCutBufferNumber(atom)
-     register Atom atom;
+static int GetCutBufferNumber(Atom atom)
 {
   if (atom == XA_CUT_BUFFER0) return(0);
   if (atom == XA_CUT_BUFFER1) return(1);
@@ -4583,11 +4258,7 @@ static int GetCutBufferNumber(atom)
 
 
 /* ARGSUSED */
-static void DoingNothing(w, event, params, num_params)
-     Widget w;
-     XEvent *event;
-     String *params;       
-     Cardinal *num_params;
+static void DoingNothing(Widget w, XEvent *event, String *params, Cardinal *num_params)
 {
   /* doing nothing */
 }

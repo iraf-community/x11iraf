@@ -10,18 +10,10 @@
  *	counterpart.
  */
 void
-XfwfDrawImageString(display, drawable, gc, x, y, string, length, tabs)
-     Display *display;
-     Drawable drawable;
-     GC gc;
-     int x;
-     int y;
-     String string;
-     int length;
-     int *tabs;
+XfwfDrawImageString(Display *display, Drawable drawable, GC gc, int x, int y, String string, int length, int *tabs)
 {
-	register char	*p, *ep;
-	register int	tx, tab;
+	char	*p, *ep;
+	int	tx, tab;
 
 	tab = tx = 0;
 	for (p = string; length; )

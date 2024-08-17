@@ -61,8 +61,6 @@ typedef struct {
 } FITS;
 
 /* Function prototypes */
-#ifdef __STDC__
-
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -75,18 +73,8 @@ static char *rdcard (char *card, char *name, enum datatype dtype, long int *kval
 static void wrcard (char *card, char *name, enum datatype dtype, int kvalue);
 static char *ftgdata (FITS *fs, void *buffer, int nelem);
 static char *ftfixdata (FITS *fs, void *buffer, int nelem);
-#else
-static char *ftopen2d ();
-static void ftclose ();
-static char *ftgbyte ();
-static char *rdheader ();
-static char *wrheader ();
-static char *rdcard ();
-static void wrcard ();
-static char *ftgdata ();
-static char *ftfixdata ();
-#endif
 
+extern void min_max(void *a, int npts, int bitpix, float *min, float *max);
 
 /* ----------------
  * Public routines.
@@ -96,22 +84,22 @@ static char *ftfixdata ();
 /* loadFits - Load a simple FITS file.
  */
 char *
-loadFITS (fname, pix, nx, ny, r,g,b, ncolors, zsc, zr, z1, z2, nsample)
-char 	*fname;                		/* input filename 	*/
-uchar   **pix;                 		/* output pixels 	*/
-int 	*nx, *ny;                       /* dimensions 		*/
-uchar 	*r, *g, *b;               	/* colormap 		*/
-int 	*ncolors;                       /* number of colors 	*/
-int	zsc, zr;			/* z-scaling flags	*/
-float	*z1, *z2;			/* zscale values	*/
-int	nsample;			/* number of sample pts */
+loadFITS (char *fname, uchar **pix, int *nx, int *ny, uchar *r, uchar *g, uchar *b, int *ncolors, int zsc, int zr, float *z1, float *z2, int nsample)
+     	                       		/* input filename 	*/
+                               		/* output pixels 	*/
+    	                                /* dimensions 		*/
+      	                          	/* colormap 		*/
+    	                                /* number of colors 	*/
+   	        			/* z-scaling flags	*/
+     	         			/* zscale values	*/
+   	        			/* number of sample pts */
 
 {
 	FITS 	fs;
 	int	i, w = 0, h = 0, bitpix, np;
 	byte 	*image;
 	char	*error;
-	extern void flip();
+	extern void flip(uchar *buffer, int nx, int ny);
 
 	error = ftopen2d (&fs, fname, &w, &h, &bitpix);
 	if (error)
@@ -154,15 +142,10 @@ int	nsample;			/* number of sample pts */
  */
 
 char *
-writeFITS (fp, image, w, h, rmap, gmap, bmap, numcols)
-FILE 	*fp;
-byte 	*image;
-int	w, h;
-byte 	*rmap, *gmap, *bmap;
-int	numcols;
+writeFITS (FILE *fp, byte *image, int w, int h, byte *rmap, byte *gmap, byte *bmap, int numcols)
 {
-	register int	i, j, np, nend;
-	register byte *ptr;
+	int	i, j, np, nend;
+	byte *ptr;
 	char	*error;
 	byte rgb[256];
 
@@ -197,10 +180,10 @@ int	numcols;
 /* IsFITS -- Test a file to see if it is a FITS file.
  */
 int 
-isFITS (fname)
-char	*fname;				/* input filename */
+isFITS (char *fname)
+    	       				/* input filename */
 {
-	register FILE *fp;
+	FILE *fp;
 	int value = 0;
 	char keyw[8], val;
 
@@ -218,8 +201,7 @@ char	*fname;				/* input filename */
  */
 
 char *
-getFITSHdr (fname)
-char	*fname;
+getFITSHdr (char *fname)
 {
 	FITS 	fs;
 	char 	*error, *line;
@@ -255,9 +237,7 @@ char	*fname;
 
 /* Writes a minimalist FITS file header */
 static char
-*wrheader (fp, nx, ny)
-FILE 	*fp;
-int	nx, ny;
+*wrheader (FILE *fp, int nx, int ny)
 {
 	char	*block;
 	int	i;
@@ -289,10 +269,7 @@ int	nx, ny;
  * array.
  */
 static char	
-*ftopen2d(fs, file, nx, ny, bitpix)
-FITS 	*fs;
-char	*file;
-int	*nx, *ny, *bitpix;
+*ftopen2d(FITS *fs, char *file, int *nx, int *ny, int *bitpix)
 {
 	FILE 	*fp;
 	int	i;
@@ -330,8 +307,7 @@ int	*nx, *ny, *bitpix;
 
 /* closes a fits file */
 static void
-ftclose (fs)
-FITS 	*fs;
+ftclose (FITS *fs)
 {
 	if (fs == NULL) 
 	    return;
@@ -344,8 +320,7 @@ FITS 	*fs;
  * Returns NULL on success, or an error message otherwise.
  */
 static char *
-rdheader (fs)
-FITS 	*fs;
+rdheader (FITS *fs)
 {
 	int	i, j, res;
 	char	name[9];
@@ -494,10 +469,10 @@ FITS 	*fs;
  *         an integer is written, right justified in columns 11-30
  */
 static void
-wrcard (card, name, dtype, kvalue)
-char	*card, *name;
-enum 	datatype dtype;   /* type of value */
-int	kvalue;
+wrcard (char *card, char *name, enum datatype dtype, int kvalue)
+    	             
+     	                  /* type of value */
+   	       
 {
 	int	l;
 	memset(card, ' ', 80);
@@ -534,11 +509,11 @@ int	kvalue;
  * It returns NULL on success, or an error message otherwise.
  */
 static char *
-rdcard (card, name, dtype, kvalue, rvalue)
-char	*card, *name;
-enum 	datatype dtype;   			/* type of value */
-long 	int *kvalue;
-float 	*rvalue;
+rdcard (char *card, char *name, enum datatype dtype, long int *kvalue, float *rvalue)
+    	             
+     	                  			/* type of value */
+     	            
+      	        
 {
 	int	i, ptr;
 	char	namestr[9];
@@ -608,10 +583,7 @@ float 	*rvalue;
  * may be truncated, and should be padded out with zeros.
  */
 static char *
-ftgdata (fs, buffer, nelem)
-FITS 	*fs;
-void 	*buffer;
-int	nelem;
+ftgdata (FITS *fs, void *buffer, int nelem)
 {
 	int	res;
 
@@ -654,13 +626,10 @@ int	nelem;
  *  int       = 4 byte integer
  */
 static char *
-ftfixdata (fs, buffer, nelem)
-FITS 	*fs;
-void 	*buffer;
-int	nelem;
+ftfixdata (FITS *fs, void *buffer, int nelem)
 {
-	register int	i, n = nelem;
-	register uchar	*ptr = buffer;
+	int	i, n = nelem;
+	uchar	*ptr = buffer;
 
 	/* conversions. Although the data may be signed, reverse using unsigned 
          * variables.  Convert from big-endian two-byte signed integer to
@@ -680,7 +649,7 @@ int	nelem;
 
 	/* convert from IEE 754 single precision to native form */
 	else if (fs->bitpix == -32) {
-	    register int	j, k, expo;
+	    int	j, k, expo;
 	    static float	*exps = NULL;
 
 	    if (exps == NULL) {
@@ -709,8 +678,8 @@ int	nelem;
 
 	/* convert from IEE 754 double precision to native form */
 	} else if (fs->bitpix == -64) {
-	    register int	expo, k, l;
-	    register unsigned int	j;
+	    int	expo, k, l;
+	    unsigned int	j;
 	    static double	*exps = NULL;
 
 	    if (exps == NULL) {
@@ -755,21 +724,14 @@ int	nelem;
  * the maximum is stored as 255
  */
 static char *
-ftgbyte(fs, cbuff, nelem, zsc, zr, z1, z2, nsample)
-FITS 	*fs;
-uchar	*cbuff;
-int	nelem;
-int	zsc, zr;
-float 	*z1, *z2;
-int	nsample;
+ftgbyte(FITS *fs, uchar *cbuff, int nelem, int zsc, int zr, float *z1, float *z2, int nsample)
 {
 	char * voidbuff;
-	register int	i, n = nelem;
+	int	i, n = nelem;
 	char	*error;
 	int	pmin = 0, pmax = 255;
 	int	npts, stdline;
-	extern	void zscale();
-	extern void min_max();
+	extern	void zscale(char *im, int nx, int ny, int bitpix, float *z1, float *z2, float contrast, int opt_size, int len_stdline);
 
 	/* if the data is uchar, then read it directly */
 	if (fs->bitpix == 8 && (fs->bscale == 1.0 && fs->bzero == 0.0)) {
@@ -801,7 +763,7 @@ int	nsample;
 	npts = fs->axes[0] * fs->axes[1];
 	stdline = (int)((float)fs->axes[1] / sqrt((float)npts/(float)nsample));
 	if (fs->bscale != 1.0 || fs->bzero != 0.0) {
-	    register float *buf;
+	    float *buf;
 
 	    buf = (float *)voidbuff;
 
@@ -809,26 +771,26 @@ int	nsample;
 	        for (i=(nelem-1); i >= 0; i--)
 		    buf[i] = (float) voidbuff[i] * fs->bscale + fs->bzero;
 	    } else if (fs->bitpix ==  16) {
-	        register short *old;
+	        short *old;
 	        for (i=(nelem-1); i >= 0; i--) {
 		    old = (short *) &voidbuff[i * 2];
 		    buf[i] = (float) *old * fs->bscale + fs->bzero;
 	        }
 	    } else if (fs->bitpix ==  32) {
-	        register int *old;
+	        int *old;
 	        for (i=(nelem-1); i >= 0; i--) {
 		    old = (int *) &voidbuff[i * 4];
 		    buf[i] = (float) *old * fs->bscale + fs->bzero;
 	        }
 	    } else if (fs->bitpix ==  -32) {
-	        register float *old;
+	        float *old;
 	        for (i=(nelem-1); i >= 0; i--) {
 		    old = (float *) &voidbuff[i * 4];
 		    buf[i] = (float) *old * fs->bscale + fs->bzero;
 	        }
 	    } else if (fs->bitpix ==  -64) {
-	        register double *old, *dbuf;
-		register float *fpix;
+	        double *old, *dbuf;
+		float *fpix;
 
 	 	dbuf = (double *) malloc (nelem * sizeof(double));
 	        for (i=(nelem-1); i >= 0; i--) {
@@ -849,7 +811,7 @@ int	nsample;
 	        zscale ((char *)buf, fs->axes[0], fs->axes[1], fs->bitpix,
 	            z1, z2, CONTRAST, nsample, stdline); 
 	    else if (zr)
-		min_max ((float *)buf, nelem, fs->bitpix, z1, z2);
+		min_max (buf, nelem, fs->bitpix, z1, z2);
 
 	} else {
 	    /* compute the optimal zscale values */
@@ -857,14 +819,14 @@ int	nsample;
 	        zscale (voidbuff, fs->axes[0], fs->axes[1], fs->bitpix,
 	            z1, z2, CONTRAST, nsample, stdline); 
 	    else if (zr)
-		min_max ((float *)voidbuff, nelem, fs->bitpix, z1, z2);
+		min_max (voidbuff, nelem, fs->bitpix, z1, z2);
 	}
 
 	/* convert short int to uchar */
 	if (fs->bitpix == 16) {
-	    register short int	*buffer = (short *)voidbuff;
-	    register int	max, min;
-	    register float	scale;
+	    short int	*buffer = (short *)voidbuff;
+	    int	max, min;
+	    float	scale;
 
 	    min = (int) *z1;
 	    max = (int) *z2;
@@ -877,9 +839,9 @@ int	nsample;
 
 	/* convert long int to uchar */
 	} else if (fs->bitpix == 32) {
-	    register int	*buffer = (int *)voidbuff;
-	    register int	max, min;
-	    register float	scale;
+	    int	*buffer = (int *)voidbuff;
+	    int	max, min;
+	    float	scale;
 
 	    min = (int) *z1;
 	    max = (int) *z2;
@@ -892,8 +854,8 @@ int	nsample;
 
 	/* convert float to uchar */
 	} else if (fs->bitpix == -32) {
-	    register float	*buffer = (float *)voidbuff;
-	    register float	max, min, scale;
+	    float	*buffer = (float *)voidbuff;
+	    float	max, min, scale;
 
 	    min = *z1;
 	    max = *z2;
@@ -906,8 +868,8 @@ int	nsample;
 
 	/* convert double to uchar */
 	} else if (fs->bitpix == -64) {
-	    register double	*buffer = (double *)voidbuff;
-	    register double	max, min, scale;
+	    double	*buffer = (double *)voidbuff;
+	    double	max, min, scale;
 
 	    min = (double) *z1;
 	    max = (double) *z2;

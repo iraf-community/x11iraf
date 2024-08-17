@@ -49,12 +49,12 @@ static XtResource resources[] = {
 };
 #undef offset
 
-static void Initialize();
-static void Resize();
-static void Redisplay();
-static Boolean SetValues();
-static void ClassInitialize();
-static void Destroy();
+static void Initialize(Widget request, Widget new, ArgList args, Cardinal *num_args);
+static void Resize(Widget w);
+static void Redisplay(Widget gw, XEvent *event, Region region);
+static Boolean SetValues(Widget current, Widget request, Widget new, ArgList args, Cardinal *num_args);
+static void ClassInitialize(void);
+static void Destroy(Widget w);
 
 SeparatorClassRec separatorClassRec = {
   {
@@ -137,13 +137,13 @@ static  XrmQuark  QSingle, QDouble, QShadowIn, QShadowOut;
 
 /* ARGSUSED */
 static Boolean
-CvtStringToSeparatorType(dpy, args, num_args, fromVal, toVal, convData)
-     Display    *dpy;             
-     XrmValuePtr args;		/* unused */
-     Cardinal	*num_args;	/* unused */
-     XrmValuePtr fromVal;
-     XrmValuePtr toVal;
-     XtPointer  *convData;       /* unused */
+CvtStringToSeparatorType(Display *dpy, XrmValuePtr args, Cardinal *num_args, XrmValuePtr fromVal, XrmValuePtr toVal, XtPointer *convData)
+                                  
+                      		/* unused */
+             	          	/* unused */
+                         
+                       
+                                 /* unused */
 {
   static XawSeparatorType separatorType;
   XrmQuark    q;
@@ -166,7 +166,7 @@ CvtStringToSeparatorType(dpy, args, num_args, fromVal, toVal, convData)
 }
 #undef done
 
-static void ClassInitialize()
+static void ClassInitialize(void)
 {
   XawInitializeWidgetSet();
   XtSetTypeConverter( XtRString, XtRSeparatorType, CvtStringToSeparatorType, 
@@ -179,8 +179,7 @@ static void ClassInitialize()
   QShadowOut = XrmStringToQuark(XawShadow_Etched_Out);
 }
 
-static void GetGC(sw)
-    SeparatorWidget sw;
+static void GetGC(SeparatorWidget sw)
 {
   XGCValues values;
   unsigned long mask;
@@ -193,10 +192,7 @@ static void GetGC(sw)
 }
 
 /* ARGSUSED */
-static void Initialize(request, new, args, num_args)
-    Widget request, new;
-    ArgList args;
-    Cardinal *num_args;
+static void Initialize(Widget request, Widget new, ArgList args, Cardinal *num_args)
 {
   SeparatorWidget newsw = (SeparatorWidget) new;
 
@@ -210,8 +206,7 @@ static void Initialize(request, new, args, num_args)
 
 }
 
-static void Resize(w)
-    Widget w;
+static void Resize(Widget w)
 {
  /* If widget is realized, clear and redisplay it */
 
@@ -222,10 +217,7 @@ static void Resize(w)
 }
 
 /* ARGSUSED */
-static Boolean SetValues(current, request, new, args, num_args)
-    Widget current, request, new;
-    ArgList args;
-    Cardinal *num_args;
+static Boolean SetValues(Widget current, Widget request, Widget new, ArgList args, Cardinal *num_args)
 {
   SeparatorWidget cursw = (SeparatorWidget) current;
   SeparatorWidget newsw = (SeparatorWidget) new;
@@ -252,18 +244,14 @@ static Boolean SetValues(current, request, new, args, num_args)
   return redisplay;
 }
 
-static void Destroy(w)
-    Widget w;
+static void Destroy(Widget w)
 {
   XtReleaseGC( w, ((SeparatorWidget)w)->separator.gc );
 }
 
-static void Redisplay(gw, event, region)
-    Widget gw;
-    XEvent *event;
-    Region region;
+static void Redisplay(Widget gw, XEvent *event, Region region)
 {
-  register SeparatorWidget sw = (SeparatorWidget) gw;
+  SeparatorWidget sw = (SeparatorWidget) gw;
   int x1, y1, x2, y2;
   
   if (!XtIsRealized(gw))

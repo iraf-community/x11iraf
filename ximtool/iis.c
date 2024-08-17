@@ -77,14 +77,14 @@ static int *wcspix_enabled = NULL;
 	
 static	int iis_debug = -1;				/* protocol debug */
 
-static void set_fbconfig(), add_mapping();
-static void xim_connectClient(), xim_disconnectClient();
-static int chan_read(), chan_write(), decode_frameno();
+static void set_fbconfig(IoChanPtr chan, int config, int frame), add_mapping(XimDataPtr xim, CtranPtr ctran, char *wcsbuf, FrameBufPtr fr);
+static void xim_connectClient(IoChanPtr chan_port, int *source, XtPointer id), xim_disconnectClient(IoChanPtr chan);
+static int chan_read(int fd, void *vptr, int nbytes), chan_write(int fd, void *vptr, int nbytes), decode_frameno(int z);
 
-static CtranPtr wcs_update();
-static IoChanPtr open_fifo(), open_inet(), open_unix();
-static IoChanPtr get_iochan();
-static MappingPtr xim_getMapping();
+static CtranPtr wcs_update(XimDataPtr xim, FrameBufPtr fr);
+static IoChanPtr open_fifo(XimDataPtr xim), open_inet(XimDataPtr xim, int portnum), open_unix(XimDataPtr xim);
+static IoChanPtr get_iochan(XimDataPtr xim);
+static MappingPtr xim_getMapping(XimDataPtr xim, float sx, float sy, int frame);
 
 
 /* XIM_IISOPEN -- Initialize the IIS protocol module and ready the module to
@@ -94,8 +94,7 @@ static MappingPtr xim_getMapping();
  * simultaneously ready to receive client connections.
  */
 int
-xim_iisOpen (xim)
-register XimDataPtr xim;
+xim_iisOpen (XimDataPtr xim)
 {
     int port, last_port = (xim->port + xim->nports - 1);
     int nopen = 0;
@@ -118,16 +117,15 @@ register XimDataPtr xim;
 /* XIM_IISCLOSE -- Close down the IIS protocol module.
  */
 void
-xim_iisClose (xim)
-register XimDataPtr xim;
+xim_iisClose (XimDataPtr xim)
 {
-	register IoChanPtr chan;
-	register int i;
+	IoChanPtr chan;
+	int i;
 
 	for (i=0, chan=NULL;  i < XtNumber(xim->chan);  i++) {
 	    chan = &xim->chan[i];
 	    if (chan->id) {
-		xim_removeInput (xim, chan->id);
+		xim_removeInput (xim, (XPointer)chan->id);
 		chan->id = 0;
 	    }
 
@@ -162,10 +160,9 @@ register XimDataPtr xim;
  * yet at this stage.
  */
 static IoChanPtr
-open_fifo (xim)
-register XimDataPtr xim;
+open_fifo (XimDataPtr xim)
 {
-	register IoChanPtr chan;
+	IoChanPtr chan;
 	int datain, dataout;
 	int keepalive;
 
@@ -250,12 +247,10 @@ done:
  * using internet domain sockets.
  */
 static IoChanPtr
-open_inet (xim, portnum)
-register XimDataPtr xim;
-int     portnum;
+open_inet (XimDataPtr xim, int portnum)
 {
-	register int s = 0;
-	register IoChanPtr chan;
+	int s = 0;
+	IoChanPtr chan;
 	struct sockaddr_in sockaddr;
 	int	reuse = 1;
 
@@ -319,11 +314,10 @@ err:
  * using unix domain sockets.
  */
 static IoChanPtr
-open_unix (xim)
-register XimDataPtr xim;
+open_unix (XimDataPtr xim)
 {
-	register int s = 0;
-	register IoChanPtr chan;
+	int s = 0;
+	IoChanPtr chan;
 	struct sockaddr_un sockaddr;
 	int	addrlen;
 	char path[256];
@@ -390,14 +384,11 @@ err:
  * communicate with the new client.
  */
 static void
-xim_connectClient (chan_port, source, id)
-IoChanPtr chan_port;
-int *source;
-XtPointer id;
+xim_connectClient (IoChanPtr chan_port, int *source, XtPointer id)
 {
-	register XimDataPtr xim = (XimDataPtr) chan_port->xim;
-	register IoChanPtr chan;
-	register int s;
+	XimDataPtr xim = (XimDataPtr) chan_port->xim;
+	IoChanPtr chan;
+	int s;
 
 	/* Accept connection. */
 	if ((s = accept ((int)*source, (struct sockaddr *)0, (int *)0)) < 0)
@@ -428,15 +419,14 @@ XtPointer id;
  * descriptor.
  */
 static void
-xim_disconnectClient (chan)
-register IoChanPtr chan;
+xim_disconnectClient (IoChanPtr chan)
 {
 	switch (chan->type) {
 	case IO_INET:
 	case IO_UNIX:
 	    close (chan->datain);
 	    if (chan->id) {
-		xim_removeInput (chan->xim, chan->id);
+		xim_removeInput (chan->xim, (XPointer)chan->id);
 		chan->id = 0;
 	    }
 	    chan->type = 0;
@@ -450,10 +440,9 @@ register IoChanPtr chan;
 /* GET_IOCHAN --- Get an i/o channel descriptor.
  */
 static IoChanPtr
-get_iochan (xim)
-register XimDataPtr xim;
+get_iochan (XimDataPtr xim)
 {
-	register int i;
+	int i;
 
 	for (i=0;  i < XtNumber(xim->chan);  i++)
 	    if (!xim->chan[i].type)
@@ -467,23 +456,20 @@ register XimDataPtr xim;
  * pending on the data stream to the ximtool client.
  */
 void
-xim_iisio (chan, fd_addr, id_addr)
-IoChanPtr chan;
-int *fd_addr;
-XtInputId *id_addr;
+xim_iisio (IoChanPtr chan, int *fd_addr, XtInputId *id_addr)
 {
-	register XimDataPtr xim = (XimDataPtr) chan->xim;
-	register MappingPtr mp = (MappingPtr) NULL;
-	register FrameBufPtr fb;
-	register int sum, i;
-	register short *p;
+	XimDataPtr xim = (XimDataPtr) chan->xim;
+	MappingPtr mp = (MappingPtr) NULL;
+	FrameBufPtr fb;
+	int sum, i;
+	short *p;
 	int	datain = *fd_addr;
 	int	dataout = chan->dataout;
 	int	ndatabytes, nbytes, n, newframe, ntrys=0;
 	struct	iism70 iis;
 	char	buf[SZ_FIFOBUF];
 	static	int errmsg=0, bswap=0;
-	extern void bswap2();
+	extern void bswap2(char *a, char *b, int nbytes);
 
 	/* Initialize the debug output. */
 	if (iis_debug == -1)
@@ -674,7 +660,8 @@ XtInputId *id_addr;
 			nx = min (xim->width-x, nbytes);
 			ny = max (1, nbytes/xim->width);
 		    }
-		    GtReadPixels (xim->gt, chan->rf_p->raster, iobuf, 8, x, y,
+		    GtReadPixels ((GtermWidget) xim->gt, chan->rf_p->raster,
+				  iobuf, 8, x, y,
 			nx, ny);
 
 		    if (iis_debug)
@@ -753,7 +740,8 @@ XtInputId *id_addr;
 			nx = min (xim->width-x, nbytes);
 			ny = max (1, nbytes/xim->width);
 		    }
-		    GtWritePixels (xim->gt, chan->rf_p->raster, iobuf, 8,
+		    GtWritePixels ((GtermWidget) xim->gt, chan->rf_p->raster,
+				   iobuf, 8,
 			x, y, nx, ny);
 
 		    if (iis_debug)
@@ -800,7 +788,7 @@ XtInputId *id_addr;
 		    CtranPtr ct = (CtranPtr) NULL;
 		    FrameBufPtr fr = (FrameBufPtr) NULL;
 		    int    wcsnum = (iis.t & 017777);
-		    register int i, j;
+		    int i, j;
 
 
 		    /* Decode the requested wcs number. */
@@ -869,7 +857,7 @@ map_found:	    if (ct) {
 	    } else {
 		/* Set the WCS for the referenced frame.
 		 */
-		register CtranPtr ct;
+		CtranPtr ct;
 		int fb_config, frame, new_wcs = 0;
 
 		frame = decode_frameno (iis.z & 0177777);
@@ -963,7 +951,7 @@ map_found:	    if (ct) {
 
 	    } else {
 		/* Write (set) the logical image cursor position. */
-		register CtranPtr ct;
+		CtranPtr ct;
 		int sx = iis.x, sy = iis.y;
 		float wx = sx, wy = sy;
 		int wcs = iis.z;
@@ -1052,12 +1040,9 @@ map_found:	    if (ct) {
  * variables iomap_len and rgb_len.
  */
 void
-xim_iisiomap (w, iomap, iomap_len)
-register XtPointer w;
-unsigned short *iomap;
-int *iomap_len;
+xim_iisiomap (XtPointer w, short unsigned int *iomap, int *iomap_len)
 {
-	register int i;
+	int i;
 	int first, nelem, maxelem;
 	int delta;
 
@@ -1084,12 +1069,9 @@ int *iomap_len;
  * first = gterm color 10.
  */
 void
-xim_iiscolormap (w, r, g, b, first, ngray, rgb_len)
-register XtPointer w;
-unsigned short *r, *g, *b;
-int *first, *ngray, *rgb_len;
+xim_iiscolormap (XtPointer w, short unsigned int *r, short unsigned int *g, short unsigned int *b, int *first, int *ngray, int *rgb_len)
 {
-	register int i, j;
+	int i, j;
 	int nelem, maxelem;
 	int delta;
 
@@ -1128,14 +1110,11 @@ int *first, *ngray, *rgb_len;
  * frames to the current configuration.
  */
 static void
-set_fbconfig (chan, config, frame)
-IoChanPtr chan;
-int config;
-int frame;
+set_fbconfig (IoChanPtr chan, int config, int frame)
 {
-	register XimDataPtr xim = (XimDataPtr) chan->xim;
-	register FrameBufPtr fb = &xim->frames[frame-1];
-	register int i;
+	XimDataPtr xim = (XimDataPtr) chan->xim;
+	FrameBufPtr fb = &xim->frames[frame-1];
+	int i;
 
 	if (config != xim->fb_configno) {
 	    /* Change the frame buffer configuration. */
@@ -1180,10 +1159,9 @@ int frame;
 /* DECODE_FRAMENO -- Decode encoded IIS register frame number.
  */
 static int
-decode_frameno (z)
-register int	z;
+decode_frameno (int z)
 {
-	register int	n;
+	int	n;
 
 	/* Get the frame number, encoded with a bit for each frame, 01 is
 	 * frame 1, 02 is frame 2, 04 is frame 3, and so on.
@@ -1200,16 +1178,16 @@ register int	z;
  * the client which requested the cursor read.
  */
 void
-xim_retCursorVal (xim, sx, sy, frame, wcs, key, strval)
-register XimDataPtr xim;
-float	sx, sy;			/* cursor screen coordinates */
-int	frame;			/* frame number */
-int	wcs;			/* nonzero if WCS coords desired */
-int	key;			/* keystroke used as trigger */
-char	*strval;		/* optional string value */
+xim_retCursorVal (XimDataPtr xim, float sx, float sy, int frame, int wcs, int key, char *strval)
+               
+     	       			/* cursor screen coordinates */
+   	      			/* frame number */
+   	    			/* nonzero if WCS coords desired */
+   	    			/* keystroke used as trigger */
+    	        		/* optional string value */
 {
-	register CtranPtr ct;
-	register MappingPtr mp = (MappingPtr) NULL;
+	CtranPtr ct;
+	MappingPtr mp = (MappingPtr) NULL;
 	int dataout, wcscode;
 	char curval[SZ_IMCURVAL];
 	char keystr[20];
@@ -1282,16 +1260,16 @@ char	*strval;		/* optional string value */
  * world units.
  */
 void
-xim_encodewcs (xim, sx, sy, sz, obuf)
-register XimDataPtr xim;
-float sx, sy;			/* screen (raster) pixel coordinates */
-int sz;				/* screen pixel value */
-char *obuf;			/* receives encoded string */
+xim_encodewcs (XimDataPtr xim, float sx, float sy, int sz, char *obuf)
+               
+             			/* screen (raster) pixel coordinates */
+       				/* screen pixel value */
+           			/* receives encoded string */
 {
-	register CtranPtr ct;
+	CtranPtr ct;
 	MappingPtr  mp = (MappingPtr) NULL;
 	float 	wx, wy, wz;
-	register int i=0, ch, map_found = 0;
+	int i=0, ch, map_found = 0;
 	char buf[SZ_LINE];
 
 
@@ -1300,7 +1278,7 @@ char *obuf;			/* receives encoded string */
          * or real-image values.
          */
         if (wcspix_enabled == NULL) {
-            register IsmModule ism;
+            IsmModule ism;
             extern ismModule ism_modules[];
             extern int ism_nmodules;
 
@@ -1394,16 +1372,16 @@ printf ("wx: %f   wy: %f\n", wx, wy);
 /* XIM_GETMAPPING -- Return the mapping struct for the given screen coords.
  */
 static MappingPtr
-xim_getMapping (xim, sx, sy, frame)
-register XimDataPtr xim;
-float 	sx, sy;			/* screen (raster) pixel coordinates */
-int	frame;
+xim_getMapping (XimDataPtr xim, float sx, float sy, int frame)
+               
+      	       			/* screen (raster) pixel coordinates */
+   	      
 {
 	FrameBufPtr fb = (FrameBufPtr) NULL;
 	MappingPtr mp = (MappingPtr) NULL;
-	register int j=0, i=0;
+	int j=0, i=0;
 	float y = xim->height - sy;
-	register int map_debug = 0;
+	int map_debug = 0;
 
 
 	/* Loop through the frame buffers until we find the current one.
@@ -1444,10 +1422,9 @@ int	frame;
  * frame.
  */
 char *
-xim_frameLabel (xim)
-register XimDataPtr xim;
+xim_frameLabel (XimDataPtr xim)
 {
-	register FrameBufPtr df_p = xim->df_p;
+	FrameBufPtr df_p = xim->df_p;
 
 	sprintf (df_p->label, "[%d] %s", df_p->frameno, df_p->ctran.imtitle);
 	return (df_p->label);
@@ -1467,11 +1444,9 @@ register XimDataPtr xim;
  * elsewhere if needed, our only purpose here is to extract the frame WCS.
  */
 static CtranPtr 
-wcs_update (xim, fr)
-register XimDataPtr xim;
-FrameBufPtr fr;
+wcs_update (XimDataPtr xim, FrameBufPtr fr)
 {
-	register CtranPtr ct = &fr->ctran;
+	CtranPtr ct = &fr->ctran;
 	char buf[1024], *format;
 
 
@@ -1539,15 +1514,11 @@ FrameBufPtr fr;
  */
 
 static void
-add_mapping (xim, ctran, wcsbuf, fr)
-register XimDataPtr xim;
-CtranPtr ctran;
-char	*wcsbuf;
-FrameBufPtr fr;
+add_mapping (XimDataPtr xim, CtranPtr ctran, char *wcsbuf, FrameBufPtr fr)
 {
-	register MappingPtr mp = &fr->mapping[fr->nmaps];
-        register CtranPtr   ct = &mp->ctran;
-	register int  i, j, frame = fr->frameno;
+	MappingPtr mp = &fr->mapping[fr->nmaps];
+        CtranPtr   ct = &mp->ctran;
+	int  i, j, frame = fr->frameno;
 	char buf[SZ_WCSBUF];
 
         /* Attempt to read the WCS and set up a unitary transformation
@@ -1630,11 +1601,10 @@ FrameBufPtr fr;
 /* PRINT_MAPPINGS -- Debug routine to print all mappings on a frame.
  */
 void
-print_mappings (fr)
-FrameBufPtr fr;
+print_mappings (FrameBufPtr fr)
 {
 	MappingPtr mp;
-	register int i;
+	int i;
 
 	if (fr->nmaps == 0) printf ("No mappings for frame %d\n", fr->frameno);
 	for (i=0; i < fr->nmaps; i++) {
@@ -1652,10 +1622,7 @@ FrameBufPtr fr;
  */
 
 static int
-chan_read (fd, vptr, nbytes)
-int 	fd; 
-void 	*vptr; 
-int 	nbytes;
+chan_read (int fd, void *vptr, int nbytes)
 {
         char    *ptr = vptr;
         int 	nread = 0, nleft = nbytes, nb = 0;
@@ -1680,10 +1647,7 @@ int 	nbytes;
  */
 
 static int
-chan_write (fd, vptr, nbytes)
-int 	fd; 
-void 	*vptr; 
-int 	nbytes;
+chan_write (int fd, void *vptr, int nbytes)
 {
         char 	*ptr = vptr;
         int     nwritten = 0,  nleft = nbytes, nb = 0;

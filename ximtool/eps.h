@@ -86,6 +86,8 @@ typedef struct {
 	PSCmap	cmap;			/* Colormap struct */
 } PSImage, *PSImagePtr;
 
+typedef unsigned char uchar;
+typedef unsigned char byte;
 
 /* Page sizes and resolution information. */
 #define EPS_LETTER	0
@@ -115,7 +117,7 @@ typedef struct {
 #define MINOR_TICK_WIDTH   0.5		/* Width of major tic mark           */
 #define NTICMARKS	   5		/* Number of major tick marks        */
 
-void eps_close();
-void eps_setPage(), eps_setTransform(), eps_setCorners();
-void eps_setCmap(), eps_print();
-void eps_setLabel();
+void eps_close(PSImage *psim);
+void eps_setPage(PSImage *psim, int orientation, int paper_size, int scale, int flags), eps_setTransform(PSImage *psim, float z1, float z2, int ztype, float offset, float scale, char *cmap_name), eps_setCorners(PSImage *psim, int llx, int lly, int urx, int ury);
+void eps_setCmap(PSImage *psim, uchar *r, uchar *g, uchar *b, int ncolors), eps_print(PSImage *psim, FILE *fp, uchar *data, int xdim, int ydim, int depth, int pad);
+void eps_setLabel(PSImage *psim, char *label);

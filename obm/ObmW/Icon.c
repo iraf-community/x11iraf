@@ -6,11 +6,7 @@
 #include <X11/extensions/shape.h>
 #include <stdio.h>
 #include "IconP.h"
-static void activate(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
+static void activate(Widget,XEvent*,String*,Cardinal*);
 
 static XtActionsRec actionsList[] = {
 {"activate", activate},
@@ -20,37 +16,14 @@ static char defaultTranslations[] = "\
 <Btn1Down>,<Btn1Up>: activate() \n\
 <Key>Return: activate() \n\
 ";
-static void _resolve_inheritance(
-#if NeedFunctionPrototypes
-WidgetClass
-#endif
-);
-static void initialize(
-#if NeedFunctionPrototypes
-Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static void expose(
-#if NeedFunctionPrototypes
-Widget,XEvent *,Region 
-#endif
-);
-static Boolean  set_values(
-#if NeedFunctionPrototypes
-Widget ,Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static void realize(
-#if NeedFunctionPrototypes
-Widget,XtValueMask *,XSetWindowAttributes *
-#endif
-);
-static void create_image_gc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-/*ARGSUSED*/static void create_image_gc(self)Widget self;
+static void _resolve_inheritance(WidgetClass);
+static void initialize(Widget ,Widget,ArgList ,Cardinal *);
+static void expose(Widget,XEvent *,Region );
+static Boolean  set_values(Widget ,Widget ,Widget,ArgList ,Cardinal *);
+static void realize(Widget,XtValueMask *,XSetWindowAttributes *);
+static void create_image_gc(Widget);
+
+/*ARGSUSED*/static void create_image_gc(Widget self)
 {
     Dimension wd, ht;
     Position x, y;
@@ -140,13 +113,12 @@ XtInherit_set_abs_location,
 };
 WidgetClass xfwfIconWidgetClass = (WidgetClass) &xfwfIconClassRec;
 /*ARGSUSED*/
-static void activate(self,event,params,num_params)Widget self;XEvent*event;String*params;Cardinal*num_params;
+static void activate(Widget self, XEvent *event, String *params, Cardinal *num_params)
 {
     XtCallCallbackList(self, ((XfwfIconWidget)self)->xfwfIcon.activate, event);
 }
 
-static void _resolve_inheritance(class)
-WidgetClass class;
+static void _resolve_inheritance(WidgetClass class)
 {
   XfwfIconWidgetClass c = (XfwfIconWidgetClass) class;
   XfwfIconWidgetClass super;
@@ -161,7 +133,7 @@ WidgetClass class;
   if (class == xfwfIconWidgetClass) return;
   super = (XfwfIconWidgetClass)class->core_class.superclass;
 }
-/*ARGSUSED*/static void initialize(request,self,args,num_args)Widget  request;Widget self;ArgList  args;Cardinal * num_args;
+/*ARGSUSED*/static void initialize(Widget request, Widget self, ArgList args, Cardinal *num_args)
 {
     Dimension dummy1, dummy2;
     Position x, y;
@@ -174,7 +146,7 @@ WidgetClass class;
 		      XtNheight, ((XfwfIconWidget)self)->xfwfIcon.image->attributes.height + 2*y, NULL);
     }
 }
-/*ARGSUSED*/static void expose(self,event,region)Widget self;XEvent * event;Region  region;
+/*ARGSUSED*/static void expose(Widget self, XEvent *event, Region region)
 {
     Dimension wd, ht;
     Position x, y;
@@ -186,7 +158,7 @@ WidgetClass class;
     }
     xfwfBoardClassRec.core_class.expose(self, event, region);
 }
-/*ARGSUSED*/static Boolean  set_values(old,request,self,args,num_args)Widget  old;Widget  request;Widget self;ArgList  args;Cardinal * num_args;
+/*ARGSUSED*/static Boolean  set_values(Widget old, Widget request, Widget self, ArgList args, Cardinal *num_args)
 {
     Dimension dummy1, dummy2;
     Position x, y;
@@ -211,7 +183,7 @@ WidgetClass class;
     }
     return need_redraw;
 }
-/*ARGSUSED*/static void realize(self,mask,attributes)Widget self;XtValueMask * mask;XSetWindowAttributes * attributes;
+/*ARGSUSED*/static void realize(Widget self, XtValueMask *mask, XSetWindowAttributes *attributes)
 {
     Dimension wd, ht;
     Position x, y;

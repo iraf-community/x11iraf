@@ -12,61 +12,17 @@
 #define focus_detail(detail) (detail ==NotifyAncestor ?"NotifyAncestor":detail ==NotifyVirtual ?"NotifyVirtual":detail ==NotifyInferior ?"NotifyInferior":detail ==NotifyNonlinear ?"NotifyNonlinear":detail ==NotifyNonlinearVirtual ?"NotifyNonlinearVirtual":detail ==NotifyPointer ?"NotifyPointer":detail ==NotifyPointerRoot ?"NotifyPointerRoot":detail ==NotifyDetailNone ?"NotifyDetailNone":"???")
 
 
-static void focusIn(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void focusOut(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void traverseDown(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void traverseUp(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void traverseLeft(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void traverseRight(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void traverseNext(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void traversePrev(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void traverseNextTop(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void traverseHome(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void traverseCurrent(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
+static void focusIn(Widget,XEvent*,String*,Cardinal*);
+static void focusOut(Widget,XEvent*,String*,Cardinal*);
+static void traverseDown(Widget,XEvent*,String*,Cardinal*);
+static void traverseUp(Widget,XEvent*,String*,Cardinal*);
+static void traverseLeft(Widget,XEvent*,String*,Cardinal*);
+static void traverseRight(Widget,XEvent*,String*,Cardinal*);
+static void traverseNext(Widget,XEvent*,String*,Cardinal*);
+static void traversePrev(Widget,XEvent*,String*,Cardinal*);
+static void traverseNextTop(Widget,XEvent*,String*,Cardinal*);
+static void traverseHome(Widget,XEvent*,String*,Cardinal*);
+static void traverseCurrent(Widget,XEvent*,String*,Cardinal*);
 
 static XtActionsRec actionsList[] = {
 {"focusIn", focusIn},
@@ -81,81 +37,21 @@ static XtActionsRec actionsList[] = {
 {"traverseHome", traverseHome},
 {"traverseCurrent", traverseCurrent},
 };
-static void _resolve_inheritance(
-#if NeedFunctionPrototypes
-WidgetClass
-#endif
-);
-static void class_initialize(
-#if NeedFunctionPrototypes
-void
-#endif
-);
-static void initialize(
-#if NeedFunctionPrototypes
-Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static Boolean  set_values(
-#if NeedFunctionPrototypes
-Widget ,Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static void compute_inside(
-#if NeedFunctionPrototypes
-Widget,Position *,Position *,Dimension *,Dimension *
-#endif
-);
-static void expose(
-#if NeedFunctionPrototypes
-Widget,XEvent *,Region 
-#endif
-);
-static void destroy(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void highlight_border(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void unhighlight_border(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static Boolean  accept_focus(
-#if NeedFunctionPrototypes
-Widget,Time *
-#endif
-);
-static Boolean  would_accept_focus(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void traverse(
-#if NeedFunctionPrototypes
-Widget,TraversalDirection ,Widget ,Time *
-#endif
-);
-static Boolean  choose_color(
-#if NeedFunctionPrototypes
-Widget,double ,Pixel ,Pixel *
-#endif
-);
-static Boolean  lighter_color(
-#if NeedFunctionPrototypes
-Widget,Pixel ,Pixel *
-#endif
-);
-static Boolean  darker_color(
-#if NeedFunctionPrototypes
-Widget,Pixel ,Pixel *
-#endif
-);
+static void _resolve_inheritance(WidgetClass);
+static void class_initialize(void);
+static void initialize(Widget ,Widget,ArgList ,Cardinal *);
+static Boolean  set_values(Widget ,Widget ,Widget,ArgList ,Cardinal *);
+static void compute_inside(Widget,Position *,Position *,Dimension *,Dimension *);
+static void expose(Widget,XEvent *,Region );
+static void destroy(Widget);
+static void highlight_border(Widget);
+static void unhighlight_border(Widget);
+static Boolean  accept_focus(Widget,Time *);
+static Boolean  would_accept_focus(Widget);
+static void traverse(Widget,TraversalDirection ,Widget ,Time *);
+static Boolean  choose_color(Widget,double ,Pixel ,Pixel *);
+static Boolean  lighter_color(Widget,Pixel ,Pixel *);
+static Boolean  darker_color(Widget,Pixel ,Pixel *);
 #define done(type, value) do {\
 	if (to->addr != NULL) {\
 	    if (to->size < sizeof(type)) {\
@@ -173,16 +69,8 @@ Widget,Pixel ,Pixel *
     }while (0 )
 
 
-static Boolean  cvtStringToAlignment(
-#if NeedFunctionPrototypes
-Display *,XrmValuePtr ,Cardinal *,XrmValuePtr ,XrmValuePtr ,XtPointer *
-#endif
-);
-static Boolean  cvtAlignmentToString(
-#if NeedFunctionPrototypes
-Display *,XrmValuePtr ,Cardinal *,XrmValuePtr ,XrmValuePtr ,XtPointer *
-#endif
-);
+static Boolean  cvtStringToAlignment(Display *,XrmValuePtr ,Cardinal *,XrmValuePtr ,XrmValuePtr ,XtPointer *);
+static Boolean  cvtAlignmentToString(Display *,XrmValuePtr ,Cardinal *,XrmValuePtr ,XrmValuePtr ,XtPointer *);
 static char  extraTranslations[] = "\
 	<FocusIn>: focusIn()\n\
 	<FocusOut>: focusOut()\n\
@@ -196,32 +84,13 @@ static char  extraTranslations[] = "\
 	Shift<Key>Tab: traversePrev()\n\
 	<Key>KP_Enter: traverseNextTop()\n\
 	<Key>Home: traverseHome()";
-static void create_bordergc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static Boolean  traverse_to_direction(
-#if NeedFunctionPrototypes
-Widget,TraversalDirection ,int ,int ,Widget *,int *
-#endif
-);
-static void traverse_to_next(
-#if NeedFunctionPrototypes
-Widget,Widget ,Time *
-#endif
-);
-static void traverse_to_prev(
-#if NeedFunctionPrototypes
-Widget,Widget ,Time *
-#endif
-);
-static void traverse_to_next_top(
-#if NeedFunctionPrototypes
-Widget,Widget ,Time *
-#endif
-);
-/*ARGSUSED*/static Boolean  cvtStringToAlignment(display,args,num_args,from,to,converter_data)Display * display;XrmValuePtr  args;Cardinal * num_args;XrmValuePtr  from;XrmValuePtr  to;XtPointer * converter_data;
+static void create_bordergc(Widget);
+static Boolean  traverse_to_direction(Widget,TraversalDirection ,int ,int ,Widget *,int *);
+static void traverse_to_next(Widget,Widget ,Time *);
+static void traverse_to_prev(Widget,Widget ,Time *);
+static void traverse_to_next_top(Widget,Widget ,Time *);
+
+/*ARGSUSED*/static Boolean  cvtStringToAlignment(Display *display, XrmValuePtr args, Cardinal *num_args, XrmValuePtr from, XrmValuePtr to, XtPointer *converter_data)
 {
     Alignment a = 0;
     char c, *t, *s = (char*) from->addr;
@@ -253,7 +122,7 @@ Widget,Widget ,Time *
     }
     done(Alignment, a);
 }
-/*ARGSUSED*/static Boolean  cvtAlignmentToString(display,args,num_args,from,to,converter_data)Display * display;XrmValuePtr  args;Cardinal * num_args;XrmValuePtr  from;XrmValuePtr  to;XtPointer * converter_data;
+/*ARGSUSED*/static Boolean  cvtAlignmentToString(Display *display, XrmValuePtr args, Cardinal *num_args, XrmValuePtr from, XrmValuePtr to, XtPointer *converter_data)
 {
     Alignment *a = (Alignment*) from->addr;
 
@@ -276,7 +145,7 @@ Widget,Widget ,Time *
     default: done(String, "unknown");
     }
 }
-/*ARGSUSED*/static void create_bordergc(self)Widget self;
+/*ARGSUSED*/static void create_bordergc(Widget self)
 {
     XtGCMask mask;
     XGCValues values;
@@ -293,7 +162,7 @@ Widget,Widget ,Time *
     }
     ((XfwfCommonWidget)self)->xfwfCommon.bordergc = XtGetGC(self, mask, &values);
 }
-/*ARGSUSED*/static Boolean  traverse_to_direction(self,dir,x,y,found,distance)Widget self;TraversalDirection  dir;int  x;int  y;Widget * found;int * distance;
+/*ARGSUSED*/static Boolean  traverse_to_direction(Widget self, TraversalDirection dir, int x, int y, Widget *found, int *distance)
 {
     int i;
     Widget child, w;
@@ -335,7 +204,7 @@ Widget,Widget ,Time *
     *found = self;
     return True;
 }
-/*ARGSUSED*/static void traverse_to_next(self,current,time)Widget self;Widget  current;Time * time;
+/*ARGSUSED*/static void traverse_to_next(Widget self, Widget current, Time *time)
 {
     int i = 0;
     Widget parent = XtParent(self);
@@ -346,7 +215,7 @@ Widget,Widget ,Time *
     if (XtIsSubclass(parent, xfwfCommonWidgetClass))
         ((XfwfCommonWidgetClass)parent->core.widget_class)->xfwfCommon_class.traverse(parent, TraverseNext, self, time);
 }
-/*ARGSUSED*/static void traverse_to_prev(self,current,time)Widget self;Widget  current;Time * time;
+/*ARGSUSED*/static void traverse_to_prev(Widget self, Widget current, Time *time)
 {
     int i = 0;
     Widget parent = XtParent(self);
@@ -357,7 +226,7 @@ Widget,Widget ,Time *
     if (XtIsSubclass(parent, xfwfCommonWidgetClass))
         ((XfwfCommonWidgetClass)parent->core.widget_class)->xfwfCommon_class.traverse(parent, TraversePrev, self, time);
 }
-/*ARGSUSED*/static void traverse_to_next_top(self,current,time)Widget self;Widget  current;Time * time;
+/*ARGSUSED*/static void traverse_to_next_top(Widget self, Widget current, Time *time)
 {
     Widget parent = XtParent(self);
 
@@ -432,7 +301,7 @@ NULL ,
 };
 WidgetClass xfwfCommonWidgetClass = (WidgetClass) &xfwfCommonClassRec;
 /*ARGSUSED*/
-static void focusIn(self,event,params,num_params)Widget self;XEvent*event;String*params;Cardinal*num_params;
+static void focusIn(Widget self, XEvent *event, String *params, Cardinal *num_params)
 {
     Time time = CurrentTime;
 
@@ -451,7 +320,7 @@ static void focusIn(self,event,params,num_params)Widget self;XEvent*event;String
 }
 
 /*ARGSUSED*/
-static void focusOut(self,event,params,num_params)Widget self;XEvent*event;String*params;Cardinal*num_params;
+static void focusOut(Widget self, XEvent *event, String *params, Cardinal *num_params)
 {
     if (event->type != FocusOut)
 	XtError("focusOut action may only be bound to FocusOut events");
@@ -462,63 +331,62 @@ static void focusOut(self,event,params,num_params)Widget self;XEvent*event;Strin
 }
 
 /*ARGSUSED*/
-static void traverseDown(self,event,params,num_params)Widget self;XEvent*event;String*params;Cardinal*num_params;
+static void traverseDown(Widget self, XEvent *event, String *params, Cardinal *num_params)
 {
     ((XfwfCommonWidgetClass)self->core.widget_class)->xfwfCommon_class.traverse(self, TraverseDown, self, &event->xkey.time);
 }
 
 /*ARGSUSED*/
-static void traverseUp(self,event,params,num_params)Widget self;XEvent*event;String*params;Cardinal*num_params;
+static void traverseUp(Widget self, XEvent *event, String *params, Cardinal *num_params)
 {
     ((XfwfCommonWidgetClass)self->core.widget_class)->xfwfCommon_class.traverse(self, TraverseUp, self, &event->xkey.time);
 }
 
 /*ARGSUSED*/
-static void traverseLeft(self,event,params,num_params)Widget self;XEvent*event;String*params;Cardinal*num_params;
+static void traverseLeft(Widget self, XEvent *event, String *params, Cardinal *num_params)
 {
     ((XfwfCommonWidgetClass)self->core.widget_class)->xfwfCommon_class.traverse(self, TraverseLeft, self, &event->xkey.time);
 }
 
 /*ARGSUSED*/
-static void traverseRight(self,event,params,num_params)Widget self;XEvent*event;String*params;Cardinal*num_params;
+static void traverseRight(Widget self, XEvent *event, String *params, Cardinal *num_params)
 {
     ((XfwfCommonWidgetClass)self->core.widget_class)->xfwfCommon_class.traverse(self, TraverseRight, self, &event->xkey.time);
 }
 
 /*ARGSUSED*/
-static void traverseNext(self,event,params,num_params)Widget self;XEvent*event;String*params;Cardinal*num_params;
+static void traverseNext(Widget self, XEvent *event, String *params, Cardinal *num_params)
 {
     ((XfwfCommonWidgetClass)self->core.widget_class)->xfwfCommon_class.traverse(self, TraverseNext, self, &event->xkey.time);
 }
 
 /*ARGSUSED*/
-static void traversePrev(self,event,params,num_params)Widget self;XEvent*event;String*params;Cardinal*num_params;
+static void traversePrev(Widget self, XEvent *event, String *params, Cardinal *num_params)
 {
     ((XfwfCommonWidgetClass)self->core.widget_class)->xfwfCommon_class.traverse(self, TraversePrev, self, &event->xkey.time);
 }
 
 /*ARGSUSED*/
-static void traverseNextTop(self,event,params,num_params)Widget self;XEvent*event;String*params;Cardinal*num_params;
+static void traverseNextTop(Widget self, XEvent *event, String *params, Cardinal *num_params)
 {
     ((XfwfCommonWidgetClass)self->core.widget_class)->xfwfCommon_class.traverse(self, TraverseNextTop, self, &event->xkey.time);
 }
 
 /*ARGSUSED*/
-static void traverseHome(self,event,params,num_params)Widget self;XEvent*event;String*params;Cardinal*num_params;
+static void traverseHome(Widget self, XEvent *event, String *params, Cardinal *num_params)
 {
     ((XfwfCommonWidgetClass)self->core.widget_class)->xfwfCommon_class.traverse(self, TraverseHome, self, &event->xkey.time);
 }
 
 /*ARGSUSED*/
-static void traverseCurrent(self,event,params,num_params)Widget self;XEvent*event;String*params;Cardinal*num_params;
+static void traverseCurrent(Widget self, XEvent *event, String *params, Cardinal *num_params)
 {
     Time time = CurrentTime;
 
     if (((XfwfCommonWidget)self)->xfwfCommon.traversalOn) (void) ((XfwfCommonWidgetClass)self->core.widget_class)->core_class.accept_focus(self, &time);
 }
 
-static void _resolve_inheritance(class)
-WidgetClass class;
+static void _resolve_inheritance(WidgetClass class)
 {
   XfwfCommonWidgetClass c = (XfwfCommonWidgetClass) class;
   XfwfCommonWidgetClass super;
@@ -549,7 +417,7 @@ WidgetClass class;
   if (c->xfwfCommon_class.darker_color == XtInherit_darker_color)
     c->xfwfCommon_class.darker_color = super->xfwfCommon_class.darker_color;
 }
-/*ARGSUSED*/static void class_initialize()
+/*ARGSUSED*/static void class_initialize(void)
 {
     static XtConvertArgRec args[] = {
     { XtWidgetBaseOffset, 0, sizeof(Widget) } };
@@ -562,7 +430,7 @@ WidgetClass class;
     XtSetTypeConverter(XtRString, "Icon", cvtStringToIcon,
 		       args, XtNumber(args), XtCacheNone, NULL);
 }
-/*ARGSUSED*/static void initialize(request,self,args,num_args)Widget  request;Widget self;ArgList  args;Cardinal * num_args;
+/*ARGSUSED*/static void initialize(Widget request, Widget self, ArgList args, Cardinal *num_args)
 {
     if (((XfwfCommonWidgetClass)self->core.widget_class)->xfwfCommon_class.traversal_trans == NULL)
 	((XfwfCommonWidgetClass)self->core.widget_class)->xfwfCommon_class.traversal_trans = XtParseTranslationTable(extraTranslations);
@@ -574,7 +442,7 @@ WidgetClass class;
     ((XfwfCommonWidget)self)->xfwfCommon.bordergc = NULL;
     create_bordergc(self);
 }
-/*ARGSUSED*/static Boolean  set_values(old,request,self,args,num_args)Widget  old;Widget  request;Widget self;ArgList  args;Cardinal * num_args;
+/*ARGSUSED*/static Boolean  set_values(Widget old, Widget request, Widget self, ArgList args, Cardinal *num_args)
 {
     Boolean need_redraw = False;
     Widget parent = XtParent(self);
@@ -603,7 +471,7 @@ WidgetClass class;
     }
     return need_redraw;
 }
-/*ARGSUSED*/static void compute_inside(self,x,y,w,h)Widget self;Position * x;Position * y;Dimension * w;Dimension * h;
+/*ARGSUSED*/static void compute_inside(Widget self, Position *x, Position *y, Dimension *w, Dimension *h)
 {
     *x = ((XfwfCommonWidget)self)->xfwfCommon.highlightThickness;
     *y = ((XfwfCommonWidget)self)->xfwfCommon.highlightThickness;
@@ -613,14 +481,14 @@ WidgetClass class;
     *h = max(0,((XfwfCommonWidget)self)->core.height - 2 * ((XfwfCommonWidget)self)->xfwfCommon.highlightThickness);
 }
 
-/*ARGSUSED*/static void expose(self,event,region)Widget self;XEvent * event;Region  region;
+/*ARGSUSED*/static void expose(Widget self, XEvent *event, Region region)
 {
     if (! XtIsRealized(self)) return;
     if (region != NULL) XSetRegion(XtDisplay(self), ((XfwfCommonWidget)self)->xfwfCommon.bordergc, region);
     if (((XfwfCommonWidget)self)->xfwfCommon.traversal_focus) ((XfwfCommonWidgetClass)self->core.widget_class)->xfwfCommon_class.highlight_border(self);
     if (region != NULL) XSetClipMask(XtDisplay(self), ((XfwfCommonWidget)self)->xfwfCommon.bordergc, None);
 }
-/*ARGSUSED*/static void destroy(self)Widget self;
+/*ARGSUSED*/static void destroy(Widget self)
 {
     Widget parent = XtParent(self);
     Time time = CurrentTime;
@@ -631,7 +499,7 @@ WidgetClass class;
 	    ((XfwfCommonWidgetClass)parent->core.widget_class)->xfwfCommon_class.traverse(parent, TraverseHome, self, &time);
     }
 }
-/*ARGSUSED*/static void highlight_border(self)Widget self;
+/*ARGSUSED*/static void highlight_border(Widget self)
 {
     XRectangle rect[4];
 
@@ -659,7 +527,7 @@ WidgetClass class;
 
     XFillRectangles(XtDisplay(self), XtWindow(self), ((XfwfCommonWidget)self)->xfwfCommon.bordergc, &rect[0], 4);
 }
-/*ARGSUSED*/static void unhighlight_border(self)Widget self;
+/*ARGSUSED*/static void unhighlight_border(Widget self)
 {
     if (((XfwfCommonWidget)self)->xfwfCommon.highlightThickness == 0) return;
 
@@ -674,7 +542,7 @@ WidgetClass class;
 	       0, ((XfwfCommonWidget)self)->core.height - ((XfwfCommonWidget)self)->xfwfCommon.highlightThickness,
 	       ((XfwfCommonWidget)self)->core.width, ((XfwfCommonWidget)self)->xfwfCommon.highlightThickness, False);
 }
-/*ARGSUSED*/static Boolean  accept_focus(self,time)Widget self;Time * time;
+/*ARGSUSED*/static Boolean  accept_focus(Widget self, Time *time)
 {
     int i;
 
@@ -690,7 +558,7 @@ WidgetClass class;
     }
     return True;
 }
-/*ARGSUSED*/static Boolean  would_accept_focus(self)Widget self;
+/*ARGSUSED*/static Boolean  would_accept_focus(Widget self)
 {
     int i;
     Widget child;
@@ -707,7 +575,7 @@ WidgetClass class;
         return True;
     }
 }
-/*ARGSUSED*/static void traverse(self,dir,current,time)Widget self;TraversalDirection  dir;Widget  current;Time * time;
+/*ARGSUSED*/static void traverse(Widget self, TraversalDirection dir, Widget current, Time *time)
 {
     Widget w, parent = XtParent(self);
     Position x, y;
@@ -734,7 +602,7 @@ WidgetClass class;
             XtCallAcceptFocus(w, time);
     }
 }
-/*ARGSUSED*/static Boolean  choose_color(self,factor,base,result)Widget self;double  factor;Pixel  base;Pixel * result;
+/*ARGSUSED*/static Boolean  choose_color(Widget self, double factor, Pixel base, Pixel *result)
 {
     XColor color1, color2, dummy;
 
@@ -755,17 +623,17 @@ WidgetClass class;
     *result = color2.pixel;
     return True;
 }
-/*ARGSUSED*/static Boolean  lighter_color(self,base,result)Widget self;Pixel  base;Pixel * result;
+/*ARGSUSED*/static Boolean  lighter_color(Widget self, Pixel base, Pixel *result)
 {
     /* return choose_color(self, 1.5, base, result); */
     return choose_color(self, 1.25, base, result);
 }
-/*ARGSUSED*/static Boolean  darker_color(self,base,result)Widget self;Pixel  base;Pixel * result;
+/*ARGSUSED*/static Boolean  darker_color(Widget self, Pixel base, Pixel *result)
 {
     /* return choose_color(self, 0.667, base, result); */
     return choose_color(self, 0.500, base, result);
 }
-/*ARGSUSED*/void XfwfCallComputeInside(self,x,y,w,h)Widget self;Position * x;Position * y;Dimension * w;Dimension * h;
+/*ARGSUSED*/void XfwfCallComputeInside(Widget self, Position *x, Position *y, Dimension *w, Dimension *h)
 {
     if (XtIsSubclass(self, xfwfCommonWidgetClass) && ((XfwfCommonWidgetClass)self->core.widget_class)->xfwfCommon_class.compute_inside)
 	((XfwfCommonWidgetClass)self->core.widget_class)->xfwfCommon_class.compute_inside(self, x, y, w, h);

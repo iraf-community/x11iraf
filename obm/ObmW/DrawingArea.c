@@ -19,11 +19,11 @@
 
 /* Private Definitions */
 
-static void ClassInitialize(), ClassPartInitialize(), Initialize(), Resize();
+static void ClassInitialize(void), ClassPartInitialize(WidgetClass class), Initialize(Widget request, Widget new, ArgList args, Cardinal *num_args), Resize(Widget w);
 static void ConstraintInitialize();
-static Boolean SetValues(), ConstraintSetValues();
-static XtGeometryResult GeometryManager(), PreferredGeometry();
-static void ChangeManaged();
+static Boolean SetValues(Widget current, Widget request, Widget new, ArgList args, Cardinal *num_args), ConstraintSetValues(Widget current, Widget request, Widget new, ArgList args, Cardinal *num_args);
+static XtGeometryResult GeometryManager(Widget w, XtWidgetGeometry *request, XtWidgetGeometry *reply), PreferredGeometry(Widget widget, XtWidgetGeometry *request, XtWidgetGeometry *reply);
+static void ChangeManaged(Widget w);
 
 DrawingAreaClassRec drawingAreaClassRec = {
   { /* core_class fields */
@@ -89,28 +89,23 @@ WidgetClass drawingAreaWidgetClass = (WidgetClass)&drawingAreaClassRec;
  *
  ****************************************************************/
 
-static void ClassInitialize()
+static void ClassInitialize(void)
 {
 }
 
-static void ClassPartInitialize(class)
-    WidgetClass class;
+static void ClassPartInitialize(WidgetClass class)
 {
 }
 
 /* ARGSUSED */
-static void Initialize(request, new, args, num_args)
-    Widget request, new;
-    ArgList args;
-    Cardinal *num_args;
+static void Initialize(Widget request, Widget new, ArgList args, Cardinal *num_args)
 {
 /*
     DrawingAreaWidget daw = (DrawingAreaWidget)new;
 */
 }
 
-static void Resize(w)
-    Widget w;
+static void Resize(Widget w)
 {
 /*
     DrawingAreaWidget daw = (DrawingAreaWidget)w;
@@ -124,10 +119,10 @@ static void Resize(w)
 
 
 /* ARGSUSED */
-static XtGeometryResult GeometryManager(w, request, reply)
-    Widget w;
-    XtWidgetGeometry *request;
-    XtWidgetGeometry *reply;	/* RETURN */
+static XtGeometryResult GeometryManager(Widget w, XtWidgetGeometry *request, XtWidgetGeometry *reply)
+             
+                              
+                            	/* RETURN */
 {
 /*
     Dimension old_width, old_height;
@@ -141,32 +136,25 @@ static XtGeometryResult GeometryManager(w, request, reply)
 
 
 /* ARGSUSED */
-static Boolean SetValues(current, request, new, args, num_args)
-    Widget current, request, new;
-    ArgList args;
-    Cardinal *num_args;
+static Boolean SetValues(Widget current, Widget request, Widget new, ArgList args, Cardinal *num_args)
 {
     return( FALSE );
 }
 
 
 /*ARGSUSED*/
-static Boolean ConstraintSetValues(current, request, new, args, num_args)
-    Widget current, request, new;
-    ArgList args;
-    Cardinal *num_args;
+static Boolean ConstraintSetValues(Widget current, Widget request, Widget new, ArgList args, Cardinal *num_args)
 {
 /*
-  register DrawingAreaConstraints cfc = 
+  DrawingAreaConstraints cfc = 
       (DrawingAreaConstraints) current->core.constraints;
-  register DrawingAreaConstraints nfc = 
+  DrawingAreaConstraints nfc = 
       (DrawingAreaConstraints) new->core.constraints;
  */
   return( FALSE );
 }
 
-static void ChangeManaged(w)
-    Widget w;
+static void ChangeManaged(Widget w)
 {
 /*
   DrawingAreaWidget daw = (DrawingAreaWidget)w;
@@ -178,9 +166,7 @@ static void ChangeManaged(w)
 }
 
 
-static XtGeometryResult PreferredGeometry( widget, request, reply  )
-    Widget widget;
-    XtWidgetGeometry *request, *reply;
+static XtGeometryResult PreferredGeometry(Widget widget, XtWidgetGeometry *request, XtWidgetGeometry *reply)
 {
 /*
     DrawingAreaWidget w = (DrawingAreaWidget)widget;

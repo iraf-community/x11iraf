@@ -551,7 +551,7 @@ typedef struct _XgtermWidgetRec {
 #define	I_SIGNAL	0x02
 #define	I_TEK		0x04
 
-extern Cursor make_colored_cursor();
-extern int GetBytesAvailable();
-extern void first_map_occurred();
-extern int kill_process_group();
+extern Cursor make_colored_cursor(int cursorindex, long unsigned int fg, long unsigned int bg);
+extern int GetBytesAvailable(int fd);
+extern void first_map_occurred(void);
+extern int kill_process_group(int pid, int sig);

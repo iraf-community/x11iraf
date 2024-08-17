@@ -2,25 +2,21 @@
 #define _Converters_h
 
 Boolean XfwfCvtLongToString(
-#if NeedFunctionPrototypes
     Display *display,
     XrmValuePtr args,
     Cardinal *num_args,
     XrmValuePtr from,
     XrmValuePtr to,
     XtPointer *converter_data
-#endif
 );
 
 Boolean cvtStringToIcon(
-#if NeedFunctionPrototypes
     Display *dpy,
     XrmValue *args,
     Cardinal *num_args,
     XrmValue *from,
     XrmValue *to,
     XtPointer *converter_data
-#endif
 );
 
 #ifndef NO_XPM

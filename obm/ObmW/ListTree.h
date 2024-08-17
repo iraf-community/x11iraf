@@ -90,37 +90,31 @@ typedef struct _ListTreeActivateStruct {
 ** Public function declarations
 */
 #ifndef _ListTree_
-#if __STDC__ || defined(__cplusplus)
-#define P_(s) s
-#else
-#define P_(s) ()
-#endif
 
 /* ListTree.c */
-void ListTreeRefresh P_((Widget w));
-void ListTreeRefreshOff P_((Widget w));
-void ListTreeRefreshOn P_((Widget w));
-ListTreeItem *ListTreeAdd P_((Widget w, ListTreeItem *parent, const char *string));
-void ListTreeRenameItem P_((Widget w, ListTreeItem *item, char *string));
-int ListTreeDelete P_((Widget w, ListTreeItem *item));
-int ListTreeDeleteChildren P_((Widget w, ListTreeItem *item));
-int ListTreeReparent P_((Widget w, ListTreeItem *item, ListTreeItem *newparent));
-int ListTreeReparentChildren P_((Widget w, ListTreeItem *item, ListTreeItem *newparent));
-int ListTreeOrderSiblings P_((Widget w, ListTreeItem *item));
-int ListTreeOrderChildren P_((Widget w, ListTreeItem *item));
-ListTreeItem *ListTreeFindSiblingName P_((Widget w, ListTreeItem *item, char *name));
-ListTreeItem *ListTreeFindChildName P_((Widget w, ListTreeItem *item, char *name));
-void ListTreeHighlightItem P_((Widget w, ListTreeItem *item));
-ListTreeItem *ListTreeFirstItem P_((Widget w));
-void ListTreeOpenAll P_((Widget w, ListTreeItem *start, int child_only));
-void ListTreeCloseAll P_((Widget w, ListTreeItem *start, int child_only));
-
+void ListTreeRefresh (Widget w);
+void ListTreeRefreshOff (Widget w);
+void ListTreeRefreshOn (Widget w);
+ListTreeItem *ListTreeAdd (Widget w, ListTreeItem *parent, const char *string);
+void ListTreeRenameItem (Widget w, ListTreeItem *item, char *string);
+int ListTreeDelete (Widget w, ListTreeItem *item);
+int ListTreeDeleteChildren (Widget w, ListTreeItem *item);
+int ListTreeReparent (Widget w, ListTreeItem *item, ListTreeItem *newparent);
+int ListTreeReparentChildren (Widget w, ListTreeItem *item, ListTreeItem *newparent);
+int ListTreeOrderSiblings (Widget w, ListTreeItem *item);
+int ListTreeOrderChildren (Widget w, ListTreeItem *item);
+ListTreeItem *ListTreeFindSiblingName (Widget w, ListTreeItem *item, char *name);
+ListTreeItem *ListTreeFindChildName (Widget w, ListTreeItem *item, char *name);
+ListTreeItem *ListTreeFindChildNameInTree(ListTreeWidget w, ListTreeItem *item, char *name);
+void ListTreeHighlightItem (Widget w, ListTreeItem *item);
+ListTreeItem *ListTreeFirstItem (Widget w);
+void ListTreeOpenAll (Widget w, ListTreeItem *start, int child_only);
+void ListTreeCloseAll (Widget w, ListTreeItem *start, int child_only);
 #ifdef USE_RDD
-void ListTreeHighlightDrop P_((Widget w, XEvent *event, String *params, Cardinal *num_params));
-ListTreeReturnStruct *ListTreeGetDrop P_((Widget w));
+void ListTreeHighlightDrop (Widget w, XEvent *event, String *params, Cardinal *num_params);
+ListTreeReturnStruct *ListTreeGetDrop (Widget w);
 #endif
 
-#undef P_
 #endif
 
 #endif /* _ListTree_H */

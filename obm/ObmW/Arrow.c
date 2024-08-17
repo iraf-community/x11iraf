@@ -7,16 +7,8 @@
 #include <stdio.h>
 #include <assert.h>
 #include "ArrowP.h"
-static void activate_and_start_timer(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void stop_timer(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
+static void activate_and_start_timer(Widget,XEvent*,String*,Cardinal*);
+static void stop_timer(Widget,XEvent*,String*,Cardinal*);
 
 static XtActionsRec actionsList[] = {
 {"activate_and_start_timer", activate_and_start_timer},
@@ -27,47 +19,16 @@ static char defaultTranslations[] = "\
 <Btn1Down>: activate_and_start_timer() \n\
 <Btn1Up>: stop_timer() \n\
 ";
-static void _resolve_inheritance(
-#if NeedFunctionPrototypes
-WidgetClass
-#endif
-);
-static void initialize(
-#if NeedFunctionPrototypes
-Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static Boolean  set_values(
-#if NeedFunctionPrototypes
-Widget ,Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static void expose(
-#if NeedFunctionPrototypes
-Widget,XEvent *,Region 
-#endif
-);
-static void timer_callback(
-#if NeedFunctionPrototypes
-XtPointer ,XtIntervalId *
-#endif
-);
-static void create_arrowgc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void create_arrowlightgc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void create_arrowdarkgc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-/*ARGSUSED*/static void timer_callback(client_data,timer)XtPointer  client_data;XtIntervalId * timer;
+static void _resolve_inheritance(WidgetClass);
+static void initialize(Widget ,Widget,ArgList ,Cardinal *);
+static Boolean  set_values(Widget ,Widget ,Widget,ArgList ,Cardinal *);
+static void expose(Widget,XEvent *,Region );
+static void timer_callback(XtPointer ,XtIntervalId *);
+static void create_arrowgc(Widget);
+static void create_arrowlightgc(Widget);
+static void create_arrowdarkgc(Widget);
+
+/*ARGSUSED*/static void timer_callback(XtPointer client_data, XtIntervalId *timer)
 {
     Widget self = (Widget) client_data;
 
@@ -75,7 +36,7 @@ Widget
     ((XfwfArrowWidget)self)->xfwfArrow.timer = XtAppAddTimeOut(XtWidgetToApplicationContext(self),
 			     ((XfwfArrowWidget)self)->xfwfArrow.repeatDelay, timer_callback, self);
 }
-/*ARGSUSED*/static void create_arrowgc(self)Widget self;
+/*ARGSUSED*/static void create_arrowgc(Widget self)
 {
     XtGCMask mask;
     XGCValues values;
@@ -85,7 +46,7 @@ Widget
     values.foreground = ((XfwfArrowWidget)self)->xfwfArrow.foreground;
     ((XfwfArrowWidget)self)->xfwfArrow.arrowgc = XtGetGC(self, mask, &values);
 }
-/*ARGSUSED*/static void create_arrowlightgc(self)Widget self;
+/*ARGSUSED*/static void create_arrowlightgc(Widget self)
 {
     XtGCMask mask;
     XGCValues values;
@@ -121,7 +82,7 @@ Widget
     }
     ((XfwfArrowWidget)self)->xfwfArrow.arrowlightgc = XtGetGC(self, mask, &values);
 }
-/*ARGSUSED*/static void create_arrowdarkgc(self)Widget self;
+/*ARGSUSED*/static void create_arrowdarkgc(Widget self)
 {
     XtGCMask mask;
     XGCValues values;
@@ -232,7 +193,7 @@ XtInherit_set_abs_location,
 };
 WidgetClass xfwfArrowWidgetClass = (WidgetClass) &xfwfArrowClassRec;
 /*ARGSUSED*/
-static void activate_and_start_timer(self,event,params,num_params)Widget self;XEvent*event;String*params;Cardinal*num_params;
+static void activate_and_start_timer(Widget self, XEvent *event, String *params, Cardinal *num_params)
 {
     if (event->type != ButtonPress) {
         XtWarning("The Arrow activate action isn't bound to a BtnDown event");
@@ -244,13 +205,12 @@ static void activate_and_start_timer(self,event,params,num_params)Widget self;XE
 }
 
 /*ARGSUSED*/
-static void stop_timer(self,event,params,num_params)Widget self;XEvent*event;String*params;Cardinal*num_params;
+static void stop_timer(Widget self, XEvent *event, String *params, Cardinal *num_params)
 {
     XtRemoveTimeOut(((XfwfArrowWidget)self)->xfwfArrow.timer);
 }
 
-static void _resolve_inheritance(class)
-WidgetClass class;
+static void _resolve_inheritance(WidgetClass class)
 {
   XfwfArrowWidgetClass c = (XfwfArrowWidgetClass) class;
   XfwfArrowWidgetClass super;
@@ -265,7 +225,7 @@ WidgetClass class;
   if (class == xfwfArrowWidgetClass) return;
   super = (XfwfArrowWidgetClass)class->core_class.superclass;
 }
-/*ARGSUSED*/static void initialize(request,self,args,num_args)Widget  request;Widget self;ArgList  args;Cardinal * num_args;
+/*ARGSUSED*/static void initialize(Widget request, Widget self, ArgList args, Cardinal *num_args)
 {
     if (((XfwfArrowWidget)self)->xfwfArrow.direction != XfwfTop && ((XfwfArrowWidget)self)->xfwfArrow.direction != XfwfLeft
 	&& ((XfwfArrowWidget)self)->xfwfArrow.direction != XfwfRight && ((XfwfArrowWidget)self)->xfwfArrow.direction != XfwfBottom) {
@@ -276,7 +236,7 @@ WidgetClass class;
     ((XfwfArrowWidget)self)->xfwfArrow.arrowlightgc = NULL; create_arrowlightgc(self);
     ((XfwfArrowWidget)self)->xfwfArrow.arrowdarkgc = NULL; create_arrowdarkgc(self);
 }
-/*ARGSUSED*/static Boolean  set_values(old,request,self,args,num_args)Widget  old;Widget  request;Widget self;ArgList  args;Cardinal * num_args;
+/*ARGSUSED*/static Boolean  set_values(Widget old, Widget request, Widget self, ArgList args, Cardinal *num_args)
 {
     Boolean need_redisplay = False;
 
@@ -318,7 +278,7 @@ WidgetClass class;
     }
     return need_redisplay;
 }
-/*ARGSUSED*/static void expose(self,event,region)Widget self;XEvent * event;Region  region;
+/*ARGSUSED*/static void expose(Widget self, XEvent *event, Region region)
 {
     XPoint p1[3], p2[4], p3[4], p4[4];
     Position x, y;

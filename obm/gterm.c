@@ -188,62 +188,113 @@ typedef struct {
 } gtermClassData, *GtermClassData;
 
 
-void GtermDestroy();
-void GtermClassDestroy();
-ObmObject GtermCreate();
+void GtermDestroy(ObmObject);
+void GtermClassDestroy(ObmContext, ObjClassRec);
+ObmObject GtermCreate(ObmContext, const char *, ObjClassRec,
+		      const char *, ArgList, int nargs);
 
-static	int gtermActivate(), gtermActiveMapping(), gtermActiveRasters();
-static	int gtermAddCallback(), gtermDeleteCallback();
-static	int gtermAssignRaster(), gtermBell(), gtermGetBias();
-static	int gtermClearScreen(), gtermClientPixel(), gtermCopyRaster();
-static	int gtermCreateMarker(), gtermCreateRaster(), gtermDeactivate();
-static	int gtermDestroyRaster(), gtermDisableMapping(), gtermDrawAlphaText();
-static	int gtermDrawDialogText(), gtermDrawMarker(), gtermDrawPolygon();
-static	int gtermDrawPolyline(), gtermDrawPolymarker(), gtermEnableMapping();
-static	int gtermEndDialog(), gtermEraseDialog(), gtermExtractPixmap();
-static	int gtermFlip(), gtermFlush(), gtermFreeColormap();
-static	int gtermFreeMapping(), gtermRaiseMapping(), gtermLowerMapping();
-static	int gtermGetAlphaTextSize(), gtermGetCursorPos();
-static	int gtermGetDialogTextSize(), gtermGetLogRes(), gtermGetMapping();
-static	int gtermGetPhysRes(), gtermGetPixel(), gtermGetRaster();
-static	int gtermInitMappings(), gtermInsertPixmap(), gtermLoadColormap();
-static	int gtermMarkerInit(), gtermNextColormap(), gtermNextMapping();
-static	int gtermNextRaster(), gtermQueryRaster(), gtermRasterInit();
-static	int gtermReadColormap(), gtermReadPixels(), gtermRefreshMapping();
-static	int gtermRefreshPixels(), gtermReset(), gtermSelectRaster();
-static	int gtermSetColorIndex(), gtermSetCursorPos(), gtermSetCursorType();
-static	int gtermSetDataLevel(), gtermSetFillType(), gtermSetGterm();
-static	int gtermSetLineStyle(), gtermSetLineWidth(), gtermSetLogRes();
-static	int gtermSetMapping(), gtermSetPhysRes(), gtermSetPixel();
-static	int gtermSetPixels(), gtermSetRaster(), gtermSetTextRes();
-static	int gtermStartDialog(), gtermUnmapPixel(), gtermWriteColormap();
-static	int gtermWritePixels();
+static	int gtermActivate(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermActiveMapping(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermActiveRasters(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermAddCallback(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermDeleteCallback(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermAssignRaster(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermBell(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermGetBias(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermClearScreen(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermClientPixel(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermCopyRaster(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermCreateMarker(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermCreateRaster(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermDeactivate(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermDestroyRaster(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermDisableMapping(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermDrawAlphaText(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermDrawDialogText(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermDrawMarker(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermDrawPolygon(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermDrawPolyline(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermDrawPolymarker(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermEnableMapping(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermEndDialog(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermEraseDialog(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermExtractPixmap(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermFlip(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermFlush(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermFreeColormap(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermFreeMapping(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermRaiseMapping(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermLowerMapping(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermGetAlphaTextSize(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermGetCursorPos(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermGetDialogTextSize(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermGetLogRes(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermGetMapping(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermGetPhysRes(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermGetPixel(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermGetRaster(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermInitMappings(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermInsertPixmap(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermLoadColormap(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermMarkerInit(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermNextColormap(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermNextMapping(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermNextRaster(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermQueryRaster(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermRasterInit(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermReadColormap(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermReadPixels(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermRefreshMapping(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermRefreshPixels(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermReset(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermSelectRaster(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermSetColorIndex(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermSetCursorPos(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermSetCursorType(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermSetDataLevel(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermSetFillType(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermSetGterm(MsgContext, Tcl_Interp *, int, const char **);
+static	int gtermSetLineStyle(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermSetLineWidth(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermSetLogRes(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermSetMapping(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermSetPhysRes(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermSetPixel(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermSetPixels(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermSetRaster(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermSetTextRes(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermStartDialog(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermUnmapPixel(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermWriteColormap(MsgContext, Tcl_Interp *, int, char **);
+static	int gtermWritePixels(MsgContext, Tcl_Interp *, int, char **);
 
-static	void gtermInputCallback();
-static	void gtermResizeCallback(), gtermResetCallback();
-static	void get_mapping(), put_mapping();
-static	XPoint *get_points();
+static	void gtermInputCallback(ObmCallback, Widget, XEvent *);
+static	void gtermResizeCallback(ObmCallback, Widget);
+static	void gtermResetCallback(ObmCallback cb, Widget);
+static	void get_mapping(char **, int *, int *, int *, int *, int *, int *, int *, int *,
+			 int *, int *, int *, int *);
+static	void put_mapping(Tcl_Interp *, char **, int, int, int, int, int, int, int,
+			 int, int, int, int, int);
+static	XPoint *get_points(char *, int *);
 
-static int dataLevelType();
-static int lineStyle();
-static int fillType();
-static int colorToIndex();
-static void ndcToPixel();
+static int dataLevelType(char *);
+static int lineStyle(char *);
+static int fillType(char *);
+static int colorToIndex(char *);
+static void ndcToPixel(GtermWidget, int, int, int, float *, float *);
 
 /* GtermClassInit -- Initialize the class record for the gterm widget class.
  */
 void
-GtermClassInit (obm, classrec)
-ObmContext obm;
-register ObjClassRec classrec;
+GtermClassInit (ObmContext obm, ObjClassRec classrec)
 {
-	register GtermClassData gcd;
-	register Tcl_Interp *tcl;
-	register ClientData c_gcd;
+	GtermClassData gcd;
+	Tcl_Interp *tcl;
+	ClientData c_gcd;
 
 	/* Install the class methods. */
 	classrec->ClassDestroy = GtermClassDestroy;
-	classrec->Create = (ObmFunc) GtermCreate;
+	classrec->Create = GtermCreate;
 	classrec->Destroy = GtermDestroy;
 	classrec->Evaluate = WidgetEvaluate;
 
@@ -260,153 +311,153 @@ register ObjClassRec classrec;
 	    gcd->level = 0;
 
 	    Tcl_CreateCommand (tcl,
-		"activate", gtermActivate, c_gcd, NULL);
+		"activate", (Tcl_CmdProc *) gtermActivate, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"activeMapping", gtermActiveMapping, c_gcd, NULL);
+		"activeMapping", (Tcl_CmdProc *) gtermActiveMapping, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"activeRasters", gtermActiveRasters, c_gcd, NULL);
+		"activeRasters", (Tcl_CmdProc *) gtermActiveRasters, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"addCallback", gtermAddCallback, c_gcd, NULL);
+		"addCallback", (Tcl_CmdProc *) gtermAddCallback, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"deleteCallback", gtermDeleteCallback, c_gcd, NULL);
+		"deleteCallback", (Tcl_CmdProc *) gtermDeleteCallback, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"assignRaster", gtermAssignRaster, c_gcd, NULL);
+		"assignRaster", (Tcl_CmdProc *) gtermAssignRaster, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"bell", gtermBell, c_gcd, NULL);
+		"bell", (Tcl_CmdProc *) gtermBell, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"clearScreen", gtermClearScreen, c_gcd, NULL);
+		"clearScreen", (Tcl_CmdProc *) gtermClearScreen, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"clientPixel", gtermClientPixel, c_gcd, NULL);
+		"clientPixel", (Tcl_CmdProc *) gtermClientPixel, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"copyRaster", gtermCopyRaster, c_gcd, NULL);
+		"copyRaster", (Tcl_CmdProc *) gtermCopyRaster, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"createMarker", gtermCreateMarker, c_gcd, NULL);
+		"createMarker", (Tcl_CmdProc *) gtermCreateMarker, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"createRaster", gtermCreateRaster, c_gcd, NULL);
+		"createRaster", (Tcl_CmdProc *) gtermCreateRaster, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"deactivate", gtermDeactivate, c_gcd, NULL);
+		"deactivate", (Tcl_CmdProc *) gtermDeactivate, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"destroyRaster", gtermDestroyRaster, c_gcd, NULL);
+		"destroyRaster", (Tcl_CmdProc *) gtermDestroyRaster, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"disableMapping", gtermDisableMapping, c_gcd, NULL);
+		"disableMapping", (Tcl_CmdProc *) gtermDisableMapping, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"drawAlphaText", gtermDrawAlphaText, c_gcd, NULL);
+		"drawAlphaText", (Tcl_CmdProc *) gtermDrawAlphaText, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"drawDialogText", gtermDrawDialogText, c_gcd, NULL);
+		"drawDialogText", (Tcl_CmdProc *) gtermDrawDialogText, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"drawMarker", gtermDrawMarker, c_gcd, NULL);
+		"drawMarker", (Tcl_CmdProc *) gtermDrawMarker, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"drawPolygon", gtermDrawPolygon, c_gcd, NULL);
+		"drawPolygon", (Tcl_CmdProc *) gtermDrawPolygon, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"drawPolyline", gtermDrawPolyline, c_gcd, NULL);
+		"drawPolyline", (Tcl_CmdProc *) gtermDrawPolyline, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"drawPolymarker", gtermDrawPolymarker, c_gcd, NULL);
+		"drawPolymarker", (Tcl_CmdProc *) gtermDrawPolymarker, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"enableMapping", gtermEnableMapping, c_gcd, NULL);
+		"enableMapping", (Tcl_CmdProc *) gtermEnableMapping, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"endDialog", gtermEndDialog, c_gcd, NULL);
+		"endDialog", (Tcl_CmdProc *) gtermEndDialog, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"eraseDialog", gtermEraseDialog, c_gcd, NULL);
+		"eraseDialog", (Tcl_CmdProc *) gtermEraseDialog, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"extractPixmap", gtermExtractPixmap, c_gcd, NULL);
+		"extractPixmap", (Tcl_CmdProc *) gtermExtractPixmap, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"flip", gtermFlip, c_gcd, NULL);
+		"flip", (Tcl_CmdProc *) gtermFlip, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"flush", gtermFlush, c_gcd, NULL);
+		"flush", (Tcl_CmdProc *) gtermFlush, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"freeColormap", gtermFreeColormap, c_gcd, NULL);
+		"freeColormap", (Tcl_CmdProc *) gtermFreeColormap, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"freeMapping", gtermFreeMapping, c_gcd, NULL);
+		"freeMapping", (Tcl_CmdProc *) gtermFreeMapping, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"raiseMapping", gtermRaiseMapping, c_gcd, NULL);
+		"raiseMapping", (Tcl_CmdProc *) gtermRaiseMapping, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"lowerMapping", gtermLowerMapping, c_gcd, NULL);
+		"lowerMapping", (Tcl_CmdProc *) gtermLowerMapping, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getAlphaTextSize", gtermGetAlphaTextSize, c_gcd, NULL);
+		"getAlphaTextSize", (Tcl_CmdProc *) gtermGetAlphaTextSize, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getBias", gtermGetBias, c_gcd, NULL);
+		"getBias", (Tcl_CmdProc *) gtermGetBias, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getCursorPos", gtermGetCursorPos, c_gcd, NULL);
+		"getCursorPos", (Tcl_CmdProc *) gtermGetCursorPos, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getDialogTextSize", gtermGetDialogTextSize, c_gcd, NULL);
+		"getDialogTextSize", (Tcl_CmdProc *) gtermGetDialogTextSize, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getLogRes", gtermGetLogRes, c_gcd, NULL);
+		"getLogRes", (Tcl_CmdProc *) gtermGetLogRes, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getMapping", gtermGetMapping, c_gcd, NULL);
+		"getMapping", (Tcl_CmdProc *) gtermGetMapping, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getPhysRes", gtermGetPhysRes, c_gcd, NULL);
+		"getPhysRes", (Tcl_CmdProc *) gtermGetPhysRes, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getPixel", gtermGetPixel, c_gcd, NULL);
+		"getPixel", (Tcl_CmdProc *) gtermGetPixel, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getRaster", gtermGetRaster, c_gcd, NULL);
+		"getRaster", (Tcl_CmdProc *) gtermGetRaster, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"initMappings", gtermInitMappings, c_gcd, NULL);
+		"initMappings", (Tcl_CmdProc *) gtermInitMappings, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"insertPixmap", gtermInsertPixmap, c_gcd, NULL);
+		"insertPixmap", (Tcl_CmdProc *) gtermInsertPixmap, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"loadColormap", gtermLoadColormap, c_gcd, NULL);
+		"loadColormap", (Tcl_CmdProc *) gtermLoadColormap, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"markerInit", gtermMarkerInit, c_gcd, NULL);
+		"markerInit", (Tcl_CmdProc *) gtermMarkerInit, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"nextColormap", gtermNextColormap, c_gcd, NULL);
+		"nextColormap", (Tcl_CmdProc *) gtermNextColormap, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"nextMapping", gtermNextMapping, c_gcd, NULL);
+		"nextMapping", (Tcl_CmdProc *) gtermNextMapping, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"nextRaster", gtermNextRaster, c_gcd, NULL);
+		"nextRaster", (Tcl_CmdProc *) gtermNextRaster, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"queryRaster", gtermQueryRaster, c_gcd, NULL);
+		"queryRaster", (Tcl_CmdProc *) gtermQueryRaster, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"rasterInit", gtermRasterInit, c_gcd, NULL);
+		"rasterInit", (Tcl_CmdProc *) gtermRasterInit, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"readColormap", gtermReadColormap, c_gcd, NULL);
+		"readColormap", (Tcl_CmdProc *) gtermReadColormap, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"readPixels", gtermReadPixels, c_gcd, NULL);
+		"readPixels", (Tcl_CmdProc *) gtermReadPixels, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"refreshMapping", gtermRefreshMapping, c_gcd, NULL);
+		"refreshMapping", (Tcl_CmdProc *) gtermRefreshMapping, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"refreshPixels", gtermRefreshPixels, c_gcd, NULL);
+		"refreshPixels", (Tcl_CmdProc *) gtermRefreshPixels, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"reset", gtermReset, c_gcd, NULL);
+		"reset", (Tcl_CmdProc *) gtermReset, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"selectRaster", gtermSelectRaster, c_gcd, NULL);
+		"selectRaster", (Tcl_CmdProc *) gtermSelectRaster, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setColorIndex", gtermSetColorIndex, c_gcd, NULL);
+		"setColorIndex", (Tcl_CmdProc *) gtermSetColorIndex, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setCursorPos", gtermSetCursorPos, c_gcd, NULL);
+		"setCursorPos", (Tcl_CmdProc *) gtermSetCursorPos, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setCursorType", gtermSetCursorType, c_gcd, NULL);
+		"setCursorType", (Tcl_CmdProc *) gtermSetCursorType, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setDataLevel", gtermSetDataLevel, c_gcd, NULL);
+		"setDataLevel", (Tcl_CmdProc *) gtermSetDataLevel, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setFillType", gtermSetFillType, c_gcd, NULL);
+		"setFillType", (Tcl_CmdProc *) gtermSetFillType, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setGterm", gtermSetGterm, c_gcd, NULL);
+		"setGterm", (Tcl_CmdProc *) gtermSetGterm, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setLineStyle", gtermSetLineStyle, c_gcd, NULL);
+		"setLineStyle", (Tcl_CmdProc *) gtermSetLineStyle, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setLineWidth", gtermSetLineWidth, c_gcd, NULL);
+		"setLineWidth", (Tcl_CmdProc *) gtermSetLineWidth, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setLogRes", gtermSetLogRes, c_gcd, NULL);
+		"setLogRes", (Tcl_CmdProc *) gtermSetLogRes, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setMapping", gtermSetMapping, c_gcd, NULL);
+		"setMapping", (Tcl_CmdProc *) gtermSetMapping, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setPhysRes", gtermSetPhysRes, c_gcd, NULL);
+		"setPhysRes", (Tcl_CmdProc *) gtermSetPhysRes, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setPixel", gtermSetPixel, c_gcd, NULL);
+		"setPixel", (Tcl_CmdProc *) gtermSetPixel, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setPixels", gtermSetPixels, c_gcd, NULL);
+		"setPixels", (Tcl_CmdProc *) gtermSetPixels, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setRaster", gtermSetRaster, c_gcd, NULL);
+		"setRaster", (Tcl_CmdProc *) gtermSetRaster, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setTextRes", gtermSetTextRes, c_gcd, NULL);
+		"setTextRes", (Tcl_CmdProc *) gtermSetTextRes, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"startDialog", gtermStartDialog, c_gcd, NULL);
+		"startDialog", (Tcl_CmdProc *) gtermStartDialog, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"unmapPixel", gtermUnmapPixel, c_gcd, NULL);
+		"unmapPixel", (Tcl_CmdProc *) gtermUnmapPixel, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"writeColormap", gtermWriteColormap, c_gcd, NULL);
+		"writeColormap", (Tcl_CmdProc *) gtermWriteColormap, c_gcd, NULL);
 	    Tcl_CreateCommand (tcl,
-		"writePixels", gtermWritePixels, c_gcd, NULL);
+		"writePixels", (Tcl_CmdProc *) gtermWritePixels, c_gcd, NULL);
 	}
 }
 
@@ -414,11 +465,9 @@ register ObjClassRec classrec;
 /* GtermClassDestroy -- Custom destroy procedure for the widget class.
  */
 void
-GtermClassDestroy (obm, classrec)
-ObmContext obm;
-register ObjClassRec classrec;
+GtermClassDestroy (ObmContext obm, ObjClassRec classrec)
 {
-	register GtermClassData gcd = (GtermClassData) classrec->class_data;
+	GtermClassData gcd = (GtermClassData) classrec->class_data;
 
 	if (gcd) {
 	    if (gcd->tcl)
@@ -432,15 +481,15 @@ register ObjClassRec classrec;
 /* GtermCreate -- Create an instance of a gterm object.
  */
 ObmObject
-GtermCreate (obm, name, classrec, parent, args, nargs)
-ObmContext obm;
-char *name;
-ObjClassRec classrec;
-char *parent;
-ArgList args;
-int nargs;
+GtermCreate (
+  ObmContext obm,
+  const char *name,
+  ObjClassRec classrec,
+  const char *parent,
+  ArgList args,
+  int nargs)
 {
-	register GtermObject obj;
+	GtermObject obj;
 	Widget w, pw;
 
 	obj = (GtermObject) WidgetCreate (obm, name,
@@ -465,13 +514,12 @@ int nargs;
 /* GtermDestroy -- Destroy an instance of a gterm object.
  */
 void
-GtermDestroy (object)
-ObmObject object;
+GtermDestroy (ObmObject object)
 {
 	GtermObject obj = (GtermObject) object;
 	ObjClassRec classrec = obj->core.classrec;
-	register GtermClassData gcd = (GtermClassData) classrec->class_data;
-	register ObmCallback cb, cb_next;
+	GtermClassData gcd = (GtermClassData) classrec->class_data;
+	ObmCallback cb, cb_next;
 	ObmContext obm = obj->widget.obm;
 	Widget w = obj->widget.w;
 
@@ -494,13 +542,13 @@ ObmObject object;
 	    /* Delete the widget level callback. */
 	    switch (cb->callback_type) {
 	    case CB_Input:
-		GtDeleteInputProc (w, gtermInputCallback, (XtPointer)cb);
+		GtDeleteInputProc ((GtermWidget)w, gtermInputCallback, (XtPointer)cb);
 		break;
 	    case CB_Resize:
-		GtDeleteResizeProc (w, gtermResizeCallback, (XtPointer)cb);
+		GtDeleteResizeProc ((GtermWidget)w, gtermResizeCallback, (XtPointer)cb);
 		break;
 	    case CB_Reset:
-		GtDeleteResetProc (w, gtermResetCallback, (XtPointer)cb);
+		GtDeleteResetProc ((GtermWidget)w, gtermResetCallback, (XtPointer)cb);
 		break;
 	    }
 
@@ -528,16 +576,12 @@ ObmObject object;
  * to the client code so that it can talk directly to the gterm widget.
  */
 static int 
-gtermSetGterm (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermSetGterm (MsgContext msg, Tcl_Interp *tcl, int argc, const char **argv)
 {
-	register GtermClassData gcd = (GtermClassData) msg;
+	GtermClassData gcd = (GtermClassData) msg;
 	GtermObject obj = (GtermObject) gcd->object[gcd->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmCallback cb;
+	WidgetPrivate wp = &obj->widget;
+	ObmCallback cb;
 	ObmContext obm = wp->obm;
 	char *message;
 
@@ -560,16 +604,12 @@ char **argv;
  * Usage:	activate
  */
 static int 
-gtermActivate (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermActivate (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 
 	GtActivate (w);
 	return (TCL_OK);
@@ -583,16 +623,12 @@ char **argv;
  * Usage:	deactivate
  */
 static int 
-gtermDeactivate (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermDeactivate (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 
 	GtDeactivate (w);
 	return (TCL_OK);
@@ -605,16 +641,12 @@ char **argv;
  * Usage:	reset
  */
 static int 
-gtermReset (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermReset (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 
 	GtReset (w);
 	return (TCL_OK);
@@ -636,16 +668,12 @@ char **argv;
  * could cause the display to appear "jerky".
  */
 static int 
-gtermFlush (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermFlush (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 
 	GtFlush (w);
 	return (TCL_OK);
@@ -681,16 +709,12 @@ char **argv;
  * applications that use the default translations.
  */
 static int 
-gtermAddCallback (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermAddCallback (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register GtermPrivate gp = &obj->gterm;
-	register Widget w = wp->w;
+	WidgetPrivate wp = &obj->widget;
+	GtermPrivate gp = &obj->gterm;
+	GtermWidget w = (GtermWidget) wp->w;
 	char *userproc, *callback_type;
 	ObmCallback cb, new;
 	int type;
@@ -746,16 +770,12 @@ char **argv;
  *  Usage:	deleteCallback procedure
  */
 static int 
-gtermDeleteCallback (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermDeleteCallback (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register GtermPrivate gp = &obj->gterm;
-	register ObmCallback cb, prev;
-	Widget w = obj->widget.w;
+	GtermPrivate gp = &obj->gterm;
+	ObmCallback cb, prev;
+	GtermWidget w = (GtermWidget) obj->widget.w;
 	char *procedure;
 
 	if (argc < 2)
@@ -802,14 +822,11 @@ char **argv;
  * "control" and so on).
  */
 static void
-gtermInputCallback (cb, w, event)
-ObmCallback cb;
-Widget w;
-XEvent *event;
+gtermInputCallback (ObmCallback cb, Widget w, XEvent *event)
 {
 	GtermObject obj = (GtermObject) cb->u.obj;
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
 	char s_x[SZ_NUMBER], s_y[SZ_NUMBER];
 	char message_data[SZ_LINE];
 	char *event_type;
@@ -819,7 +836,7 @@ XEvent *event;
 	case KeyPress:
 	case KeyRelease:
 	    {   XKeyPressedEvent *ev = (XKeyPressedEvent *) event;
-		register char *ip, *op = message_data;
+		char *ip, *op = message_data;
 		char buf[SZ_MESSAGE];
 		int n;
 
@@ -856,7 +873,7 @@ XEvent *event;
 	case ButtonPress:
 	case ButtonRelease:
 	    {   XButtonPressedEvent *ev = (XButtonPressedEvent *) event;
-		register char *op = message_data;
+		char *op = message_data;
 
 		if (event->type == KeyPress)
 		    event_type = "buttonPress";
@@ -905,17 +922,15 @@ XEvent *event;
  * Callback: userproc widget-name width height
  */
 static void
-gtermResizeCallback (cb, w)
-ObmCallback cb;
-Widget w;
+gtermResizeCallback (ObmCallback cb, Widget w)
 {
 	GtermObject obj = (GtermObject) cb->u.obj;
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
 	int rtype, width, height, depth, status;
 	char s_width[SZ_NUMBER], s_height[SZ_NUMBER];
 
-	GtQueryRaster (wp->w, 0, &rtype, &width, &height, &depth);
+	GtQueryRaster ((GtermWidget)w, 0, &rtype, &width, &height, &depth);
 	sprintf (s_width, "%d", width);
 	sprintf (s_height, "%d", height);
 
@@ -941,13 +956,11 @@ Widget w;
  * Callback: userproc
  */
 static void
-gtermResetCallback (cb, w)
-ObmCallback cb;
-Widget w;
+gtermResetCallback (ObmCallback cb, Widget w)
 {
 	GtermObject obj = (GtermObject) cb->u.obj;
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
 	int status;
 
 	status = Tcl_VarEval (obm->tcl,
@@ -975,15 +988,11 @@ Widget w;
  * to be used.  raster=0 yields screen coordinates.
  */
 static int 
-gtermSetCursorPos (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermSetCursorPos (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
 	int raster, sv_raster, x, y;
 
 	if (argc < 3)
@@ -994,16 +1003,16 @@ char **argv;
 	raster = (argc > 3) ? atoi (argv[3]) : -1;
 
 	if (raster >= 0) {
-	    sv_raster = GtGetRaster (wp->w);
+	  sv_raster = GtGetRaster ((GtermWidget)wp->w);
 	    if (raster != sv_raster)
-		GtSetRaster (wp->w, raster);
+		GtSetRaster ((GtermWidget)wp->w, raster);
 	}
 
-	GtSetCursorPos (wp->w, x, y);
+	GtSetCursorPos ((GtermWidget)wp->w, x, y);
 
 	if (raster >= 0)
 	    if (raster != sv_raster)
-		GtSetRaster (wp->w, sv_raster);
+		GtSetRaster ((GtermWidget)wp->w, sv_raster);
 
 	return (TCL_OK);
 }
@@ -1014,15 +1023,11 @@ char **argv;
  * Usage:	getCursorPos x y
  */
 static int 
-gtermGetCursorPos (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermGetCursorPos (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
 	char *xout, *yout, buf[SZ_NUMBER];
 	int x, y;
 
@@ -1032,7 +1037,7 @@ char **argv;
 	xout = argv[1];
 	yout = argv[2];
 
-	GtGetCursorPos (wp->w, &x, &y);
+	GtGetCursorPos ((GtermWidget)wp->w, &x, &y);
 	sprintf (buf, "%d", x);
 	Tcl_SetVar (obm->tcl, xout, buf, 0);
 	sprintf (buf, "%d", y);
@@ -1054,16 +1059,12 @@ char **argv;
  *			waiting for graphics input
  */
 static int 
-gtermSetCursorType (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermSetCursorType (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	char *cursor_type;
 	int type;
 
@@ -1091,16 +1092,12 @@ char **argv;
  * Usage:	bell
  */
 static int 
-gtermBell (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermBell (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 
 	GtBell (w);
 	return (TCL_OK);
@@ -1113,16 +1110,12 @@ char **argv;
  * Usage:	setRaster raster-number
  */
 static int 
-gtermSetRaster (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermSetRaster (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	int raster;
 
 	if (argc < 2)
@@ -1144,16 +1137,12 @@ char **argv;
  * directly in that variable.
  */
 static int 
-gtermGetRaster (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermGetRaster (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	char buf[SZ_NUMBER], *raster_var;
 	int raster;
 
@@ -1179,16 +1168,12 @@ char **argv;
  * of the physical resolution of the drawing surface.
  */
 static int 
-gtermSetLogRes (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermSetLogRes (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	int width, height;
 
 	if (argc < 3)
@@ -1208,16 +1193,12 @@ char **argv;
  * Usage:	getLogRes width height
  */
 static int 
-gtermGetLogRes (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermGetLogRes (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	char *s_width, *s_height;
 	char buf[SZ_NUMBER];
 	int width, height;
@@ -1248,16 +1229,12 @@ char **argv;
  * raster.  The default raster is the current drawing raster.
  */
 static int 
-gtermSetPhysRes (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermSetPhysRes (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	int raster, width, height;
 
 	if (argc < 3)
@@ -1281,16 +1258,12 @@ char **argv;
  * raster are returned.
  */
 static int 
-gtermGetPhysRes (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermGetPhysRes (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	char *s_width, *s_height;
 	int raster, width, height;
 	char buf[SZ_NUMBER];
@@ -1325,16 +1298,12 @@ char **argv;
  * number to select the best font.
  */
 static int 
-gtermSetTextRes (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermSetTextRes (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	int rows, cols;
 
 	if (argc < 3)
@@ -1358,16 +1327,12 @@ char **argv;
  * reset.
  */
 static int 
-gtermSetDataLevel (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermSetDataLevel (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	int level;
 
 	if (argc < 2)
@@ -1390,16 +1355,12 @@ char **argv;
  * reset.
  */
 static int 
-gtermSetLineWidth (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermSetLineWidth (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	int width;
 
 	if (argc < 2)
@@ -1422,16 +1383,12 @@ char **argv;
  * clearScreen or reset.
  */
 static int 
-gtermSetLineStyle (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermSetLineStyle (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	int style;
 
 	if (argc < 2)
@@ -1466,16 +1423,12 @@ char **argv;
  * reset.
  */
 static int 
-gtermSetColorIndex (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermSetColorIndex (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	int color;
 
 	if (argc < 2)
@@ -1496,16 +1449,12 @@ char **argv;
  * in effect until the next clearScreen or reset.
  */
 static int 
-gtermSetFillType (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermSetFillType (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	int filltype;
 
 	if (argc < 2)
@@ -1525,16 +1474,12 @@ char **argv;
  * Usage:	clearScreen
  */
 static int 
-gtermClearScreen (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermClearScreen (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 
 	GtClearScreen (w);
 	return (TCL_OK);
@@ -1552,17 +1497,13 @@ char **argv;
  * if any, and so on will affect the drawing operation.
  */
 static int
-gtermDrawPolyline (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermDrawPolyline (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
-	register XPoint *pv;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
+	XPoint *pv;
 	int npoints;
 
 	if (argc < 2)
@@ -1588,17 +1529,13 @@ char **argv;
  * if any, and so on will affect the drawing operation.
  */
 static int
-gtermDrawPolymarker (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermDrawPolymarker (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
-	register XPoint *pv;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
+	XPoint *pv;
 	int npoints;
 
 	if (argc < 2)
@@ -1624,17 +1561,13 @@ char **argv;
  * if any, and so on will affect the drawing operation.
  */
 static int
-gtermDrawPolygon (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermDrawPolygon (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
-	register XPoint *pv;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
+	XPoint *pv;
 	int npoints;
 
 	if (argc < 2)
@@ -1657,16 +1590,12 @@ char **argv;
  * The marker type is one of "box", "circle", "ellipse", and so on.
  */
 static int
-gtermDrawMarker (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermDrawMarker (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 
 	/* not yet implemented. */
 	return (TCL_ERROR);
@@ -1688,16 +1617,12 @@ char **argv;
  * is "E", the coordinates x,y refer to the lower left corner of the E.
  */
 static int
-gtermDrawAlphaText (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermDrawAlphaText (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	char *text;
 	int x, y;
 
@@ -1725,17 +1650,13 @@ char **argv;
  * top of the string to the baseline of the characters forming the string.
  */
 static int
-gtermGetAlphaTextSize (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermGetAlphaTextSize (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
-	register XPoint *pv;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
+	XPoint *pv;
 
 	char *s_width, *s_height, *s_base;
 	int width, height, base;
@@ -1786,17 +1707,13 @@ char **argv;
  * text mode, prior to drawing dialog text with drawDialogText.
  */
 static int
-gtermStartDialog (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermStartDialog (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
-	register Widget w = wp->w;
-	register XPoint *pv;
+	GtermWidget w = (GtermWidget) wp->w;
+	XPoint *pv;
 
 	GtStartDialog (w);
 	return (TCL_OK);
@@ -1811,17 +1728,13 @@ char **argv;
  * the dialog text area and terminating dialog text mode.
  */
 static int
-gtermEndDialog (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermEndDialog (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
-	register Widget w = wp->w;
-	register XPoint *pv;
+	GtermWidget w = (GtermWidget) wp->w;
+	XPoint *pv;
 
 	GtEndDialog (w);
 	return (TCL_OK);
@@ -1836,17 +1749,13 @@ char **argv;
  * exiting dialog text mode.
  */
 static int
-gtermEraseDialog (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermEraseDialog (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
-	register Widget w = wp->w;
-	register XPoint *pv;
+	GtermWidget w = (GtermWidget) wp->w;
+	XPoint *pv;
 
 	GtEraseDialog (w);
 	return (TCL_OK);
@@ -1868,17 +1777,13 @@ char **argv;
  * of the E.
  */
 static int
-gtermDrawDialogText (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermDrawDialogText (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
-	register Widget w = wp->w;
-	register XPoint *pv;
+	GtermWidget w = (GtermWidget) wp->w;
+	XPoint *pv;
 	char *text;
 	int x, y;
 
@@ -1906,17 +1811,13 @@ char **argv;
  * top of the string to the baseline of the characters forming the string.
  */
 static int
-gtermGetDialogTextSize (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermGetDialogTextSize (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
-	register XPoint *pv;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
+	XPoint *pv;
 
 	char *s_width, *s_height, *s_base;
 	int width, height, base;
@@ -1959,16 +1860,12 @@ char **argv;
  * Usage:	rasterInit
  */
 static int 
-gtermRasterInit (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermRasterInit (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 
 	GtRasterInit (w);
 	return (TCL_OK);
@@ -1992,16 +1889,12 @@ char **argv;
  * and displayed in multiple destination windows.
  */
 static int 
-gtermAssignRaster (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermAssignRaster (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject gt_obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &gt_obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	WidgetPrivate wp = &gt_obj->widget;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	XtPointer drawable;
 	ObmObject obj;
 	int raster, type;
@@ -2076,16 +1969,12 @@ char **argv;
  * set by the gterm widget resource maxRasters at widget creation.
  */
 static int
-gtermCreateRaster (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermCreateRaster (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	int raster, width, height, type, depth;
 	char *s_type;
 
@@ -2119,16 +2008,12 @@ char **argv;
  * number zero (the widget's window) are ignored.
  */
 static int
-gtermDestroyRaster (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermDestroyRaster (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	int raster;
 
 	if (argc < 2)
@@ -2151,16 +2036,12 @@ char **argv;
  * raster does not exist the output variables may be undefined after the call.
  */
 static int
-gtermQueryRaster (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermQueryRaster (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 
 	char *s_width, *s_height, *s_type, *s_depth;
 	int exists, raster, width, height, type, depth;
@@ -2208,16 +2089,12 @@ char **argv;
  *
  */
 static int
-gtermNextRaster (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermNextRaster (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	char buf[SZ_NUMBER];
 	int raster;
 
@@ -2238,16 +2115,12 @@ char **argv;
  *
  */
 static int
-gtermActiveRasters (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermActiveRasters (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	char buf[SZ_NUMBER];
 
 	sprintf (buf, "%d", GtNRasters(w));
@@ -2272,16 +2145,12 @@ char **argv;
  * be set.
  */
 static int 
-gtermSetPixel (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermSetPixel (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
-	Widget w = wp->w;
+	GtermWidget w = (GtermWidget) wp->w;
 	int raster, x, y;
 	uchar data[1];
 
@@ -2311,16 +2180,12 @@ char **argv;
  * be read.
  */
 static int 
-gtermGetPixel (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermGetPixel (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
-	Widget w = wp->w;
+	GtermWidget w = (GtermWidget) wp->w;
 	char buf[SZ_NUMBER];
 	int raster, x, y;
 	uchar data[1];
@@ -2401,20 +2266,16 @@ char **argv;
  * applications, e.g., where the image is computed or modified by the GUI.
  */
 static int 
-gtermWritePixels (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermWritePixels (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
-	Widget w = wp->w;
+	GtermWidget w = (GtermWidget) wp->w;
 
-	register char *ip;
-	register uchar *op;
-	register int v, i, j;
+	char *ip;
+	uchar *op;
+	int v, i, j;
 	static uchar hex1[256], hex2[256];
 	static int have_tables = 0;
 	int raster, nbits, bias;
@@ -2585,19 +2446,15 @@ err:	    XtFree ((char *)data);
  * of a single pixel.
  */
 static int 
-gtermReadPixels (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermReadPixels (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
-	Widget w = wp->w;
+	GtermWidget w = (GtermWidget) wp->w;
 
-	register int v, i;
-	register uchar *ip, *op;
+	int v, i;
+	uchar *ip, *op;
 	int bias, nchars, npix, n, j;
 	char *pixels, *encoding;
 	int x1, y1, nx, ny;
@@ -2826,16 +2683,12 @@ char **argv;
  * are zero indexed.
  */
 static int
-gtermRefreshPixels (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermRefreshPixels (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	float x1, y1, nx, ny;
 	int raster, ctype;
 
@@ -2874,16 +2727,12 @@ char **argv;
  * form this word.  Most applications do not need to specify a rasterop.
  */
 static int
-gtermSetPixels (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermSetPixels (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	int color, rop, raster, ctype;
 	float x1, y1, nx, ny;
 
@@ -2932,21 +2781,18 @@ char **argv;
  * extracted region.  If no region is given the entire raster is assumed.
  */
 static int
-gtermExtractPixmap (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermExtractPixmap (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	float x1, y1, nx, ny;
 	int raster, ctype;
 	Pixmap pixmap;
 	char *s_pixmap;
-	int createPixmap();
+	int createPixmap(ObmContext, char *, int, int, int, Pixmap, char *,
+			 unsigned long, unsigned long);
 
 	if (argc < 3)
 	    return (TCL_ERROR);
@@ -2985,16 +2831,12 @@ char **argv;
  * location.  If no region is given the entire raster is assumed.
  */
 static int
-gtermInsertPixmap (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermInsertPixmap (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	float x1, y1, nx, ny;
 	int raster, ctype;
 	Pixmap pixmap;
@@ -3038,16 +2880,12 @@ char **argv;
  * number of colormaps.
  */
 static int
-gtermNextColormap (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermNextColormap (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	char buf[SZ_NUMBER];
 
 	sprintf (buf, "%d", GtNextColormap (w));
@@ -3065,16 +2903,12 @@ char **argv;
  * the given colormap is not defined.
  */
 static int
-gtermFreeColormap (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermFreeColormap (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	int colormap;
 
 	if (argc < 2)
@@ -3106,19 +2940,15 @@ char **argv;
  * the same way for both types of colormaps.
  */
 static int 
-gtermWriteColormap (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermWriteColormap (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	ObmContext obm = obj->widget.obm;
 	GtermPrivate gp = &obj->gterm;
-	Widget w = obj->widget.w;
+	GtermWidget w = (GtermWidget) obj->widget.w;
 
-	register int ncolors;
-	register char *ip;
+	int ncolors;
+	char *ip;
 	char *colors, *ip_save;
 	ushort r[MAX_COLORS];
 	ushort g[MAX_COLORS];
@@ -3173,19 +3003,15 @@ char **argv;
  * For example, { {R G B} {R G B} ...}.
  */
 static int 
-gtermReadColormap (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermReadColormap (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	ObmContext obm = obj->widget.obm;
 	GtermPrivate gp = &obj->gterm;
-	Widget w = obj->widget.w;
+	GtermWidget w = (GtermWidget) obj->widget.w;
 
-	register int i;
-	register char *op;
+	int i;
+	char *op;
 	char colors[MAX_COLORS * 3 * 20];
 	ushort r[MAX_COLORS];
 	ushort g[MAX_COLORS];
@@ -3233,16 +3059,12 @@ char **argv;
  * has offset=0.5, scale=1.0.  Colormap zero is the hardware colormap.
  */
 static int 
-gtermLoadColormap (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermLoadColormap (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	ObmContext obm = obj->widget.obm;
 	GtermPrivate gp = &obj->gterm;
-	Widget w = obj->widget.w;
+	GtermWidget w = (GtermWidget) obj->widget.w;
 	float offset, scale;
 	int colormap;
 
@@ -3276,16 +3098,12 @@ char **argv;
  * color.
  */
 static int
-gtermClientPixel (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermClientPixel (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	int pixel, client_pixel;
 	char buf[SZ_NUMBER];
 
@@ -3318,16 +3136,12 @@ char **argv;
  * i.e. nelem=0 if no dynamic colors have been allocated.
  */
 static int
-gtermGetBias (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermGetBias (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	int first, nelem, maxelem;
 	char buf[SZ_NUMBER];
 
@@ -3355,16 +3169,12 @@ char **argv;
  * Usage:	initMappings
  */
 static int 
-gtermInitMappings (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermInitMappings (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 
 	GtInitMappings (w);
 	return (TCL_OK);
@@ -3378,16 +3188,12 @@ char **argv;
  * Returns the mapping number as the function value.
  */
 static int 
-gtermNextMapping (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermNextMapping (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
-	Widget w = wp->w;
+	GtermWidget w = (GtermWidget) wp->w;
 	char buf[SZ_NUMBER];
 	int mapping;
 
@@ -3407,16 +3213,12 @@ char **argv;
  * are freed.
  */
 static int
-gtermFreeMapping (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermFreeMapping (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	int mapping, erase;
 
 	if (argc < 2)
@@ -3441,16 +3243,12 @@ char **argv;
  * of the mapping stacking order, making it be drawn below all other mappings.
  */
 static int
-gtermLowerMapping (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermLowerMapping (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	int mapping, reference;
 
 	if (argc < 2)
@@ -3475,16 +3273,12 @@ char **argv;
  * of the mapping stacking order, making it be drawn above all other mappings.
  */
 static int
-gtermRaiseMapping (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermRaiseMapping (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	int mapping, reference;
 
 	if (argc < 2)
@@ -3506,16 +3300,12 @@ char **argv;
  * if the mapping is already enabled.
  */
 static int
-gtermEnableMapping (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermEnableMapping (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	int mapping, refresh;
 
 	if (argc < 2)
@@ -3539,16 +3329,12 @@ char **argv;
  * if the mapping is not enabled.
  */
 static int
-gtermDisableMapping (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermDisableMapping (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	int mapping, erase;
 
 	if (argc < 2)
@@ -3571,16 +3357,12 @@ char **argv;
  * Returns True if the mapping is defined and enabled, False otherwise.
  */
 static int 
-gtermActiveMapping (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermActiveMapping (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	char buf[SZ_NUMBER];
 	int mapping, active;
 
@@ -3603,16 +3385,12 @@ char **argv;
  * rect is repainted.
  */
 static int
-gtermRefreshMapping (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermRefreshMapping (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	int mapping;
 
 	if (argc < 2)
@@ -3646,16 +3424,12 @@ char **argv;
  * refreshed properly in response to window system expose events).
  */
 static int 
-gtermCopyRaster (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermCopyRaster (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	int rop, src, st, dst, dt, status;
 	int sx, sy, snx, sny, dx, dy, dnx, dny;
 
@@ -3736,16 +3510,12 @@ char **argv;
  * infinite loops can result.
  */
 static int 
-gtermSetMapping (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermSetMapping (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	int mapping, rop, src, st, dst, dt, status;
 	int sx, sy, snx, sny, dx, dy, dnx, dny;
 
@@ -3777,16 +3547,12 @@ char **argv;
  * not defined, but the mapping need not be enabled.
  */
 static int 
-gtermGetMapping (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermGetMapping (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	int mapping, rop, src, st, dst, dt, status;
 	int sx, sy, snx, sny, dx, dy, dnx, dny;
 	char buf[SZ_NUMBER];
@@ -3836,15 +3602,12 @@ char **argv;
  * this coordinate to a raster pixel number.
  */
 static int 
-gtermSelectRaster (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermSelectRaster (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	int raster, dras, dt, dx, dy, rt, rx, ry, mp;
 	char *xout, *yout, *mpout;
 	float fx, fy;
@@ -3869,7 +3632,7 @@ char **argv;
 	yout = argv[7];
 	mpout = (argc > 8) ? argv[8] : NULL;
 
-	raster = GtSelectRaster (wp->w, dras, dt, dx, dy, GtNDC, &rx, &ry, &mp);
+	raster = GtSelectRaster (w, dras, dt, dx, dy, GtNDC, &rx, &ry, &mp);
 
 	if (rt == GtNDC) {
 	    /* Return coords scaled 0.0 - 1.0.  */
@@ -3877,7 +3640,7 @@ char **argv;
 	    fy = (float)ry / MAXNDC;
 	} else {
 	    /* Return raster pixel coordinates. */
-	    ndcToPixel (wp->w, raster, rx, ry, &fx, &fy);
+	    ndcToPixel (w, raster, rx, ry, &fx, &fy);
 	}
 
 	sprintf (buf, "%g", fx);
@@ -3914,15 +3677,12 @@ char **argv;
  * return the raster number and coordinates for raster A.
  */
 static int 
-gtermUnmapPixel (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermUnmapPixel (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	GtermWidget w = (GtermWidget) wp->w;
 	int dst, dx, dy, src, sx, sy, mapping;
 	char *raster_out, *x_out, *y_out, *z_out;
 	char buf[SZ_NUMBER];
@@ -3944,10 +3704,10 @@ char **argv;
 	src = 0;
 
 	do {
-	    src = GtSelectRaster (wp->w, dst=src,
+	    src = GtSelectRaster ((GtermWidget)wp->w, dst=src,
 		GtPixel, dx, dy, GtNDC, &sx, &sy, &mapping);
 	    if (src != dst) {
-		ndcToPixel (wp->w, src, sx, sy, &fx, &fy);
+		ndcToPixel (w, src, sx, sy, &fx, &fy);
 		dx = (int) fx;
 		dy = (int) fy;
 	    }
@@ -3962,7 +3722,7 @@ char **argv;
 
 	if (z_out) {
 	    uchar data[1];
-	    GtReadPixels (wp->w, src, data, 8, dx, dy, 1, 1);
+	    GtReadPixels (w, src, data, 8, dx, dy, 1, 1);
 	    sprintf (buf, "%d", data[0]);
 	    Tcl_SetVar (obm->tcl, z_out, buf, 0);
 	}
@@ -3979,16 +3739,12 @@ char **argv;
  * the flip portion of a mapping.
  */
 static int 
-gtermFlip (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermFlip (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
-	register Widget w = wp->w;
+	GtermWidget w = (GtermWidget) wp->w;
 	int mapping, rop, flipX, flipY, i;
 	int src, st, sx, sy, snx, sny;
 	int dst, dt, dx, dy, dnx, dny;
@@ -4028,16 +3784,12 @@ char **argv;
  * Usage:	markerInit
  */
 static int 
-gtermMarkerInit (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermMarkerInit (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 
-	GtMarkerInit (wp->w);
+	GtMarkerInit ((GtermWidget)wp->w);
 	return (TCL_OK);
 }
 
@@ -4089,18 +3841,14 @@ char **argv;
  * by sending setAttribute messages to the marker.
  */
 static int 
-gtermCreateMarker (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+gtermCreateMarker (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	GtermObject obj = (GtermObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
 	Arg args[MAX_ARGS];
 	int nargs, i;
-	char **items;
+	const char **items;
 	int nitems;
 	char *name;
 
@@ -4116,7 +3864,7 @@ char **argv;
 	} else if (argc > 3) {
 	    /* Attribute list passed as separate arguments. */
 	    nitems = argc - 2;
-	    items = (char **) Tcl_Alloc (nitems * sizeof(char *));
+	    items = (const char **) Tcl_Alloc (nitems * sizeof(char *));
 	    if (items == NULL)
 		return (TCL_ERROR);
 	    for (i=0;  i < nitems;  i++)
@@ -4148,8 +3896,7 @@ char **argv;
  * integer code.
  */
 int
-coordType (name)
-char *name;
+coordType (char *name)
 {
 	if (strcmp (name, "pixel") == 0 ||
 	    strcmp (name, "Pixel") == 0 ||
@@ -4171,8 +3918,7 @@ char *name;
 /* dataLevelType -- Convert a data level type string to an integer code.
  */
 static int
-dataLevelType (name)
-char *name;
+dataLevelType (char *name)
 {
 	if (strcmp (name, "set") == 0)
 	    return (GtSet);
@@ -4188,8 +3934,7 @@ char *name;
 /* lineStyle -- Convert a line style string to an integer code.
  */
 static int
-lineStyle (name)
-char *name;
+lineStyle (char *name)
 {
 	if (strcmp (name, "solid") == 0)
 	    return (GtSolid);
@@ -4209,8 +3954,7 @@ char *name;
 /* fillType -- Convert a fill type string to an integer code.
  */
 static int
-fillType (name)
-char *name;
+fillType (char *name)
 {
 	if (strcmp (name, "solid") == 0)
 	    return (GtSolid);
@@ -4225,8 +3969,7 @@ char *name;
  * index.
  */
 static int
-colorToIndex (name)
-char *name;
+colorToIndex (char *name)
 {
 	if (isdigit (*name))
 	    return (atoi (name));
@@ -4262,11 +4005,7 @@ char *name;
 /* ncdToPixel -- Convert NDC (integer) to raster pixel (floating) coordinates.
  */
 static void
-ndcToPixel (w, raster, nx, ny, rx, ry)
-Widget w;
-int raster;
-int nx, ny;
-float *rx, *ry;
+ndcToPixel (GtermWidget w, int raster, int nx, int ny, float *rx, float *ry)
 {
 	int rtype, width, height, depth;
 	int x2, y2;
@@ -4280,13 +4019,11 @@ float *rx, *ry;
 }
 
 static XPoint *
-get_points (points, npoints)
-char *points;
-int *npoints;
+get_points (char *points, int *npoints)
 {
-	register int i;
-	register char *ip;
-	register XPoint *pv;
+	int i;
+	char *ip;
+	XPoint *pv;
 	char *ipp, *ip_save;
 	int maxpts, npts;
 
@@ -4326,15 +4063,23 @@ int *npoints;
 /* get_mapping -- Read a mapping from an argument list into local variables.
  */
 static void
-get_mapping (argv, src, st, sx,sy,snx,sny, dst, dt, dx,dy,dnx,dny)
-register char **argv;		/* mapping values */
-int *src, *st;
-int *sx, *sy, *snx, *sny;
-int *dst, *dt;
-int *dx, *dy, *dnx, *dny;
+get_mapping (
+  char **argv,		/* mapping values */
+  int *src,
+  int *st,
+  int *sx,
+  int *sy,
+  int *snx,
+  int *sny,
+  int *dst,
+  int *dt,
+  int *dx,
+  int *dy,
+  int *dnx,
+  int *dny)
 {
-	register int ndc;
-	register double v;
+	int ndc;
+	double v;
 
 	*src = atoi (argv[0]);
 	*st  = (strcmp(argv[1],"pixel")==0 || strcmp(argv[1],"Pixel")==0) ?
@@ -4374,15 +4119,23 @@ int *dx, *dy, *dnx, *dny;
  * variables.
  */
 static void
-put_mapping (tcl, argv, src, st, sx,sy,snx,sny, dst, dt, dx,dy,dnx,dny)
-register Tcl_Interp *tcl;
-register char **argv;		/* mapping variables */
-int src, st;
-int sx, sy, snx, sny;
-int dst, dt;
-int dx, dy, dnx, dny;
+put_mapping (
+  Tcl_Interp *tcl,
+  char **argv,		/* mapping variables */
+  int src,
+  int st,
+  int sx,
+  int sy,
+  int snx,
+  int sny,
+  int dst,
+  int dt,
+  int dx,
+  int dy,
+  int dnx,
+  int dny)
 {
-	register int ndc;
+	int ndc;
 	char buf[SZ_NUMBER];
 
 	sprintf (buf, "%d", src);

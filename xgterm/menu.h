@@ -24,38 +24,38 @@ extern MenuEntry mainMenuEntries[], vtMenuEntries[], tekMenuEntries[];
 extern MenuEntry fontMenuEntries[];
 extern Arg menuArgs[];
 
-extern void HandleAllowSends();
-extern void HandleSetVisualBell();
+extern void HandleAllowSends(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void HandleSetVisualBell(Widget w, XEvent *event, String *params, Cardinal *param_count);
 #ifdef ALLOWLOGGING
-extern void HandleLogging();
+extern void HandleLogging(Widget w, XEvent *event, String *params, Cardinal *param_count);
 #endif
-extern void HandleRedraw();
-extern void HandleSendSignal();
-extern void HandleQuit();
-extern void HandleScrollbar();
-extern void HandleJumpscroll();
-extern void HandleReverseVideo();
+extern void HandleRedraw(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void HandleSendSignal(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void HandleQuit(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void HandleScrollbar(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void HandleJumpscroll(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void HandleReverseVideo(Widget w, XEvent *event, String *params, Cardinal *param_count);
 extern void HandleColorText();
-extern void HandleAutoWrap();
-extern void HandleReverseWrap();
-extern void HandleAutoLineFeed();
-extern void HandleAppCursor();
-extern void HandleAppKeypad();
-extern void HandleScrollKey();
-extern void HandleScrollTtyOutput();
-extern void HandleAllow132();
-extern void HandleCursesEmul();
-extern void HandleMarginBell();
-extern void HandleAltScreen();
-extern void HandleSoftReset();
-extern void HandleHardReset();
-extern void HandleClearSavedLines();
-extern void HandleSetTerminalType();
-extern void HandleVisibility();
-extern void HandleTekPage();
-extern void HandleTekReset();
-extern void HandleTekCopy();
-extern void DoSecureKeyboard();
+extern void HandleAutoWrap(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void HandleReverseWrap(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void HandleAutoLineFeed(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void HandleAppCursor(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void HandleAppKeypad(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void HandleScrollKey(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void HandleScrollTtyOutput(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void HandleAllow132(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void HandleCursesEmul(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void HandleMarginBell(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void HandleAltScreen(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void HandleSoftReset(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void HandleHardReset(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void HandleClearSavedLines(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void HandleSetTerminalType(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void HandleVisibility(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void HandleTekPage(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void HandleTekReset(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void HandleTekCopy(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void DoSecureKeyboard(Time time);
 
 /*
  * The following definitions MUST match the order of entries given in 

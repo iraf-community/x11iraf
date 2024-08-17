@@ -76,8 +76,8 @@ char *argv[];
 		exit (4);
 	    }
 	} else {
-	    register int ch;
-	    register char *op;
+	    int ch;
+	    char *op;
 	    char *message = (char *) XtMalloc (1024000);
 
 	    for (op=message;  (ch = getc(stdin)) != EOF;  )

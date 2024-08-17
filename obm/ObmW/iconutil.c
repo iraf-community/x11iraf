@@ -83,7 +83,7 @@ static Boolean initialized = False;
 
 /* This function initializes the quarks. */
 
-static void init_icon_quarks()
+static void init_icon_quarks(void)
 {
     filleddiamondq = XrmPermStringToQuark("filleddiamond");
     emptydiamondq = XrmPermStringToQuark("emptydiamond");
@@ -115,10 +115,7 @@ static void init_icon_quarks()
  * |cvtStringToIcon|.  It reads a file in XPM format into an XPM image and
  * prints error messages in case of failure.
  */
-static void file_to_xpmimage (dpy, file, image)
-    Display *dpy;
-    String file;
-    XpmImage *image;
+static void file_to_xpmimage (Display *dpy, String file, XpmImage *image)
 {
     Cardinal one = 1;
     int status;
@@ -152,10 +149,7 @@ static void file_to_xpmimage (dpy, file, image)
  * |cvtStringToIcon|.  It converts data in XPM format into an XPM image and
  * prints error messages in case of failure.
  */
-static void data_to_xpmimage (dpy, data, image)
-    Display *dpy;
-    String *data;
-    XpmImage *image;
+static void data_to_xpmimage (Display *dpy, String *data, XpmImage *image)
 {
     int status;
 
@@ -194,11 +188,7 @@ first converted to an unsigned long, tehn the offset is added to it and
 the result is converted back to a pointer, in this case a pointer to a
 |Pixel|. */
 
-static void build_colortable(self, table, size, n)
-    Widget self;
-    XpmColorSymbol *table;
-    Cardinal size;
-    Cardinal *n;
+static void build_colortable(Widget self, XpmColorSymbol *table, Cardinal size, Cardinal *n)
 {
     Cardinal nres, i;
     XtResourceList res;
@@ -219,13 +209,7 @@ static void build_colortable(self, table, size, n)
 
 
 
-Boolean cvtStringToIcon(dpy, args, num_args, from, to, converter_data)
-    Display *dpy;
-    XrmValue *args;
-    Cardinal *num_args;
-    XrmValue *from;
-    XrmValue *to;
-    XtPointer *converter_data;
+Boolean cvtStringToIcon(Display *dpy, XrmValue *args, Cardinal *num_args, XrmValue *from, XrmValue *to, XtPointer *converter_data)
 {
     static XpmColorSymbol table[MAXCOLORSYM];
     String *data = NULL, s = (String) from->addr;

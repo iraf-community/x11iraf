@@ -5,21 +5,9 @@
 #include <X11/StringDefs.h>
 #include "Converters.h"
 #include "ToggleP.h"
-static void toggle(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void switch_on(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void switch_off(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
+static void toggle(Widget,XEvent*,String*,Cardinal*);
+static void switch_on(Widget,XEvent*,String*,Cardinal*);
+static void switch_off(Widget,XEvent*,String*,Cardinal*);
 
 static XtActionsRec actionsList[] = {
 {"toggle", toggle},
@@ -32,37 +20,14 @@ static char defaultTranslations[] = "\
 <Btn1Up>: toggle() set_shadow() \n\
 <Key>Return: toggle() \n\
 ";
-static void _resolve_inheritance(
-#if NeedFunctionPrototypes
-WidgetClass
-#endif
-);
-static void initialize(
-#if NeedFunctionPrototypes
-Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static Boolean  set_values(
-#if NeedFunctionPrototypes
-Widget ,Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static void expose(
-#if NeedFunctionPrototypes
-Widget,XEvent *,Region 
-#endif
-);
-static void create_on_gc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void create_off_gc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-/*ARGSUSED*/static void create_on_gc(self)Widget self;
+static void _resolve_inheritance(WidgetClass);
+static void initialize(Widget ,Widget,ArgList ,Cardinal *);
+static Boolean  set_values(Widget ,Widget ,Widget,ArgList ,Cardinal *);
+static void expose(Widget,XEvent *,Region );
+static void create_on_gc(Widget);
+static void create_off_gc(Widget);
+
+/*ARGSUSED*/static void create_on_gc(Widget self)
 {
     XtGCMask mask = GCFillStyle;
     XGCValues values;
@@ -79,7 +44,7 @@ Widget
     values.fill_style = FillTiled;
     ((XfwfToggleWidget)self)->xfwfToggle.on_gc = XtGetGC(self, mask, &values);
 }
-/*ARGSUSED*/static void create_off_gc(self)Widget self;
+/*ARGSUSED*/static void create_off_gc(Widget self)
 {
     XtGCMask mask = GCFillStyle;
     XGCValues values;
@@ -176,14 +141,14 @@ XtInherit_set_label,
 };
 WidgetClass xfwfToggleWidgetClass = (WidgetClass) &xfwfToggleClassRec;
 /*ARGSUSED*/
-static void toggle(self,event,params,num_params)Widget self;XEvent*event;String*params;Cardinal*num_params;
+static void toggle(Widget self, XEvent *event, String *params, Cardinal *num_params)
 {
     XtVaSetValues(self, "on", !((XfwfToggleWidget)self)->xfwfToggle.on, NULL);
     XtCallCallbackList(self, ((XfwfToggleWidget)self)->xfwfToggle.on ? ((XfwfToggleWidget)self)->xfwfToggle.onCallback : ((XfwfToggleWidget)self)->xfwfToggle.offCallback, event);
 }
 
 /*ARGSUSED*/
-static void switch_on(self,event,params,num_params)Widget self;XEvent*event;String*params;Cardinal*num_params;
+static void switch_on(Widget self, XEvent *event, String *params, Cardinal *num_params)
 {
     if (! ((XfwfToggleWidget)self)->xfwfToggle.on) {
         XtVaSetValues(self, "on", True, NULL);
@@ -192,7 +157,7 @@ static void switch_on(self,event,params,num_params)Widget self;XEvent*event;Stri
 }
 
 /*ARGSUSED*/
-static void switch_off(self,event,params,num_params)Widget self;XEvent*event;String*params;Cardinal*num_params;
+static void switch_off(Widget self, XEvent *event, String *params, Cardinal *num_params)
 {
     if (((XfwfToggleWidget)self)->xfwfToggle.on) {
         XtVaSetValues(self, "on", False, NULL);
@@ -200,8 +165,7 @@ static void switch_off(self,event,params,num_params)Widget self;XEvent*event;Str
     }
 }
 
-static void _resolve_inheritance(class)
-WidgetClass class;
+static void _resolve_inheritance(WidgetClass class)
 {
   XfwfToggleWidgetClass c = (XfwfToggleWidgetClass) class;
   XfwfToggleWidgetClass super;
@@ -216,7 +180,7 @@ WidgetClass class;
   if (class == xfwfToggleWidgetClass) return;
   super = (XfwfToggleWidgetClass)class->core_class.superclass;
 }
-/*ARGSUSED*/static void initialize(request,self,args,num_args)Widget  request;Widget self;ArgList  args;Cardinal * num_args;
+/*ARGSUSED*/static void initialize(Widget request, Widget self, ArgList args, Cardinal *num_args)
 {
     int status;
     Dimension w1, w2, w;
@@ -231,7 +195,7 @@ WidgetClass class;
     w = max(w1, w2);
     if (w != 0) XtVaSetValues(self, XtNleftMargin, ((XfwfToggleWidget)self)->xfwfLabel.leftMargin + w, NULL);
 }
-/*ARGSUSED*/static Boolean  set_values(old,request,self,args,num_args)Widget  old;Widget  request;Widget self;ArgList  args;Cardinal * num_args;
+/*ARGSUSED*/static Boolean  set_values(Widget old, Widget request, Widget self, ArgList args, Cardinal *num_args)
 {
     Boolean redraw = False, compute_margin = False;
     Dimension w1, w2, w;
@@ -264,7 +228,7 @@ WidgetClass class;
     }
     return redraw;
 }
-/*ARGSUSED*/static void expose(self,event,region)Widget self;XEvent * event;Region  region;
+/*ARGSUSED*/static void expose(Widget self, XEvent *event, Region region)
 {
     Position x, y;
     Dimension w, h;

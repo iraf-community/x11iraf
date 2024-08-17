@@ -56,7 +56,6 @@ static char	errstr[128];
 #define RAS_RLE 0x80
 
 
-#ifdef __STDC__
 static char *sunRasError(char *, char *);
 static int  rle_read(unsigned char *, int, int, FILE *, int);
 static void SunRas1to8(unsigned char *, unsigned char *, int);
@@ -64,14 +63,6 @@ static void SunRas8to1(unsigned char *, unsigned char *, int, int);
 static int  read_sun_long(long *, FILE *);
 static int  write_sun_long(long, FILE *);
 static void fixBGR(unsigned char *, int, int);
-#else
-static char *sunRasError();
-static int  rle_read();
-static void SunRas1to8();
-static void SunRas8to1();
-static int  read_sun_long(), write_sun_long();
-static void fixBGR();
-#endif
 
 
 /*
@@ -87,17 +78,17 @@ static void fixBGR();
  * contain space for at least 256 elements.
  */
 char *
-loadSunRas (fname, pixels, pixtype, o_w,o_h, r,g,b, ncolors, colorstyle)
-char 	*fname;				/* input filename                    */
-unsigned char **pixels;			/* output pixels                     */
-int 	*pixtype;			/* 8-bit or 24-bit                   */
-int 	*o_w, *o_h;			/* dimensions                        */
-unsigned char *r, *g, *b;		/* colormap                          */
-int 	*ncolors;			/* number of colors                  */
-int	colorstyle;			/* return color (0) or grayscale (1) */
+loadSunRas (char *fname, unsigned char **pixels, int *pixtype, int *o_w, int *o_h, unsigned char *r, unsigned char *g, unsigned char *b, int *ncolors, int colorstyle)
+     	       				/* input filename                    */
+                       			/* output pixels                     */
+    	         			/* 8-bit or 24-bit                   */
+    	           			/* dimensions                        */
+                         		/* colormap                          */
+    	         			/* number of colors                  */
+   	           			/* return color (0) or grayscale (1) */
 {
-	register FILE *fp;
-	register int i, j;
+	FILE *fp;
+	int i, j;
 	int linesize, lsize, csize, isize, w, h, d, nc, ct;
 	unsigned char *image, *line, p;
 	struct rasterfile sunhdr;
@@ -292,12 +283,7 @@ int	colorstyle;			/* return color (0) or grayscale (1) */
  * F_GREYSCALE, writes an 8-bit grayscale image.
  */
 int
-writeSunRas (fp, pixels, pixtype, w,h, r,g,b, ncolors, colorstyle)
-FILE *fp;
-unsigned char *pixels;
-int pixtype, w, h;
-unsigned char *r, *g, *b;
-int ncolors, colorstyle;
+writeSunRas (FILE *fp, unsigned char *pixels, int pixtype, int w, int h, unsigned char *r, unsigned char *g, unsigned char *b, int ncolors, int colorstyle)
 {
 	unsigned char *line, *graypic, graymap[256], *sp, *dp;
 	int linesize, i, color, d, y, flipbw;
@@ -429,10 +415,10 @@ int ncolors, colorstyle;
 /* IsSunRas -- Test a file to see if it is a Sun rasterfile.
  */
 int
-isSunRas (fname)
-char *fname;				/* input filename */
+isSunRas (char *fname)
+            				/* input filename */
 {
-	register FILE *fp;
+	FILE *fp;
 	struct rasterfile sunhdr;
 	int value = 0;
 
@@ -450,8 +436,7 @@ char *fname;				/* input filename */
  */
 
 char *
-getSunRasHdr (fname)
-char    *fname;
+getSunRasHdr (char *fname)
 {
         FILE    *fp;
         char 	*line;
@@ -493,10 +478,7 @@ char    *fname;
  */
 
 static int
-rle_read (ptr, size, nitems, fp, init)
-register unsigned char *ptr;
-int size, nitems, init;
-FILE *fp;
+rle_read (unsigned char *ptr, int size, int nitems, FILE *fp, int init)
 {
 	static int count, ch;
 	int readbytes, c, read;
@@ -538,8 +520,7 @@ FILE *fp;
 
 
 static char *
-sunRasError (fname, st)
-char *fname, *st;
+sunRasError (char *fname, char *st)
 {
 	sprintf (errstr, "%s: %s\n", fname, st);
 	return (errstr);
@@ -547,11 +528,9 @@ char *fname, *st;
 
 
 static void
-SunRas1to8 (dest, src, len)
-unsigned char *dest, *src;
-int len;
+SunRas1to8 (unsigned char *dest, unsigned char *src, int len)
 {
-	register int i, b;
+	int i, b;
 	int c = 0;
 
 	for (i = 0, b = -1; i < len; i++) {
@@ -565,9 +544,7 @@ int len;
 
 
 static void
-SunRas8to1 (dest, src, len, flip)
-unsigned char *dest, *src;
-int len, flip;
+SunRas8to1 (unsigned char *dest, unsigned char *src, int len, int flip)
 {
 	int i, b;
 	int c;
@@ -594,9 +571,7 @@ int len, flip;
  * Returns 0 for success, EOF for failure.
  */
 static int
-read_sun_long (l, fp)
-long *l;
-FILE *fp;
+read_sun_long (long int *l, FILE *fp)
 {
 	int c0, c1, c2, c3;
 
@@ -621,9 +596,7 @@ FILE *fp;
  * Returns 0 for success, EOF for failure.
  */
 static int
-write_sun_long (l, fp)
-long l;
-FILE *fp;
+write_sun_long (long int l, FILE *fp)
 {
 	char c;
 
@@ -646,9 +619,7 @@ FILE *fp;
 /* kr3 - fix up BGR order SUN 24-bit rasters to be RGB order
  */
 static void
-fixBGR (img, w, h)
-unsigned char *img;
-int w, h;
+fixBGR (unsigned char *img, int w, int h)
 {
 	int i, npixels;
 	unsigned char	tmp;

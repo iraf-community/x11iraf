@@ -6,10 +6,10 @@
  * this is a no-op.
  */
 static int
-refresh_source (w, mp, x1, y1, nx, ny)
-    GtermWidget w;
-    register Mapping mp;	/* mapping defining refresh operation */
-    int x1, y1, nx, ny;		/* region of source to be refreshed */
+refresh_source (GtermWidget w, Mapping mp, int x1, int y1, int nx, int ny)
+                  
+               	/* mapping defining refresh operation */
+                       		/* region of source to be refreshed */
 {
     int sx1, sx2, sy1, sy2, snx, sny;
     int dx1, dx2, dy1, dy2, dnx, dny;
@@ -89,10 +89,10 @@ refresh_source (w, mp, x1, y1, nx, ny)
  * coordinates (no NDC).
  */
 static int
-refresh_destination (w, mp, x1, y1, nx, ny)
-    GtermWidget w;
-    Mapping mp;			/* mapping defining refresh operation */
-    int x1, y1, nx, ny;		/* region of destination to be refreshed */
+refresh_destination (GtermWidget w, Mapping mp, int x1, int y1, int nx, int ny)
+                  
+               			/* mapping defining refresh operation */
+                       		/* region of destination to be refreshed */
 {
     Raster sr, dr, pr;
     Display *display = w->gterm.display;
@@ -844,17 +844,17 @@ done:
  * using pixel replication and the given x and y dst->scr pixels maps.
  */
 static void
-scale_zoom (idata,ibpl, odata,obpl, xmap,ymap, dx,dy,dnx,dny, clip_region)
+scale_zoom (uchar *idata, int ibpl, uchar *odata, int obpl, int *xmap, int *ymap, int dx, int dy, int dnx, int dny, Region clip_region)
 
-    uchar *idata, *odata;		/* input, output data */
-    int ibpl, obpl;			/* bytes per line */
-    register int *xmap;			/* src coords of each dst pixel */
-    int *ymap;				/* src coords of each dst pixel */
-    int dx, dy, dnx, dny;		/* destination rect */
-    Region clip_region;			/* clip Region or null */
+                         		/* input, output data */
+                   			/* bytes per line */
+              			/* src coords of each dst pixel */
+              				/* src coords of each dst pixel */
+                         		/* destination rect */
+                       			/* clip Region or null */
 {
-    register int i, j;
-    register uchar *ip, *op;
+    int i, j;
+    uchar *ip, *op;
     uchar *last_ip = NULL;
     uchar *last_op = NULL;
 
@@ -887,18 +887,18 @@ scale_zoom (idata,ibpl, odata,obpl, xmap,ymap, dx,dy,dnx,dny, clip_region)
  * case of integer scaling.
  */
 static void
-scale_intzoom (idata,ibpl,odata,obpl, sx,sy,dx,dy,dnx,dny, xflip,yflip, nx,ny)
+scale_intzoom (uchar *idata, int ibpl, uchar *odata, int obpl, int sx, int sy, int dx, int dy, int dnx, int dny, int xflip, int yflip, int nx, int ny)
 
-    uchar *idata, *odata;		/* input, output data */
-    int ibpl, obpl;			/* bytes per line */
-    int sx, sy;				/* start coords of src rect */
-    int dx, dy, dnx, dny;		/* destination rect */
-    int xflip, yflip;			/* set if x or y is flipped */
-    int nx, ny;				/* replication factors */
+                         		/* input, output data */
+                   			/* bytes per line */
+               				/* start coords of src rect */
+                         		/* destination rect */
+                     			/* set if x or y is flipped */
+               				/* replication factors */
 {
-    register int n;
-    register int pix;
-    register uchar *ip, *op;
+    int n;
+    int pix;
+    uchar *ip, *op;
     uchar *otop, *olast, *lp;
     int i, j, k;
 
@@ -1076,18 +1076,18 @@ scale_intzoom (idata,ibpl,odata,obpl, sx,sy,dx,dy,dnx,dny, xflip,yflip, nx,ny)
  * using the nearest neighbor technique.
  */
 static void
-scale_nearest (idata,inx,iny,ibpl, odata,onx,ony,obpl,
-    x_src,y_src, dx,dy,dnx,dny, clip_region)
+scale_nearest (
 
-    uchar *idata, *odata;		/* input, output data */
-    int inx, iny, ibpl;			/* dimensions of input array */
-    int onx, ony, obpl;			/* dimensions of output array */
-    float *x_src, *y_src;		/* src coords of each dst pixel */
-    int dx, dy, dnx, dny;		/* destination rect */
-    Region clip_region;			/* clip Region or null */
+    uchar *idata,			/* input data */
+    int inx, int iny, int ibpl,		/* dimensions of input array */
+    uchar *odata,			/* output data */
+    int onx, int ony, int obpl,		/* dimensions of output array */
+    float *x_src, float *y_src,		/* src coords of each dst pixel */
+    int dx, int dy, int dnx, int dny,	/* destination rect */
+    Region clip_region)			/* clip Region or null */
 {
-    register int m, n, i, j;
-    register uchar *op;
+    int m, n, i, j;
+    uchar *op;
 
     for (j=0;  j < dny;  j++) {
 	op = odata + (j+dy) * obpl + dx;
@@ -1113,19 +1113,19 @@ scale_nearest (idata,inx,iny,ibpl, odata,onx,ony,obpl,
  * using bilinear interpolation.
  */
 static void
-scale_bilinear (idata,inx,iny,ibpl, odata,onx,ony,obpl,
-    x_src,y_src, dx,dy,dnx,dny, clip_region)
+scale_bilinear (
 
-    uchar *idata, *odata;		/* input, output data */
-    int inx, iny, ibpl;			/* dimensions of input array */
-    int onx, ony, obpl;			/* dimensions of output array */
-    float *x_src, *y_src;		/* src coords of each dst pixel */
-    int dx, dy, dnx, dny;		/* destination rect */
-    Region clip_region;			/* clip Region or null */
+    uchar *idata,			/* input data */
+    int inx, int iny, int ibpl,		/* dimensions of input array */
+    uchar *odata,			/* output data */
+    int onx, int ony, int obpl,		/* dimensions of output array */
+    float *x_src, float *y_src,		/* src coords of each dst pixel */
+    int dx, int dy, int dnx, int dny,	/* destination rect */
+    Region clip_region)			/* clip Region or null */
 {
-    register int i;
-    register uchar *op;
-    register float *lp, *w1, *w2;
+    int i;
+    uchar *op;
+    float *lp, *w1, *w2;
     int buflen, line, *px, pixel, j;
     float lo_w, hi_w, x, y;
     uchar *lo, *hi;
@@ -1191,17 +1191,17 @@ scale_bilinear (idata,inx,iny,ibpl, odata,onx,ony,obpl,
  * xscale, yscale.
  */
 static void
-scale_lowpass (idata,inx,iny,ibpl, odata,onx,ony,obpl, x_src,y_src,
-    sx,sy,snx,sny, dx,dy,dnx,dny, xscale,yscale, clip_region)
+scale_lowpass (
 
-    uchar *idata, *odata;		/* input, output data */
-    int inx, iny, ibpl;			/* full input array */
-    int onx, ony, obpl;			/* full input array */
-    float *x_src, *y_src;		/* src coords of each dst pixel */
-    int sx, sy, snx, sny;		/* source rect */
-    int dx, dy, dnx, dny;		/* destination rect */
-    float xscale, yscale;		/* scale factors */
-    Region clip_region;			/* clip Region or null */
+    uchar *idata,			/* input data */
+    int inx, int iny, int ibpl,		/* full input array */
+    uchar *odata,			/* output data */
+    int onx, int ony, int obpl,		/* full input array */
+    float *x_src, float *y_src,		/* src coords of each dst pixel */
+    int sx, int sy, int snx, int sny,	/* source rect */
+    int dx, int dy, int dnx, int dny,	/* destination rect */
+    float xscale, float yscale,		/* scale factors */
+    Region clip_region)			/* clip Region or null */
 {
     uchar *data;
     
@@ -1223,18 +1223,18 @@ scale_lowpass (idata,inx,iny,ibpl, odata,onx,ony,obpl, x_src,y_src,
 /* lw_convolve -- Convolution primitive for scale_lowpass.
  */
 static void
-lw_convolve (idata,inx,iny,ibpl,ix,iy, odata,onx,ony,obpl,ox,oy,
-    nx, ny, xscale, yscale)
-
-    uchar *idata, *odata;		/* input, output data */
-    int inx, iny, ix, iy;		/* size of input array, start pos */
-    int onx, ony, ox, oy;		/* size of output array, start pos */
-    int ibpl, obpl;			/* bytes per line */
-    int nx, ny;				/* size of output region */
-    float xscale, yscale;		/* determines amount of smoothing */
+lw_convolve (
+    uchar *idata, 			/* input data */
+    int inx, int iny, int ix, int iy,	/* size of input array, start pos */
+    int ibpl,				/* bytes per line */
+    uchar *odata,			/* output data */
+    int onx, int ony, int ox, int oy,	/* size of output array, start pos */
+    int obpl,				/* bytes per line */
+    int nx, int ny,				/* size of output region */
+    float xscale, float yscale)		/* determines amount of smoothing */
 {
-    register uchar *ip;
-    register int l, m, x, hx, pixval;
+    uchar *ip;
+    int l, m, x, hx, pixval;
     int kx, ky, hy, i, j, y;
     uchar *lp[11], *op;
 
@@ -1309,18 +1309,19 @@ lw_convolve (idata,inx,iny,ibpl,ix,iy, odata,onx,ony,obpl,ox,oy,
  * image.
  */
 static void
-scale_boxcar (idata,inx,iny,ibpl, odata,onx,ony,obpl, x_src,y_src,
-    sx,sy,snx,sny, dx,dy,dnx,dny, xscale,yscale, interp, clip_region)
-
-    uchar *idata, *odata;		/* input, output data */
-    int inx, iny, ibpl;			/* full input array */
-    int onx, ony, obpl;			/* full input array */
-    float *x_src, *y_src;		/* src coords of each dst pixel */
-    int sx, sy, snx, sny;		/* source rect */
-    int dx, dy, dnx, dny;		/* destination rect */
-    float xscale, yscale;		/* scale factors */
-    int interp;				/* set if interpolation is desired */
-    Region clip_region;			/* clip Region or null */
+scale_boxcar (
+    uchar *idata, 		/* input data */
+    int inx, int iny, int ibpl,	/* full input array */
+    uchar  *odata,		/* output data */
+    int onx, int ony, int obpl,	/* full input array */
+    float *x_src, float *y_src,	/* src coords of each dst pixel */
+    int sx, int sy,
+    int snx, int sny,		/* source rect */
+    int dx, int dy,
+    int dnx, int dny,		/* destination rect */
+    float xscale, float yscale,	/* scale factors */
+    int interp,			/* set if interpolation is desired */
+    Region clip_region)		/* clip Region or null */
 {
     int xblock, yblock;
     int x1, x2, y1, y2, nx, ny;
@@ -1383,15 +1384,15 @@ scale_boxcar (idata,inx,iny,ibpl, odata,onx,ony,obpl, x_src,y_src,
 /* bx_boxcar -- Block average primitive for scale_boxcar.
  */
 static void
-bx_boxcar (idata,inx,iny,ibpl, x1,y1,x2,y2, obuf, xblock, yblock)
-    uchar *idata;			/* input data array */
-    int inx, iny, ibpl;			/* array dimensions */
-    int x1,y1,x2,y2;			/* region to be block averaged */
-    uchar *obuf;			/* output array */
-    int xblock, yblock;			/* blocking factors */
+bx_boxcar (uchar *idata, int inx, int iny, int ibpl, int x1, int y1, int x2, int y2, uchar *obuf, int xblock, int yblock)
+                 			/* input data array */
+                       			/* array dimensions */
+                    			/* region to be block averaged */
+                			/* output array */
+                       			/* blocking factors */
 {
-    register uchar *ip, *op;
-    register int count, i, *sp;
+    uchar *ip, *op;
+    int count, i, *sp;
     int obpl, block, nxblocks, nyblocks, j, k;
     uchar *lp, *bp;
     int *sb;
@@ -1427,20 +1428,20 @@ bx_boxcar (idata,inx,iny,ibpl, x1,y1,x2,y2, obuf, xblock, yblock)
 /* bx_extract -- Block extract primitive for scale_boxcar.
  */
 static void
-bx_extract (idata,inx,iny,ibpl, odata,onx,ony,obpl,
-    x_src,y_src, xoff,yoff,xstep,ystep, dx,dy,dnx,dny, clip_region)
+bx_extract (
 
-    uchar *idata, *odata;		/* input, output data */
-    int inx, iny, ibpl;			/* full input array */
-    int onx, ony, obpl;			/* full input array */
-    float *x_src, *y_src;		/* src coords of each dst pixel */
-    int dx, dy, dnx, dny;		/* destination rect */
-    int xoff, yoff;			/* offset of input region */
-    float xstep, ystep;			/* scale of input region */
-    Region clip_region;			/* clip Region or null */
+    uchar *idata,			/* input, output data */
+    int inx, int iny, int ibpl,		/* full input array */
+    uchar *odata,			/* input, output data */
+    int onx, int ony, int obpl,		/* full input array */
+    float *x_src, float *y_src,		/* src coords of each dst pixel */
+    int dx, int dy, int dnx, int dny,	/* destination rect */
+    int xoff, int yoff,			/* offset of input region */
+    float xstep, float ystep,		/* scale of input region */
+    Region clip_region)			/* clip Region or null */
 {
-    register int m, n, i;
-    register uchar *op;
+    int m, n, i;
+    uchar *op;
     int j;
 
     for (j=0;  j < dny;  j++) {
@@ -1466,21 +1467,21 @@ bx_extract (idata,inx,iny,ibpl, odata,onx,ony,obpl,
 /* bx_interp -- Bilinear interpolation primitive for scale_boxcar.
  */
 static void
-bx_interp (idata,inx,iny,ibpl, odata,onx,ony,obpl,
-    x_src,y_src, xoff,yoff,xstep,ystep, dx,dy,dnx,dny, clip_region)
+bx_interp (
 
-    uchar *idata, *odata;		/* input, output data */
-    int inx, iny, ibpl;			/* dimensions of input array */
-    int onx, ony, obpl;			/* dimensions of output array */
-    float *x_src, *y_src;		/* src coords of each dst pixel */
-    int xoff, yoff;			/* offset of input region */
-    float xstep, ystep;			/* scale of input region */
-    int dx, dy, dnx, dny;		/* destination rect */
-    Region clip_region;			/* clip Region or null */
+    uchar *idata,			/* input, output data */
+    int inx, int iny, int ibpl,		/* dimensions of input array */
+    uchar *odata,			/* input, output data */
+    int onx, int ony, int obpl,		/* dimensions of output array */
+    float *x_src, float *y_src,		/* src coords of each dst pixel */
+    int xoff, int yoff,			/* offset of input region */
+    float xstep, float ystep,		/* scale of input region */
+    int dx, int dy, int dnx, int dny,	/* destination rect */
+    Region clip_region)			/* clip Region or null */
 {
-    register int i;
-    register uchar *op;
-    register float *lp, *w1, *w2;
+    int i;
+    uchar *op;
+    float *lp, *w1, *w2;
     int buflen, line, *px, pixel, j;
     float lo_w, hi_w, x, y;
     uchar *lo, *hi;
@@ -1543,19 +1544,19 @@ bx_interp (idata,inx,iny,ibpl, odata,onx,ony,obpl,
  * pixel numbers to pixel intensities.
  */
 static void
-mf_getinten (w, idata,inx,iny,ibpl, sx,sy, odata,onx,ony,obpl, dx,dy, nx,ny)
+mf_getinten (GtermWidget w, uchar *idata, int inx, int iny, int ibpl, int sx, int sy, uchar *odata, int onx, int ony, int obpl, int dx, int dy, int nx, int ny)
 
-    GtermWidget w;
-    uchar *idata, *odata;		/* input, output data */
-    int inx, iny, ibpl;			/* dimensions of input array */
-    int onx, ony, obpl;			/* dimensions of output array */
-    int sx, sy;				/* source offset */
-    int dx, dy;				/* destination offset */
-    int nx, ny;				/* size of region */
+                  
+                         		/* input, output data */
+                       			/* dimensions of input array */
+                       			/* dimensions of output array */
+               				/* source offset */
+               				/* destination offset */
+               				/* size of region */
 {
-    register Pixel *cmap;
-    register uchar *ip, *op;
-    register int n;
+    Pixel *cmap;
+    uchar *ip, *op;
+    int n;
     int j;
 
     cmap = get_cmap_out (w);
@@ -1572,19 +1573,19 @@ mf_getinten (w, idata,inx,iny,ibpl, sx,sy, odata,onx,ony,obpl, dx,dy, nx,ny)
  * pixel intensities to pixel numbers.
  */
 static void
-mf_getpixel (w, idata,inx,iny,ibpl, sx,sy, odata,onx,ony,obpl, dx,dy, nx,ny)
+mf_getpixel (GtermWidget w, uchar *idata, int inx, int iny, int ibpl, int sx, int sy, uchar *odata, int onx, int ony, int obpl, int dx, int dy, int nx, int ny)
 
-    GtermWidget w;
-    uchar *idata, *odata;		/* input, output data */
-    int inx, iny, ibpl;			/* dimensions of input array */
-    int onx, ony, obpl;			/* dimensions of output array */
-    int sx, sy;				/* source offset */
-    int dx, dy;				/* destination offset */
-    int nx, ny;				/* size of region */
+                  
+                         		/* input, output data */
+                       			/* dimensions of input array */
+                       			/* dimensions of output array */
+               				/* source offset */
+               				/* destination offset */
+               				/* size of region */
 {
-    register Pixel *cmap;
-    register uchar *ip, *op;
-    register int n;
+    Pixel *cmap;
+    uchar *ip, *op;
+    int n;
     int j;
 
     cmap = get_cmap_in (w);
@@ -1604,13 +1605,10 @@ mf_getpixel (w, idata,inx,iny,ibpl, sx,sy, odata,onx,ony,obpl, dx,dy, nx,ny)
  * regions.  The number of regions output is returned as the function value.
  */
 static int
-get_regions (xs,xe,xv, max_regions, dx, dnx, xmap, alt_dx, alt_dnx, alt_xmap)
-    int *xs, *xe, *xv, max_regions;
-    int dx, dnx, *xmap;
-    int alt_dx, alt_dnx, *alt_xmap;
+get_regions (int *xs, int *xe, int *xv, int max_regions, int dx, int dnx, int *xmap, int alt_dx, int alt_dnx, int *alt_xmap)
 {
-    register int state, current;
-    register int nx, i;
+    int state, current;
+    int nx, i;
     int offset, old_i;
 
     offset = dx - alt_dx;
@@ -1653,14 +1651,14 @@ get_regions (xs,xe,xv, max_regions, dx, dnx, xmap, alt_dx, alt_dnx, alt_xmap)
  * X or Y are selected.  Adjacent rects are combined.
  */
 static int
-get_rects (o_rl, max_rects, xs,xe,xv,nx, ys,ye,yv,ny, xcond,ycond)
-    XRectangle *o_rl;		/* receives list of rectangles */
-    int max_rects;		/* max rectangles out */
-    int *xs, *xe, *xv, nx;	/* X list of regions */
-    int *ys, *ye, *yv, ny;	/* Y list of regions */
-    int xcond, ycond;		/* X,Y condition bitflags */
+get_rects (XRectangle *o_rl, int max_rects, int *xs, int *xe, int *xv, int nx, int *ys, int *ye, int *yv, int ny, int xcond, int ycond)
+                     		/* receives list of rectangles */
+                  		/* max rectangles out */
+                          	/* X list of regions */
+                          	/* Y list of regions */
+                     		/* X,Y condition bitflags */
 {
-    register int i, j;
+    int i, j;
     XRectangle rl[MAX_REGIONS];
     int limit = min (max_rects, MAX_REGIONS);
     int o_nrects=0, nrects=0;
@@ -1735,9 +1733,7 @@ get_rects (o_rl, max_rects, xs,xe,xv,nx, ys,ye,yv,ny, xcond,ycond)
  * returned if the rects do not intersect.
  */
 static int
-rect_intersect (in, r1, r2)
-    register XRectangle *in;
-    register XRectangle *r1, *r2;
+rect_intersect (XRectangle *in, XRectangle *r1, XRectangle *r2)
 {
     int x1, y1, x2, y2;
 
@@ -1758,11 +1754,7 @@ rect_intersect (in, r1, r2)
 /* save_mapping -- Store a mapping in a mapping descriptor.
  */
 static void 
-save_mapping (mp, mapping, rop, src, st, sx,sy,sw,sh, dst, dt, dx,dy,dw,dh)
-    register Mapping mp;
-    int mapping, rop;
-    int src, st, sx,sy,sw,sh;
-    int dst, dt, dx,dy,dw,dh;
+save_mapping (Mapping mp, int mapping, int rop, int src, int st, int sx, int sy, int sw, int sh, int dst, int dt, int dx, int dy, int dw, int dh)
 {
     mp->src = src;  mp->st = st;
 	mp->sx = sx; mp->sy = sy; mp->snx = sw; mp->sny = sh;
@@ -1776,11 +1768,7 @@ save_mapping (mp, mapping, rop, src, st, sx,sy,sw,sh, dst, dt, dx,dy,dw,dh)
 /* load_mapping -- Load a mapping from a mapping descriptor.
  */
 static void
-load_mapping (mp, mapping, rop, src, st, sx,sy,sw,sh, dst, dt, dx,dy,dw,dh)
-    register Mapping mp;
-    int *mapping, *rop;
-    int *src, *st, *sx,*sy,*sw,*sh;
-    int *dst, *dt, *dx,*dy,*dw,*dh;
+load_mapping (Mapping mp, int *mapping, int *rop, int *src, int *st, int *sx, int *sy, int *sw, int *sh, int *dst, int *dt, int *dx, int *dy, int *dw, int *dh)
 {
     *src = mp->src;  *st = mp->st;
 	*sx = mp->sx; *sy = mp->sy; *sw = mp->snx; *sh = mp->sny;
@@ -1795,11 +1783,11 @@ load_mapping (mp, mapping, rop, src, st, sx,sy,sw,sh, dst, dt, dx,dy,dw,dh)
  * the process if the mapping is not already in pixel coordinates.
  */
 static void
-get_pixel_mapping (w, mp1, mp2, update)
-    GtermWidget w;
-    register Mapping mp1;		/* input mapping */
-    register Mapping mp2;		/* output mapping */
-    int update;				/* update mapping */
+get_pixel_mapping (GtermWidget w, Mapping mp1, Mapping mp2, int update)
+                  
+                		/* input mapping */
+                		/* output mapping */
+               				/* update mapping */
 {
     float maxndc = (float)MAXNDC;
 
@@ -1876,11 +1864,9 @@ get_pixel_mapping (w, mp1, mp2, update)
  * it contains something meaningful.
  */
 static int
-valid_mapping (w, mp)
-    GtermWidget w;
-    register Mapping mp;
+valid_mapping (GtermWidget w, Mapping mp)
 {
-    register int x, y;
+    int x, y;
     int snx, sny, dnx, dny;
     int s_width, s_height, d_width, d_height;
     Raster sr, dr;
@@ -1946,8 +1932,7 @@ valid_mapping (w, mp)
 /* initialize_mapping -- Initialize the contents of a mapping descriptor.
  */
 static void
-initialize_mapping (mp)
-    register Mapping mp;
+initialize_mapping (Mapping mp)
 {
     memset ((char *)mp, 0, sizeof(struct mapping));
 }
@@ -1959,12 +1944,10 @@ initialize_mapping (mp)
  * maps back to a source pixel and vice versa.
  */
 static void
-update_mapping (w, mp)
-    GtermWidget w;
-    register Mapping mp;
+update_mapping (GtermWidget w, Mapping mp)
 {
-    register uchar *op;
-    register int i, j, k;
+    uchar *op;
+    int i, j, k;
     int snx, sny, dnx, dny, sx, sy, dx, dy;
     int xmax, ymax, lo, hi, edge1, edge2;
     int temp, xflip=0, yflip=0;
@@ -2119,9 +2102,7 @@ update_mapping (w, mp)
  * and deactivate the mapping.
  */
 static void
-free_mapping (w, mp)
-    GtermWidget w;
-    register Mapping mp;
+free_mapping (GtermWidget w, Mapping mp)
 {
     mp_unlink (w, mp);
     mp->defined = mp->enabled = mp->updated = 0;
@@ -2137,12 +2118,9 @@ free_mapping (w, mp)
 }
 
 static void
-mp_linkafter (w, mp, ref_mp)
-    register GtermWidget w;
-    register Mapping mp;
-    register Mapping ref_mp;
+mp_linkafter (GtermWidget w, Mapping mp, Mapping ref_mp)
 {
-    register Mapping map;
+    Mapping map;
 
     /* Don't use the reference mapping unless it is already linked or
      * the list is empty.
@@ -2169,9 +2147,7 @@ mp_linkafter (w, mp, ref_mp)
 
 
 static void
-mp_unlink (w, mp)
-    register GtermWidget w;
-    register Mapping mp;
+mp_unlink (GtermWidget w, Mapping mp)
 {
     if (mp->prev)
 	mp->prev->next = mp->next;

@@ -4,11 +4,7 @@
 #include <X11/IntrinsicP.h>
 #include <X11/StringDefs.h>
 #include "ButtonP.h"
-static void activate(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
+static void activate(Widget,XEvent*,String*,Cardinal*);
 
 static XtActionsRec actionsList[] = {
 {"activate", activate},
@@ -20,11 +16,7 @@ static char defaultTranslations[] = "\
 Button1<Leave>: set_shadow() \n\
 <Key>Return: set_shadow(sunken) activate() set_shadow() \n\
 ";
-static void _resolve_inheritance(
-#if NeedFunctionPrototypes
-WidgetClass
-#endif
-);
+static void _resolve_inheritance(WidgetClass);
 
 static XtResource resources[] = {
 {XtNactivate,XtCActivate,XtRCallback,sizeof(((XfwfButtonRec*)NULL)->xfwfButton.activate),XtOffsetOf(XfwfButtonRec,xfwfButton.activate),XtRImmediate,(XtPointer)NULL },
@@ -100,13 +92,12 @@ XtInherit_set_label,
 };
 WidgetClass xfwfButtonWidgetClass = (WidgetClass) &xfwfButtonClassRec;
 /*ARGSUSED*/
-static void activate(self,event,params,num_params)Widget self;XEvent*event;String*params;Cardinal*num_params;
+static void activate(Widget self, XEvent *event, String *params, Cardinal *num_params)
 {
     XtCallCallbackList(self, ((XfwfButtonWidget)self)->xfwfButton.activate, event);
 }
 
-static void _resolve_inheritance(class)
-WidgetClass class;
+static void _resolve_inheritance(WidgetClass class)
 {
   XfwfButtonWidgetClass c = (XfwfButtonWidgetClass) class;
   XfwfButtonWidgetClass super;

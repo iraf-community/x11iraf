@@ -74,8 +74,14 @@
 
 #include <X11/xpm.h>
 #include <tcl.h>
-int Tcl_GetErrorLine();
-void Tcl_SetErrorLine();
+/* Backward compatibility patch for errorLine access. These functions were
+ * introduced only in Tcl 8.6, and direct access to errorLine is deprecated
+ * since then.
+ */
+#if (TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION < 6)
+int Tcl_GetErrorLine(Tcl_Interp *);
+void Tcl_SetErrorLine(Tcl_Interp *, int);
+#endif
 
 /* Size limiting definitions. */
 #define SZ_NAME		128		/* class or object name */
@@ -118,16 +124,25 @@ void Tcl_SetErrorLine();
 #define	OtNClasses	6
 
 typedef	struct obmObject *ObmObject;
+typedef	struct obmContext *ObmContext;
+typedef struct objClassRec *ObjClassRec;
 
 typedef	int (*ObmFunc)();
-typedef	ObmObject (*ObmCreateFunc)();
-typedef	void (*ObmMethod)();
+typedef	int (*ObmEvaluateFunc)(ObmObject, const char *);
+typedef	ObmObject (*ObmCreateFunc)(ObmContext, const char *, ObjClassRec,
+				   const char *, ArgList, int);
+typedef	void (*ObmMethod)(ObmContext, ObjClassRec);
+typedef void (*ObmDestroyFunc)(ObmObject);
 
-extern	void ServerClassInit(), ClientClassInit(), ParameterClassInit();
-extern	void WidgetClassInit(), GenericClassDestroy();
-extern	void GtermClassInit(), MarkerClassInit();
+extern	void ServerClassInit(ObmContext, ObjClassRec);
+extern	void ClientClassInit(ObmContext, ObjClassRec);
+extern	void ParameterClassInit(ObmContext, ObjClassRec);
+extern	void WidgetClassInit(ObmContext, ObjClassRec);
+extern	void GenericClassDestroy(ObmContext, ObjClassRec);
+extern	void GtermClassInit(ObmContext, ObjClassRec);
+extern	void MarkerClassInit(ObmContext, ObjClassRec);
 #ifndef OSI_COMPLIANT
-extern void HTMLClassInit();
+extern void HTMLClassInit(ObmContext, ObjClassRec);
 #endif
 
 /* Dummy WtClass bit flag definitions for initializers. */
@@ -198,7 +213,7 @@ typedef struct {
 } baseClassRec, *BaseClassRec;
 
 /* UI object class descriptor. */
-typedef struct {
+typedef struct objClassRec {
 	char name[SZ_NAME];		/* object class name */
 	int object_type;		/* widget type (shell etc.) */
 	WidgetClass *widget_class;	/* for Xt/Athena widgets */
@@ -206,10 +221,11 @@ typedef struct {
 	ObmMethod ClassInit;		/* initializes class record */
 	ObmMethod ClassDestroy;		/* close class record */
 	ObmCreateFunc Create;		/* create proc */
-	ObmMethod Destroy;		/* destroy proc */
-	ObmFunc Evaluate;		/* evaluate proc */
+	ObmDestroyFunc Destroy;		/* destroy proc */
+	ObmEvaluateFunc Evaluate;	/* evaluate proc */
 	XtPointer class_data;		/* class specific data */
 } objClassRec, *ObjClassRec;
+
 
 /* Class descriptors for all UI object classes and subclasses.  In the
  * following only the class initializer function needs to be set statically,
@@ -502,31 +518,31 @@ typedef unsigned char	uchar;
 #define	TRUESTR		"1"
 #define	FALSESTR	"0"
 
-int obmClientCommand ();
-extern int obmClass();
-extern ObmObject obmFindObject();
-extern	ObjClassRec obmGetClassrec();
-extern	Widget widgetGetPointer();
-extern	ObmCallback obmAddCallback();
-extern	void widget_setTTName();
-extern	char *widget_getTTName();
-extern	void obmRemoveCallback();
+typedef struct widgetObject *WidgetObject;
+
+int obmClientCommand (Tcl_Interp *tcl, const char *commmand);
+extern int obmClass(struct objClassRec *classrec, long unsigned int flag1, long unsigned int flag2);
+extern ObmObject obmFindObject(struct obmContext *obm, const char *object);
+extern	ObjClassRec obmGetClassrec(const char *classname);
+extern	Widget widgetGetPointer(struct obmObject *object);
+extern	ObmCallback obmAddCallback(struct _obmCallback **callback_list);
+extern	void widget_setTTName(WidgetObject obj, char *name);
+extern	char *widget_getTTName(WidgetObject obj);
+extern	void obmRemoveCallback(struct _obmCallback **callback_list, struct _obmCallback *callback);
 extern	void obmFreeObject();
-extern	void obmDestroyObject();
-extern	void obmGenericClassDestroy();
-extern	void obmDisplay(), obmUndisplay();
-extern int obm_nameToObjectList ();
-extern  void freeMenu();
-extern  void freeIcon();
-extern	Pixmap findBitmap();
-extern	Pixmap findPixmap();
-extern	Cursor findCursor();
-extern	Icon *findIcon();
-extern	char *get_geometry();
+extern	void obmDestroyObject(struct obmContext *obm, struct obmObject *object);
+extern	void obmGenericClassDestroy(struct obmContext *obm, struct objClassRec *classrec);
+extern	void obmDisplay(struct obmContext *obm, struct obmObject *obj), obmUndisplay(struct obmContext *obm, struct obmObject *obj);
+extern int obm_nameToObjectList (struct obmContext *obm, char *object, struct obmObject **pobjs, int *nobjs, struct obmObject **objs);
+extern  void freeMenu(MenuPtr mp);
+extern  void freeIcon(struct obmContext *obm, Icon *icon);
+extern	Pixmap findBitmap(struct obmContext *obm, const char *name);
+extern	Pixmap findPixmap(struct obmContext *obm, const char *name);
+extern	Cursor findCursor(struct obmContext *obm, char *name);
+extern	Icon *findIcon(struct obmContext *obm, char *name);
+extern	char *get_geometry(Display *display, Screen *screen, Window window, int origin);
 
 /* Public functions. */
 #define Obm_Private
 #include "Obm.h"
 #undef Obm_Private
-
-extern  char *getenv();

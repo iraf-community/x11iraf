@@ -33,22 +33,20 @@ char *defgui_text[] = {
     NULL
 };
 
-void xim_onsig();
-void Usage();
-void printoption();
+void xim_onsig(int sig, int *code, int *scp);
+void Usage(void);
+void printoption(char *st);
 
 
 /* MAIN -- XImtool main program.  This is the only ximtool routine containing
  * window system specific code.
  */
 int
-main (argc, argv)
-int argc;
-char *argv[];
+main (int argc, char **argv)
 {
-	register XimDataPtr xim = &ximtool_data;
-	register int i;
-        register IsmModule ism;
+	XimDataPtr xim = &ximtool_data;
+	int i;
+        IsmModule ism;
 
 	Widget toplevel;
 	XtPointer obm;
@@ -56,8 +54,8 @@ char *argv[];
 	int sv_argc, ncolors, base;
 	int tile = 0;
 
-	extern IsmModule ismNameToPtr();
-	int 	xerror(), xioerror();
+	extern IsmModule ismNameToPtr(char *name);
+	int 	xerror(Display *display, XErrorEvent *event), xioerror(Display *dpy);
 
 
 	/* Process the command line arguments.  Scan the arglist first to see
@@ -74,7 +72,7 @@ char *argv[];
       	        exit (1);
 
     	    } else if (strcmp (argv[1], "-defgui") == 0) {
-	        register int i;
+	        int i;
 	        for (i=0;  defgui_text[i];  i++)
 		    printf ("%s\n", defgui_text[i]);
 	        exit (0);
@@ -184,7 +182,7 @@ char *argv[];
 
 	/* Initialize the object manager. */
 	xim->obm = obm = (XtPointer) ObmOpen (app_context, argc, argv);
-	ObmAddCallback (obm, OBMCB_setGterm|OBMCB_preserve, xim_reset,
+	ObmAddCallback (obm, OBMCB_setGterm|OBMCB_preserve, (ObmFunc)xim_reset,
 	    (XtPointer)xim);
 
 
@@ -321,7 +319,7 @@ char *argv[];
 	if (strcmp (xim->gui, "default") == 0 ||
 	    (ObmDeliverMsgFromFile (obm, server, xim->gui) != 0)) {
 
-	    register char *ip, *op;
+	    char *ip, *op;
 	    char *message;
 	    int i;
 
@@ -386,8 +384,7 @@ char *argv[];
 /* XIM_SHUTDOWN -- Terminate ximtool.
  */
 int
-xim_shutdown (xim)
-register XimDataPtr xim;
+xim_shutdown (XimDataPtr xim)
 {
 	eps_close (xim->psim);
 	xim_loadClose (xim);
@@ -406,11 +403,7 @@ register XimDataPtr xim;
  * talk to X directly so we need to provide this interface routine.
  */
 XtInputId
-xim_addInput (xim, input, proc, client_data)
-register XimDataPtr xim;
-int input;
-void (*proc)();
-XtPointer client_data;
+xim_addInput (XimDataPtr xim, int input, void (*proc) (/* ??? */), XtPointer client_data)
 {
 	return XtAppAddInput (app_context, input,
 	    (XtPointer)XtInputReadMask, *proc, client_data);
@@ -420,9 +413,7 @@ XtPointer client_data;
 /* XIM_REMOVEINPUT -- Remove a callback previously posted with xim_addInput.
  */
 void
-xim_removeInput (xim, id)
-register XimDataPtr xim;
-XtPointer id;
+xim_removeInput (XimDataPtr xim, XtPointer id)
 {
 	XtRemoveInput ((XtInputId)id);
 }
@@ -431,7 +422,7 @@ XtPointer id;
 /* USAGE -- Print a list of command-line options.
  */
 void
-Usage ()
+Usage (void)
 {
     fprintf (stderr, "Usage:\n\n");
     printoption ("    ximtool");
@@ -472,8 +463,7 @@ Usage ()
  */
 static int cpos = 0;
 void
-printoption(st)
-char 	*st;
+printoption(char *st)
 {
   	if (strlen(st) + cpos > 78) {
     	    fprintf (stderr,"\n\t");
@@ -489,9 +479,7 @@ char 	*st;
  * more informative message so the user can correct the visual.
  */
 int
-xim_badVisual (depth, class)
-int	depth;
-int	class;
+xim_badVisual (int depth, int class)
 {
     fprintf (stderr, 
 	"\nERROR: Detected incorrect X visual:  depth=%d class=", depth);
@@ -541,13 +529,11 @@ int	class;
 */
 /*ARGSUSED*/
 int
-xerror (display, event)
-Display *display;
-register XErrorEvent *event;
+xerror (Display *display, XErrorEvent *event)
 {
         static char *envvar = "XGXERROR";
         static int nerrs = 0;
-        extern char *getenv();
+        extern char *getenv(const char *);
         char fname[128];
         char *action;
         int pid;
@@ -585,10 +571,9 @@ register XErrorEvent *event;
 
 /*ARGSUSED*/
 int
-xioerror(dpy)
-Display *dpy;
+xioerror(Display *dpy)
 {
-    char *SysErrorMsg();
+    char *SysErrorMsg(int n);
 
     (void) fprintf (stderr,
         "ximtool: fatal IO error %d (%s) or KillClient on X server \"%s\"\r\n",
@@ -598,16 +583,14 @@ Display *dpy;
     exit (ERROR_XIOERROR);
 }
 
-void xt_error(message)
-    String message;
+void xt_error(String message)
 {
     (void) fprintf (stderr, "ximtool Xt error: %s\n", message);
     exit (1);
 }
 
 
-char *SysErrorMsg (n)
-    int n;
+char *SysErrorMsg (int n)
 {
     return((n >= 0) ? (char *)strerror(n) : "unknown error");
 }
@@ -616,10 +599,10 @@ char *SysErrorMsg (n)
 /* XIM_ONSIG -- Catch interrupt and shutdown gracefully.
  */
 void
-xim_onsig (sig, code, scp)
-int     sig;                    /* signal which was trapped     */
-int     *code;                  /* not used */
-int     *scp;                   /* not used */
+xim_onsig (int sig, int *code, int *scp)
+                                /* signal which was trapped     */
+                                /* not used */
+                                /* not used */
 {
         xim_shutdown (&ximtool_data);
 }

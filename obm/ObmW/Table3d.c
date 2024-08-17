@@ -37,12 +37,10 @@ typedef struct _ColorCashRec {
 }ColorCashRec, *ColorCash;
 
 static ColorCashRec* color_cash = NULL;
-static void GetTopShadow();
+static void GetTopShadow(XColor *trom, XColor *to);
 
 
-static void GetTopShadow(trom ,to)
-     XColor* trom;
-     XColor* to;
+static void GetTopShadow(XColor *trom, XColor *to)
 {
   ColorCashRec* cash;
   float         save;
@@ -106,9 +104,7 @@ static void GetTopShadow(trom ,to)
   color_cash = cash;
 }
 
-static void GetBotShadow(trom ,to)
-     XColor* trom;
-     XColor* to;
+static void GetBotShadow(XColor *trom, XColor *to)
 {
   ColorCashRec* cash;
   float         save;
@@ -170,9 +166,7 @@ static void GetBotShadow(trom ,to)
   color_cash = cash;
 }
 
-static void GetArmShadow(trom ,to)
-     XColor* trom;
-     XColor* to;
+static void GetArmShadow(XColor *trom, XColor *to)
 {
   ColorCashRec* cash;
   float         save;
@@ -248,13 +242,7 @@ static unsigned char mbshadowpm_bits[] = {
 
 
 GC 
-#ifdef Xraw_NEED_PROTO
 AllocGCFromPixmap (Widget w, Pixmap pixmap)
-#else
-AllocGCFromPixmap(w, pixmap)
-     Widget w;
-     Pixmap pixmap;
-#endif
 {
   XGCValues values;
 
@@ -268,13 +256,7 @@ AllocGCFromPixmap(w, pixmap)
 }
 
 GC 
-#ifdef Xraw_NEED_PROTO
 AllocGCFromPixel (Widget w, Pixel fore)
-#else
-AllocGCFromPixel(w, fore)
-     Widget w;
-     Pixel fore;
-#endif
 {
   XGCValues values;
   
@@ -282,9 +264,7 @@ AllocGCFromPixel(w, fore)
   return XtGetGC(w, GCForeground, &values);
 }
 
-static Pixmap Depth_1_ShadowPixmap (w, top_or_bottom)
-     Widget w;
-     int top_or_bottom;
+static Pixmap Depth_1_ShadowPixmap (Widget w, int top_or_bottom)
 {
   Screen  *scn = XtScreen (w);
 
@@ -301,10 +281,7 @@ static Pixmap Depth_1_ShadowPixmap (w, top_or_bottom)
     return None;
 }
 
-static Pixmap Depth_NOT_1_ShadowPixmap (w, colour, top_or_bottom)
-     Widget w;
-     Pixel colour;
-     int top_or_bottom;
+static Pixmap Depth_NOT_1_ShadowPixmap (Widget w, Pixel colour, int top_or_bottom)
 {
   Display *dpy = XtDisplay (w);
   Screen  *scn = XtScreen (w);
@@ -337,14 +314,7 @@ static Pixmap Depth_NOT_1_ShadowPixmap (w, colour, top_or_bottom)
 }
 
 Pixmap 
-#ifdef Xraw_NEED_PROTO
 CreateShadowPixmap (Widget w, Pixel colour, int top_or_bottom)
-#else
-CreateShadowPixmap (w, colour, top_or_bottom)
-     Widget w;
-     Pixel colour;
-     int top_or_bottom;
-#endif
 {
   if (DEPTH_SCREEN(w) == 1)
     return Depth_1_ShadowPixmap (w, top_or_bottom);
@@ -357,19 +327,11 @@ CreateShadowPixmap (w, colour, top_or_bottom)
 
 
 Boolean 
-#ifdef Xraw_NEED_PROTO
 XrawAllocShadowPixel (
      Widget w,
      Pixel  base,
      int    brightness,   
      Pixel *result)
-#else
-XrawAllocShadowPixel (w, base, brightness, result)
-     Widget w;
-     Pixel  base;
-     int    brightness;   
-     Pixel *result;   /* RETURN */
-#endif
 {
   XColor         set;
   XColor         get;
@@ -404,20 +366,11 @@ XrawAllocShadowPixel (w, base, brightness, result)
 }
 
 GC 
-#ifdef Xraw_NEED_PROTO
 MakeGC (Widget w,
 	Pixel base,
 	int brightness,
 	Boolean pseudo,
 	int top_or_bottom)
-#else
-MakeGC(w, base, brightness, pseudo, top_or_bottom)
-     Widget w;
-     Pixel base;
-     int brightness;
-     Boolean pseudo;
-     int top_or_bottom;
-#endif
 {
   Pixel fore;
   Pixmap tile;
@@ -441,13 +394,7 @@ MakeGC(w, base, brightness, pseudo, top_or_bottom)
 }
 
 GC 
-#ifdef Xraw_NEED_PROTO
 MakeTopShadowGC (Widget w, Pixel base)
-#else
-MakeTopShadowGC(w, base)
-     Widget w;
-     Pixel base;
-#endif
 {
   Pixel fore;
   Pixmap tile;
@@ -467,13 +414,7 @@ MakeTopShadowGC(w, base)
 
 
 GC 
-#ifdef Xraw_NEED_PROTO
 MakeBottomShadowGC (Widget w, Pixel base)
-#else
-MakeBottomShadowGC(w, base)
-     Widget w;
-     Pixel base;
-#endif
 {
   Pixel fore;
   Pixmap tile;
@@ -492,13 +433,7 @@ MakeBottomShadowGC(w, base)
 }
 
 GC 
-#ifdef Xraw_NEED_PROTO
 MakeArmedGC (Widget w, Pixel base)
-#else
-MakeArmedGC(w, base)
-     Widget w;
-     Pixel base;
-#endif
 {
   Pixel fore;
   Pixmap tile;
@@ -517,7 +452,6 @@ MakeArmedGC(w, base)
 }
 
 void 
-#ifdef Xraw_NEED_PROTO
 XawDrawFrame (Widget       gw,
 	      Position     x,
 	      Position     y,
@@ -527,18 +461,6 @@ XawDrawFrame (Widget       gw,
 	      Dimension    t,
 	      GC           lightgc,
 	      GC           darkgc)
-#else
-XawDrawFrame (gw, x, y, w, h, frame_type, t, lightgc, darkgc)
-     Widget       gw;
-     Position     x;
-     Position     y;
-     Dimension    w; 
-     Dimension    h;
-     XawFrameType frame_type;
-     Dimension    t;
-     GC           lightgc;
-     GC           darkgc;
-#endif
 {
   XPoint top_polygon[6];
   XPoint bottom_polygon[6];
@@ -664,16 +586,9 @@ XawDrawFrame (gw, x, y, w, h, frame_type, t, lightgc, darkgc)
 
 
 Boolean
-#ifdef Xraw_NEED_PROTO
 BottomShadowColor( Widget widget,
 		   Pixel  base,
 		   Pixel  *result)
-#else
-BottomShadowColor(widget, base, result)
-     Widget widget;
-     Pixel  base;
-     Pixel  *result;
-#endif
 {
   Colormap colormap;
   XColor color;
@@ -715,16 +630,9 @@ BottomShadowColor(widget, base, result)
 }
 
 Boolean
-#ifdef Xraw_NEED_PROTO
 TopShadowColor( Widget widget,
 	       Pixel  base,
 	       Pixel  *result)
-#else
-TopShadowColor(widget, base, result)
-     Widget widget;
-     Pixel  base;
-     Pixel  *result;
-#endif
 {
   Colormap colormap;
   XColor color;
@@ -766,16 +674,9 @@ TopShadowColor(widget, base, result)
 }
 
 Boolean
-#ifdef Xraw_NEED_PROTO
 ArmedColor( Widget widget,
 	       Pixel  base,
 	       Pixel  *result)
-#else
-ArmedColor(widget, base, result)
-     Widget widget;
-     Pixel  base;
-     Pixel  *result;
-#endif
 {
   Colormap colormap;
   XColor color;
@@ -823,7 +724,6 @@ ArmedColor(widget, base, result)
 
 
 void 
-#ifdef Xraw_NEED_PROTO
 DrawRhombus (
 	      Widget w,
 	      short x,
@@ -834,19 +734,6 @@ DrawRhombus (
 	      GC foreground_gc,
 	      GC bottom_shadow_GC,
 	      Boolean state )
-#else
-DrawRhombus(w, x, y, g, t,
-	     top_shadow_GC, foreground_gc, bottom_shadow_GC, state)
-     Widget w;
-     short x;
-     short y;
-     short g;
-     short t;
-     GC top_shadow_GC;
-     GC foreground_gc;
-     GC bottom_shadow_GC;
-     Boolean state;
-#endif
 {
   XPoint top_shade[6];
   XPoint bot_shade[6];
@@ -904,14 +791,7 @@ DrawRhombus(w, x, y, g, t,
 }
 
 Boolean
-#ifdef Xraw_NEED_PROTO
 FetchPixel (Widget w, String name, Pixel* pixel)
-#else
-FetchPixel(w, name, pixel)
-     Widget w;
-     String name;
-     Pixel* pixel;
-#endif
 {
   XrmValue source, dest;
 

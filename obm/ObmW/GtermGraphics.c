@@ -5,16 +5,14 @@
  */
 
 void
-GtActivate (w)
-    GtermWidget w;
+GtActivate (GtermWidget w)
 {
     w->gterm.interactive = 0;
     w->gterm.save_x = w->gterm.save_y = 0;
 }
 
 void
-GtDeactivate (w)
-    GtermWidget w;
+GtDeactivate (GtermWidget w)
 {
     Display *display = w->gterm.display;
     Window window = w->gterm.window;
@@ -40,15 +38,13 @@ GtDeactivate (w)
 }
 
 int
-GtReady (w)
-    GtermWidget w;
+GtReady (GtermWidget w)
 {
     return (w->gterm.delay == 0);
 }
 
 void
-GtReset (w)
-    GtermWidget w;
+GtReset (GtermWidget w)
 {
     invalidate_draw_context (w);
     set_default_color_index (w);
@@ -65,9 +61,7 @@ GtReset (w)
 }
 
 void
-GtTimerInhibit (w, state)
-    GtermWidget w;
-    Boolean state;
+GtTimerInhibit (GtermWidget w, Boolean state)
 {
     /* This is a kludge to allow a client (xgterm) to disable use of timers
      * if they don't work in a given implementation.
@@ -76,11 +70,9 @@ GtTimerInhibit (w, state)
 }
 
 void
-GtAugmentTranslations (w, translations)
-    register GtermWidget w;
-    char *translations;
+GtAugmentTranslations (GtermWidget w, char *translations)
 {
-    register int i;
+    int i;
 
     if ((i = w->gterm.nauxTrans) < MAX_AUXTRANS) {
 	w->gterm.auxTrans[i] =
@@ -92,11 +84,9 @@ GtAugmentTranslations (w, translations)
 }
 
 void
-GtOverrideTranslations (w, translations)
-    register GtermWidget w;
-    char *translations;
+GtOverrideTranslations (GtermWidget w, char *translations)
 {
-    register int i;
+    int i;
 
     if ((i = w->gterm.nauxTrans) < MAX_AUXTRANS) {
 	w->gterm.auxTrans[i] =
@@ -108,38 +98,30 @@ GtOverrideTranslations (w, translations)
 }
 
 void
-GtFlush (w)
-    GtermWidget w;
+GtFlush (GtermWidget w)
 {
     XFlush (w->gterm.display);
 }
 
 void
-GtSetLogRes (w, width, height)
-    GtermWidget w;
-    int width, height;
+GtSetLogRes (GtermWidget w, int width, int height)
 {
     w->gterm.xres = width;
     w->gterm.yres = height;
 }
 
 void
-GtGetLogRes (w, width, height)
-    GtermWidget w;
-    int *width, *height;
+GtGetLogRes (GtermWidget w, int *width, int *height)
 {
     *width = w->gterm.xres;
     *height = w->gterm.yres;
 }
 
 void
-GtGetPhysRes (w, raster, width, height)
-    GtermWidget w;
-    int raster;				/* zero for screen size */
-    int *width, *height;
+GtGetPhysRes (GtermWidget w, int raster, int *width, int *height)
 {
     if (raster) {
-	register Raster rp = &w->gterm.rasters[raster];
+	Raster rp = &w->gterm.rasters[raster];
 	*width = rp->width;
 	*height = rp->height;
     } else {
@@ -149,18 +131,13 @@ GtGetPhysRes (w, raster, width, height)
 }
 
 void
-GtSetPhysRes (w, raster, width, height)
-    GtermWidget w;
-    int raster;
-    int width, height;
+GtSetPhysRes (GtermWidget w, int raster, int width, int height)
 {
     GtCreateRaster (w, raster, GtServer, width, height, RasterDepth);
 }
 
 void
-GtSetRaster (w, raster)
-    GtermWidget w;
-    int raster;
+GtSetRaster (GtermWidget w, int raster)
 {
     if (raster >= 0 && raster < w->gterm.maxRasters) {
 	w->gterm.raster = raster;
@@ -169,17 +146,14 @@ GtSetRaster (w, raster)
 }
 
 int
-GtGetRaster (w)
-    GtermWidget w;
+GtGetRaster (GtermWidget w)
 {
     return (w->gterm.raster);
 }
 
 /* ARGSUSED */
 void
-GtSetTextRes (w, optrows, optcols)
-    GtermWidget w;
-    int optrows, optcols;
+GtSetTextRes (GtermWidget w, int optrows, int optcols)
 {
     w->gterm.optrows = optrows;
     w->gterm.optcols = optcols;
@@ -187,16 +161,12 @@ GtSetTextRes (w, optrows, optcols)
 
 /* ARGSUSED */
 void
-GtSetCharSize (w, ival)
-    GtermWidget w;
-    int ival;
+GtSetCharSize (GtermWidget w, int ival)
 {
 }
 
 void
-GtSetDataLevel (w, ival)
-    GtermWidget w;
-    int ival;
+GtSetDataLevel (GtermWidget w, int ival)
 {
     invalidate_draw_context (w);
 
@@ -232,9 +202,7 @@ GtSetDataLevel (w, ival)
 
 
 void
-GtSetLineWidth (w, ival)
-    GtermWidget w;
-    int ival;
+GtSetLineWidth (GtermWidget w, int ival)
 {
     w->gterm.line_width = ival;
     GtSetLineStyle (w, w->gterm.line_style);
@@ -246,9 +214,7 @@ GtSetLineWidth (w, ival)
 #define	Dash3Dot	"\024\003\001\003\001\003\001\003"
 
 void
-GtSetLineStyle (w, ival)
-    GtermWidget w;
-    int ival;
+GtSetLineStyle (GtermWidget w, int ival)
 {
     int line_width = w->gterm.line_width;
     int line_style = LineSolid;
@@ -299,15 +265,13 @@ GtSetLineStyle (w, ival)
 }
 
 void
-GtSetColorIndex (w, ival)
-    GtermWidget w;
-    int ival;
+GtSetColorIndex (GtermWidget w, int ival)
 {
-    register int color = w->gterm.iomap[ival];
+    int color = w->gterm.iomap[ival];
 
     if (color >= 0 && color < w->gterm.ncolors) {
 	if (w->gterm.useGlobalCmap) {
-	    register int i, found = 0;
+	    int i, found = 0;
 
 	    for (i=0; i < num_static_colors; i++) {
 		if (ival == static_colors[i].index) {
@@ -332,9 +296,7 @@ GtSetColorIndex (w, ival)
 }
 
 void
-GtSetFillType (w, ival)
-    GtermWidget w;
-    int ival;
+GtSetFillType (GtermWidget w, int ival)
 {
     switch (ival) {
     case GtSolid:
@@ -345,10 +307,9 @@ GtSetFillType (w, ival)
 }
 
 void
-GtClearScreen (w)
-GtermWidget w;
+GtClearScreen (GtermWidget w)
 {
-    register Mapping mp;
+    Mapping mp;
 
 
     if (!w || !XtIsRealized ((Widget)w))
@@ -392,15 +353,12 @@ GtermWidget w;
 }
 
 void
-GtDrawPolyline (w, pv, npts)
-    GtermWidget w;
-    XPoint *pv;
-    int npts;
+GtDrawPolyline (GtermWidget w, XPoint *pv, int npts)
 {
     XPoint *points, o_pv[MAX_POINTS];
     DrawContext dx = get_draw_context (w);
-    register MappingContext mx;
-    register int i;
+    MappingContext mx;
+    int i;
 
     for (i=0;  i < dx->nmappings;  i++) {
 	mx = &dx->mapContext[i];
@@ -418,15 +376,12 @@ GtDrawPolyline (w, pv, npts)
 }
 
 void
-GtDrawPolymarker (w, pv, npts)
-    GtermWidget w;
-    XPoint *pv;
-    int npts;
+GtDrawPolymarker (GtermWidget w, XPoint *pv, int npts)
 {
     XPoint *points, o_pv[MAX_POINTS];
     DrawContext dx = get_draw_context (w);
-    register MappingContext mx;
-    register int i;
+    MappingContext mx;
+    int i;
 
     for (i=0;  i < dx->nmappings;  i++) {
 	mx = &dx->mapContext[i];
@@ -444,15 +399,12 @@ GtDrawPolymarker (w, pv, npts)
 }
 
 void
-GtDrawPolygon (w, pv, npts)
-    GtermWidget w;
-    XPoint *pv;
-    int npts;
+GtDrawPolygon (GtermWidget w, XPoint *pv, int npts)
 {
     XPoint *points, o_pv[MAX_POINTS];
     DrawContext dx = get_draw_context (w);
-    register MappingContext mx;
-    register int i;
+    MappingContext mx;
+    int i;
 
     for (i=0;  i < dx->nmappings;  i++) {
 	mx = &dx->mapContext[i];
@@ -501,17 +453,12 @@ GtDrawPolygon (w, pv, npts)
 }
 
 void
-GtDrawMarker (w, x, y, xsize, ysize, type)
-    GtermWidget w;
-    int x, y;
-    int xsize, ysize;
-    int type;
+GtDrawMarker (GtermWidget w, int x, int y, int xsize, int ysize, int type)
 {
 }
 
 void
-GtBell (w)
-    GtermWidget w;
+GtBell (GtermWidget w)
 {
     XBell (w->gterm.display, 0);
 }
@@ -540,13 +487,11 @@ GtBell (w)
  * coordinate transformation, but there are no mappings to complicate things.
  */
 void
-GtSetCursorPos (w, x, y)
-    GtermWidget w;
-    int x, y;
+GtSetCursorPos (GtermWidget w, int x, int y)
 {
-    register MappingContext mx;
-    register DrawContext dx;
-    register Mapping mp;
+    MappingContext mx;
+    DrawContext dx;
+    Mapping mp;
 
     Window window = w->gterm.window;
     int sv_raster = w->gterm.raster;
@@ -662,18 +607,14 @@ havemap:
 }
 
 void
-GtGetCursorPos (w, x, y)
-    GtermWidget w;
-    int *x, *y;
+GtGetCursorPos (GtermWidget w, int *x, int *y)
 {
     *x = w->gterm.last_x;
     *y = w->gterm.last_y;
 }
 
 void
-GtSetCursorType (w, type)
-    GtermWidget w;
-    int type;
+GtSetCursorType (GtermWidget w, int type)
 {
     static XtIntervalId id = (XtIntervalId) NULL;
     Display *display = w->gterm.display;
@@ -816,7 +757,7 @@ GtSetCursorType (w, type)
 	if ((interval = w->gterm.ginmodeBlinkInterval)) {
 	    XtAppContext appcon = XtWidgetToApplicationContext ((Widget) w);
 	    id = XtAppAddTimeOut (appcon,
-		interval, blink_cursor, (XtPointer)w);
+		interval, (XtTimerCallbackProc)blink_cursor, (XtPointer)w);
 	} else
 	    id = (XtIntervalId) NULL;
 	break;
@@ -839,9 +780,7 @@ GtSetCursorType (w, type)
 }
 
 static void
-blink_cursor (w, id)
-    GtermWidget w;
-    XtIntervalId *id;
+blink_cursor (GtermWidget w, XtIntervalId *id)
 {
     XtAppContext app_context;
     XColor bg, fg;
@@ -866,12 +805,9 @@ blink_cursor (w, id)
 }
 
 void
-GtPostInputProc (w, userfcn, client_data)
-    GtermWidget w;
-    GtCallbackProc userfcn;
-    XtPointer client_data;
+GtPostInputProc (GtermWidget w, GtCallbackProc userfcn, XtPointer client_data)
 {
-    register GtCallback *cb, *new;
+    GtCallback *cb, *new;
 
     new = (GtCallback *) XtMalloc (sizeof (GtCallback));
     new->proc = userfcn;
@@ -887,12 +823,9 @@ GtPostInputProc (w, userfcn, client_data)
 }
 
 void
-GtDeleteInputProc (w, userfcn, client_data)
-    GtermWidget w;
-    GtCallbackProc userfcn;
-    XtPointer client_data;
+GtDeleteInputProc (GtermWidget w, GtCallbackProc userfcn, XtPointer client_data)
 {
-    register GtCallback *cb, *prev;
+    GtCallback *cb, *prev;
 
     for (prev=NULL, cb = w->gterm.inputCallback;  cb;  cb = cb->next)
 	if (cb->proc == userfcn && cb->client_data == client_data) {
@@ -907,12 +840,9 @@ GtDeleteInputProc (w, userfcn, client_data)
 }
 
 void
-GtPostResetProc (w, userfcn, client_data)
-    GtermWidget w;
-    GtCallbackProc userfcn;
-    XtPointer client_data;
+GtPostResetProc (GtermWidget w, GtCallbackProc userfcn, XtPointer client_data)
 {
-    register GtCallback *cb, *new;
+    GtCallback *cb, *new;
 
     new = (GtCallback *) XtMalloc (sizeof (GtCallback));
     new->proc = userfcn;
@@ -928,12 +858,9 @@ GtPostResetProc (w, userfcn, client_data)
 }
 
 void
-GtDeleteResetProc (w, userfcn, client_data)
-    GtermWidget w;
-    GtCallbackProc userfcn;
-    XtPointer client_data;
+GtDeleteResetProc (GtermWidget w, GtCallbackProc userfcn, XtPointer client_data)
 {
-    register GtCallback *cb, *prev;
+    GtCallback *cb, *prev;
 
     for (prev=NULL, cb = w->gterm.resetCallback;  cb;  cb = cb->next)
 	if (cb->proc == userfcn && cb->client_data == client_data) {
@@ -948,12 +875,9 @@ GtDeleteResetProc (w, userfcn, client_data)
 }
 
 void
-GtPostResizeProc (w, userfcn, client_data)
-    GtermWidget w;
-    GtCallbackProc userfcn;
-    XtPointer client_data;
+GtPostResizeProc (GtermWidget w, GtCallbackProc userfcn, XtPointer client_data)
 {
-    register GtCallback *cb, *new;
+    GtCallback *cb, *new;
 
     new = (GtCallback *) XtMalloc (sizeof (GtCallback));
     new->proc = userfcn;
@@ -969,12 +893,9 @@ GtPostResizeProc (w, userfcn, client_data)
 }
 
 void
-GtDeleteResizeProc (w, userfcn, client_data)
-    GtermWidget w;
-    GtCallbackProc userfcn;
-    XtPointer client_data;
+GtDeleteResizeProc (GtermWidget w, GtCallbackProc userfcn, XtPointer client_data)
 {
-    register GtCallback *cb, *prev;
+    GtCallback *cb, *prev;
 
     for (prev=NULL, cb = w->gterm.resizeCallback;  cb;  cb = cb->next)
 	if (cb->proc == userfcn && cb->client_data == client_data) {
@@ -989,15 +910,12 @@ GtDeleteResizeProc (w, userfcn, client_data)
 }
 
 void
-GtDrawAlphaText (w, x, y, text)
-    GtermWidget w;
-    int x, y;
-    char *text;
+GtDrawAlphaText (GtermWidget w, int x, int y, char *text)
 {
     XPoint *points, pv[1], o_pv[1];
     DrawContext dx = get_draw_context (w);
-    register MappingContext mx;
-    register int npts, i;
+    MappingContext mx;
+    int npts, i;
 
     pv[0].x = x;
     pv[0].y = y;
@@ -1019,10 +937,7 @@ GtDrawAlphaText (w, x, y, text)
 }
 
 void
-GtGetAlphaTextSize (w, string, width, height, base)
-    GtermWidget w;
-    char *string;
-    int *width, *height, *base;
+GtGetAlphaTextSize (GtermWidget w, char *string, int *width, int *height, int *base)
 {
     XFontStruct *fp;
 
@@ -1037,21 +952,17 @@ GtGetAlphaTextSize (w, string, width, height, base)
 }
 
 void
-GtWriteAlphaCursor (w, x, y)
-    GtermWidget w;
-    int x, y;
+GtWriteAlphaCursor (GtermWidget w, int x, int y)
 {
 }
 
 void
-GtEraseAlphaCursor (w)
-    GtermWidget w;
+GtEraseAlphaCursor (GtermWidget w)
 {
 }
 
 void
-GtStartDialog (w)
-    GtermWidget w;
+GtStartDialog (GtermWidget w)
 {
     if (DBG_TRACE)
 	fprintf (stderr, "GtStartDialog:  ENTER  d_pixmap=0x%x d_saved=%d\n",
@@ -1075,16 +986,14 @@ GtStartDialog (w)
 }
 
 void
-GtEndDialog (w)
-    GtermWidget w;
+GtEndDialog (GtermWidget w)
 {
     GtEraseDialog (w);
     w->gterm.d_saved = 0;
 }
 
 void
-GtEraseDialog (w)
-    GtermWidget w;
+GtEraseDialog (GtermWidget w)
 {
     if (DBG_TRACE)
 	fprintf (stderr, "GtEraseDialog:  ENTER  d_pixmap=0x%x d_saved=%d\n",
@@ -1107,10 +1016,7 @@ GtEraseDialog (w)
 }
 
 void
-GtDrawDialogText (w, x, y, text)
-    GtermWidget w;
-    int x, y;
-    char *text;
+GtDrawDialogText (GtermWidget w, int x, int y, char *text)
 {
     int xpos = w->gterm.d_xoff + x;
     int ypos = w->gterm.d_yoff + y;
@@ -1123,10 +1029,7 @@ GtDrawDialogText (w, x, y, text)
 }
 
 void
-GtGetDialogTextSize (w, string, width, height, base)
-    GtermWidget w;
-    char *string;
-    int *width, *height, *base;
+GtGetDialogTextSize (GtermWidget w, char *string, int *width, int *height, int *base)
 {
     XFontStruct *fp;
 
@@ -1147,8 +1050,7 @@ GtGetDialogTextSize (w, string, width, height, base)
  */
 
 static void
-set_default_color_index (w)
-    GtermWidget w;
+set_default_color_index (GtermWidget w)
 {
     /* The default color index is 1, corresponding to the foreground
      * drawing color color1.  Index zero is the background drawing color
@@ -1167,9 +1069,7 @@ set_default_color_index (w)
 
 
 static void
-draw_crosshair (w, x, y)
-    GtermWidget w;
-    int x, y;
+draw_crosshair (GtermWidget w, int x, int y)
 {
     if (!w || !XtIsRealized ((Widget)w))
 	return;
@@ -1206,15 +1106,14 @@ draw_crosshair (w, x, y)
 
 
 static void
-erase_crosshair (w)
-    GtermWidget w;
+erase_crosshair (GtermWidget w)
 {
     if (!w || !XtIsRealized ((Widget)w))
 	return;
 
     if (w->gterm.cursor_drawn) {
-	register int x = w->gterm.cur_x;
-	register int y = w->gterm.cur_y;
+	int x = w->gterm.cur_x;
+	int y = w->gterm.cur_y;
 
 	XSetClipMask (w->gterm.display, w->gterm.exposeGC, None);
 	if (w->gterm.pixmap) {
@@ -1242,9 +1141,7 @@ erase_crosshair (w)
 
 
 static void
-update_transients (w, region)
-    GtermWidget w;
-    Region region;
+update_transients (GtermWidget w, Region region)
 {
     /* If an explicit region is given redisplay any markers in it immediately,
      * otherwise set the redisplay flag to cause a full screen redisplay when
@@ -1261,12 +1158,11 @@ update_transients (w, region)
 
 
 static void
-update_cursor (w)
-    GtermWidget w;
+update_cursor (GtermWidget w)
 {
     if (w->gterm.cursor_type == GtGinmodeCursor && w->gterm.full_crosshair) {
-	register int x = w->gterm.cur_x;
-	register int y = w->gterm.cur_y;
+	int x = w->gterm.cur_x;
+	int y = w->gterm.cur_y;
 
 	if (x || y)
 	    draw_crosshair (w, x, y);
@@ -1274,9 +1170,7 @@ update_cursor (w)
 }
 
 static Cursor
-get_cursor (w, cursor_name)
-    GtermWidget w;
-    String cursor_name;
+get_cursor (GtermWidget w, String cursor_name)
 {
     XrmValue from, to;
     Cursor cursor;
@@ -1295,15 +1189,14 @@ get_cursor (w, cursor_name)
 
 
 static DrawContext
-get_draw_context (w)
-    GtermWidget w;
+get_draw_context (GtermWidget w)
 {
     DrawContext dx = &w->gterm.draw;
 
     if (!dx->valid) {
 	int raster = w->gterm.raster;
 	Raster rp = &w->gterm.rasters[raster];
-	register MappingContext mx = &dx->mapContext[0];
+	MappingContext mx = &dx->mapContext[0];
 	Region clip_region, mask_region;
 	struct mapping *map, *mp, *np, p_mp;
 	int xres = w->gterm.xres;
@@ -1454,12 +1347,11 @@ get_draw_context (w)
 
 
 static void
-invalidate_draw_context (w)
-    GtermWidget w;
+invalidate_draw_context (GtermWidget w)
 {
-    register DrawContext dx = &w->gterm.draw;
-    register MappingContext mx;
-    register int i;
+    DrawContext dx = &w->gterm.draw;
+    MappingContext mx;
+    int i;
 
     if (dx->valid) {
 	for (i=0;  i < dx->nmappings;  i++) {
@@ -1472,15 +1364,11 @@ invalidate_draw_context (w)
 }
 
 static XPoint *
-mapVector (mx, pv1, pv2, npts)
-    register MappingContext mx;
-    XPoint *pv1;
-    XPoint *pv2;
-    int npts;
+mapVector (MappingContext mx, XPoint *pv1, XPoint *pv2, int npts)
 {
-    register XPoint *ip = pv1;
-    register XPoint *op = pv2;
-    register int n;
+    XPoint *ip = pv1;
+    XPoint *op = pv2;
+    int n;
 
     for (n=npts;  --n >= 0;  ip++, op++) {
 	op->x = ip->x * mx->xscale + mx->xoffset;
@@ -1492,9 +1380,7 @@ mapVector (mx, pv1, pv2, npts)
 
 
 static void
-savepos (w, event)
-    GtermWidget w;
-    XEvent *event;
+savepos (GtermWidget w, XEvent *event)
 {
     if (event == NULL)
 	return;

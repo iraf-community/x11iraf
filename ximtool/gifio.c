@@ -76,14 +76,12 @@ static struct {
 
 
 /* Function prototypes */
-#ifdef __STDC__
-
 #include <stddef.h>
 #include <stdlib.h>
 
 static int colorstobpp (int colors);
 static void BumpPixel (void);
-static int GIFNextPixel ();
+static int GIFNextPixel (void);
 static void GIFEncode (FILE* fp, int GWidth, int GHeight, int GInterlace, 
           int Background, int BitsPerPixel, int Red[], int Green[], int Blue[]);
 static void Putword (int w, FILE* fp);
@@ -106,17 +104,6 @@ static int  LWZReadByte (FILE *fd, int flag, int input_code_size );
 static char *ReadImage (FILE *fd, int len, int height, 
 	int interlace, int ignore, uchar **image );
 
-#else
-static int	colorstobpp(), GIFNextPixel();
-static void 	BumpPixel (), GIFEncode (), Putword (), compress ();
-static void 	output (), cl_block (), cl_hash (), writeerr (), char_init ();
-static void 	char_out (), flush_char ();
-
-static char 	*ReadGIF (), *ReadImage ();
-static int  	ReadColorMap (), DoExtension (), GetDataBlock ();
-static int  	GetCode (), LWZReadByte ();
-#endif
-
 static byte	*pixels;
 static int	nrows, ncols;
 static char	*errstr = NULL;
@@ -131,16 +118,16 @@ static char	*errstr = NULL;
  */
 
 char	*
-loadGIF  (fname, pix, nx, ny, r,g,b, ncolors, gray)
-char    *fname;                         /* input filename       */
-uchar   **pix;                          /* output pixels        */
-int     *nx, *ny;                       /* dimensions           */
-uchar   *r, *g, *b;                     /* colormap             */
-int     *ncolors;                       /* number of colors     */
-int	gray;				/* read as a grayscale? */
+loadGIF  (char *fname, uchar **pix, int *nx, int *ny, uchar *r, uchar *g, uchar *b, int *ncolors, int gray)
+                                        /* input filename       */
+                                        /* output pixels        */
+                                        /* dimensions           */
+                                        /* colormap             */
+                                        /* number of colors     */
+   	     				/* read as a grayscale? */
 {
-	register FILE *fd;
-	register int i, imageNumber = 1;
+	FILE *fd;
+	int i, imageNumber = 1;
 
         if ((fd = fopen(fname, "rb")) == NULL)
             return "Unable to open FITS file";
@@ -164,15 +151,15 @@ int	gray;				/* read as a grayscale? */
  */
 
 int
-writeGIF (fp, image, w, h, rmap, gmap, bmap, numcols, gray)
-FILE 	*fp;				/* output file descriptor */
-byte 	*image;				/* image pixels 	  */
-int	w, h;				/* image dimensions	  */
-byte 	*rmap, *gmap, *bmap;		/* colormap		  */
-int	numcols;			/* number of colors       */
-int	gray;				/* save as grayscale?	  */
+writeGIF (FILE *fp, byte *image, int w, int h, byte *rmap, byte *gmap, byte *bmap, int numcols, int gray)
+     	    				/* output file descriptor */
+     	       				/* image pixels 	  */
+   	     				/* image dimensions	  */
+     	                    		/* colormap		  */
+   	        			/* number of colors       */
+   	     				/* save as grayscale?	  */
 {
-	register int	i, bpp, npix;
+	int	i, bpp, npix;
 	int	 r[MAXCOLORS], g[MAXCOLORS], b[MAXCOLORS];
 
 	/* Change type of the colormap. */
@@ -206,10 +193,10 @@ int	gray;				/* save as grayscale?	  */
 /* IsGIF -- Test a file to see if it is a GIF file.
  */
 int	
-isGIF (fname)
-char	*fname;	    	    /* input filename */
+isGIF (char *fname)
+    	       	    	    /* input filename */
 {
-	register FILE *fp;
+	FILE *fp;
 	int	value = 0;
 	char	tag[5];
 
@@ -227,8 +214,7 @@ char	*fname;	    	    /* input filename */
  */
 
 char *
-getGIFHdr (fname)
-char    *fname;
+getGIFHdr (char *fname)
 {
         FILE    *fp;
         char    *line;
@@ -275,8 +261,7 @@ char    *fname;
  * bits-per-pixel value.
  */
 static int	
-colorstobpp (colors)
-int	colors;
+colorstobpp (int colors)
 {
 	int	bpp;
 
@@ -322,13 +307,7 @@ int	colors;
 
 
 static char *
-ReadGIF(fd, imageNumber, pix, nx, ny, r, g, b, ncolors)
-FILE	*fd;
-int	imageNumber;
-uchar	**pix;
-int	*nx, *ny;
-uchar	*r, *g, *b;
-int	*ncolors;
+ReadGIF(FILE *fd, int imageNumber, uchar **pix, int *nx, int *ny, uchar *r, uchar *g, uchar *b, int *ncolors)
 {
 	uchar	buf[16];
 	uchar	c;
@@ -410,10 +389,7 @@ int	*ncolors;
 
 
 static int	
-ReadColorMap(fd, number, r, g, b)
-FILE		*fd;
-int	number;
-uchar	*r, *g, *b;
+ReadColorMap(FILE *fd, int number, uchar *r, uchar *g, uchar *b)
 {
 	int	i;
 	uchar	rgb[3];
@@ -431,9 +407,7 @@ uchar	*r, *g, *b;
 
 
 static int	
-DoExtension(fd, label)
-FILE	*fd;
-int	label;
+DoExtension(FILE *fd, int label)
 {
 	static char	buf[256];
 
@@ -471,9 +445,7 @@ int	label;
 static int ZeroDataBlock = FALSE;
 
 static int	
-GetDataBlock(fd, buf)
-FILE		*fd;
-uchar	*buf;
+GetDataBlock(FILE *fd, uchar *buf)
 {
 	uchar	count;
 
@@ -490,10 +462,7 @@ uchar	*buf;
 
 
 static int	
-GetCode(fd, code_size, flag)
-FILE	*fd;
-int	code_size;
-int	flag;
+GetCode(FILE *fd, int code_size, int flag)
 {
 	static uchar	buf[280];
 	static int	curbit, lastbit, done, last_byte;
@@ -532,10 +501,7 @@ int	flag;
 
 
 static int	
-LWZReadByte(fd, flag, input_code_size)
-FILE	*fd;
-int	flag;
-int	input_code_size;
+LWZReadByte(FILE *fd, int flag, int input_code_size)
 {
 	static int	fresh = FALSE;
 	int	code, incode;
@@ -545,7 +511,7 @@ int	input_code_size;
 	static int	clear_code, end_code;
 	static int	table[2][(1<< GIFBITS)];
 	static int	stack[(1<<(GIFBITS))*2], *sp;
-	register int	i;
+	int	i;
 
 	if (flag) {
 	    set_code_size = input_code_size;
@@ -644,11 +610,7 @@ int	input_code_size;
 
 
 static char *
-ReadImage(fd, len, height, interlace, ignore, image)
-FILE	*fd;
-int	len, height;
-int	interlace, ignore;
-uchar	**image;
+ReadImage(FILE *fd, int len, int height, int interlace, int ignore, uchar **image)
 {
 	uchar	c;
 	int	v;
@@ -853,7 +815,7 @@ int	Red[], Green[], Blue[];
 /* Bump the 'curx' and 'cury' to point to the next pixel
  */
 static void
-BumpPixel()
+BumpPixel(void)
 {
 	/* Bump the current X position */
 	++curx;
@@ -902,7 +864,7 @@ BumpPixel()
 /* Return the next pixel from the image
  */
 static int	
-GIFNextPixel ()
+GIFNextPixel (void)
 {
 	int	r;
 
@@ -919,9 +881,7 @@ GIFNextPixel ()
 /* Write out a word to the GIF file
  */
 static void
-Putword (w, fp)
-int	w;
-FILE*fp;
+Putword (int w, FILE *fp)
 {
 	fputc (w & 0xff, fp);
 	fputc ((w / 256) & 0xff, fp);
@@ -1044,17 +1004,15 @@ static int a_count; 	     /* Number of characters so far in this 'packet' */
 static char accum[ 256 ];    /* Define the storage for the packet accumulator */
 
 static void
-compress (init_bits, outfile)
-int	init_bits;
-FILE*outfile;
+compress (int init_bits, FILE *outfile)
 {
-	register long	fcode;
-	register code_int i /* = 0 */;
-	register int	c;
-	register code_int ent;
-	register code_int disp;
-	register code_int hsize_reg;
-	register int	hshift;
+	long	fcode;
+	code_int i /* = 0 */;
+	int	c;
+	code_int ent;
+	code_int disp;
+	code_int hsize_reg;
+	int	hshift;
 
 	/*
          * Set up the globals:  g_init_bits - initial number of bits
@@ -1160,8 +1118,7 @@ nomatch:
 
 
 static void
-output (code)
-code_int  code;
+output (code_int code)
 {
 	cur_accum &= masks[ cur_bits ];
 
@@ -1215,7 +1172,7 @@ code_int  code;
  * Clear out the hash table
  */
 static void
-cl_block ()             /* table clear for block compress */
+cl_block (void)             /* table clear for block compress */
 {
 
 	cl_hash  ((count_int) hsize);
@@ -1226,14 +1183,14 @@ cl_block ()             /* table clear for block compress */
 }
 
 static void
-cl_hash(hsize)          /* reset code table */
-register count_int hsize;
+cl_hash(count_int hsize)          /* reset code table */
+                
 {
 
-	register count_int *htab_p = htab + hsize;
+	count_int *htab_p = htab + hsize;
 
-	register long	i;
-	register long	m1 = -1;
+	long	i;
+	long	m1 = -1;
 
 	i = hsize - 16;
 	do {                            /* might use Sys V memset(3) here */
@@ -1261,7 +1218,7 @@ register count_int hsize;
 }
 
 static void
-writeerr()
+writeerr(void)
 {
 	perror ("error writing output file");
 }
@@ -1277,9 +1234,9 @@ writeerr()
 /* Set up the 'byte output' routine
  */
 static void
-char_init()
+char_init(void)
 {
-	register int i;
+	int i;
 
 	a_count = 0;
 	for (i=0; i<256; i++)
@@ -1292,8 +1249,7 @@ char_init()
  * characters, flush the packet to disk.
  */
 static void
-char_out (c)
-int	c;
+char_out (int c)
 {
 	accum[ a_count++ ] = c;
 	if (a_count >= 254)
@@ -1304,7 +1260,7 @@ int	c;
  * Flush the packet to disk, and reset the accumulator
  */
 static void
-flush_char()
+flush_char(void)
 {
     	if (a_count > 0) {
     	    fputc (a_count, g_outfile);

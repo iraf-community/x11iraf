@@ -4,11 +4,7 @@
 #ifndef _XfwfScrollbar_H_
 #define _XfwfScrollbar_H_
 #include "Board.h"
-void XfwfSetScrollbar(
-#if NeedFunctionPrototypes
-Widget,double ,double 
-#endif
-);
+void XfwfSetScrollbar(Widget,double ,double );
 #ifndef XtNvertical
 #define XtNvertical "vertical"
 #endif

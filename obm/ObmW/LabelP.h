@@ -5,11 +5,7 @@
 #define _XfwfLabelP_H_
 #include "BoardP.h"
 #include "Label.h"
-typedef void (*set_label_Proc)(
-#if NeedFunctionPrototypes
-Widget,String 
-#endif
-);
+typedef void (*set_label_Proc)(Widget,String );
 #define XtInherit_set_label ((set_label_Proc) _XtInherit)
 typedef struct {
 /* methods */

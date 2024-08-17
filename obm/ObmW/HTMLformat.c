@@ -84,35 +84,35 @@ struct timezone Tz;
 #define ALIGN_TOP	2
 
 
-extern struct ele_rec *AddEle();
-extern void FreeLineList();
-extern void FreeObjList();
-extern int SwapElements();
-extern struct ele_rec **MakeLineList();
-extern char *ParseMarkTag();
-extern char *MaxTextWidth();
-extern char *IsMapForm();
-extern char *DelayedHRef();
-extern int IsDelayedHRef();
-extern int AnchoredHeight();
-extern struct mark_up *HTMLParse();
-extern struct ref_rec *FindHRef();
-extern struct delay_rec *FindDelayedImage();
-extern ImageInfo *NoImageData();
-extern ImageInfo *DelayedImageData();
-extern Pixmap NoImage();
-extern Pixmap DelayedImage();
-extern Pixmap InfoToImage();
-extern int caseless_equal();
-extern void clean_white_space();
-extern void WidgetRefresh();
-extern WidgetInfo *MakeWidget();
-extern XFontStruct *GetWidgetFont();
-extern void AddNewForm();
-extern void PrepareFormEnd();
-extern char *ComposeCommaList();
-extern void FreeCommaList();
-extern int IsIsMapForm();
+extern struct ele_rec *AddEle(struct ele_rec **elistp, struct ele_rec *current, struct ele_rec *eptr);
+extern void FreeLineList(struct ele_rec *list);
+extern void FreeObjList(struct mark_up *List);
+extern int SwapElements(struct ele_rec *start, struct ele_rec *end, int start_pos, int end_pos);
+extern struct ele_rec **MakeLineList(struct ele_rec *elist, int max_line);
+extern char *ParseMarkTag(char *text, char *mtext, char *mtag);
+extern char *MaxTextWidth(char *txt, int *cnt);
+extern char *IsMapForm(HTMLWidget hw);
+extern char *DelayedHRef(HTMLWidget hw);
+extern int IsDelayedHRef(HTMLWidget hw, char *href);
+extern int AnchoredHeight(HTMLWidget hw);
+extern struct mark_up *HTMLParse(struct mark_up *old_list, char *str);
+extern struct ref_rec *FindHRef(struct ref_rec *list, char *href);
+extern struct delay_rec *FindDelayedImage(struct delay_rec *list, char *src);
+extern ImageInfo *NoImageData(HTMLWidget hw);
+extern ImageInfo *DelayedImageData(HTMLWidget hw, Boolean anchored);
+extern Pixmap NoImage(HTMLWidget hw);
+extern Pixmap DelayedImage(HTMLWidget hw, Boolean anchored);
+extern Pixmap InfoToImage(HTMLWidget hw, ImageInfo *img_info);
+extern int caseless_equal(char *str1, char *str2);
+extern void clean_white_space(char *txt);
+extern void WidgetRefresh(HTMLWidget hw, struct ele_rec *eptr);
+extern WidgetInfo *MakeWidget(HTMLWidget hw, char *text, int x, int y, int id, FormInfo *fptr);
+extern XFontStruct *GetWidgetFont(HTMLWidget hw, WidgetInfo *wptr);
+extern void AddNewForm(HTMLWidget hw, FormInfo *fptr);
+extern void PrepareFormEnd(HTMLWidget hw, Widget w, FormInfo *fptr);
+extern char *ComposeCommaList(char **list, int cnt);
+extern void FreeCommaList(char **list, int cnt);
+extern int IsIsMapForm(HTMLWidget hw, char *href);
 
 
 /*
@@ -188,12 +188,7 @@ static int CompWordLen = 0;
  * Create a formatted element
  */
 struct ele_rec *
-CreateElement(hw, type, fp, x, y, edata)
-	HTMLWidget hw;
-	int type;
-	XFontStruct *fp;
-	int x, y;
-	char *edata;
+CreateElement(HTMLWidget hw, int type, XFontStruct *fp, int x, int y, char *edata)
 {
 	struct ele_rec *eptr;
 	int baseline;
@@ -699,12 +694,7 @@ CreateElement(hw, type, fp, x, y, edata)
  * list position if possible, otherwise allocate a new list position.
  */
 void
-SetElement(hw, type, fp, x, y, edata)
-	HTMLWidget hw;
-	int type;
-	XFontStruct *fp;
-	int x, y;
-	char *edata;
+SetElement(HTMLWidget hw, int type, XFontStruct *fp, int x, int y, char *edata)
 {
 	struct ele_rec *eptr;
 	int len;
@@ -1333,8 +1323,7 @@ SetElement(hw, type, fp, x, y, edata)
  * Change our drawing font 
  */
 void
-NewFont(fp)
-	XFontStruct *fp;
+NewFont(XFontStruct *fp)
 {
 	/*
 	 * Deal with bad Lucidia descents.
@@ -1355,9 +1344,7 @@ NewFont(fp)
  * Create and add the element record for it.
  */
 void
-LinefeedPlace(hw, x, y)
-	HTMLWidget hw;
-	int *x, *y;
+LinefeedPlace(HTMLWidget hw, int *x, int *y)
 {
 	/*
 	 * At the end of every line check if we have a new MaxWidth
@@ -1376,9 +1363,7 @@ LinefeedPlace(hw, x, y)
  * and move down some space.
  */
 void
-LineFeed(hw, x, y)
-	HTMLWidget hw;
-	int *x, *y;
+LineFeed(HTMLWidget hw, int *x, int *y)
 {
 	/*
 	 * Manipulate linefeed state for special pre-formatted linefeed
@@ -1461,10 +1446,7 @@ LineFeed(hw, x, y)
  * But if we are already there, don't put in a new line.
  */
 void
-ConditionalLineFeed(hw, x, y, state)
-	HTMLWidget hw;
-	int *x, *y;
-	int state;
+ConditionalLineFeed(HTMLWidget hw, int *x, int *y, int state)
 {
 	if (PF_LF_State < state)
 	{
@@ -1496,9 +1478,7 @@ ConditionalLineFeed(hw, x, y, state)
  * looking linefeeds.
  */
 void
-HardLineFeed(hw, x, y)
-	HTMLWidget hw;
-	int *x, *y;
+HardLineFeed(HTMLWidget hw, int *x, int *y)
 {
 	/*
 	 * Manipulate linefeed state for special pre-formatted linefeed
@@ -1557,7 +1537,7 @@ HardLineFeed(hw, x, y)
 
 
 static void
-AdjustBaseLine()
+AdjustBaseLine(void)
 {
 	int baseline;
 
@@ -1645,9 +1625,7 @@ AdjustBaseLine()
  * list item. Create and add the element record for it.
  */
 void
-BulletPlace(hw, x, y)
-	HTMLWidget hw;
-	int *x, *y;
+BulletPlace(HTMLWidget hw, int *x, int *y)
 {
 	int width, l_height;
 
@@ -1685,10 +1663,7 @@ BulletPlace(hw, x, y)
  * Create and add the element record for it.
  */
 void
-HRulePlace(hw, x, y, width)
-	HTMLWidget hw;
-	int *x, *y;
-	unsigned int width;
+HRulePlace(HTMLWidget hw, int *x, int *y, unsigned int width)
 {
 	NeedSpace = 0;
 	*x = hw->html.margin_width;
@@ -1704,10 +1679,7 @@ HRulePlace(hw, x, y, width)
  * list item. Create and add the element record for it.
  */
 void
-ListNumberPlace(hw, x, y, val)
-	HTMLWidget hw;
-	int *x, *y;
-	int val;
+ListNumberPlace(HTMLWidget hw, int *x, int *y, int val)
 {
 	int width, my_x;
 	int dir, ascent, descent;
@@ -1746,11 +1718,7 @@ ListNumberPlace(hw, x, y, val)
  * Place a piece of pre-formatted text. Add an element record for it.
  */
 void
-PreformatPlace(hw, mptr, x, y, width)
-	HTMLWidget hw;
-	struct mark_up *mptr;
-	int *x, *y;
-	unsigned int width;
+PreformatPlace(HTMLWidget hw, struct mark_up *mptr, int *x, int *y, unsigned int width)
 {
 	char *text;
 	char *start;
@@ -1987,11 +1955,7 @@ PreformatPlace(hw, mptr, x, y, width)
  * Format and place a piece of text. Add an element record for it.
  */
 void
-FormatPlace(hw, mptr, x, y, width)
-	HTMLWidget hw;
-	struct mark_up *mptr;
-	int *x, *y;
-	unsigned int width;
+FormatPlace(HTMLWidget hw, struct mark_up *mptr, int *x, int *y, unsigned int width)
 {
 	char *text;
 	char *start;
@@ -2396,11 +2360,7 @@ FormatPlace(hw, mptr, x, y, width)
  * Place an image. Add an element record for it.
  */
 void
-ImagePlace(hw, mptr, x, y, width)
-	HTMLWidget hw;
-	struct mark_up *mptr;
-	int *x, *y;
-	unsigned int width;
+ImagePlace(HTMLWidget hw, struct mark_up *mptr, int *x, int *y, unsigned int width)
 {
 	char *tptr;
 
@@ -2683,11 +2643,7 @@ ImagePlace(hw, mptr, x, y, width)
  * Place an Widget. Add an element record for it.
  */
 void
-WidgetPlace(hw, mptr, x, y, width)
-	HTMLWidget hw;
-	struct mark_up *mptr;
-	int *x, *y;
-	unsigned int width;
+WidgetPlace(HTMLWidget hw, struct mark_up *mptr, int *x, int *y, unsigned int width)
 {
 	SetElement(hw, E_WIDGET, currentFont, *x, *y, mptr->start);
 
@@ -2864,8 +2820,7 @@ WidgetPlace(hw, mptr, x, y, width)
 
 
 static void
-PushFont(font)
-	XFontStruct *font;
+PushFont(XFontStruct *font)
 {
 	FontRec *fptr;
 
@@ -2883,7 +2838,7 @@ PushFont(font)
 
 
 static XFontStruct *
-PopFont()
+PopFont(void)
 {
 	XFontStruct *font;
 	FontRec *fptr;
@@ -2914,8 +2869,7 @@ PopFont()
  * value if is_value is set.
  */
 static void
-ProcessOption(sptr)
-	SelectInfo *sptr;
+ProcessOption(SelectInfo *sptr)
 {
 	int i, cnt;
 	char **tarray;
@@ -2975,9 +2929,7 @@ ProcessOption(sptr)
  * This lets us safely put the resultant value between double quotes.
  */
 char *
-TextAreaAddValue(value, text)
-	char *value;
-	char *text;
+TextAreaAddValue(char *value, char *text)
 {
 	int extra;
 	char *buf;
@@ -3043,10 +2995,7 @@ TextAreaAddValue(value, text)
  * Some calls create elements that are added to the formatted element list.
  */
 void
-TriggerMarkChanges(hw, mptr, x, y)
-	HTMLWidget hw;
-	struct mark_up *mptr;
-	int *x, *y;
+TriggerMarkChanges(HTMLWidget hw, struct mark_up *mptr, int *x, int *y)
 {
 	struct mark_up *mark;
 	XFontStruct *font;
@@ -3697,7 +3646,7 @@ TriggerMarkChanges(hw, mptr, x, y)
 				{
 					free(tptr);
 					WidgetId++;
-					(void)MakeWidget(hw, mptr->start, x, y,
+					MakeWidget(hw, mptr->start, *x, *y,
 						WidgetId, CurrentForm);
 				}
 				else
@@ -3706,7 +3655,7 @@ TriggerMarkChanges(hw, mptr, x, y)
 					{
 						free(tptr);
 					}
-					WidgetPlace(hw, mptr, x, y, Width);
+					WidgetPlace(hw, mptr, (int *)x, (int *)y, Width);
 				}
 			}
 			break;
@@ -4306,9 +4255,7 @@ TriggerMarkChanges(hw, mptr, x, y)
  * before this function was called.
  */
 void
-FormatChunk(hw, x, y)
-	HTMLWidget hw;
-	int *x, *y;
+FormatChunk(HTMLWidget hw, int *x, int *y)
 {
 	struct mark_up *mptr;
 
@@ -4339,9 +4286,7 @@ FormatChunk(hw, x, y)
  * Title objects are ignored, and not formatted.
  */
 int
-FormatAll(hw, Fwidth)
-	HTMLWidget hw;
-	int *Fwidth;
+FormatAll(HTMLWidget hw, int *Fwidth)
 {
 	int x, y;
 	int width;
@@ -4565,9 +4510,7 @@ fprintf(stderr, "FormatAll exit (%d.%d)\n", Tv.tv_sec, Tv.tv_usec);
  * Basically a filled rectangle at the end of a line.
  */
 void
-LinefeedRefresh(hw, eptr)
-	HTMLWidget hw;
-	struct ele_rec *eptr;
+LinefeedRefresh(HTMLWidget hw, struct ele_rec *eptr)
 {
 	int x1, y1;
 	unsigned int width, height;
@@ -4646,11 +4589,7 @@ LinefeedRefresh(hw, eptr)
  * Redraw part of a formatted text element, in the passed fg and bg
  */
 void
-PartialRefresh(hw, eptr, start_pos, end_pos, fg, bg)
-	HTMLWidget hw;
-	struct ele_rec *eptr;
-	int start_pos, end_pos;
-	unsigned long fg, bg;
+PartialRefresh(HTMLWidget hw, struct ele_rec *eptr, int start_pos, int end_pos, long unsigned int fg, long unsigned int bg)
 {
 	int ascent;
 	char *tdata;
@@ -4865,10 +4804,7 @@ PartialRefresh(hw, eptr, start_pos, end_pos, fg, bg)
  * Redraw a formatted text element
  */
 void
-TextRefresh(hw, eptr, start_pos, end_pos)
-	HTMLWidget hw;
-	struct ele_rec *eptr;
-	int start_pos, end_pos;
+TextRefresh(HTMLWidget hw, struct ele_rec *eptr, int start_pos, int end_pos)
 {
 	if (eptr->selected == False)
 	{
@@ -4904,9 +4840,7 @@ TextRefresh(hw, eptr, start_pos, end_pos)
  * Redraw a formatted bullet element
  */
 void
-BulletRefresh(hw, eptr)
-	HTMLWidget hw;
-	struct ele_rec *eptr;
+BulletRefresh(HTMLWidget hw, struct ele_rec *eptr)
 {
 	int width, line_height;
 	int x1, y1;
@@ -4968,9 +4902,7 @@ BulletRefresh(hw, eptr)
  * Redraw a formatted horizontal rule element
  */
 void
-HRuleRefresh(hw, eptr)
-	HTMLWidget hw;
-	struct ele_rec *eptr;
+HRuleRefresh(HTMLWidget hw, struct ele_rec *eptr)
 {
 	int width, height;
 	int x1, y1;
@@ -5024,9 +4956,7 @@ HRuleRefresh(hw, eptr)
  * now.
  */
 void
-ImageRefresh(hw, eptr)
-	HTMLWidget hw;
-	struct ele_rec *eptr;
+ImageRefresh(HTMLWidget hw, struct ele_rec *eptr)
 {
 	if (eptr->pic_data != NULL)
 	{
@@ -5183,10 +5113,7 @@ ImageRefresh(hw, eptr)
 
 
 void
-RefreshTextRange(hw, start, end)
-	HTMLWidget hw;
-	struct ele_rec *start;
-	struct ele_rec *end;
+RefreshTextRange(HTMLWidget hw, struct ele_rec *start, struct ele_rec *end)
 {
 	struct ele_rec *eptr;
 
@@ -5215,9 +5142,7 @@ RefreshTextRange(hw, start, end)
  * Refresh all elements on a single line into the widget's window
  */
 void
-PlaceLine(hw, line)
-	HTMLWidget hw;
-	int line;
+PlaceLine(HTMLWidget hw, int line)
 {
 	struct ele_rec *eptr;
 
@@ -5262,10 +5187,7 @@ PlaceLine(hw, line)
  * you are at in the pos pointer passed.
  */
 struct ele_rec *
-LocateElement(hw, x, y, pos)
-	HTMLWidget hw;
-	int x, y;
-	int *pos;
+LocateElement(HTMLWidget hw, int x, int y, int *pos)
 {
 	struct ele_rec *eptr;
 	struct ele_rec *rptr;
@@ -5558,11 +5480,7 @@ LocateElement(hw, x, y, pos)
  * both the current string length, and the total buffer length.
  */
 void
-strcpy_or_grow(str, slen, blen, add)
-	char **str;
-	int *slen;
-	int *blen;
-	char *add;
+strcpy_or_grow(char **str, int *slen, int *blen, char *add)
 {
 	int newlen;
 	int addlen;
@@ -5619,13 +5537,7 @@ strcpy_or_grow(str, slen, blen, add)
  * to indent lines.
  */
 char *
-ParseTextToString(elist, startp, endp, start_pos, end_pos, space_width, lmargin)
-	struct ele_rec *elist;
-	struct ele_rec *startp;
-	struct ele_rec *endp;
-	int start_pos, end_pos;
-	int space_width;
-	int lmargin;
+ParseTextToString(struct ele_rec *elist, struct ele_rec *startp, struct ele_rec *endp, int start_pos, int end_pos, int space_width, int lmargin)
 {
 	int newline;
 	int epos;
@@ -6174,9 +6086,7 @@ ParseTextToPrettyString(hw, elist, startp, endp, start_pos, end_pos,
  * 	(width of that text's font)
  */
 int
-DocumentWidth(hw, list)
-	HTMLWidget hw;
-	struct mark_up *list;
+DocumentWidth(HTMLWidget hw, struct mark_up *list)
 {
 	struct mark_up *mptr;
 	int plain_text;

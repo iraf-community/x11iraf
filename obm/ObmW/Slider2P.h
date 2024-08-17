@@ -5,29 +5,13 @@
 #define _XfwfSlider2P_H_
 #include "LabelP.h"
 #include "Slider2.h"
-typedef void (*compute_thumb_Proc)(
-#if NeedFunctionPrototypes
-Widget,Position *,Position *,Dimension *,Dimension *
-#endif
-);
+typedef void (*compute_thumb_Proc)(Widget,Position *,Position *,Dimension *,Dimension *);
 #define XtInherit_compute_thumb ((compute_thumb_Proc) _XtInherit)
-typedef void (*move_thumb_Proc)(
-#if NeedFunctionPrototypes
-Widget,int ,int ,int ,int ,int ,int 
-#endif
-);
+typedef void (*move_thumb_Proc)(Widget,int ,int ,int ,int ,int ,int );
 #define XtInherit_move_thumb ((move_thumb_Proc) _XtInherit)
-typedef void (*compute_info_Proc)(
-#if NeedFunctionPrototypes
-Widget,Position *,Position *,Dimension *,Dimension *,float *,float *,float *,float *
-#endif
-);
+typedef void (*compute_info_Proc)(Widget,Position *,Position *,Dimension *,Dimension *,float *,float *,float *,float *);
 #define XtInherit_compute_info ((compute_info_Proc) _XtInherit)
-typedef void (*scroll_response_Proc)(
-#if NeedFunctionPrototypes
-Widget ,XtPointer ,XtPointer 
-#endif
-);
+typedef void (*scroll_response_Proc)(Widget ,XtPointer ,XtPointer );
 #define XtInherit_scroll_response ((scroll_response_Proc) _XtInherit)
 typedef struct {
 /* methods */

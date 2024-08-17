@@ -102,14 +102,14 @@
 #define	W_HIDDEN	9
 
 
-extern void NewJot();
-extern void ClearJot();
-extern void EVJotExpose();
-extern void EVJotPress();
-extern void EVJotMove();
-extern void EVJotRelease();
-extern char *EJB_JOTfromJot();
-extern char *ParseMarkTag();
+extern void NewJot(Widget w, int width, int height);
+extern void ClearJot(HTMLWidget hw, Widget w, int width, int height);
+extern void EVJotExpose(Widget w, XtPointer data, XEvent *event);
+extern void EVJotPress(Widget w, XtPointer data, XEvent *event);
+extern void EVJotMove(Widget w, XtPointer data, XEvent *event);
+extern void EVJotRelease(Widget w, XtPointer data, XEvent *event);
+extern char *EJB_JOTfromJot(Widget w);
+extern char *ParseMarkTag(char *text, char *mtext, char *mtag);
 
 
 #ifdef MOTIF
@@ -117,19 +117,16 @@ static Boolean ModifyIgnore = False;
 #endif /* MOTIF */
 
 
-char **ParseCommaList();
-void FreeCommaList();
-char *MapOptionReturn();
+char **ParseCommaList(char *str, int *count);
+void FreeCommaList(char **list, int cnt);
+char *MapOptionReturn(char *val, char **mapping);
 
 
 #ifndef MOTIF
 #define FONTHEIGHT(font) (font->max_bounds.ascent + font->max_bounds.descent)
 
 void
-setTextSize(w, columns, lines)
-	Widget w;
-	int columns;
-	int lines;
+setTextSize(Widget w, int columns, int lines)
 {
 	XFontStruct *font;
 	Position lm, rm, tm, bm;
@@ -150,10 +147,7 @@ setTextSize(w, columns, lines)
 }
 
 void
-CBListDestroy(w, client_data, call_data)
-	Widget w;
-	caddr_t client_data;
-	caddr_t call_data;
+CBListDestroy(Widget w, caddr_t client_data, caddr_t call_data)
 {
 	char **string_list, **p;
 	int item_count;
@@ -174,10 +168,7 @@ CBListDestroy(w, client_data, call_data)
 
 
 void
-CBTextDestroy(w, client_data, call_data)
-	Widget w;
-	caddr_t client_data;
-	caddr_t call_data;
+CBTextDestroy(Widget w, caddr_t client_data, caddr_t call_data)
 {
 	char *txt = (char *)client_data;
 	free(txt);
@@ -185,10 +176,7 @@ CBTextDestroy(w, client_data, call_data)
 
 
 void
-CBoption(w, client_data, call_data)
-	Widget w;
-	caddr_t client_data;
-	caddr_t call_data;
+CBoption(Widget w, caddr_t client_data, caddr_t call_data)
 {
 	Widget menuButton = (Widget)client_data;
 	char *label;
@@ -201,9 +189,7 @@ CBoption(w, client_data, call_data)
 
 
 void
-AddNewForm(hw, fptr)
-	HTMLWidget hw;
-	FormInfo *fptr;
+AddNewForm(HTMLWidget hw, FormInfo *fptr)
 {
 	FormInfo *ptr;
 
@@ -226,10 +212,7 @@ AddNewForm(hw, fptr)
 
 
 int
-CollectSubmitInfo(fptr, name_list, value_list)
-	FormInfo *fptr;
-	char ***name_list;
-	char ***value_list;
+CollectSubmitInfo(FormInfo *fptr, char ***name_list, char ***value_list)
 {
 	HTMLWidget hw = (HTMLWidget)(fptr->hw);
 	WbFormCallbackData cbdata;
@@ -529,11 +512,7 @@ CollectSubmitInfo(fptr, name_list, value_list)
 
 
 void
-ImageSubmitForm(fptr, event, name, x, y)
-	FormInfo *fptr;
-	XEvent *event;
-	char *name;
-	int x, y;
+ImageSubmitForm(FormInfo *fptr, XEvent *event, char *name, int x, int y)
 {
 	HTMLWidget hw = (HTMLWidget)(fptr->hw);
 	WbFormCallbackData cbdata;
@@ -612,10 +591,7 @@ ImageSubmitForm(fptr, event, name, x, y)
 
 
 void
-CBSubmitForm(w, client_data, call_data)
-	Widget w;
-	caddr_t client_data;
-	caddr_t call_data;
+CBSubmitForm(Widget w, caddr_t client_data, caddr_t call_data)
 {
 	FormInfo *fptr = (FormInfo *)client_data;
 	HTMLWidget hw = (HTMLWidget)(fptr->hw);
@@ -649,10 +625,7 @@ CBSubmitForm(w, client_data, call_data)
  * If there are other radios of the same name, turn them off.
  */
 void
-CBChangeRadio(w, client_data, call_data)
-	Widget w;
-	caddr_t client_data;
-	caddr_t call_data;
+CBChangeRadio(Widget w, caddr_t client_data, caddr_t call_data)
 {
 	FormInfo *fptr = (FormInfo *)client_data;
 	HTMLWidget hw = (HTMLWidget)(fptr->hw);
@@ -987,10 +960,7 @@ CBPasswordModify(w, client_data, call_data)
  * If this is the only textfield in this form, submit the form.
  */
 void
-CBActivateField(w, client_data, call_data)
-	Widget w;
-	caddr_t client_data;
-	caddr_t call_data;
+CBActivateField(Widget w, caddr_t client_data, caddr_t call_data)
 {
 	FormInfo *fptr = (FormInfo *)client_data;
 	HTMLWidget hw = (HTMLWidget)(fptr->hw);
@@ -1064,10 +1034,7 @@ CBActivateField(w, client_data, call_data)
 
 
 void
-CBResetForm(w, client_data, call_data)
-	Widget w;
-	caddr_t client_data;
-	caddr_t call_data;
+CBResetForm(Widget w, caddr_t client_data, caddr_t call_data)
 {
 	FormInfo *fptr = (FormInfo *)client_data;
 	HTMLWidget hw = (HTMLWidget)(fptr->hw);
@@ -1419,10 +1386,7 @@ CBResetForm(w, client_data, call_data)
 
 
 void
-PrepareFormEnd(hw, w, fptr)
-	HTMLWidget hw;
-	Widget w;
-	FormInfo *fptr;
+PrepareFormEnd(HTMLWidget hw, Widget w, FormInfo *fptr)
 {
 #ifdef MOTIF
 	XtAddCallback(w, XmNactivateCallback, 
@@ -1435,10 +1399,7 @@ PrepareFormEnd(hw, w, fptr)
 
 
 void
-PrepareFormReset(hw, w, fptr)
-	HTMLWidget hw;
-	Widget w;
-	FormInfo *fptr;
+PrepareFormReset(HTMLWidget hw, Widget w, FormInfo *fptr)
 {
 #ifdef MOTIF
 	XtAddCallback(w, XmNactivateCallback, 
@@ -1451,8 +1412,7 @@ PrepareFormReset(hw, w, fptr)
 
 
 void
-HideWidgets(hw)
-	HTMLWidget hw;
+HideWidgets(HTMLWidget hw)
 {
 	WidgetInfo *wptr;
 	XEvent event;
@@ -1491,8 +1451,7 @@ HideWidgets(hw)
 
 
 void
-MapWidgets(hw)
-	HTMLWidget hw;
+MapWidgets(HTMLWidget hw)
 {
 	WidgetInfo *wptr;
 
@@ -1510,10 +1469,7 @@ MapWidgets(hw)
 
 
 Boolean
-AlreadyChecked(hw, fptr, name)
-	HTMLWidget hw;
-	FormInfo *fptr;
-	char *name;
+AlreadyChecked(HTMLWidget hw, FormInfo *fptr, char *name)
 {
 	WidgetInfo *wptr;
 	Boolean radio_checked;
@@ -1539,18 +1495,7 @@ AlreadyChecked(hw, fptr, name)
 
 
 WidgetInfo *
-AddNewWidget(hw, fptr, w, type, id, x, y, width, height, name, value, mapping, checked)
-	HTMLWidget hw;
-	FormInfo *fptr;
-	Widget w;
-	int type;
-	int id;
-	int x, y;
-	int width, height;
-	char *name;
-	char *value;
-	char **mapping;
-	Boolean checked;
+AddNewWidget(HTMLWidget hw, FormInfo *fptr, Widget w, int type, int id, int x, int y, int width, int height, char *name, char *value, char **mapping, Boolean checked)
 {
 	WidgetInfo *wptr;
 
@@ -1613,9 +1558,7 @@ AddNewWidget(hw, fptr, w, type, id, x, y, width, height, name, value, mapping, c
  * we can use the font's baseline to place them.
  */
 XFontStruct *
-GetWidgetFont(hw, wptr)
-	HTMLWidget hw;
-	WidgetInfo *wptr;
+GetWidgetFont(HTMLWidget hw, WidgetInfo *wptr)
 {
 	Widget child;
 	XFontStruct *font;
@@ -1716,8 +1659,7 @@ GetWidgetFont(hw, wptr)
  * characters
  */
 char *
-NextComma(string)
-        char *string;
+NextComma(char *string)
 {
         char *tptr;
 
@@ -1749,9 +1691,7 @@ NextComma(string)
 
 
 char **
-ParseCommaList(str, count)
-	char *str;
-	int *count;
+ParseCommaList(char *str, int *count)
 {
 	char *str_copy;
 	char **list;
@@ -1854,9 +1794,7 @@ ParseCommaList(str, count)
  * turn '"' into ''', and turn ''' into '\''
  */
 char *
-ComposeCommaList(list, cnt)
-	char **list;
-	int cnt;
+ComposeCommaList(char **list, int cnt)
 {
 	int i;
 	char *fail;
@@ -1952,9 +1890,7 @@ ComposeCommaList(list, cnt)
 
 
 void
-FreeCommaList(list, cnt)
-	char **list;
-	int cnt;
+FreeCommaList(char **list, int cnt)
 {
 	int i;
 
@@ -1978,8 +1914,7 @@ FreeCommaList(list, cnt)
  * lone ' back to "
  */
 void
-UnMuckTextAreaValue(value)
-	char *value;
+UnMuckTextAreaValue(char *value)
 {
 	char *tptr;
 
@@ -2011,9 +1946,7 @@ UnMuckTextAreaValue(value)
 
 
 char *
-MapOptionReturn(val, mapping)
-	char *val;
-	char **mapping;
+MapOptionReturn(char *val, char **mapping)
 {
 	int cnt;
 
@@ -2036,10 +1969,7 @@ MapOptionReturn(val, mapping)
 
 
 char **
-MakeOptionMappings(list1, list2, list_cnt)
-	char **list1;
-	char **list2;
-	int list_cnt;
+MakeOptionMappings(char **list1, char **list2, int list_cnt)
 {
 	int i, cnt;
 	char **list;
@@ -3079,12 +3009,7 @@ MakeWidget(hw, text, x, y, id, fptr)
  * WidgetInfo structure and return it.
  */
 WidgetInfo *
-MakeWidget(hw, text, x, y, id, fptr)
-	HTMLWidget hw;
-	char *text;
-	int x, y;
-	int id;
-	FormInfo *fptr;
+MakeWidget(HTMLWidget hw, char *text, int x, int y, int id, FormInfo *fptr)
 {
 	Arg arg[30];
 	Cardinal argcnt;
@@ -3375,7 +3300,7 @@ MakeWidget(hw, text, x, y, id, fptr)
 					XtManageChild(button);
 
 					XtAddCallback(button, XtNcallback,
-						CBoption, (XtPointer)w);
+						(XtCallbackProc)CBoption, (XtPointer)w);
 
 					if (i==0)
 					{
@@ -3484,9 +3409,9 @@ MakeWidget(hw, text, x, y, id, fptr)
 				XtManageChild(w);
 
 				XtAddCallback(w, XtNdestroyCallback,
-					CBListDestroy, NULL);
+					(XtCallbackProc)CBListDestroy, NULL);
 
-				XawListChange(w, string_list, list_cnt,
+				XawListChange(w, (const char **) string_list, list_cnt,
 					0, True);
 
 				if (vlist_cnt > 0)
@@ -3836,7 +3761,7 @@ MakeWidget(hw, text, x, y, id, fptr)
 				if (maxlength > 0)
 				{
 					XtAddCallback(w, XtNdestroyCallback,
-						CBTextDestroy, (caddr_t)txt);
+						(XtCallbackProc)CBTextDestroy, (caddr_t)txt);
 				}
 
 				XtOverrideTranslations(w,
@@ -3897,7 +3822,7 @@ MakeWidget(hw, text, x, y, id, fptr)
 		}
 
 		wptr = AddNewWidget(hw, fptr, w, type, id, x, y, width, height,
-			name, value, checked);
+			name, value, NULL, checked);
 	}
 	else
 	/*
@@ -3931,9 +3856,7 @@ MakeWidget(hw, text, x, y, id, fptr)
 
 
 void
-WidgetRefresh(hw, eptr)
-        HTMLWidget hw;
-        struct ele_rec *eptr;
+WidgetRefresh(HTMLWidget hw, struct ele_rec *eptr)
 {
 	if ((eptr->widget_data != NULL)&&(eptr->widget_data->mapped == False)&&
 		(eptr->widget_data->w != NULL))

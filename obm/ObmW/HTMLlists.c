@@ -69,8 +69,7 @@
  * all memory associates with each element.
  */
 void
-FreeObjList(List)
-	struct mark_up *List;
+FreeObjList(struct mark_up *List)
 {
 	struct mark_up *current;
 	struct mark_up *mptr;
@@ -106,11 +105,7 @@ FreeObjList(List)
  * white space.
  */
 struct mark_up *
-AddObj(listp, current, mark, keep_wsp)
-	struct mark_up **listp;
-	struct mark_up *current;
-	struct mark_up *mark;
-	int keep_wsp;
+AddObj(struct mark_up **listp, struct mark_up *current, struct mark_up *mark, int keep_wsp)
 {
 	if (mark == NULL)
 	{
@@ -363,9 +358,7 @@ PrintList(list)
  * finding line widths, a newline resets the width count.
  */
 char *
-MaxTextWidth(txt, cnt)
-	char *txt;
-	int *cnt;
+MaxTextWidth(char *txt, int *cnt)
 {
 	char *start;
 	char *end;
@@ -418,8 +411,7 @@ MaxTextWidth(txt, cnt)
  * all memory associates with each element.
  */
 void
-FreeLineList(list)
-	struct ele_rec *list;
+FreeLineList(struct ele_rec *list)
 {
 	struct ele_rec *current;
 	struct ele_rec *eptr;
@@ -452,10 +444,7 @@ FreeLineList(list)
  * return a pointer to the current (end) position in the list.
  */
 struct ele_rec *
-AddEle(elistp, current, eptr)
-	struct ele_rec **elistp;
-	struct ele_rec *current;
-	struct ele_rec *eptr;
+AddEle(struct ele_rec **elistp, struct ele_rec *current, struct ele_rec *eptr)
 {
 	if (eptr == NULL)
 	{
@@ -491,9 +480,7 @@ AddEle(elistp, current, eptr)
  * into the element list.
  */
 struct ele_rec **
-MakeLineList(elist, max_line)
-	struct ele_rec *elist;
-	int max_line;
+MakeLineList(struct ele_rec *elist, int max_line)
 {
 	int i;
 	struct ele_rec *eptr;
@@ -545,10 +532,7 @@ MakeLineList(elist, max_line)
  * Otherwise return 0.
  */
 int
-ElementLessThan(start, end, start_pos, end_pos)
-	struct ele_rec *start;
-	struct ele_rec *end;
-	int start_pos, end_pos;
+ElementLessThan(struct ele_rec *start, struct ele_rec *end, int start_pos, int end_pos)
 {
 	struct ele_rec *current;
 
@@ -629,10 +613,7 @@ ElementLessThan(start, end, start_pos, end_pos)
  * Otherwise return 0.
  */
 int
-SwapElements(start, end, start_pos, end_pos)
-	struct ele_rec *start;
-	struct ele_rec *end;
-	int start_pos, end_pos;
+SwapElements(struct ele_rec *start, struct ele_rec *end, int start_pos, int end_pos)
 {
 	struct ele_rec *current;
 
@@ -710,8 +691,7 @@ SwapElements(start, end, start_pos, end_pos)
  * Free up the allocated list of internal hrefs.
  */
 void
-FreeHRefs(list)
-	struct ref_rec *list;
+FreeHRefs(struct ref_rec *list)
 {
 	struct ref_rec *hptr;
 	struct ref_rec *tptr;
@@ -735,9 +715,7 @@ FreeHRefs(list)
  * return a pointer to the element, or NULL if not found.
  */
 struct ref_rec *
-FindHRef(list, href)
-	struct ref_rec *list;
-	char *href;
+FindHRef(struct ref_rec *list, char *href)
 {
 	struct ref_rec *hptr;
 
@@ -765,9 +743,7 @@ FindHRef(list, href)
  * return a pointer to the head of the new list.
  */
 struct ref_rec *
-AddHRef(list, href)
-	struct ref_rec *list;
-	char *href;
+AddHRef(struct ref_rec *list, char *href)
 {
 	struct ref_rec *hptr;
 
@@ -806,8 +782,7 @@ AddHRef(list, href)
  * Free up the allocated list of visited delayed images
  */
 void
-FreeDelayedImages(list)
-	struct delay_rec *list;
+FreeDelayedImages(struct delay_rec *list)
 {
 	struct delay_rec *iptr;
 	struct delay_rec *tptr;
@@ -831,9 +806,7 @@ FreeDelayedImages(list)
  * return a pointer to the element, or NULL if not found.
  */
 struct delay_rec *
-FindDelayedImage(list, src)
-	struct delay_rec *list;
-	char *src;
+FindDelayedImage(struct delay_rec *list, char *src)
 {
 	struct delay_rec *iptr;
 
@@ -860,9 +833,7 @@ FindDelayedImage(list, src)
  * return a pointer to the head of the new list.
  */
 struct delay_rec *
-AddDelayedImage(list, src)
-	struct delay_rec *list;
-	char *src;
+AddDelayedImage(struct delay_rec *list, char *src)
 {
 	struct delay_rec *iptr;
 

@@ -5,11 +5,7 @@
 #define _XfwfBoardP_H_
 #include "FrameP.h"
 #include "Board.h"
-typedef void (*set_abs_location_Proc)(
-#if NeedFunctionPrototypes
-Widget,unsigned  int ,int ,int ,int ,int 
-#endif
-);
+typedef void (*set_abs_location_Proc)(Widget,unsigned  int ,int ,int ,int ,int );
 #define XtInherit_set_abs_location ((set_abs_location_Proc) _XtInherit)
 typedef struct {
 /* methods */

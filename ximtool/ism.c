@@ -46,14 +46,14 @@
 #define MAXCONN         5
 #define MAX_TRY         5
 
-IsmModule    ismNameToPtr();
+IsmModule    ismNameToPtr(char *name);
 
-static void  ism_connectClient(), ism_disconnectClient(), ism_io();
-static int   ism_read(), ism_write(), ism_type(), ism_parseSend();
-static int   ism_openSocket();
-static IsmIoChanPtr ism_getChannel();
-static char *ism_parse();
-static int ismObjects();
+static void  ism_connectClient(IsmIoChanPtr chan, int *source, XtPointer id), ism_disconnectClient(IsmIoChanPtr chan), ism_io(IsmIoChanPtr chan, int *fd_addr, XtInputId *id_addr);
+static int   ism_read(int fd, void *vptr, int nbytes), ism_write(int fd, void *vptr, int nbytes), ism_type(char *message), ism_parseSend(char *msg, char *object, char *text);
+static int   ism_openSocket(char *path);
+static IsmIoChanPtr ism_getChannel(XimDataPtr xim);
+static char *ism_parse(char *msg, int *ip, int *incomplete, int maxch);
+static int ismObjects(char *name);
 
 static int ism_debug = 0;
 extern int errno;
@@ -84,11 +84,10 @@ ismModule ism_modules[] = {
  * local processes and we want to use the uid for a unique address.
  */
 void
-xim_ismOpen (xim)
-register XimDataPtr xim;
+xim_ismOpen (XimDataPtr xim)
 {
-        register int s = 0;
-        register IsmIoChanPtr chan = &(xim->ism_chan);
+        int s = 0;
+        IsmIoChanPtr chan = &(xim->ism_chan);
         char path[SZ_FNAME], *ism_path;
 
 
@@ -148,17 +147,16 @@ register XimDataPtr xim;
  * clients and close the port.
  */
 void
-xim_ismClose (xim)
-register XimDataPtr xim;
+xim_ismClose (XimDataPtr xim)
 {
-	register IsmIoChanPtr chan = &(xim->ism_chan);
-	register int i;
+	IsmIoChanPtr chan = &(xim->ism_chan);
+	int i;
 
 	/* Send a 'quit' message to all connected clients. */
 	for (i=0, chan=NULL; i < XtNumber(xim->ism_client); i++) {
 	    chan = &xim->ism_client[i];
             if (chan->id) {
-                xim_removeInput (xim, chan->id);
+                xim_removeInput (xim, (XPointer)chan->id);
                 chan->id = 0;
 	    }
 
@@ -171,7 +169,7 @@ register XimDataPtr xim;
 	/* Close the ISM request socket. */
 	chan = &(xim->ism_chan);
         if (chan->id) {
-            xim_removeInput (xim, chan->id);
+            xim_removeInput (xim, (XPointer)chan->id);
             chan->id = 0;
         }
         close (chan->datain);
@@ -183,11 +181,10 @@ register XimDataPtr xim;
  * the ISM name.
  */
 IsmModule
-ismNameToPtr (name)
-char	*name;
+ismNameToPtr (char *name)
 {
         IsmModule ism;
-        register int i;
+        int i;
 
         for (i=0; i < ism_nmodules; i++) {
             ism = &ism_modules[i];
@@ -208,13 +205,10 @@ char	*name;
  * communicate with the new client.
  */
 static void
-ism_connectClient (chan, source, id)
-IsmIoChanPtr chan;
-int *source;
-XtPointer id;
+ism_connectClient (IsmIoChanPtr chan, int *source, XtPointer id)
 {
-	register XimDataPtr xim = (XimDataPtr) chan->xim;
-	register int s;
+	XimDataPtr xim = (XimDataPtr) chan->xim;
+	int s;
 
 	/* Accept connection. */
 	if ((s = accept ((int)*source, (struct sockaddr *)0, (int *)0)) < 0)
@@ -238,12 +232,11 @@ XtPointer id;
  * descriptor.
  */
 static void
-ism_disconnectClient (chan)
-register IsmIoChanPtr chan;
+ism_disconnectClient (IsmIoChanPtr chan)
 {
 	close (chan->datain);
 	if (chan->id) {
-	    xim_removeInput (chan->xim, chan->id);
+	    xim_removeInput (chan->xim, (XPointer)chan->id);
 	    chan->connected = 0;
 	    chan->id = 0;
 	}
@@ -254,13 +247,10 @@ register IsmIoChanPtr chan;
  * pending on the data stream to the ximtool client.
  */
 static void
-ism_io (chan, fd_addr, id_addr)
-IsmIoChanPtr chan;
-int *fd_addr;
-XtInputId *id_addr;
+ism_io (IsmIoChanPtr chan, int *fd_addr, XtInputId *id_addr)
 {
-    register XimDataPtr xim = (XimDataPtr) chan->xim;
-    register IsmModule ism;
+    XimDataPtr xim = (XimDataPtr) chan->xim;
+    IsmModule ism;
     IsmIoChanPtr new_chan;
     int     datain = *fd_addr;
     int     dataout = chan->dataout;
@@ -429,13 +419,9 @@ XtInputId *id_addr;
  * value. 
  */
 static char *
-ism_parse (msg, ip, incomplete, maxch)
-char	*msg;
-int	*ip;
-int	*incomplete;
-int	maxch;
+ism_parse (char *msg, int *ip, int *incomplete, int maxch)
 {
-	register int j, i = *ip;
+	int j, i = *ip;
 	char	text[SZ_ISMBUF+1];
 
 	if (msg[*ip] == '\0') {
@@ -474,10 +460,9 @@ int	maxch;
 /* ISM_TYPE -- Determine the message type.
  */
 static int
-ism_type (message)
-char	*message;
+ism_type (char *message)
 {
-	register char *ip;
+	char *ip;
 
 	for (ip=message; isspace(*ip); ip++) ;		/* skip whitespace */
 
@@ -497,12 +482,9 @@ char	*message;
 /* ISM_PARSESEND -- Parse the client SEND message.
  */
 static int
-ism_parseSend (msg, object, text) 
-char	*msg;
-char	*object;
-char	*text;
+ism_parseSend (char *msg, char *object, char *text)
 {
-	register int i=0, ip=4, count=0;
+	int i=0, ip=4, count=0;
 
 	/* skip leading whitespace */
 	for ( ; isspace(msg[ip]) && msg[ip]; ip++) ;	
@@ -536,14 +518,11 @@ char	*text;
  * connected.
  */
 void
-ism_evaluate (xim, object, command)
-register XimDataPtr xim;
-char	*object;
-char	*command;
+ism_evaluate (XimDataPtr xim, char *object, char *command)
 {
-	register IsmIoChanPtr chan;
-	register int i=0;
-	register int len = strlen(command) + 1;
+	IsmIoChanPtr chan;
+	int i=0;
+	int len = strlen(command) + 1;
 	char *buf = XtCalloc (len+1, sizeof(char));
 
 	for (i=0; i < XtNumber (xim->ism_client); i++) {
@@ -564,9 +543,7 @@ char	*command;
 /* ISM_MESSAGE -- Convenience wrapper for the evaluate procedure.
  */
 int
-ism_message (xim, object, command)
-register XimDataPtr xim;
-char	*object, *command;
+ism_message (XimDataPtr xim, char *object, char *command)
 {
 	ism_evaluate (xim, object, command);
 }
@@ -575,8 +552,8 @@ char	*object, *command;
 /* ISM_OPENSOCKET --  Open a unix socket on the named path.
  */
 static int
-ism_openSocket (path)
-char	*path;					/* path to the socket */
+ism_openSocket (char *path)
+    	      					/* path to the socket */
 {
         int addrlen, s = 0, on = 1;
         struct sockaddr_un sockaddr;
@@ -613,10 +590,9 @@ err: 	    fprintf (stderr, "ximtool: can't open ISM socket on %s, errno=%d\n",
 /* ISM_GETCHANNEL --- Get an ISM i/o channel descriptor.
  */
 static IsmIoChanPtr
-ism_getChannel (xim)
-register XimDataPtr xim;
+ism_getChannel (XimDataPtr xim)
 {
-        register int i;
+        int i;
 
         for (i=0;  i < XtNumber(xim->ism_client); i++) {
             if (!xim->ism_client[i].connected) {
@@ -634,8 +610,7 @@ register XimDataPtr xim;
  *  creating the same object in the OBM each time a client connects.
  */
 static int
-ismObjects (name)
-char	*name;
+ismObjects (char *name)
 {
 	static char objects[SZ_LINE] = "";
 
@@ -652,10 +627,7 @@ char	*name;
  */
 
 static int
-ism_read (fd, vptr, nbytes)
-int 	fd; 
-void 	*vptr; 
-int 	nbytes;
+ism_read (int fd, void *vptr, int nbytes)
 {
         char    *ptr = vptr;
         int 	nread = 0, nleft = nbytes, nb = 0;
@@ -681,10 +653,7 @@ int 	nbytes;
  */
 
 static int
-ism_write (fd, vptr, nbytes)
-int 	fd; 
-void 	*vptr; 
-int 	nbytes;
+ism_write (int fd, void *vptr, int nbytes)
 {
         char 	*ptr = vptr;
         int     nwritten = 0,  nleft = nbytes, nb = 0;

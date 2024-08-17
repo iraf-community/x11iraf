@@ -78,9 +78,7 @@ static RGB RGBBlack = { 0, 0, 0 };
  * Intensity percentages to RGB.
  */
 
-static void PctToRGB(rgb, rr, gg, bb)
-     RGB  *rgb;
-     float rr, gg, bb;
+static void PctToRGB(RGB *rgb, float rr, float gg, float bb)
 {
 	if (rr > 1.0)
 		rr = 1.0;
@@ -98,9 +96,7 @@ static void PctToRGB(rgb, rr, gg, bb)
  * Intensity percentages to HSV.
  */
 
-static void PctToHSV(hsv, hh, ss, vv)
-     HSV  *hsv;
-     float hh, ss, vv;
+static void PctToHSV(HSV *hsv, float hh, float ss, float vv)
 {
 	if (hh > 1.0)
 		hh = 1.0;
@@ -118,8 +114,7 @@ static void PctToHSV(hsv, hh, ss, vv)
  * The Manhattan distance between two colors, between 0.0 and 3.0.
  */
 
-static float RGBDist(r, s)
-     RGB *r, *s;
+static float RGBDist(RGB *r, RGB *s)
 {
 	return (
 	    ABS((float)(r->r - s->r)) +
@@ -131,9 +126,7 @@ static float RGBDist(r, s)
  * Load an XColor with an RGB.
  */
 
-static void RGBToXColor(r, x)
-     RGB	*r;
-     XColor	*x;
+static void RGBToXColor(RGB *r, XColor *x)
 {
 	x->red   = r->r;
 	x->green = r->g;
@@ -145,9 +138,7 @@ static void RGBToXColor(r, x)
  * Convert a CMY to RGB.
  */
 
-static void CMYToRGB(rgb, cmy)
-     RGB *rgb;
-     CMY *cmy;
+static void CMYToRGB(RGB *rgb, CMY *cmy)
 {
 	rgb->r = MAX_INTENSITY - cmy->c;
 	rgb->g = MAX_INTENSITY - cmy->m;
@@ -158,9 +149,7 @@ static void CMYToRGB(rgb, cmy)
  * Convert an RGB to CMY.
  */
 
-static void RGBToCMY(rgb, cmy)
-     RGB *rgb;
-     CMY *cmy;
+static void RGBToCMY(RGB *rgb, CMY *cmy)
 {
 	cmy->c = MAX_INTENSITY - rgb->r;
 	cmy->m = MAX_INTENSITY - rgb->g;
@@ -171,12 +160,7 @@ static void RGBToCMY(rgb, cmy)
  * Mix two RGBs, with scale factors alpha and beta, in RGB space.
  */
 
-static void MixRGB(r, alpha, s, beta, t)
-     RGB  *r;
-     float alpha;
-     RGB  *s;
-     float beta;
-     RGB  *t;
+static void MixRGB(RGB *r, float alpha, RGB *s, float beta, RGB *t)
 {
 	t->r = MAX(0, MIN(MAX_INTENSITY, (int)(alpha*(r->r) + beta*(s->r))));
 	t->g = MAX(0, MIN(MAX_INTENSITY, (int)(alpha*(r->g) + beta*(s->g))));
@@ -187,12 +171,7 @@ static void MixRGB(r, alpha, s, beta, t)
  * Mix two RGBs with scale factors alpha and beta, in HSV space.
  */
 
-static void MixHSV(r, alpha, s, beta, t)
-     RGB  *r;
-     float alpha;
-     RGB  *s;
-     float beta;
-     RGB  *t;
+static void MixHSV(RGB *r, float alpha, RGB *s, float beta, RGB *t)
 {
 	HSV	rr, ss, tt;
 
@@ -214,13 +193,7 @@ static void MixHSV(r, alpha, s, beta, t)
  */
 
 void
-#ifdef Xraw_NEED_PROTO
 HSVToRGB(HSV *hsv, RGB *rgb)
-#else
-HSVToRGB(hsv, rgb)
-     HSV *hsv;
-     RGB *rgb;
-#endif
 {
 	float	p, q, t, f;
 	float   h = hsv->h;
@@ -265,13 +238,7 @@ HSVToRGB(hsv, rgb)
  */
 
 void
-#ifdef Xraw_NEED_PROTO
 RGBToHSV(RGB *rgb, HSV *hsv)
-#else
-RGBToHSV(rgb, hsv)
-     RGB *rgb;
-     HSV *hsv;
-#endif
 {
 	float	rr, gg, bb;
 	float	min, max;

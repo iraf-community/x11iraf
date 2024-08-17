@@ -27,18 +27,12 @@
 
 #include "VTparse.h"
 
-#if __STDC__
-#define Const const
-#else
-#define Const /**/
-#endif
-
 /*
  * Stupid Apollo C preprocessor can't handle long lines.  So... To keep
  * it happy, we put each onto a separate line....  Sigh...
  */
 
-Const int groundtable[] =
+const int groundtable[] =
 {
 /*	NUL		SOH		STX		ETX	*/
 CASE_IGNORE,
@@ -362,7 +356,7 @@ CASE_PRINT,
 CASE_PRINT,
 };
 
-Const int csitable[] =		/* ESC [ */
+const int csitable[] =		/* ESC [ */
 {
 /*	NUL		SOH		STX		ETX	*/
 CASE_IGNORE,
@@ -686,7 +680,7 @@ CASE_GROUND_STATE,
 CASE_GROUND_STATE,
 };
 
-Const int dectable[] =		/* ESC [ ? */
+const int dectable[] =		/* ESC [ ? */
 {
 /*	NUL		SOH		STX		ETX	*/
 CASE_IGNORE,
@@ -1010,7 +1004,7 @@ CASE_GROUND_STATE,
 CASE_GROUND_STATE,
 };
 
-Const int eigtable[] =		/* CASE_ESC_IGNORE */
+const int eigtable[] =		/* CASE_ESC_IGNORE */
 {
 /*	NUL		SOH		STX		ETX	*/
 CASE_IGNORE,
@@ -1335,7 +1329,7 @@ CASE_GROUND_STATE,
 CASE_GROUND_STATE,
 };
 
-Const int esctable[] =		/* ESC */
+const int esctable[] =		/* ESC */
 {
 /*	NUL		SOH		STX		ETX	*/
 CASE_IGNORE,
@@ -1659,7 +1653,7 @@ CASE_GROUND_STATE,
 CASE_GROUND_STATE,
 };
 
-Const int iestable[] =		/* CASE_IGNORE_ESC */
+const int iestable[] =		/* CASE_IGNORE_ESC */
 {
 /*	NUL		SOH		STX		ETX	*/
 CASE_IGNORE_STATE,
@@ -1983,7 +1977,7 @@ CASE_GROUND_STATE,
 CASE_GROUND_STATE,
 };
 
-Const int igntable[] =		/* CASE_IGNORE_STATE */
+const int igntable[] =		/* CASE_IGNORE_STATE */
 {
 /*	NUL		SOH		STX		ETX	*/
 CASE_IGNORE,
@@ -2307,7 +2301,7 @@ CASE_GROUND_STATE,
 CASE_GROUND_STATE,
 };
 
-Const int scrtable[] =		/* ESC # */
+const int scrtable[] =		/* ESC # */
 {
 /*	NUL		SOH		STX		ETX	*/
 CASE_IGNORE,
@@ -2631,7 +2625,7 @@ CASE_GROUND_STATE,
 CASE_GROUND_STATE,
 };
 
-Const int scstable[] =		/* ESC ( etc. */
+const int scstable[] =		/* ESC ( etc. */
 {
 /*	NUL		SOH		STX		ETX	*/
 CASE_IGNORE,

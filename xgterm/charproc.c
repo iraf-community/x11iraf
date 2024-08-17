@@ -94,7 +94,7 @@ extern jmp_buf VTend;
 
 extern XtAppContext app_con;
 extern Widget toplevel;
-extern void exit();
+extern void exit(int);
 #ifndef X_NOT_STDC_ENV
 #include <stdlib.h>
 #else
@@ -103,19 +103,25 @@ extern char *realloc();
 #endif
 
 
-static void VTallocbuf();
-static int finput();
-static void dotext();
-static void WriteText();
-static int in_put();
-static void do_read(), do_write();
-static void ToAlternate();
-static void FromAlternate();
-static void update_font_info();
+static void VTallocbuf(void);
+static int finput(void);
+static void dotext(TScreen *screen, unsigned int flags, char charset, char *buf, char *ptr, unsigned int fg, unsigned int bg);
+static void WriteText(TScreen *screen, char *str, int len, unsigned int flags, unsigned int fg, unsigned int bg);
+static int in_put(void);
+static void do_read(XtPointer w, int *fd, XtInputId *id), do_write(XtPointer w, int *fd, XtInputId *id);
+static void ToAlternate(TScreen *screen);
+static void FromAlternate(TScreen *screen);
+static void update_font_info(TScreen *screen, int doresize);
 
-static void bitset(), bitclr();
-void ShowCursor(), HideCursor();
-    
+static void bitset(unsigned int *p, int mask), bitclr(unsigned int *p, int mask);
+void ShowCursor(void), HideCursor(void);
+
+void unparseseq(ANSI *ap, int fd);
+void unparseputn(unsigned int n, int fd);
+void unparseputc(char c, int fd);
+void unparsefputs (char *s, int fd);
+void VTReset(Boolean full);
+
 #define	DEFAULT		-1
 #define	TEXT_BUF_SIZE	1024
 #define TRACKTIMESEC	4L
@@ -255,31 +261,31 @@ extern int scstable[];
 
 
 /* event handlers */
-extern void HandleKeyPressed(), HandleEightBitKeyPressed();
-extern void HandleStringEvent();
-extern void HandleEnterWindow();
-extern void HandleLeaveWindow();
-extern void HandleBellPropertyChange();
-extern void HandleFocusChange();
-static void HandleKeymapChange();
-extern void HandleInsertSelection();
-extern void HandleSelectStart(), HandleKeyboardSelectStart();
-extern void HandleSelectExtend(), HandleSelectSet();
-extern void HandleSelectEnd(), HandleKeyboardSelectEnd();
-extern void HandleStartExtend(), HandleKeyboardStartExtend();
-static void HandleBell();
-static void HandleVisualBell();
-static void HandleIgnore();
-extern void HandleSecure();
-extern void HandleScrollForward();
-extern void HandleScrollBack();
-extern void HandleCreateMenu(), HandlePopupMenu();
-extern void HandleSetFont();
-extern void SetVTFont();
+extern void HandleKeyPressed(Widget w, XEvent *event, String *params, Cardinal *nparams), HandleEightBitKeyPressed(Widget w, XEvent *event, String *params, Cardinal *nparams);
+extern void HandleStringEvent(Widget w, XEvent *event, String *params, Cardinal *nparams);
+extern void HandleEnterWindow(Widget w, caddr_t eventdata, XEnterWindowEvent *event);
+extern void HandleLeaveWindow(Widget w, caddr_t eventdata, XEnterWindowEvent *event);
+extern void HandleBellPropertyChange(Widget w, XtPointer data, XEvent *ev, Boolean *more);
+extern void HandleFocusChange(Widget w, caddr_t eventdata, XFocusChangeEvent *event);
+static void HandleKeymapChange(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void HandleInsertSelection(Widget w, XEvent *event, String *params, Cardinal *num_params);
+extern void HandleSelectStart(Widget w, XEvent *event, String *params, Cardinal *num_params), HandleKeyboardSelectStart(Widget w, XEvent *event, String *params, Cardinal *num_params);
+extern void HandleSelectExtend(Widget w, XEvent *event, String *params, Cardinal *num_params), HandleSelectSet(Widget w, XEvent *event, String *params, Cardinal *num_params);
+extern void HandleSelectEnd(Widget w, XEvent *event, String *params, Cardinal *num_params), HandleKeyboardSelectEnd(Widget w, XEvent *event, String *params, Cardinal *num_params);
+extern void HandleStartExtend(Widget w, XEvent *event, String *params, Cardinal *num_params), HandleKeyboardStartExtend(Widget w, XEvent *event, String *params, Cardinal *num_params);
+static void HandleBell(Widget w, XEvent *event, String *params, Cardinal *param_count);
+static void HandleVisualBell(Widget w, XEvent *event, String *params, Cardinal *param_count);
+static void HandleIgnore(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void HandleSecure(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void HandleScrollForward(Widget gw, XEvent *event, String *params, Cardinal *nparams);
+extern void HandleScrollBack(Widget gw, XEvent *event, String *params, Cardinal *nparams);
+extern void HandleCreateMenu(Widget w, XEvent *event, String *params, Cardinal *param_count), HandlePopupMenu(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void HandleSetFont(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void SetVTFont(int i, int doresize, char *name1, char *name2);
 
-extern void ViButton(), DiredButton();
-extern Boolean SendMousePosition();
-extern void ScrnSetAttributes();
+extern void ViButton(Widget w, XEvent *event, String *params, Cardinal *num_params), DiredButton(Widget w, XEvent *event, String *params, Cardinal *num_params);
+extern Boolean SendMousePosition(Widget w, XEvent *event);
+extern void ScrnSetAttributes(TScreen *screen, int row, int col, unsigned int mask, unsigned int value, int length);
 
 /*
  * NOTE: VTInitialize zeros out the entire ".screen" component of the 
@@ -629,13 +635,13 @@ static XtResource resources[] = {
         XtRBoolean, (XtPointer) &defaultFALSE},
 };
 
-static void VTClassInit();
-static void VTInitialize();
-static void VTRealize();
-static void VTExpose();
-static void VTResize();
-static void VTDestroy();
-static Boolean VTSetValues();
+static void VTClassInit(void);
+static void VTInitialize(Widget wrequest, Widget wnew, ArgList args, Cardinal *num_args);
+static void VTRealize(Widget w, XtValueMask *valuemask, XSetWindowAttributes *values);
+static void VTExpose(Widget w, XEvent *event, Region region);
+static void VTResize(Widget w);
+static void VTDestroy(Widget w);
+static Boolean VTSetValues(Widget cur, Widget request, Widget new, ArgList args, Cardinal *num_args);
 #ifdef I18N
 static void VTInitI18N();
 #endif
@@ -680,14 +686,14 @@ static WidgetClassRec xgtermClassRec = {
 
 WidgetClass xgtermWidgetClass = (WidgetClass)&xgtermClassRec;
 
-static void VTparse()
+static void VTparse(void)
 {
-	register TScreen *screen = &term->screen;
-	register int *parsestate = groundtable;
-	register unsigned int c;
-	register unsigned char *cp;
-	register int row, col, top, bot, scstype;
-	extern int TrackMouse();
+	TScreen *screen = &term->screen;
+	int *parsestate = groundtable;
+	unsigned int c;
+	unsigned char *cp;
+	int row, col, top, bot, scstype;
+	extern int TrackMouse(int func, int startrow, int startcol, int firstrow, int lastrow);
 
 	if(setjmp(vtjmpbuf))
 		parsestate = groundtable;
@@ -1378,7 +1384,7 @@ static void VTparse()
 	}
 }
 
-static finput()
+static finput(void)
 {
 	return(doinput());
 }
@@ -1398,10 +1404,7 @@ static int pty_read_bytes = 0;
 /* Write data to the pty as typed by the user, pasted with the mouse,
    or generated by us in response to a query ESC sequence. */
 
-v_write(f, d, len)
-    int f;
-    char *d;
-    int len;
+v_write(int f, char *d, int len)
 {
 	int riten;
 	int c = len;
@@ -1561,10 +1564,10 @@ v_write(f, d, len)
  * been received from the client.
  */
 static int
-in_put()
+in_put(void)
 {
-    register TScreen *screen = &term->screen;
-    register XtInputMask mask;
+    TScreen *screen = &term->screen;
+    XtInputMask mask;
 
     /* Enable pty input. */
     if (!input_handler)
@@ -1628,12 +1631,9 @@ done:
  * processed out of the buffer elsewhere.
  */
 static void
-do_read (w, fd, id)
-    XtPointer w;
-    int *fd;
-    XtInputId *id;
+do_read (XtPointer w, int *fd, XtInputId *id)
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
     /* Don't read any more data until the input buffer is empty. */
     if (bcnt > 0)
@@ -1669,8 +1669,8 @@ do_read (w, fd, id)
 	}
 
 	if (!screen->output_eight_bits) {
-	    register int bc = bcnt;
-	    register Char *b = bptr;
+	    int bc = bcnt;
+	    Char *b = bptr;
 
 	    for (; bc > 0; bc--, b++) {
 		*b &= (Char) 0x7f;
@@ -1690,10 +1690,7 @@ do_read (w, fd, id)
  * queued and the output file is ready for writing.
  */
 static void
-do_write (w, fd, id)
-    XtPointer w;
-    int *fd;
-    XtInputId *id;
+do_write (XtPointer w, int *fd, XtInputId *id)
 {
     v_write (*fd, 0, 0);
 }
@@ -1701,8 +1698,7 @@ do_write (w, fd, id)
 /* init_ttyio -- Initialize tty i/o.  Called by the main when the terminal
  * file descriptor has been obtained.
  */
-init_ttyio (pty)
-    int pty;
+init_ttyio (int pty)
 {
     if (pty < 0) {
         Panic ("init_ttyio: invalid pty=%d\n", pty);
@@ -1719,17 +1715,17 @@ init_ttyio (pty)
  * by charset.  worry about end of line conditions (wraparound if selected).
  */
 static void
-dotext(screen, flags, charset, buf, ptr, fg, bg)
-    register TScreen	*screen;
-    unsigned	flags, fg, bg;
-    char	charset;
-    char	*buf;		/* start of characters to process */
-    char	*ptr;		/* end */
+dotext(TScreen *screen, unsigned int flags, char charset, char *buf, char *ptr, unsigned int fg, unsigned int bg)
+           	        
+            	              
+        	        
+        	     		/* start of characters to process */
+        	     		/* end */
 {
-	register char	*s;
-	register int	len;
-	register int	n;
-	register int	next_col;
+	char	*s;
+	int	len;
+	int	n;
+	int	next_col;
 
 	switch (charset) {
 	case 'A':	/* United Kingdom set			*/
@@ -1787,15 +1783,11 @@ dotext(screen, flags, charset, buf, ptr, fg, bg)
  * the current cursor position.  update cursor position.
  */
 static void
-WriteText(screen, str, len, flags, fg, bg)
-    register TScreen	*screen;
-    register char	*str;
-    register int	len;
-    unsigned		flags, fg, bg;
+WriteText(TScreen *screen, char *str, int len, unsigned int flags, unsigned int fg, unsigned int bg)
 {
-	register int cx, cy;
-	register unsigned fgs = flags;
-        register Pixel fg_pix, bg_pix;
+	int cx, cy;
+	unsigned fgs = flags;
+        Pixel fg_pix, bg_pix;
 	GC	currentGC;
 
         fg_pix = (fgs & FG_COLOR) ? screen->colors[fg] : 
@@ -1870,11 +1862,9 @@ WriteText(screen, str, len, flags, fg, bg)
 /*
  * process ANSI modes set, reset
  */
-ansi_modes(termw, func)
-    XgtermWidget	termw;
-    int		(*func)();
+ansi_modes(XgtermWidget termw, int (*func) (/* ??? */))
 {
-	register int	i;
+	int	i;
 
 	for (i=0; i<nparam; ++i) {
 		switch (param[i]) {
@@ -1893,12 +1883,10 @@ ansi_modes(termw, func)
 /*
  * process DEC private modes set, reset
  */
-dpmodes(termw, func)
-    XgtermWidget	termw;
-    void (*func)();
+dpmodes(XgtermWidget termw, void (*func) (/* ??? */))
 {
-	register TScreen	*screen	= &termw->screen;
-	register int	i, j;
+	TScreen	*screen	= &termw->screen;
+	int	i, j;
 
 	for (i=0; i<nparam; ++i) {
 		switch (param[i]) {
@@ -2075,11 +2063,10 @@ dpmodes(termw, func)
 /*
  * process xgterm private modes save
  */
-savemodes(termw)
-    XgtermWidget termw;
+savemodes(XgtermWidget termw)
 {
-	register TScreen	*screen	= &termw->screen;
-	register int i;
+	TScreen	*screen	= &termw->screen;
+	int i;
 
 	for (i = 0; i < nparam; i++) {
 		switch (param[i]) {
@@ -2141,11 +2128,10 @@ savemodes(termw)
 /*
  * process xgterm private modes restore
  */
-restoremodes(termw)
-    XgtermWidget termw;
+restoremodes(XgtermWidget termw)
 {
-	register TScreen	*screen	= &termw->screen;
-	register int i, j;
+	TScreen	*screen	= &termw->screen;
+	int i, j;
 
 	for (i = 0; i < nparam; i++) {
 		switch (param[i]) {
@@ -2272,9 +2258,7 @@ restoremodes(termw)
 /*
  * set a bit in a word given a pointer to the word and a mask.
  */
-static void bitset(p, mask)
-    unsigned *p;
-    int mask;
+static void bitset(unsigned int *p, int mask)
 {
 	*p |= mask;
 }
@@ -2282,20 +2266,16 @@ static void bitset(p, mask)
 /*
  * clear a bit in a word given a pointer to the word and a mask.
  */
-static void bitclr(p, mask)
-    unsigned *p;
-    int mask;
+static void bitclr(unsigned int *p, int mask)
 {
 	*p &= ~mask;
 }
 
-unparseseq(ap, fd)
-    register ANSI *ap;
-    int fd;
+void unparseseq(ANSI *ap, int fd)
 {
-	register int	c;
-	register int	i;
-	register int	inters;
+	int	c;
+	int	i;
+	int	inters;
 
 	c = ap->a_type;
 	if (c>=0x80 && c<=0x9F) {
@@ -2322,9 +2302,7 @@ unparseseq(ap, fd)
 	}
 }
 
-unparseputn(n, fd)
-unsigned int	n;
-int fd;
+void unparseputn(unsigned int n, int fd)
 {
 	unsigned int	q;
 
@@ -2334,12 +2312,10 @@ int fd;
 	unparseputc((char) ('0' + (n%10)), fd);
 }
 
-unparseputc(c, fd)
-char c;
-int fd;
+void unparseputc(char c, int fd)
 {
 	char	buf[2];
-	register i = 1;
+	int i = 1;
 	extern XgtermWidget term;
 
 	if((buf[0] = c) == '\r' && (term->flags & LINEFEED)) {
@@ -2349,36 +2325,32 @@ int fd;
 	v_write(fd, buf, i);
 }
 
-unparsefputs (s, fd)
-    register char *s;
-    int fd;
+void unparsefputs (char *s, int fd)
 {
     if (s) {
 	while (*s) unparseputc (*s++, fd);
     }
 }
 
-static void SwitchBufs();
+static void SwitchBufs(TScreen *screen);
 
 static void
-ToAlternate(screen)
-register TScreen *screen;
+ToAlternate(TScreen *screen)
 {
-	extern ScrnBuf Allocate();
+	extern ScrnBuf Allocate(int nrow, int ncol, Char **addr);
 
 	if(screen->alternate)
 		return;
 	if(!screen->altbuf)
-		screen->altbuf = Allocate(screen->max_row + 1, screen->max_col
-		 + 1, &screen->abuf_address);
+		screen->altbuf = Allocate(screen->max_row + 1, 
+		 screen->max_col + 1, (Char **)&screen->abuf_address);
 	SwitchBufs(screen);
 	screen->alternate = TRUE;
 	update_altscreen();
 }
 
 static void
-FromAlternate(screen)
-register TScreen *screen;
+FromAlternate(TScreen *screen)
 {
 	if(!screen->alternate)
 		return;
@@ -2388,10 +2360,9 @@ register TScreen *screen;
 }
 
 static void
-SwitchBufs(screen)
-    register TScreen *screen;
+SwitchBufs(TScreen *screen)
 {
-	register int rows, top;
+	int rows, top;
 
 	if(screen->cursor_state)
 		HideCursor();
@@ -2431,10 +2402,9 @@ SwitchBufs(screen)
 
 /* swap buffer line pointers between alt and regular screens */
 
-SwitchBufPtrs(screen)
-    register TScreen *screen;
+SwitchBufPtrs(TScreen *screen)
 {
-    register int rows = screen->max_row + 1;
+    int rows = screen->max_row + 1;
     char *save [4 * MAX_ROWS];
 
     memmove( (char *)save, (char *)screen->buf, 4 * sizeof(char *) * rows);
@@ -2443,10 +2413,10 @@ SwitchBufPtrs(screen)
     memmove( (char *)screen->altbuf, (char *)save, 4 * sizeof(char *) * rows);
 }
 
-VTRun()
+VTRun(void)
 {
-	register TScreen *screen = &term->screen;
-	register int i;
+	TScreen *screen = &term->screen;
+	int i;
 	
 	XtRealizeWidget (term->core.parent);
 	if (!screen->TekEmu)
@@ -2483,12 +2453,9 @@ VTRun()
 }
 
 /*ARGSUSED*/
-static void VTExpose(w, event, region)
-    Widget w;
-    XEvent *event;
-    Region region;
+static void VTExpose(Widget w, XEvent *event, Region region)
 {
-	register TScreen *screen = &term->screen;
+	TScreen *screen = &term->screen;
 
 #ifdef DEBUG
 	if(debug)
@@ -2498,10 +2465,9 @@ static void VTExpose(w, event, region)
 		HandleExposure (screen, event);
 }
 
-static void VTGraphicsOrNoExpose (event)
-    XEvent *event;
+static void VTGraphicsOrNoExpose (XEvent *event)
 {
-	register TScreen *screen = &term->screen;
+	TScreen *screen = &term->screen;
 	if (screen->incopy <= 0) {
 		screen->incopy = 1;
 		if (screen->scrolls > 0)
@@ -2521,11 +2487,11 @@ static void VTGraphicsOrNoExpose (event)
 }
 
 /*ARGSUSED*/
-static void VTNonMaskableEvent (w, closure, event, cont)
-Widget w;			/* unused */
-XtPointer closure;		/* unused */
-XEvent *event;
-Boolean *cont;			/* unused */
+static void VTNonMaskableEvent (Widget w, XtPointer closure, XEvent *event, Boolean *cont)
+         			/* unused */
+                  		/* unused */
+              
+              			/* unused */
 {
     switch (event->type) {
        case GraphicsExpose:
@@ -2538,8 +2504,7 @@ Boolean *cont;			/* unused */
 
 
 
-static void VTResize(w)
-    Widget w;
+static void VTResize(Widget w)
 {
     if (XtIsRealized(w))
       ScreenResize (&term->screen, term->core.width, term->core.height,
@@ -2553,9 +2518,9 @@ static String xgterm_trans =
     "<ClientMessage>WM_PROTOCOLS: DeleteWindow()\n\
      <MappingNotify>: KeyboardMapping()\n";
 
-int VTInit ()
+int VTInit (void)
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
     Widget vtparent = term->core.parent;
 
     XtRealizeWidget (vtparent);
@@ -2567,17 +2532,17 @@ int VTInit ()
     return (1);
 }
 
-static void VTallocbuf ()
+static void VTallocbuf (void)
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
     int nrows = screen->max_row + 1;
-    extern ScrnBuf Allocate();
+    extern ScrnBuf Allocate(int nrow, int ncol, Char **addr);
 
     /* allocate screen buffer now, if necessary. */
     if (screen->scrollWidget)
       nrows += screen->savelines;
     screen->allbuf = Allocate (nrows, screen->max_col + 1,
-     &screen->sbuf_address);
+     (Char **)&screen->sbuf_address);
     if (screen->scrollWidget)
       screen->buf = &screen->allbuf[4 * screen->savelines];
     else
@@ -2585,7 +2550,7 @@ static void VTallocbuf ()
     return;
 }
 
-static void VTClassInit ()
+static void VTClassInit (void)
 {
     XtAddConverter(XtRString, XtRGravity, XmuCvtStringToGravity,
 		   (XtConvertArgList) NULL, (Cardinal) 0);
@@ -2593,10 +2558,7 @@ static void VTClassInit ()
 
 
 /* ARGSUSED */
-static void VTInitialize (wrequest, wnew, args, num_args)
-   Widget wrequest, wnew;
-   ArgList args;
-   Cardinal *num_args;
+static void VTInitialize (Widget wrequest, Widget wnew, ArgList args, Cardinal *num_args)
 {
    XgtermWidget request = (XgtermWidget) wrequest;
    XgtermWidget new     = (XgtermWidget) wnew;
@@ -2672,17 +2634,17 @@ static void VTInitialize (wrequest, wnew, args, num_args)
     * to care about the shell's border being part of our focus.
     */
    XtAddEventHandler(XtParent(new), FocusChangeMask, FALSE,
-		HandleFocusChange, (Opaque)NULL);
+		(XtEventHandler)HandleFocusChange, (Opaque)NULL);
    XtAddEventHandler((Widget)new, 0L, TRUE,
 		VTNonMaskableEvent, (Opaque)NULL);
    XtAddEventHandler((Widget)new, PropertyChangeMask, FALSE,
 		     HandleBellPropertyChange, (Opaque)NULL);
 
    /* These apply to vt100 window events. */
-   XtAddEventHandler (wnew, EnterWindowMask, FALSE, HandleEnterWindow,
-       (Opaque)NULL);
-   XtAddEventHandler (wnew, LeaveWindowMask, FALSE, HandleLeaveWindow,
-       (Opaque)NULL);
+   XtAddEventHandler (wnew, EnterWindowMask, FALSE,
+       (XtEventHandler)HandleLeaveWindow, (Opaque)NULL);
+   XtAddEventHandler (wnew, LeaveWindowMask, FALSE, 
+       (XtEventHandler)HandleLeaveWindow, (Opaque)NULL);
 
    new->screen.bellInProgress = FALSE;
    set_character_class (new->screen.charClass);
@@ -2705,20 +2667,16 @@ static void VTInitialize (wrequest, wnew, args, num_args)
 }
 
 
-static void VTDestroy (w)
-Widget w;
+static void VTDestroy (Widget w)
 {
     XtFree(((XgtermWidget)w)->screen.selection);
 }
 
 /*ARGSUSED*/
-static void VTRealize (w, valuemask, values)
-    Widget w;
-    XtValueMask *valuemask;
-    XSetWindowAttributes *values;
+static void VTRealize (Widget w, XtValueMask *valuemask, XSetWindowAttributes *values)
 {
 	unsigned int width, height;
-	register TScreen *screen = &term->screen;
+	TScreen *screen = &term->screen;
 	int xpos, ypos, pr;
 	XSizeHints		sizehints;
 	int scrollbar_width;
@@ -3011,10 +2969,7 @@ static void VTInitI18N()
 #endif
 
 
-static Boolean VTSetValues (cur, request, new, args, num_args)
-    Widget cur, request, new;
-    ArgList args;
-    Cardinal *num_args;
+static Boolean VTSetValues (Widget cur, Widget request, Widget new, ArgList args, Cardinal *num_args)
 {
     XgtermWidget curvt = (XgtermWidget) cur;
     XgtermWidget newvt = (XgtermWidget) new; 
@@ -3074,10 +3029,10 @@ static Boolean VTSetValues (cur, request, new, args, num_args)
  * Shows cursor at new cursor position in screen.
  */
 void
-ShowCursor()
+ShowCursor(void)
 {
-	register TScreen *screen = &term->screen;
-	register int x, y, flags;
+	TScreen *screen = &term->screen;
+	int x, y, flags;
 	Char c;
 	GC	currentGC;
 	Boolean	in_selection;
@@ -3193,12 +3148,12 @@ ShowCursor()
  * hide cursor at previous cursor position in screen.
  */
 void
-HideCursor()
+HideCursor(void)
 {
-	register TScreen *screen = &term->screen;
+	TScreen *screen = &term->screen;
 	GC	currentGC;
-	register int x, y, flags, fg, bg;
-	register Pixel fg_pix, bg_pix;
+	int x, y, flags, fg, bg;
+	Pixel fg_pix, bg_pix;
 	char c;
 	Boolean	in_selection;
 
@@ -3262,10 +3217,10 @@ HideCursor()
 	screen->cursor_state = OFF;
 }
 
-VTReset(full)
-    Boolean full;
+void
+VTReset(Boolean full)
 {
-	register TScreen *screen = &term->screen;
+	TScreen *screen = &term->screen;
 
 	/* reset scrolling region */
 	screen->top_marg = 0;
@@ -3335,10 +3290,9 @@ VTReset(full)
  * and sets the indicated ranges to the indicated values.
  */
 
-int set_character_class (s)
-    register char *s;
+int set_character_class (char *s)
 {
-    register int i;			/* iterator, index into s */
+    int i;			/* iterator, index into s */
     int len;				/* length of s */
     int acc;				/* accumulator */
     int low, high;			/* bounds of range [0..127] */
@@ -3432,11 +3386,7 @@ int set_character_class (s)
 }
 
 /* ARGSUSED */
-static void HandleKeymapChange(w, event, params, param_count)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *param_count;
+static void HandleKeymapChange(Widget w, XEvent *event, String *params, Cardinal *param_count)
 {
     static XtTranslations keymap, original;
     static XtResource key_resources[] = {
@@ -3465,11 +3415,11 @@ static void HandleKeymapChange(w, event, params, param_count)
 
 
 /* ARGSUSED */
-static void HandleBell(w, event, params, param_count)
-    Widget w;
-    XEvent *event;		/* unused */
-    String *params;		/* [0] = volume */
-    Cardinal *param_count;	/* 0 or 1 */
+static void HandleBell(Widget w, XEvent *event, String *params, Cardinal *param_count)
+             
+                  		/* unused */
+                   		/* [0] = volume */
+                          	/* 0 or 1 */
 {
     int percent = (*param_count) ? atoi(params[0]) : 0;
 
@@ -3478,22 +3428,22 @@ static void HandleBell(w, event, params, param_count)
 
 
 /* ARGSUSED */
-static void HandleVisualBell(w, event, params, param_count)
-    Widget w;
-    XEvent *event;		/* unused */
-    String *params;		/* unused */
-    Cardinal *param_count;	/* unused */
+static void HandleVisualBell(Widget w, XEvent *event, String *params, Cardinal *param_count)
+             
+                  		/* unused */
+                   		/* unused */
+                          	/* unused */
 {
     VisualBell();
 }
 
 
 /* ARGSUSED */
-static void HandleIgnore(w, event, params, param_count)
-    Widget w;
-    XEvent *event;		/* unused */
-    String *params;		/* unused */
-    Cardinal *param_count;	/* unused */
+static void HandleIgnore(Widget w, XEvent *event, String *params, Cardinal *param_count)
+             
+                  		/* unused */
+                   		/* unused */
+                          	/* unused */
 {
     /* do nothing, but check for funny escape sequences */
     (void) SendMousePosition(w, event);
@@ -3502,13 +3452,7 @@ static void HandleIgnore(w, event, params, param_count)
 
 /* ARGSUSED */
 static void
-DoSetSelectedFont(w, client_data, selection, type, value, length, format)
-    Widget w;
-    XtPointer client_data;
-    Atom *selection, *type;
-    XtPointer value;
-    unsigned long *length;
-    int *format;
+DoSetSelectedFont(Widget w, XtPointer client_data, Atom *selection, Atom *type, XtPointer value, long unsigned int *length, int *format)
 {
     char *val = (char *)value;
     int len;
@@ -3530,9 +3474,7 @@ DoSetSelectedFont(w, client_data, selection, type, value, length, format)
     }
 }
 
-void FindFontSelection (atom_name, justprobe)
-    char *atom_name;
-    Bool justprobe;
+void FindFontSelection (char *atom_name, int justprobe)
 {
     static AtomPtr *atoms;
     static int atomCount = 0;
@@ -3565,11 +3507,11 @@ void FindFontSelection (atom_name, justprobe)
 
 
 /* ARGSUSED */
-void HandleSetFont(w, event, params, param_count)
-    Widget w;
-    XEvent *event;		/* unused */
-    String *params;		/* unused */
-    Cardinal *param_count;	/* unused */
+void HandleSetFont(Widget w, XEvent *event, String *params, Cardinal *param_count)
+             
+                  		/* unused */
+                   		/* unused */
+                          	/* unused */
 {
     int fontnum;
     char *name1 = NULL, *name2 = NULL;
@@ -3620,10 +3562,7 @@ void HandleSetFont(w, event, params, param_count)
 }
 
 
-void SetVTFont (i, doresize, name1, name2)
-    int i;
-    Bool doresize;
-    char *name1, *name2;
+void SetVTFont (int i, int doresize, char *name1, char *name2)
 {
     TScreen *screen = &term->screen;
 
@@ -3643,11 +3582,7 @@ void SetVTFont (i, doresize, name1, name2)
 }
 
 
-int LoadNewFont (screen, nfontname, bfontname, doresize, fontnum)
-    TScreen *screen;
-    char *nfontname, *bfontname;
-    Bool doresize;
-    int fontnum;
+int LoadNewFont (TScreen *screen, char *nfontname, char *bfontname, int doresize, int fontnum)
 {
     XFontStruct *nfs = NULL, *bfs = NULL;
     XGCValues xgcv;
@@ -3756,9 +3691,7 @@ int LoadNewFont (screen, nfontname, bfontname, doresize, fontnum)
 }
 
 static void
-update_font_info (screen, doresize)
-    TScreen *screen;
-    Bool doresize;
+update_font_info (TScreen *screen, int doresize)
 {
     int i, j, width, height, scrollbar_width;
 
@@ -3798,8 +3731,7 @@ update_font_info (screen, doresize)
     set_vt_box (screen);
 }
 
-set_vt_box (screen)
-	TScreen *screen;
+set_vt_box (TScreen *screen)
 {
 	XPoint	*vp;
 
@@ -3812,8 +3744,7 @@ set_vt_box (screen)
 }
 
 
-set_cursor_gcs (screen)
-    TScreen *screen;
+set_cursor_gcs (TScreen *screen)
 {
     XGCValues xgcv;
     unsigned long mask;

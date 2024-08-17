@@ -68,9 +68,9 @@ struct timezone Tz;
 #include "HTMLamp.h"
 
 
-extern void FreeObjList();
-extern struct mark_up *AddObj();
-extern int ParseMarkType();
+extern void FreeObjList(struct mark_up *List);
+extern struct mark_up *AddObj(struct mark_up **listp, struct mark_up *current, struct mark_up *mark, int keep_wsp);
+extern int ParseMarkType(char *str);
 
 #ifdef NOT_ASCII
 #define TOLOWER(x)	(tolower(x))
@@ -106,9 +106,7 @@ unsigned char map_table[256]={
  * return 1 if equal, 0 otherwise.
  */
 int
-caseless_equal(str1, str2)
-	char *str1;
-	char *str2;
+caseless_equal(char *str1, char *str2)
 {
 	if ((str1 == NULL)||(str2 == NULL))
 	{
@@ -142,10 +140,7 @@ caseless_equal(str1, str2)
  * return 1 if equal, 0 otherwise.
  */
 int
-caseless_equal_prefix(str1, str2, cnt)
-	char *str1;
-	char *str2;
-	int cnt;
+caseless_equal_prefix(char *str1, char *str2, int cnt)
 {
 	int i;
 
@@ -182,8 +177,7 @@ caseless_equal_prefix(str1, str2, cnt)
  * it can never get longer.
  */
 void
-clean_white_space(txt)
-	char *txt;
+clean_white_space(char *txt)
 {
 	char *ptr;
 	char *start;
@@ -271,10 +265,7 @@ clean_white_space(txt)
  *	2: terminated with whitespace
  */
 char
-ExpandEscapes(esc, endp, termination)
-	char *esc;
-	char **endp;
-	int termination;
+ExpandEscapes(char *esc, char **endp, int termination)
 {
 	int cnt;
 	char val;
@@ -348,8 +339,7 @@ ExpandEscapes(esc, endp, termination)
  * if any escapes are replaced, the string becomes shorter.
  */
 void
-clean_text(txt)
-	char *txt;
+clean_text(char *txt)
 {
 	int unterminated;
 	int space_terminated;
@@ -499,9 +489,7 @@ clean_text(txt)
  * The returned text has already expanded '&' escapes.
  */
 char *
-get_text(start, endp)
-	char *start;
-	char **endp;
+get_text(char *start, char **endp)
 {
 	char *ptr;
 	char *text;
@@ -572,9 +560,7 @@ get_text(start, endp)
  * endp pointing to the ttrailing '>' in the original string.
  */
 struct mark_up *
-get_mark(start, endp)
-	char *start;
-	char **endp;
+get_mark(char *start, char **endp)
 {
 	char *ptr;
 	char *text;
@@ -673,9 +659,7 @@ get_mark(start, endp)
  * end of the plain text mark, or the end of the file.
  */
 char *
-get_plain_text(start, endp)
-	char *start;
-	char **endp;
+get_plain_text(char *start, char **endp)
 {
 	char *ptr;
 	char *text;
@@ -771,9 +755,7 @@ get_plain_text(start, endp)
  * may want to add code to append to the old list.
  */
 struct mark_up *
-HTMLParse(old_list, str)
-	struct mark_up *old_list;
-	char *str;
+HTMLParse(struct mark_up *old_list, char *str)
 {
 	int preformat;
 	char *start, *end;
@@ -965,8 +947,7 @@ fprintf(stderr, "HTMLParse exit (%d.%d)\n", Tv.tv_sec, Tv.tv_usec);
  * Determine mark type from the identifying string passed
  */
 int
-ParseMarkType(str)
-	char *str;
+ParseMarkType(char *str)
 {
 	int type;
 	char *tptr;
@@ -1188,10 +1169,7 @@ ParseMarkType(str)
  * Finally the function returns the tag value in a malloced buffer.
  */
 char *
-AnchorTag(ptrp, startp, endp)
-	char **ptrp;
-	char **startp;
-	char **endp;
+AnchorTag(char **ptrp, char **startp, char **endp)
 {
 	char *tag_val;
 	char *ptr;
@@ -1324,10 +1302,7 @@ AnchorTag(ptrp, startp, endp)
  * If the passed tag is found but has no value, return "".
  */
 char *
-ParseMarkTag(text, mtext, mtag)
-	char *text;
-	char *mtext;
-	char *mtag;
+ParseMarkTag(char *text, char *mtext, char *mtag)
 {
 	char *ptr;
 	char *start;

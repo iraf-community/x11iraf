@@ -78,7 +78,7 @@ ant */
  * resources.
  */
 
-extern void XfwfConnectScrollingWidgets( /* Widget w1, Widget w2 */);
+extern void XfwfConnectScrollingWidgets(Widget w1, Widget w2);
 
 
 /*
@@ -91,6 +91,6 @@ extern void XfwfConnectScrollingWidgets( /* Widget w1, Widget w2 */);
  * and the XfwfS prefix may be present but is not necessary.
  */
 
-extern XfwfSReason XfwfCvtStringToScrollReason(/* char * */);
+extern XfwfSReason XfwfCvtStringToScrollReason(String s);
 
 #endif /* _XFWF_SCROLL_H */

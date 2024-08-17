@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "ObmP.h"
 #include "widget.h"
+#include "ObmW/ListTree.h"
 
 /*
  * WIDGET class.
@@ -193,13 +194,13 @@ static fontProp fontNamePropTable[] = {				/*   |   */
 								/*   |   */
 #define NUMITEMS(arr) ((int) (sizeof(arr) / sizeof(arr[0])))	/* \ | / */
 								/*  \|/  */
-static char *widgetGetFontName(); 				/* MF016 */
+static char *widgetGetFontName(Display *, XFontStruct *);	/* MF016 */
 
 
-static	void do_text();
-static	void do_userproc();
-static	void do_popup();
-static	void do_popdown();
+static	void do_text(Widget, XEvent *, String *, Cardinal *);
+static	void do_userproc(Widget, XEvent *, String *, Cardinal *);
+static	void do_popup(Widget, XEvent *, String *, Cardinal *);
+static	void do_popdown(Widget, XEvent *, String *, Cardinal *);
 static XtActionsRec widget_actions[] = {
 	{"call",      do_userproc},
 	{"do_text",   do_text},
@@ -207,47 +208,91 @@ static XtActionsRec widget_actions[] = {
 	{"popdown",   do_popdown},
 };
 
-static	void call_callbacks();
-static	void widgetEvent(), widgetSetDestroy(), widgetDestroy();
-static	void widgetCallback(), widgetSCCallback(), widgetJPCallback();
-static	void widgetSPCallback(), widgetPUCallback(), widgetPDCallback();
-static	void widgetSBCallback(), widgetSECallback(), widgetRPCallback();
-static	void widgetRGCallback(), widgetLTHCallback(), widgetLTACallback();
-static	void widgetTCCCallback();
-static	int widgetSet(), widgetGet(), widgetMap(), widgetUnmap();
-static	int widgetRealize(), widgetUnrealize(), widgetIsRealized();
-static	int widgetPopup(), widgetPopupSpringLoaded(), widgetPopdown();
-static	int widgetAddCallback(), widgetDeleteCallback();
-static	int widgetMove(), widgetResize(), widgetConfigure();
-static	int widgetParseGeometry(), widgetGetGeometry();
-static	int widgetSetSensitive(), widgetIsSensitive();
-static	int widgetManage(), widgetUnmanage(), widgetAppend();
-static	int widgetAddEventHandler(), widgetRemoveEventHandler();
-static	int widgetHighlight(), widgetUnhighlight(), widgetSetTop();
-static	int widgetSetList(), widgetGetItem(), widgetGetValue();
-static	int widgetGetThumb(), widgetMoveThumb(), widgetResizeThumb();
-static	int widgetSetScrollbar(), widgetSetTTName(), widgetGetTTName();
-static	int widgetSetListTree(), widgetListTreeSelect();
-static	int widgetListTreeHighlight(), widgetListTreeDelete();
-static 	int widgetSetLocation(), widgetSetCoordinates();
+static	void call_callbacks(WidgetObject, int, char *);
+static	void widgetEvent(Widget, ObmCallback, XEvent *, Boolean *);
+static	void widgetSetDestroy(ObmObject);
+static	void widgetDestroy(ObmObject);
+static	void widgetCallback(Widget, WidgetObject, caddr_t);
+static	void widgetSCCallback(Widget w, WidgetObject obj, caddr_t);
+static	void widgetJPCallback(Widget w, WidgetObject obj, caddr_t);
+static	void widgetSPCallback(Widget w, WidgetObject obj, caddr_t);
+static	void widgetPUCallback(Widget w, WidgetObject obj, caddr_t);
+static	void widgetPDCallback(Widget w, WidgetObject obj, caddr_t);
+static	void widgetSBCallback(Widget w, WidgetObject obj, caddr_t);
+static	void widgetSECallback(Widget w, WidgetObject obj, caddr_t);
+static	void widgetRPCallback(Widget w, WidgetObject obj, caddr_t);
+static	void widgetRGCallback(Widget w, WidgetObject obj, caddr_t);
+static	void widgetLTHCallback(Widget w, WidgetObject obj, caddr_t);
+static	void widgetLTACallback(Widget w, WidgetObject obj, caddr_t);
+static	void widgetTCCCallback(Widget w, WidgetObject obj, caddr_t);
+static	int widgetSet(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetGet(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetMap(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetUnmap(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetRealize(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetUnrealize(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetIsRealized(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetPopup(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetPopupSpringLoaded(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetPopdown(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetAddCallback(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetDeleteCallback(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetMove(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetResize(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetConfigure(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetParseGeometry(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetGetGeometry(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetSetSensitive(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetIsSensitive(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetManage(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetUnmanage(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetAppend(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetAddEventHandler(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetRemoveEventHandler(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetHighlight(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetUnhighlight(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetSetTop(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetSetList(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetGetItem(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetGetValue(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetGetThumb(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetMoveThumb(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetResizeThumb(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetSetScrollbar(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetSetTTName(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetGetTTName(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetSetListTree(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetListTreeSelect(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetListTreeHighlight(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetListTreeDelete(MsgContext, Tcl_Interp *, int, char **);
+static 	int widgetSetLocation(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetSetCoordinates(MsgContext, Tcl_Interp *, int, char **);
 #ifndef OSI_COMPLIANT
-static	int widgetSetTable(), widgetSetCellAttr(), widgetGetCellAttr();
-static	int widgetGetColAttr(), widgetSetColAttr(), widgetSetRowAttr();
-static	int widgetDeleteRow(), widgetAddRow(), widgetGetTableSize();
-static	int widgetDeleteCol(), widgetAddCol(), widgetSetTableSize();
+static	int widgetSetTable(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetSetCellAttr(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetGetCellAttr(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetGetColAttr(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetSetColAttr(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetSetRowAttr(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetDeleteRow(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetAddRow(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetGetTableSize(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetDeleteCol(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetAddCol(MsgContext, Tcl_Interp *, int, char **);
+static	int widgetSetTableSize(MsgContext, Tcl_Interp *, int, char **);
 #endif
-static	int get_itemno(), buildTreeList(), widgetGetRowAttr();
+static	int get_itemno(WidgetObject, char *);
+static	int buildTreeList(Widget, Tcl_Interp *, ListTreeItem *, const char *);
+static	int widgetGetRowAttr(MsgContext, Tcl_Interp *, int, char **);
 
 
 /* WidgetClassInit -- Initialize the class record for the widget class.
  */
 void
-WidgetClassInit (obm, classrec)
-ObmContext obm;
-register ObjClassRec classrec;
+WidgetClassInit (ObmContext obm, ObjClassRec classrec)
 {
-	register int hashval, n;
-	register char *ip;
+	int hashval, n;
+	char *ip;
 	ObjClassRec widgetclass;
 	static int hashed = 0;
 	Tcl_Interp *tcl;
@@ -260,7 +305,7 @@ register ObjClassRec classrec;
 
 	/* Install the class methods. */
 	classrec->ClassDestroy = WidgetClassDestroy;
-	classrec->Create = (ObmFunc) WidgetCreate;
+	classrec->Create = WidgetCreate;
 	classrec->Destroy = WidgetDestroy;
 	classrec->Evaluate = WidgetEvaluate;
 
@@ -277,142 +322,142 @@ register ObjClassRec classrec;
 
 	    /* Register widget-object actions. */
 	    Tcl_CreateCommand (tcl,
-		"addCallback", widgetAddCallback, (ClientData)msg, NULL);
+		"addCallback", (Tcl_CmdProc *) widgetAddCallback, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"deleteCallback", widgetDeleteCallback, (ClientData)msg,
+		"deleteCallback", (Tcl_CmdProc *) widgetDeleteCallback, (ClientData)msg,
 		NULL);
 	    Tcl_CreateCommand (tcl,
-		"addEventHandler", widgetAddEventHandler, (ClientData)msg,
+		"addEventHandler", (Tcl_CmdProc *) widgetAddEventHandler, (ClientData)msg,
 		NULL);
 	    Tcl_CreateCommand (tcl,
-		"removeEventHandler", widgetRemoveEventHandler,
+		"removeEventHandler", (Tcl_CmdProc *) widgetRemoveEventHandler,
 		(ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"set", widgetSet, (ClientData)msg, NULL);
+		"set", (Tcl_CmdProc *) widgetSet, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"get", widgetGet, (ClientData)msg, NULL);
+		"get", (Tcl_CmdProc *) widgetGet, (ClientData)msg, NULL);
 
 	    /* Text Widget Callbacks */
 	    Tcl_CreateCommand (tcl,
-		"append", widgetAppend, (ClientData)msg, NULL);
+		"append", (Tcl_CmdProc *) widgetAppend, (ClientData)msg, NULL);
 
 	    /* List Widget Callbacks */
 	    Tcl_CreateCommand (tcl,
-		"setList", widgetSetList, (ClientData)msg, NULL);
+		"setList", (Tcl_CmdProc *) widgetSetList, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getItem", widgetGetItem, (ClientData)msg, NULL);
+		"getItem", (Tcl_CmdProc *) widgetGetItem, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"highlight", widgetHighlight, (ClientData)msg, NULL);
+		"highlight", (Tcl_CmdProc *) widgetHighlight, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"unhighlight", widgetUnhighlight, (ClientData)msg, NULL);
+		"unhighlight", (Tcl_CmdProc *) widgetUnhighlight, (ClientData)msg, NULL);
 
 	    /* Dialog Widget Callbacks */
 	    Tcl_CreateCommand (tcl,
-		"getValue", widgetGetValue, (ClientData)msg, NULL);
+		"getValue", (Tcl_CmdProc *) widgetGetValue, (ClientData)msg, NULL);
 
 	    /* Slider Widget Callbacks */
 	    Tcl_CreateCommand (tcl,
-		"getThumb", widgetGetThumb, (ClientData)msg, NULL);
+		"getThumb", (Tcl_CmdProc *) widgetGetThumb, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"moveThumb", widgetMoveThumb, (ClientData)msg, NULL);
+		"moveThumb", (Tcl_CmdProc *) widgetMoveThumb, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"resizeThumb", widgetResizeThumb, (ClientData)msg, NULL);
+		"resizeThumb", (Tcl_CmdProc *) widgetResizeThumb, (ClientData)msg, NULL);
 
 	    /* Scrollbar Widget Callbacks */
 	    Tcl_CreateCommand (tcl,
-		"setScrollbar", widgetSetScrollbar, (ClientData)msg, NULL);
+		"setScrollbar", (Tcl_CmdProc *) widgetSetScrollbar, (ClientData)msg, NULL);
 
 	    /* Viewport Widget Callbacks */
 	    Tcl_CreateCommand (tcl,
-		"setLocation", widgetSetLocation, (ClientData)msg, NULL);
+		"setLocation", (Tcl_CmdProc *) widgetSetLocation, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setCoordinates", widgetSetCoordinates, (ClientData)msg, NULL);
+		"setCoordinates", (Tcl_CmdProc *) widgetSetCoordinates, (ClientData)msg, NULL);
 
 	    /* Tabs Widget Callbacks */
 	    Tcl_CreateCommand (tcl,
-		"setTop", widgetSetTop, (ClientData)msg, NULL);
+		"setTop", (Tcl_CmdProc *) widgetSetTop, (ClientData)msg, NULL);
 
 	    /* Tree Widget Callbacks */
 	    Tcl_CreateCommand (tcl,
-		"setListTree", widgetSetListTree, (ClientData)msg, NULL);
+		"setListTree", (Tcl_CmdProc *) widgetSetListTree, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"listTreeSelect", widgetListTreeSelect, (ClientData)msg, NULL);
+		"listTreeSelect", (Tcl_CmdProc *) widgetListTreeSelect, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"listTreeDelete", widgetListTreeDelete, (ClientData)msg, NULL);
+		"listTreeDelete", (Tcl_CmdProc *) widgetListTreeDelete, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"listTreeHighlight", widgetListTreeHighlight,
+		"listTreeHighlight", (Tcl_CmdProc *) widgetListTreeHighlight,
 		(ClientData)msg, NULL);
 
 #ifndef OSI_COMPLIANT
 	    /* Table Widget Callbacks */
 	    Tcl_CreateCommand (tcl,
-		"setTable", widgetSetTable, (ClientData)msg, NULL);
+		"setTable", (Tcl_CmdProc *) widgetSetTable, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getCellAttr", widgetGetCellAttr, (ClientData)msg, NULL);
+		"getCellAttr", (Tcl_CmdProc *) widgetGetCellAttr, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setCellAttr", widgetSetCellAttr, (ClientData)msg, NULL);
+		"setCellAttr", (Tcl_CmdProc *) widgetSetCellAttr, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setColAttr", widgetSetColAttr, (ClientData)msg, NULL);
+		"setColAttr", (Tcl_CmdProc *) widgetSetColAttr, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getColAttr", widgetGetColAttr, (ClientData)msg, NULL);
+		"getColAttr", (Tcl_CmdProc *) widgetGetColAttr, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setRowAttr", widgetSetRowAttr, (ClientData)msg, NULL);
+		"setRowAttr", (Tcl_CmdProc *) widgetSetRowAttr, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getRowAttr", widgetGetRowAttr, (ClientData)msg, NULL);
+		"getRowAttr", (Tcl_CmdProc *) widgetGetRowAttr, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"deleteCol", widgetDeleteCol, (ClientData)msg, NULL);
+		"deleteCol", (Tcl_CmdProc *) widgetDeleteCol, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"deleteRow", widgetDeleteRow, (ClientData)msg, NULL);
+		"deleteRow", (Tcl_CmdProc *) widgetDeleteRow, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"addCol", widgetAddCol, (ClientData)msg, NULL);
+		"addCol", (Tcl_CmdProc *) widgetAddCol, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"addRow", widgetAddRow, (ClientData)msg, NULL);
+		"addRow", (Tcl_CmdProc *) widgetAddRow, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setTableSize", widgetSetTableSize, (ClientData)msg, NULL);
+		"setTableSize", (Tcl_CmdProc *) widgetSetTableSize, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getTableSize", widgetGetTableSize, (ClientData)msg, NULL);
+		"getTableSize", (Tcl_CmdProc *) widgetGetTableSize, (ClientData)msg, NULL);
 #endif
 
 	    Tcl_CreateCommand (tcl,
-		"realize", widgetRealize, (ClientData)msg, NULL);
+		"realize", (Tcl_CmdProc *) widgetRealize, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"unrealize", widgetUnrealize, (ClientData)msg, NULL);
+		"unrealize", (Tcl_CmdProc *) widgetUnrealize, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"isRealized", widgetIsRealized, (ClientData)msg, NULL);
+		"isRealized", (Tcl_CmdProc *) widgetIsRealized, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"map", widgetMap, (ClientData)msg, NULL);
+		"map", (Tcl_CmdProc *) widgetMap, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"unmap", widgetUnmap, (ClientData)msg, NULL);
+		"unmap", (Tcl_CmdProc *) widgetUnmap, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"manage", widgetManage, (ClientData)msg, NULL);
+		"manage", (Tcl_CmdProc *) widgetManage, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"unmanage", widgetUnmanage, (ClientData)msg, NULL);
+		"unmanage", (Tcl_CmdProc *) widgetUnmanage, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"popup", widgetPopup, (ClientData)msg, NULL);
+		"popup", (Tcl_CmdProc *) widgetPopup, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"popupSpringLoaded", widgetPopupSpringLoaded,
+		"popupSpringLoaded", (Tcl_CmdProc *) widgetPopupSpringLoaded,
 		(ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"popdown", widgetPopdown, (ClientData)msg, NULL);
+		"popdown", (Tcl_CmdProc *) widgetPopdown, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setSensitive", widgetSetSensitive, (ClientData)msg, NULL);
+		"setSensitive", (Tcl_CmdProc *) widgetSetSensitive, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"isSensitive", widgetIsSensitive, (ClientData)msg, NULL);
+		"isSensitive", (Tcl_CmdProc *) widgetIsSensitive, (ClientData)msg, NULL);
 
 	    Tcl_CreateCommand (tcl,
-		"move", widgetMove, (ClientData)msg, NULL);
+		"move", (Tcl_CmdProc *) widgetMove, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"resize", widgetResize, (ClientData)msg, NULL);
+		"resize", (Tcl_CmdProc *) widgetResize, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"configure", widgetConfigure, (ClientData)msg, NULL);
+		"configure", (Tcl_CmdProc *) widgetConfigure, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"parseGeometry", widgetParseGeometry, (ClientData)msg, NULL);
+		"parseGeometry", (Tcl_CmdProc *) widgetParseGeometry, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getGeometry", widgetGetGeometry, (ClientData)msg, NULL);
+		"getGeometry", (Tcl_CmdProc *) widgetGetGeometry, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setTTName", widgetSetTTName, (ClientData)msg, NULL);
+		"setTTName", (Tcl_CmdProc *) widgetSetTTName, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getTTName", widgetGetTTName, (ClientData)msg, NULL);
+		"getTTName", (Tcl_CmdProc *) widgetGetTTName, (ClientData)msg, NULL);
 
 	    /* Register any actions. */
 	    XtAppAddActions (obm->app_context, widget_actions,
@@ -444,11 +489,9 @@ register ObjClassRec classrec;
 /* WidgetClassDestroy -- Custom destroy procedure for the widget class.
  */
 void
-WidgetClassDestroy (obm, classrec)
-ObmContext obm;
-register ObjClassRec classrec;
+WidgetClassDestroy (ObmContext obm, ObjClassRec classrec)
 {
-	register MsgContext msg = (MsgContext) classrec->class_data;
+	MsgContext msg = (MsgContext) classrec->class_data;
 
 	if (msg) {
 	    if (msg->tcl)
@@ -462,15 +505,15 @@ register ObjClassRec classrec;
 /* WidgetCreate -- Create an instance of a widget object.
  */
 ObmObject
-WidgetCreate (obm, name, classrec, parent, args, nargs)
-ObmContext obm;
-char *name;
-ObjClassRec classrec;
-char *parent;
-ArgList args;
-int nargs;
+WidgetCreate (
+  ObmContext obm,
+  const char *name,
+  ObjClassRec classrec,
+  const char *parent,
+  ArgList args,
+  int nargs)
 {
-	register WidgetObject obj, pobj;
+	WidgetObject obj, pobj;
 	Widget w, pw;
 
 	/* Create the widget object descriptor. */
@@ -520,54 +563,54 @@ int nargs;
 	    obmClass (classrec, WtToggle) ||
 	    obmClass (classrec, WtArrow)) {
 
-	    XtAddCallback (w, XtNcallback, widgetCallback, obj);
+	  XtAddCallback (w, XtNcallback, (XtCallbackProc) widgetCallback, obj);
 
 	} else if (obmClass (classrec, WtListTree)) {
-	    XtAddCallback (w, XtNhighlightCallback, widgetLTHCallback, obj);
-	    XtAddCallback (w, XtNactivateCallback, widgetLTACallback, obj);
+	    XtAddCallback (w, XtNhighlightCallback, (XtCallbackProc) widgetLTHCallback, obj);
+	    XtAddCallback (w, XtNactivateCallback, (XtCallbackProc) widgetLTACallback, obj);
 
 	} else if (obmClass (classrec, WtRepeater)) {
-	    XtAddCallback (w, XtNcallback, widgetCallback, obj);
-	    XtAddCallback (w, XtNstartCallback, widgetSBCallback, obj);
-	    XtAddCallback (w, XtNstopCallback, widgetSECallback, obj);
+	    XtAddCallback (w, XtNcallback, (XtCallbackProc) widgetCallback, obj);
+	    XtAddCallback (w, XtNstartCallback, (XtCallbackProc) widgetSBCallback, obj);
+	    XtAddCallback (w, XtNstopCallback, (XtCallbackProc) widgetSECallback, obj);
 
 	} else if (obmClass (classrec, WtStripChart)) {
-	    XtAddCallback (w, XtNgetValue, widgetSCCallback, obj);
+	    XtAddCallback (w, XtNgetValue, (XtCallbackProc) widgetSCCallback, obj);
 
 	} else if (obmClass (classrec, WtScrollbar)) {
-	    XtAddCallback (w, XtNjumpProc, widgetJPCallback, obj);
-	    XtAddCallback (w, XtNscrollProc, widgetSPCallback, obj);
+	    XtAddCallback (w, XtNjumpProc, (XtCallbackProc) widgetJPCallback, obj);
+	    XtAddCallback (w, XtNscrollProc, (XtCallbackProc) widgetSPCallback, obj);
 
 	} else if (obmClass (classrec, WtShell) ||
 		   obmClass (classrec, WtSimpleMenu)) {
 
-	    XtAddCallback (w, XtNpopupCallback, widgetPUCallback, obj);
-	    XtAddCallback (w, XtNpopdownCallback, widgetPDCallback, obj);
+	    XtAddCallback (w, XtNpopupCallback, (XtCallbackProc) widgetPUCallback, obj);
+	    XtAddCallback (w, XtNpopdownCallback, (XtCallbackProc) widgetPDCallback, obj);
 
 	} else if (obmClass (classrec, WtPanner) ||
 		   obmClass (classrec, WtPorthole) ||
 		   obmClass (classrec, WtViewport)) {
 
-	    XtAddCallback (w, XtNreportCallback, widgetRPCallback, obj);
+	    XtAddCallback (w, XtNreportCallback, (XtCallbackProc) widgetRPCallback, obj);
 
 	} else if (obmClass (classrec, WtTextButton) ||
 		   obmClass (classrec, WtIcon)) {
-	    XtAddCallback (w, XtNactivate, widgetCallback, obj);
+	    XtAddCallback (w, XtNactivate, (XtCallbackProc) widgetCallback, obj);
 
 	} else if (obmClass (classrec, WtGroup) ||
 		   obmClass (classrec, WtRadioGroup)) {
-	    XtAddCallback (w, XtNactivate, widgetRGCallback, obj);
+	    XtAddCallback (w, XtNactivate, (XtCallbackProc) widgetRGCallback, obj);
 
 	} else if (obmClass (classrec, WtTextToggle)) {
-	    XtAddCallback (w, XtNonCallback, widgetCallback, obj);
-	    XtAddCallback (w, XtNoffCallback, widgetCallback, obj);
+	    XtAddCallback (w, XtNonCallback, (XtCallbackProc) widgetCallback, obj);
+	    XtAddCallback (w, XtNoffCallback, (XtCallbackProc) widgetCallback, obj);
 
 	} else if (obmClass (classrec, WtSlider2d) ||
 		   obmClass (classrec, WtScrollbar2)) {
 
 	    XtVaGetValues (w, "scrollResponse", &obj->widget.response_cb, NULL);
-	    XtAddCallback (w, XtNscrollCallback, widgetJPCallback, obj);
-	    XtAddCallback (w, XtNscrollCallback, widgetSPCallback, obj);
+	    XtAddCallback (w, XtNscrollCallback, (XtCallbackProc) widgetJPCallback, obj);
+	    XtAddCallback (w, XtNscrollCallback, (XtCallbackProc) widgetSPCallback, obj);
 	}
 
 	obj->widget.w = w;
@@ -579,12 +622,11 @@ int nargs;
 /* WidgetDestroy -- Destroy an instance of a widget object.
  */
 void
-WidgetDestroy (object)
-ObmObject object;
+WidgetDestroy (ObmObject object)
 {
-	register WidgetObject obj = (WidgetObject) object;
-	register WidgetPrivate wp = &obj->widget;
-	register ObmCallback cb, next;
+	WidgetObject obj = (WidgetObject) object;
+	WidgetPrivate wp = &obj->widget;
+	ObmCallback cb, next;
 
 	/* Ignore the second call to Destroy. */
 	if (obj->core.being_destroyed++)
@@ -613,7 +655,7 @@ ObmObject object;
 	 */
 	if (!wp->widget_destroyed) {
 	    widgetSetDestroy (object);
-	    widgetDestroy (obj);
+	    widgetDestroy (object);
 	}
 }
 
@@ -625,10 +667,9 @@ ObmObject object;
  * while the widgets have already been destroyed.
  */
 static void
-widgetSetDestroy (obj)
-register ObmObject obj;
+widgetSetDestroy (ObmObject obj)
 {
-	register int i;
+	int i;
 	ObmObject child;
 	int object_type;
 
@@ -649,10 +690,9 @@ register ObmObject obj;
  * shells and their children.
  */
 static void
-widgetDestroy (obj)
-register ObmObject obj;
+widgetDestroy (ObmObject obj)
 {
-	register int i;
+	int i;
 	WidgetObject wobj = (WidgetObject) obj;
 	WidgetClass *widget_class;
 	ObmObject child;
@@ -673,12 +713,10 @@ register ObmObject obj;
 /* WidgetEvaluate -- Evaluate a widget command or message.
  */
 int
-WidgetEvaluate (object, command)
-ObmObject object;
-char *command;
+WidgetEvaluate (ObmObject object, const char *command)
 {
-	register WidgetObject obj = (WidgetObject) object;
-	register Tcl_Interp *tcl, *server = obj->widget.obm->tcl;
+	WidgetObject obj = (WidgetObject) object;
+	Tcl_Interp *tcl, *server = obj->widget.obm->tcl;
 	MsgContext omsg = (MsgContext) obj->core.classrec->class_data;
 	MsgContext pmsg = (MsgContext) obj->core.superclass->class_data;
 
@@ -694,7 +732,8 @@ char *command;
 	    omsg->object[++omsg->level] = object;
 	    if (Tcl_Eval (tcl, command) == TCL_OK) {
 		if (*Tcl_GetStringResult (tcl))
-		    Tcl_SetResult (server, Tcl_GetStringResult (tcl), TCL_VOLATILE);
+		  Tcl_SetResult (server, (char *) Tcl_GetStringResult (tcl),
+				 TCL_VOLATILE);
 		omsg->level--;
 		return (TCL_OK);
 
@@ -718,7 +757,8 @@ char *command;
 	    pmsg->object[++pmsg->level] = object;
 	    if (Tcl_Eval (tcl, command) == TCL_OK) {
 	    	if (*Tcl_GetStringResult (tcl))
-		    Tcl_SetResult (server, Tcl_GetStringResult (tcl), TCL_VOLATILE);
+		    Tcl_SetResult (server, (char *) Tcl_GetStringResult (tcl),
+				   TCL_VOLATILE);
 		pmsg->level--;
 		return (TCL_OK);
 	    } else
@@ -727,7 +767,7 @@ char *command;
 
 error:
 	if (*Tcl_GetStringResult (tcl))
-	    Tcl_SetResult (server, Tcl_GetStringResult (tcl), TCL_VOLATILE);
+	    Tcl_SetResult (server, (char *) Tcl_GetStringResult (tcl), TCL_VOLATILE);
 	else {
 	    /* Supply a default error message if none was returned. */
 	    Tcl_SetResult (server, obmClientCommand (tcl, command) ?
@@ -743,10 +783,9 @@ error:
  * object descriptor.
  */
 Widget
-widgetGetPointer (object)
-ObmObject object;
+widgetGetPointer (ObmObject object)
 {
-	register WidgetObject obj = (WidgetObject) object;
+	WidgetObject obj = (WidgetObject) object;
 	return (obj->widget.w);
 }
 
@@ -754,12 +793,10 @@ ObmObject object;
 /* widgetToObject -- Convert a widget pointer to an OBM object name.
  */
 WidgetObject
-widgetToObject (obm, w)
-ObmContext obm;
-Widget w;
+widgetToObject (ObmContext obm, Widget w)
 {
-	register int i;
-	register WidgetPrivate wp;
+	int i;
+	WidgetPrivate wp;
         ObmObject objs[256];
 	int nobjs;
 
@@ -783,14 +820,10 @@ Widget w;
  * wrong type of callback can be registered, but it will never be called.
  */
 static int 
-widgetAddCallback (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetAddCallback (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register WidgetObject obj = (WidgetObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
+	WidgetObject obj = (WidgetObject) msg->object[msg->level];
+	WidgetPrivate wp = &obj->widget;
 	ObmCallback cb, new_cb;
 	char *s_proc, *s_type;
 	int callback_type, i;
@@ -830,7 +863,7 @@ char **argv;
 		XtOverrideTranslations (wp->w, translations);
 	    } else {
 		XtAddCallback (XawTextGetSource(wp->w), XtNcallback,
-		    widgetCallback, obj);
+		    (XtCallbackProc) widgetCallback, obj);
 	    }
 
 	/* Create callback record. */
@@ -856,14 +889,10 @@ char **argv;
  *  Usage:	deleteCallback <procedure-name>
  */
 static int 
-widgetDeleteCallback (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetDeleteCallback (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register WidgetObject obj = (WidgetObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
+	WidgetObject obj = (WidgetObject) msg->object[msg->level];
+	WidgetPrivate wp = &obj->widget;
 	ObmCallback cb, prev;
 
 	/* Locate and delete procedure entry in callback list. */
@@ -887,13 +916,10 @@ char **argv;
  * the callback type.
  */
 static void
-widgetCallback (w, obj, call_data)
-Widget w;
-WidgetObject obj;
-caddr_t call_data;
+widgetCallback (Widget w, WidgetObject obj, caddr_t call_data)
 {
-	register WidgetPrivate wp = &obj->widget;
-	register ObjClassRec classrec = obj->core.classrec;
+	WidgetPrivate wp = &obj->widget;
+	ObjClassRec classrec = obj->core.classrec;
 	char buffer[SZ_COMMAND];
 	char *message = buffer;
 	int callback_type, i;
@@ -938,7 +964,7 @@ caddr_t call_data;
 	    XfwfMultiListReturnStruct *list =
 		(XfwfMultiListReturnStruct *) call_data;
 	    Boolean state, sensitive;
-	    register char *ip, *op;
+	    char *ip, *op;
 	    int buflen, need, i;
 	    char *string;
 
@@ -1031,15 +1057,12 @@ caddr_t call_data;
  * are currently selected.
  */
 static void
-widgetRGCallback (w, obj, call_data)
-Widget w;
-WidgetObject obj;
-caddr_t call_data;
+widgetRGCallback (Widget w, WidgetObject obj, caddr_t call_data)
 {
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 	long selection = (long) call_data;
-	register char *op;
-	register int i;
+	char *op;
+	int i;
 
 	char message[SZ_COMMAND];
 	SelectionType selectionType;
@@ -1088,15 +1111,12 @@ caddr_t call_data;
 /* widgetLTHCallback -- ListTree highlight callback.
  */
 static void
-widgetLTHCallback (w, obj, call_data)
-Widget w;
-WidgetObject obj;
-caddr_t call_data;
+widgetLTHCallback (Widget w, WidgetObject obj, caddr_t call_data)
 {
 	ListTreeMultiReturnStruct *list;
 	ListTreeItem *item;
 	char message[SZ_COMMAND], buf[SZ_LINE];
-	register int i;
+	int i;
 
 	list = (ListTreeMultiReturnStruct *) call_data;
 	if (!list->items)
@@ -1109,7 +1129,7 @@ caddr_t call_data;
 	sprintf (message, "{%s %d} ",
 	    list->items[0]->text, list->items[0]->open);
 
-	strncat (message, "{ ", 2);
+	strcat (message, "{ ");
 	for (i=0; i < list->count; i++) {
 	    item = list->items[i];
 	    sprintf (buf, "{ %s } ", item->text);
@@ -1120,7 +1140,7 @@ caddr_t call_data;
 		strcat (message, buf);
 	    }
 	}
-	strncat (message, "}", 1);
+	strcat (message, "}");
 
 	call_callbacks (obj, Ctcallback, message);
 }
@@ -1129,10 +1149,7 @@ caddr_t call_data;
 /* widgetLTACallback -- ListTree activate callback.
  */
 static void
-widgetLTACallback (w, obj, call_data)
-Widget w;
-WidgetObject obj;
-caddr_t call_data;
+widgetLTACallback (Widget w, WidgetObject obj, caddr_t call_data)
 {
 	ListTreeActivateStruct *ret;
 	ListTreeMultiReturnStruct ret2;
@@ -1147,7 +1164,7 @@ caddr_t call_data;
 	 */
 	sprintf (message, "{%s %d} ", ret->item->text, ret->item->open);
 
-	strncat (message, "{ ", 2);
+	strcat (message, "{ ");
 	item = ret->item;
 	sprintf (buf, "{ %s } ", item->text);
 	strcat (message, buf);
@@ -1156,7 +1173,7 @@ caddr_t call_data;
 	    sprintf (buf, "{ %s } ", item->text);
 	    strcat (message, buf);
         }
-	strncat (message, "}", 1);
+	strcat (message, "}");
 
 	call_callbacks (obj, Ctcallback, message);
 }
@@ -1165,12 +1182,9 @@ caddr_t call_data;
 /* widgetSBCallback -- Repeater start callback.
  */
 static void
-widgetSBCallback (w, obj, call_data)
-Widget w;
-WidgetObject obj;
-caddr_t call_data;
+widgetSBCallback (Widget w, WidgetObject obj, caddr_t call_data)
 {
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 	call_callbacks (obj, CtstartCallback, NULL);
 }
 
@@ -1178,12 +1192,9 @@ caddr_t call_data;
 /* widgetSECallback -- Repeater stop callback.
  */
 static void
-widgetSECallback (w, obj, call_data)
-Widget w;
-WidgetObject obj;
-caddr_t call_data;
+widgetSECallback (Widget w, WidgetObject obj, caddr_t call_data)
 {
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 	call_callbacks (obj, CtstopCallback, NULL);
 }
 
@@ -1193,13 +1204,10 @@ caddr_t call_data;
  * thumb (panner) or child widget (porthole, viewport).
  */
 static void
-widgetRPCallback (w, obj, call_data)
-Widget w;
-WidgetObject obj;
-caddr_t call_data;
+widgetRPCallback (Widget w, WidgetObject obj, caddr_t call_data)
 {
-	register WidgetPrivate wp = &obj->widget;
-	register XawPannerReport *rp = (XawPannerReport *) call_data;
+	WidgetPrivate wp = &obj->widget;
+	XawPannerReport *rp = (XawPannerReport *) call_data;
 	char message[100];
 
 	/* Return args: changed x y w h cw ch */
@@ -1215,15 +1223,12 @@ caddr_t call_data;
  * called when the thumb port of the scroll bar is dragged or moved (button 2).
  */
 static void
-widgetJPCallback (w, obj, call_data)
-Widget w;
-WidgetObject obj;
-caddr_t call_data;
+widgetJPCallback (Widget w, WidgetObject obj, caddr_t call_data)
 {
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 	XfwfScrollInfo *info = (XfwfScrollInfo *) call_data;
 	XfwfScrollInfo update_info;
-	register int flags = info->flags;
+	int flags = info->flags;
 	char message[100];
 
 	if (obmClass (obj->core.classrec, WtScrollbar)) {
@@ -1264,12 +1269,9 @@ caddr_t call_data;
  * used for incremental scrolling (button 1 or 3).
  */
 static void
-widgetSPCallback (w, obj, call_data)
-Widget w;
-WidgetObject obj;
-caddr_t call_data;
+widgetSPCallback (Widget w, WidgetObject obj, caddr_t call_data)
 {
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 	char message[100];
 
 	if (obmClass (obj->core.classrec, WtScrollbar)) {
@@ -1285,7 +1287,7 @@ caddr_t call_data;
 	     */
 	    XfwfScrollInfo *info = (XfwfScrollInfo *) call_data;
 	    XfwfScrollInfo update_info;
-	    register int flags = info->flags;
+	    int flags = info->flags;
 
 	    /* Slider2d callback:   widget-name x y 
 	     * Scrollbar2 callback: widget-name fraction
@@ -1321,16 +1323,12 @@ caddr_t call_data;
  * plotted.
  */
 static void
-widgetSCCallback (w, obj, call_data)
-Widget w;
-WidgetObject obj;
-caddr_t call_data;
+widgetSCCallback (Widget w, WidgetObject obj, caddr_t call_data)
 {
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
 	char *callback_name;
 	ObmCallback cb;
-	double atof();
 	int status, i;
 
 	callback_name = "getValue";
@@ -1371,12 +1369,9 @@ caddr_t call_data;
  * widgets.  Called when the window pops up.
  */
 static void
-widgetPUCallback (w, obj, call_data)
-Widget w;
-WidgetObject obj;
-caddr_t call_data;
+widgetPUCallback (Widget w, WidgetObject obj, caddr_t call_data)
 {
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 	call_callbacks (obj, CtpopupCallback, NULL);
 }
 
@@ -1385,12 +1380,9 @@ caddr_t call_data;
  * widgets.  Called when the window pops down.
  */
 static void
-widgetPDCallback (w, obj, call_data)
-Widget w;
-WidgetObject obj;
-caddr_t call_data;
+widgetPDCallback (Widget w, WidgetObject obj, caddr_t call_data)
 {
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 	call_callbacks (obj, CtpopdownCallback, NULL);
 }
 
@@ -1399,14 +1391,11 @@ caddr_t call_data;
  * widget object, passing the given message on the argument list.
  */
 static void
-call_callbacks (obj, callback_type, message)
-WidgetObject obj;
-int callback_type;
-char *message;
+call_callbacks (WidgetObject obj, int callback_type, char *message)
 {
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register ObmCallback cb;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	ObmCallback cb;
 	char *callback_name;
 	int status, i;
 
@@ -1458,11 +1447,7 @@ char *message;
  * return is typed to process an input string ("linemode" callback type).
  */
 static void
-do_text (w, event, params, num_params)
-Widget w;
-XEvent *event;
-String *params;
-Cardinal *num_params;
+do_text (Widget w, XEvent *event, String *params, Cardinal *num_params)
 {
 	char *message, *s;
 	WidgetObject obj;
@@ -1507,13 +1492,9 @@ Cardinal *num_params;
  * The "user procedure" can be any server procedure.
  */
 static void
-do_userproc (w, event, params, num_params)
-Widget w;
-XEvent *event;
-String *params;
-Cardinal *num_params;
+do_userproc (Widget w, XEvent *event, String *params, Cardinal *num_params)
 {
-	register char *ip, *op;
+	char *ip, *op;
 	ObmContext obm = global_obm_handle;
 	char cmd[SZ_COMMAND], *param;
 	int x, y, x_root, y_root;
@@ -1639,14 +1620,10 @@ Cardinal *num_params;
  * automatically when the widget changes the translation table.
  */
 static int 
-widgetSetTTName (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetSetTTName (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register WidgetObject obj = (WidgetObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
+	WidgetObject obj = (WidgetObject) msg->object[msg->level];
+	WidgetPrivate wp = &obj->widget;
 
 	if (argc < 2)
 	    return (TCL_ERROR);
@@ -1656,11 +1633,9 @@ char **argv;
 }
 
 void
-widget_setTTName (obj, name)
-WidgetObject obj;
-char *name;
+widget_setTTName (WidgetObject obj, char *name)
 {
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 	strncpy (wp->translation_table_name, name, SZ_NAME);
 	wp->translation_table_name[SZ_NAME-1] = '\0';
 }
@@ -1671,24 +1646,19 @@ char *name;
  * Usage:	name = getTTName
  */
 static int 
-widgetGetTTName (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetGetTTName (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
-	register WidgetObject obj = (WidgetObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
+	WidgetObject obj = (WidgetObject) msg->object[msg->level];
+	WidgetPrivate wp = &obj->widget;
 
 	Tcl_SetResult (wp->obm->tcl, widget_getTTName(obj), TCL_VOLATILE);
 	return (TCL_OK);
 }
 
 char *
-widget_getTTName (obj)
-WidgetObject obj;
+widget_getTTName (WidgetObject obj)
 {
-	register WidgetPrivate wp = &obj->widget;
+	WidgetPrivate wp = &obj->widget;
 	return (wp->translation_table_name);
 }
 
@@ -1699,13 +1669,9 @@ WidgetObject obj;
  *    Usage:  popup(menu-name [xoffset [yoffset]])
  */
 static void
-do_popup (w, event, params, num_params)
-Widget w;
-XEvent *event;
-String *params;
-Cardinal *num_params;
+do_popup (Widget w, XEvent *event, String *params, Cardinal *num_params)
 {
-	register char *ip, *op;
+	char *ip, *op;
 	ObmContext obm = global_obm_handle;
 	XKeyEvent *ev = (XKeyEvent *) event;
 	Boolean spring_loaded;
@@ -1788,13 +1754,9 @@ Cardinal *num_params;
  *    Usage:  popdown(menu-name)
  */
 static void
-do_popdown (w, event, params, num_params)
-Widget w;
-XEvent *event;
-String *params;
-Cardinal *num_params;
+do_popdown (Widget w, XEvent *event, String *params, Cardinal *num_params)
 {
-	register char *ip, *op;
+	char *ip, *op;
 	ObmContext obm = global_obm_handle;
 	XKeyEvent *ev = (XKeyEvent *) event;
 	char *menu_name;
@@ -1817,18 +1779,14 @@ Cardinal *num_params;
  *  Usage:	set <resource-name> <value>
  */
 static int 
-widgetSet (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetSet (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
-	register char *ip;
-	register int hashval, n;
-	register Rtype rp;
+	char *ip;
+	int hashval, n;
+	Rtype rp;
 	XrmValue from, to;
 	Arg args[1];
 
@@ -1866,7 +1824,7 @@ char **argv;
 
 	    /* The following is for text widgets. */
 	    if (obmClass (obj->core.classrec, WtAsciiText)) {
-		register ObmCallback cb;
+		ObmCallback cb;
 
 		wp->text_newline = 0;
 		wp->text_pos = strlen (argv[2]);
@@ -2054,19 +2012,15 @@ set_bval:	XtSetArg (args[0], rp->name, value);
  *  Usage:	get <resource-name>
  */
 static int 
-widgetGet (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetGet (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
 	char rbuf[SZ_MESSAGE];
 	char *result = rbuf;
-	register char *ip;
-	register int hashval, n;
-	register Rtype rp;
+	char *ip;
+	int hashval, n;
+	Rtype rp;
 
 	if (argc < 2)
 	    return (TCL_ERROR);
@@ -2176,17 +2130,13 @@ char **argv;
  *  Usage:	append <text>
  */
 static int 
-widgetAppend (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetAppend (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
 
-	register char *ip, *op;
+	char *ip, *op;
 	char buf[SZ_COMMAND];
 	XawTextBlock tx;
 	char *text;
@@ -2241,17 +2191,13 @@ char **argv;
  * special characters).
  */
 static int 
-widgetSetList (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetSetList (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
 	Boolean resize;
-	String *items;
+	const char **items;
 	int nitems;
 	char *list;
 
@@ -2273,10 +2219,10 @@ char **argv;
 	    return (TCL_ERROR);
 
 	if ((obmClass (obj->core.classrec, WtList)))
-	    XawListChange (wp->w, items, nitems, 0, resize);
+	  XawListChange (wp->w, items, nitems, 0, resize);
 	else if ((obmClass (obj->core.classrec, WtMultiList)))
 	    XfwfMultiListSetNewData ((XfwfMultiListWidget)wp->w,
-		items, nitems, 0, resize, NULL);
+				     (String *) items, nitems, 0, resize, NULL);
 
 	if (wp->data)
 	    Tcl_Free (wp->data);
@@ -2300,19 +2246,15 @@ char **argv;
  * ITEMNO will be set to "none" ({}) on output.
  */
 static int 
-widgetGetItem (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetGetItem (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
 
-	register int nelem;
-	register String *list;
-	register char *ip, *op;
+	int nelem;
+	String *list;
+	char *ip, *op;
 	XawListReturnStruct *itemp;
 	char *s_itemno, *s_item;
 	char buf[SZ_NUMBER];
@@ -2423,11 +2365,7 @@ char **argv;
  * List items may be specified by either the element number or by name.
  */
 static int 
-widgetHighlight (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetHighlight (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
@@ -2466,11 +2404,7 @@ char **argv;
  * the actual item number, or the name of the list element.
  */
 static int 
-widgetUnhighlight (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetUnhighlight (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
@@ -2508,12 +2442,10 @@ char **argv;
  * either the ascii representation of the item number, or the item string.
  */
 static int
-get_itemno (obj, itemstr)
-WidgetObject obj;
-char *itemstr;
+get_itemno (WidgetObject obj, char *itemstr)
 {
 	WidgetPrivate wp = &obj->widget;
-	register int i;
+	int i;
 
 	if (isdigit (*itemstr))
 	    return (atoi(itemstr));
@@ -2549,11 +2481,7 @@ char *itemstr;
  * Usage:	value = getValue
  */
 static int 
-widgetGetValue (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetGetValue (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
@@ -2578,11 +2506,7 @@ char **argv;
  * Usage:	getThumb x [y [width [height]]]
  */
 static int 
-widgetGetThumb (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetGetThumb (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
@@ -2631,17 +2555,12 @@ char **argv;
  * arguments should be floating point values in the range 0.0 to 1.0.
  */
 static int 
-widgetMoveThumb (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetMoveThumb (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
 	double x, y;
-	double atof();
 
 	if (!(obmClass (obj->core.classrec, WtSlider2d))) {
 	    Tcl_SetResult (obm->tcl, "not a slider2d widget", TCL_STATIC);
@@ -2673,17 +2592,12 @@ char **argv;
  * values in the range 0.0 to 1.0.
  */
 static int 
-widgetResizeThumb (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetResizeThumb (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
 	double width, height;
-	double atof();
 
 	if (!(obmClass (obj->core.classrec, WtSlider2d))) {
 	    Tcl_SetResult (obm->tcl, "not a slider2d widget", TCL_STATIC);
@@ -2715,17 +2629,12 @@ char **argv;
  * height arguments should be floating point values in the range 0.0 to 1.0.
  */
 static int 
-widgetSetScrollbar (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetSetScrollbar (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
 	double position, size;
-	double atof();
 
 	if (!(obmClass (obj->core.classrec, WtScrollbar) ||
 	      obmClass (obj->core.classrec, WtScrollbar2))) {
@@ -2759,17 +2668,12 @@ char **argv;
  *
  */
 static int 
-widgetSetLocation (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetSetLocation (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
 	float x, y;
-	double atof();
 
 	if (!(obmClass (obj->core.classrec, WtViewport))) {
 	    Tcl_SetResult (obm->tcl, "not a viewport widget", TCL_STATIC);
@@ -2796,17 +2700,12 @@ char **argv;
  *
  */
 static int 
-widgetSetCoordinates (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetSetCoordinates (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
 	int	 x, y;
-	double atof();
 
 	if (!(obmClass (obj->core.classrec, WtViewport))) {
 	    Tcl_SetResult (obm->tcl, "not a viewport widget", TCL_STATIC);
@@ -2833,11 +2732,7 @@ char **argv;
  *
  */
 static int 
-widgetSetTop (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetSetTop (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
@@ -2881,11 +2776,7 @@ char **argv;
  *
  */
 static int 
-widgetSetListTree (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetSetListTree (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
@@ -2897,7 +2788,6 @@ char **argv;
 	static char **sv_items = NULL;
 	static int sv_nitems;
 	ListTreeItem *val;
-	extern ListTreeItem *ListTreeAdd(), *ListTreeFirstItem();
 
 
 	/* Do some error checking first. */
@@ -2955,11 +2845,7 @@ ret:	Tcl_Free ((char *) items);
  * lists.  This is used to fill out the ListTree widget values.
  */
 static int
-buildTreeList (w, tcl, parent, item)
-Widget	w;
-Tcl_Interp *tcl;
-ListTreeItem *parent;
-char	*item;
+buildTreeList (Widget w, Tcl_Interp *tcl, ListTreeItem *parent, const char *item)
 {
 	const char **fields, **entry;
 	int i, nentries, nfields, field;
@@ -3017,11 +2903,7 @@ char	*item;
  *
  */
 static int
-widgetListTreeSelect (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetListTreeSelect (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
         WidgetObject obj = (WidgetObject) msg->object[msg->level];
         WidgetPrivate wp = &obj->widget;
@@ -3030,10 +2912,6 @@ char **argv;
 	char message[SZ_COMMAND], buf[SZ_LINE];
 	int i, count;
 	ListTreeItem *item, *titem, *first;
-
-	extern ListTreeItem *ListTreeFindSiblingName();
-	extern ListTreeItem *ListTreeFindChildName();
-	extern ListTreeItem *ListTreeFindChildNameInTree();
 
 
 	if (argc < 2)
@@ -3076,14 +2954,14 @@ char **argv;
 	        titem = ListTreeFindSiblingName (wp->w, first, top);
 	        if (titem)
 		    ListTreeOpenAll (wp->w, titem, 0);
-	        item = ListTreeFindChildNameInTree (wp->w, titem, name);
+	        item = ListTreeFindChildNameInTree ((ListTreeWidget) wp->w, titem, name);
 	        item = (item ? item : titem);
 	    } else {
-	        titem = ListTreeFindSiblingName (wp->w, first, name);
+		titem = ListTreeFindSiblingName (wp->w, first, name);
 		if (strcmp (name, titem->text) == 0)
 		    item = titem;
 		else
-	            item = ListTreeFindChildNameInTree (wp->w, titem, name);
+	            item = ListTreeFindChildNameInTree ((ListTreeWidget) wp->w, titem, name);
 	    }
 	    ListTreeHighlightItem (wp->w, item);
 	    ListTreeOpenAll (wp->w, item, 0);
@@ -3093,7 +2971,7 @@ char **argv;
 	     */
 	    sprintf (message, "{%s %d} ", item->text, item->open);
 
-	    strncat (message, "{ ", 2);
+	    strcat (message, "{ ");
 	    sprintf (buf, "{ %s } ", item->text);
 	    strcat (message, buf);
 	    while (item->parent) {
@@ -3102,7 +2980,7 @@ char **argv;
 	        strcat (message, buf);
             }
 
-	    strncat (message, "}", 1);
+	    strcat (message, "}");
 
 	}
 
@@ -3131,11 +3009,7 @@ char **argv;
  *
  */
 static int
-widgetListTreeHighlight (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetListTreeHighlight (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
         WidgetObject obj = (WidgetObject) msg->object[msg->level];
         WidgetPrivate wp = &obj->widget;
@@ -3144,10 +3018,6 @@ char **argv;
 	char message[SZ_COMMAND], buf[SZ_LINE];
 	int i, count;
 	ListTreeItem *item, *titem, *first, *op;
-
-	extern ListTreeItem *ListTreeFindSiblingName();
-	extern ListTreeItem *ListTreeFindChildName();
-	extern ListTreeItem *ListTreeFindChildNameInTree();
 
 
 	if (argc < 2)
@@ -3159,7 +3029,7 @@ char **argv;
 	if (argc == 3) {
 	    top = argv[2];
 	    titem = ListTreeFindSiblingName (wp->w, first, top);
-	    item = ListTreeFindChildNameInTree (wp->w, titem, name);
+	    item = ListTreeFindChildNameInTree ((ListTreeWidget) wp->w, titem, name);
 	    item = (item ? item : titem);
 
 	    /* Now chain back up thru the parents and open the nodes.
@@ -3172,11 +3042,11 @@ char **argv;
 	} else {
 	    if (first->open == 0)
 	        ListTreeOpenAll (wp->w, first, 0);
-	    titem = ListTreeFindChildNameInTree (wp->w, first, name);
+	    titem = ListTreeFindChildNameInTree ((ListTreeWidget) wp->w, first, name);
 	    if (titem && strcmp (name, titem->text) == 0)
 		item = titem;
 	    else
-	        item = ListTreeFindChildNameInTree (wp->w, titem, name);
+	        item = ListTreeFindChildNameInTree ((ListTreeWidget) wp->w, titem, name);
 	}
 	ListTreeHighlightItem (wp->w, item);
 
@@ -3185,7 +3055,7 @@ char **argv;
 	 */
 	sprintf (message, "{%s %d} ", item->text, item->open);
 
-	strncat (message, "{ ", 2);
+	strcat (message, "{ ");
 	sprintf (buf, "{ %s } ", item->text);
 	strcat (message, buf);
 	while (item->parent) {
@@ -3193,7 +3063,7 @@ char **argv;
 	    sprintf (buf, "{ %s } ", item->text);
 	    strcat (message, buf);
         }
-	strncat (message, "}", 1);
+	strcat (message, "}");
 
 	/* Call all the callbacks with the message. */
 	call_callbacks (obj, Ctcallback, message);
@@ -3220,21 +3090,13 @@ char **argv;
  *
  */
 static int
-widgetListTreeDelete (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetListTreeDelete (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
         WidgetObject obj = (WidgetObject) msg->object[msg->level];
         WidgetPrivate wp = &obj->widget;
         ObmContext obm = wp->obm;
 	char *top, *name;
 	ListTreeItem *item, *titem, *first;
-
-	extern ListTreeItem *ListTreeFindSiblingName();
-	extern ListTreeItem *ListTreeFindChildName();
-	extern ListTreeItem *ListTreeFirstItem();
 
 
 	if (argc < 2)
@@ -3303,17 +3165,13 @@ char **argv;
  *
  */
 static int
-widgetSetTable (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetSetTable (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
         WidgetObject obj = (WidgetObject) msg->object[msg->level];
         WidgetPrivate wp = &obj->widget;
         ObmContext obm = wp->obm;
 
-	register int i, j;
+	int i, j;
 	int	nrows, ncols, ndrows=0, ndcols=0, onrows, oncols;
 	const char	*list = NULL, **rows = NULL, **cols = NULL;
 
@@ -3367,11 +3225,7 @@ char **argv;
  *
  */
 static int
-widgetGetCellAttr (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetGetCellAttr (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
         WidgetObject obj = (WidgetObject) msg->object[msg->level];
         WidgetPrivate wp = &obj->widget;
@@ -3413,11 +3267,7 @@ char **argv;
  *
  */
 static int
-widgetSetCellAttr (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetSetCellAttr (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
         WidgetObject obj = (WidgetObject) msg->object[msg->level];
         WidgetPrivate wp = &obj->widget;
@@ -3481,11 +3331,7 @@ char **argv;
  *
  */
 static int
-widgetSetColAttr (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetSetColAttr (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
         WidgetObject obj = (WidgetObject) msg->object[msg->level];
         WidgetPrivate wp = &obj->widget;
@@ -3594,11 +3440,7 @@ char **argv;
  *
  */
 static int
-widgetGetColAttr (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetGetColAttr (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
         WidgetObject obj = (WidgetObject) msg->object[msg->level];
         WidgetPrivate wp = &obj->widget;
@@ -3655,11 +3497,7 @@ char **argv;
  *	foreground		foreground color
  */
 static int
-widgetSetRowAttr (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetSetRowAttr (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
         WidgetObject obj = (WidgetObject) msg->object[msg->level];
         WidgetPrivate wp = &obj->widget;
@@ -3723,11 +3561,7 @@ char **argv;
  *
  */
 static int
-widgetGetRowAttr (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetGetRowAttr (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
         WidgetObject obj = (WidgetObject) msg->object[msg->level];
         WidgetPrivate wp = &obj->widget;
@@ -3758,11 +3592,7 @@ char **argv;
  *
  */
 static int
-widgetDeleteCol (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetDeleteCol (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
         WidgetObject obj = (WidgetObject) msg->object[msg->level];
         WidgetPrivate wp = &obj->widget;
@@ -3798,11 +3628,7 @@ char **argv;
  *
  */
 static int
-widgetAddCol (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetAddCol (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
         WidgetObject obj = (WidgetObject) msg->object[msg->level];
         WidgetPrivate wp = &obj->widget;
@@ -3839,11 +3665,7 @@ char **argv;
  *
  */
 static int
-widgetDeleteRow (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetDeleteRow (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
         WidgetObject obj = (WidgetObject) msg->object[msg->level];
         WidgetPrivate wp = &obj->widget;
@@ -3878,11 +3700,7 @@ char **argv;
  *
  */
 static int
-widgetAddRow (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetAddRow (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
         WidgetObject obj = (WidgetObject) msg->object[msg->level];
         WidgetPrivate wp = &obj->widget;
@@ -3918,11 +3736,7 @@ char **argv;
  *
  */
 static int
-widgetSetTableSize (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetSetTableSize (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
         WidgetObject obj = (WidgetObject) msg->object[msg->level];
         WidgetPrivate wp = &obj->widget;
@@ -3949,11 +3763,7 @@ char **argv;
  *
  */
 static int
-widgetGetTableSize (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetGetTableSize (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
         WidgetObject obj = (WidgetObject) msg->object[msg->level];
         WidgetPrivate wp = &obj->widget;
@@ -3987,11 +3797,7 @@ char **argv;
  *  Usage:	realize
  */
 static int 
-widgetRealize (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetRealize (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
@@ -4007,11 +3813,7 @@ char **argv;
  *  Usage:	unrealize
  */
 static int 
-widgetUnrealize (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetUnrealize (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
@@ -4026,11 +3828,7 @@ char **argv;
  *  Usage:	isRealized
  */
 static int 
-widgetIsRealized (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetIsRealized (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
@@ -4049,11 +3847,7 @@ char **argv;
  *  Usage:	map
  */
 static int 
-widgetMap (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetMap (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
@@ -4069,11 +3863,7 @@ char **argv;
  *  Usage:	unmap
  */
 static int 
-widgetUnmap (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetUnmap (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
@@ -4102,11 +3892,7 @@ char **argv;
  * of the children.
  */
 static int 
-widgetManage (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetManage (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
@@ -4134,11 +3920,7 @@ char **argv;
  * of the children.
  */
 static int 
-widgetUnmanage (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetUnmanage (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
@@ -4160,11 +3942,7 @@ char **argv;
  *  Usage:	popup [grab-kind]
  */
 static int 
-widgetPopup (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetPopup (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
@@ -4190,11 +3968,7 @@ char **argv;
  *  Usage:	popdown
  */
 static int 
-widgetPopdown (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetPopdown (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
@@ -4210,11 +3984,7 @@ char **argv;
  *  Usage:	popupSpringLoaded
  */
 static int
-widgetPopupSpringLoaded (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetPopupSpringLoaded (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
@@ -4229,11 +3999,7 @@ char **argv;
  *  Usage:	move x y
  */
 static int 
-widgetMove (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetMove (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
@@ -4256,11 +4022,7 @@ char **argv;
  *  Usage:	resize width height [border-width]
  */
 static int 
-widgetResize (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetResize (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
@@ -4288,11 +4050,7 @@ char **argv;
  *  Usage:	configure x y width height [border-width]
  */
 static int 
-widgetConfigure (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetConfigure (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
@@ -4325,17 +4083,13 @@ char **argv;
  * must be fully specified.
  */
 static int 
-widgetParseGeometry (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetParseGeometry (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
 
-	register int uflags, dflags;
+	int uflags, dflags;
 	Dimension winWidth, winHeight;
 	int need, x, y, width, height;
 	char *user_geom, *def_geom;
@@ -4423,17 +4177,13 @@ char **argv;
  * of the region are returned.
  */
 static int 
-widgetGetGeometry (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetGetGeometry (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
 
-	register char *op;
+	char *op;
 	Dimension winWidth, winHeight;
 	int dist, gravity, x, y, width, height;
 	char buf[128];
@@ -4478,11 +4228,7 @@ char **argv;
  *  Usage:	setSensitive <sensitive>
  */
 static int 
-widgetSetSensitive (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetSetSensitive (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
@@ -4508,11 +4254,7 @@ char **argv;
  *  Usage:	isSensitive
  */
 static int 
-widgetIsSensitive (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetIsSensitive (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
 	WidgetPrivate wp = &obj->widget;
@@ -4614,15 +4356,11 @@ struct evType {
  *  Usage:	addEventHandler <procname> <event-mask> [<event-mask>...]
  */
 static int 
-widgetAddEventHandler (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetAddEventHandler (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
 	ObmCallback cb, new_cb;
 	int event_mask, i, j;
 	Boolean nonmaskable;
@@ -4661,7 +4399,8 @@ char **argv;
 	    wp->event_handler = new_cb;
 
 	/* Post event handler. */
-	XtAddEventHandler (wp->w, event_mask, nonmaskable, widgetEvent, new_cb);
+	XtAddEventHandler (wp->w, event_mask, nonmaskable, (XtEventHandler) widgetEvent,
+			   new_cb);
 
 	return (TCL_OK);
 }
@@ -4672,16 +4411,12 @@ char **argv;
  * Usage:	removeEventHandler procname
  */
 static int
-widgetRemoveEventHandler (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+widgetRemoveEventHandler (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	WidgetObject obj = (WidgetObject) msg->object[msg->level];
-	register WidgetPrivate wp = &obj->widget;
-	register ObmContext obm = wp->obm;
-	register ObmCallback cb, pcb;
+	WidgetPrivate wp = &obj->widget;
+	ObmContext obm = wp->obm;
+	ObmCallback cb, pcb;
 	Boolean nonmaskable;
 	char *procname;
 
@@ -4697,7 +4432,7 @@ char **argv;
 
 	if (cb) {
 	    XtRemoveEventHandler (wp->w, (int) cb->client_data, nonmaskable,
-		widgetEvent, cb);
+		(XtEventHandler) widgetEvent, cb);
 	    if (pcb)
 		pcb->next = cb->next;
 	    else
@@ -4720,18 +4455,14 @@ char **argv;
  * the event.
  */
 static void
-widgetEvent (w, cb, event, continue_to_dispatch)
-Widget w;
-ObmCallback cb;
-XEvent *event;
-Boolean *continue_to_dispatch;
+widgetEvent (Widget w, ObmCallback cb, XEvent *event, Boolean *continue_to_dispatch)
 {
 	WidgetObject obj = (WidgetObject) cb->u.obj;
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
 	char cmd[SZ_COMMAND];
-	register char *ip, *op;
-	register int i, j;
+	char *ip, *op;
+	int i, j;
 	int status;
 
 	/* Our job is to translate the X event into a call to a widget server
@@ -4944,9 +4675,7 @@ Boolean *continue_to_dispatch;
 /* widgetEventState -- Encode the "state" field of an event struct.
  */
 char *
-widgetEventState (op, state)
-register char *op;
-unsigned int state;
+widgetEventState (char *op, unsigned int state)
 {
 	if (state & ShiftMask)
 	    { sprintf (op, "shift ");  while (*op) op++; }
@@ -4977,11 +4706,9 @@ unsigned int state;
 #define	SZ_FONT_NAME		128
 
 static char *
-widgetGetFontName (display, fs)					/* MF016 */
-Display *display;
-XFontStruct *fs;
+widgetGetFontName (Display *display, XFontStruct *fs) /* MF016 */
 {
-        register int i;
+        int i;
         unsigned long val;
 	char *name = (char *) malloc (SZ_FONT_NAME), *str, *lp;
 

@@ -6,21 +6,9 @@
 #include "stip4.bm"
 #include <stdio.h>
 #include "Slider2P.h"
-static void start(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void finish(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
-static void drag(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
+static void start(Widget,XEvent*,String*,Cardinal*);
+static void finish(Widget,XEvent*,String*,Cardinal*);
+static void drag(Widget,XEvent*,String*,Cardinal*);
 
 static XtActionsRec actionsList[] = {
 {"start", start},
@@ -33,77 +21,22 @@ static char defaultTranslations[] = "\
 <Btn1Motion>: drag() \n\
 <Btn1Up>: finish() \n\
 ";
-static void _resolve_inheritance(
-#if NeedFunctionPrototypes
-WidgetClass
-#endif
-);
-static void compute_thumb(
-#if NeedFunctionPrototypes
-Widget,Position *,Position *,Dimension *,Dimension *
-#endif
-);
-static void compute_inside(
-#if NeedFunctionPrototypes
-Widget,Position *,Position *,Dimension *,Dimension *
-#endif
-);
-static void expose(
-#if NeedFunctionPrototypes
-Widget,XEvent *,Region 
-#endif
-);
-static void initialize(
-#if NeedFunctionPrototypes
-Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static void move_thumb(
-#if NeedFunctionPrototypes
-Widget,int ,int ,int ,int ,int ,int 
-#endif
-);
-static void compute_info(
-#if NeedFunctionPrototypes
-Widget,Position *,Position *,Dimension *,Dimension *,float *,float *,float *,float *
-#endif
-);
-static Boolean  set_values(
-#if NeedFunctionPrototypes
-Widget ,Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static void scroll_response(
-#if NeedFunctionPrototypes
-Widget ,XtPointer ,XtPointer 
-#endif
-);
-static void create_gc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void create_graygc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void create_thumbgc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void create_thumblightgc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void create_thumbdarkgc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-/*ARGSUSED*/static void create_gc(self)Widget self;
+static void _resolve_inheritance(WidgetClass);
+static void compute_thumb(Widget,Position *,Position *,Dimension *,Dimension *);
+static void compute_inside(Widget,Position *,Position *,Dimension *,Dimension *);
+static void expose(Widget,XEvent *,Region );
+static void initialize(Widget ,Widget,ArgList ,Cardinal *);
+static void move_thumb(Widget,int ,int ,int ,int ,int ,int );
+static void compute_info(Widget,Position *,Position *,Dimension *,Dimension *,float *,float *,float *,float *);
+static Boolean  set_values(Widget ,Widget ,Widget,ArgList ,Cardinal *);
+static void scroll_response(Widget ,XtPointer ,XtPointer );
+static void create_gc(Widget);
+static void create_graygc(Widget);
+static void create_thumbgc(Widget);
+static void create_thumblightgc(Widget);
+static void create_thumbdarkgc(Widget);
+
+/*ARGSUSED*/static void create_gc(Widget self)
 {
     XtGCMask mask;
     XGCValues values;
@@ -122,7 +55,7 @@ Widget
     mask = GCFont | GCBackground | GCForeground;
     ((XfwfSlider2Widget)self)->xfwfLabel.rv_gc = XtGetGC(self, mask, &values);
 }
-/*ARGSUSED*/static void create_graygc(self)Widget self;
+/*ARGSUSED*/static void create_graygc(Widget self)
 {
     XtGCMask mask;
     XGCValues values;
@@ -137,7 +70,7 @@ Widget
     mask = GCForeground | GCStipple | GCFillStyle;
     ((XfwfSlider2Widget)self)->xfwfLabel.graygc = XtGetGC(self, mask, &values);
 }
-/*ARGSUSED*/static void create_thumbgc(self)Widget self;
+/*ARGSUSED*/static void create_thumbgc(Widget self)
 {
     XtGCMask mask;
     XGCValues values;
@@ -153,7 +86,7 @@ Widget
     }
     ((XfwfSlider2Widget)self)->xfwfSlider2.thumbgc = XtGetGC(self, mask, &values);
 }
-/*ARGSUSED*/static void create_thumblightgc(self)Widget self;
+/*ARGSUSED*/static void create_thumblightgc(Widget self)
 {
     XtGCMask mask;
     XGCValues values;
@@ -189,7 +122,7 @@ Widget
     }
     ((XfwfSlider2Widget)self)->xfwfSlider2.thumblightgc = XtGetGC(self, mask, &values);
 }
-/*ARGSUSED*/static void create_thumbdarkgc(self)Widget self;
+/*ARGSUSED*/static void create_thumbdarkgc(Widget self)
 {
     XtGCMask mask;
     XGCValues values;
@@ -309,7 +242,7 @@ scroll_response,
 };
 WidgetClass xfwfSlider2WidgetClass = (WidgetClass) &xfwfSlider2ClassRec;
 /*ARGSUSED*/
-static void start(self,event,params,num_params)Widget self;XEvent*event;String*params;Cardinal*num_params;
+static void start(Widget self, XEvent *event, String *params, Cardinal *num_params)
 {
     Dimension w, h;
     Position x, y;
@@ -356,7 +289,7 @@ static void start(self,event,params,num_params)Widget self;XEvent*event;String*p
 }
 
 /*ARGSUSED*/
-static void finish(self,event,params,num_params)Widget self;XEvent*event;String*params;Cardinal*num_params;
+static void finish(Widget self, XEvent *event, String *params, Cardinal *num_params)
 {
     XfwfScrollInfo info;
 
@@ -371,7 +304,7 @@ static void finish(self,event,params,num_params)Widget self;XEvent*event;String*
 }
 
 /*ARGSUSED*/
-static void drag(self,event,params,num_params)Widget self;XEvent*event;String*params;Cardinal*num_params;
+static void drag(Widget self, XEvent *event, String *params, Cardinal *num_params)
 {
     XfwfScrollInfo info;
     Dimension wd, ht, fwd, fht;
@@ -394,8 +327,7 @@ static void drag(self,event,params,num_params)Widget self;XEvent*event;String*pa
     XtCallCallbackList(self, ((XfwfSlider2Widget)self)->xfwfSlider2.scrollCallback, &info);
 }
 
-static void _resolve_inheritance(class)
-WidgetClass class;
+static void _resolve_inheritance(WidgetClass class)
 {
   XfwfSlider2WidgetClass c = (XfwfSlider2WidgetClass) class;
   XfwfSlider2WidgetClass super;
@@ -418,7 +350,7 @@ WidgetClass class;
   if (c->xfwfSlider2_class.scroll_response == XtInherit_scroll_response)
     c->xfwfSlider2_class.scroll_response = super->xfwfSlider2_class.scroll_response;
 }
-/*ARGSUSED*/static void compute_thumb(self,x,y,width,height)Widget self;Position * x;Position * y;Dimension * width;Dimension * height;
+/*ARGSUSED*/static void compute_thumb(Widget self, Position *x, Position *y, Dimension *width, Dimension *height)
 {
     Position fx, fy;
     Dimension fw, fh;
@@ -431,7 +363,7 @@ WidgetClass class;
     *x = fx + ((XfwfSlider2Widget)self)->xfwfSlider2.thumb_x * (fw - *width) + 0.5;
     *y = fy + ((XfwfSlider2Widget)self)->xfwfSlider2.thumb_y * (fh - *height) + 0.5;
 }
-/*ARGSUSED*/static void compute_inside(self,x,y,w,h)Widget self;Position * x;Position * y;Dimension * w;Dimension * h;
+/*ARGSUSED*/static void compute_inside(Widget self, Position *x, Position *y, Dimension *w, Dimension *h)
 {
     int tmp;
 
@@ -441,7 +373,7 @@ WidgetClass class;
     tmp = *w - 2 * ((XfwfSlider2Widget)self)->xfwfSlider2.thumbFrameWidth;  *w = (tmp < 0) ? 0 : tmp;
     tmp = *h - 2 * ((XfwfSlider2Widget)self)->xfwfSlider2.thumbFrameWidth;  *h = (tmp < 0) ? 0 : tmp;
 }
-/*ARGSUSED*/static void expose(self,event,region)Widget self;XEvent * event;Region  region;
+/*ARGSUSED*/static void expose(Widget self, XEvent *event, Region region)
 {
     Position x, y;
     Dimension wd, ht;
@@ -463,7 +395,7 @@ WidgetClass class;
     }
     xfwfLabelClassRec.core_class.expose(self, event, region);
 }
-/*ARGSUSED*/static void initialize(request,self,args,num_args)Widget  request;Widget self;ArgList  args;Cardinal * num_args;
+/*ARGSUSED*/static void initialize(Widget request, Widget self, ArgList args, Cardinal *num_args)
 {
     ((XfwfSlider2Widget)self)->xfwfSlider2.thumb_x = ((XfwfSlider2Widget)self)->xfwfSlider2.thumb_y = 0.0;
     ((XfwfSlider2Widget)self)->xfwfSlider2.thumb_wd = ((XfwfSlider2Widget)self)->xfwfSlider2.thumb_ht = 1.0;
@@ -474,7 +406,7 @@ WidgetClass class;
     ((XfwfSlider2Widget)self)->xfwfSlider2.thumblightgc = NULL; create_thumblightgc(self);
     ((XfwfSlider2Widget)self)->xfwfSlider2.thumbdarkgc = NULL; create_thumbdarkgc(self);
 }
-/*ARGSUSED*/static void move_thumb(self,oldx,oldy,wd,ht,newx,newy)Widget self;int  oldx;int  oldy;int  wd;int  ht;int  newx;int  newy;
+/*ARGSUSED*/static void move_thumb(Widget self, int oldx, int oldy, int wd, int ht, int newx, int newy)
 {
     int h;
 
@@ -500,7 +432,7 @@ WidgetClass class;
 		       newx - oldx, ht - abs(h), False);
     }
 }
-/*ARGSUSED*/static void compute_info(self,x,y,w,h,thumb_x,thumb_y,thumb_wd,thumb_ht)Widget self;Position * x;Position * y;Dimension * w;Dimension * h;float * thumb_x;float * thumb_y;float * thumb_wd;float * thumb_ht;
+/*ARGSUSED*/static void compute_info(Widget self, Position *x, Position *y, Dimension *w, Dimension *h, float *thumb_x, float *thumb_y, float *thumb_wd, float *thumb_ht)
 {
     Dimension fw, fh;
     Position fx, fy;
@@ -515,7 +447,7 @@ WidgetClass class;
     *thumb_x = (*w == fw) ? 0.0 : ((float) (*x - fx))/(fw - *w);
     *thumb_y = (*h == fh) ? 0.0 : ((float) (*y - fy))/(fh - *h);
 }
-/*ARGSUSED*/static Boolean  set_values(old,request,self,args,num_args)Widget  old;Widget  request;Widget self;ArgList  args;Cardinal * num_args;
+/*ARGSUSED*/static Boolean  set_values(Widget old, Widget request, Widget self, ArgList args, Cardinal *num_args)
 {
     Boolean need_redisplay = False;
     Position x, y;
@@ -543,7 +475,7 @@ WidgetClass class;
     }
     return need_redisplay;
 }
-/*ARGSUSED*/static void scroll_response(wdg,client_data,call_data)Widget  wdg;XtPointer  client_data;XtPointer  call_data;
+/*ARGSUSED*/static void scroll_response(Widget wdg, XtPointer client_data, XtPointer call_data)
 {
     Widget self = (Widget) client_data;
     XfwfScrollInfo *inf = (XfwfScrollInfo *)call_data;
@@ -597,7 +529,7 @@ WidgetClass class;
 	XtCallCallbackList(self, ((XfwfSlider2Widget)self)->xfwfSlider2.scrollCallback, &new_info);
     }
 }
-/*ARGSUSED*/void XfwfGetThumb(self,info)Widget self;XfwfScrollInfo * info;
+/*ARGSUSED*/void XfwfGetThumb(Widget self, XfwfScrollInfo *info)
 {
     if (! XtIsSubclass(self, xfwfSlider2WidgetClass))
 	XtError("XfwfGetThumb called with incorrect widget type");
@@ -608,7 +540,7 @@ WidgetClass class;
     info->hpos = ((XfwfSlider2Widget)self)->xfwfSlider2.thumb_x;
     info->hsize = ((XfwfSlider2Widget)self)->xfwfSlider2.thumb_wd;
 }
-/*ARGSUSED*/void XfwfMoveThumb(self,x,y)Widget self;double  x;double  y;
+/*ARGSUSED*/void XfwfMoveThumb(Widget self, double x, double y)
 {
     XfwfScrollInfo info;
 
@@ -623,7 +555,7 @@ WidgetClass class;
     info.hpos = x;
     ((XfwfSlider2WidgetClass)self->core.widget_class)->xfwfSlider2_class.scroll_response(NULL, self, &info);
 }
-/*ARGSUSED*/void XfwfResizeThumb(self,wd,ht)Widget self;double  wd;double  ht;
+/*ARGSUSED*/void XfwfResizeThumb(Widget self, double wd, double ht)
 {
     XfwfScrollInfo info;
 

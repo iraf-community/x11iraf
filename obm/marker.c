@@ -1,6 +1,7 @@
 /* Copyright(c) 1993 Association of Universities for Research in Astronomy Inc.
  */
 
+#include <stdlib.h>
 #include <ctype.h>
 #include "ObmP.h"
 #include "widget.h"
@@ -123,39 +124,51 @@ typedef struct {
 	markerPrivate marker;
 } markerObject, *MarkerObject;
 
-static void MarkerDestroy();
-static void MarkerClassDestroy();
-static ObmObject MarkerCreate();
-static int MarkerEvaluate();
-static int markerDestroyCallback();
-static int markerFocusCallback();
+static void MarkerDestroy(ObmObject);
+static void MarkerClassDestroy(ObmContext, ObjClassRec);
+static ObmObject MarkerCreate(ObmContext, const char *, ObjClassRec,
+			      const char *, ArgList, int);
+static int MarkerEvaluate(ObmObject, const char *);
+static int markerDestroyCallback(MarkerObject, XtPointer, int, XEvent *, String *, Cardinal);
+static int markerFocusCallback(MarkerObject, XtPointer, int, XEvent *, String *, Cardinal);
 
-static	int markerMakeCopy(), markerAddCallback();
-static	int markerDeleteCallback(), markerCallbackProc();
-static	int markerNotify(), markerDestroy(), markerMarkpos(), markerRedraw();
-static	int markerRaise(), markerLower(), markerMove(), markerResize();
-static	int markerRotate(), markerGetAttribute(), markerSetAttribute();
-static	int markerGetAttributes(), markerSetAttributes();
-static	int markerGetVertices(), markerSetVertices();
-static	int markerGetRegion(), markerGetRect();
+static	int markerMakeCopy(MsgContext, Tcl_Interp *, int, char **);
+static	int markerAddCallback(MsgContext, Tcl_Interp *, int, char **);
+static	int markerDeleteCallback(MsgContext, Tcl_Interp *, int, char **);
+static	int markerCallbackProc(ObmCallback, XtPointer, int, XEvent *, String *, Cardinal);
+static	int markerNotify(MsgContext, Tcl_Interp *, int, char **);
+static	int markerDestroy(MsgContext, Tcl_Interp *, int, char **);
+static	int markerMarkpos(MsgContext, Tcl_Interp *, int, char **);
+static	int markerRedraw(MsgContext, Tcl_Interp *, int, char **);
+static	int markerRaise(MsgContext, Tcl_Interp *, int, char **);
+static	int markerLower(MsgContext, Tcl_Interp *, int, char **);
+static	int markerMove(MsgContext, Tcl_Interp *, int, char **);
+static	int markerResize(MsgContext, Tcl_Interp *, int, char **);
+static	int markerRotate(MsgContext, Tcl_Interp *, int, char **);
+static	int markerGetAttribute(MsgContext, Tcl_Interp *, int, char **);
+static	int markerSetAttribute(MsgContext, Tcl_Interp *, int, char **);
+static	int markerGetAttributes(MsgContext, Tcl_Interp *, int, const char **);
+static	int markerSetAttributes(MsgContext, Tcl_Interp *, int, const char **);
+static	int markerGetVertices(MsgContext, Tcl_Interp *, int, char **);
+static	int markerSetVertices(MsgContext, Tcl_Interp *, int, char **);
+static	int markerGetRegion(MsgContext, Tcl_Interp *, int, char **);
+static	int markerGetRect(MsgContext, Tcl_Interp *, int, char **);
 
-extern	XtPointer GmCreate(), GmCopy();
-extern	double strtod();
+extern	XtPointer GmCreate(GtermWidget, int, int);
+extern	XtPointer GmCopy(Marker);
 
 
 /* MarkerClassInit -- Initialize the class record for the marker widget class.
  */
 void
-MarkerClassInit (obm, classrec)
-ObmContext obm;
-register ObjClassRec classrec;
+MarkerClassInit (ObmContext obm, ObjClassRec classrec)
 {
-	register MsgContext msg;
-	register Tcl_Interp *tcl;
+	MsgContext msg;
+	Tcl_Interp *tcl;
 
 	/* Install the class methods. */
 	classrec->ClassDestroy = MarkerClassDestroy;
-	classrec->Create = (ObmFunc) MarkerCreate;
+	classrec->Create = MarkerCreate;
 	classrec->Destroy = MarkerDestroy;
 	classrec->Evaluate = MarkerEvaluate;
 
@@ -171,51 +184,51 @@ register ObjClassRec classrec;
 	    msg->level = 0;
 
 	    Tcl_CreateCommand (tcl,
-		"makeCopy", markerMakeCopy, (ClientData)msg, NULL);
+		"makeCopy", (Tcl_CmdProc *) markerMakeCopy, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"addCallback", markerAddCallback, (ClientData)msg, NULL);
+		"addCallback", (Tcl_CmdProc *) markerAddCallback, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"deleteCallback", markerDeleteCallback, (ClientData)msg, NULL);
+		"deleteCallback", (Tcl_CmdProc *) markerDeleteCallback, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"callbackProc", markerCallbackProc, (ClientData)msg, NULL);
+		"callbackProc", (Tcl_CmdProc *) markerCallbackProc, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"notify", markerNotify, (ClientData)msg, NULL);
+		"notify", (Tcl_CmdProc *) markerNotify, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"destroy", markerDestroy, (ClientData)msg, NULL);
+		"destroy", (Tcl_CmdProc *) markerDestroy, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"markpos", markerMarkpos, (ClientData)msg, NULL);
+		"markpos", (Tcl_CmdProc *) markerMarkpos, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"redraw", markerRedraw, (ClientData)msg, NULL);
+		"redraw", (Tcl_CmdProc *) markerRedraw, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"raise", markerRaise, (ClientData)msg, NULL);
+		"raise", (Tcl_CmdProc *) markerRaise, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"lower", markerLower, (ClientData)msg, NULL);
+		"lower", (Tcl_CmdProc *) markerLower, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"move", markerMove, (ClientData)msg, NULL);
+		"move", (Tcl_CmdProc *) markerMove, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"resize", markerResize, (ClientData)msg, NULL);
+		"resize", (Tcl_CmdProc *) markerResize, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"rotate", markerRotate, (ClientData)msg, NULL);
+		"rotate", (Tcl_CmdProc *) markerRotate, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"set", markerSetAttribute, (ClientData)msg, NULL);
+		"set", (Tcl_CmdProc *) markerSetAttribute, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"get", markerGetAttribute, (ClientData)msg, NULL);
+		"get", (Tcl_CmdProc *) markerGetAttribute, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setAttribute", markerSetAttribute, (ClientData)msg, NULL);
+		"setAttribute", (Tcl_CmdProc *) markerSetAttribute, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getAttribute", markerGetAttribute, (ClientData)msg, NULL);
+		"getAttribute", (Tcl_CmdProc *) markerGetAttribute, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setAttributes", markerSetAttributes, (ClientData)msg, NULL);
+		"setAttributes", (Tcl_CmdProc *) markerSetAttributes, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getAttributes", markerGetAttributes, (ClientData)msg, NULL);
+		"getAttributes", (Tcl_CmdProc *) markerGetAttributes, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"setVertices", markerSetVertices, (ClientData)msg, NULL);
+		"setVertices", (Tcl_CmdProc *) markerSetVertices, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getVertices", markerGetVertices, (ClientData)msg, NULL);
+		"getVertices", (Tcl_CmdProc *) markerGetVertices, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getRegion", markerGetRegion, (ClientData)msg, NULL);
+		"getRegion", (Tcl_CmdProc *) markerGetRegion, (ClientData)msg, NULL);
 	    Tcl_CreateCommand (tcl,
-		"getRect", markerGetRect, (ClientData)msg, NULL);
+		"getRect", (Tcl_CmdProc *) markerGetRect, (ClientData)msg, NULL);
 	}
 }
 
@@ -223,11 +236,9 @@ register ObjClassRec classrec;
 /* MarkerClassDestroy -- Custom destroy procedure for the widget class.
  */
 static void
-MarkerClassDestroy (obm, classrec)
-ObmContext obm;
-register ObjClassRec classrec;
+MarkerClassDestroy (ObmContext obm, ObjClassRec classrec)
 {
-	register MsgContext msg = (MsgContext) classrec->class_data;
+	MsgContext msg = (MsgContext) classrec->class_data;
 
 	if (msg) {
 	    if (msg->tcl)
@@ -241,16 +252,16 @@ register ObjClassRec classrec;
 /* MarkerCreate -- Create a new instance of a marker object.
  */
 static ObmObject
-MarkerCreate (obm, name, classrec, parent, args, nargs)
-ObmContext obm;
-char *name;
-ObjClassRec classrec;
-char *parent;
-ArgList args;
-int nargs;
+MarkerCreate (
+  ObmContext obm,
+  const char *name,
+  ObjClassRec classrec,
+  const char *parent,
+  ArgList args,
+  int nargs)
 {
-	register MarkerObject obj;
-	register Widget gt;
+	MarkerObject obj;
+	Widget gt;
 	ObmObject gterm_obj;
 	int type, interactive;
 	int erase, visible, i;
@@ -293,7 +304,7 @@ int nargs;
 	    gm = marker;
 	else {
 	    gt = widgetGetPointer (gterm_obj);
-	    if ((gm = GmCreate (gt, type, interactive)) == NULL) {
+	    if ((gm = GmCreate ((GtermWidget) gt, type, interactive)) == NULL) {
 		XtFree ((char *)obj);
 		return (NULL);
 	    }
@@ -336,12 +347,11 @@ int nargs;
 /* MarkerDestroy -- Destroy an instance of a marker object.
  */
 static void
-MarkerDestroy (object)
-ObmObject object;
+MarkerDestroy (ObmObject object)
 {
 	MarkerObject obj = (MarkerObject) object;
-	register ObmContext obm = obj->marker.obm;
-        register ObmCallback cb, next;
+	ObmContext obm = obj->marker.obm;
+        ObmCallback cb, next;
 
 	/* Destroy the object in the second final call to Destroy. */
 	if (!obj->core.being_destroyed++)
@@ -370,13 +380,11 @@ ObmObject object;
 /* MarkerEvaluate -- Evaluate a marker command or message.
  */
 static int
-MarkerEvaluate (object, command)
-ObmObject object;
-char *command;
+MarkerEvaluate (ObmObject object, const char *command)
 {
-	register MarkerObject obj = (MarkerObject) object;
-	register MsgContext msg = (MsgContext) obj->core.classrec->class_data;
-	register ObmContext obm = obj->marker.obm;
+	MarkerObject obj = (MarkerObject) object;
+	MsgContext msg = (MsgContext) obj->core.classrec->class_data;
+	ObmContext obm = obj->marker.obm;
 	int status;
 
 	/* Since the class wide interpreter is used to evaluate the message
@@ -394,7 +402,8 @@ char *command;
 	    status = Tcl_Eval (msg->tcl, command);
 	    if (status == TCL_ERROR) {
 		if (*Tcl_GetStringResult (msg->tcl))
-		    Tcl_SetResult (obm->tcl, Tcl_GetStringResult (msg->tcl), TCL_VOLATILE);
+		    Tcl_SetResult (obm->tcl, (char *) Tcl_GetStringResult (msg->tcl),
+				   TCL_VOLATILE);
 		else {
 		    /* Supply a default error message if none was returned. */
 		    Tcl_SetResult (obm->tcl, "evaluation error", TCL_VOLATILE);
@@ -402,7 +411,8 @@ char *command;
 		Tcl_SetErrorLine (obm->tcl, Tcl_GetErrorLine (msg->tcl));
 
 	    } else if (*Tcl_GetStringResult (msg->tcl))
-		Tcl_SetResult (obm->tcl, Tcl_GetStringResult (msg->tcl), TCL_VOLATILE);
+	        Tcl_SetResult (obm->tcl, (char *) Tcl_GetStringResult (msg->tcl),
+			       TCL_VOLATILE);
 	}
 
 	msg->level--;
@@ -422,15 +432,11 @@ char *command;
  *  Usage:	makeCopy name
  */
 static int 
-markerMakeCopy (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+markerMakeCopy (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmContext obm = mp->obm;
+	MarkerPrivate mp = &obj->marker;
+	ObmContext obm = mp->obm;
 	XtPointer gm;
 	Arg args[10];
 	char *name;
@@ -455,16 +461,12 @@ char **argv;
  *  Usage:	addCallback procedure [event [event ...]]
  */
 static int 
-markerAddCallback (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+markerAddCallback (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
+	MarkerPrivate mp = &obj->marker;
 	ObmContext obm = mp->obm;
-	register ObmCallback cb, new_cb;
+	ObmCallback cb, new_cb;
 	char *procedure;
 	int events=0, i;
 
@@ -511,15 +513,11 @@ char **argv;
  *  Usage:	deleteCallback procedure
  */
 static int 
-markerDeleteCallback (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+markerDeleteCallback (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmCallback cb, prev;
+	MarkerPrivate mp = &obj->marker;
+	ObmCallback cb, prev;
 	char *procedure;
 
 	if (argc < 2)
@@ -546,19 +544,19 @@ char **argv;
  * marker code when a marker event occurs.
  */
 static int
-markerCallbackProc (cb, gm, events, event, params, nparams)
-register ObmCallback cb;
-XtPointer gm;
-int events;
-XEvent *event;
-String *params;
-Cardinal nparams;
+markerCallbackProc (
+  ObmCallback cb,
+  XtPointer gm,
+  int events,
+  XEvent *event,
+  String *params,
+  Cardinal nparams)
 {
 	MarkerObject obj = (MarkerObject) cb->u.obj;
 	MarkerPrivate mp = &obj->marker;
 	ObmContext obm = mp->obm;
 	char message_data[SZ_MESSAGE];
-	register char *op;
+	char *op;
 	int status = 0;
 
 	/* Call the user callback procedure.  The callback procedure is called
@@ -640,7 +638,7 @@ Cardinal nparams;
 	    case KeyPress:
 	    case KeyRelease:
 		{   XKeyPressedEvent *ev = (XKeyPressedEvent *) event;
-		    register char *ip, *op = message_data;
+		    char *ip, *op = message_data;
 		    char buf[SZ_MESSAGE];
 		    int n;
 
@@ -676,7 +674,7 @@ Cardinal nparams;
 	    case ButtonPress:
 	    case ButtonRelease:
 		{   XButtonPressedEvent *ev = (XButtonPressedEvent *) event;
-		    register char *op = message_data;
+		    char *op = message_data;
 
 		    if (event->type == ButtonPress)
 			strcpy (op, "buttonPress ");
@@ -817,15 +815,11 @@ Cardinal nparams;
  * Usage:	notify [event-type [param [param ...]]]
  */
 static int
-markerNotify (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+markerNotify (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmContext obm = mp->obm;
+	MarkerPrivate mp = &obj->marker;
+	ObmContext obm = mp->obm;
 	char *event_type;
 	int first_param;
 	XEvent event;
@@ -834,7 +828,7 @@ char **argv;
 	first_param = (argc > 1) ? 2 : 1;
 
 	GmNotify (mp->gm, GmStrToEvent(event_type), &event,
-	    argv[first_param], max (0, argc - first_param));
+	    &argv[first_param], max (0, argc - first_param));
 
 	return (TCL_OK);
 }
@@ -847,14 +841,10 @@ char **argv;
  * Usage:	destroy
  */
 static int
-markerDestroy (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+markerDestroy (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
+	MarkerPrivate mp = &obj->marker;
 
 	GmDestroy (mp->gm);
 	return (TCL_OK);
@@ -865,13 +855,13 @@ char **argv;
  * Gterm widget code when a marker is about to be destroyed.
  */
 static int
-markerDestroyCallback (obj, gm, events, event, params, nparams)
-MarkerObject obj;
-XtPointer gm;
-int events;
-XEvent *event;
-String *params;
-Cardinal nparams;
+markerDestroyCallback (
+  MarkerObject obj,
+  XtPointer gm,
+  int events,
+  XEvent *event,
+  String *params,
+  Cardinal nparams)
 {
 	MarkerPrivate mp = &obj->marker;
 	ObmContext obm = mp->obm;
@@ -885,16 +875,16 @@ Cardinal nparams;
  * gets or loses the focus.
  */
 static int
-markerFocusCallback (obj, gm, events, event, params, nparams)
-MarkerObject obj;
-XtPointer gm;
-int events;
-XEvent *event;
-String *params;
-Cardinal nparams;
+markerFocusCallback (
+  MarkerObject obj,
+  XtPointer gm,
+  int events,
+  XEvent *event,
+  String *params,
+  Cardinal nparams)
 {
 	MarkerPrivate mp = &obj->marker;
-	ObmObject gtobj = mp->pobj;
+	WidgetObject gtobj = (WidgetObject)mp->pobj;
 	ObmContext obm = mp->obm;
 
 	if (events & GmEvFocusIn)
@@ -917,15 +907,11 @@ Cardinal nparams;
  * marker.
  */
 static int
-markerMarkpos (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+markerMarkpos (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmContext obm = mp->obm;
+	MarkerPrivate mp = &obj->marker;
+	ObmContext obm = mp->obm;
 	int erase;
 
 	GmMarkpos (mp->gm);
@@ -951,15 +937,11 @@ char **argv;
  * A normal marker redraw uses function=copy.
  */
 static int
-markerRedraw (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+markerRedraw (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmContext obm = mp->obm;
+	MarkerPrivate mp = &obj->marker;
+	ObmContext obm = mp->obm;
 	Boolean markpos = False;
 	Boolean erase = True;
 	int function = GXcopy;
@@ -998,15 +980,11 @@ char **argv;
  * marker, otherwise the raised marker becomes the topmost marker.
  */
 static int
-markerRaise (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+markerRaise (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmContext obm = mp->obm;
+	MarkerPrivate mp = &obj->marker;
+	ObmContext obm = mp->obm;
 	XtPointer ref_gm = NULL;
 	MarkerObject ref;
 
@@ -1033,15 +1011,11 @@ char **argv;
  * marker, otherwise the lowered marker becomes the lowest marker.
  */
 static int
-markerLower (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+markerLower (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmContext obm = mp->obm;
+	MarkerPrivate mp = &obj->marker;
+	ObmContext obm = mp->obm;
 	XtPointer ref_gm = NULL;
 	MarkerObject ref;
 
@@ -1066,15 +1040,11 @@ char **argv;
  * Move the marker center to the indicated coordinates in the display window.
  */
 static int
-markerMove (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+markerMove (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmContext obm = mp->obm;
+	MarkerPrivate mp = &obj->marker;
+	ObmContext obm = mp->obm;
 	Arg args[10];
 	int erase;
 
@@ -1102,15 +1072,11 @@ char **argv;
  * is an acceptable value for a text marker dimension.
  */
 static int
-markerResize (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+markerResize (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmContext obm = mp->obm;
+	MarkerPrivate mp = &obj->marker;
+	ObmContext obm = mp->obm;
 	Arg args[10];
 	int erase;
 
@@ -1136,15 +1102,11 @@ char **argv;
  * given in radians.
  */
 static int
-markerRotate (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+markerRotate (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmContext obm = mp->obm;
+	MarkerPrivate mp = &obj->marker;
+	ObmContext obm = mp->obm;
 	Arg args[10];
 	int erase;
 
@@ -1166,15 +1128,11 @@ char **argv;
  * Usage:	value = getAttribute attribute-name
  */
 static int
-markerGetAttribute (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+markerGetAttribute (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmContext obm = mp->obm;
+	MarkerPrivate mp = &obj->marker;
+	ObmContext obm = mp->obm;
 	char *name, value[SZ_COMMAND];
 
 	if (argc < 2)
@@ -1196,15 +1154,11 @@ char **argv;
  * Usage:	setAttribute attribute-name value
  */
 static int
-markerSetAttribute (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+markerSetAttribute (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmContext obm = mp->obm;
+	MarkerPrivate mp = &obj->marker;
+	ObmContext obm = mp->obm;
 	char *name, *value;
 
 	if (argc < 3)
@@ -1230,18 +1184,15 @@ char **argv;
  * is to be stored.
  */
 static int
-markerGetAttributes (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+markerGetAttributes (MsgContext msg, Tcl_Interp *tcl, int argc, const char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmContext obm = mp->obm;
-	char *name, *variable, value[SZ_COMMAND];
+	MarkerPrivate mp = &obj->marker;
+	ObmContext obm = mp->obm;
+	const char *name, *variable;
+	char value[SZ_COMMAND];
 	int i, status = 0;
-	char **items;
+	const char **items;
 	int nitems;
 
 	if (argc < 2)
@@ -1254,7 +1205,7 @@ char **argv;
 	} else if (argc > 2) {
 	    /* Attribute list passed as separate arguments. */
 	    nitems = argc - 1;
-	    items = (char **) Tcl_Alloc (nitems * sizeof(char *));
+	    items = (const char **) Tcl_Alloc (nitems * sizeof(char *));
 	    if (items == NULL)
 		return (TCL_ERROR);
 	    for (i=0;  i < nitems;  i++)
@@ -1286,19 +1237,15 @@ char **argv;
  * where "value" is the new value of the associated marker attribute.
  */
 static int
-markerSetAttributes (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+markerSetAttributes (MsgContext msg, Tcl_Interp *tcl, int argc, const char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmContext obm = mp->obm;
-	char *name, *value;
+	MarkerPrivate mp = &obj->marker;
+	ObmContext obm = mp->obm;
+	const char *name, *value;
 	Arg args[MAX_ARGS];
 	int status, argno, i;
-	char **items;
+	const char **items;
 	int nitems;
 
 	if (argc < 2)
@@ -1311,7 +1258,7 @@ char **argv;
 	} else if (argc > 2) {
 	    /* Attribute list passed as separate arguments. */
 	    nitems = argc - 1;
-	    items = (char **) Tcl_Alloc (nitems * sizeof(char *));
+	    items = (const char **) Tcl_Alloc (nitems * sizeof(char *));
 	    if (items == NULL)
 		return (TCL_ERROR);
 	    for (i=0;  i < nitems;  i++)
@@ -1346,19 +1293,15 @@ char **argv;
  * coordinates.
  */
 static int
-markerGetVertices (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+markerGetVertices (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
 	MarkerPrivate mp = &obj->marker;
 	ObmContext obm = mp->obm;
 
-	register int i;
-	register char *op;
-	register DPoint *pv;
+	int i;
+	char *op;
+	DPoint *pv;
 	int first, maxpts, npts, ngot;
 	int nchars, status, buflen;
 	char *points, *buf;
@@ -1438,19 +1381,15 @@ again:
  * point to the list.
  */
 static int
-markerSetVertices (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+markerSetVertices (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
 	MarkerPrivate mp = &obj->marker;
 	ObmContext obm = mp->obm;
 
-	register int i;
-	register char *ip;
-	register DPoint *pv;
+	int i;
+	char *ip;
+	DPoint *pv;
 	int first, maxpts, npts, ngot;
 	char *ipp, *points, *ip_save;
 
@@ -1528,18 +1467,14 @@ char **argv;
  * coordinates being the default.
  */
 static int
-markerGetRegion (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+markerGetRegion (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
 	MarkerPrivate mp = &obj->marker;
 	ObmContext obm = mp->obm;
-	register DPoint *pv, *vv;
-	register char *op;
-	register int i;
+	DPoint *pv, *vv;
+	char *op;
+	int i;
 
 	Boolean unmap = False;
 	int ctype_out = GtPixel;
@@ -1573,7 +1508,7 @@ char **argv;
 	XtSetArg (args[4], GmHeight, &height);
 	GmGetAttributes (mp->gm, args, 5, XtRInt);
 
-	if (GmGetAttribute (mp->gm, GmRotangle, &rotangle, XtRFloat) < 0)
+	if (GmGetAttribute (mp->gm, GmRotangle, (long)&rotangle, XtRFloat) < 0)
 	    return (TCL_ERROR);
 
 	/* Get the points array, needed for some markers. */
@@ -1614,11 +1549,11 @@ again:
 
 	if (unmap) {
 	    do {
-		src = GtSelectRaster (mp->gt, dst=src,
+		src = GtSelectRaster ((GtermWidget)mp->gt, dst=src,
 		    GtPixel, (int)(pv[0].x + 0.5), (int)(pv[0].y + 0.5),
 		    GtPixel, &x, &y, &mapping);
 		if (src != dst)
-		    GtMapVector (mp->gt, mapping, GtUnmap, pv, pv, pvlen);
+		    GtMapVector ((GtermWidget)mp->gt, mapping, GtUnmap, pv, pv, pvlen);
 	    } while (dst != src);
 	}
 
@@ -1627,7 +1562,7 @@ again:
 	 * level, which we scale to the range 0-1 floating at the GUI level.
 	 */
 	if (ctype_out == GtNDC) {
-	    GtPixelToNDC (mp->gt, src, pv, pv, pvlen);
+	    GtPixelToNDC ((GtermWidget)mp->gt, src, pv, pv, pvlen);
 	    for (i=0;  i < pvlen;  i++) {
 		pv[i].x /= (double)MAXNDC;
 		pv[i].y /= (double)MAXNDC;
@@ -1791,15 +1726,11 @@ again:
  * nonrotated rectangular markers.
  */
 static int
-markerGetRect (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+markerGetRect (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	MarkerObject obj = (MarkerObject) msg->object[msg->level];
-	register MarkerPrivate mp = &obj->marker;
-	register ObmContext obm = mp->obm;
+	MarkerPrivate mp = &obj->marker;
+	ObmContext obm = mp->obm;
 	char *dx_out, *dy_out, *dnx_out, *dny_out;
 	int marker_type, x, y, width, height, status;
 	int dx, dy, dnx, dny;

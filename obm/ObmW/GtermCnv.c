@@ -99,7 +99,7 @@ Pixmap rasPM_to_gtermPM (Raster src, GtermWidget w)
 XImage *ximage_to_rasPM (GtermWidget w, XImage *xin, Raster dest, 
   	    int sx, int sy, int dnx, int dny)
 {
-    uchar *renderPixels ();
+    uchar *renderPixels (GtermWidget w, uchar *in, int width, int height, int depth, int sx, int sy, int dnx, int dny, int bpl, int bpp, int border);
     XImage *cnvImg  = (XImage *) NULL;
 
  
@@ -145,7 +145,7 @@ XImage *ximage_to_rasPM (GtermWidget w, XImage *xin, Raster dest,
 XImage *ximage_to_gtermPM (GtermWidget w, XImage *xin, 
   	    int sx, int sy, int dnx, int dny)
 {
-    uchar *renderPixels ();
+    uchar *renderPixels (GtermWidget w, uchar *in, int width, int height, int depth, int sx, int sy, int dnx, int dny, int bpl, int bpp, int border);
     XImage *cnvImg  = (XImage *) NULL;
 
  
@@ -191,14 +191,9 @@ XImage *ximage_to_gtermPM (GtermWidget w, XImage *xin,
 **  the pointer to the output pixels and assume the caller will free it.
 */
 uchar *
-renderPixels (w, in, width, height, depth, sx, sy, dnx, dny, bpl, bpp, border)
-GtermWidget w;
-uchar	*in;
-int	width, height, depth;
-int	sx, sy, dnx, dny;
-int     bpl, bpp, border;
+renderPixels (GtermWidget w, uchar *in, int width, int height, int depth, int sx, int sy, int dnx, int dny, int bpl, int bpp, int border)
 {
-    register int i, j, npix = (width * height);
+    int i, j, npix = (width * height);
     uint32_t  *lp, xcol, lval;
     int    nbytes = ((depth == ColormapDepth) ? 1 : 4);
     uchar  *ip = in, pv;
@@ -258,7 +253,7 @@ int     bpl, bpp, border;
 static int
 init_lut (int bpp, int border)
 {
-    register int i;
+    int i;
     unsigned long  rmask, gmask, bmask, rpix, gpix, bpix, xcol, lval;
     int    rshift, gshift, bshift, nbytes;
     uchar  *op, pv;
@@ -350,7 +345,7 @@ init_lut (int bpp, int border)
 */
 int highbit(unsigned long i)
 {
-    register int h = 1;
+    int h = 1;
     if (i == 0)
         return (0);
 #ifdef _LP64
@@ -372,7 +367,7 @@ int highbit(unsigned long i)
 */
 int lowbit(unsigned long i)
 {
-    register int h = 1;
+    int h = 1;
 
     if (i == 0)
         return (0);
@@ -466,7 +461,7 @@ dbg_printMappings (GtermWidget w)
 static void
 dbg_printRasters (GtermWidget w)
 {
-    register int i;
+    int i;
     Raster   rp;
 
 

@@ -51,19 +51,19 @@ static char    *l_order = "II*\0";
 /* MONO returns total intensity of r,g,b components */
 #define MONO(rd,gn,bl) (((rd)*11 + (gn)*16 + (bl)*5) >> 5)  /*.33R+ .5G+ .17B*/
 
-extern int is_swapped();
-void create_TIFFtag();
+extern int is_swapped(void);
+void create_TIFFtag(TiffTag *tag, short int desig, short int type, int count, int offset);
 
 /* writeTIFF -- Write a TIFF 6.0 image.
 */
 void
-writeTIFF (fa, data, w, h, ncolors, gray, r, g, b)
-FILE 	*fa;				/* output file descriptor	*/
-unsigned char *data;			/* pixel data			*/
-int w, h;				/* image dimensions		*/
-int ncolors;				/* number of colors		*/
-int gray;				/* grayscale?			*/
-unsigned char *r, *g, *b;		/* colormap			*/
+writeTIFF (FILE *fa, unsigned char *data, int w, int h, int ncolors, int gray, unsigned char *r, unsigned char *g, unsigned char *b)
+     	    				/* output file descriptor	*/
+                    			/* pixel data			*/
+         				/* image dimensions		*/
+            				/* number of colors		*/
+         				/* grayscale?			*/
+                         		/* colormap			*/
 {
 	int	i,size,offset;
 	short   dirs = 12;
@@ -186,12 +186,12 @@ unsigned char *r, *g, *b;		/* colormap			*/
 /* create_TIFFtag - Create a TIFF IFD (Image File Directory).
 */
 void
-create_TIFFtag (tag, desig, type, count, offset)
-TiffTag *tag;				/* tag to create		*/
-short desig;				/* tag definition		*/
-short type;				/* scalar type of data items	*/
-int count;				/* no. of items in tag data	*/
-int offset;				/* byte offset to data items	*/
+create_TIFFtag (TiffTag *tag, short int desig, short int type, int count, int offset)
+             				/* tag to create		*/
+            				/* tag definition		*/
+           				/* scalar type of data items	*/
+          				/* no. of items in tag data	*/
+           				/* byte offset to data items	*/
 {
 	tag->tag = desig;
 	tag->type = type;

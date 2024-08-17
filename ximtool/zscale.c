@@ -46,9 +46,9 @@
 #define abs(a) ((a) >= 0 ? (a) : -(a))
 
 
-static void	flattenData(), subSample();
-static int	sampleImage(), fitLine(), floatCompare();
-static int	rejectPixels(), computeSigma();
+static void	flattenData(float *data, float *flat, float *x, int npix, double z0, double dz), subSample(float *a, float *b, int npix, int step);
+static int	sampleImage(char *im, int bitpix, float **sample, int nx, int ny, int optimal_size, int len_stdline), fitLine(float *data, int npix, float *zstart, float *zslope, float krej, int ngrow, int maxiter), floatCompare(float *i, float *j);
+static int	rejectPixels(float *data, float *flat, float *normx, char *badpix, int npix, double *sumxsqr, double *sumxz, double *sumx, double *sumz, double threshold, int ngrow), computeSigma(float *a, char *badpix, int npix, double *mean, double *sigma);
 
 
 
@@ -56,17 +56,17 @@ static int	rejectPixels(), computeSigma();
  */
 
 void
-zscale (im, nx, ny, bitpix, z1, z2, contrast, opt_size, len_stdline)
+zscale (char *im, int nx, int ny, int bitpix, float *z1, float *z2, float contrast, int opt_size, int len_stdline)
 
-char    *im;			/* image data to be sampled		*/
-int	nx, ny;			/* image dimensions			*/
-int	bitpix;			/* bits per pixel			*/
-float	*z1, *z2;		/* output min and max greyscale values	*/
-float	contrast;		/* adj. to slope of transfer function	*/
-int	opt_size;		/* desired number of pixels in sample	*/
-int	len_stdline;		/* optimal number of pixels per line	*/
+            			/* image data to be sampled		*/
+   	       			/* image dimensions			*/
+   	       			/* bits per pixel			*/
+     	         		/* output min and max greyscale values	*/
+     	         		/* adj. to slope of transfer function	*/
+   	         		/* desired number of pixels in sample	*/
+   	            		/* optimal number of pixels per line	*/
 {
-	register int npix, minpix, ngoodpix, center_pixel, ngrow;
+	int npix, minpix, ngoodpix, center_pixel, ngrow;
 	float	zmin, zmax, median;
 	float	zstart, zslope;
 	float 	*sample, *left;
@@ -77,7 +77,7 @@ int	len_stdline;		/* optimal number of pixels per line	*/
 	/* Sort the sample, compute the minimum, maximum, and median pixel
 	 * values.
 	 */
-	qsort (sample, npix, sizeof (float), floatCompare);
+	qsort (sample, npix, sizeof (float), (int(*)())floatCompare);
 	zmin = *sample;
 	zmax = *(sample+npix-1);
 
@@ -130,16 +130,16 @@ int	len_stdline;		/* optimal number of pixels per line	*/
  */
 
 static int 
-sampleImage (im, bitpix, sample, nx, ny, optimal_size, len_stdline)
+sampleImage (char *im, int bitpix, float **sample, int nx, int ny, int optimal_size, int len_stdline)
 
-char	*im;			/* image to be sampled			*/
-int	bitpix;			/* bits per pixel in image		*/
-float	**sample;		/* output vector containing the sample	*/
-int	nx, ny;			/* image dimensions			*/
-int	optimal_size;		/* desired number of pixels in sample	*/
-int	len_stdline;		/* optimal number of pixels per line	*/
+    	    			/* image to be sampled			*/
+   	       			/* bits per pixel in image		*/
+     	         		/* output vector containing the sample	*/
+   	       			/* image dimensions			*/
+   	             		/* desired number of pixels in sample	*/
+   	            		/* optimal number of pixels per line	*/
 {
-	register int i;
+	int i;
 	int ncols, nlines, col_step, line_step, maxpix, line;
 	int opt_npix_per_line, npix_per_line, npix = 0;
 	int opt_nlines_in_sample, min_nlines_in_sample, max_nlines_in_sample;
@@ -233,12 +233,9 @@ int	len_stdline;		/* optimal number of pixels per line	*/
  */
 
 static void
-subSample (a, b, npix, step)
-float	*a;
-float	*b;
-int	npix, step;
+subSample (float *a, float *b, int npix, int step)
 {
-	register int ip, i;
+	int ip, i;
 
 	if (step <= 1)
 	    memmove (b, a, npix);
@@ -261,15 +258,15 @@ int	npix, step;
  */
 
 static int 
-fitLine (data, npix, zstart, zslope, krej, ngrow, maxiter)
+fitLine (float *data, int npix, float *zstart, float *zslope, float krej, int ngrow, int maxiter)
 
-float	*data;			/* data to be fitted	  		  */
-int	npix;			/* number of pixels before rejection	  */
-float	*zstart;		/* Z-value of pixel data[1]	(output)  */
-float	*zslope;		/* dz/pixel			(output)  */
-float	krej;			/* k-sigma pixel rejection factor	  */
-int	ngrow;			/* number of pixels of growing		  */
-int	maxiter;		/* max iterations			  */
+     	      			/* data to be fitted	  		  */
+   	     			/* number of pixels before rejection	  */
+     	        		/* Z-value of pixel data[1]	(output)  */
+     	        		/* dz/pixel			(output)  */
+     	     			/* k-sigma pixel rejection factor	  */
+   	      			/* number of pixels of growing		  */
+   	        		/* max iterations			  */
 {
 	int	i, ngoodpix, last_ngoodpix, minpix, niter;
 	double	xscale, z0, dz, o_dz, x, z, mean, sigma, threshold;
@@ -392,14 +389,14 @@ int	maxiter;		/* max iterations			  */
  */
 
 static void
-flattenData (data, flat, x, npix, z0, dz)
-float	*data;			/* raw data array			*/
-float	*flat;			/* flattened data  (output)		*/
-float	*x;			/* x value of each pixel		*/
-int	npix;			/* number of pixels			*/
-double	z0, dz;			/* z-intercept, dz/dx of fitted line	*/
+flattenData (float *data, float *flat, float *x, int npix, double z0, double dz)
+     	      			/* raw data array			*/
+     	      			/* flattened data  (output)		*/
+     	   			/* x value of each pixel		*/
+   	     			/* number of pixels			*/
+      	       			/* z-intercept, dz/dx of fitted line	*/
 {
-	register int i;
+	int i;
 
 	for (i=0; i < npix; i++) 
 	    flat[i] = data[i] - (x[i] * dz + z0);
@@ -411,12 +408,12 @@ double	z0, dz;			/* z-intercept, dz/dx of fitted line	*/
  */
 
 static int 
-computeSigma (a, badpix, npix, mean, sigma)
+computeSigma (float *a, char *badpix, int npix, double *mean, double *sigma)
 
-float	*a;			/* flattened data array			*/
-char	*badpix;		/* bad pixel flags (!= 0 if bad pixel)	*/
-int	npix;
-double	*mean, *sigma;		/* (output)				*/
+     	   			/* flattened data array			*/
+    	        		/* bad pixel flags (!= 0 if bad pixel)	*/
+   	     
+      	              		/* (output)				*/
 {
 	float	pixval;
 	int	i, ngoodpix = 0;
@@ -526,8 +523,7 @@ int	ngrow;			/* number of pixels of growing		*/
 
 
 static int
-floatCompare (i,j)
-float 	*i, *j;
+floatCompare (float *i, float *j)
 {
 	/* return ((int) (*i - *j + 0.5)); */
         return ((*i <= *j) ? -1 : 1);

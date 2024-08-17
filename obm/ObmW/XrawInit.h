@@ -22,19 +22,6 @@
 #ifndef _XawInit_
 #define _XawInit_
 
-#if !(defined(__STDC__) && __STDC__) && !defined(__cplusplus) && !defined(c_plusplus) && !defined(FUNCPROTO) && !defined(XTFUNCPROTO) && !defined(XAWFUNCPROTO) && !(defined(NeedFunctionPrototypes) && NeedFunctionPrototypes)
-#define Xraw_NO_PROTO
-#else
-#define Xraw_NEED_PROTO
-#endif /* __STDC__ */
-
-
-#ifdef  Xraw_NEED_PROTO
-#define Xraw_PROTO(args) args
-#else
-#define Xraw_PROTO(args) ()
-#endif
-
 #define Xraw_VERSION  1
 #define Xraw_REVISION 2
 
@@ -51,7 +38,7 @@
 #define WNULL          (Widget)NULL
 
 /* called from ClassInit procs */
-extern void XawInitializeWidgetSet Xraw_PROTO((void));
+extern void XawInitializeWidgetSet (void);
 
 #if defined(XtSpecificationRelease) && XtSpecificationRelease < 5
 #define XPointer XtPointer

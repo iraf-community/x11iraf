@@ -100,7 +100,7 @@
 
 static	XtAppContext app_con;
 static	ObmContext obm;			/* object manager		*/
-static	Widget gw;			/* graphics widget		*/
+static	GtermWidget gw;			/* graphics widget		*/
 
 static	int gio_graphicsenabled = 0;	/* switch text/graphics output	*/
 static	int gio_enabled = 1;		/* enable graphics window	*/
@@ -212,16 +212,18 @@ typedef Request	*RequestPtr;
 static RequestPtr request_head = NULL;
 static RequestPtr request_tail = NULL;
 
-static	int gio_reset(), gio_setginmodeterm(), gio_output();
-static	int gio_clear();
-static	int gio_retcursor(), gio_queue_output(), gio_queue_request();
-static	int gio_hardreset(), gio_activate(), gio_enable(), gio_tekmode();
-static	int gio_processdata(), gio_ptyinput(), gio_escape(), gio_status();
-static	void gio_activate_cb();
-static  void gio_connect_cb();
-static	void gio_deactivate_cb();
-static	void gio_keyinput(), gio_resize();
-static	void pl_decodepts(), gio_retenq();
+static	void gio_reset(int, GtermWidget, char *);
+static	int gio_setginmodeterm(int dummy, char *str);
+static	int gio_output(void);
+static	int gio_clear(int dummy);
+static	int gio_retcursor(int key, int sx, int sy, int raster, int rx, int ry, int datalen), gio_queue_output(int fd, XtPointer tcl, char *objname, int key, char *strval), gio_queue_request(int sx, int sy, int raster, int rx, int ry, int key, char *strval);
+static	int gio_hardreset(int dummy), gio_activate(int dummy, int state), gio_enable(int dummy, int onoff), gio_tekmode(int dummy, int onoff);
+static	int gio_processdata(void), gio_ptyinput(int notused, char *ttybuf, int nchars), gio_escape(void), gio_status(int dummy, char *app_name, char *app_class);
+static	int gio_activate_cb(int dummy, Widget w, int state);
+static  int gio_connect_cb(int dummy, Display *display, Widget toplevel, int state);
+static	int gio_deactivate_cb(int dummy, Widget w, int state);
+static	void gio_keyinput(XtPointer notused, Widget w, XEvent *event), gio_resize(XtPointer notused, Widget w);
+static	void pl_decodepts(void), gio_retenq(void);
 
 /* Externally callable routines. */
 static struct GT_function gio_functions[] = {
@@ -238,9 +240,9 @@ static struct GT_function gio_functions[] = {
 
 
 /* Translation to hook Tek menu to gterm widget. */
-extern void HandlePopupMenu();
-extern void DeleteWindow();
-extern char *gtermio_getResource();
+extern void HandlePopupMenu(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void DeleteWindow(Widget w, XEvent *event, String *params, Cardinal *num_params);
+extern char *gtermio_getResource(char *name);
 static Atom wm_delete_window = 0;   /* for ICCCM delete window */
 
 static char *gio_shellTrans =
@@ -262,11 +264,11 @@ static XtActionsRec actionsList[] = {
  * process startup to establish communications between the caller and gtermio.
  */
 void
-gio_setup (app_context, argc, argv, fd)
-XtAppContext app_context;	/* applications context of caller */
-int	argc;			/* argument count */
-char	*argv[];		/* argument vector */
-int	fd;			/* fd of pty for terminal i/o */
+gio_setup (
+   XtAppContext app_context,	/* applications context of caller */
+   int	argc,			/* argument count */
+   char	*argv[],		/* argument vector */
+   int	fd)			/* fd of pty for terminal i/o */
 {
 	app_con = app_context;
 	pty_fd = fd;
@@ -285,7 +287,7 @@ int	fd;			/* fd of pty for terminal i/o */
 	ObmAddCallback (obm, OBMCB_clientOutput|OBMCB_preserve,
 	    gio_queue_output, NULL);
 	ObmAddCallback (obm, OBMCB_setGterm|OBMCB_preserve,
-	    gio_reset, NULL);
+	    (ObmFunc)gio_reset, NULL);
 
 	/* Register xgterm global actions. */
 	if (!actions_registered) {
@@ -301,13 +303,11 @@ int	fd;			/* fd of pty for terminal i/o */
  * be called when the display connection is opened or close.
  */
 void
-gio_postconnectcallback (connect, client_data)
-void (*connect)();
-int client_data;
+gio_postconnectcallback (int (*connect)(), int client_data)
 {
 	if (obm) {
 	    ObmAddCallback (obm, OBMCB_connect|OBMCB_preserve,
-		connect, client_data);
+		connect, (XtPointer)client_data);
 	}
 }
 
@@ -316,9 +316,7 @@ int client_data;
  * disabled, all i/o is directed to the text window.
  */
 static int
-gio_enable (dummy, onoff)
-int	dummy;
-int	onoff;
+gio_enable (int	dummy, int onoff)
 {
 	switch (onoff) {
 	case 0:
@@ -338,11 +336,9 @@ int	onoff;
  * forcibly activate or deactivate the graphics UI.
  */
 static int
-gio_activate (dummy, state)
-int dummy;
-int state;
+gio_activate (int dummy, int state)
 {
-	register RequestPtr rp;
+	RequestPtr rp;
 
 	/* Cancel any buffered command output. */
 	wait_cursor = 0;
@@ -384,10 +380,7 @@ int state;
  * not a GUI has been loaded.
  */
 static int
-gio_status (dummy, app_name, app_class)
-int dummy;
-char *app_name;			/* can be NULL */
-char *app_class;		/* can be NULL */
+gio_status (int dummy, char *app_name, char *app_class)
 {
 	return (ObmStatus (obm, app_name, app_class));
 }
@@ -396,16 +389,13 @@ char *app_class;		/* can be NULL */
 /* GIO_ACTIVATE_CB -- Activate callback, called by the gterm widget when the
  * user interface is activated.
  */
-static void
-gio_activate_cb (dummy, w, state)
-int dummy;
-Widget w;
-int state;
+static int
+gio_activate_cb (int dummy, Widget w, int state)
 {
-	register RequestPtr rp;
+	RequestPtr rp;
 
 	if (!state)
-	    return;
+	    return 0;
 
 	/* Cancel any buffered command output. */
 	wait_cursor = 0;
@@ -424,6 +414,7 @@ int state;
 	wm_delete_window = XInternAtom (XtDisplay(w),
 	    "WM_DELETE_WINDOW", False);
 	XSetWMProtocols (XtDisplay(w), XtWindow(w), &wm_delete_window, 1);
+	return 0;
 }
 
 
@@ -432,28 +423,22 @@ int state;
  * to intercept a window close action in a GUI to keep from shutting down 
  * completely.
  */
-static void
-gio_deactivate_cb (dummy, w, state)
-int dummy;
-Widget w;
-int state;
+static int
+gio_deactivate_cb (int dummy, Widget w, int state)
 {
+	return 0;
 }
 
 
 /* GIO_CONNECT_CB -- Connect callback, called by the gterm widget when a new
  * application GUI is initialized or when the display connection is closed.
  */
-static void
-gio_connect_cb (dummy, display, toplevel, state)
-int dummy;
-Display *display;
-Widget toplevel;
-int state;
+static int
+gio_connect_cb (int dummy, Display *display, Widget toplevel, int state)
 {
 	if (state) {
 	    extern Widget term;
-	    extern char *mktemp();
+	    extern char *mktemp(char *);
 	    XrmDatabase db1, db2;
 	    char *fname, buf[256];
 
@@ -480,6 +465,7 @@ int state;
 		XtParseTranslationTable (gio_shellTrans));
 	} else
 	    memset (gterms, 0, sizeof(gterms));
+	return 0;
 }
 
 
@@ -488,9 +474,7 @@ int state;
  * can be called to manually switch the input to a window.
  */
 static int
-gio_tekmode (dummy, onoff)
-int dummy;
-int onoff;
+gio_tekmode (int dummy, int onoff)
 {
 	switch (onoff) {
 	case 0:
@@ -509,8 +493,7 @@ int onoff;
 /* GIO_CLEAR -- Clear the graphics window.
  */
 static int
-gio_clear (dummy)
-int dummy;
+gio_clear (int dummy)
 {
 	if (gw) {
 	    GtClearScreen (gw);
@@ -528,10 +511,9 @@ int dummy;
  * that may be in progress.
  */
 static int
-gio_hardreset (dummy)
-int dummy;
+gio_hardreset (int dummy)
 {
-	register RequestPtr rp;
+	RequestPtr rp;
 
 	/* If a cusor read is currently in progress send the application EOF
 	 * to indicate that it should exit graphics mode.
@@ -591,18 +573,15 @@ int dummy;
  * whenever any important data structures change, e.g., if the graphics
  * window is resized.
  */
-static int
-gio_reset (notused, w, args)
-int notused;
-register Widget w;
-char *args;
+static void
+gio_reset (int notused, GtermWidget w, char *args)
 {
-	register int i;
+	int i;
 	int new_widget;
 
 	/* Make this the active graphics widget. */
 	if ((gw = w) == NULL)
-	    return (0);
+	    return;
 
 	GtReset (w);
 	GtActivate (w);
@@ -612,7 +591,7 @@ char *args;
 	 */
 	new_widget = 1;
 	for (i=0;  i < MAX_GTERM;  i++)
-	    if (gterms[i] == w) {
+	  if (gterms[i] == (Widget) w) {
 		new_widget = 0;
 		break;
 	    }
@@ -627,7 +606,7 @@ char *args;
 
 	    for (i=0;  i < MAX_GTERM;  i++)
 		if (!gterms[i]) {
-		    gterms[i] = w;
+		  gterms[i] = (Widget) w;
 		    break;
 		}
 	}
@@ -660,8 +639,6 @@ char *args;
 
 	cur_x = tx_leftmargin;
 	cur_y = tx_charbase;
-
-	return (0);
 }
 
 
@@ -669,12 +646,10 @@ char *args;
  * expressed as octal constants in the input string argument.
  */
 static int
-gio_setginmodeterm (dummy, str)
-int	dummy;
-char	*str;
+gio_setginmodeterm (int dummy, char *str)
 {
-	register char	*ip;
-	register int	n;
+	char	*ip;
+	int	n;
 
 	trailer1 = trailer2 = -1;
 
@@ -708,14 +683,12 @@ char	*str;
  * drawing window is resized.
  */
 static void
-gio_resize (notused, w)
-XtPointer notused;
-Widget w;
+gio_resize (XtPointer notused, Widget w)
 {
 	/* Ignore the resize callback if the widget being resized is not the
 	 * active widget.
 	 */
-	if (w != gw)
+	if (w != (Widget) gw)
 	    return;
 
 	/* Always update the window size variables. */
@@ -743,7 +716,7 @@ Widget w;
 	 */
 	if (!g_havedata) {
 	    if (gw)
-		gio_reset (0, gw, NULL);
+		gio_reset (0, (GtermWidget) gw, NULL);
 
 	    /* If the client posted a resize escape sequence, send this
 	     * value to the client as a cursor read to signal the resize
@@ -768,12 +741,12 @@ Widget w;
  * read) pending, the request will be passed on immediately.
  */
 static int
-gio_queue_output (fd, tcl, objname, key, strval)
-int fd;				/* pty */
-XtPointer tcl;			/* not used */
-char *objname;			/* client object name (not used) */
-int key;			/* cursor keystroke or NULL */
-char *strval;			/* cursor strval or literal command */
+gio_queue_output (
+    int fd,			/* pty */
+    XtPointer tcl,		/* not used */
+    char *objname,		/* client object name (not used) */
+    int key,			/* cursor keystroke or NULL */
+    char *strval)		/* cursor strval or literal command */
 {
         int mapping, raster;
 	int sx, sy, rx, ry;
@@ -803,13 +776,9 @@ char *strval;			/* cursor strval or literal command */
 /* GIO_QUEUE_REQUEST -- Queue a request.
  */
 static int
-gio_queue_request (sx, sy, raster, rx, ry, key, strval)
-int sx, sy;
-int raster, rx, ry;
-int key;
-char *strval;
+gio_queue_request (int sx, int sy, int raster, int rx, int ry, int key, char *strval)
 {
-	register RequestPtr rp;
+	RequestPtr rp;
 	int buflen, nchars;
 	char *buf;
 
@@ -855,9 +824,9 @@ char *strval;
  * contains a field giving the length of the data string which follows.
  */
 static int
-gio_output()
+gio_output(void)
 {
-	register RequestPtr rp;
+	RequestPtr rp;
 
 	if (!(rp = request_head))
 	    return (-1);
@@ -897,13 +866,13 @@ gio_output()
  * Sometime later the graphics drawing code will be called to process the data.
  */
 static int
-gio_ptyinput (notused, ttybuf, nchars)
-int	notused;
-char	*ttybuf;		/* raw data on input, tty data on output */
-int	nchars;			/* nchars of raw data */
+gio_ptyinput (
+  int notused, 
+  char	*ttybuf,		/* raw data on input, tty data on output */
+  int	nchars)			/* nchars of raw data */
 {
-	register char *itop = ttybuf + nchars;
-	register char *op, *ip = ttybuf, ch;
+	char *itop = ttybuf + nchars;
+	char *op, *ip = ttybuf, ch;
 
 	if (!gio_enabled || nchars <= 0)
 	    return (nchars);
@@ -1045,9 +1014,9 @@ gstart:			g_putc (GS);
  * on, solid line type, and so on.
  */
 static int
-gio_processdata()
+gio_processdata(void)
 {
-	register int quota, ch;
+	int quota, ch;
 	unsigned char *save_ip, *ip_start;
 	int textwidth;
 
@@ -1055,7 +1024,7 @@ gio_processdata()
 	 * before processing any further graphics input data.
 	 */
 	if (gio_delay) {
-	    gio_delay = gw ? !GtReady (gw) : 0;
+	    gio_delay = gw ? !GtReady ((GtermWidget) gw) : 0;
 	    if (gio_delay)
 		return (1);
 	}
@@ -1107,7 +1076,7 @@ again:
 				gio_activate (0, 1);
 			    }
 			    if (gw)
-				GtActivate (gw);
+				GtActivate ((GtermWidget) gw);
 			    workstation_open = 1;
 			    g_ungetc (ch);
 			    goto exit;
@@ -1226,8 +1195,8 @@ again:
 		    }
 		    msgbuf[msg_op++] = ch;
 		} else {
-		    register int i, j, v;
-		    register char *ip = msgbuf;
+		    int i, j, v;
+		    char *ip = msgbuf;
 		    unsigned short r[MAX_COLORS], g[MAX_COLORS], b[MAX_COLORS];
 		    int b1, b2;
 
@@ -1271,8 +1240,8 @@ again:
 		    }
 		    msgbuf[msg_op++] = ch;
 		} else {
-		    register int b1, b2, i;
-		    register char *ip = msgbuf;
+		    int b1, b2, i;
+		    char *ip = msgbuf;
 		    unsigned short iomap[MAX_COLORS];
 
 		    msgbuf[msg_op++] = 0;
@@ -1567,9 +1536,9 @@ exit:
  * zero when the screen is cleared.
  */
 static void
-pl_decodepts()
+pl_decodepts(void)
 {
-	register char	*ip, *itop;
+	char	*ip, *itop;
 	int	hiy, loy, hix, lox, type, data, nb;
 	char	*ip_save;
 
@@ -1628,10 +1597,7 @@ pl_decodepts()
  * merely passed on.
  */
 static void
-gio_keyinput (notused, w, event)
-XtPointer notused;
-Widget	w;
-XEvent	*event;
+gio_keyinput (XtPointer notused, Widget	w, XEvent *event)
 {
         XKeyEvent *xkey = &event->xkey;
         char strbuf[SZ_STRBUF];
@@ -1648,7 +1614,7 @@ XEvent	*event;
 		 * cursor is in, in addition to the usual screen coordinates.
 		 */
                 if (wincursor) {
-		    raster = GtSelectRaster (w, 0, GtPixel, sx, sy, 
+		  raster = GtSelectRaster ((GtermWidget)w, 0, GtPixel, sx, sy, 
 			GtNDC, &rx, &ry, &mapping);
 		    ry = MAXNDC - ry;
 		} else
@@ -1656,7 +1622,7 @@ XEvent	*event;
 
                 gio_retcursor (strbuf[0], sx, sy, raster, rx, ry, 0);
                 if (w)
-                    GtSetCursorType (w, GtBusyCursor);
+                    GtSetCursorType ((GtermWidget)w, GtBusyCursor);
             } else
                 v_write (pty_fd, strbuf, nbytes);
         }
@@ -1669,14 +1635,14 @@ XEvent	*event;
  * processing routine.
  */
 static int
-gio_retcursor (key, sx, sy, raster, rx, ry, datalen)
-int	key;			/* key (or whatever) typed to trigger read */
-int	sx, sy;			/* screen coords of event */
-int	raster;			/* raster number */
-int	rx, ry;			/* raster coords of event */
-int	datalen;		/* nchars of data following cursor value */
+gio_retcursor (int key, int sx, int sy, int raster, int rx, int ry, int datalen)
+   	    			/* key (or whatever) typed to trigger read */
+   	       			/* screen coords of event */
+   	       			/* raster number */
+   	       			/* raster coords of event */
+   	        		/* nchars of data following cursor value */
 {
-	register int n=0, mc_x, mc_y;
+	int n=0, mc_x, mc_y;
 	char curval[20];
 
 	/* Ignore cursor events unless requested via program control.
@@ -1733,9 +1699,9 @@ int	datalen;		/* nchars of data following cursor value */
 /* GIO_RETENQ -- Respond to the ESC ENQ request.
  */
 static void
-gio_retenq()
+gio_retenq(void)
 {
-	register int	mc_x, mc_y;
+	int	mc_x, mc_y;
 	char	curval[7];
 	int	len;
 
@@ -1783,7 +1749,7 @@ static	struct	_esc **e_pcand, **e_acand;	/* candidates arrays	*/
 static	int	e_npcand, e_nacand;		/* number of candidates	*/
 static	int	e_charno;			/* char being examined	*/
 static	int	scanok;				/* clr if decode fails  */
-static	int	startscan(), getint(), getstr(), endscan();
+static	int	startscan(void), getint(int *value), getstr(char *value), endscan(void);
 
 static	struct _esc e_table[] = {
 #include "gtermio.esc"			/* Gterm escape sequence table	*/
@@ -1807,10 +1773,10 @@ static	struct _esc e_table[] = {
  * screen.
  */
 static int
-gio_escape()
+gio_escape(void)
 {
-	register struct	_esc *esc;
-	register int ch, i, j;
+	struct	_esc *esc;
+	int ch, i, j;
 	struct	_esc **e_temp;
 	int tag;
 
@@ -2135,9 +2101,9 @@ action:
 	case ESC_READPIXELS:
 	    {	/* parameters: RN EC X1 Y1 NX NY BP (return NX*NY pixels) */
 		int raster, encoding, x1, y1, nx, ny, nbits, npix=0;
-		register unsigned char *data, *op;
+		unsigned char *data, *op;
 		unsigned char obuf[128];
-		register int i;
+		int i;
 
 		if (startscan())
 		    return (-1);
@@ -2241,8 +2207,8 @@ action:
 		int map, first, ncolors, buflen;
 		unsigned short *buf, *r, *g, *b, v[3];
 		unsigned char obuf[128];
-		register unsigned char *op;
-		register int i, j;
+		unsigned char *op;
+		int i, j;
 
 		if (startscan() || getint(&map) || getint(&first) ||
 			getint(&ncolors) || endscan())
@@ -2336,8 +2302,8 @@ action:
 		int first, ncolors, buflen;
 		unsigned short *iomap, v;
 		unsigned char obuf[128];
-		register unsigned char *op;
-		register int i;
+		unsigned char *op;
+		int i;
 
 		if (startscan() || getint(&first) ||
 			getint(&ncolors) || endscan())
@@ -2537,9 +2503,9 @@ action:
 /* STARTSCAN -- Reset the scanok flag at the start of a scan.
  */
 static int
-startscan()
+startscan(void)
 {
-	register int ch;
+	int ch;
 
 	/* Skip forward to the '[' preceeding the first argument. */
 	while (g_getc (ch) >= 0)
@@ -2558,11 +2524,10 @@ startscan()
  * if a decode error occurs.
  */
 static int
-getint (value)
-int *value;
+getint (int *value)
 {
-	register int ch;
-	register int v;
+	int ch;
+	int v;
 	int	neg = 0;
 
 	if (scanok) {
@@ -2611,11 +2576,10 @@ int *value;
  * if a decode error occurs.
  */
 static int
-getstr (value)
-char *value;
+getstr (char *value)
 {
-	register int ch;
-	register char *op = value;
+	int ch;
+	char *op = value;
 
 	if (scanok) {
 	    /* Skip to the next string token. */
@@ -2647,9 +2611,9 @@ char *value;
 /* ENDSCAN -- Scan forward to the ']' input argument list delimiter.
  */
 static int
-endscan()
+endscan(void)
 {
-	register int ch;
+	int ch;
 
 	/* Skip to the ']' delimiter. */
 	for (;;) {

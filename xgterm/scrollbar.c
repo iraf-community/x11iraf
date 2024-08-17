@@ -43,21 +43,19 @@
 
 /* Event handlers */
 
-static void ScrollTextTo();
-static void ScrollTextUpDownBy();
+static void ScrollTextTo(Widget scrollbarWidget, XtPointer client_data, XtPointer call_data);
+static void ScrollTextUpDownBy(Widget scrollbarWidget, XtPointer client_data, XtPointer call_data);
 
-void ScrollBarOn(), ScrollBarOff(), WindowScroll();
+void ScrollBarOn(XgtermWidget xw, int init, int doalloc), ScrollBarOff(TScreen *screen), WindowScroll(TScreen *screen, int top);
 
 
 /* resize the text window for a terminal screen, modifying the
  * appropriate WM_SIZE_HINTS and taking advantage of bit gravity.
  */
 
-static void ResizeScreen(xw, min_width, min_height )
-	register XgtermWidget xw;
-	int min_width, min_height;
+static void ResizeScreen(XgtermWidget xw, int min_width, int min_height)
 {
-	register TScreen *screen = &xw->screen;
+	TScreen *screen = &xw->screen;
 #ifndef nothack
 	XSizeHints sizehints;
 	long supp;
@@ -161,17 +159,14 @@ static void ResizeScreen(xw, min_width, min_height )
 #endif
 }
 
-void DoResizeScreen (xw)
-    register XgtermWidget xw;
+void DoResizeScreen (XgtermWidget xw)
 {
     int border = 2 * xw->screen.border;
     ResizeScreen (xw, border + xw->screen.scrollbar, border);
 }
 
 
-static Widget CreateScrollBar(xw, x, y, height)
-	XgtermWidget xw;
-	int x, y, height;
+static Widget CreateScrollBar(XgtermWidget xw, int x, int y, int height)
 {
 	Widget scrollWidget;
 
@@ -196,16 +191,13 @@ static Widget CreateScrollBar(xw, x, y, height)
 	return (scrollWidget);
 }
 
-static void RealizeScrollBar (sbw, screen)
-    Widget sbw;
-    TScreen *screen;
+static void RealizeScrollBar (Widget sbw, TScreen *screen)
 {
     XtRealizeWidget (sbw);
 }
 
 
-ScrollBarReverseVideo(scrollWidget)
-	register Widget scrollWidget;
+ScrollBarReverseVideo(Widget scrollWidget)
 {
 	Arg args[4];
 	int nargs = XtNumber(args);
@@ -230,11 +222,10 @@ ScrollBarReverseVideo(scrollWidget)
 
 
 
-ScrollBarDrawThumb(scrollWidget)
-	register Widget scrollWidget;
+ScrollBarDrawThumb(Widget scrollWidget)
 {
-	register TScreen *screen = &term->screen;
-	register int thumbTop, thumbHeight, totalHeight;
+	TScreen *screen = &term->screen;
+	int thumbTop, thumbHeight, totalHeight;
 	
 	thumbTop    = screen->topline + screen->savedlines;
 	thumbHeight = screen->max_row + 1;
@@ -246,10 +237,7 @@ ScrollBarDrawThumb(scrollWidget)
 	
 }
 
-ResizeScrollBar(scrollWidget, x, y, height)
-	register Widget scrollWidget;
-	int x, y;
-	unsigned height;
+ResizeScrollBar(Widget scrollWidget, int x, int y, unsigned int height)
 {
 	XtConfigureWidget(scrollWidget, x, y, scrollWidget->core.width,
 	    height, scrollWidget->core.border_width);
@@ -259,13 +247,11 @@ ResizeScrollBar(scrollWidget, x, y, height)
 }
 
 void
-WindowScroll(screen, top)
-	register TScreen *screen;
-	int top;
+WindowScroll(TScreen *screen, int top)
 {
-	register int i, lines;
-	register int scrolltop, scrollheight, refreshtop;
-	register int x = 0;
+	int i, lines;
+	int scrolltop, scrollheight, refreshtop;
+	int x = 0;
 
 	if (top < -screen->savedlines)
 		top = -screen->savedlines;
@@ -309,13 +295,11 @@ WindowScroll(screen, top)
 
 
 void
-ScrollBarOn (xw, init, doalloc)
-    XgtermWidget xw;
-    int init, doalloc;
+ScrollBarOn (XgtermWidget xw, int init, int doalloc)
 {
-	register TScreen *screen = &xw->screen;
-	register int border = 2 * screen->border;
-	register int i;
+	TScreen *screen = &xw->screen;
+	int border = 2 * screen->border;
+	int i;
 
 	if(screen->scrollbar)
 		return;
@@ -384,8 +368,7 @@ ScrollBarOn (xw, init, doalloc)
 }
 
 void
-ScrollBarOff(screen)
-	register TScreen *screen;
+ScrollBarOff(TScreen *screen)
 {
 	if(!screen->scrollbar)
 		return;
@@ -400,13 +383,10 @@ ScrollBarOff(screen)
 }
 
 /*ARGSUSED*/
-static void ScrollTextTo(scrollbarWidget, client_data, call_data)
-	Widget scrollbarWidget;
-	XtPointer client_data;
-	XtPointer call_data;
+static void ScrollTextTo(Widget scrollbarWidget, XtPointer client_data, XtPointer call_data)
 {
 	float *topPercent = (float *) call_data;
-	register TScreen *screen = &term->screen;
+	TScreen *screen = &term->screen;
 	int thumbTop;	/* relative to first saved line */
 	int newTopLine;
 
@@ -422,15 +402,12 @@ static void ScrollTextTo(scrollbarWidget, client_data, call_data)
 }
 
 /*ARGSUSED*/
-static void ScrollTextUpDownBy(scrollbarWidget, client_data, call_data)
-	Widget scrollbarWidget;
-	XtPointer client_data;
-	XtPointer call_data;
+static void ScrollTextUpDownBy(Widget scrollbarWidget, XtPointer client_data, XtPointer call_data)
 {
 	int pixels = (int) call_data;
 
-	register TScreen *screen = &term->screen;
-	register int rowOnScreen, newTopLine;
+	TScreen *screen = &term->screen;
+	int rowOnScreen, newTopLine;
 
 	rowOnScreen = pixels / FontHeight(screen);
 	if (rowOnScreen == 0) {
@@ -447,10 +424,9 @@ static void ScrollTextUpDownBy(scrollbarWidget, client_data, call_data)
 /*
  * assume that b is lower case and allow plural
  */
-static int specialcmplowerwiths (a, b)
-    char *a, *b;
+static int specialcmplowerwiths (char *a, char *b)
 {
-    register char ca, cb;
+    char ca, cb;
 
     if (!a || !b) return 0;
 
@@ -473,13 +449,10 @@ static int specialcmplowerwiths (a, b)
     return 0;
 }
 
-static int params_to_pixels (screen, params, n)
-    TScreen *screen;
-    String *params;
-    int n;
+static int params_to_pixels (TScreen *screen, String *params, int n)
 {
-    register mult = 1;
-    register char *s;
+    int mult = 1;
+    char *s;
 
     switch (n > 2 ? 2 : n) {
       case 2:
@@ -506,14 +479,10 @@ static int params_to_pixels (screen, params, n)
 
 
 /*ARGSUSED*/
-void HandleScrollForward (gw, event, params, nparams)
-    Widget gw;
-    XEvent *event;
-    String *params;
-    Cardinal *nparams;
+void HandleScrollForward (Widget gw, XEvent *event, String *params, Cardinal *nparams)
 {
     XgtermWidget w = (XgtermWidget) gw;
-    register TScreen *screen = &w->screen;
+    TScreen *screen = &w->screen;
 
     ScrollTextUpDownBy (gw, (XtPointer) NULL,
 			(XtPointer)params_to_pixels (screen, params, (int) *nparams));
@@ -522,14 +491,10 @@ void HandleScrollForward (gw, event, params, nparams)
 
 
 /*ARGSUSED*/
-void HandleScrollBack (gw, event, params, nparams)
-    Widget gw;
-    XEvent *event;
-    String *params;
-    Cardinal *nparams;
+void HandleScrollBack (Widget gw, XEvent *event, String *params, Cardinal *nparams)
 {
     XgtermWidget w = (XgtermWidget) gw;
-    register TScreen *screen = &w->screen;
+    TScreen *screen = &w->screen;
 
     ScrollTextUpDownBy (gw, (XtPointer) NULL,
 			(XtPointer)-params_to_pixels (screen, params, (int) *nparams));

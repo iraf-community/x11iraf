@@ -21,7 +21,7 @@ extern int errno;
 
 
 /* WCS/Pixel ISM client callbacks. */
-void  wcspix_connect(), wcspix_disconnect(), wcspix_command(), wcspix_message();
+void  wcspix_connect(XimDataPtr xim, IsmModule ism), wcspix_disconnect(XimDataPtr xim, IsmModule ism), wcspix_command(XimDataPtr xim, IsmModule ism, int argc, char **argv), wcspix_message(XimDataPtr xim, char *message);
 
 
 
@@ -30,14 +30,11 @@ void  wcspix_connect(), wcspix_disconnect(), wcspix_command(), wcspix_message();
  * the GUI that we are alive.
  */
 void
-wcspix_connect (xim, ism)
-register XimDataPtr xim;
-register IsmModule ism;
-
+wcspix_connect (XimDataPtr xim, IsmModule ism)
 {
         MappingPtr mp;
 	FrameBufPtr fr;
-        register int i, j;
+        int i, j;
 	char buf[SZ_LINE];
 
 	if (wcspix_debug) printf ("ConnectCB for '%s' ....\n", ism->name);
@@ -68,13 +65,11 @@ register IsmModule ism;
  * command to the module and notify the GUI.
  */
 void
-wcspix_disconnect (xim, ism)
-register XimDataPtr xim;
-register IsmModule ism;
+wcspix_disconnect (XimDataPtr xim, IsmModule ism)
 {
         MappingPtr mp;
 	FrameBufPtr fr;
-        register int i, j;
+        int i, j;
 	char buf[SZ_LINE];
 
 	if (wcspix_debug) printf ("DisconnectCB for '%s' ....\n", ism->name);
@@ -108,13 +103,9 @@ register IsmModule ism;
  *
  */
 void
-wcspix_command (xim, ism, argc, argv)
-register XimDataPtr xim;
-register IsmModule ism;
-int	argc;
-char	**argv;
+wcspix_command (XimDataPtr xim, IsmModule ism, int argc, char **argv)
 {
-	register int i;
+	int i;
 
 	if (wcspix_debug) printf ("CommandCB....\n");
 
@@ -128,9 +119,7 @@ char	**argv;
  * but format it so it's delivered to the WCSPIX callback procedures.
  */
 void
-wcspix_message (xim, message)
-register XimDataPtr xim;
-char *message;
+wcspix_message (XimDataPtr xim, char *message)
 {
         char msgbuf[SZ_MSGBUF];
 

@@ -37,10 +37,9 @@
 /*
  * places tabstops at only every 8 columns
  */
-TabReset(tabs)
-Tabs	tabs;
+TabReset(unsigned int *tabs)
 {
-	register int i;
+	int i;
 
 	for (i=0; i<TAB_ARRAY_SIZE; ++i)
 		tabs[i] = 0;
@@ -53,9 +52,7 @@ Tabs	tabs;
 /*
  * places a tabstop at col
  */
-TabSet(tabs, col)
-    Tabs	tabs;
-    int		col;
+TabSet(unsigned int *tabs, int col)
 {
 	tabs[col >> 5] |= (1 << (col & 31));
 }
@@ -63,9 +60,7 @@ TabSet(tabs, col)
 /*
  * clears a tabstop at col
  */
-TabClear(tabs, col)
-    Tabs	tabs;
-    int		col;
+TabClear(unsigned int *tabs, int col)
 {
 	tabs[col >> 5] &= ~(1 << (col & 31));
 }
@@ -75,12 +70,10 @@ TabClear(tabs, col)
  * (or MAX_TABS - 1 if there are no more).
  * A tabstop at col is ignored.
  */
-TabNext (tabs, col)
-    Tabs	tabs;
-    int		col;
+TabNext (unsigned int *tabs, int col)
 {
 	extern XgtermWidget term;
-	register TScreen *screen = &term->screen;
+	TScreen *screen = &term->screen;
 
 	if(screen->curses && screen->do_wrap && (term->flags & WRAPAROUND)) {
 		Index(screen, 1);
@@ -96,10 +89,9 @@ TabNext (tabs, col)
 /*
  * clears all tabs
  */
-TabZonk (tabs)
-Tabs	tabs;
+TabZonk (unsigned int *tabs)
 {
-	register int i;
+	int i;
 
 	for (i=0; i<TAB_ARRAY_SIZE; ++i)
 		tabs[i] = 0;

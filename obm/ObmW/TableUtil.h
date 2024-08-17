@@ -21,12 +21,6 @@ Commercial  usage is  also  possible  with  participation of the author.
 #include <X11/Intrinsic.h>
 #include "Table.h"
 
-#if __STDC__ || defined(__cplusplus)
-#define F_PROTO(s) s
-#else
-#define F_PROTO(s) ()
-#endif
-
 typedef struct _XawTableNodeRec {              /* Node of table grid */
   struct _XawTableNodeRec *l;
   struct _XawTableNodeRec *r;
@@ -35,60 +29,58 @@ typedef struct _XawTableNodeRec {              /* Node of table grid */
 }XawTableNodeRec, *XawTableNode;
 
 
-extern XtPointer create_table 	    F_PROTO((int rows,
-					     int columns, 
-					     int node_size));
+extern XtPointer create_table 	    (int rows,
+				     int columns, 
+				     int node_size);
 
-extern Boolean row_insert_after     F_PROTO((XtPointer d,
-					     int node_size));
+extern Boolean row_insert_after     (XtPointer d,
+				     int node_size);
      
-extern Boolean row_insert_before    F_PROTO((XtPointer f,
-					     int node_size));
+extern Boolean row_insert_before    (XtPointer f,
+				     int node_size);
      
-extern Boolean column_insert_after  F_PROTO((XtPointer d,
-					     int node_size));
+extern Boolean column_insert_after  (XtPointer d,
+				     int node_size);
      
-extern Boolean column_insert_before F_PROTO((XtPointer f,
-					     int node_size));
+extern Boolean column_insert_before (XtPointer f,
+				     int node_size);
      
-extern XtPointer get_table 	    F_PROTO((XtPointer f));
+extern XtPointer get_table 	    (XtPointer f);
      
-extern XtPointer get_cell 	    F_PROTO((XtPointer p,
-					     int i,
-					     int j));
+extern XtPointer get_cell 	    (XtPointer p,
+				     int i,
+				     int j);
      
-extern void get_table_size 	    F_PROTO((XtPointer p,
-					     int *i,
-					     int *j));
+extern void get_table_size 	    (XtPointer p,
+				     int *i,
+				     int *j);
      
-extern void get_cell_positions 	    F_PROTO((XtPointer p,
-					     int *i,
-					     int *j));
+extern void get_cell_positions 	    (XtPointer p,
+				     int *i,
+				     int *j);
 
-extern void row_delete 		    F_PROTO((XtPointer p));
+extern void row_delete 		    (XtPointer p);
      
-extern void column_delete 	    F_PROTO((XtPointer p));
+extern void column_delete 	    (XtPointer p);
      
-extern void delete_table 	    F_PROTO((XtPointer p));
+extern void delete_table 	    (XtPointer p);
 
-extern Boolean go_table 	    F_PROTO((XtPointer w, 
-					     XawTableProc proc, 
-					     XtPointer table, 
-					     int begin_row,
-					     int end_row,
-					     int begin_column, 
-					     int end_column,
-					     int direction,
-					     register int *row,
-					     register int *column,
-					     XtPointer client_data));
+extern Boolean go_table 	    (XtPointer w, 
+				     XawTableProc proc, 
+				     XtPointer table, 
+				     int begin_row,
+				     int end_row,
+				     int begin_column, 
+				     int end_column,
+				     int direction,
+				     int *row,
+				     int *column,
+				     XtPointer client_data);
 
 #ifdef EBUG_XRAW_MALLOC
-extern void _check_table            F_PROTO((XtPointer table, 
-					     int rows, 
-					     int columns));
+extern void _check_table            (XtPointer table, 
+				     int rows, 
+				     int columns);
 #endif
-
-#undef F_PROTO
 
 #endif /* _table_h_ */

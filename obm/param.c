@@ -76,27 +76,29 @@ struct msgContext {
 };
 typedef struct msgContext *MsgContext;
 
-static	void ParameterDestroy();
-static	int ParameterEvaluate();
-static	ObmObject ParameterCreate();
-static	void ParameterClassDestroy();
-static	int parameterSetValue(), parameterGetValue(), parameterNotify();
-static	int parameterAddCallback(), parameterDeleteCallback();
+static	void ParameterDestroy(ObmObject);
+static	int ParameterEvaluate(ObmObject, const char *);
+static	ObmObject ParameterCreate(ObmContext, const char *, ObjClassRec,
+				  const char *, ArgList, int);
+static	void ParameterClassDestroy(ObmContext, ObjClassRec);
+static	int parameterSetValue(MsgContext, Tcl_Interp *, int, char **);
+static	int parameterGetValue(MsgContext, Tcl_Interp *, int, char **);
+static	int parameterNotify(MsgContext, Tcl_Interp *, int, char **);
+static	int parameterAddCallback(MsgContext, Tcl_Interp *, int, char **);
+static	int parameterDeleteCallback(MsgContext, Tcl_Interp *, int, char **);
 
 
 /* ParameterClassInit -- Initialize the class record for the parameter class.
  */
 void
-ParameterClassInit (obm, classrec)
-ObmContext obm;
-register ObjClassRec classrec;
+ParameterClassInit (ObmContext obm, ObjClassRec classrec)
 {
-	register Tcl_Interp *tcl;
-	register MsgContext msg;
+	Tcl_Interp *tcl;
+	MsgContext msg;
 
 	/* Install the class methods. */
 	classrec->ClassDestroy = ParameterClassDestroy;
-	classrec->Create = (ObmFunc) ParameterCreate;
+	classrec->Create = ParameterCreate;
 	classrec->Destroy = ParameterDestroy;
 	classrec->Evaluate = ParameterEvaluate;
 
@@ -111,15 +113,15 @@ register ObjClassRec classrec;
 
 	/* Register parameter-object actions.  */
 	Tcl_CreateCommand (tcl, "setValue",
-	    parameterSetValue, (ClientData)msg, NULL);
+	    (Tcl_CmdProc *) parameterSetValue, (ClientData)msg, NULL);
 	Tcl_CreateCommand (tcl, "getValue",
-	    parameterGetValue, (ClientData)msg, NULL);
+	    (Tcl_CmdProc *) parameterGetValue, (ClientData)msg, NULL);
 	Tcl_CreateCommand (tcl, "addCallback",
-	    parameterAddCallback, (ClientData)msg, NULL);
+	    (Tcl_CmdProc *) parameterAddCallback, (ClientData)msg, NULL);
 	Tcl_CreateCommand (tcl, "deleteCallback",
-	    parameterDeleteCallback, (ClientData)msg, NULL);
+	    (Tcl_CmdProc *) parameterDeleteCallback, (ClientData)msg, NULL);
 	Tcl_CreateCommand (tcl, "notify",
-	    parameterNotify, (ClientData)msg, NULL);
+	    (Tcl_CmdProc *) parameterNotify, (ClientData)msg, NULL);
 }
 
 
@@ -127,11 +129,9 @@ register ObjClassRec classrec;
  * class.
  */
 static void
-ParameterClassDestroy (obm, classrec)
-ObmContext obm;
-register ObjClassRec classrec;
+ParameterClassDestroy (ObmContext obm, ObjClassRec classrec)
 {
-	register MsgContext msg = (MsgContext) classrec->class_data;
+	MsgContext msg = (MsgContext) classrec->class_data;
 
 	if (msg) {
 	    if (msg->tcl)
@@ -145,15 +145,15 @@ register ObjClassRec classrec;
 /* ParameterCreate -- Create an instance of a parameter object.
  */
 static ObmObject
-ParameterCreate (obm, name, classrec, parent, args, nargs)
-ObmContext obm;
-char *name;
-ObjClassRec classrec;
-char *parent;
-ArgList args;
-int nargs;
+ParameterCreate (
+  ObmContext obm,
+  const char *name,
+  ObjClassRec classrec,
+  const char *parent,
+  ArgList args,
+  int nargs)
 {
-	register ParameterObject obj;
+	ParameterObject obj;
 
 	obj = (ParameterObject) XtCalloc (1, sizeof (struct parameterObject));
 	obj->parameter.obm = obm;
@@ -165,11 +165,10 @@ int nargs;
 /* ParameterDestroy -- Destroy an instance of a parameter object.
  */
 static void
-ParameterDestroy (object)
-ObmObject object;
+ParameterDestroy (ObmObject object)
 {
-	register ParameterObject obj = (ParameterObject) object;
-	register ObmCallback cb, next;
+	ParameterObject obj = (ParameterObject) object;
+	ObmCallback cb, next;
 
 	/* Destroy the object in the second final call to Destroy. */
 	if (!obj->core.being_destroyed++)
@@ -186,13 +185,11 @@ ObmObject object;
 /* ParameterEvaluate -- Evaluate a parameter command or message.
  */
 static int
-ParameterEvaluate (object, command)
-ObmObject object;
-char *command;
+ParameterEvaluate (ObmObject object, const char *command)
 {
-	register ParameterObject obj = (ParameterObject) object;
-	register MsgContext msg = (MsgContext) obj->core.classrec->class_data;
-	register ObmContext obm = obj->parameter.obm;
+	ParameterObject obj = (ParameterObject) object;
+	MsgContext msg = (MsgContext) obj->core.classrec->class_data;
+	ObmContext obm = obj->parameter.obm;
 	int status;
 
 	/* Since the class wide interpreter is used to evaluate the message
@@ -210,7 +207,8 @@ char *command;
 	    status = Tcl_Eval (msg->tcl, command);
 	    if (status == TCL_ERROR) {
 		if (*Tcl_GetStringResult (msg->tcl))
-		    Tcl_SetResult (obm->tcl, Tcl_GetStringResult (msg->tcl), TCL_VOLATILE);
+		  Tcl_SetResult (obm->tcl, (char *) Tcl_GetStringResult (msg->tcl),
+				 TCL_VOLATILE);
 		else {
 		    /* Supply a default error message if none was returned. */
 		    Tcl_SetResult (obm->tcl, "evaluation error", TCL_VOLATILE);
@@ -218,7 +216,8 @@ char *command;
 		Tcl_SetErrorLine (obm->tcl, Tcl_GetErrorLine (msg->tcl));
 
 	    } else if (*Tcl_GetStringResult (msg->tcl))
-		Tcl_SetResult (obm->tcl, Tcl_GetStringResult (msg->tcl), TCL_VOLATILE);
+	      Tcl_SetResult (obm->tcl, (char *) Tcl_GetStringResult (msg->tcl),
+			     TCL_VOLATILE);
 	}
 
 	msg->level--;
@@ -232,15 +231,11 @@ char *command;
  *  Usage:	setValue <new-value>
  */
 static int 
-parameterSetValue (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+parameterSetValue (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	ParameterObject obj = (ParameterObject) msg->object[msg->level];
-	register ObmContext obm = obj->parameter.obm;
-	register ParameterPrivate pp = &obj->parameter;
+	ObmContext obm = obj->parameter.obm;
+	ParameterPrivate pp = &obj->parameter;
 	char *new_value, *old_value;
 	ObmCallback cb, cbl[128];
 	int ncb, status, i;
@@ -284,15 +279,11 @@ i, obj->core.name, cb->name, new_value);*/
  *  Usage:	getValue
  */
 static int 
-parameterGetValue (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+parameterGetValue (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	ParameterObject obj = (ParameterObject) msg->object[msg->level];
-	register ObmContext obm = obj->parameter.obm;
-	register ParameterPrivate pp = &obj->parameter;
+	ObmContext obm = obj->parameter.obm;
+	ParameterPrivate pp = &obj->parameter;
 
 	Tcl_SetResult (obm->tcl, pp->value, TCL_STATIC);
 	return (TCL_OK);
@@ -305,15 +296,11 @@ char **argv;
  *  Usage:	notify
  */
 static int 
-parameterNotify (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+parameterNotify (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	ParameterObject obj = (ParameterObject) msg->object[msg->level];
-	register ObmContext obm = obj->parameter.obm;
-	register ParameterPrivate pp = &obj->parameter;
+	ObmContext obm = obj->parameter.obm;
+	ParameterPrivate pp = &obj->parameter;
 	ObmCallback cb;
 	int status;
 
@@ -344,14 +331,10 @@ char **argv;
  *  Usage:	addCallback <procedure-name>
  */
 static int 
-parameterAddCallback (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+parameterAddCallback (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	ParameterObject obj = (ParameterObject) msg->object[msg->level];
-	register ParameterPrivate pp = &obj->parameter;
+	ParameterPrivate pp = &obj->parameter;
 	ObmCallback cb, new_cb;
 
 	/* Create callback record. */
@@ -376,14 +359,10 @@ char **argv;
  *  Usage:	deleteCallback <procedure-name>
  */
 static int 
-parameterDeleteCallback (msg, tcl, argc, argv)
-MsgContext msg;
-Tcl_Interp *tcl;
-int argc;
-char **argv;
+parameterDeleteCallback (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 {
 	ParameterObject obj = (ParameterObject) msg->object[msg->level];
-	register ParameterPrivate pp = &obj->parameter;
+	ParameterPrivate pp = &obj->parameter;
 	ObmCallback cb, prev;
 
 	/* Locate and delete procedure entry in callback list. */

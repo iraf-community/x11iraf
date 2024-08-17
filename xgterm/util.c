@@ -34,28 +34,27 @@
 
 #include <stdio.h>
 
-static void horizontal_copy_area();
-static void vertical_copy_area();
-void scrolling_copy_area();
+static void horizontal_copy_area(TScreen *screen, int firstchar, int nchars, int amount);
+static void vertical_copy_area(TScreen *screen, int firstline, int nlines, int amount);
+void scrolling_copy_area(TScreen *screen, int firstline, int nlines, int amount);
 
-void Scroll(), InsertLine(), DeleteLine(), CopyWait(), recolor_cursor();
-void ShowCursor(), HideCursor();
-void ClearScreen(), ClearLeft(), ClearRight();
+void Scroll(TScreen *screen, int amount), InsertLine(TScreen *screen, int n), DeleteLine(TScreen *screen, int n), CopyWait(TScreen *screen), recolor_cursor(Cursor cursor, long unsigned int fg, long unsigned int bg);
+void ShowCursor(void), HideCursor(void);
+void ClearScreen(TScreen *screen), ClearLeft(TScreen *screen), ClearRight(TScreen *screen);
 
 /*
  * These routines are used for the jump scroll feature
  */
 void
-FlushScroll(screen)
-register TScreen *screen;
+FlushScroll(TScreen *screen)
 {
-	register int i;
-	register int shift = -screen->topline;
-	register int bot = screen->max_row - shift;
-	register int refreshtop;
-	register int refreshheight;
-	register int scrolltop;
-	register int scrollheight;
+	int i;
+	int shift = -screen->topline;
+	int bot = screen->max_row - shift;
+	int refreshtop;
+	int refreshheight;
+	int scrolltop;
+	int scrollheight;
 
 	if(screen->cursor_state)
 		HideCursor();
@@ -130,16 +129,15 @@ register TScreen *screen;
 }
 
 int
-AddToRefresh(screen)
-register TScreen *screen;
+AddToRefresh(TScreen *screen)
 {
-	register int amount = screen->refresh_amt;
-	register int row = screen->cur_row;
+	int amount = screen->refresh_amt;
+	int row = screen->cur_row;
 
 	if(amount == 0)
 		return(0);
 	if(amount > 0) {
-		register int bottom;
+		int bottom;
 
 		if(row == (bottom = screen->bot_marg) - amount) {
 			screen->refresh_amt++;
@@ -147,7 +145,7 @@ register TScreen *screen;
 		}
 		return(row >= bottom - amount + 1 && row <= bottom);
 	} else {
-		register int top;
+		int top;
 
 		amount = -amount;
 		if(row == (top = screen->top_marg) + amount) {
@@ -165,17 +163,15 @@ register TScreen *screen;
  * requires: amount > 0
  */
 void
-Scroll(screen, amount)
-register TScreen *screen;
-register int amount;
+Scroll(TScreen *screen, int amount)
 {
-	register int i = screen->bot_marg - screen->top_marg + 1;
-	register int shift;
-	register int bot;
-	register int refreshtop = 0;
-	register int refreshheight;
-	register int scrolltop;
-	register int scrollheight;
+	int i = screen->bot_marg - screen->top_marg + 1;
+	int shift;
+	int bot;
+	int refreshtop = 0;
+	int refreshheight;
+	int scrolltop;
+	int scrollheight;
 
 	if(screen->cursor_state)
 		HideCursor();
@@ -271,17 +267,15 @@ register int amount;
  * Requires: amount > 0
  */
 void
-RevScroll(screen, amount)
-register TScreen *screen;
-register int amount;
+RevScroll(TScreen *screen, int amount)
 {
-	register int i = screen->bot_marg - screen->top_marg + 1;
-	register int shift;
-	register int bot;
-	register int refreshtop;
-	register int refreshheight;
-	register int scrolltop;
-	register int scrollheight;
+	int i = screen->bot_marg - screen->top_marg + 1;
+	int shift;
+	int bot;
+	int refreshtop;
+	int refreshheight;
+	int scrolltop;
+	int scrollheight;
 
 	if(screen->cursor_state)
 		HideCursor();
@@ -342,17 +336,15 @@ register int amount;
  * bottom margin are lost.
  */
 void
-InsertLine (screen, n)
-register TScreen *screen;
-register int n;
+InsertLine (TScreen *screen, int n)
 {
-	register int i;
-	register int shift;
-	register int bot;
-	register int refreshtop;
-	register int refreshheight;
-	register int scrolltop;
-	register int scrollheight;
+	int i;
+	int shift;
+	int bot;
+	int refreshtop;
+	int refreshheight;
+	int scrolltop;
+	int scrollheight;
 
 	if (screen->cur_row < screen->top_marg ||
 	 screen->cur_row > screen->bot_marg)
@@ -406,17 +398,15 @@ register int n;
  * at the cursor's position, lines added at bottom margin are blank.
  */
 void
-DeleteLine(screen, n)
-register TScreen *screen;
-register int n;
+DeleteLine(TScreen *screen, int n)
 {
-	register int i;
-	register int shift;
-	register int bot;
-	register int refreshtop;
-	register int refreshheight;
-	register int scrolltop;
-	register int scrollheight;
+	int i;
+	int shift;
+	int bot;
+	int refreshtop;
+	int refreshheight;
+	int scrolltop;
+	int scrollheight;
 
 	if (screen->cur_row < screen->top_marg ||
 	 screen->cur_row > screen->bot_marg)
@@ -489,11 +479,9 @@ register int n;
  * Insert n blanks at the cursor's position, no wraparound
  */
 void
-InsertChar (screen, n)
-    register TScreen *screen;
-    register int n;
+InsertChar (TScreen *screen, int n)
 {
-        register int cx, cy;
+        int cx, cy;
 
 	if(screen->cursor_state)
 		HideCursor();
@@ -533,11 +521,9 @@ InsertChar (screen, n)
  * Deletes n chars at the cursor's position, no wraparound.
  */
 void
-DeleteChar (screen, n)
-    register TScreen *screen;
-    register int	n;
+DeleteChar (TScreen *screen, int n)
 {
-	register int width;
+	int width;
 
 	if(screen->cursor_state)
 		HideCursor();
@@ -575,10 +561,9 @@ DeleteChar (screen, n)
  * Clear from cursor position to beginning of display, inclusive.
  */
 void
-ClearAbove (screen)
-register TScreen *screen;
+ClearAbove (TScreen *screen)
 {
-	register int top, height;
+	int top, height;
 
 	if(screen->cursor_state)
 		HideCursor();
@@ -605,10 +590,9 @@ register TScreen *screen;
  * Clear from cursor position to end of display, inclusive.
  */
 void
-ClearBelow (screen)
-register TScreen *screen;
+ClearBelow (TScreen *screen)
 {
-	register int top;
+	int top;
 
 	ClearRight(screen);
 	if((top = screen->cur_row - screen->topline) <= screen->max_row) {
@@ -630,8 +614,7 @@ register TScreen *screen;
  * Clear last part of cursor's line, inclusive.
  */
 void
-ClearRight (screen)
-register TScreen *screen;
+ClearRight (TScreen *screen)
 {
 	if(screen->cursor_state)
 		HideCursor();
@@ -664,8 +647,7 @@ register TScreen *screen;
  * Clear first part of cursor's line, inclusive.
  */
 void
-ClearLeft (screen)
-    register TScreen *screen;
+ClearLeft (TScreen *screen)
 {
         int i;
 	Char *cp;
@@ -704,8 +686,7 @@ ClearLeft (screen)
  * Erase the cursor's line.
  */
 void
-ClearLine(screen)
-register TScreen *screen;
+ClearLine(TScreen *screen)
 {
 	if(screen->cursor_state)
 		HideCursor();
@@ -730,10 +711,9 @@ register TScreen *screen;
 }
 
 void
-ClearScreen(screen)
-register TScreen *screen;
+ClearScreen(TScreen *screen)
 {
-	register int top;
+	int top;
 
 	if(screen->cursor_state)
 		HideCursor();
@@ -756,8 +736,7 @@ register TScreen *screen;
 }
 
 void
-CopyWait(screen)
-register TScreen *screen;
+CopyWait(TScreen *screen)
 {
 	XEvent reply;
 	XEvent *rep = &reply;
@@ -798,11 +777,7 @@ register TScreen *screen;
  * used by vertical_copy_area and and horizontal_copy_area
  */
 static void
-copy_area(screen, src_x, src_y, width, height, dest_x, dest_y)
-    TScreen *screen;
-    int src_x, src_y;
-    unsigned int width, height;
-    int dest_x, dest_y;
+copy_area(TScreen *screen, int src_x, int src_y, unsigned int width, unsigned int height, int dest_x, int dest_y)
 {
     /* wait for previous CopyArea to complete unless
        multiscroll is enabled and active */
@@ -828,11 +803,11 @@ copy_area(screen, src_x, src_y, width, height, dest_x, dest_y)
  * use when inserting or deleting characters on the current line
  */
 static void
-horizontal_copy_area(screen, firstchar, nchars, amount)
-    TScreen *screen;
-    int firstchar;		/* char pos on screen to start copying at */
-    int nchars;
-    int amount;			/* number of characters to move right */
+horizontal_copy_area(TScreen *screen, int firstchar, int nchars, int amount)
+                    
+                  		/* char pos on screen to start copying at */
+               
+               			/* number of characters to move right */
 {
     int src_x = CursorX(screen, firstchar);
     int src_y = CursorY(screen, screen->cur_row);
@@ -846,11 +821,11 @@ horizontal_copy_area(screen, firstchar, nchars, amount)
  * use when inserting or deleting lines from the screen
  */
 static void
-vertical_copy_area(screen, firstline, nlines, amount)
-    TScreen *screen;
-    int firstline;		/* line on screen to start copying at */
-    int nlines;
-    int amount;			/* number of lines to move up (neg=down) */
+vertical_copy_area(TScreen *screen, int firstline, int nlines, int amount)
+                    
+                  		/* line on screen to start copying at */
+               
+               			/* number of lines to move up (neg=down) */
 {
     if(nlines > 0) {
 	int src_x, src_y;
@@ -870,11 +845,11 @@ vertical_copy_area(screen, firstline, nlines, amount)
  * use when scrolling the entire screen
  */
 void
-scrolling_copy_area(screen, firstline, nlines, amount)
-    TScreen *screen;
-    int firstline;		/* line on screen to start copying at */
-    int nlines;
-    int amount;			/* number of lines to move up (neg=down) */
+scrolling_copy_area(TScreen *screen, int firstline, int nlines, int amount)
+                    
+                  		/* line on screen to start copying at */
+               
+               			/* number of lines to move up (neg=down) */
 {
 
     if(nlines > 0) {
@@ -887,11 +862,9 @@ scrolling_copy_area(screen, firstline, nlines, amount)
  * Returns 1 iff the area where the cursor was got refreshed.
  */
 int
-HandleExposure (screen, event)
-    register TScreen *screen;
-    register XEvent *event;
+HandleExposure (TScreen *screen, XEvent *event)
 {
-    register XExposeEvent *reply = (XExposeEvent *)event;
+    XExposeEvent *reply = (XExposeEvent *)event;
 
     /* if not doing CopyArea or if this is a GraphicsExpose, don't translate */
     if(!screen->incopy  ||  event->type != Expose)
@@ -933,12 +906,9 @@ HandleExposure (screen, event)
  * The rectangle passed in is pixel coordinates.
  */
 int
-handle_translated_exposure (screen, rect_x, rect_y, rect_width, rect_height)
-    register TScreen *screen;
-    register int rect_x, rect_y;
-    register unsigned int rect_width, rect_height;
+handle_translated_exposure (TScreen *screen, int rect_x, int rect_y, unsigned int rect_width, unsigned int rect_height)
 {
-	register int toprow, leftcol, nrows, ncols;
+	int toprow, leftcol, nrows, ncols;
 	extern Bool waiting_for_initial_map;
 
 	toprow = (rect_y - screen->border) / FontHeight(screen);
@@ -988,10 +958,9 @@ handle_translated_exposure (screen, rect_x, rect_y, rect_width, rect_height)
 }
 
 void
-ReverseVideo (termw)
-	XgtermWidget termw;
+ReverseVideo (XgtermWidget termw)
 {
-	register TScreen *screen = &termw->screen;
+	TScreen *screen = &termw->screen;
 	GC tmpGC;
 	unsigned long tmp;
 
@@ -1034,12 +1003,12 @@ ReverseVideo (termw)
 
 
 void
-recolor_cursor (cursor, fg, bg)
-    Cursor cursor;			/* X cursor ID to set */
-    unsigned long fg, bg;		/* pixel indexes to look up */
+recolor_cursor (Cursor cursor, long unsigned int fg, long unsigned int bg)
+                  			/* X cursor ID to set */
+                         		/* pixel indexes to look up */
 {
-    register TScreen *screen = &term->screen;
-    register Display *dpy = screen->display;
+    TScreen *screen = &term->screen;
+    Display *dpy = screen->display;
     XColor colordefs[2];		/* 0 is foreground, 1 is background */
 
     colordefs[0].pixel = fg;
@@ -1053,11 +1022,9 @@ recolor_cursor (cursor, fg, bg)
 
 
 void
-GetColors(term,pColors)
-        XgtermWidget term;
-        ScrnColors *pColors;
+GetColors(XgtermWidget term, ScrnColors *pColors)
 {
-        register TScreen *screen = &term->screen;
+        TScreen *screen = &term->screen;
         GC tmpGC;
         unsigned long tmp;
 
@@ -1072,11 +1039,9 @@ GetColors(term,pColors)
 
 
 void
-ChangeColors(term,pNew)
-        XgtermWidget term;
-        ScrnColors *pNew;
+ChangeColors(XgtermWidget term, ScrnColors *pNew)
 {
-        register TScreen *screen = &term->screen;
+        TScreen *screen = &term->screen;
         GC tmpGC;
         unsigned long tmp;
         Bool    newCursor=      TRUE;

@@ -83,7 +83,7 @@ static XtResource Resources[] = {
 
 char *ProgramName;
 
-usage ()
+usage (void)
 {
     fprintf(stderr, "usage:  %s [-options...]\n", ProgramName);
     fprintf(stderr, "\nwhere options include:\n");
@@ -103,11 +103,9 @@ usage ()
     exit (1);
 }
 
-static void print_tree_level (wn, level)
-    register XmuWidgetNode *wn;
-    register int level;
+static void print_tree_level (XmuWidgetNode *wn, int level)
 {
-    register int i;
+    int i;
 
     if (!wn) return;
 
@@ -119,10 +117,10 @@ static void print_tree_level (wn, level)
     print_tree_level (wn->siblings, level);
 }
 
-static void tree_known_widgets ()
+static void tree_known_widgets (void)
 {
-    register int i;
-    register XmuWidgetNode *wn;
+    int i;
+    XmuWidgetNode *wn;
 
     for (i = 0, wn = widget_list; i < nwidgets; i++, wn++) {
 	if (!wn->superclass) {		/* list all rooted objects */
@@ -136,10 +134,7 @@ static void tree_known_widgets ()
  * print_classname - print out the superclass-to-subclass hierchy of names
  * in the form super\sub\sub....
  */
-static int print_classname (node, topnode, level, showvar)
-    XmuWidgetNode *node, *topnode;
-    int level;
-    Bool showvar;
+static int print_classname (XmuWidgetNode *node, XmuWidgetNode *topnode, int level, int showvar)
 {
     int retval;
 
@@ -156,7 +151,7 @@ static int print_classname (node, topnode, level, showvar)
     return retval;
 }
 
-static void list_known_widgets ()
+static void list_known_widgets (void)
 {
     int i;
     XmuWidgetNode *wn;
@@ -176,12 +171,7 @@ static void list_known_widgets ()
 }
 
 /* ARGSUSED */
-static void print_resources (node, format, topnode, showsuper, showvar)
-    XmuWidgetNode *node;
-    char *format;
-    XmuWidgetNode *topnode;
-    Bool showsuper;
-    Bool showvar;
+static void print_resources (XmuWidgetNode *node, char *format, XmuWidgetNode *topnode, int showsuper, int showvar)
 {
     int i;
     XtResourceList res = node->resources;
@@ -213,13 +203,7 @@ static void print_resources (node, format, topnode, showsuper, showvar)
  * list_resources - display resources of a widget, identifying class from
  * which they come
  */
-static list_resources (node, format, topnode, toplevel, showsuper, showvar)
-    XmuWidgetNode *node;
-    char *format;
-    XmuWidgetNode *topnode;
-    Widget toplevel;
-    Bool showsuper;
-    Bool showvar;
+static list_resources (XmuWidgetNode *node, char *format, XmuWidgetNode *topnode, Widget toplevel, int showsuper, int showvar)
 {
     static Bool first = True;
 
@@ -241,9 +225,7 @@ static list_resources (node, format, topnode, toplevel, showsuper, showvar)
 }
 
 
-main (argc, argv)
-    int argc;
-    char **argv;
+main (int argc, char **argv)
 {
     int i;
     XtAppContext appcon;

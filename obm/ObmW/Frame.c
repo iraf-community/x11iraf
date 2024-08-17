@@ -9,70 +9,22 @@
 #include <X11/Xmu/CharSet.h>
 #include "stip4.bm"
 #include "FrameP.h"
-static void set_shadow(
-#if NeedFunctionPrototypes
-Widget,XEvent*,String*,Cardinal*
-#endif
-);
+static void set_shadow(Widget,XEvent*,String*,Cardinal*);
 
 static XtActionsRec actionsList[] = {
 {"set_shadow", set_shadow},
 };
-static void _resolve_inheritance(
-#if NeedFunctionPrototypes
-WidgetClass
-#endif
-);
-static void class_initialize(
-#if NeedFunctionPrototypes
-void
-#endif
-);
-static void initialize(
-#if NeedFunctionPrototypes
-Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static void realize(
-#if NeedFunctionPrototypes
-Widget,XtValueMask *,XSetWindowAttributes *
-#endif
-);
-static Boolean  set_values(
-#if NeedFunctionPrototypes
-Widget ,Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static void expose(
-#if NeedFunctionPrototypes
-Widget,XEvent *,Region 
-#endif
-);
-static void compute_inside(
-#if NeedFunctionPrototypes
-Widget,Position *,Position *,Dimension *,Dimension *
-#endif
-);
-static XtGeometryResult  query_geometry(
-#if NeedFunctionPrototypes
-Widget,XtWidgetGeometry *,XtWidgetGeometry *
-#endif
-);
-static XtGeometryResult  geometry_manager(
-#if NeedFunctionPrototypes
-Widget ,XtWidgetGeometry *,XtWidgetGeometry *
-#endif
-);
-static void resize(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void change_managed(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
+static void _resolve_inheritance(WidgetClass);
+static void class_initialize(void);
+static void initialize(Widget ,Widget,ArgList ,Cardinal *);
+static void realize(Widget,XtValueMask *,XSetWindowAttributes *);
+static Boolean  set_values(Widget ,Widget ,Widget,ArgList ,Cardinal *);
+static void expose(Widget,XEvent *,Region );
+static void compute_inside(Widget,Position *,Position *,Dimension *,Dimension *);
+static XtGeometryResult  query_geometry(Widget,XtWidgetGeometry *,XtWidgetGeometry *);
+static XtGeometryResult  geometry_manager(Widget ,XtWidgetGeometry *,XtWidgetGeometry *);
+static void resize(Widget);
+static void change_managed(Widget);
 #define done(type, value) do {\
       if (to->addr != NULL) {\
 	  if (to->size < sizeof(type)) {\
@@ -91,27 +43,13 @@ Widget
 
 
 static char  rcsid[] = "$Header: Frame.w,v 1.5 92/11/02 14:07:52 bert Exp $";
-static void create_darkgc(
-#if NeedFunctionPrototypes
-Widget
-#endif
+static void create_darkgc(Widget);
+static void create_lightgc(Widget);
+static void compute_topcolor(Widget,int ,XrmValue *);
+static void compute_bottomcolor(Widget,int ,XrmValue *
 );
-static void create_lightgc(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
-static void compute_topcolor(
-#if NeedFunctionPrototypes
-Widget,int ,XrmValue *
-#endif
-);
-static void compute_bottomcolor(
-#if NeedFunctionPrototypes
-Widget,int ,XrmValue *
-#endif
-);
-/*ARGSUSED*/static void create_darkgc(self)Widget self;
+
+/*ARGSUSED*/static void create_darkgc(Widget self)
 {
     XtGCMask mask;
     XGCValues values;
@@ -144,7 +82,7 @@ Widget,int ,XrmValue *
     }
     ((XfwfFrameWidget)self)->xfwfFrame.darkgc = XtGetGC(self, mask, &values);
 }
-/*ARGSUSED*/static void create_lightgc(self)Widget self;
+/*ARGSUSED*/static void create_lightgc(Widget self)
 {
     XtGCMask mask;
     XGCValues values;
@@ -177,13 +115,13 @@ Widget,int ,XrmValue *
     }
     ((XfwfFrameWidget)self)->xfwfFrame.lightgc = XtGetGC(self, mask, &values);
 }
-/*ARGSUSED*/static void compute_topcolor(self,offset,value)Widget self;int  offset;XrmValue * value;
+/*ARGSUSED*/static void compute_topcolor(Widget self, int offset, XrmValue *value)
 {
     static Pixel color;
     ((XfwfFrameWidgetClass)self->core.widget_class)->xfwfCommon_class.lighter_color(self, ((XfwfFrameWidget)self)->core.background_pixel, &color);
     value->addr = (XtPointer) &color;
 }
-/*ARGSUSED*/static void compute_bottomcolor(self,offset,value)Widget self;int  offset;XrmValue * value;
+/*ARGSUSED*/static void compute_bottomcolor(Widget self, int offset, XrmValue *value)
 {
     static Pixel color;
     ((XfwfFrameWidgetClass)self->core.widget_class)->xfwfCommon_class.darker_color(self, ((XfwfFrameWidget)self)->core.background_pixel, &color);
@@ -263,7 +201,7 @@ NULL ,
 };
 WidgetClass xfwfFrameWidgetClass = (WidgetClass) &xfwfFrameClassRec;
 /*ARGSUSED*/
-static void set_shadow(self,event,params,num_params)Widget self;XEvent*event;String*params;Cardinal*num_params;
+static void set_shadow(Widget self, XEvent *event, String *params, Cardinal *num_params)
 {
     Position x, y;
     Dimension w, h;
@@ -285,8 +223,7 @@ static void set_shadow(self,event,params,num_params)Widget self;XEvent*event;Str
     }
 }
 
-static void _resolve_inheritance(class)
-WidgetClass class;
+static void _resolve_inheritance(WidgetClass class)
 {
   XfwfFrameWidgetClass c = (XfwfFrameWidgetClass) class;
   XfwfFrameWidgetClass super;
@@ -301,7 +238,7 @@ WidgetClass class;
   if (class == xfwfFrameWidgetClass) return;
   super = (XfwfFrameWidgetClass)class->core_class.superclass;
 }
-/*ARGSUSED*/static void class_initialize()
+/*ARGSUSED*/static void class_initialize(void)
 {
     static XtConvertArgRec screenArg[] = {
     {XtBaseOffset, (XtPointer)XtOffset(Widget, core.screen), sizeof(Screen*)}};
@@ -319,13 +256,13 @@ WidgetClass class;
     XtSetTypeConverter(XtRShadowScheme, XtRString, cvtShadowSchemeToString,
 		       NULL, 0, XtCacheNone, NULL);
 }
-/*ARGSUSED*/static void initialize(request,self,args,num_args)Widget  request;Widget self;ArgList  args;Cardinal * num_args;
+/*ARGSUSED*/static void initialize(Widget request, Widget self, ArgList args, Cardinal *num_args)
 {
     ((XfwfFrameWidget)self)->xfwfFrame.lightgc = NULL;
     ((XfwfFrameWidget)self)->xfwfFrame.darkgc = NULL;
     ((XfwfFrameWidget)self)->xfwfFrame.old_frame_type = ((XfwfFrameWidget)self)->xfwfFrame.frameType;
 }
-/*ARGSUSED*/static void realize(self,mask,attributes)Widget self;XtValueMask * mask;XSetWindowAttributes * attributes;
+/*ARGSUSED*/static void realize(Widget self, XtValueMask *mask, XSetWindowAttributes *attributes)
 {
 #ifdef USE_CWCURSOR
     *mask |= CWCursor;
@@ -342,7 +279,7 @@ WidgetClass class;
     create_lightgc(self);
     create_darkgc(self);
 }
-/*ARGSUSED*/static Boolean  set_values(old,request,self,args,num_args)Widget  old;Widget  request;Widget self;ArgList  args;Cardinal * num_args;
+/*ARGSUSED*/static Boolean  set_values(Widget old, Widget request, Widget self, ArgList args, Cardinal *num_args)
 {
     Boolean need_redisplay = False;
 
@@ -394,7 +331,7 @@ WidgetClass class;
 
     return need_redisplay;
 }
-/*ARGSUSED*/static void expose(self,event,region)Widget self;XEvent * event;Region  region;
+/*ARGSUSED*/static void expose(Widget self, XEvent *event, Region region)
 {
     Position x, y;
     Dimension w, h;
@@ -413,7 +350,7 @@ WidgetClass class;
     }
     xfwfCommonClassRec.core_class.expose(self, event, region);
 }
-/*ARGSUSED*/static void compute_inside(self,x,y,w,h)Widget self;Position * x;Position * y;Dimension * w;Dimension * h;
+/*ARGSUSED*/static void compute_inside(Widget self, Position *x, Position *y, Dimension *w, Dimension *h)
 {
     int ww, hh;		/* DCT */
 
@@ -440,7 +377,7 @@ WidgetClass class;
     *h -= 2 * (((XfwfFrameWidget)self)->xfwfFrame.outerOffset + ((XfwfFrameWidget)self)->xfwfFrame.frameWidth + ((XfwfFrameWidget)self)->xfwfFrame.innerOffset);
 }
 
-/*ARGSUSED*/static XtGeometryResult  query_geometry(self,request,reply)Widget self;XtWidgetGeometry * request;XtWidgetGeometry * reply;
+/*ARGSUSED*/static XtGeometryResult  query_geometry(Widget self, XtWidgetGeometry *request, XtWidgetGeometry *reply)
 {
     XtWidgetGeometry request2, reply2;
     XtGeometryResult result;
@@ -482,7 +419,7 @@ WidgetClass class;
     reply->stack_mode = reply2.stack_mode;
     return XtGeometryAlmost;
 }
-/*ARGSUSED*/static XtGeometryResult  geometry_manager(child,request,reply)Widget  child;XtWidgetGeometry * request;XtWidgetGeometry * reply;
+/*ARGSUSED*/static XtGeometryResult  geometry_manager(Widget child, XtWidgetGeometry *request, XtWidgetGeometry *reply)
 { Widget self = XtParent(child); {
     XtWidgetGeometry request2, reply2;
     XtGeometryResult result;
@@ -505,7 +442,7 @@ WidgetClass class;
     return XtGeometryAlmost;
 }
 }
-/*ARGSUSED*/static void resize(self)Widget self;
+/*ARGSUSED*/static void resize(Widget self)
 {
     Position x, y;
     Dimension w, h;
@@ -518,7 +455,7 @@ WidgetClass class;
     h -= 2 * ((XfwfFrameWidget)child)->core.border_width;
     XtConfigureWidget(child, x, y, w, h, ((XfwfFrameWidget)child)->core.border_width);
 }
-/*ARGSUSED*/static void change_managed(self)Widget self;
+/*ARGSUSED*/static void change_managed(Widget self)
 {
     XtWidgetGeometry request2, reply2;
     XtGeometryResult result;
@@ -538,7 +475,7 @@ WidgetClass class;
     h -= 2 * ((XfwfFrameWidget)child)->core.border_width;
     XtConfigureWidget(child, x, y, w, h, ((XfwfFrameWidget)child)->core.border_width);
 }
-/*ARGSUSED*/void XfwfDrawFrame(self,x,y,w,h,tp,t,lightgc,darkgc)Widget self;int  x;int  y;int  w;int  h;FrameType  tp;int  t;GC  lightgc;GC  darkgc;
+/*ARGSUSED*/void XfwfDrawFrame(Widget self, int x, int y, int w, int h, FrameType tp, int t, GC lightgc, GC darkgc)
 {
     XPoint tlPoints[7], brPoints[7];
 
@@ -585,7 +522,7 @@ WidgetClass class;
     }
 
 }
-/*ARGSUSED*/Boolean  cvtStringToFrameType(display,args,num_args,from,to,converter_data)Display * display;XrmValuePtr  args;Cardinal * num_args;XrmValuePtr  from;XrmValuePtr  to;XtPointer * converter_data;
+/*ARGSUSED*/Boolean  cvtStringToFrameType(Display *display, XrmValuePtr args, Cardinal *num_args, XrmValuePtr from, XrmValuePtr to, XtPointer *converter_data)
 {
     String s = (String) from->addr;
 
@@ -603,7 +540,7 @@ WidgetClass class;
     XtDisplayStringConversionWarning(display, s, XtRFrameType);
     done(FrameType, XfwfRaised);
 }
-/*ARGSUSED*/Boolean  cvtFrameTypeToString(display,args,num_args,from,to,converter_data)Display * display;XrmValuePtr  args;Cardinal * num_args;XrmValuePtr  from;XrmValuePtr  to;XtPointer * converter_data;
+/*ARGSUSED*/Boolean  cvtFrameTypeToString(Display *display, XrmValuePtr args, Cardinal *num_args, XrmValuePtr from, XrmValuePtr to, XtPointer *converter_data)
 {
     if (*num_args != 0)
 	XtAppErrorMsg(XtDisplayToApplicationContext(display),
@@ -619,7 +556,7 @@ WidgetClass class;
     default: XtError("Illegal FrameType");
     }
 }
-/*ARGSUSED*/Boolean  cvtStringToShadowScheme(display,args,num_args,from,to,converter_data)Display * display;XrmValuePtr  args;Cardinal * num_args;XrmValuePtr  from;XrmValuePtr  to;XtPointer * converter_data;
+/*ARGSUSED*/Boolean  cvtStringToShadowScheme(Display *display, XrmValuePtr args, Cardinal *num_args, XrmValuePtr from, XrmValuePtr to, XtPointer *converter_data)
 {
     String s = (String) from->addr;
 
@@ -636,7 +573,7 @@ WidgetClass class;
     XtDisplayStringConversionWarning(display, s, XtRShadowScheme);
     done(ShadowScheme, XfwfAuto);
 }
-/*ARGSUSED*/Boolean  cvtShadowSchemeToString(display,args,num_args,from,to,converter_data)Display * display;XrmValuePtr  args;Cardinal * num_args;XrmValuePtr  from;XrmValuePtr  to;XtPointer * converter_data;
+/*ARGSUSED*/Boolean  cvtShadowSchemeToString(Display *display, XrmValuePtr args, Cardinal *num_args, XrmValuePtr from, XrmValuePtr to, XtPointer *converter_data)
 {
     if (*num_args != 0)
 	XtAppErrorMsg(XtDisplayToApplicationContext(display),

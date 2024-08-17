@@ -24,18 +24,17 @@
  * otherwise the indicated region is saved.
  */
 
-static int xims_write();
-static void savestat(), savetext();
+static int xims_write(XimDataPtr xim, FILE *fp, int fileformat, unsigned char *pixels, int w, int h, int d, unsigned char *r, unsigned char *g, unsigned char *b, int ncolors);
+static void savestat(XimDataPtr xim, char *message), savetext(XimDataPtr xim, int seqno, char *fullname, int fileformat, int filesize, int w, int h, int d);
 
 
 /* XIM_INITSAVE -- Initialize the file save structure.
  */
 void
-xim_initSave (xim)
-register XimDataPtr xim;
+xim_initSave (XimDataPtr xim)
 {
-	register fileSavePtr fsp;
-	extern char *getcwd(), *getenv();
+	fileSavePtr fsp;
+	extern char *getcwd(char *, size_t), *getenv(const char *);
 	char buf[SZ_LINE];
 
 	if (!(xim->fsp = fsp = (fileSavePtr) calloc (1, sizeof (fileSave))))
@@ -59,10 +58,9 @@ register XimDataPtr xim;
 /* XIM_SAVECLOSE -- Close the save structure.
  */
 void
-xim_saveClose (xim)
-register XimDataPtr xim;
+xim_saveClose (XimDataPtr xim)
 {
-	register fileSavePtr fsp = xim->fsp;
+	fileSavePtr fsp = xim->fsp;
 
 	if (fsp)
 	    free ((char *) fsp);
@@ -73,14 +71,14 @@ register XimDataPtr xim;
  * ny is zero the entire frame is saved, otherwise the given region is saved.
  */
 int
-xim_saveFile (xim, template, fileformat, x0,y0, nx,ny)
-register XimDataPtr xim;
-char *template;			/* file name or printf format */
-int fileformat;			/* output raster file format/type */
-int x0, y0, nx, ny;		/* region of display to be saved */
+xim_saveFile (XimDataPtr xim, char *template, int fileformat, int x0, int y0, int nx, int ny)
+               
+               			/* file name or printf format */
+               			/* output raster file format/type */
+                   		/* region of display to be saved */
 {
-	register int i, j;
-	register fileSavePtr fsp = xim->fsp;
+	int i, j;
+	fileSavePtr fsp = xim->fsp;
         int w, h, ncols;
         char text[SZ_LINE], fname[SZ_FNAME];
         unsigned char r[256], g[256], b[256];
@@ -89,7 +87,7 @@ int x0, y0, nx, ny;		/* region of display to be saved */
 	static int debug=0;
 	extern int errno;
 	FILE *fp;
-	char *mktemp();
+	char *mktemp(char *);
 
 	/* Generate output file name. */
         sprintf (fname, template, fsp->seqno++);
@@ -102,7 +100,7 @@ int x0, y0, nx, ny;		/* region of display to be saved */
             goto done;
 
 	if (debug) {
-	    register int cpix, val;
+	    int cpix, val;
 	    fprintf (stderr, "saveFile: %s -> %dx%d at %d colors\n", 
 		fname, w, h, ncols);
 	    cpix = (w/2+(h/2)*w);
@@ -188,25 +186,18 @@ done:
 /* XIMS_WRITE -- Write a file in the indicated format.
  */
 static int
-xims_write (xim, fp, fileformat, pixels, w,h,d, r,g,b, ncolors)
-register XimDataPtr xim;
-FILE *fp;
-int fileformat;
-unsigned char *pixels;
-int w, h, d;
-unsigned char *r, *g, *b;
-int ncolors;
+xims_write (XimDataPtr xim, FILE *fp, int fileformat, unsigned char *pixels, int w, int h, int d, unsigned char *r, unsigned char *g, unsigned char *b, int ncolors)
 {
-        register PSImagePtr psim = xim->psim;
-        register FrameBufPtr fb = xim->df_p;
-        register ColorMapPtr cm = &colormaps[fb->colormap-1];
-	register int sv_annotate = psim->annotate;
-	register int sv_colorClass = psim->colorClass;
+        PSImagePtr psim = xim->psim;
+        FrameBufPtr fb = xim->df_p;
+        ColorMapPtr cm = &colormaps[fb->colormap-1];
+	int sv_annotate = psim->annotate;
+	int sv_colorClass = psim->colorClass;
 	int gray=0, status=0;
-	extern int writeSunRas();
-	extern int writeFITS();
-	extern int writeGIF();
-	extern int writeTIFF();
+	extern int writeSunRas(FILE *fp, unsigned char *pixels, int pixtype, int w, int h, unsigned char *r, unsigned char *g, unsigned char *b, int ncolors, int colorstyle);
+	extern int writeFITS(FILE *fp, byte *image, int w, int h, byte *rmap, byte *gmap, byte *bmap, int numcols);
+	extern int writeGIF(FILE *fp, byte *image, int w, int h, byte *rmap, byte *gmap, byte *bmap, int numcols, int gray);
+	extern int writeTIFF(FILE *fa, unsigned char *data, int w, int h, int ncolors, int gray, unsigned char *r, unsigned char *g, unsigned char *b);
 
         switch (fileformat) {
         case XIM_RAS:
@@ -282,11 +273,9 @@ int ncolors;
  * xim_save above.
  */
 void
-xims_rename (xim, old, new)
-register XimDataPtr xim;
-char *old, *new;
+xims_rename (XimDataPtr xim, char *old, char *new)
 {
-	register fileSavePtr fsp = xim->fsp;
+	fileSavePtr fsp = xim->fsp;
 	char text[SZ_LINE];
 	struct stat fs;
 
@@ -304,9 +293,7 @@ char *old, *new;
 }
 
 void
-xims_cancel (xim, fname)
-register XimDataPtr xim;
-char *fname;
+xims_cancel (XimDataPtr xim, char *fname)
 {
 	savestat (xim, "Save cancelled.");
 	unlink (fname);
@@ -316,9 +303,7 @@ char *fname;
 /* SAVESTAT -- Internal routine for save status messages.
  */
 static void
-savestat (xim, message)
-register XimDataPtr xim;
-char *message;
+savestat (XimDataPtr xim, char *message)
 {
 	char text[SZ_LINE];
 	sprintf (text, "status {%s}", message);
@@ -329,15 +314,9 @@ char *message;
 /* SAVETEXT -- Write something useful the text box in the save panel.
  */
 static void
-savetext (xim, seqno, fullname, fileformat, filesize, w,h,d)
-register XimDataPtr xim;
-int seqno;
-char *fullname;
-int fileformat;
-int filesize;
-int w, h, d;
+savetext (XimDataPtr xim, int seqno, char *fullname, int fileformat, int filesize, int w, int h, int d)
 {
-	register char *ip;
+	char *ip;
 	char *fmt, *fname, text[SZ_LINE];
 
 	for (ip=fname=fullname;  *ip;  ip++)

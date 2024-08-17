@@ -13,10 +13,9 @@
 
 
 void
-xim_displayLogo (xim)
-register XimDataPtr xim;
+xim_displayLogo (XimDataPtr xim)
 {
-    register int i;
+    int i;
     unsigned char r[256], g[256], b[256];
 
 
@@ -30,7 +29,7 @@ register XimDataPtr xim;
 
     /* Set the logical resolution of the display.
     */
-    GtSetLogRes (xim->gt, LOGO_XDIM, LOGO_YDIM);
+    GtSetLogRes ((GtermWidget)xim->gt, LOGO_XDIM, LOGO_YDIM);
 
     if (xim_writeDisplay (xim, 1, "logo", logo_data,
 	LOGO_XDIM, LOGO_YDIM, r, g, b, LOGO_NCOLORS) < 0)

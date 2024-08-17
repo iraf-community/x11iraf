@@ -75,9 +75,7 @@ static int allocation_index[256];
  * Free all the colors in the default colormap that we have allocated so far.
  */
 void
-FreeColors(dsp, colormap)
-	Display *dsp;
-	Colormap colormap;
+FreeColors(Display *dsp, Colormap colormap)
 {
 	int i, j;
 	unsigned long pix;
@@ -105,8 +103,7 @@ FreeColors(dsp, colormap)
  * Free up all the pixmaps allocated for this document.
  */
 void
-FreeImages(hw)
-	HTMLWidget hw;
+FreeImages(HTMLWidget hw)
 {
 	struct ele_rec *eptr;
 
@@ -149,10 +146,7 @@ FreeImages(hw)
  * color
  */
 void
-FindColor(dsp, colormap, colr)
-	Display *dsp;
-	Colormap colormap;
-	XColor *colr;
+FindColor(Display *dsp, Colormap colormap, XColor *colr)
 {
 	int i, match;
 #ifdef MORE_ACCURATE
@@ -250,8 +244,7 @@ static int have_colors = 0;
 
 
 static int
-highbit(ul)
-unsigned long ul;
+highbit(long unsigned int ul)
 {
 	/*
 	 * returns position of highest set bit in 'ul' as an integer (0-31),
@@ -268,12 +261,7 @@ unsigned long ul;
  * Make am image of appropriate depth for display from image data.
  */
 XImage *
-MakeImage(dsp, data, width, height, depth, img_info)
-	Display *dsp;
-	unsigned char *data;
-	int width, height;
-	int depth;
-	ImageInfo *img_info;
+MakeImage(Display *dsp, unsigned char *data, int width, int height, int depth, ImageInfo *img_info)
 {
 	int linepad, shiftnum;
 	int shiftstart, shiftstop, shiftinc;
@@ -438,16 +426,14 @@ MakeImage(dsp, data, width, height, depth, img_info)
 
 
 int
-AnchoredHeight(hw)
-	HTMLWidget hw;
+AnchoredHeight(HTMLWidget hw)
 {
 	return((int)(AnchoredImage_height + IMAGE_BORDER));
 }
 
 
 char *
-IsMapForm(hw)
-	HTMLWidget hw;
+IsMapForm(HTMLWidget hw)
 {
 	char *str;
 
@@ -461,9 +447,7 @@ IsMapForm(hw)
 
 
 int
-IsIsMapForm(hw, href)
-	HTMLWidget hw;
-	char *href;
+IsIsMapForm(HTMLWidget hw, char *href)
 {
 	if ((href != NULL)&&(strcmp(href, "ISMAP Form") == 0))
 	{
@@ -477,8 +461,7 @@ IsIsMapForm(hw, href)
 
 
 char *
-DelayedHRef(hw)
-	HTMLWidget hw;
+DelayedHRef(HTMLWidget hw)
 {
 	char *str;
 
@@ -492,9 +475,7 @@ DelayedHRef(hw)
 
 
 int
-IsDelayedHRef(hw, href)
-	HTMLWidget hw;
-	char *href;
+IsDelayedHRef(HTMLWidget hw, char *href)
 {
 	if ((href != NULL)&&(strcmp(href, "Delayed Image") == 0))
 	{
@@ -508,9 +489,7 @@ IsDelayedHRef(hw, href)
 
 
 Pixmap
-DelayedImage(hw, anchored)
-	HTMLWidget hw;
-	Boolean anchored;
+DelayedImage(HTMLWidget hw, Boolean anchored)
 {
 	if (delayed_image.image == (Pixmap)NULL)
 	{
@@ -583,9 +562,7 @@ DelayedImage(hw, anchored)
 
 
 ImageInfo *
-DelayedImageData(hw, anchored)
-	HTMLWidget hw;
-	Boolean anchored;
+DelayedImageData(HTMLWidget hw, Boolean anchored)
 {
 	delayed_image.delayed = 1;
 	delayed_image.internal = 0;
@@ -622,8 +599,7 @@ DelayedImageData(hw, anchored)
 
 
 Pixmap
-NoImage(hw)
-	HTMLWidget hw;
+NoImage(HTMLWidget hw)
 {
 	if (no_image.image == (Pixmap)NULL)
 	{
@@ -648,8 +624,7 @@ NoImage(hw)
 
 
 ImageInfo *
-NoImageData(hw)
-	HTMLWidget hw;
+NoImageData(HTMLWidget hw)
 {
 	no_image.delayed = 0;
 	no_image.internal = 0;
@@ -668,9 +643,7 @@ NoImageData(hw)
 
 
 Pixmap
-InfoToImage(hw, img_info)
-	HTMLWidget hw;
-	ImageInfo *img_info;
+InfoToImage(HTMLWidget hw, ImageInfo *img_info)
 {
 	int i, size;
 	int delta, not_right_col, not_last_row;

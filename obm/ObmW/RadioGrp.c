@@ -5,31 +5,11 @@
 #include <X11/StringDefs.h>
 #include "Toggle.h"
 #include "RadioGrpP.h"
-static void _resolve_inheritance(
-#if NeedFunctionPrototypes
-WidgetClass
-#endif
-);
-static void class_initialize(
-#if NeedFunctionPrototypes
-void
-#endif
-);
-static void initialize(
-#if NeedFunctionPrototypes
-Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static Boolean  set_values(
-#if NeedFunctionPrototypes
-Widget ,Widget ,Widget,ArgList ,Cardinal *
-#endif
-);
-static void create_toggles(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
+static void _resolve_inheritance(WidgetClass);
+static void class_initialize(void);
+static void initialize(Widget ,Widget,ArgList ,Cardinal *);
+static Boolean  set_values(Widget ,Widget ,Widget,ArgList ,Cardinal *);
+static void create_toggles(Widget);
 #define done(type, value) do {\
 	if (to->addr != NULL) {\
 	    if (to->size < sizeof(type)) {\
@@ -47,22 +27,11 @@ Widget
     }while (0 )
 
 
-static Boolean  cvtStringToStringArray(
-#if NeedFunctionPrototypes
-Display *,XrmValuePtr ,Cardinal *,XrmValuePtr ,XrmValuePtr ,XtPointer *
-#endif
-);
-static StringArray  newStringArray(
-#if NeedFunctionPrototypes
-StringArray 
-#endif
-);
-static void freeStringArray(
-#if NeedFunctionPrototypes
-StringArray 
-#endif
-);
-/*ARGSUSED*/static void create_toggles(self)Widget self;
+static Boolean  cvtStringToStringArray(Display *,XrmValuePtr ,Cardinal *,XrmValuePtr ,XrmValuePtr ,XtPointer *);
+static StringArray  newStringArray(StringArray );
+static void freeStringArray(StringArray );
+
+/*ARGSUSED*/static void create_toggles(Widget self)
 {
     Cardinal i;
     StringArray s;
@@ -78,7 +47,7 @@ StringArray
 	     True, XtNborderWidth, 0, XtNframeWidth, 0, NULL);
     }
 }
-/*ARGSUSED*/static Boolean  cvtStringToStringArray(display,args,num_args,from,to,converter_data)Display * display;XrmValuePtr  args;Cardinal * num_args;XrmValuePtr  from;XrmValuePtr  to;XtPointer * converter_data;
+/*ARGSUSED*/static Boolean  cvtStringToStringArray(Display *display, XrmValuePtr args, Cardinal *num_args, XrmValuePtr from, XrmValuePtr to, XtPointer *converter_data)
 {
     String t, s;
     StringArray a = NULL;
@@ -107,7 +76,7 @@ StringArray
     a[i] = NULL;
     done(StringArray, a);
 }
-/*ARGSUSED*/static StringArray  newStringArray(a)StringArray  a;
+/*ARGSUSED*/static StringArray  newStringArray(StringArray a)
 {
     Cardinal n, i;
     StringArray s;
@@ -119,7 +88,7 @@ StringArray
     s[n] = NULL;
     return s;
 }
-/*ARGSUSED*/static void freeStringArray(a)StringArray  a;
+/*ARGSUSED*/static void freeStringArray(StringArray a)
 {
     Cardinal i;
 
@@ -202,8 +171,7 @@ XtInherit_layout,
 },
 };
 WidgetClass xfwfRadioGroupWidgetClass = (WidgetClass) &xfwfRadioGroupClassRec;
-static void _resolve_inheritance(class)
-WidgetClass class;
+static void _resolve_inheritance(WidgetClass class)
 {
   XfwfRadioGroupWidgetClass c = (XfwfRadioGroupWidgetClass) class;
   XfwfRadioGroupWidgetClass super;
@@ -218,17 +186,17 @@ WidgetClass class;
   if (class == xfwfRadioGroupWidgetClass) return;
   super = (XfwfRadioGroupWidgetClass)class->core_class.superclass;
 }
-/*ARGSUSED*/static void class_initialize()
+/*ARGSUSED*/static void class_initialize(void)
 {
     XtSetTypeConverter(XtRString, "StringArray", cvtStringToStringArray,
 		       NULL, 0, XtCacheNone, NULL);
 }
-/*ARGSUSED*/static void initialize(request,self,args,num_args)Widget  request;Widget self;ArgList  args;Cardinal * num_args;
+/*ARGSUSED*/static void initialize(Widget request, Widget self, ArgList args, Cardinal *num_args)
 {
     ((XfwfRadioGroupWidget)self)->xfwfRadioGroup.labels = newStringArray(((XfwfRadioGroupWidget)self)->xfwfRadioGroup.labels);
     create_toggles(self);
 }
-/*ARGSUSED*/static Boolean  set_values(old,request,self,args,num_args)Widget  old;Widget  request;Widget self;ArgList  args;Cardinal * num_args;
+/*ARGSUSED*/static Boolean  set_values(Widget old, Widget request, Widget self, ArgList args, Cardinal *num_args)
 {
     if (((XfwfRadioGroupWidget)old)->xfwfRadioGroup.labels != ((XfwfRadioGroupWidget)self)->xfwfRadioGroup.labels) {
 	freeStringArray(((XfwfRadioGroupWidget)old)->xfwfRadioGroup.labels);

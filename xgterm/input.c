@@ -57,12 +57,11 @@ static char *kypd_apl =
     " ABCDEFGHIJKLMNOPQRSTUVWXYZ??????abcdefghijklmnopqrstuvwxyzXXX";
 static char *cur = "DACB";
 
-static int funcvalue(), sunfuncvalue();
+static int funcvalue(int keycode), sunfuncvalue(int keycode);
 extern Boolean sunFunctionKeys;
 
 static void
-AdjustAfterInput (screen)
-register TScreen *screen;
+AdjustAfterInput (TScreen *screen)
 {
 	if(screen->scrollkey && screen->topline != 0)
 		WindowScroll(screen, 0);
@@ -83,11 +82,7 @@ register TScreen *screen;
 }
 
 void
-Input (keyboard, screen, event, eightbit)
-    register TKeyboard	*keyboard;
-    register TScreen	*screen;
-    register XKeyEvent *event;
-    Bool eightbit;
+Input (TKeyboard *keyboard, TScreen *screen, XKeyEvent *event, int eightbit)
 {
 
 #ifdef I18N
@@ -97,8 +92,8 @@ Input (keyboard, screen, event, eightbit)
 #endif
 
 	char strbuf[STRBUFSIZE];
-	register char *string;
-	register int key = FALSE;
+	char *string;
+	int key = FALSE;
 	int	pty	= screen->respond;
 	int	nbytes;
 	KeySym  keysym = 0;
@@ -186,10 +181,7 @@ Input (keyboard, screen, event, eightbit)
 	return;
 }
 
-StringInput (screen, string, nbytes)
-    register TScreen	*screen;
-    register char *string;
-    int nbytes;
+StringInput (TScreen *screen, char *string, int nbytes)
 {
 	int	pty	= screen->respond;
 
@@ -198,8 +190,7 @@ StringInput (screen, string, nbytes)
 	AdjustAfterInput(screen);
 }
 
-static int funcvalue (keycode)
-	int keycode;
+static int funcvalue (int keycode)
 {
 	switch (keycode) {
 		case XK_F1:	return(11);
@@ -239,9 +230,8 @@ static int funcvalue (keycode)
 }
 
 
-static int sunfuncvalue (keycode)
-	int keycode;
-  {
+static int sunfuncvalue (int keycode)
+{
   	switch (keycode) {
 		case XK_F1:	return(224);
 		case XK_F2:	return(225);

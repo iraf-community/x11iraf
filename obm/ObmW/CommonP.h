@@ -5,53 +5,21 @@
 #define _XfwfCommonP_H_
 #include <X11/CompositeP.h>
 #include "Common.h"
-typedef void (*compute_inside_Proc)(
-#if NeedFunctionPrototypes
-Widget,Position *,Position *,Dimension *,Dimension *
-#endif
-);
+typedef void (*compute_inside_Proc)(Widget,Position *,Position *,Dimension *,Dimension *);
 #define XtInherit_compute_inside ((compute_inside_Proc) _XtInherit)
-typedef void (*highlight_border_Proc)(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
+typedef void (*highlight_border_Proc)(Widget);
 #define XtInherit_highlight_border ((highlight_border_Proc) _XtInherit)
-typedef void (*unhighlight_border_Proc)(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
+typedef void (*unhighlight_border_Proc)(Widget);
 #define XtInherit_unhighlight_border ((unhighlight_border_Proc) _XtInherit)
-typedef Boolean  (*would_accept_focus_Proc)(
-#if NeedFunctionPrototypes
-Widget
-#endif
-);
+typedef Boolean  (*would_accept_focus_Proc)(Widget);
 #define XtInherit_would_accept_focus ((would_accept_focus_Proc) _XtInherit)
-typedef void (*traverse_Proc)(
-#if NeedFunctionPrototypes
-Widget,TraversalDirection ,Widget ,Time *
-#endif
-);
+typedef void (*traverse_Proc)(Widget,TraversalDirection ,Widget ,Time *);
 #define XtInherit_traverse ((traverse_Proc) _XtInherit)
-typedef Boolean  (*choose_color_Proc)(
-#if NeedFunctionPrototypes
-Widget,double ,Pixel ,Pixel *
-#endif
-);
+typedef Boolean  (*choose_color_Proc)(Widget,double ,Pixel ,Pixel *);
 #define XtInherit_choose_color ((choose_color_Proc) _XtInherit)
-typedef Boolean  (*lighter_color_Proc)(
-#if NeedFunctionPrototypes
-Widget,Pixel ,Pixel *
-#endif
-);
+typedef Boolean  (*lighter_color_Proc)(Widget,Pixel ,Pixel *);
 #define XtInherit_lighter_color ((lighter_color_Proc) _XtInherit)
-typedef Boolean  (*darker_color_Proc)(
-#if NeedFunctionPrototypes
-Widget,Pixel ,Pixel *
-#endif
-);
+typedef Boolean  (*darker_color_Proc)(Widget,Pixel ,Pixel *);
 #define XtInherit_darker_color ((darker_color_Proc) _XtInherit)
 typedef struct {
 /* methods */

@@ -27,10 +27,9 @@
  * when the custom colormap is installed.
  */
 static Colormap
-get_colormap (w)
-    GtermWidget w;
+get_colormap (GtermWidget w)
 {
-    register int i, j;
+    int i, j;
     Display *display = w->gterm.display;
     Screen *screen = w->gterm.screen;
     XColor def_colors[SZ_STATIC_CMAP], *cp, *c1, *c2;
@@ -271,8 +270,7 @@ use_default:
  * level window.
  */
 static void
-request_colormap_focus (w)
-    GtermWidget w;
+request_colormap_focus (GtermWidget w)
 {
     Widget p;
 
@@ -289,7 +287,7 @@ request_colormap_focus (w)
     if (p) {
 	Window window = XtWindow (p);
 	Window *wl = NULL, n_wl[MAX_WMWIN+1];
-	register int n_nw, i;
+	int n_nw, i;
 	int nw;
 
 	/* If WM_COLORMAP_WINDOWS is already set save its value, otherwise
@@ -323,10 +321,9 @@ request_colormap_focus (w)
  * should follow a prior call to request_colormap_focus.
  */
 static void
-restore_colormap_focus (w)
-    GtermWidget w;
+restore_colormap_focus (GtermWidget w)
 {
-    register int nw, n_nw, i;
+    int nw, n_nw, i;
     Window *wl, n_wl[MAX_WMWIN+1], old;
 
     if (!w || !XtIsRealized ((Widget)w))
@@ -357,11 +354,10 @@ restore_colormap_focus (w)
  * the colormap (which is usually where X allocates its colors).
  */
 static void
-inherit_default_colormap (w)
-    GtermWidget w;
+inherit_default_colormap (GtermWidget w)
 {
-    register XColor *cp, *ap;
-    register int ncolors, i;
+    XColor *cp, *ap;
+    int ncolors, i;
     Display *display = w->gterm.display;
     Screen *screen = w->gterm.screen;
     Window root = w->gterm.root;
@@ -441,12 +437,11 @@ inherit_default_colormap (w)
  * colormap focus changes.
  */
 static void
-update_default_colormap (w)
-    GtermWidget w;
+update_default_colormap (GtermWidget w)
 {
-    register XColor *ip, *op;
-    register int j, n;
-    register Pixel v;
+    XColor *ip, *op;
+    int j, n;
+    Pixel v;
 
     XColor colors[MAX_SZCMAP];
     Pixel pixels[MAX_SZCMAP];
@@ -535,8 +530,7 @@ done:
 
 /* Global Colormap routines.
  */
-static int SetGlobalCmap(w)
-     GtermWidget w;
+static int SetGlobalCmap(GtermWidget w)
 {
   static int init=0;
 
@@ -561,8 +555,7 @@ static int SetGlobalCmap(w)
 }
 
 
-static int ParseGlobalCmap(w)
-     GtermWidget w;
+static int ParseGlobalCmap(GtermWidget w)
 {
   char *s;
   char *t;
@@ -626,10 +619,9 @@ static int ParseGlobalCmap(w)
  * the actually-allocated colormap -- very ugly ...
  *
  */
-static int GetMaxCmapColors(w)
-     GtermWidget w;
+static int GetMaxCmapColors(GtermWidget w)
 {
-  register int n;
+  int n;
   unsigned long plane_masks[1];
   int req;
   int first, nelem, maxelem;
@@ -682,15 +674,14 @@ static int GetMaxCmapColors(w)
 
 
 static int
-GetGlobalColors()
+GetGlobalColors(void)
 {
   return (global_ncolors);
 }
 
 
 static void
-SetGlobalColors(n)
-     int n;
+SetGlobalColors(int n)
 {
   global_ncolors = n;
 }
@@ -703,9 +694,7 @@ SetGlobalColors(n)
  */
 
 static Pixel
-ColorNameToPixel (w, str)
-GtermWidget     w;
-String          str;
+ColorNameToPixel (GtermWidget w, String str)
 {
     int i;
     XColor color;

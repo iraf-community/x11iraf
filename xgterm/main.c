@@ -450,7 +450,7 @@ int	Ptyfd;
 #define SIGNAL_RETURN return
 #endif
 
-SIGNAL_T Exit();
+SIGNAL_T Exit(int n);
 
 #ifndef X_NOT_POSIX
 #include <unistd.h>
@@ -476,16 +476,16 @@ extern void exit();
 extern char *ttyname();
 #endif
 
-extern char *ptsname();
+extern char *ptsname(int);
 
-extern char *strindex ();
-extern void HandlePopupMenu();
-extern void gtermio_connect();
-extern void resize();
+extern char *strindex (char *s1, char *s2);
+extern void HandlePopupMenu(Widget w, XEvent *event, String *params, Cardinal *param_count);
+extern void gtermio_connect(int notused, Display *display, Widget toplevel, int state);
+extern void resize(TScreen *screen, char *TermName, char *oldtc);
 
 int switchfb[] = {0, 2, 1, 3};
 
-static SIGNAL_T reapchild ();
+static SIGNAL_T reapchild (int n);
 static Bool added_utmp_entry = False;
 
 static char **command_to_exec;
@@ -524,7 +524,6 @@ static struct jtchars d_jtc = {
 #endif /* sony */
 #endif /* USE_SYSV_TERMIO */
 
-static int parse_tty_modes ();
 /*
  * SYSV has the termio.c_cc[V] and ltchars; BSD has tchars and ltchars;
  * SVR4 has only termio.c_cc, but it includes everything from ltchars.
@@ -579,6 +578,8 @@ struct _xttymodes {
 { NULL, 0, 0, '\0' },			/* end of data */
 };
 
+static int parse_tty_modes (char *s, struct _xttymodes *modelist);
+
 #ifdef USE_SYSV_UTMP
 #if defined(X_NOT_STDC_ENV) || defined(AIXV3)
 extern struct utmp *getutent();
@@ -604,7 +605,7 @@ extern void setpwent();
 extern void endpwent();
 #endif
 
-extern struct passwd *fgetpwent();
+extern struct passwd *fgetpwent(FILE *);
 #else	/* not USE_SYSV_UTMP */
 static char etc_utmp[] = UTMP_FILENAME;
 #ifdef LASTLOG
@@ -867,7 +868,7 @@ NULL};
 static Boolean
 get_termcap(char *name, char *buffer, char *resized)
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
     *buffer = 0;        /* initialize, in case we're using terminfo's tgetent */
 
@@ -887,8 +888,7 @@ get_termcap(char *name, char *buffer, char *resized)
 }
 
 
-static void Syntax (badOption)
-    char *badOption;
+static void Syntax (char *badOption)
 {
     struct _options *opt;
     int col;
@@ -913,7 +913,7 @@ static void Syntax (badOption)
     exit (1);
 }
 
-static void Help ()
+static void Help (void)
 {
     struct _options *opt;
     char **cpp;
@@ -938,12 +938,7 @@ static void Help ()
 #if defined(TIOCCONS) || defined(SRIOCSREDIR)
 /* ARGSUSED */
 static Boolean
-ConvertConsoleSelection(w, selection, target, type, value, length, format)
-    Widget w;
-    Atom *selection, *target, *type;
-    XtPointer *value;
-    unsigned long *length;
-    int *format;
+ConvertConsoleSelection(Widget w, Atom *selection, Atom *target, Atom *type, XtPointer *value, long unsigned int *length, int *format)
 {
     /* we don't save console output, so can't offer it */
     return False;
@@ -963,39 +958,31 @@ XtAppContext app_con;
 Widget toplevel;
 Bool waiting_for_initial_map;
 
-extern void do_hangup();
-extern void xt_error();
+extern void do_hangup(Widget gw, caddr_t closure, caddr_t data);
+__attribute__((noreturn)) void xt_error(String message);
 
 /*
  * DeleteWindow(): Action proc to implement ICCCM delete_window.
  */
 /* ARGSUSED */
 void
-DeleteWindow(w, event, params, num_params)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *num_params;
+DeleteWindow(Widget w, XEvent *event, String *params, Cardinal *num_params)
 {
   if (w == toplevel)
     if (term->screen.Tshow)
       hide_vt_window();
     else
-      do_hangup(w);
+      do_hangup(w, NULL, NULL);
   else
     if (term->screen.Vshow)
       hide_tek_window();
     else
-      do_hangup(w);
+      do_hangup(w, NULL, NULL);
 }
 
 /* ARGSUSED */
 void
-KeyboardMapping(w, event, params, num_params)
-    Widget w;
-    XEvent *event;
-    String *params;
-    Cardinal *num_params;
+KeyboardMapping(Widget w, XEvent *event, String *params, Cardinal *num_params)
 {
     switch (event->type) {
        case MappingNotify:
@@ -1013,15 +1000,13 @@ Atom wm_delete_window;
 
 
 int
-main (argc, argv)
-int argc;
-char **argv;
+main (int argc, char **argv)
 {
-	register TScreen *screen;
-	register int pty;
+	TScreen *screen;
+	int pty;
 	int Xsocket, mode;
-	char *base_name();
-	int xerror(), xioerror();
+	char *base_name(char *name);
+	int xerror(Display *display, XErrorEvent *event), xioerror(Display *dpy);
 
 #ifdef I18N
         setlocale(LC_ALL, NULL);
@@ -1502,10 +1487,9 @@ char **argv;
 	    VTRun();
 }
 
-char *base_name(name)
-char *name;
+char *base_name(char *name)
 {
-	register char *cp;
+	char *cp;
 
 	cp = strrchr(name, '/');
 	return(cp ? cp + 1 : name);
@@ -1847,8 +1831,7 @@ get_pty (pty)
  * a functional interface for allocating a pty.
  * Returns 0 if found a pty, 1 if fails.
  */
-int pty_search(pty)
-    int *pty;
+int pty_search(int *pty)
 {
     static int devindex, letter = 0;
 
@@ -1901,12 +1884,12 @@ int pty_search(pty)
     return 1;
 }
 
-get_terminal ()
+get_terminal (void)
 /* 
  * sets up X and initializes the terminal structure except for term.buf.fildes.
  */
 {
-	register TScreen *screen = &term->screen;
+	TScreen *screen = &term->screen;
 	
 	screen->arrow = make_colored_cursor (XC_left_ptr, 
 					     screen->mousecolor,
@@ -1957,8 +1940,7 @@ static char *vtterm[] = {
 };
 
 /* ARGSUSED */
-SIGNAL_T hungtty(i)
-	int i;
+SIGNAL_T hungtty(int i)
 {
 	longjmp(env, 1);
 	SIGNAL_RETURN;
@@ -1995,9 +1977,7 @@ typedef struct {
  */
 
 void
-HsSysError(pf, error)
-int pf;
-int error;
+HsSysError(int pf, int error)
 {
 	handshake_t handshake;
 
@@ -2012,10 +1992,10 @@ int error;
 static int pc_pipe[2];	/* this pipe is used for parent to child transfer */
 static int cp_pipe[2];	/* this pipe is used for child to parent transfer */
 
-void first_map_occurred ()
+void first_map_occurred (void)
 {
     handshake_t handshake;
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 
     handshake.status = PTY_EXEC;
     handshake.rows = screen->max_row;
@@ -2077,10 +2057,10 @@ set_owner(char *device, int uid, int gid, int mode)
  * to have to do a realloc().
  */
 void
-xtermSetenv(register char *var, register char *value)
+xtermSetenv(char *var, char *value)
 {
-    register int envindex = 0;
-    register size_t len = strlen(var);
+    int envindex = 0;
+    size_t len = strlen(var);
 
     while (environ[envindex] != NULL) {
         if (strncmp(environ[envindex], var, len) == 0) {
@@ -2175,7 +2155,7 @@ spawn(void)
  *  If slave, the pty named in passedPty is already open for use
  */
 {
-    register TScreen *screen = &term->screen;
+    TScreen *screen = &term->screen;
 #if OPT_PTY_HANDSHAKE
     handshake_t handshake;
     int done;
@@ -2235,7 +2215,7 @@ spawn(void)
 #endif /* USE_LASTLOG */
 #endif /* HAVE_UTMP */
 #endif /* !USE_UTEMPTER */
-    char *x_basename();
+    char *x_basename(char *name);
 
     /* Noisy compilers (suppress some unused-variable warnings) */
     (void) rc;
@@ -3738,7 +3718,7 @@ spawn ()
  */
 {
 	extern char *SysErrorMsg();
-	register TScreen *screen = &term->screen;
+	TScreen *screen = &term->screen;
 	int Xsocket = ConnectionNumber(screen->display);
 #ifdef USE_HANDSHAKE
 	handshake_t handshake;
@@ -4957,10 +4937,9 @@ spawn ()
 
 
 SIGNAL_T
-Exit(n)
-	int n;
+Exit(int n)
 {
-	register TScreen *screen = &term->screen;
+	TScreen *screen = &term->screen;
         int pty = term->screen.respond;  /* file descriptor of pty */
 #ifdef UTMP
 #ifdef USE_SYSV_UTMP
@@ -5020,8 +4999,8 @@ Exit(n)
 	    (void) endutent();
 	}
 #else	/* not USE_SYSV_UTMP */
-	register int wfd;
-	register int i;
+	int wfd;
+	int i;
 	struct utmp utmp;
 
 	if (!resource.utmpInhibit && added_utmp_entry &&
@@ -5068,16 +5047,15 @@ Exit(n)
 
 /* ARGSUSED */
 void
-resize(screen, TermName, oldtc, newtc)
-TScreen *screen;
-char *TermName;
-register char *oldtc, *newtc;
+resize(TScreen *screen, char *TermName, char *oldtc)
 {
 #ifndef USE_SYSV_ENVVARS
-	register char *ptr1, *ptr2;
-	register int i;
-	register int li_first = 0;
-	register char *temp;
+	char *ptr1, *ptr2;
+	char buf[1024];
+	char *newtc = buf;
+	int i;
+	int li_first = 0;
+	char *temp;
 
 	if ((ptr1 = strindex (oldtc, "co#")) == NULL){
 		strcat (oldtc, "co#80:");
@@ -5116,7 +5094,7 @@ register char *oldtc, *newtc;
  * Returns the pid of the child, or 0 or -1 if none or error.
  */
 int
-nonblocking_wait()
+nonblocking_wait(void)
 {
 #ifdef USE_POSIX_WAIT
         pid_t pid;
@@ -5128,7 +5106,7 @@ nonblocking_wait()
 	int pid = 0;
 #else	/* defined(USE_SYSV_SIGNALS) && (defined(CRAY) || !defined(SIGTSTP)) */
 	/* union wait status; */ int status;
-	register int pid;
+	int pid;
 
 	pid = wait3 (&status, WNOHANG, (struct rusage *)NULL);
 #endif /* defined(USE_SYSV_SIGNALS) && !defined(SIGTSTP) */
@@ -5138,8 +5116,7 @@ nonblocking_wait()
 }
 
 /* ARGSUSED */
-static SIGNAL_T reapchild (n)
-    int n;
+static SIGNAL_T reapchild (int n)
 {
     int pid;
 
@@ -5165,15 +5142,13 @@ static SIGNAL_T reapchild (n)
 
 
 int
-remove_termcap_entry (buf, str)
-    char *buf;
-    char *str;
+remove_termcap_entry (char *buf, char *str)
 {
-    register char *strinbuf;
+    char *strinbuf;
 
     strinbuf = strindex (buf, str);
     if (strinbuf) {
-        register char *colonPtr = strchr(strinbuf+1, ':');
+        char *colonPtr = strchr(strinbuf+1, ':');
         if (colonPtr) {
             while (*colonPtr) {
                 *strinbuf++ = *colonPtr++;      /* copy down */
@@ -5194,9 +5169,7 @@ remove_termcap_entry (buf, str)
  * where setting consists of the words in the modelist followed by a character
  * or ^char.
  */
-static int parse_tty_modes (s, modelist)
-    char *s;
-    struct _xttymodes *modelist;
+static int parse_tty_modes (char *s, struct _xttymodes *modelist)
 {
     struct _xttymodes *mp;
     int c;
@@ -5229,8 +5202,7 @@ static int parse_tty_modes (s, modelist)
 }
 
 
-int GetBytesAvailable (fd)
-    int fd;
+int GetBytesAvailable (int fd)
 {
 #ifdef FIONREAD
     static long arg;
@@ -5253,9 +5225,7 @@ int GetBytesAvailable (fd)
    everybody who used to call killpg() */
 
 int
-kill_process_group(pid, sig)
-    int pid;
-    int sig;
+kill_process_group(int pid, int sig)
 {
 #ifndef X_NOT_POSIX
     return kill (-pid, sig);
