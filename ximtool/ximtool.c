@@ -365,7 +365,7 @@ main (int argc, char **argv)
          */
         if ((ism = ismNameToPtr ("wcspix"))) {
             system (ism->command);
-	    ism_message (ism, "wcspix", "initialize");
+	    ism_message ((XimDataPtr)ism, "wcspix", "initialize");
 	}
 
         XSetErrorHandler(xerror);
