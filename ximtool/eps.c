@@ -1837,7 +1837,7 @@ make_label(void)
         char    hostname[32];
         char    username[32];
         struct  passwd *pw;
-        long    clock;
+        time_t    clock;
 
 
 	bzero (buf, 128);
@@ -1850,7 +1850,7 @@ make_label(void)
         gethostname (hostname, 32);
 #endif
 
-        clock = time(0);
+        clock = time(NULL);
         pw = getpwuid (getuid());
         strcpy (username, pw->pw_name);
         endpwent();

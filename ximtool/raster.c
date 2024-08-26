@@ -2738,7 +2738,7 @@ xim_setColormap (
 	    int red, green, blue;
 	    
 	    if (!seed)
-		seed = time(0);
+		seed = time(NULL);
 	    srand (seed++);
 
 	    for (i=0;  i < nelem;  ) {
@@ -2757,7 +2757,7 @@ xim_setColormap (
 	    int red, green, blue;
 	    
 	    if (!seed)
-		seed = time(0);
+		seed = time(NULL);
 	    srand (seed++);
 
 	    for (i=0;  i < nelem;  ) {
@@ -2774,7 +2774,7 @@ xim_setColormap (
 
 	} else if (strncmp (function, "Random", 6) == 0) {
 	    if (!seed)
-		seed = time(0);
+		seed = time(NULL);
 	    srand (seed++);
 	    for (i=0;  i < nelem;  i++) {
 		m_red[i]   = ((rand() >> 4) % vsat);

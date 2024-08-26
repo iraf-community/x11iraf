@@ -626,7 +626,7 @@ xim_iisio (IoChanPtr chan, int *fd_addr, XtInputId *id_addr)
 		 */
 		unsigned char *ip, iobuf[SZ_IOBUF];
 		int     nbytes, nleft, n, x, y;
-		long    starttime;
+		time_t    starttime;
 
 		/* Get the frame to read from. */
 		xim_setReferenceFrame (chan, decode_frameno (iis.z & 0177777));
@@ -670,11 +670,11 @@ xim_iisio (IoChanPtr chan, int *fd_addr, XtInputId *id_addr)
 		}
 
 		/* Return the data from the frame buffer. */
-		starttime = time(0);
+		starttime = time(NULL);
 		for (nleft=nbytes, ip=iobuf;  nleft > 0;  nleft -= n) {
 		    n = (nleft < SZ_FIFOBUF) ? nleft : SZ_FIFOBUF;
 		    if ((n = chan_write (dataout, ip, n)) <= 0) {
-			if (n < 0 || (time(0) - starttime > IO_TIMEOUT)) {
+			if (n < 0 || (time(NULL) - starttime > IO_TIMEOUT)) {
 			    fprintf (stderr, "XIMTOOL: timeout on write\n");
 			    break;
 			}
@@ -689,7 +689,7 @@ xim_iisio (IoChanPtr chan, int *fd_addr, XtInputId *id_addr)
 		 */
 		unsigned char *op, iobuf[SZ_IOBUF];
 		int     nbytes, nleft, n, x, y;
-		long    starttime;
+		time_t    starttime;
 
 		/* Get the frame to be written into (encoded with a bit for
 		 * each frame, 01 is frame 1, 02 is frame 2, 04 is frame 3,
@@ -703,11 +703,11 @@ xim_iisio (IoChanPtr chan, int *fd_addr, XtInputId *id_addr)
 
 		/* Read the data into the frame buffer.
 		 */
-		starttime = time(0);
+		starttime = time(NULL);
 		for (nleft=nbytes, op=iobuf;  nleft > 0;  nleft -= n) {
 		    n = (nleft < SZ_FIFOBUF) ? nleft : SZ_FIFOBUF;
 		    if ((n = chan_read (datain, op, n)) <= 0) {
-			if (n < 0 || (time(0) - starttime > IO_TIMEOUT)) {
+			if (n < 0 || (time(NULL) - starttime > IO_TIMEOUT)) {
 			    fprintf (stderr, "XIMTOOL: timeout on read\n");
 			    break;
 			}

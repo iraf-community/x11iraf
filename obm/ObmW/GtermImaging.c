@@ -1338,7 +1338,7 @@ usedef:	    /* Allocate private r/w colors from default colormap. */
 	     * does not yet exist we create one.  Multiple gterm widget
 	     * instances may share the same colormap.
 	     */
-	    long timeval;
+	    time_t timeval;
 	    int shadow;
 
 
@@ -1395,7 +1395,7 @@ usedef:	    /* Allocate private r/w colors from default colormap. */
 	     * be loaded by the window manager.
 	     */
 	    shadow = w->gterm.cmapShadow;
-	    timeval = time((long *)NULL);
+	    timeval = time(NULL);
 
 	    if (shadow && (!w->gterm.in_window ||
 		    (timeval - w->gterm.cmapLastShadow > shadow * 1000))) {
