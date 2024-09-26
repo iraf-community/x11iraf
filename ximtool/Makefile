@@ -37,7 +37,7 @@ ximtool.html.h: ximtool.html
 ximtool: $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(OBJS) \
 	    -L../obm -lobm \
-	    -lXpm $(TCL_LIB) -lXaw3d -lXmu -lXt -lXext -lX11 -lncurses -lm
+	    -lXpm $(TCL_LIB) -lXaw -lXmu -lXt -lXext -lX11 -lncurses -lm
 
 clients:
 	cd clients && $(MKPKG) || true

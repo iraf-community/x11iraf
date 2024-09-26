@@ -1,6 +1,7 @@
 OBJS = Arrow.o Board.o Button.o Common.o DrawIString.o DrawString.o	\
  DrawingArea.o Frame.o Group.o Gterm.o Icon.o iconutil.o Label.o	\
- MenuBar.o MultiList.o RadioGrp.o RowCol.o Scrollbar.o		\
+ MenuBar.o MultiList.o RadioGrp.o RowCol.o Scrollbar.o			\
+ laygram.o laylex.o Layout.o						\
  Slider2.o Tablist2Tabs.o TextWidth.o Toggle.o cvtLong.o scroll.o	\
  strnchr.o Tabs.o Gcs.o ListTree.o Container.o color.o
 
@@ -24,4 +25,10 @@ Gterm.o: Gterm.c GtermCnv.c GtermGraphics.c GtermImaging.c		\
  GtermCmap.c GtermMapping.c GtermMarker.c GtermUtil.c GtermDebug.c
 
 clean:
-	rm -f $(OBJS)
+	rm -f $(OBJS) laygram.[ch] laylex.[ch]
+
+.y.c:
+	yacc -d $< -o $@ -p LayYY
+
+.l.c:
+	lex -o $@ -P LayYY $<
