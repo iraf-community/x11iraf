@@ -716,7 +716,7 @@ void xim_initialize(XimDataPtr xim, int config, int nframes, int hardreset), xim
 int xim_shutdown (XimDataPtr xim);
 void xim_close(XimDataPtr xim), xim_initFrame(XimDataPtr xim, int frame, int nframes, FbConfigPtr config, char *memModel), xim_setFrame(XimDataPtr xim, int frame), xim_setRop(XimDataPtr xim, FrameBufPtr fb, int rop);
 void xim_setReferenceFrame(IoChanPtr chan, int frame), xim_setDisplayFrame(XimDataPtr xim, int frame);
-void xim_delFrame(XimDataPtr xim, int frame), xim_setMapping(FrameBufPtr fb, XimDataPtr xim, int frame, int mapping, int src, int dst, int fill_mode);
+void xim_delFrame(XimDataPtr xim, int frame), xim_setMapping(XimDataPtr xim, FrameBufPtr fb, int frame, int mapping, int src, int dst, int fill_mode);
 void xim_setZoom(XimDataPtr, FrameBufPtr, int, int, int, int, float, float,
 		 float, float, float, float, Boolean);
 void xim_setCursorPos(XimDataPtr, float, float);

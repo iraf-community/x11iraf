@@ -497,11 +497,11 @@ xim_resize (XimDataPtr xim, Widget w)
 			       &junk, &junk, &junk);
 		GtCreateRaster ((GtermWidget) w, fb->zoomras, zoomtype,
 				width, height, depth);
-		xim_setMapping ((FrameBufPtr)xim, NULL, frame, fb->dispmap,
+		xim_setMapping (xim, NULL, frame, fb->dispmap,
 		    fb->zoomras, 0, M_FILL);
 		if (!active) {
 		    GtDisableMapping ((GtermWidget)w, fb->dispmap, 0);
-		    xim_setMapping ((FrameBufPtr)xim, NULL, frame, fb->zoommap,
+		    xim_setMapping (xim, NULL, frame, fb->zoommap,
 			fb->raster, fb->zoomras, M_FILL);
 		    GtDisableMapping ((GtermWidget)w, fb->zoommap, 0);
 		}
@@ -750,11 +750,9 @@ fast:	    fb->zoomras = GtNextRaster (gt);
 		    fb->zoomras, GtServer, width, height, depth) < 0)
 		goto nice;
 
-	    xim_setMapping ((FrameBufPtr)xim, (XimDataPtr)fb,
-		frame, fb->zoommap = GtNextMapping(gt),
+	    xim_setMapping (xim, fb, frame, fb->zoommap = GtNextMapping(gt),
 		fb->raster, fb->zoomras, xim->autoscale ? M_ASPECT : M_UNITARY);
-	    xim_setMapping ((FrameBufPtr)xim, (XimDataPtr)fb,
-		frame, fb->dispmap = GtNextMapping(gt),
+	    xim_setMapping (xim, fb, frame, fb->dispmap = GtNextMapping(gt),
 		fb->zoomras, 0, M_FILL);
 
 	} else if (strcmp (memModel, "beNiceToServer") == 0) {
@@ -772,11 +770,9 @@ nice: 	    fb->zoomras = GtNextRaster (gt);
 		    fb->zoomras, GtClient, width, height, depth) < 0)
 		goto small;
 
-	    xim_setMapping ((FrameBufPtr)xim, (XimDataPtr)fb,
-		frame, fb->zoommap = GtNextMapping(gt),
+	    xim_setMapping (xim, fb, frame, fb->zoommap = GtNextMapping(gt),
 		fb->raster, fb->zoomras, xim->autoscale ? M_ASPECT : M_UNITARY);
-	    xim_setMapping ((FrameBufPtr)xim, (XimDataPtr)fb,
-		frame, fb->dispmap = GtNextMapping(gt),
+	    xim_setMapping (xim, fb, frame, fb->dispmap = GtNextMapping(gt),
 		fb->zoomras, 0, M_FILL);
 
 	} else if (strcmp (memModel, "small") == 0) {
@@ -795,8 +791,7 @@ small:	    fb->zoomras = 0;
 		    "xim_initFrame: creating 'small' model (0x%x)\n", 
 		    fb->zoomras);
 
-	    xim_setMapping ((FrameBufPtr)xim, (XimDataPtr)fb,
-		frame, fb->zoommap = GtNextMapping(gt),
+	    xim_setMapping (xim, fb, frame, fb->zoommap = GtNextMapping(gt),
 		fb->raster, fb->zoomras, xim->autoscale ? M_ASPECT : M_UNITARY);
 	    fb->dispmap = fb->zoommap;
 
@@ -1223,7 +1218,7 @@ xim_cursorMode (XimDataPtr xim, int state)
 /* XIM_SETMAPPING -- Set up a mapping between two rasters.
  */
 void
-xim_setMapping (FrameBufPtr fb, XimDataPtr xim, int frame, int mapping,
+xim_setMapping (XimDataPtr xim, FrameBufPtr fb, int frame, int mapping,
 		int src, int dst, int fill_mode)
 {
 	GtermWidget gt = (GtermWidget) xim->gt;
