@@ -2311,7 +2311,8 @@ get_fbconfig (XimDataPtr xim)
 		"/usr/local/lib/imtoolrc",
 		"/opt/local/lib/imtoolrc",
 		"/iraf/iraf/dev/imtoolrc",
-		"/local/lib/imtoolrc",
+		"/usr/lib/iraf/dev/imtoolrc",
+		"/usr/local/lib/iraf/dev/imtoolrc",
 		"/usr/iraf/dev/imtoolrc",
 		"/usr/local/iraf/dev/imtoolrc",
 		NULL};
@@ -2340,6 +2341,14 @@ get_fbconfig (XimDataPtr xim)
 	    fp = fopen (fname, "r");
 	if (!fp && (fname = getenv ("HOME"))) {
 	    sprintf (lbuf, "%s/%s", fname, FBCONFIG_1);
+	    fp = fopen (fname = lbuf, "r");
+	    if (fp) {
+	        xim->imtoolrc = (char *) XtCalloc (SZ_LINE, sizeof(char));
+		strncpy (xim->imtoolrc, fname, strlen(fname));
+	    }
+	}
+	if (!fp && (fname = getenv ("iraf"))) {
+	    sprintf (lbuf, "%sdev/imtoolrc", fname);
 	    fp = fopen (fname = lbuf, "r");
 	    if (fp) {
 	        xim->imtoolrc = (char *) XtCalloc (SZ_LINE, sizeof(char));
