@@ -2219,7 +2219,7 @@ widgetSetList (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	    return (TCL_ERROR);
 
 	if ((obmClass (obj->core.classrec, WtList)))
-	  XawListChange (wp->w, items, nitems, 0, resize);
+	  XawListChange (wp->w, (char **)items, nitems, 0, resize);
 	else if ((obmClass (obj->core.classrec, WtMultiList)))
 	    XfwfMultiListSetNewData ((XfwfMultiListWidget)wp->w,
 				     (String *) items, nitems, 0, resize, NULL);
