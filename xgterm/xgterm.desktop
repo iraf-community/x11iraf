@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+
+Name=XGTerm
+Comment=IRAF terminal emulator
+Categories=Science;Astronomy;
+Icon=xgterm
+Exec=xgterm
+
+StartupWMClass=XGterm

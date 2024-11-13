@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>community.iraf.ximtool</id>
+
+  <name>ximtool</name>
+  <summary>Interactive image display program for the X Window System</summary>
+  <url type="homepage">https://iraf-community.github.io/x11iraf</url>
+
+  <metadata_license>MIT</metadata_license>
+  <project_license>LicenseRef-IRAF=https://iraf-community.github.io/COPYRIGHT</project_license>
+
+  <description>
+    <p>
+      Ximtool provides an image display capability to remote client
+      applications for IRAF using the standard imtool/iis image
+      display protocol. The image display server allows a number of
+      image frame buffers to be created and displayed. The client can
+      read and write data in these frame buffers. Any frame or
+      combination of frames can be displayed. Various display options
+      are provided, e.g., zoom and pan, flip about either axis, frame
+      blink, windowing of the display, and colortable enhancement.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">ximtool.desktop</launchable>
+  <content_rating type="oars-1.0"/>
+  <screenshots>
+    <screenshot type="default"><image>
+      https://screenshots.debian.net/shrine/screenshot/19253/simage/large-34c804c61f34485fbc2762b319bc54f5.png
+    </image></screenshot>
+  </screenshots>
+</component>

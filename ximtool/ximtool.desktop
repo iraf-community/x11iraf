@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+
+Name=XImtool
+Comment=Astronomical Image Visualization Application
+Categories=Science;Astronomy;
+Icon=ximtool
+Exec=ximtool %F
+
+StartupWMClass=XImtool
