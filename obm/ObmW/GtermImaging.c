@@ -1143,7 +1143,7 @@ GtInsertPixmap (GtermWidget w, Pixmap pixmap, int dst, int ctype,
  */
 int
 GtWriteColormap (GtermWidget w, int map, int first, int nelem,
-		 ushort *r, ushort *g, ushort *b)
+		 unsigned short *r, unsigned short *g, unsigned short *b)
 {
     XWindowAttributes wa;
     XColor *cp;
@@ -1215,9 +1215,9 @@ GtWriteColormap (GtermWidget w, int map, int first, int nelem,
 	}
 
         if (nelem >= 0) {
-	    memmove (&cm->r[first], r, nelem * sizeof (ushort));
-	    memmove (&cm->g[first], g, nelem * sizeof (ushort));
-	    memmove (&cm->b[first], b, nelem * sizeof (ushort));
+	    memmove (&cm->r[first], r, nelem * sizeof (unsigned short));
+	    memmove (&cm->g[first], g, nelem * sizeof (unsigned short));
+	    memmove (&cm->b[first], b, nelem * sizeof (unsigned short));
         }
 
 
@@ -1475,7 +1475,7 @@ unitary:
  */
 int
 GtReadColormap (GtermWidget w, int map, int first, int nelem,
-		ushort *r, ushort *g, ushort *b)
+		unsigned short *r, unsigned short *g, unsigned short *b)
 {
     int i;
 	
@@ -1538,9 +1538,9 @@ GtReadColormap (GtermWidget w, int map, int first, int nelem,
     		    first+i, r[i]>>8, g[i]>>8, b[i]>>8);
 
 		cp = &w->gterm.color[first+i];
-		r[i] = (ushort) cp->red;
-		g[i] = (ushort) cp->green;
-		b[i] = (ushort) cp->blue;
+		r[i] = (unsigned short) cp->red;
+		g[i] = (unsigned short) cp->green;
+		b[i] = (unsigned short) cp->blue;
 	    } else
 		break;
 	    
@@ -1582,7 +1582,7 @@ GtLoadColormap (GtermWidget w, int map, float offset, float slope)
     struct colormap d_cmap, o_cmap;
     int noscale, nelem, c1, c2;
     float x, y, z, frac;
-    ushort r, g, b;
+    unsigned short r, g, b;
 
 
     if (DBG_TRACE)
@@ -1871,7 +1871,7 @@ GtFreeColormap (GtermWidget w, int colormap)
  * in i/o operations between the client and the Gterm widget.
  */
 void
-GtWriteIomap (GtermWidget w, ushort *iomap, int first, int nelem)
+GtWriteIomap (GtermWidget w, unsigned short *iomap, int first, int nelem)
 {
     int c1, c2;
 
@@ -1887,7 +1887,7 @@ GtWriteIomap (GtermWidget w, ushort *iomap, int first, int nelem)
 
     nelem = c2 - c1 + 1;
 
-    memmove (&w->gterm.iomap[c1], iomap, nelem * sizeof(ushort));
+    memmove (&w->gterm.iomap[c1], iomap, nelem * sizeof(unsigned short));
     invalidate_cmap (w);
 
     if (DBG_IOMAP) {
@@ -1901,7 +1901,7 @@ GtWriteIomap (GtermWidget w, ushort *iomap, int first, int nelem)
 /* GtReadIomap -- Read back the contents of the iomap.
  */
 void
-GtReadIomap (GtermWidget w, ushort *iomap, int first, int nelem)
+GtReadIomap (GtermWidget w, unsigned short *iomap, int first, int nelem)
 {
     int c1, c2;
 
@@ -1909,7 +1909,7 @@ GtReadIomap (GtermWidget w, ushort *iomap, int first, int nelem)
     c2 = max(0, min(MAX_SZCMAP-1, first + nelem - 1));
     nelem = c2 - c1 + 1;
 
-    memmove (iomap, &w->gterm.iomap[c1], nelem * sizeof(ushort));
+    memmove (iomap, &w->gterm.iomap[c1], nelem * sizeof(unsigned short));
 }
 
 
@@ -1933,7 +1933,7 @@ GtReadLUT (GtermWidget w, unsigned long *lut, int first, int nelem)
 static void
 init_iomap (GtermWidget w)
 {
-    ushort *iomap = w->gterm.iomap;
+    unsigned short *iomap = w->gterm.iomap;
     int i;
 
     for (i=0;  i < MAX_SZCMAP;  i++)
@@ -1968,7 +1968,7 @@ static Pixel *
 get_cmap_in (GtermWidget w)
 {
     Pixel *cmap, *cmap_in = w->gterm.cmap_in;
-    ushort *iomap;
+    unsigned short *iomap;
     int i, j;
     int ncolors;
 
@@ -2010,7 +2010,7 @@ static Pixel *
 get_cmap_out (GtermWidget w)
 {
     Pixel *cmap;
-    ushort *iomap;
+    unsigned short *iomap;
     Pixel *cmap_out = w->gterm.cmap_out;
     int pixel, i;
     int j;
@@ -2088,7 +2088,7 @@ int
 GtGetClientPixel (GtermWidget w, int pixel)
 {
     int i;
-    ushort *iomap;
+    unsigned short *iomap;
     int client_pixel = 0;
 
     get_cmap_in (w);

@@ -431,7 +431,7 @@ typedef struct {
 	Pixel		*cmap;			/* map color number to pixval */
 	XColor		*color;			/* RGB color assignments      */
 
-	ushort		iomap[MAX_SZCMAP];	/* client i/o color map       */
+	unsigned short	iomap[MAX_SZCMAP];	/* client i/o color map       */
 	Pixel		cmap_in[MAX_SZCMAP];	/* umap and cmap combined     */
 	Pixel		cmap_out[MAX_SZCMAP];	/* umap and cmap combined     */
 	int		cmap_in_valid;		/* set when cmap_in computed  */

@@ -375,9 +375,9 @@ extern int GtInsertPixmap(GtermWidget w, Pixmap pixmap, int dst, int ctype,
 extern int GtNextColormap(GtermWidget w);
 extern void GtFreeColormap(GtermWidget w, int colormap);
 extern int GtWriteColormap(GtermWidget w, int map, int first, int nelem,
-			   ushort *r, ushort *g, ushort *b);
+			   unsigned short *r, unsigned short *g, unsigned short *b);
 extern int GtReadColormap(GtermWidget w, int map, int first, int nelem,
-			  ushort *r, ushort *g, ushort *b);
+			  unsigned short *r, unsigned short *g, unsigned short *b);
 extern int GtLoadColormap(GtermWidget w, int map, float offset, float slope);
 extern int GtQueryColormap(GtermWidget w, int map, int *first, int *nelem, int *maxelem);
 extern void GtSetColormapFocus(int box_size);
@@ -404,8 +404,8 @@ extern void GtOverrideTranslations(GtermWidget w, char *translations);
 extern void GtWriteAlphaCursor(GtermWidget w, int x, int y);
 extern void GtEraseAlphaCursor(GtermWidget w);
 extern void GtSetTextRes(GtermWidget w, int optrows, int optcols);
-extern void GtReadIomap(GtermWidget w, ushort *iomap, int first, int nelem);
-extern void GtWriteIomap(GtermWidget w, ushort *iomap, int first, int nelem);
+extern void GtReadIomap(GtermWidget w, unsigned short *iomap, int first, int nelem);
+extern void GtWriteIomap(GtermWidget w, unsigned short *iomap, int first, int nelem);
 extern void GtReadLUT(GtermWidget w, long unsigned int *lut, int first, int nelem);
 
 extern void GmAddCallback(struct marker *gm, int events, GmIMethod func, XtPointer client_data);

@@ -532,7 +532,7 @@ void GmRedisplay(GtermWidget w, Region region);
 void GmRaise(struct marker *gm, struct marker *ref_gm);
 void GmLower(struct marker *gm, struct marker *ref_gm);
 void GmSetVertices(struct marker *gm, DPoint *points, int first, int npts);
-void GtReadIomap(GtermWidget w, ushort *iomap, int first, int nelem);
+void GtReadIomap(GtermWidget w, unsigned short *iomap, int first, int nelem);
 void GtClearScreen(GtermWidget w);
 void GtSetCursorPos(GtermWidget w, int x, int y);
 void GtSetCursorType(GtermWidget w, int type);

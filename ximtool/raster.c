@@ -1818,7 +1818,7 @@ xim_readDisplay (
 
 
 	/* Get Gterm widget colormap. */
-	if (!(cmap = (ushort *) malloc (3 * MAX_COLORS * sizeof(ushort))))
+	if (!(cmap = (unsigned short *) malloc (3 * MAX_COLORS * sizeof(unsigned short))))
 	    goto error;
 
 	rs = cmap;
@@ -1845,7 +1845,7 @@ xim_readDisplay (
 	    ** while we return an 8 bit RGB colormap to our caller.
 	    */
 	    /* Get iomap. */
-	    if (!(iomap = (ushort *) malloc (MAX_COLORS * sizeof(ushort))))
+	    if (!(iomap = (unsigned short *) malloc (MAX_COLORS * sizeof(unsigned short))))
 	        goto error;
 	    GtReadIomap (gt, iomap, 0, MAX_COLORS);
 
