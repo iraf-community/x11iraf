@@ -170,39 +170,39 @@ static XtResource resources[] =
 	{XtNhighlightBackground, XtCHBackground, XtRPixel, sizeof(Pixel),
 	    MultiListFieldOffset(highlight_bg), XtRString, "XtDefaultForeground"},
 	{XtNcolumnSpacing, XtCSpacing, XtRDimension, sizeof(Dimension),
-	    MultiListFieldOffset(column_space), XtRImmediate, (caddr_t)8},
+	    MultiListFieldOffset(column_space), XtRImmediate, (void *)8},
 	{XtNrowSpacing, XtCSpacing, XtRDimension, sizeof(Dimension),
-	    MultiListFieldOffset(row_space), XtRImmediate, (caddr_t)0},
+	    MultiListFieldOffset(row_space), XtRImmediate, (void *)0},
 	{XtNdefaultColumns, XtCColumns, XtRInt,  sizeof(int),
-	    MultiListFieldOffset(default_cols), XtRImmediate, (caddr_t)1},
+	    MultiListFieldOffset(default_cols), XtRImmediate, (void *)1},
 	{XtNforceColumns, XtCColumns, XtRBoolean, sizeof(Boolean),
-	    MultiListFieldOffset(force_cols), XtRString, (caddr_t) "False"},
+	    MultiListFieldOffset(force_cols), XtRString, (void *) "False"},
 	{XtNpasteBuffer, XtCBoolean, XtRBoolean, sizeof(Boolean),
-	    MultiListFieldOffset(paste), XtRString, (caddr_t) "False"},
+	    MultiListFieldOffset(paste), XtRString, (void *) "False"},
 	{XtNverticalList, XtCBoolean, XtRBoolean,  sizeof(Boolean),
-	    MultiListFieldOffset(row_major), XtRString, (caddr_t) "False"},
+	    MultiListFieldOffset(row_major), XtRString, (void *) "False"},
 	{XtNlongest, XtCLongest, XtRInt,  sizeof(int),
-	    MultiListFieldOffset(longest), XtRImmediate, (caddr_t)0},
+	    MultiListFieldOffset(longest), XtRImmediate, (void *)0},
 	{XtNnumberStrings, XtCNumberStrings, XtRInt,  sizeof(int),
-	    MultiListFieldOffset(nitems), XtRImmediate, (caddr_t)0},
+	    MultiListFieldOffset(nitems), XtRImmediate, (void *)0},
 	{XtNfont,  XtCFont, XtRFontStruct, sizeof(XFontStruct *),
 	    MultiListFieldOffset(font),XtRString, "XtDefaultFont"},
 	{XtNlist, XtCList, XtRPointer, sizeof(char **),
 	    MultiListFieldOffset(list), XtRString, NULL},
 	{XtNsensitiveArray, XtCList, XtRPointer, sizeof(Boolean *),
 	    MultiListFieldOffset(sensitive_array), XtRString, NULL},
-	{XtNcallback, XtCCallback, XtRCallback, sizeof(caddr_t),
+	{XtNcallback, XtCCallback, XtRCallback, sizeof(void *),
 	    MultiListFieldOffset(callback), XtRCallback, NULL},
 	{XtNmaxSelectable, XtCValue, XtRInt, sizeof(int),
-	    MultiListFieldOffset(max_selectable), XtRImmediate, (caddr_t) 1},
+	    MultiListFieldOffset(max_selectable), XtRImmediate, (void *) 1},
 
 	{XtNshadeSurplus, XtCBoolean, XtRBoolean, sizeof(Boolean),
 	    MultiListFieldOffset(shade_surplus), XtRString, "True"},
 
 	{XtNcolumnWidth, XtCValue, XtRDimension, sizeof(Dimension),
-	    MultiListFieldOffset(col_width), XtRImmediate, (caddr_t)0},
+	    MultiListFieldOffset(col_width), XtRImmediate, (void *)0},
 	{XtNrowHeight, XtCValue, XtRDimension, sizeof(Dimension),
-	    MultiListFieldOffset(row_height), XtRImmediate, (caddr_t)0},
+	    MultiListFieldOffset(row_height), XtRImmediate, (void *)0},
 
 	{XtNtablist, XtCTablist, XtRString, sizeof(int *),
 	    MultiListFieldOffset(tablist), XtRImmediate, (XtPointer)NULL },
@@ -1385,7 +1385,7 @@ static void Notify(XfwfMultiListWidget mlw, XEvent *event, String *params, Cardi
 			ret_value.item));
 	ret_value.num_selected = MultiListNumSelected(mlw);
 	ret_value.selected_items = MultiListSelArray(mlw);
-	XtCallCallbacks((Widget)mlw,XtNcallback,(caddr_t)&ret_value);
+	XtCallCallbacks((Widget)mlw,XtNcallback,(void *)&ret_value);
 } /* End Notify */
 
 /*===========================================================================*

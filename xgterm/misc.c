@@ -198,7 +198,7 @@ static void DoSpecialEnterNotify (XEnterWindowEvent *ev)
 }
 
 /*ARGSUSED*/
-void HandleEnterWindow(Widget w, caddr_t eventdata, XEnterWindowEvent *event)
+void HandleEnterWindow(Widget w, void * eventdata, XEnterWindowEvent *event)
 {
     /* This code is necessary as xevent does not see all events anymore. */
     XEvent *ev = (XEvent *) event;
@@ -223,7 +223,7 @@ static void DoSpecialLeaveNotify (XEnterWindowEvent *ev)
 
 
 /*ARGSUSED*/
-void HandleLeaveWindow(Widget w, caddr_t eventdata, XEnterWindowEvent *event)
+void HandleLeaveWindow(Widget w, void * eventdata, XEnterWindowEvent *event)
 {
     /* This code is necessary as xevent does not see all events anymore. */
     XEvent *ev = (XEvent *) event;
@@ -234,7 +234,7 @@ void HandleLeaveWindow(Widget w, caddr_t eventdata, XEnterWindowEvent *event)
 
 
 /*ARGSUSED*/
-void HandleFocusChange(Widget w, caddr_t eventdata, XFocusChangeEvent *event)
+void HandleFocusChange(Widget w, void * eventdata, XFocusChangeEvent *event)
 {
         TScreen *screen = &term->screen;
 

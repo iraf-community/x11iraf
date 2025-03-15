@@ -798,7 +798,7 @@ FetchPixel (Widget w, String name, Pixel* pixel)
   source.size = strlen(name)+1;
   source.addr = name;
   dest.size = sizeof(Pixel);
-  dest.addr = (caddr_t) pixel;
+  dest.addr = (void *) pixel;
   
   return XtConvertAndStore(w, XtRString, &source, XtRPixel, &dest);
 }

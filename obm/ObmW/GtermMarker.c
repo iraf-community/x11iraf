@@ -154,7 +154,7 @@ GtMarkerInit (GtermWidget w)
 	    r.resource_size   = sizeof (char *);
 	    r.resource_offset = 0;
 	    r.default_type    = XtRString;
-	    r.default_addr    = (caddr_t) NULL;
+	    r.default_addr    = (void *) NULL;
 
 	    XtGetApplicationResources ((Widget)w, &translations, &r, 1,NULL,0);
 
@@ -1837,7 +1837,7 @@ gm_getpixel (GtermWidget w, XtArgVal value, char *type)
 	     */
 	    from.size = strlen ((char *)value) + 1;
 	    from.addr = (char *)value;
-	    to.addr = (caddr_t) &pixel;
+	    to.addr = (void *) &pixel;
 	    to.size = sizeof(pixel);
 
 	    if (!XtConvertAndStore ((Widget)w, XtRString, &from, XtRPixel, &to))

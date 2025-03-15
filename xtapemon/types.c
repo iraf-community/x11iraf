@@ -45,7 +45,7 @@ initConverters(appContext)
 XtAppContext appContext;
 {
     static XtConvertArgRec parentCvtArgs[] = {
-        {XtBaseOffset, (caddr_t)XtOffset(Widget, core.parent), sizeof(Widget)}
+        {XtBaseOffset, (void *)XtOffset(Widget, core.parent), sizeof(Widget)}
     };
 
     /* Have to initialize Form class first or our converter will be	*/

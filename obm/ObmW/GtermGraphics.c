@@ -1178,7 +1178,7 @@ get_cursor (GtermWidget w, String cursor_name)
     from.size = strlen (cursor_name) + 1;
     from.addr = cursor_name;
 
-    to.addr = (caddr_t) &cursor;
+    to.addr = (void *) &cursor;
     to.size = sizeof(cursor);
 
     if (!XtConvertAndStore ((Widget)w, XtRString, &from, XtRCursor, &to))

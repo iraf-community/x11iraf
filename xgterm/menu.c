@@ -44,21 +44,21 @@ extern void FindFontSelection(char *atom_name, int justprobe);
 Arg menuArgs[2] = {{ XtNleftBitmap, (XtArgVal) 0 },
 		   { XtNsensitive, (XtArgVal) 0 }};
 
-void do_hangup(Widget gw, caddr_t closure, caddr_t data);
+void do_hangup(Widget gw, void * closure, void * data);
 
-static void do_securekbd(Widget gw, caddr_t closure, caddr_t data), do_allowsends(Widget gw, caddr_t closure, caddr_t data), do_visualbell(Widget gw, caddr_t closure, caddr_t data),
+static void do_securekbd(Widget gw, void * closure, void * data), do_allowsends(Widget gw, void * closure, void * data), do_visualbell(Widget gw, void * closure, void * data),
 #ifdef ALLOWLOGGING
-    do_logging(Widget gw, caddr_t closure, caddr_t data),
+    do_logging(Widget gw, void * closure, void * data),
 #endif
-    do_redraw(Widget gw, caddr_t closure, caddr_t data), do_suspend(Widget gw, caddr_t closure, caddr_t data), do_continue(Widget gw, caddr_t closure, caddr_t data), do_interrupt(Widget gw, caddr_t closure, caddr_t data), 
-    do_terminate(Widget gw, caddr_t closure, caddr_t data), do_kill(Widget gw, caddr_t closure, caddr_t data), do_quit(Widget gw, caddr_t closure, caddr_t data), do_scrollbar(Widget gw, caddr_t closure, caddr_t data), do_jumpscroll(Widget gw, caddr_t closure, caddr_t data),
-    do_reversevideo(Widget gw, caddr_t closure, caddr_t data), do_autowrap(Widget gw, caddr_t closure, caddr_t data), do_reversewrap(Widget gw, caddr_t closure, caddr_t data), do_autolinefeed(Widget gw, caddr_t closure, caddr_t data),
-    do_appcursor(Widget gw, caddr_t closure, caddr_t data), do_appkeypad(Widget gw, caddr_t closure, caddr_t data), do_scrollkey(Widget gw, caddr_t closure, caddr_t data), do_scrollttyoutput(Widget gw, caddr_t closure, caddr_t data),
-    do_allow132(Widget gw, caddr_t closure, caddr_t data), do_cursesemul(Widget gw, caddr_t closure, caddr_t data), do_marginbell(Widget gw, caddr_t closure, caddr_t data), do_altscreen(Widget gw, caddr_t closure, caddr_t data),
-    do_softreset(Widget gw, caddr_t closure, caddr_t data), do_hardreset(Widget gw, caddr_t closure, caddr_t data), do_clearsavedlines(Widget gw, caddr_t closure, caddr_t data),
-    do_vthide(Widget gw, caddr_t closure, caddr_t data), do_vtshow(Widget gw, caddr_t closure, caddr_t data), do_vtmode(Widget gw, caddr_t closure, caddr_t data), do_vtfont(Widget gw, caddr_t closure, caddr_t data),
-    do_gioenable(Widget gw, caddr_t closure, caddr_t data), do_tekshow(Widget gw, caddr_t closure, caddr_t data), do_tekmode(Widget gw, caddr_t closure, caddr_t data), do_tekpage(Widget gw, caddr_t closure, caddr_t data),
-    do_tekreset(Widget gw, caddr_t closure, caddr_t data), do_tekcopy(Widget gw, caddr_t closure, caddr_t data), do_tekhide(Widget gw, caddr_t closure, caddr_t data), do_colortext(Widget gw, caddr_t closure, caddr_t data);
+    do_redraw(Widget gw, void * closure, void * data), do_suspend(Widget gw, void * closure, void * data), do_continue(Widget gw, void * closure, void * data), do_interrupt(Widget gw, void * closure, void * data), 
+    do_terminate(Widget gw, void * closure, void * data), do_kill(Widget gw, void * closure, void * data), do_quit(Widget gw, void * closure, void * data), do_scrollbar(Widget gw, void * closure, void * data), do_jumpscroll(Widget gw, void * closure, void * data),
+    do_reversevideo(Widget gw, void * closure, void * data), do_autowrap(Widget gw, void * closure, void * data), do_reversewrap(Widget gw, void * closure, void * data), do_autolinefeed(Widget gw, void * closure, void * data),
+    do_appcursor(Widget gw, void * closure, void * data), do_appkeypad(Widget gw, void * closure, void * data), do_scrollkey(Widget gw, void * closure, void * data), do_scrollttyoutput(Widget gw, void * closure, void * data),
+    do_allow132(Widget gw, void * closure, void * data), do_cursesemul(Widget gw, void * closure, void * data), do_marginbell(Widget gw, void * closure, void * data), do_altscreen(Widget gw, void * closure, void * data),
+    do_softreset(Widget gw, void * closure, void * data), do_hardreset(Widget gw, void * closure, void * data), do_clearsavedlines(Widget gw, void * closure, void * data),
+    do_vthide(Widget gw, void * closure, void * data), do_vtshow(Widget gw, void * closure, void * data), do_vtmode(Widget gw, void * closure, void * data), do_vtfont(Widget gw, void * closure, void * data),
+    do_gioenable(Widget gw, void * closure, void * data), do_tekshow(Widget gw, void * closure, void * data), do_tekmode(Widget gw, void * closure, void * data), do_tekpage(Widget gw, void * closure, void * data),
+    do_tekreset(Widget gw, void * closure, void * data), do_tekcopy(Widget gw, void * closure, void * data), do_tekhide(Widget gw, void * closure, void * data), do_colortext(Widget gw, void * closure, void * data);
 
 
 /*
@@ -351,7 +351,7 @@ static Widget create_menu (Widget w, Widget toplevelw, char *name, struct _MenuE
 
     for (; nentries > 0; nentries--, entries++) {
 	cb[0].callback = (XtCallbackProc) entries->function;
-	cb[0].closure = (caddr_t) entries->name;
+	cb[0].closure = (void *) entries->name;
 	entries->widget = XtCreateManagedWidget (entries->name, 
 						 (entries->function ?
 						  smeBSBObjectClass :
@@ -411,7 +411,7 @@ void DoSecureKeyboard (Time time)
     do_securekbd (term->screen.mainMenu, NULL, NULL);
 }
 
-static void do_securekbd (Widget gw, caddr_t closure, caddr_t data)
+static void do_securekbd (Widget gw, void * closure, void * data)
 {
     TScreen *screen = &term->screen;
     Time time = CurrentTime;		/* XXX - wrong */
@@ -434,7 +434,7 @@ static void do_securekbd (Widget gw, caddr_t closure, caddr_t data)
 }
 
 
-static void do_allowsends (Widget gw, caddr_t closure, caddr_t data)
+static void do_allowsends (Widget gw, void * closure, void * data)
 {
     TScreen *screen = &term->screen;
 
@@ -444,7 +444,7 @@ static void do_allowsends (Widget gw, caddr_t closure, caddr_t data)
      */
 }
 
-static void do_visualbell (Widget gw, caddr_t closure, caddr_t data)
+static void do_visualbell (Widget gw, void * closure, void * data)
 {
     TScreen *screen = &term->screen;
 
@@ -453,7 +453,7 @@ static void do_visualbell (Widget gw, caddr_t closure, caddr_t data)
 }
 
 #ifdef ALLOWLOGGING
-static void do_logging (Widget gw, caddr_t closure, caddr_t data)
+static void do_logging (Widget gw, void * closure, void * data)
 {
     TScreen *screen = &term->screen;
 
@@ -466,7 +466,7 @@ static void do_logging (Widget gw, caddr_t closure, caddr_t data)
 }
 #endif
 
-static void do_redraw (Widget gw, caddr_t closure, caddr_t data)
+static void do_redraw (Widget gw, void * closure, void * data)
 {
     Redraw ();
 }
@@ -479,7 +479,7 @@ static void do_redraw (Widget gw, caddr_t closure, caddr_t data)
 
 
 /* ARGSUSED */
-static void do_suspend (Widget gw, caddr_t closure, caddr_t data)
+static void do_suspend (Widget gw, void * closure, void * data)
 {
 #ifdef SIGTSTP
     handle_send_signal (gw, SIGTSTP);
@@ -487,7 +487,7 @@ static void do_suspend (Widget gw, caddr_t closure, caddr_t data)
 }
 
 /* ARGSUSED */
-static void do_continue (Widget gw, caddr_t closure, caddr_t data)
+static void do_continue (Widget gw, void * closure, void * data)
 {
 #ifdef SIGCONT
     handle_send_signal (gw, SIGCONT);
@@ -495,30 +495,30 @@ static void do_continue (Widget gw, caddr_t closure, caddr_t data)
 }
 
 /* ARGSUSED */
-static void do_interrupt (Widget gw, caddr_t closure, caddr_t data)
+static void do_interrupt (Widget gw, void * closure, void * data)
 {
     handle_send_signal (gw, SIGINT);
 }
 
 /* ARGSUSED */
-void do_hangup (Widget gw, caddr_t closure, caddr_t data)
+void do_hangup (Widget gw, void * closure, void * data)
 {
     handle_send_signal (gw, SIGHUP);
 }
 
 /* ARGSUSED */
-static void do_terminate (Widget gw, caddr_t closure, caddr_t data)
+static void do_terminate (Widget gw, void * closure, void * data)
 {
     handle_send_signal (gw, SIGTERM);
 }
 
 /* ARGSUSED */
-static void do_kill (Widget gw, caddr_t closure, caddr_t data)
+static void do_kill (Widget gw, void * closure, void * data)
 {
     handle_send_signal (gw, SIGKILL);
 }
 
-static void do_quit (Widget gw, caddr_t closure, caddr_t data)
+static void do_quit (Widget gw, void * closure, void * data)
 {
     Cleanup (0);
 }
@@ -529,7 +529,7 @@ static void do_quit (Widget gw, caddr_t closure, caddr_t data)
  * vt menu callbacks
  */
 
-static void do_scrollbar (Widget gw, caddr_t closure, caddr_t data)
+static void do_scrollbar (Widget gw, void * closure, void * data)
 {
     TScreen *screen = &term->screen;
 
@@ -542,7 +542,7 @@ static void do_scrollbar (Widget gw, caddr_t closure, caddr_t data)
 }
 
 
-static void do_jumpscroll (Widget gw, caddr_t closure, caddr_t data)
+static void do_jumpscroll (Widget gw, void * closure, void * data)
 {
     TScreen *screen = &term->screen;
 
@@ -557,7 +557,7 @@ static void do_jumpscroll (Widget gw, caddr_t closure, caddr_t data)
 }
 
 
-static void do_reversevideo (Widget gw, caddr_t closure, caddr_t data)
+static void do_reversevideo (Widget gw, void * closure, void * data)
 {
     term->flags ^= REVERSE_VIDEO;
     ReverseVideo (term);
@@ -565,7 +565,7 @@ static void do_reversevideo (Widget gw, caddr_t closure, caddr_t data)
 }
 
 
-static void do_colortext (Widget gw, caddr_t closure, caddr_t data)
+static void do_colortext (Widget gw, void * closure, void * data)
 {
     term->misc.dynamicColors = !term->misc.dynamicColors;
     update_colortext ();
@@ -573,42 +573,42 @@ static void do_colortext (Widget gw, caddr_t closure, caddr_t data)
 }
 
 
-static void do_autowrap (Widget gw, caddr_t closure, caddr_t data)
+static void do_autowrap (Widget gw, void * closure, void * data)
 {
     term->flags ^= WRAPAROUND;
     update_autowrap();
 }
 
 
-static void do_reversewrap (Widget gw, caddr_t closure, caddr_t data)
+static void do_reversewrap (Widget gw, void * closure, void * data)
 {
     term->flags ^= REVERSEWRAP;
     update_reversewrap();
 }
 
 
-static void do_autolinefeed (Widget gw, caddr_t closure, caddr_t data)
+static void do_autolinefeed (Widget gw, void * closure, void * data)
 {
     term->flags ^= LINEFEED;
     update_autolinefeed();
 }
 
 
-static void do_appcursor (Widget gw, caddr_t closure, caddr_t data)
+static void do_appcursor (Widget gw, void * closure, void * data)
 {
     term->keyboard.flags ^= CURSOR_APL;
     update_appcursor();
 }
 
 
-static void do_appkeypad (Widget gw, caddr_t closure, caddr_t data)
+static void do_appkeypad (Widget gw, void * closure, void * data)
 {
     term->keyboard.flags ^= KYPD_APL;
     update_appkeypad();
 }
 
 
-static void do_scrollkey (Widget gw, caddr_t closure, caddr_t data)
+static void do_scrollkey (Widget gw, void * closure, void * data)
 {
     TScreen *screen = &term->screen;
 
@@ -617,7 +617,7 @@ static void do_scrollkey (Widget gw, caddr_t closure, caddr_t data)
 }
 
 
-static void do_scrollttyoutput (Widget gw, caddr_t closure, caddr_t data)
+static void do_scrollttyoutput (Widget gw, void * closure, void * data)
 {
     TScreen *screen = &term->screen;
 
@@ -626,7 +626,7 @@ static void do_scrollttyoutput (Widget gw, caddr_t closure, caddr_t data)
 }
 
 
-static void do_allow132 (Widget gw, caddr_t closure, caddr_t data)
+static void do_allow132 (Widget gw, void * closure, void * data)
 {
     TScreen *screen = &term->screen;
 
@@ -635,7 +635,7 @@ static void do_allow132 (Widget gw, caddr_t closure, caddr_t data)
 }
 
 
-static void do_cursesemul (Widget gw, caddr_t closure, caddr_t data)
+static void do_cursesemul (Widget gw, void * closure, void * data)
 {
     TScreen *screen = &term->screen;
 
@@ -644,7 +644,7 @@ static void do_cursesemul (Widget gw, caddr_t closure, caddr_t data)
 }
 
 
-static void do_marginbell (Widget gw, caddr_t closure, caddr_t data)
+static void do_marginbell (Widget gw, void * closure, void * data)
 {
     TScreen *screen = &term->screen;
 
@@ -653,26 +653,26 @@ static void do_marginbell (Widget gw, caddr_t closure, caddr_t data)
 }
 
 
-static void do_altscreen (Widget gw, caddr_t closure, caddr_t data)
+static void do_altscreen (Widget gw, void * closure, void * data)
 {
     /* do nothing for now; eventually, will want to flip screen */
 }
 
 
-static void do_softreset (Widget gw, caddr_t closure, caddr_t data)
+static void do_softreset (Widget gw, void * closure, void * data)
 {
     VTReset (FALSE);
 }
 
 
-static void do_hardreset (Widget gw, caddr_t closure, caddr_t data)
+static void do_hardreset (Widget gw, void * closure, void * data)
 {
     gt_reset();
     VTReset (TRUE);		/* does a longjmp */
 }
 
 
-static void do_clearsavedlines (Widget gw, caddr_t closure, caddr_t data)
+static void do_clearsavedlines (Widget gw, void * closure, void * data)
 {
     TScreen *screen = &term->screen;
 
@@ -682,14 +682,14 @@ static void do_clearsavedlines (Widget gw, caddr_t closure, caddr_t data)
 }
 
 /* ARGSUSED */
-static void do_gioenable (Widget gw, caddr_t closure, caddr_t data)
+static void do_gioenable (Widget gw, void * closure, void * data)
 {
     gt_enable (!gt_enable(2));
     update_gioenable();
 }
 
 /* ARGSUSED */
-static void do_tekmode (Widget gw, caddr_t closure, caddr_t data)
+static void do_tekmode (Widget gw, void * closure, void * data)
 {
     switch_modes (gt_tekmode(2));	/* switch to tek mode */
 }
@@ -707,20 +707,20 @@ static void handle_tekshow (Widget gw, int allowswitch)
 }
 
 /* ARGSUSED */
-static void do_tekshow (Widget gw, caddr_t closure, caddr_t data)
+static void do_tekshow (Widget gw, void * closure, void * data)
 {
     handle_tekshow (gw, True);
 }
 
 /* ARGSUSED */
-static void do_tekonoff (Widget gw, caddr_t closure, caddr_t data)
+static void do_tekonoff (Widget gw, void * closure, void * data)
 {
     handle_tekshow (gw, False);
 }
 
 
 /* ARGSUSED */
-static void do_vthide (Widget gw, caddr_t closure, caddr_t data)
+static void do_vthide (Widget gw, void * closure, void * data)
 {
     hide_vt_window();
 }
@@ -730,7 +730,7 @@ static void do_vthide (Widget gw, caddr_t closure, caddr_t data)
  * vtfont menu
  */
 
-static void do_vtfont (Widget gw, caddr_t closure, caddr_t data)
+static void do_vtfont (Widget gw, void * closure, void * data)
 {
     char *entryname = (char *) closure;
     int i;
@@ -750,13 +750,13 @@ static void do_vtfont (Widget gw, caddr_t closure, caddr_t data)
  */
 
 
-static void do_tekpage (Widget gw, caddr_t closure, caddr_t data)
+static void do_tekpage (Widget gw, void * closure, void * data)
 {
     gt_clear();
 }
 
 
-static void do_tekreset (Widget gw, caddr_t closure, caddr_t data)
+static void do_tekreset (Widget gw, void * closure, void * data)
 {
     gt_reset();
     set_vthide_sensitivity();
@@ -769,7 +769,7 @@ static void do_tekreset (Widget gw, caddr_t closure, caddr_t data)
 }
 
 
-static void do_tekcopy (Widget gw, caddr_t closure, caddr_t data)
+static void do_tekcopy (Widget gw, void * closure, void * data)
 {
     /* TekCopy (); */
 }
@@ -788,17 +788,17 @@ static void handle_vtshow (Widget gw, int allowswitch)
 	Bell();
 }
 
-static void do_vtshow (Widget gw, caddr_t closure, caddr_t data)
+static void do_vtshow (Widget gw, void * closure, void * data)
 {
     handle_vtshow (gw, True);
 }
 
-static void do_vtonoff (Widget gw, caddr_t closure, caddr_t data)
+static void do_vtonoff (Widget gw, void * closure, void * data)
 {
     handle_vtshow (gw, False);
 }
 
-static void do_vtmode (Widget gw, caddr_t closure, caddr_t data)
+static void do_vtmode (Widget gw, void * closure, void * data)
 {
     TScreen *screen = &term->screen;
 
@@ -807,7 +807,7 @@ static void do_vtmode (Widget gw, caddr_t closure, caddr_t data)
 
 
 /* ARGSUSED */
-static void do_tekhide (Widget gw, caddr_t closure, caddr_t data)
+static void do_tekhide (Widget gw, void * closure, void * data)
 {
     gt_deactivate();
     set_vthide_sensitivity();
@@ -825,7 +825,7 @@ static void do_tekhide (Widget gw, caddr_t closure, caddr_t data)
  * public handler routines
  */
 
-static void handle_toggle (void (*proc) (/* ??? */), int var, String *params, Cardinal nparams, Widget w, caddr_t closure, caddr_t data)
+static void handle_toggle (void (*proc) (/* ??? */), int var, String *params, Cardinal nparams, Widget w, void * closure, void * data)
 {
     int dir = -2;
 

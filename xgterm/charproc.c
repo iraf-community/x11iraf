@@ -263,10 +263,10 @@ extern int scstable[];
 /* event handlers */
 extern void HandleKeyPressed(Widget w, XEvent *event, String *params, Cardinal *nparams), HandleEightBitKeyPressed(Widget w, XEvent *event, String *params, Cardinal *nparams);
 extern void HandleStringEvent(Widget w, XEvent *event, String *params, Cardinal *nparams);
-extern void HandleEnterWindow(Widget w, caddr_t eventdata, XEnterWindowEvent *event);
-extern void HandleLeaveWindow(Widget w, caddr_t eventdata, XEnterWindowEvent *event);
+extern void HandleEnterWindow(Widget w, void * eventdata, XEnterWindowEvent *event);
+extern void HandleLeaveWindow(Widget w, void * eventdata, XEnterWindowEvent *event);
 extern void HandleBellPropertyChange(Widget w, XtPointer data, XEvent *ev, Boolean *more);
-extern void HandleFocusChange(Widget w, caddr_t eventdata, XFocusChangeEvent *event);
+extern void HandleFocusChange(Widget w, void * eventdata, XFocusChangeEvent *event);
 static void HandleKeymapChange(Widget w, XEvent *event, String *params, Cardinal *param_count);
 extern void HandleInsertSelection(Widget w, XEvent *event, String *params, Cardinal *num_params);
 extern void HandleSelectStart(Widget w, XEvent *event, String *params, Cardinal *num_params), HandleKeyboardSelectStart(Widget w, XEvent *event, String *params, Cardinal *num_params);

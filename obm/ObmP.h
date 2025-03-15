@@ -406,7 +406,7 @@ typedef	struct obmObjectCore *ObmObjectCore;
 /* Object list. */
 struct objList {
 	char name[SZ_NAME];
-	caddr_t ptr;
+	void * ptr;
 	struct objList *next;
 };
 

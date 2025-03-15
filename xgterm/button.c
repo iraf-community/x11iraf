@@ -1151,7 +1151,7 @@ int *format;
 	unsigned long std_length;
 	XmuConvertStandardSelection(
 		    w, xgterm->screen.selection_time, selection,
-		    target, type, (caddr_t*)&std_targets, &std_length, format
+		    target, type, (char **)&std_targets, &std_length, format
 		   );
 	*length = std_length + 5;
 	*value = (XtPointer)XtMalloc(sizeof(Atom)*(*length));
@@ -1208,7 +1208,7 @@ int *format;
     }
     if (XmuConvertStandardSelection(w, xgterm->screen.selection_time, selection,
 				    target, type,
-				    (caddr_t *)value, length, format))
+				    (char **)value, length, format))
 	return True;
 
     /* else */
