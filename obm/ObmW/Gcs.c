@@ -173,7 +173,7 @@ static	char	rcsid[] = "$Id: Gcs.c,v 1.7 1999/09/08 17:44:12 falk Exp $" ;
 
 #if	XtSpecificationRelease	< 5
 
-static	GC	XtAllocateGC(Widget, int, u_long, XGCValues *, u_long, u_long) ;
+static	GC	XtAllocateGC(Widget, int, unsigned long, XGCValues *, unsigned long, unsigned long) ;
 
 #endif
 
@@ -187,7 +187,7 @@ GC
 AllocFgGC(Widget w, Pixel fg, Font font)
 {
 	XGCValues	values ;
-	u_long		vmask, dcmask ;
+	unsigned long		vmask, dcmask ;
 
 	values.foreground = fg ;
 	values.font = font ;
@@ -234,7 +234,7 @@ AllocShadeGC(Widget w, Pixel fg, Pixel bg, Font font,
 	int contrast, Bool be_nice_to_cmap)
 {
 	XGCValues	values ;
-	u_long		vmask, dcmask ;
+	unsigned long		vmask, dcmask ;
 
 	values.foreground = fg ;
 	values.background = bg ;
@@ -528,18 +528,18 @@ Draw3dBox(Widget w, int x, int y, int wid, int hgt, int s, GC topgc, GC botgc)
 #if XtSpecificationRelease < 5
 
 static	GC
-XtAllocateGC(Widget w, int depth, u_long mask, XGCValues *values,
-	u_long dynamic, du_long ontcare)
+XtAllocateGC(Widget w, int depth, unsigned long mask, XGCValues *values,
+	unsigned long dynamic, unsigned long ontcare)
 {
 	return XtGetGC(w, mask, values) ;
 }
 #endif
 
 
-static	u_char	screen0[2] = {0,0} ;
-static	u_char	screen25[2] = {0,0xaa} ;
-static	u_char	screen75[2] = {0xaa,0xff} ;
-static	u_char	screen100[2] = {0xff,0xff} ;
+static	unsigned char	screen0[2] = {0,0} ;
+static	unsigned char	screen25[2] = {0,0xaa} ;
+static	unsigned char	screen75[2] = {0xaa,0xff} ;
+static	unsigned char	screen100[2] = {0xff,0xff} ;
 
 static	Pixmap
 getDitherPixmap(Widget w, int contrast)

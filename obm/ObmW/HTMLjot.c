@@ -425,7 +425,7 @@ EJB_JOTfromJot(Widget w)
 {
 	int i, cnt;
 	int dlen, total;
-	u_long val;
+	unsigned long val;
 	unsigned char uchar;
 	JotInfo *jptr;
 	Stroke *sptr;
@@ -440,7 +440,7 @@ EJB_JOTfromJot(Widget w)
 		return(NULL);
 	}
 
-	dlen = (2 * sizeof(u_long) + sizeof(char)) * jptr->stroke_cnt;
+	dlen = (2 * sizeof(unsigned long) + sizeof(char)) * jptr->stroke_cnt;
 	data = (unsigned char *)malloc(dlen);
 
 	cnt = 0;
@@ -448,13 +448,13 @@ EJB_JOTfromJot(Widget w)
 	dptr = data;
 	while ((sptr != NULL)&&(cnt < jptr->stroke_cnt))
 	{
-		val = htonl((u_long)sptr->x);
-		bcopy((char *)&val, (char *)dptr, sizeof(u_long));
-		dptr = dptr + sizeof(u_long);
+		val = htonl((unsigned long)sptr->x);
+		bcopy((char *)&val, (char *)dptr, sizeof(unsigned long));
+		dptr = dptr + sizeof(unsigned long);
 
-		val = htonl((u_long)sptr->y);
-		bcopy((char *)&val, (char *)dptr, sizeof(u_long));
-		dptr = dptr + sizeof(u_long);
+		val = htonl((unsigned long)sptr->y);
+		bcopy((char *)&val, (char *)dptr, sizeof(unsigned long));
+		dptr = dptr + sizeof(unsigned long);
 
 		if (sptr->draw == False)
 		{
@@ -472,11 +472,11 @@ EJB_JOTfromJot(Widget w)
 	for (i=cnt; i<jptr->stroke_cnt; i++)
 	{
 		val = 0;
-		bcopy((char *)&val, (char *)dptr, sizeof(u_long));
-		dptr = dptr + sizeof(u_long);
+		bcopy((char *)&val, (char *)dptr, sizeof(unsigned long));
+		dptr = dptr + sizeof(unsigned long);
 		val = 0;
-		bcopy((char *)&val, (char *)dptr, sizeof(u_long));
-		dptr = dptr + sizeof(u_long);
+		bcopy((char *)&val, (char *)dptr, sizeof(unsigned long));
+		dptr = dptr + sizeof(unsigned long);
 		uchar = 0;
 		*dptr++ = uchar;
 	}
