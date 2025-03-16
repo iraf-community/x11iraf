@@ -54,6 +54,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <strings.h>
 #include "HTMLP.h"
 #ifdef MOTIF
 #include <Xm/DrawingA.h>

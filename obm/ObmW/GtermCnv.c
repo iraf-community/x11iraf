@@ -1,5 +1,7 @@
 
 #include <stdint.h>
+#include <strings.h>
+
 /* Convenience macros.
 */
 #define	GPMtoRPM		gtermPM_to_rasPM	/* Pixmap	*/

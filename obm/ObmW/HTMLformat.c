@@ -60,6 +60,7 @@ struct timezone Tz;
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <strings.h>
 #include <ctype.h>
 #include "HTMLP.h"
 
