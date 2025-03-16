@@ -84,6 +84,10 @@ static Region null_region;
 static XRectangle null_rect = { 0, 0, 0, 0 };
 #define NullRect(r)	(!(r)->width || !(r)->height)
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 #define PI_2		1.57079632679489661923
 #define PI_4		0.78539816339744830962
 #define BORDER		5
