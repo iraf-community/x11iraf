@@ -49,8 +49,9 @@
 IsmModule    ismNameToPtr(char *name);
 
 static void  ism_connectClient(IsmIoChanPtr chan, int *source, XtPointer id), ism_disconnectClient(IsmIoChanPtr chan), ism_io(IsmIoChanPtr chan, int *fd_addr, XtInputId *id_addr);
-static int   ism_read(int fd, void *vptr, int nbytes), ism_write(int fd, void *vptr, int nbytes), ism_type(char *message), ism_parseSend(char *msg, char *object, char *text);
-static int   ism_openSocket(char *path);
+static int  ism_read(int fd, void *vptr, int nbytes), ism_write(int fd, void *vptr, int nbytes), ism_type(char *message);
+static void ism_parseSend(char *msg, char *object, char *text);
+static int  ism_openSocket(char *path);
 static IsmIoChanPtr ism_getChannel(XimDataPtr xim);
 static char *ism_parse(char *msg, int *ip, int *incomplete, int maxch);
 static int ismObjects(char *name);
@@ -211,7 +212,7 @@ ism_connectClient (IsmIoChanPtr chan, int *source, XtPointer id)
 	int s;
 
 	/* Accept connection. */
-	if ((s = accept ((int)*source, (struct sockaddr *)0, (int *)0)) < 0)
+	if ((s = accept (*source, NULL, NULL)) < 0)
 	    return;
 	/*if (fcntl (s, F_SETFL, O_RDWR|O_NDELAY) < 0) {*/
 	if (fcntl (s, F_SETFL, O_NDELAY) < 0) {
@@ -481,7 +482,7 @@ ism_type (char *message)
 
 /* ISM_PARSESEND -- Parse the client SEND message.
  */
-static int
+static void
 ism_parseSend (char *msg, char *object, char *text)
 {
 	int i=0, ip=4, count=0;
@@ -542,7 +543,7 @@ ism_evaluate (XimDataPtr xim, char *object, char *command)
 
 /* ISM_MESSAGE -- Convenience wrapper for the evaluate procedure.
  */
-int
+void
 ism_message (XimDataPtr xim, char *object, char *command)
 {
 	ism_evaluate (xim, object, command);

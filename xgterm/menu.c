@@ -363,6 +363,7 @@ static Widget create_menu (Widget w, Widget toplevelw, char *name, struct _MenuE
     return m;
 }
 
+void
 init_menu (char *menu)
 {
     TScreen *screen = &term->screen;
@@ -825,7 +826,7 @@ static void do_tekhide (Widget gw, void * closure, void * data)
  * public handler routines
  */
 
-static void handle_toggle (void (*proc) (/* ??? */), int var, String *params, Cardinal nparams, Widget w, void * closure, void * data)
+static void handle_toggle (void (*proc) (Widget, void*, void*), int var, String *params, Cardinal nparams, Widget w, void * closure, void * data)
 {
     int dir = -2;
 

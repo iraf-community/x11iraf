@@ -29,6 +29,7 @@
 
 #include "ptyx.h"
 
+void TabSet(unsigned int *tabs, int col);
 /*
  * This file presumes 32bits/word.  This is somewhat of a crock, and should
  * be fixed sometime.
@@ -37,6 +38,7 @@
 /*
  * places tabstops at only every 8 columns
  */
+void
 TabReset(unsigned int *tabs)
 {
 	int i;
@@ -52,6 +54,7 @@ TabReset(unsigned int *tabs)
 /*
  * places a tabstop at col
  */
+void
 TabSet(unsigned int *tabs, int col)
 {
 	tabs[col >> 5] |= (1 << (col & 31));
@@ -60,6 +63,7 @@ TabSet(unsigned int *tabs, int col)
 /*
  * clears a tabstop at col
  */
+void
 TabClear(unsigned int *tabs, int col)
 {
 	tabs[col >> 5] &= ~(1 << (col & 31));
@@ -89,6 +93,7 @@ TabNext (unsigned int *tabs, int col)
 /*
  * clears all tabs
  */
+void
 TabZonk (unsigned int *tabs)
 {
 	int i;

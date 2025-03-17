@@ -349,14 +349,14 @@ static void _GetSelection(Widget w, Time time, String *params, Cardinal num_para
 /* SelectionReceived: stuff received selection text into pty */
 
 /* ARGSUSED */
-static void SelectionReceived(w, client_data, selection, type,
-			      value, length, format)
-Widget w;
-XtPointer client_data;
-Atom *selection, *type;
-XtPointer value;
-unsigned long *length;
-int *format;
+static void SelectionReceived(
+  Widget w,
+  XtPointer client_data,
+  Atom *selection,
+  Atom *type,
+  XtPointer value,
+  unsigned long *length,
+  int *format)
 {
     int pty = ((XgtermWidget)w)->screen.respond;	/* file descriptor of pty */
     char *lag, *cp, *end;
@@ -1132,13 +1132,14 @@ SaltTextAway(int crow, int ccol, int row, int col, String *params, Cardinal num_
 	_OwnSelection(term, params, num_params);
 }
 
-static Boolean ConvertSelection(w, selection, target,
-				type, value, length, format)
-Widget w;
-Atom *selection, *target, *type;
-XtPointer *value;
-unsigned long *length;
-int *format;
+static Boolean ConvertSelection(
+    Widget w,
+    Atom *selection,
+    Atom *target,
+    Atom *type,
+    XtPointer *value,
+    unsigned long *length,
+    int *format)
 {
     Display* d = XtDisplay(w);
     XgtermWidget xgterm = (XgtermWidget)w;

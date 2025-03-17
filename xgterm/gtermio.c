@@ -1693,6 +1693,7 @@ gio_retcursor (int key, int sx, int sy, int raster, int rx, int ry, int datalen)
 
 	if (!gio_delay)
 	    gio_processdata();
+	return 0;
 }
 
 

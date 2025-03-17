@@ -197,6 +197,7 @@ static void RealizeScrollBar (Widget sbw, TScreen *screen)
 }
 
 
+void
 ScrollBarReverseVideo(Widget scrollWidget)
 {
 	Arg args[4];
@@ -221,7 +222,7 @@ ScrollBarReverseVideo(Widget scrollWidget)
 }
 
 
-
+void
 ScrollBarDrawThumb(Widget scrollWidget)
 {
 	TScreen *screen = &term->screen;
@@ -237,6 +238,7 @@ ScrollBarDrawThumb(Widget scrollWidget)
 	
 }
 
+void
 ResizeScrollBar(Widget scrollWidget, int x, int y, unsigned int height)
 {
 	XtConfigureWidget(scrollWidget, x, y, scrollWidget->core.width,

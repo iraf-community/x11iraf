@@ -66,6 +66,10 @@ void VisualBell(void), FlushLog(TScreen *screen), Setenv(char *var, char *value)
 
 extern XtAppContext app_con;
 
+void Changename(char *name);
+void Changetitle(char *name);
+void Cleanup (int code);
+
 void
 xevents(void)
 {
@@ -619,6 +623,7 @@ void logpipe()
 #endif /* ALLOWLOGGING */
 
 
+void
 do_osc(int (*func) (/* ??? */))
 {
 	int mode, c;
@@ -696,7 +701,7 @@ do_osc(int (*func) (/* ??? */))
 	}
 }
 
-static ChangeGroup(String attribute, XtArgVal value)
+static void ChangeGroup(String attribute, XtArgVal value)
 {
 	extern Widget toplevel;
 	Arg args[1];
@@ -705,11 +710,13 @@ static ChangeGroup(String attribute, XtArgVal value)
 	XtSetValues( toplevel, args, 1 );
 }
 
+void
 Changename(char *name)
 {
     ChangeGroup( XtNiconName, (XtArgVal)name );
 }
 
+void
 Changetitle(char *name)
 {
     ChangeGroup( XtNtitle, (XtArgVal)name );
@@ -885,10 +892,7 @@ int             i,ndx;
 /***====================================================================***/
 
 
-
-#ifndef DEBUG
-/* ARGSUSED */
-#endif
+void
 Panic(char *s, int a)
 {
 #ifdef DEBUG
@@ -907,6 +911,7 @@ char *SysErrorMsg (int n)
 }
 
 
+void
 SysError (int i)
 {
 	int oerrno;
@@ -918,6 +923,7 @@ SysError (int i)
 	Cleanup(i);
 }
 
+void
 Error (int i)
 {
 	fprintf (stderr, "%s: Error %d\n", xgterm_name, i);
@@ -928,6 +934,7 @@ Error (int i)
 /*
  * cleanup by sending SIGHUP to client processes
  */
+void
 Cleanup (int code)
 {
 	extern XgtermWidget term;
@@ -1065,7 +1072,7 @@ xerror (Display *display, XErrorEvent *event)
 	return (0);
 }
 
-/*ARGSUSED*/
+void
 xioerror(Display *dpy)
 {
 	(void) fprintf (stderr, 
@@ -1271,15 +1278,15 @@ void gtermio_close_workstation(void) { set_workstation_state(0); }
 
 /* GTERMIO protocol module functions.
  */
-int (*gtermio_reset)();		XtPointer gtermio_reset_data;
-int (*gtermio_clear)();		XtPointer gtermio_clear_data;
-int (*gtermio_input)();		XtPointer gtermio_input_data;
-int (*gtermio_output)();	XtPointer gtermio_output_data;
-int (*gtermio_activate)();	XtPointer gtermio_activate_data;
-int (*gtermio_status)();	XtPointer gtermio_status_data;
-int (*gtermio_enable)();	XtPointer gtermio_enable_data;
-int (*gtermio_tekmode)();	XtPointer gtermio_tekmode_data;
-int (*gtermio_SGMT)();		XtPointer gtermio_SGMT_data;
+int (*gtermio_reset)(XtPointer);		XtPointer gtermio_reset_data;
+int (*gtermio_clear)(XtPointer);		XtPointer gtermio_clear_data;
+int (*gtermio_input)(XtPointer, char *, int);	XtPointer gtermio_input_data;
+int (*gtermio_output)(XtPointer);		XtPointer gtermio_output_data;
+int (*gtermio_activate)(XtPointer, int);	XtPointer gtermio_activate_data;
+int (*gtermio_status)(XtPointer, char *, void *);	XtPointer gtermio_status_data;
+int (*gtermio_enable)(XtPointer, int);		XtPointer gtermio_enable_data;
+int (*gtermio_tekmode)(XtPointer, int);		XtPointer gtermio_tekmode_data;
+int (*gtermio_SGMT)(XtPointer, char *);		XtPointer gtermio_SGMT_data;
 
 /* gtermio_register -- This routine is called by the GTERMIO protocol
  * module code during startup to register the protocol module's public

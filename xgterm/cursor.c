@@ -47,6 +47,7 @@ static void _CheckSelection(TScreen *screen)
  * (this includes scrolling regions)
  * The origin is considered to be 0, 0 for this procedure.
  */
+void
 CursorSet(TScreen *screen, int row, int col, unsigned int flags)
 {
 	int maxr;
@@ -67,6 +68,7 @@ CursorSet(TScreen *screen, int row, int col, unsigned int flags)
 /*
  * moves the cursor left n, no wrap around
  */
+void
 CursorBack(TScreen *screen, int n)
 {
 	int i, j, k, rev;
@@ -94,6 +96,7 @@ CursorBack(TScreen *screen, int n)
 /*
  * moves the cursor forward n, no wraparound
  */
+void
 CursorForward(TScreen *screen, int n)
 {
 	screen->cur_col += n;
@@ -107,6 +110,7 @@ CursorForward(TScreen *screen, int n)
  * moves the cursor down n, no scrolling.
  * Won't pass bottom margin or bottom of screen.
  */
+void
 CursorDown(TScreen *screen, int n)
 {
 	int max;
@@ -125,6 +129,7 @@ CursorDown(TScreen *screen, int n)
  * moves the cursor up n, no linestarving.
  * Won't pass top margin or top of screen.
  */
+void
 CursorUp(TScreen *screen, int n)
 {
 	int min;
@@ -186,6 +191,7 @@ RevIndex(TScreen *screen, int amount)
 /*
  * Moves Cursor To First Column In Line
  */
+void
 CarriageReturn(TScreen *screen)
 {
 	screen->cur_col = 0;
@@ -196,6 +202,7 @@ CarriageReturn(TScreen *screen)
 /*
  * Save Cursor and Attributes
  */
+void
 CursorSave(XgtermWidget term, SavedCursor *sc)
 {
 	TScreen *screen = &term->screen;
@@ -211,6 +218,7 @@ CursorSave(XgtermWidget term, SavedCursor *sc)
 /*
  * Restore Cursor and Attributes
  */
+void
 CursorRestore(XgtermWidget term, SavedCursor *sc)
 {
 	TScreen *screen = &term->screen;

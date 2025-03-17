@@ -181,6 +181,7 @@ Input (TKeyboard *keyboard, TScreen *screen, XKeyEvent *event, int eightbit)
 	return;
 }
 
+void
 StringInput (TScreen *screen, char *string, int nbytes)
 {
 	int	pty	= screen->respond;

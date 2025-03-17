@@ -490,6 +490,8 @@ static Bool added_utmp_entry = False;
 
 static char **command_to_exec;
 
+void get_terminal (void);
+
 #ifdef USE_SYSV_TERMIO
 /* The following structures are initialized in main() in order
 ** to eliminate any assumptions about the internal order of their
@@ -596,7 +598,6 @@ extern void utmpname();
 #endif
 #endif /* !SVR4 */
 
-/*#ifndef SYSV386		/* could remove paragraph unconditionally? */
 #ifdef X_NOT_STDC_ENV		/* could remove paragraph unconditionally? */
 extern struct passwd *getpwent();
 extern struct passwd *getpwuid();
@@ -1884,6 +1885,7 @@ int pty_search(int *pty)
     return 1;
 }
 
+void
 get_terminal (void)
 /* 
  * sets up X and initializes the terminal structure except for term.buf.fildes.

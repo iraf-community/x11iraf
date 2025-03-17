@@ -765,5 +765,5 @@ void xim_tileFrames(XimDataPtr xim, int frame_list);
 void xim_fitFrame(XimDataPtr xim);
 void xim_cursorMode(XimDataPtr xim, int state);
 
-int ism_message(XimDataPtr xim, char *object, char *command);
+void ism_message(XimDataPtr xim, char *object, char *command);
 void wcspix_message(XimDataPtr xim, char *message);

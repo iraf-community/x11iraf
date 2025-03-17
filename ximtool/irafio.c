@@ -383,19 +383,22 @@ irafGetPixfile (char *fname, char *pfile)
 /* IRAFREADPIXELS -- Read the pixel file and scale the data.
  */
 
-static char *
-irafReadPixels (pixfile, swap, pix_offset, pixtype, image, nx,ny, px,py,
-		zsc, zr, z1, z2, nsample)
-char    *pixfile;			/* pixfile pathname      */
-int	swap;				/* byte-swap pixels      */
-int     pix_offset;			/* offset to pixel data	 */
-int     pixtype;			/* pixel types		 */
-uchar   **image;			/* output image pixels   */
-int     nx, ny;				/* image dimensions      */
-int     px, py;				/* physical storage dims */
-int     zsc, zr;			/* z-scaling flags	 */
-float   *z1, *z2;
-int	nsample;
+static char
+*irafReadPixels(
+    char *pixfile,
+    int swap,
+    int pix_offset,
+    int pixtype,
+    uchar **image,
+    int nx,
+    int ny,
+    int px,
+    int py,
+    int zsc,
+    int zr,
+    float *z1,
+    float *z2,
+    int nsample)
 {
 	FILE *fd;
 	int i, j, npix, stdline;

@@ -200,6 +200,7 @@ ScreenWrite (TScreen *screen, char *str, unsigned int flags, unsigned int cur_fg
 	    *attrs0 |= LINEWRAPPED;
 }
 
+void
 ScrnInsertLine (ScrnBuf sb, int last, int where, int n, int size)
 /*
    Inserts n blank lines at sb + where, treating last as a bottom margin.
@@ -240,6 +241,7 @@ ScrnInsertLine (ScrnBuf sb, int last, int where, int n, int size)
 }
 
 
+void
 ScrnDeleteLine (ScrnBuf sb, int last, int where, int n, int size)
 /*
    Deletes n lines at sb + where, treating last as a bottom margin.
@@ -271,6 +273,7 @@ ScrnDeleteLine (ScrnBuf sb, int last, int where, int n, int size)
 }
 
 
+void
 ScrnInsertChar (ScrnBuf sb, int row, int col, int n, int size)
     /*
       Inserts n blanks in sb at row, col.  Size is the size of each row.
@@ -300,6 +303,7 @@ ScrnInsertChar (ScrnBuf sb, int row, int col, int n, int size)
 }
 
 
+void
 ScrnDeleteChar (ScrnBuf sb, int row, int col, int n, int size)
     /*
       Deletes n characters in sb at row, col. Size is the size of each row.
@@ -322,6 +326,7 @@ ScrnDeleteChar (ScrnBuf sb, int row, int col, int n, int size)
 }
 
 
+void
 ScrnRefresh (TScreen *screen, int toprow, int leftcol, int nrows, int ncols, Boolean force)
 /*
    Repaints the area enclosed by the parameters.
@@ -522,6 +527,7 @@ ScrnRefresh (TScreen *screen, int toprow, int leftcol, int nrows, int ncols, Boo
 	}
 }
 
+void
 ClearBufRows (TScreen *screen, int first, int last)
 /*
    Sets the rows first though last of the buffer of screen to spaces.
@@ -552,6 +558,7 @@ ClearBufRows (TScreen *screen, int first, int last)
   7. Clears origin mode and sets scrolling region to be entire screen.
   8. Returns 0
   */
+int
 ScreenResize (TScreen *screen, int width, int height, unsigned int *flags)
 {
 	int rows, cols;

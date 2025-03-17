@@ -102,6 +102,15 @@ extern char *malloc();
 extern char *realloc();
 #endif
 
+void init_ttyio (int pty);
+void ansi_modes(XgtermWidget termw, void (*func) (unsigned int *, int));
+void dpmodes(XgtermWidget termw, void (*func) (unsigned int *, int));
+void savemodes(XgtermWidget termw);
+void restoremodes(XgtermWidget termw);
+void SwitchBufPtrs(TScreen *screen);
+void VTRun(void);
+void set_vt_box (TScreen *screen);
+void set_cursor_gcs (TScreen *screen);
 
 static void VTallocbuf(void);
 static int finput(void);
@@ -1698,6 +1707,7 @@ do_write (XtPointer w, int *fd, XtInputId *id)
 /* init_ttyio -- Initialize tty i/o.  Called by the main when the terminal
  * file descriptor has been obtained.
  */
+void
 init_ttyio (int pty)
 {
     if (pty < 0) {
@@ -1862,7 +1872,8 @@ WriteText(TScreen *screen, char *str, int len, unsigned int flags, unsigned int 
 /*
  * process ANSI modes set, reset
  */
-ansi_modes(XgtermWidget termw, int (*func) (/* ??? */))
+void
+ansi_modes(XgtermWidget termw, void (*func) (unsigned int *, int))
 {
 	int	i;
 
@@ -1883,7 +1894,8 @@ ansi_modes(XgtermWidget termw, int (*func) (/* ??? */))
 /*
  * process DEC private modes set, reset
  */
-dpmodes(XgtermWidget termw, void (*func) (/* ??? */))
+void
+dpmodes(XgtermWidget termw, void (*func) (unsigned int *, int))
 {
 	TScreen	*screen	= &termw->screen;
 	int	i, j;
@@ -2063,6 +2075,7 @@ dpmodes(XgtermWidget termw, void (*func) (/* ??? */))
 /*
  * process xgterm private modes save
  */
+void
 savemodes(XgtermWidget termw)
 {
 	TScreen	*screen	= &termw->screen;
@@ -2128,6 +2141,7 @@ savemodes(XgtermWidget termw)
 /*
  * process xgterm private modes restore
  */
+void
 restoremodes(XgtermWidget termw)
 {
 	TScreen	*screen	= &termw->screen;
@@ -2402,6 +2416,7 @@ SwitchBufs(TScreen *screen)
 
 /* swap buffer line pointers between alt and regular screens */
 
+void
 SwitchBufPtrs(TScreen *screen)
 {
     int rows = screen->max_row + 1;
@@ -2413,6 +2428,7 @@ SwitchBufPtrs(TScreen *screen)
     memmove( (char *)screen->altbuf, (char *)save, 4 * sizeof(char *) * rows);
 }
 
+void
 VTRun(void)
 {
 	TScreen *screen = &term->screen;
@@ -3731,6 +3747,7 @@ update_font_info (TScreen *screen, int doresize)
     set_vt_box (screen);
 }
 
+void
 set_vt_box (TScreen *screen)
 {
 	XPoint	*vp;
@@ -3744,6 +3761,7 @@ set_vt_box (TScreen *screen)
 }
 
 
+void
 set_cursor_gcs (TScreen *screen)
 {
     XGCValues xgcv;
