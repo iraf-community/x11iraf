@@ -68,21 +68,21 @@ xim_initLoad (XimDataPtr xim)
 	flp->nsample = 1000;
 
 	/* Update the GUI with the initial state. */
-        sprintf (buf, "curdir %s\0", flp->curdir);
+        sprintf (buf, "curdir %s", flp->curdir);
             xim_message (xim, "loadOptions", buf);
-        sprintf (buf, "pattern %s\0", flp->pattern);
+        sprintf (buf, "pattern %s", flp->pattern);
             xim_message (xim, "loadOptions", buf);
-        sprintf (buf, "gray %d\0", flp->gray);
+        sprintf (buf, "gray %d", flp->gray);
             xim_message (xim, "loadOptions", buf);
-        sprintf (buf, "zscale %d\0", flp->zscale);
+        sprintf (buf, "zscale %d", flp->zscale);
             xim_message (xim, "loadOptions", buf);
-        sprintf (buf, "zrange %d\0", flp->zrange);
+        sprintf (buf, "zrange %d", flp->zrange);
             xim_message (xim, "loadOptions", buf);
-        sprintf (buf, "z1 %g\0", flp->z1);
+        sprintf (buf, "z1 %g", flp->z1);
             xim_message (xim, "loadOptions", buf);
-        sprintf (buf, "z2 %g\0", flp->z2);
+        sprintf (buf, "z2 %g", flp->z2);
             xim_message (xim, "loadOptions", buf);
-        sprintf (buf, "nsample %d\0", flp->nsample);
+        sprintf (buf, "nsample %d", flp->nsample);
             xim_message (xim, "loadOptions", buf);
 }
 
@@ -131,7 +131,7 @@ xim_loadFile (XimDataPtr xim, char *fname, int frame)
 
         /* Make sure the file exists. */
 	if (access(fname, R_OK) != 0) {
-	    sprintf (buf, "warning %s\0", "Error: File not found.");
+	    sprintf (buf, "warning %s", "Error: File not found.");
 	    xim_message (xim, "loadOptions", buf);
 	    return (-1);
 	}
@@ -193,7 +193,7 @@ xim_loadFile (XimDataPtr xim, char *fname, int frame)
 
         default:
             /* We don't know what this is so give up and notify the GUI. */
-	    sprintf (buf, "warning %s\0", "Error: Unknown raster file type.");
+	    sprintf (buf, "warning %s", "Error: Unknown raster file type.");
 	    xim_message (xim, "loadOptions", buf);
 	    return (-1);
         }
@@ -289,7 +289,7 @@ xim_loadFile (XimDataPtr xim, char *fname, int frame)
             }
 
             /* Change the frame buffer configuration. */
-            sprintf (buf, "%d %d %d\0", cf->width, cf->height, 8);
+            sprintf (buf, "%d %d %d", cf->width, cf->height, 8);
             xim_message (xim, "frameSize", buf);
 
             /* Create the frame. */

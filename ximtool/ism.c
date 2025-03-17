@@ -529,7 +529,7 @@ ism_evaluate (XimDataPtr xim, char *object, char *command)
 	for (i=0; i < XtNumber (xim->ism_client); i++) {
 	    chan = &xim->ism_client[i];
 	    if (chan->connected && strcmp (chan->name, object) == 0) {
-		sprintf (buf, "%s\0", command);
+		sprintf (buf, "%s", command);
 		len = strlen (buf) + 1;       	/* +1 to send the NULL */
 		ism_write (chan->dataout, buf, len);
         	if (ism_debug >= 2) printf("writing %d bytes: '%s'\n", len,buf);
@@ -617,7 +617,7 @@ ismObjects (char *name)
 
 	if (strstr (objects, name) == NULL) {
 	    strcat (objects, name);
-	    strcat (objects, "|\0");
+	    strcat (objects, "|");
 	    return (0);
 	} else
 	    return (1);

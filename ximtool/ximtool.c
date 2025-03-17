@@ -90,50 +90,50 @@ main (int argc, char **argv)
 
 	    if (strcmp (argv[i], "-cmapName") == 0) {
 		str = argv[++i];
-		strcpy (argv[i-1], "-xrm\0");
+		strcpy (argv[i-1], "-xrm");
 		argv[i] = (char *) malloc (256);
-		sprintf (argv[i], "XImtool*cmapName:%s\0", str);
+		sprintf (argv[i], "XImtool*cmapName:%s", str);
 
 	    } else if (strcmp (argv[i], "-maxColors") == 0) {
 		ncolors = atoi (argv[++i]);
 		ncolors = max (32, min (201, ncolors));
-		strcpy (argv[i-1], "-xrm\0");
+		strcpy (argv[i-1], "-xrm");
 		argv[i] = (char *) malloc (256);
-		sprintf (argv[i], "XImtool*maxColors:%d\0", ncolors);
+		sprintf (argv[i], "XImtool*maxColors:%d", ncolors);
 
 	    } else if (strcmp (argv[i], "-basePixel") == 0) {
 		base = atoi (argv[++i]);
-		strcpy (argv[i-1], "-xrm\0");
+		strcpy (argv[i-1], "-xrm");
 		argv[i] = (char *) malloc (256);
 		sprintf (argv[i], "XImtool*basePixel:%d", base);
 
 	    } else if (strcmp (argv[i], "-cmapInitialize") == 0) {
 		str = argv[++i];
-		strcpy (argv[i-1], "-xrm\0");
+		strcpy (argv[i-1], "-xrm");
 		argv[i] = (char *) malloc (256);
 		sprintf (argv[i], "XImtool*cmapInitialize:%s", str);
 
 	    } else if (strcmp (argv[i], "-displayPanner") == 0) {
 		str = argv[++i];
-		strcpy (argv[i-1], "-xrm\0");
+		strcpy (argv[i-1], "-xrm");
 		argv[i] = (char *) malloc (256);
 		sprintf (argv[i], "XImtool*displayPanner:%s", str);
 
            } else if (strcmp (argv[i], "-displayMagnifier") == 0) {
                 str = argv[++i];
-                strcpy (argv[i-1], "-xrm\0");
+                strcpy (argv[i-1], "-xrm");
                 argv[i] = (char *) malloc (256);
                 sprintf (argv[i], "XImtool*displayMagnifier:%s", str);
 
 	    } else if (strcmp (argv[i], "-displayCoords") == 0) {
 		str = argv[++i];
-		strcpy (argv[i-1], "-xrm\0");
+		strcpy (argv[i-1], "-xrm");
 		argv[i] = (char *) malloc (256);
 		sprintf (argv[i], "XImtool*displayCoords:%s", str);
 
 	    } else if (strcmp (argv[i], "-printConfig") == 0) {
 		str = argv[++i];
-		strcpy (argv[i-1], "-xrm\0");
+		strcpy (argv[i-1], "-xrm");
 		argv[i] = (char *) malloc (256);
 		sprintf (argv[i], "XImtool*printConfig:%s", str);
 	    }
