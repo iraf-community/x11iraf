@@ -1064,7 +1064,7 @@ serverPostTimedCallback (ObmObject object, Tcl_Interp *tcl, int argc, char **arg
 	} else
 	    cb = NULL;
 
-	sprintf (buf, "0x%lx", cb);
+	sprintf (buf, "%p", cb);
 	Tcl_SetResult (tcl, buf, TCL_VOLATILE);
 
 	return (TCL_OK);
@@ -1179,7 +1179,7 @@ serverPostWorkProc (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 	    serverWorkProc, (XtPointer)cb);
 	link_callback (&obj->server, cb);
 
-	sprintf (buf, "0x%lx", cb);
+	sprintf (buf, "%p", cb);
 	Tcl_SetResult (tcl, buf, TCL_VOLATILE);
 
 	return (TCL_OK);

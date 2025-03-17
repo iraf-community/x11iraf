@@ -965,7 +965,7 @@ void
 GtStartDialog (GtermWidget w)
 {
     if (DBG_TRACE)
-	fprintf (stderr, "GtStartDialog:  ENTER  d_pixmap=0x%x d_saved=%d\n",
+	fprintf (stderr, "GtStartDialog:  ENTER  d_pixmap=0x%lx d_saved=%d\n",
 	    w->gterm.d_pixmap, w->gterm.d_saved);
 
     if (w->gterm.d_pixmap) {
@@ -996,7 +996,7 @@ void
 GtEraseDialog (GtermWidget w)
 {
     if (DBG_TRACE)
-	fprintf (stderr, "GtEraseDialog:  ENTER  d_pixmap=0x%x d_saved=%d\n",
+	fprintf (stderr, "GtEraseDialog:  ENTER  d_pixmap=0x%lx d_saved=%d\n",
 	    w->gterm.d_pixmap, w->gterm.d_saved);
 
     if (w->gterm.d_pixmap && w->gterm.d_saved) {

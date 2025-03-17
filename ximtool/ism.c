@@ -293,7 +293,7 @@ ism_io (IsmIoChanPtr chan, int *fd_addr, XtInputId *id_addr)
     bzero (chan->msgbuf, SZ_ISMBUF);
 
     if (ism_debug >= 2)
-	printf("\nism_io: nread=%d pkt=%d count=%d n=%d\n",nread,pkt++,count,n);
+	printf("\nism_io: nread=%ld pkt=%ld count=%d n=%d\n",nread,pkt++,count,n);
 
 
     ip = 0;
@@ -304,7 +304,7 @@ ism_io (IsmIoChanPtr chan, int *fd_addr, XtInputId *id_addr)
 	    /* Save the incomplete message to the buffer for later parsing.
 	     */
 	    if (ism_debug >= 2)
-		printf ("INCOMPLETE '%s' ip=%d len=%d\n", text,ip,strlen(text));
+		printf ("INCOMPLETE '%s' ip=%d len=%lu\n", text,ip,strlen(text));
             strcpy (chan->msgbuf, text);
 	    break;
 	}
@@ -404,7 +404,7 @@ ism_io (IsmIoChanPtr chan, int *fd_addr, XtInputId *id_addr)
 	     */
 	    ism_parseSend (text, name, buf);
 	    if (ism_debug >= 3)
-		printf ("SEND: len=%d '%s'->'%.45s'\n", strlen(buf), name, buf);
+		printf ("SEND: len=%lu '%s'->'%.45s'\n", strlen(buf), name, buf);
 	    xim_message (xim, name, buf);
 	    break;
 

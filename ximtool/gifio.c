@@ -150,7 +150,7 @@ loadGIF  (char *fname, uchar **pix, int *nx, int *ny, uchar *r, uchar *g, uchar 
 /* writeGIF -- Write a GIF image.
  */
 
-int
+void
 writeGIF (FILE *fp, byte *image, int w, int h, byte *rmap, byte *gmap, byte *bmap, int numcols, int gray)
      	    				/* output file descriptor */
      	       				/* image pixels 	  */

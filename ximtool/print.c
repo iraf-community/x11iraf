@@ -200,7 +200,7 @@ ximp_rename (XimDataPtr xim, char *old, char *new)
 	    sprintf (text, "Could not write file %s", new);
 	    printstat (xim, text);
 	} else {
-	    sprintf (text, "Wrote %d bytes to %s", fs.st_size, new);
+	    sprintf (text, "Wrote %ld bytes to %s", fs.st_size, new);
 	    printstat (xim, text);
 	}
 }

@@ -122,7 +122,7 @@ refresh_destination (GtermWidget w, Mapping mp, int x1, int y1, int nx, int ny)
 
 
     if (DBG_TRACE)
-	fprintf(stderr, "refresh_destination ENTER[0x%x]: pos=%d,%d sz=%d,%d\n",
+	fprintf(stderr, "refresh_destination ENTER[%p]: pos=%d,%d sz=%d,%d\n",
 	    w, x1,y1,nx,ny);
 
     if (!w || !XtIsRealized ((Widget)w))
@@ -184,10 +184,10 @@ refresh_destination (GtermWidget w, Mapping mp, int x1, int y1, int nx, int ny)
 	        (sr->type == 1 ? "image" : "pixmap"),  sr->depth,
 	        (dr->type == 1 ? "image" : "pixmap"),  dr->depth);
 	fprintf (stderr, 
-	    "refresh: gterm.pixmap=0x%x src.pixmap=0x%x  dest.pixmap=0x%x\n",
+	    "refresh: gterm.pixmap=0x%lx src.pixmap=0x%lx  dest.pixmap=0x%lx\n",
 	    w->gterm.pixmap, sr->r.pixmap, dr->r.pixmap);
 	fprintf (stderr, 
-	    "refresh: gterm.pixmap=0x%x src.ximage=0x%x  dest.ximage=0x%x\n",
+	    "refresh: gterm.pixmap=0x%lx src.ximage=%p  dest.ximage=%p\n",
 	    w->gterm.pixmap, sr->r.ximage, dr->r.ximage);
 	fprintf (stderr, 
 	    "refresh_destination: src=>(%d,%d : %d,%d)  dst=>(%d,%d : %d,%d)\n",
@@ -310,7 +310,7 @@ refresh_destination (GtermWidget w, Mapping mp, int x1, int y1, int nx, int ny)
 	    if (DBG_TRACE) {
 		fprintf (stderr, 
 		    "refresh_destination: pixmap copy src || dst != 0\n");
-		fprintf (stderr, "src=%d  dest=%d  shadow=0x%x  ximage=0x%x\n",
+		fprintf (stderr, "src=%d  dest=%d  shadow=0x%lx  ximage=%p\n",
 		    src, dst, dr->shadow_pixmap, rp->r.ximage);
 		dbg_printRasters (w);
 		fprintf (stderr,
@@ -360,7 +360,7 @@ refresh_destination (GtermWidget w, Mapping mp, int x1, int y1, int nx, int ny)
 
 	    if (DBG_TRACE) {
 		fprintf (stderr, "refresh_destination: xin is cached XImage ");
-		fprintf (stderr, " src=%d pix=0x%x  dims=%d,%d\n",
+		fprintf (stderr, " src=%d pix=0x%lx  dims=%d,%d\n",
 		    src, w->gterm.pixmap, sr->width, sr->height);
 	    }
 
@@ -382,7 +382,7 @@ refresh_destination (GtermWidget w, Mapping mp, int x1, int y1, int nx, int ny)
 	    if (w->gterm.w_depth > ColormapDepth) {
 		if (DBG_TRACE) {
 		    fprintf (stderr,
-			"src=%d  dst=%d  d_ras=%d  %d x %d  pr=0x%x  sr=0x%x\n",
+			"src=%d  dst=%d  d_ras=%d  %d x %d  pr=0x%lx  sr=0x%lx\n",
 		        src, dst, w->gterm.d_raster, sr->width, sr->height, 
 		        pr->shadow_pixmap, sr->shadow_pixmap);
 		    dbg_printRasters (w);
@@ -443,7 +443,7 @@ refresh_destination (GtermWidget w, Mapping mp, int x1, int y1, int nx, int ny)
 
 	    if (DBG_TRACE)
 		fprintf (stderr,
-		    "\n\nrefresh: gterm.pixmap=0x%x dest.pixmap=0x%x\n\n",
+		    "\n\nrefresh: gterm.pixmap=0x%lx dest.pixmap=0x%lx\n\n",
 		    w->gterm.pixmap, dr->r.pixmap);
 
 	    XCopyArea (display, 
@@ -463,7 +463,7 @@ refresh_destination (GtermWidget w, Mapping mp, int x1, int y1, int nx, int ny)
 		    "refresh_destination: src=(%d,%d) => %d,%d : %d,%d\n",
 		    sx, sy, dx, dy, dnx, dny);
 		fprintf (stderr, 
-		    "refresh_destination: dr->shadow_pixmap = 0x%x\n",
+		    "refresh_destination: dr->shadow_pixmap = 0x%lx\n",
 		    dr->shadow_pixmap);
 		fprintf (stderr, "refresh_destination: xin => %d x %d x %d\n",
 		    xin->width, xin->height, xin->depth);
@@ -486,7 +486,7 @@ refresh_destination (GtermWidget w, Mapping mp, int x1, int y1, int nx, int ny)
 		*/
 		if (DBG_TRACE)
 		    fprintf (stderr,
-			"updating shadow_pixmap........................0x%x\n",
+			"updating shadow_pixmap........................0x%lx\n",
 			dr->shadow_pixmap);
 	        XPutImage (display, dr->shadow_pixmap,
 		    w->gterm.expose8GC, xin,
@@ -555,7 +555,7 @@ refresh_destination (GtermWidget w, Mapping mp, int x1, int y1, int nx, int ny)
      * type of scaling we are doing.
      */
     if (DBG_TRACE)
-	fprintf (stderr, "refresh: scaling=%d  xin=0x%x  xout=0x%x\n",
+	fprintf (stderr, "refresh: scaling=%d  xin=%p  xout=%p\n",
 	    scaling, xin, xout);
 
     if (!scaling) {
@@ -747,7 +747,7 @@ filter:
 	    if (w->gterm.w_depth > ColormapDepth) {
 		if (DBG_TRACE) {
 		    fprintf (stderr,
-			"updating shadow_pixmap........................0x%x\n",
+			"updating shadow_pixmap........................0x%lx\n",
 			dr->shadow_pixmap);
 		    fprintf (stderr,
 			"updating %d,%d  to %d,%d  %d %d\n",
@@ -781,7 +781,7 @@ filter:
 		*/
 		if (DBG_TRACE) {
 		    fprintf (stderr,
-			"updating shadow_pixmap........................0x%x\n",
+			"updating shadow_pixmap........................0x%lx\n",
 		        dr->shadow_pixmap);
 		    fprintf (stderr,
 			"updating %d,%d  to %d,%d  %d %d\n", 

@@ -790,7 +790,7 @@ Initialize (Widget request, Widget new)
 
 	if (DBG_TRACE)
 	    fprintf (stderr, 
-		"Gterm.intialize(Pseudo8): colormap = 0x%x base=%d\n",
+		"Gterm.intialize(Pseudo8): colormap = 0x%lx base=%lu\n",
 		w->core.colormap, w->gterm.base_pixel);
 
         /* create Standard Color Map */
@@ -822,7 +822,7 @@ Initialize (Widget request, Widget new)
 
 	if (DBG_TRACE)
 	    fprintf (stderr,
-		"Gterm.initialize(Pseudo8): defDepth=%d  cmap=0x%x\n", 
+		"Gterm.initialize(Pseudo8): defDepth=%d  cmap=0x%lx\n", 
     		w->gterm.w_depth, w->core.colormap);
 
         /* Let gterm know what we have done.
@@ -847,7 +847,7 @@ Initialize (Widget request, Widget new)
 
 	if (DBG_TRACE) {
 	    fprintf (stderr, "NO 8-bit PSEUDO FOUND.....USING TRUECOLOR\n");
-	    fprintf (stderr, "nvis=%d  defDepth=%d  cmap=0x%x\n", 
+	    fprintf (stderr, "nvis=%d  defDepth=%d  cmap=0x%lx\n", 
 	        nvis, w->gterm.w_depth, w->core.colormap);
 	}
 
@@ -942,7 +942,7 @@ Initialize (Widget request, Widget new)
 
 	if (DBG_TRACE)
 	    fprintf (stderr, 
-		"Gterm.initialize (TrueColor): after colormap, cmap=0x%x\n",
+		"Gterm.initialize (TrueColor): after colormap, cmap=0x%lx\n",
 		w->core.colormap);
     }
     /* Deep Frame */
@@ -1025,7 +1025,7 @@ Initialize (Widget request, Widget new)
 
     if (DBG_TRACE)
 	fprintf (stderr, 
-	    "Gterm.intialize: ncolors=%d useDefaultCM=%d  core.colormap=0x%x\n",
+	    "Gterm.intialize: ncolors=%d useDefaultCM=%d  core.colormap=0x%lx\n",
 	    w->gterm.ncolors, w->gterm.useDefaultCM, w->core.colormap);
 
     w->gterm.cmapLastUpdate = 0;
@@ -1373,7 +1373,7 @@ Realize (Widget gw, XtValueMask *valueMask, XSetWindowAttributes *attrs)
     w->gterm.cursorGC = gc;
 
     if (DBG_TRACE)
-        fprintf (stderr, "Gterm.Realize:  force8=%d  core colormap 0x%x\n",
+        fprintf (stderr, "Gterm.Realize:  force8=%d  core colormap 0x%lx\n",
 	    w->gterm.forcePseudo8, w->core.colormap);
 
     set_default_color_index (w);

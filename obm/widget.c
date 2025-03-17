@@ -857,7 +857,7 @@ widgetAddCallback (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	    if (callback_type == Ctlinemode) {
 		char text_translations[SZ_LINE];
 		XtTranslations translations;
-		sprintf (text_translations, "<Key>Return: do_text(0x%lx, %s) ",
+		sprintf (text_translations, "<Key>Return: do_text(%p, %s) ",
 		    wp->obm, XtName(wp->w));
 		translations = XtParseTranslationTable (text_translations);
 		XtOverrideTranslations (wp->w, translations);
@@ -1569,7 +1569,7 @@ do_userproc (Widget w, XEvent *event, String *params, Cardinal *num_params)
 		    *op++ = ' ';
 
 		} else if (strcmp (param, "$time") == 0) {
-		    sprintf (op, "%u ", time);
+		    sprintf (op, "%lu ", time);
 		    while (*op)
 			op++;
 		} else if (strcmp (param, "$x") == 0) {
@@ -2103,7 +2103,7 @@ widgetGet (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 
 	    XtSetArg (args[0], rp->name, &value);
 	    XtGetValues (wp->w, args, 1);
-	    sprintf (result, "0x%x", value);
+	    sprintf (result, "%p", value);
 
   	    font_struct = (XFontStruct *) value;
   	    name = widgetGetFontName (obm->display, font_struct);
@@ -2117,7 +2117,7 @@ widgetGet (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	    void * value;  Arg args[1];
 	    XtSetArg (args[0], rp->name, &value);
 	    XtGetValues (wp->w, args, 1);
-	    sprintf (result, "0x%x", value);
+	    sprintf (result, "%p", value);
 	}
 
 	Tcl_SetResult (wp->obm->tcl, result, TCL_VOLATILE);
@@ -4499,7 +4499,7 @@ widgetEvent (Widget w, ObmCallback cb, XEvent *event, Boolean *continue_to_dispa
 		char buf[20];
 		int n;
 
-		sprintf (op, "%u %d %d %d %d ",
+		sprintf (op, "%lu %d %d %d %d ",
 		    ev->time, ev->x, ev->y, ev->x_root, ev->y_root);
 		while (*op) op++;
 
@@ -4530,7 +4530,7 @@ widgetEvent (Widget w, ObmCallback cb, XEvent *event, Boolean *continue_to_dispa
 	case ButtonRelease:
 	    {	XButtonPressedEvent *ev = (XButtonPressedEvent *) event;
 
-		sprintf (op, "%u %d %d %d %d ",
+		sprintf (op, "%lu %d %d %d %d ",
 		    ev->time, ev->x, ev->y, ev->x_root, ev->y_root);
 		while (*op) op++;
 
@@ -4572,7 +4572,7 @@ widgetEvent (Widget w, ObmCallback cb, XEvent *event, Boolean *continue_to_dispa
 	case LeaveNotify:
 	    {	XPointerMovedEvent *ev = (XPointerMovedEvent *) event;
 
-		sprintf (op, "%u %d %d %d %d ",
+		sprintf (op, "%lu %d %d %d %d ",
 		    ev->time, ev->x, ev->y, ev->x_root, ev->y_root);
 		while (*op) op++;
 
@@ -4739,7 +4739,7 @@ widgetGetFontName (Display *display, XFontStruct *fs) /* MF016 */
                     case unscaled:
                     case scaledXoverY:
                     case uncomputed:
-                        sprintf(name, "%s%d", name, val);
+                        sprintf(name, "%s%lu", name, val);
                         break;
                     }
                 } else

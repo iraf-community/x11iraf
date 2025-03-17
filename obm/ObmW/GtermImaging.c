@@ -941,7 +941,7 @@ GtRefreshPixels (GtermWidget w, int raster, int ct, int x1, int y1, int nx, int 
     for (mp = w->gterm.mp_head;  mp;  mp = mp->next) {
 
         if (DBG_TRACE)
-	    fprintf (stderr, "GtRefreshPixels: mp=0x%x enabled=%d src=%d/%d\n",
+	    fprintf (stderr, "GtRefreshPixels: mp=%p enabled=%d src=%d/%d\n",
 		mp, mp->enabled, mp->src, raster);
 
 	if (mp->enabled && mp->src == raster) {
@@ -1614,7 +1614,7 @@ dummy:
 		break;
 
         if (DBG_TRACE)
-	    fprintf (stderr, "GtLoadColormap: map=%d/%d cm=0x%x ncells=%d\n", 
+	    fprintf (stderr, "GtLoadColormap: map=%d/%d cm=%p ncells=%d\n", 
 		map, cm->map, cm, cm->ncells);
 
 	if (!cm)
@@ -2994,7 +2994,7 @@ GtDebug (GtermWidget w, FILE *fp, int what)
 
     /* Print widget header. */
     if (what & 001) {
-	fprintf (fp, "Widget 0x%x (%s) %dx%d raster=%d\n",
+	fprintf (fp, "Widget %p (%s) %dx%d raster=%d\n",
 	    w, w->core.name, w->core.width, w->core.height, w->gterm.raster);
 	fprintf (fp,
 	    "--------------------------------------------------------------\n");
@@ -3061,7 +3061,7 @@ GtDebug (GtermWidget w, FILE *fp, int what)
     if (what & 010) {
 	struct colormap *cm;
 
-	fprintf (fp, "cmapName=%s ncolors=%d basePixel=%d\n",
+	fprintf (fp, "cmapName=%s ncolors=%d basePixel=%lu\n",
 	    w->gterm.cmapName, w->gterm.ncolors, w->gterm.base_pixel);
 	for (cm = w->gterm.colormaps;  cm;  cm = cm->next)
 	    fprintf (fp, "colormap %2d ncells=%d\n", cm->map, cm->ncells);
@@ -3074,7 +3074,7 @@ GtDebug (GtermWidget w, FILE *fp, int what)
 
 	for (mm = w->gterm.gm_head;  mm;  mm = mm->next) {
 	    GmGetAttribute (mm, GmType, (XtArgVal)value, XtRString);
-	    fprintf (fp, "marker 0x%x: %10s flags=0x%x [%d %d %d %d] %0.5g\n",
+	    fprintf (fp, "marker %p: %10s flags=0x%x [%d %d %d %d] %0.5g\n",
 		mm, value, mm->flags, mm->x, mm->y, mm->width, mm->height,
 		mm->rotangle);
 	}

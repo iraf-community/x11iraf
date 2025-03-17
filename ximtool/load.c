@@ -200,7 +200,7 @@ xim_loadFile (XimDataPtr xim, char *fname, int frame)
 
 	if (debug) {
 	    fprintf (stderr,
-		"Load: pix=%d w=%d h=%d xnc=%d nc=%d pcm=%d z1=%g z2=%g\n",
+		"Load: pix=%s w=%d h=%d xnc=%d nc=%d pcm=%d z1=%g z2=%g\n",
 		    pix, w, h, xim->ncolors, ncolors, has_private_cmap, z1, z2);
 	    fflush (stderr);
 	}

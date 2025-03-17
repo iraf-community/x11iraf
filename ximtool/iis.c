@@ -479,7 +479,7 @@ xim_iisio (IoChanPtr chan, int *fd_addr, XtInputId *id_addr)
 	if ((n = chan_read (datain, (char *)&iis, sizeof(iis))) < sizeof(iis)) {
 	    if (n != 0) 
 	        fprintf (stderr, 
-	            "ximtool: command input read error, n=%d of %d, errno=%d\n",
+	            "ximtool: command input read error, n=%d of %lu, errno=%d\n",
 	                n, sizeof(iis), errno);
 	    if (n <= 0)
 		xim_disconnectClient (chan);
@@ -746,7 +746,7 @@ xim_iisio (IoChanPtr chan, int *fd_addr, XtInputId *id_addr)
 
 		    if (iis_debug)
                 	fprintf (stderr, "write %d bytes at x=%d, y=%d\n",
-                    	    nbytes, x, y, nx, ny);
+                    	    nbytes, x, y);
 		}
 
 		return;
