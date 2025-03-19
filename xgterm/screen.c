@@ -86,7 +86,7 @@ ScrnBuf Allocate (int nrow, int ncol, Char **addr)
  *  Returns the number of lines the text was moved down (neg for up).
  *  (Return value only necessary with SouthWestGravity.)
  */
-static
+static int
 Reallocate(ScrnBuf *sbuf, Char **sbufaddr, int nrow, int ncol, int oldrow, int oldcol)
 {
 	ScrnBuf base;

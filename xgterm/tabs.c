@@ -74,6 +74,7 @@ TabClear(unsigned int *tabs, int col)
  * (or MAX_TABS - 1 if there are no more).
  * A tabstop at col is ignored.
  */
+int
 TabNext (unsigned int *tabs, int col)
 {
 	extern XgtermWidget term;

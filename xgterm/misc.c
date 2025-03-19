@@ -1005,7 +1005,7 @@ char *strindex (char *s1, char *s2)
  * depending upon the value of the environment variable XGXERROR, if defined.
  */
 /*ARGSUSED*/
-xerror (Display *display, XErrorEvent *event)
+int xerror (Display *display, XErrorEvent *event)
 {
 	static char *envvar = "XGXERROR";
 	static char *env_maxerrs = "XGMAXERROR";
@@ -1092,7 +1092,7 @@ void xt_error(String message)
     exit(1);
 }
 
-XStrCmp(char *s1, char *s2)
+int XStrCmp(char *s1, char *s2)
 {
   if (s1 && s2) return(strcmp(s1, s2));
   if (s1 && *s1) return(1);

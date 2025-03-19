@@ -2148,8 +2148,7 @@ set_pty_id(char *device, char *id)
 }
 
 
-
-
+int
 spawn(void)
 /*
  *  Inits pty and tty and forks a login process.
