@@ -1,5 +1,7 @@
 
 #include <stdint.h>
+#include <strings.h>
+
 /* Convenience macros.
 */
 #define	GPMtoRPM		gtermPM_to_rasPM	/* Pixmap	*/
@@ -61,6 +63,7 @@ Pixmap rasPM_to_rasPM (Raster src, Raster dest)
 	fprintf (stderr, "RPMtoRPM: %d > %d\n", src->depth, dest->depth);
 	return 0; /* not implemented yet */
     }
+    return 0;
 }
 
 
@@ -87,6 +90,7 @@ Pixmap rasPM_to_gtermPM (Raster src, GtermWidget w)
 	fprintf (stderr, "RPMtoRPM: %d > %d\n", src->depth, w->gterm.w_depth);
 	return 0; /* not implemented yet */
     }
+    return 0;
 }
 
 
@@ -104,7 +108,7 @@ XImage *ximage_to_rasPM (GtermWidget w, XImage *xin, Raster dest,
 
  
     if (DBG_TRACE) {
-	fprintf (stderr, "IMGtoRPM: %d <-> %d  [%d,%d]  cnvImg=0x%x\n",
+	fprintf (stderr, "IMGtoRPM: %d <-> %d  [%d,%d]  cnvImg=%p\n",
 	    xin->depth, dest->depth, xin->width, xin->height, cnvImg);
 	fprintf (stderr, "IMGtoRPM: Map: (%d,%d)  : %d  %d\n",
 	    sx, sy, dnx, dny);
@@ -331,7 +335,7 @@ init_lut (int bpp, int border)
     }
 
     if (DBG_TRACE && DBG_CM_VERB)
-	fprintf (stderr, "init_lut: mask=(0x%x,0x%x,0x%x) shift=(%d,%d,%d)\n",
+	fprintf (stderr, "init_lut: mask=(0x%lx,0x%lx,0x%lx) shift=(%d,%d,%d)\n",
 	    rmask, gmask, bmask, rshift, gshift, bshift);
 
     valid_lut = 1;
@@ -411,7 +415,7 @@ dbg_printCmaps (GtermWidget w)
 
     fprintf (stderr, "cmaps: first=%d nelem=%d max=%d  nc=%d\n",
         first, nelem, maxelem, nc);
-    fprintf (stderr, "cmaps: basePixel=%d  maxColors=%d ncolors=%d\n",
+    fprintf (stderr, "cmaps: basePixel=%lu  maxColors=%d ncolors=%d\n",
         w->gterm.base_pixel, w->gterm.maxColors, w->gterm.ncolors);
 
 
@@ -428,7 +432,7 @@ dbg_printCmaps (GtermWidget w)
     fprintf (stderr, "GlobalCmap   cm    in   out\n");
     for (i=0;  i < MAX_SZCMAP;  i++)
      fprintf (stderr, 
-     "cmap: %3d  %3d   %3d %3d %3d   %3d %3d %3d  %3d %3d %3d  %3d  %3d  %3d\n",
+     "cmap: %3d  %3d   %3d %3d %3d   %3d %3d %3d  %3d %3d %3d  %3lu  %3lu  %3lu\n",
           i, iomap[i], rs[i]>>8, gs[i]>>8, bs[i]>>8, r[i], g[i], b[i],
 	  global_color[i].red>>8, global_color[i].green>>8, 
 	  global_color[i].blue>>8, global_cmap[i],
@@ -471,7 +475,7 @@ dbg_printRasters (GtermWidget w)
 	fprintf (stderr, "Raster %d:  ty=%s  size=(%d,%d,%d)\t",
 	    i, (rp->type == 1 ? "ximage" : "pixmap"),
 	    rp->width, rp->height, rp->depth);
-	fprintf (stderr, ": p=0x%x im=0x%x sh=0x%x\n",
+	fprintf (stderr, ": p=0x%lx im=%p sh=0x%lx\n",
 	    rp->r.pixmap, rp->r.ximage, rp->shadow_pixmap);
     }
 }

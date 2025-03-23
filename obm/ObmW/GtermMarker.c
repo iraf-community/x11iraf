@@ -84,6 +84,10 @@ static Region null_region;
 static XRectangle null_rect = { 0, 0, 0, 0 };
 #define NullRect(r)	(!(r)->width || !(r)->height)
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 #define PI_2		1.57079632679489661923
 #define PI_4		0.78539816339744830962
 #define BORDER		5
@@ -154,7 +158,7 @@ GtMarkerInit (GtermWidget w)
 	    r.resource_size   = sizeof (char *);
 	    r.resource_offset = 0;
 	    r.default_type    = XtRString;
-	    r.default_addr    = (caddr_t) NULL;
+	    r.default_addr    = (void *) NULL;
 
 	    XtGetApplicationResources ((Widget)w, &translations, &r, 1,NULL,0);
 
@@ -1837,7 +1841,7 @@ gm_getpixel (GtermWidget w, XtArgVal value, char *type)
 	     */
 	    from.size = strlen ((char *)value) + 1;
 	    from.addr = (char *)value;
-	    to.addr = (caddr_t) &pixel;
+	    to.addr = (void *) &pixel;
 	    to.size = sizeof(pixel);
 
 	    if (!XtConvertAndStore ((Widget)w, XtRString, &from, XtRPixel, &to))

@@ -1968,7 +1968,7 @@ info (XimClientPtr xc, Tcl_Interp *tcl, int argc, char **argv)
             return (TCL_ERROR);
 	}
 
-	strcat (message, "\n\0");
+	strcat (message, "\n");
 
 	if (*message)
             xim_message (xim, "info", message);

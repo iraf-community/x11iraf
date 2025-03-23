@@ -46,11 +46,11 @@ static XtResource resources[] = {
   },
   {
     XtNforeground, XtCForeground, XtRPixel, sizeof(Pixel),
-     offset(foreground), XtRString, (caddr_t) XtDefaultForeground
+     offset(foreground), XtRString, (void *) XtDefaultForeground
   },
   {
     XtNuserData, XtCUserData, XtRPixmap, sizeof(Pixmap),
-     offset(user_data), XtRImmediate, (caddr_t) NULL
+     offset(user_data), XtRImmediate, (void *) NULL
   },
   {
     XtNborderWidth, XtCBorderWidth, XtRDimension, sizeof(Dimension),
@@ -71,7 +71,7 @@ static void InsPixel(Widget w, int off, XrmValue *value)
   {  
     p->container.bottom_shadow_GC = UndefinedGC;
   }
-  value->addr = (caddr_t) &pixel;
+  value->addr = (void *) &pixel;
 }
 
 #undef offset

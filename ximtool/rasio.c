@@ -118,7 +118,7 @@ loadSunRas (char *fname, unsigned char **pixels, int *pixtype, int *o_w, int *o_
 	    sunhdr.ras_depth != 24 && 
 	    sunhdr.ras_depth != 32) {
 
-	    fprintf (stderr, "Sun rasterfile image has depth %d\n", 
+	    fprintf (stderr, "Sun rasterfile image has depth %ld\n", 
 	        sunhdr.ras_depth);
 	    fprintf (stderr, "Depths supported are 1, 8, 24, and 32\n");
 	    fclose (fp);
@@ -130,7 +130,7 @@ loadSunRas (char *fname, unsigned char **pixels, int *pixtype, int *o_w, int *o_
 	    sunhdr.ras_type != RT_BYTE_ENCODED && 
 	    sunhdr.ras_type != RT_FORMAT_RGB) {
 
-	    fprintf (stderr, "Sun rasterfile of unsupported type %d\n",
+	    fprintf (stderr, "Sun rasterfile of unsupported type %ld\n",
 	        sunhdr.ras_type);
 	    fclose (fp);
 	    return (sunRasError(fname, "Unsupported rasterfile type"));
@@ -140,7 +140,7 @@ loadSunRas (char *fname, unsigned char **pixels, int *pixtype, int *o_w, int *o_
 	    sunhdr.ras_maptype != RMT_NONE && 
 	    sunhdr.ras_maptype != RMT_EQUAL_RGB) {
 
-	    fprintf (stderr, "Sun rasterfile colormap of unsupported type %d\n",
+	    fprintf (stderr, "Sun rasterfile colormap of unsupported type %ld\n",
 	        sunhdr.ras_maptype);
 	    fclose (fp);
 	    return (sunRasError(fname, "Unsupported rasterfile colormap"));
@@ -166,10 +166,10 @@ loadSunRas (char *fname, unsigned char **pixels, int *pixtype, int *o_w, int *o_
 	    fprintf (stderr, "LoadSunRas() - loading a %dx%d pic, %d planes\n",
 		w, h, d);
 	    fprintf (stderr, 
-	    "type %d, maptype %d, isize %d, csize %d, lsize %d, linesize %d\n",
+	    "type %ld, maptype %ld, isize %d, csize %d, lsize %d, linesize %d\n",
 		sunhdr.ras_type, sunhdr.ras_maptype,
 		isize, csize, lsize, linesize);
-	    fprintf (stderr, "colorstyle=%d nc=%d\n", colorstyle,
+	    fprintf (stderr, "colorstyle=%d nc=%ld\n", colorstyle,
 		sunhdr.ras_maplength/3);
 	}
 
@@ -459,7 +459,7 @@ getSunRasHdr (char *fname)
 
 	/* Format the description. */
         line = (char *) malloc (80);
-        sprintf (line, "%-16.16s  %3d  %5dx%-5d  %s %s",
+        sprintf (line, "%-16.16s  %3ld  %5ldx%-5ld  %s %s",
             fname, hdr.ras_depth, hdr.ras_width, hdr.ras_height, 
 	    "Sun Rasterfile",
 	    ((((hdr.ras_type == RT_OLD) ? "(OLD)" : 

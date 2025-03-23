@@ -2950,9 +2950,9 @@ gtermWriteColormap (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	int ncolors;
 	char *ip;
 	char *colors, *ip_save;
-	ushort r[MAX_COLORS];
-	ushort g[MAX_COLORS];
-	ushort b[MAX_COLORS];
+	unsigned short r[MAX_COLORS];
+	unsigned short g[MAX_COLORS];
+	unsigned short b[MAX_COLORS];
 	int offset, colormap;
 	char *ipp;
 
@@ -3013,9 +3013,9 @@ gtermReadColormap (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	int i;
 	char *op;
 	char colors[MAX_COLORS * 3 * 20];
-	ushort r[MAX_COLORS];
-	ushort g[MAX_COLORS];
-	ushort b[MAX_COLORS];
+	unsigned short r[MAX_COLORS];
+	unsigned short g[MAX_COLORS];
+	unsigned short b[MAX_COLORS];
 	int offset, colormap;
 	int ncolors, request;
 	char buf[SZ_NUMBER];

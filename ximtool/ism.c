@@ -49,8 +49,9 @@
 IsmModule    ismNameToPtr(char *name);
 
 static void  ism_connectClient(IsmIoChanPtr chan, int *source, XtPointer id), ism_disconnectClient(IsmIoChanPtr chan), ism_io(IsmIoChanPtr chan, int *fd_addr, XtInputId *id_addr);
-static int   ism_read(int fd, void *vptr, int nbytes), ism_write(int fd, void *vptr, int nbytes), ism_type(char *message), ism_parseSend(char *msg, char *object, char *text);
-static int   ism_openSocket(char *path);
+static int  ism_read(int fd, void *vptr, int nbytes), ism_write(int fd, void *vptr, int nbytes), ism_type(char *message);
+static void ism_parseSend(char *msg, char *object, char *text);
+static int  ism_openSocket(char *path);
 static IsmIoChanPtr ism_getChannel(XimDataPtr xim);
 static char *ism_parse(char *msg, int *ip, int *incomplete, int maxch);
 static int ismObjects(char *name);
@@ -211,7 +212,7 @@ ism_connectClient (IsmIoChanPtr chan, int *source, XtPointer id)
 	int s;
 
 	/* Accept connection. */
-	if ((s = accept ((int)*source, (struct sockaddr *)0, (int *)0)) < 0)
+	if ((s = accept (*source, NULL, NULL)) < 0)
 	    return;
 	/*if (fcntl (s, F_SETFL, O_RDWR|O_NDELAY) < 0) {*/
 	if (fcntl (s, F_SETFL, O_NDELAY) < 0) {
@@ -292,7 +293,7 @@ ism_io (IsmIoChanPtr chan, int *fd_addr, XtInputId *id_addr)
     bzero (chan->msgbuf, SZ_ISMBUF);
 
     if (ism_debug >= 2)
-	printf("\nism_io: nread=%d pkt=%d count=%d n=%d\n",nread,pkt++,count,n);
+	printf("\nism_io: nread=%ld pkt=%ld count=%d n=%d\n",nread,pkt++,count,n);
 
 
     ip = 0;
@@ -303,7 +304,7 @@ ism_io (IsmIoChanPtr chan, int *fd_addr, XtInputId *id_addr)
 	    /* Save the incomplete message to the buffer for later parsing.
 	     */
 	    if (ism_debug >= 2)
-		printf ("INCOMPLETE '%s' ip=%d len=%d\n", text,ip,strlen(text));
+		printf ("INCOMPLETE '%s' ip=%d len=%lu\n", text,ip,strlen(text));
             strcpy (chan->msgbuf, text);
 	    break;
 	}
@@ -403,7 +404,7 @@ ism_io (IsmIoChanPtr chan, int *fd_addr, XtInputId *id_addr)
 	     */
 	    ism_parseSend (text, name, buf);
 	    if (ism_debug >= 3)
-		printf ("SEND: len=%d '%s'->'%.45s'\n", strlen(buf), name, buf);
+		printf ("SEND: len=%lu '%s'->'%.45s'\n", strlen(buf), name, buf);
 	    xim_message (xim, name, buf);
 	    break;
 
@@ -481,7 +482,7 @@ ism_type (char *message)
 
 /* ISM_PARSESEND -- Parse the client SEND message.
  */
-static int
+static void
 ism_parseSend (char *msg, char *object, char *text)
 {
 	int i=0, ip=4, count=0;
@@ -528,7 +529,7 @@ ism_evaluate (XimDataPtr xim, char *object, char *command)
 	for (i=0; i < XtNumber (xim->ism_client); i++) {
 	    chan = &xim->ism_client[i];
 	    if (chan->connected && strcmp (chan->name, object) == 0) {
-		sprintf (buf, "%s\0", command);
+		sprintf (buf, "%s", command);
 		len = strlen (buf) + 1;       	/* +1 to send the NULL */
 		ism_write (chan->dataout, buf, len);
         	if (ism_debug >= 2) printf("writing %d bytes: '%s'\n", len,buf);
@@ -542,7 +543,7 @@ ism_evaluate (XimDataPtr xim, char *object, char *command)
 
 /* ISM_MESSAGE -- Convenience wrapper for the evaluate procedure.
  */
-int
+void
 ism_message (XimDataPtr xim, char *object, char *command)
 {
 	ism_evaluate (xim, object, command);
@@ -616,7 +617,7 @@ ismObjects (char *name)
 
 	if (strstr (objects, name) == NULL) {
 	    strcat (objects, name);
-	    strcat (objects, "|\0");
+	    strcat (objects, "|");
 	    return (0);
 	} else
 	    return (1);

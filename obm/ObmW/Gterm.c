@@ -69,9 +69,9 @@ static char defaultMarkerTranslations[] =
 
 static XtResource resources[] = {
     {XtNwidth, XtCWidth, XtRDimension, sizeof(Dimension),
-	XtOffset(Widget,core.width), XtRDimension, (caddr_t)&defXDim},
+	XtOffset(Widget,core.width), XtRDimension, (void *)&defXDim},
     {XtNheight, XtCHeight, XtRDimension, sizeof(Dimension),
-	XtOffset(Widget,core.height), XtRDimension, (caddr_t)&defYDim},
+	XtOffset(Widget,core.height), XtRDimension, (void *)&defYDim},
 
     {XtNalphaFont1, XtCFont, XtRFontStruct, sizeof(XFontStruct *),
         XtOffset(GtermWidget,gterm.alphaFont1), XtRString, "nil2"},
@@ -164,16 +164,16 @@ static XtResource resources[] = {
         XtOffset(GtermWidget,gterm.ginmodeCursor), XtRString, "full_crosshair"},
     {XtNwarpCursor, XtCBoolean, XtRBoolean, sizeof(Boolean),
 	XtOffset(GtermWidget,gterm.warpCursor), XtRImmediate,
-	(caddr_t)DEF_WARPCURSOR},
+	(void *)DEF_WARPCURSOR},
     {XtNraiseWindow, XtCBoolean, XtRBoolean, sizeof(Boolean),
 	XtOffset(GtermWidget,gterm.raiseWindow), XtRImmediate,
-	(caddr_t)DEF_RAISEWINDOW},
+	(void *)DEF_RAISEWINDOW},
     {XtNdeiconifyWindow, XtCBoolean, XtRBoolean, sizeof(Boolean),
 	XtOffset(GtermWidget,gterm.deiconifyWindow), XtRImmediate,
-	(caddr_t)DEF_DEICONIFYWINDOW},
+	(void *)DEF_DEICONIFYWINDOW},
     {XtNuseTimers, XtCBoolean, XtRBoolean, sizeof(Boolean),
 	XtOffset(GtermWidget,gterm.useTimers), XtRImmediate,
-	(caddr_t)DEF_USETIMERS},
+	(void *)DEF_USETIMERS},
 
     {XtNcolor0, XtCBackground, XtRPixel, sizeof(Pixel),
         XtOffset(GtermWidget,gterm.color0), XtRString, "black"},
@@ -198,34 +198,34 @@ static XtResource resources[] = {
 
     {XtNcacheRasters, XtCString, XtRString, sizeof(String),
 	XtOffset(GtermWidget,gterm.color0Str), XtRImmediate, 
-	(caddr_t)"black"},
+	(void *)"black"},
     {XtNcacheRasters, XtCString, XtRString, sizeof(String),
 	XtOffset(GtermWidget,gterm.color1Str), XtRImmediate, 
-	(caddr_t)"white"},
+	(void *)"white"},
     {XtNcacheRasters, XtCString, XtRString, sizeof(String),
 	XtOffset(GtermWidget,gterm.color2Str), XtRImmediate, 
-	(caddr_t)"red"},
+	(void *)"red"},
     {XtNcacheRasters, XtCString, XtRString, sizeof(String),
 	XtOffset(GtermWidget,gterm.color3Str), XtRImmediate, 
-	(caddr_t)"green"},
+	(void *)"green"},
     {XtNcacheRasters, XtCString, XtRString, sizeof(String),
 	XtOffset(GtermWidget,gterm.color4Str), XtRImmediate, 
-	(caddr_t)"blue"},
+	(void *)"blue"},
     {XtNcacheRasters, XtCString, XtRString, sizeof(String),
 	XtOffset(GtermWidget,gterm.color5Str), XtRImmediate, 
-	(caddr_t)"cyan"},
+	(void *)"cyan"},
     {XtNcacheRasters, XtCString, XtRString, sizeof(String),
 	XtOffset(GtermWidget,gterm.color6Str), XtRImmediate, 
-	(caddr_t)"yellow"},
+	(void *)"yellow"},
     {XtNcacheRasters, XtCString, XtRString, sizeof(String),
 	XtOffset(GtermWidget,gterm.color7Str), XtRImmediate, 
-	(caddr_t)"magenta"},
+	(void *)"magenta"},
     {XtNcacheRasters, XtCString, XtRString, sizeof(String),
 	XtOffset(GtermWidget,gterm.color8Str), XtRImmediate, 
-	(caddr_t)"purple"},
+	(void *)"purple"},
     {XtNcacheRasters, XtCString, XtRString, sizeof(String),
 	XtOffset(GtermWidget,gterm.color9Str), XtRImmediate,
-	(caddr_t)"darkslategray"},
+	(void *)"darkslategray"},
 
     {XtNmarkerFillColorStr, XtCString, XtRString, sizeof(String),
         XtOffset(GtermWidget,gterm.gm_fillColorStr),
@@ -303,63 +303,63 @@ static XtResource resources[] = {
 
     {XtNcopyOnResize, XtCBoolean, XtRBoolean, sizeof(Boolean),
 	XtOffset(GtermWidget,gterm.copyOnResize), XtRImmediate,
-	(caddr_t)DEF_COPYONRESIZE},
+	(void *)DEF_COPYONRESIZE},
     {XtNcmapName, XtCString, XtRString, sizeof(String),
 	XtOffset(GtermWidget,gterm.cmapName), XtRImmediate,
-	(caddr_t)"default"},
+	(void *)"default"},
     {XtNuseGlobalCmap, XtCBoolean, XtRBoolean, sizeof(Boolean),
         XtOffset(GtermWidget,gterm.useGlobalCmap), XtRImmediate,
-        (caddr_t)FALSE},
+        (void *)FALSE},
     {XtNcmapInitialize, XtCBoolean, XtRBoolean, sizeof(Boolean),
 	XtOffset(GtermWidget,gterm.cmapInitialize), XtRImmediate,
-	(caddr_t)FALSE},
+	(void *)FALSE},
     {XtNbasePixel, XtCInt, XtRInt, sizeof(int),
 	XtOffset(GtermWidget,gterm.base_pixel), XtRImmediate,
-	(caddr_t)DEF_BASEPIXEL},
+	(void *)DEF_BASEPIXEL},
     {XtNcmapUpdate, XtCInt, XtRInt, sizeof(int),
 	XtOffset(GtermWidget,gterm.cmapUpdate), XtRImmediate,
-	(caddr_t)DEF_CMAPUPDATE},
+	(void *)DEF_CMAPUPDATE},
     {XtNcmapShadow, XtCInt, XtRInt, sizeof(int),
 	XtOffset(GtermWidget,gterm.cmapShadow), XtRImmediate,
-	(caddr_t)DEF_CMAPSHADOW},
+	(void *)DEF_CMAPSHADOW},
     {XtNcmapInterpolate, XtCBoolean, XtRBoolean, sizeof(Boolean),
 	XtOffset(GtermWidget,gterm.cmapInterpolate), XtRImmediate,
-	(caddr_t)True},
+	(void *)True},
     {XtNcacheRasters, XtCString, XtRString, sizeof(String),
 	XtOffset(GtermWidget,gterm.cacheRasters), XtRImmediate,
-	(caddr_t)"whenNeeded"},
+	(void *)"whenNeeded"},
     {XtNmaxRasters, XtCInt, XtRInt, sizeof(int),
 	XtOffset(GtermWidget,gterm.maxRasters), XtRImmediate,
-	(caddr_t)MAX_RASTERS},
+	(void *)MAX_RASTERS},
     {XtNmaxMappings, XtCInt, XtRInt, sizeof(int),
 	XtOffset(GtermWidget,gterm.maxMappings), XtRImmediate,
-	(caddr_t)MAX_MAPPINGS},
+	(void *)MAX_MAPPINGS},
     {XtNmaxColors, XtCInt, XtRInt, sizeof(int),
 	XtOffset(GtermWidget,gterm.maxColors), XtRImmediate,
-	(caddr_t)DEF_MAXCOLORS},
+	(void *)DEF_MAXCOLORS},
 
     {XtNmarkerTranslations, XtCString, XtRString, sizeof(String),
 	XtOffset(GtermWidget,gterm.gm_translations), XtRImmediate,
-	(caddr_t)defaultMarkerTranslations},
+	(void *)defaultMarkerTranslations},
     {XtNdefaultMarker, XtCString, XtRString, sizeof(String),
 	XtOffset(GtermWidget,gterm.gm_defaultMarker), XtRImmediate,
-	(caddr_t)"rectangle"},
+	(void *)"rectangle"},
     {XtNnearEdge, XtCInt, XtRInt, sizeof(int),
 	XtOffset(GtermWidget,gterm.gm_nearEdge), XtRImmediate,
-	(caddr_t)E_DIST},
+	(void *)E_DIST},
     {XtNnearVertex, XtCInt, XtRInt, sizeof(int),
 	XtOffset(GtermWidget,gterm.gm_nearVertex), XtRImmediate,
-	(caddr_t)V_DIST},
+	(void *)V_DIST},
 
     {XtNmarkerLineWidth, XtCInt, XtRInt, sizeof(int),
 	XtOffset(GtermWidget,gterm.gm_lineWidth), XtRImmediate,
-	(caddr_t)1},
+	(void *)1},
     {XtNmarkerLineStyle, XtCInt, XtRInt, sizeof(int),
 	XtOffset(GtermWidget,gterm.gm_lineStyle), XtRImmediate,
-	(caddr_t)LineSolid},
+	(void *)LineSolid},
     {XtNmarkerFill, XtCBoolean, XtRBoolean, sizeof(Boolean),
 	XtOffset(GtermWidget,gterm.gm_fill), XtRImmediate,
-	(caddr_t)False},
+	(void *)False},
     {XtNmarkerFillColor, XtCForeground, XtRPixel, sizeof(Pixel),
         XtOffset(GtermWidget,gterm.gm_fillColor), XtRString,
 	"SlateGray"},
@@ -368,19 +368,19 @@ static XtResource resources[] = {
 	"black"},
     {XtNmarkerFillStyle, XtCInt, XtRInt, sizeof(int),
 	XtOffset(GtermWidget,gterm.gm_fillStyle), XtRImmediate,
-	(caddr_t)FillSolid},
+	(void *)FillSolid},
     {XtNxorFill, XtCBoolean, XtRBoolean, sizeof(Boolean),
 	XtOffset(GtermWidget,gterm.gm_xorFill), XtRImmediate,
-	(caddr_t)False},
+	(void *)False},
     {XtNxorFillColor, XtCInt, XtRInt, sizeof(int),
 	XtOffset(GtermWidget,gterm.gm_xorFillColor), XtRImmediate,
-	(caddr_t)2},
+	(void *)2},
     {XtNxorFillBgColor, XtCInt, XtRInt, sizeof(int),
 	XtOffset(GtermWidget,gterm.gm_xorFillBgColor), XtRImmediate,
-	(caddr_t)255},
+	(void *)255},
     {XtNmarkerHighlightWidth, XtCInt, XtRInt, sizeof(int),
 	XtOffset(GtermWidget,gterm.gm_highlightWidth), XtRImmediate,
-	(caddr_t)2},
+	(void *)2},
     {XtNmarkerHighlightColor, XtCForeground, XtRPixel, sizeof(Pixel),
 	XtOffset(GtermWidget,gterm.gm_highlightColor), XtRString,
 	"green"},
@@ -399,7 +399,7 @@ static XtResource resources[] = {
 	"blue"},
     {XtNmarkerLineKnotSize, XtCInt, XtRInt, sizeof(int),
 	XtOffset(GtermWidget,gterm.gm_LineKnotSize), XtRImmediate,
-	(caddr_t)5},
+	(void *)5},
 
     {XtNmarkerTextLineColor, XtCForeground, XtRPixel, sizeof(Pixel),
         XtOffset(GtermWidget,gterm.gm_TextLineColor), XtRString,
@@ -412,13 +412,13 @@ static XtResource resources[] = {
 	"SlateGray"},
     {XtNmarkerTextBorder, XtCInt, XtRInt, sizeof(int),
 	XtOffset(GtermWidget,gterm.gm_TextBorder), XtRImmediate,
-	(caddr_t)2},
+	(void *)2},
     {XtNmarkerTextFont, XtCFont, XtRFontStruct, sizeof(XFontStruct *),
         XtOffset(GtermWidget,gterm.gm_TextFont), XtRString,
 	"6x13"},
     {XtNmarkerTextString, XtCString, XtRString, sizeof(String),
 	XtOffset(GtermWidget,gterm.gm_TextString), XtRImmediate,
-	(caddr_t)NULL},
+	(void *)NULL},
 
     {XtNmarkerRectLineColor, XtCForeground, XtRPixel, sizeof(Pixel),
         XtOffset(GtermWidget,gterm.gm_RectLineColor), XtRString,
@@ -428,7 +428,7 @@ static XtResource resources[] = {
 	"blue"},
     {XtNmarkerRectKnotSize, XtCInt, XtRInt, sizeof(int),
 	XtOffset(GtermWidget,gterm.gm_RectKnotSize), XtRImmediate,
-	(caddr_t)0},
+	(void *)0},
     {XtNmarkerBoxLineColor, XtCForeground, XtRPixel, sizeof(Pixel),
         XtOffset(GtermWidget,gterm.gm_BoxLineColor), XtRString,
 	"green"},
@@ -437,7 +437,7 @@ static XtResource resources[] = {
 	"blue"},
     {XtNmarkerBoxKnotSize, XtCInt, XtRInt, sizeof(int),
 	XtOffset(GtermWidget,gterm.gm_BoxKnotSize), XtRImmediate,
-	(caddr_t)0},
+	(void *)0},
     {XtNmarkerCircleLineColor, XtCForeground, XtRPixel, sizeof(Pixel),
         XtOffset(GtermWidget,gterm.gm_CircleLineColor), XtRString,
 	"green"},
@@ -446,7 +446,7 @@ static XtResource resources[] = {
 	"blue"},
     {XtNmarkerCircleKnotSize, XtCInt, XtRInt, sizeof(int),
 	XtOffset(GtermWidget,gterm.gm_CircleKnotSize), XtRImmediate,
-	(caddr_t)0},
+	(void *)0},
     {XtNmarkerEllipseLineColor, XtCForeground, XtRPixel, sizeof(Pixel),
         XtOffset(GtermWidget,gterm.gm_EllipseLineColor), XtRString,
 	"green"},
@@ -455,7 +455,7 @@ static XtResource resources[] = {
 	"blue"},
     {XtNmarkerEllipseKnotSize, XtCInt, XtRInt, sizeof(int),
 	XtOffset(GtermWidget,gterm.gm_EllipseKnotSize), XtRImmediate,
-	(caddr_t)0},
+	(void *)0},
     {XtNmarkerPgonLineColor, XtCForeground, XtRPixel, sizeof(Pixel),
         XtOffset(GtermWidget,gterm.gm_PgonLineColor), XtRString,
 	"green"},
@@ -464,7 +464,7 @@ static XtResource resources[] = {
 	"blue"},
     {XtNmarkerPgonKnotSize, XtCInt, XtRInt, sizeof(int),
 	XtOffset(GtermWidget,gterm.gm_PgonKnotSize), XtRImmediate,
-	(caddr_t)5},
+	(void *)5},
 };
 
 struct {
@@ -532,7 +532,7 @@ void GmRedisplay(GtermWidget w, Region region);
 void GmRaise(struct marker *gm, struct marker *ref_gm);
 void GmLower(struct marker *gm, struct marker *ref_gm);
 void GmSetVertices(struct marker *gm, DPoint *points, int first, int npts);
-void GtReadIomap(GtermWidget w, ushort *iomap, int first, int nelem);
+void GtReadIomap(GtermWidget w, unsigned short *iomap, int first, int nelem);
 void GtClearScreen(GtermWidget w);
 void GtSetCursorPos(GtermWidget w, int x, int y);
 void GtSetCursorType(GtermWidget w, int type);
@@ -790,7 +790,7 @@ Initialize (Widget request, Widget new)
 
 	if (DBG_TRACE)
 	    fprintf (stderr, 
-		"Gterm.intialize(Pseudo8): colormap = 0x%x base=%d\n",
+		"Gterm.intialize(Pseudo8): colormap = 0x%lx base=%lu\n",
 		w->core.colormap, w->gterm.base_pixel);
 
         /* create Standard Color Map */
@@ -822,7 +822,7 @@ Initialize (Widget request, Widget new)
 
 	if (DBG_TRACE)
 	    fprintf (stderr,
-		"Gterm.initialize(Pseudo8): defDepth=%d  cmap=0x%x\n", 
+		"Gterm.initialize(Pseudo8): defDepth=%d  cmap=0x%lx\n", 
     		w->gterm.w_depth, w->core.colormap);
 
         /* Let gterm know what we have done.
@@ -847,7 +847,7 @@ Initialize (Widget request, Widget new)
 
 	if (DBG_TRACE) {
 	    fprintf (stderr, "NO 8-bit PSEUDO FOUND.....USING TRUECOLOR\n");
-	    fprintf (stderr, "nvis=%d  defDepth=%d  cmap=0x%x\n", 
+	    fprintf (stderr, "nvis=%d  defDepth=%d  cmap=0x%lx\n", 
 	        nvis, w->gterm.w_depth, w->core.colormap);
 	}
 
@@ -942,7 +942,7 @@ Initialize (Widget request, Widget new)
 
 	if (DBG_TRACE)
 	    fprintf (stderr, 
-		"Gterm.initialize (TrueColor): after colormap, cmap=0x%x\n",
+		"Gterm.initialize (TrueColor): after colormap, cmap=0x%lx\n",
 		w->core.colormap);
     }
     /* Deep Frame */
@@ -1025,7 +1025,7 @@ Initialize (Widget request, Widget new)
 
     if (DBG_TRACE)
 	fprintf (stderr, 
-	    "Gterm.intialize: ncolors=%d useDefaultCM=%d  core.colormap=0x%x\n",
+	    "Gterm.intialize: ncolors=%d useDefaultCM=%d  core.colormap=0x%lx\n",
 	    w->gterm.ncolors, w->gterm.useDefaultCM, w->core.colormap);
 
     w->gterm.cmapLastUpdate = 0;
@@ -1373,7 +1373,7 @@ Realize (Widget gw, XtValueMask *valueMask, XSetWindowAttributes *attrs)
     w->gterm.cursorGC = gc;
 
     if (DBG_TRACE)
-        fprintf (stderr, "Gterm.Realize:  force8=%d  core colormap 0x%x\n",
+        fprintf (stderr, "Gterm.Realize:  force8=%d  core colormap 0x%lx\n",
 	    w->gterm.forcePseudo8, w->core.colormap);
 
     set_default_color_index (w);

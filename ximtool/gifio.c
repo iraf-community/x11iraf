@@ -150,7 +150,7 @@ loadGIF  (char *fname, uchar **pix, int *nx, int *ny, uchar *r, uchar *g, uchar 
 /* writeGIF -- Write a GIF image.
  */
 
-int
+void
 writeGIF (FILE *fp, byte *image, int w, int h, byte *rmap, byte *gmap, byte *bmap, int numcols, int gray)
      	    				/* output file descriptor */
      	       				/* image pixels 	  */
@@ -708,15 +708,16 @@ static int	Interlace;
 
 
 static void
-GIFEncode (fp, GWidth, GHeight, GInterlace, Background,
-BitsPerPixel, Red, Green, Blue)
-
-FILE*fp;
-int	GWidth, GHeight;
-int	GInterlace;
-int	Background;
-int	BitsPerPixel;
-int	Red[], Green[], Blue[];
+GIFEncode (
+   FILE*fp,
+   int	GWidth,
+   int GHeight,
+   int	GInterlace,
+   int	Background,
+   int	BitsPerPixel,
+   int	Red[],
+   int Green[],
+   int Blue[])
 {
 	int	B;
 	int	RWidth, RHeight;

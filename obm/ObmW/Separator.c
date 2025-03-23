@@ -35,12 +35,12 @@ static XtResource resources[] = {
   },
   {
     XtNmargin, XtCMargin, XtRDimension, sizeof(Dimension),
-    offset(separator.margin), XtRImmediate, (caddr_t)1
+    offset(separator.margin), XtRImmediate, (void *)1
   },
   {
     XtNseparatorType, XtCSeparatorType, XtRSeparatorType,
     sizeof(XawSeparatorType), offset(separator.separatorType),
-    XtRImmediate,(caddr_t)XawSHADOW_ETCHED_IN
+    XtRImmediate,(void *)XawSHADOW_ETCHED_IN
   },
   {
     XtNshadowWidth, XtCShadowWidth, XtRDimension, sizeof(Dimension),
@@ -126,7 +126,7 @@ WidgetClass separatorWidgetClass = (WidgetClass)&separatorClassRec;
     {						\
 	static type static_val;			\
 	static_val = (value);			\
-	toVal->addr = (caddr_t)&static_val;	\
+	toVal->addr = (void *)&static_val;	\
     }						\
     toVal->size = sizeof(type);			\
     return True;				\

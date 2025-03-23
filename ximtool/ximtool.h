@@ -63,7 +63,7 @@
 #define	PRINTCONFIG	   "/usr/local/lib/ximprint.cfg"
 
 #define	DEF_ISM_ADDR	   "/tmp/.ISM%d"	/* default ISM unix socket    */
-#define	DEF_ISM_TEMPLATE   "/tmp/.ISM%d_%d"	/* ISM client socket template */
+#define	DEF_ISM_TEMPLATE   "/tmp/.ISM%d_%lu"	/* ISM client socket template */
 #define DEF_ISM_TASK	   "wcspix"
 #define DEF_ISM_CMD	   "ism_wcspix.e wcspix &"
 /* "/usr/local/bin/ism_wcspix.e wcspix &" */
@@ -387,7 +387,7 @@ static XtResource resources[] = {
 	sizeof(int),
 	XtOffsetOf(XimData, def_config),
 	XtRImmediate,
-	(caddr_t)1
+	(void *)1
     },
     {
 	XtNdefNFrames,
@@ -396,7 +396,7 @@ static XtResource resources[] = {
 	sizeof(int),
 	XtOffsetOf(XimData, def_nframes),
 	XtRImmediate,
-	(caddr_t)0
+	(void *)0
     },
     {
 	XtNncolors,
@@ -405,7 +405,7 @@ static XtResource resources[] = {
 	sizeof(int),
 	XtOffsetOf(XimData, ncolors),
 	XtRImmediate,
-	(caddr_t)DEF_NCOLORS
+	(void *)DEF_NCOLORS
     },
     {
 	XtNtileBorderWidth,
@@ -414,7 +414,7 @@ static XtResource resources[] = {
 	sizeof(int),
 	XtOffsetOf(XimData, tileBorder),
 	XtRImmediate,
-	(caddr_t)DEF_TILE_BORDER
+	(void *)DEF_TILE_BORDER
     },
     {
 	XtNtileBorderColor,
@@ -423,7 +423,7 @@ static XtResource resources[] = {
 	sizeof(String),
 	XtOffsetOf(XimData, borderColor),
 	XtRImmediate,
-	(caddr_t)DEF_BORDER_COLOR
+	(void *)DEF_BORDER_COLOR
     },
     {
 	XtNautoscale,
@@ -432,7 +432,7 @@ static XtResource resources[] = {
 	sizeof(Boolean),
 	XtOffsetOf(XimData, autoscale),
 	XtRImmediate,
-	(caddr_t)FALSE
+	(void *)FALSE
     },
     {
 	XtNantialias,
@@ -441,7 +441,7 @@ static XtResource resources[] = {
 	sizeof(Boolean),
 	XtOffsetOf(XimData, antialias),
 	XtRImmediate,
-	(caddr_t)FALSE
+	(void *)FALSE
     },
     {
 	XtNantialiasType,
@@ -450,7 +450,7 @@ static XtResource resources[] = {
 	sizeof(String),
 	XtOffsetOf(XimData, antialiasType),
 	XtRImmediate,
-	(caddr_t)DEF_ANTIALIASTYPE
+	(void *)DEF_ANTIALIASTYPE
     },
     {
 	XtNinvert,
@@ -459,7 +459,7 @@ static XtResource resources[] = {
 	sizeof(Boolean),
 	XtOffsetOf(XimData, invert),
 	XtRImmediate,
-	(caddr_t)FALSE
+	(void *)FALSE
     },
     {
 	XtNtileFrames,
@@ -468,7 +468,7 @@ static XtResource resources[] = {
 	sizeof(Boolean),
 	XtOffsetOf(XimData, tileFrames),
 	XtRImmediate,
-	(caddr_t)FALSE
+	(void *)FALSE
     },
     {
 	XtNhighlightFrames,
@@ -477,7 +477,7 @@ static XtResource resources[] = {
 	sizeof(Boolean),
 	XtOffsetOf(XimData, highlightFrames),
 	XtRImmediate,
-	(caddr_t)TRUE
+	(void *)TRUE
     },
     {
 	XtNcmFocus,
@@ -486,7 +486,7 @@ static XtResource resources[] = {
 	sizeof(int),
 	XtOffsetOf(XimData, cm_focus),
 	XtRImmediate,
-	(caddr_t)512
+	(void *)512
     },
     {
 	XtNgui,
@@ -495,7 +495,7 @@ static XtResource resources[] = {
 	sizeof(String),
 	XtOffsetOf(XimData, gui),
 	XtRImmediate,
-	(caddr_t)"default"
+	(void *)"default"
     },
     {
 	XtNimtoolrc,
@@ -504,7 +504,7 @@ static XtResource resources[] = {
 	sizeof(String),
 	XtOffsetOf(XimData, imtoolrc),
 	XtRImmediate,
-	(caddr_t)FBCONFIG_2
+	(void *)FBCONFIG_2
     },
     {
 	XtNmemModel,
@@ -513,7 +513,7 @@ static XtResource resources[] = {
 	sizeof(String),
 	XtOffsetOf(XimData, memModel),
 	XtRImmediate,
-	(caddr_t)"fast"
+	(void *)"fast"
     },
     {
 	XtNuserCMap1,
@@ -522,7 +522,7 @@ static XtResource resources[] = {
 	sizeof(String),
 	XtOffsetOf(XimData, userCMap1),
 	XtRImmediate,
-	(caddr_t)"none"
+	(void *)"none"
     },
     {
 	XtNuserCMap2,
@@ -531,7 +531,7 @@ static XtResource resources[] = {
 	sizeof(String),
 	XtOffsetOf(XimData, userCMap2),
 	XtRImmediate,
-	(caddr_t)"none"
+	(void *)"none"
     },
     {
 	XtNuserCMapDir1,
@@ -540,7 +540,7 @@ static XtResource resources[] = {
 	sizeof(String),
 	XtOffsetOf(XimData, userCMapDir1),
 	XtRImmediate,
-	(caddr_t)"none"
+	(void *)"none"
     },
     {
 	XtNuserCMapDir2,
@@ -549,7 +549,7 @@ static XtResource resources[] = {
 	sizeof(String),
 	XtOffsetOf(XimData, userCMapDir2),
 	XtRImmediate,
-	(caddr_t)CMAPCONFIG
+	(void *)CMAPCONFIG
     },
     {
 	XtNprintConfig,
@@ -558,7 +558,7 @@ static XtResource resources[] = {
 	sizeof(String),
 	XtOffsetOf(XimData, printConfig),
 	XtRImmediate,
-	(caddr_t)PRINTCONFIG
+	(void *)PRINTCONFIG
     },
     {
 	XtNinput_fifo,
@@ -567,7 +567,7 @@ static XtResource resources[] = {
 	sizeof(String),
 	XtOffsetOf(XimData, input_fifo),
 	XtRImmediate,
-	(caddr_t)O_DEVNAME
+	(void *)O_DEVNAME
     },
     {
 	XtNoutput_fifo,
@@ -576,7 +576,7 @@ static XtResource resources[] = {
 	sizeof(String),
 	XtOffsetOf(XimData, output_fifo),
 	XtRImmediate,
-	(caddr_t)I_DEVNAME
+	(void *)I_DEVNAME
     },
     {
 	XtNunixaddr,
@@ -585,7 +585,7 @@ static XtResource resources[] = {
 	sizeof(String),
 	XtOffsetOf(XimData, unixaddr),
 	XtRImmediate,
-	(caddr_t)DEF_UNIXADDR
+	(void *)DEF_UNIXADDR
     },
     {
 	XtNism_addr,
@@ -594,7 +594,7 @@ static XtResource resources[] = {
 	sizeof(String),
 	XtOffsetOf(XimData, ism_addr),
 	XtRImmediate,
-	(caddr_t)DEF_ISM_ADDR
+	(void *)DEF_ISM_ADDR
     },
     {
 	XtNport,
@@ -603,7 +603,7 @@ static XtResource resources[] = {
 	sizeof(int),
 	XtOffsetOf(XimData, port),
 	XtRImmediate,
-	(caddr_t)DEF_PORT
+	(void *)DEF_PORT
     },
     {
 	XtNnports,
@@ -612,7 +612,7 @@ static XtResource resources[] = {
 	sizeof(int),
 	XtOffsetOf(XimData, nports),
 	XtRImmediate,
-	(caddr_t)DEF_NPORTS
+	(void *)DEF_NPORTS
     },
     {
 	XtNism_task,
@@ -621,7 +621,7 @@ static XtResource resources[] = {
 	sizeof(String),
 	XtOffsetOf(XimData, ism_task),
 	XtRImmediate,
-	(caddr_t)DEF_ISM_TASK
+	(void *)DEF_ISM_TASK
     },
 };
 
@@ -765,5 +765,5 @@ void xim_tileFrames(XimDataPtr xim, int frame_list);
 void xim_fitFrame(XimDataPtr xim);
 void xim_cursorMode(XimDataPtr xim, int state);
 
-int ism_message(XimDataPtr xim, char *object, char *command);
+void ism_message(XimDataPtr xim, char *object, char *command);
 void wcspix_message(XimDataPtr xim, char *message);

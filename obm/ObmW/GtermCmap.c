@@ -44,7 +44,7 @@ get_colormap (GtermWidget w)
 
 
     if (DBG_TRACE && DBG_CM_VERB)
- 	fprintf (stderr, "get_colormap: have=%d ncols=%d maxcols=%d base=%d\n",
+ 	fprintf (stderr, "get_colormap: have=%d ncols=%d maxcols=%d base=%lu\n",
 	    w->gterm.haveColormap, w->gterm.ncolors, w->gterm.maxColors,
 	    w->gterm.base_pixel);
 
@@ -76,7 +76,7 @@ get_colormap (GtermWidget w)
 	w->gterm.base_pixel = cm.base_pixel;
 
 	if (DBG_TRACE)
- 	    fprintf (stderr, "get_colormap: use existing cmap=0x%x; base=%d\n",
+ 	    fprintf (stderr, "get_colormap: use existing cmap=0x%lx; base=%lu\n",
 	        colormap, w->gterm.base_pixel);
 
 
@@ -85,7 +85,7 @@ get_colormap (GtermWidget w)
 	/*  Setup for TrueColor visual.
 	 */
 	if (DBG_TRACE && DBG_CM_VERB)
- 	    fprintf (stderr, "get_colormap: TrueColor gt.ncolors=%d base=%d\n",
+ 	    fprintf (stderr, "get_colormap: TrueColor gt.ncolors=%d base=%lu\n",
 	        w->gterm.ncolors, w->gterm.base_pixel);
 
         nitems = MAX_SZCMAP;
@@ -369,7 +369,7 @@ inherit_default_colormap (GtermWidget w)
 
 
     if (DBG_TRACE)
- 	fprintf (stderr, "inherit_default_cmap: ncols=%d maxcols=%d base=%d\n",
+ 	fprintf (stderr, "inherit_default_cmap: ncols=%d maxcols=%d base=%lu\n",
 	    w->gterm.ncolors, w->gterm.maxColors, w->gterm.base_pixel);
 
     if (!w || !XtIsRealized ((Widget)w))

@@ -463,20 +463,21 @@ computeSigma (float *a, char *badpix, int npix, double *mean, double *sigma)
  * fact that bad pixels tend to be clumped.  The number of pixels left in the
  * fit is returned as the function value.
  */
-
+//data, flat, normx, badpix, npix,
+//			 sumxsqr, sumxz, sumx, sumz, threshold, ngrow)
 static int 
-rejectPixels (data, flat, normx, badpix, npix,
-			 sumxsqr, sumxz, sumx, sumz, threshold, ngrow)
-
-float	*data;			/* raw data array			*/
-float	*flat;			/* flattened data array			*/
-float	*normx;			/* normalized x values of pixels	*/
-char	*badpix;		/* bad pixel flags (!= 0 if bad pixel)	*/
-int	npix;
-double	*sumxsqr, *sumxz,	/* matrix sums				*/
-	*sumx, *sumz;
-double	threshold;		/* threshold for pixel rejection	*/
-int	ngrow;			/* number of pixels of growing		*/
+rejectPixels (
+  float	*data,		/* raw data array			*/
+  float	*flat,		/* flattened data array			*/
+  float	*normx,		/* normalized x values of pixels	*/
+  char	*badpix,	/* bad pixel flags (!= 0 if bad pixel)	*/
+  int	npix,
+  double *sumxsqr,
+  double *sumxz,	/* matrix sums				*/
+  double *sumx,
+  double *sumz,
+  double threshold,	/* threshold for pixel rejection	*/
+  int	ngrow)		/* number of pixels of growing		*/
 {
 	int	ngoodpix, i, j;
 	double	residual, lcut, hcut;

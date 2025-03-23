@@ -1373,7 +1373,7 @@ flush_alpha:	    if (tx_len > 0) {
 			    tx_buf[tx_len] = '\0';
 			    if (tx_len) {
 			        char  txtbuf[2048];
-			        sprintf (txtbuf, "setValue {%s}\0", tx_buf);
+			        sprintf (txtbuf, "setValue {%s}", tx_buf);
 			        ObmDeliverMsg (obm, "textout", txtbuf);
 			    }
 			}
@@ -1693,6 +1693,7 @@ gio_retcursor (int key, int sx, int sy, int raster, int rx, int ry, int datalen)
 
 	if (!gio_delay)
 	    gio_processdata();
+	return 0;
 }
 
 

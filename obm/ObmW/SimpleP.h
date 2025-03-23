@@ -14,7 +14,7 @@ typedef Boolean (*XawChangeSensitive) (Widget);
 typedef struct {
   XawChangeSensitive  change_sensitive;
   XawDisplayRectProc  display_rect;
-  caddr_t 	      extension;
+  void * 	      extension;
 } SimpleClassPart;
 
 typedef struct _SimpleClassRec {
@@ -39,7 +39,7 @@ typedef struct {
   Pixmap  	highlight_pixmap;
   Dimension	highlight_thickness;
   
-  caddr_t	user_data;
+  void *	user_data;
   
     /* private state */
   GC		top_shadow_GC;

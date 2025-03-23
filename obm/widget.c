@@ -212,19 +212,19 @@ static	void call_callbacks(WidgetObject, int, char *);
 static	void widgetEvent(Widget, ObmCallback, XEvent *, Boolean *);
 static	void widgetSetDestroy(ObmObject);
 static	void widgetDestroy(ObmObject);
-static	void widgetCallback(Widget, WidgetObject, caddr_t);
-static	void widgetSCCallback(Widget w, WidgetObject obj, caddr_t);
-static	void widgetJPCallback(Widget w, WidgetObject obj, caddr_t);
-static	void widgetSPCallback(Widget w, WidgetObject obj, caddr_t);
-static	void widgetPUCallback(Widget w, WidgetObject obj, caddr_t);
-static	void widgetPDCallback(Widget w, WidgetObject obj, caddr_t);
-static	void widgetSBCallback(Widget w, WidgetObject obj, caddr_t);
-static	void widgetSECallback(Widget w, WidgetObject obj, caddr_t);
-static	void widgetRPCallback(Widget w, WidgetObject obj, caddr_t);
-static	void widgetRGCallback(Widget w, WidgetObject obj, caddr_t);
-static	void widgetLTHCallback(Widget w, WidgetObject obj, caddr_t);
-static	void widgetLTACallback(Widget w, WidgetObject obj, caddr_t);
-static	void widgetTCCCallback(Widget w, WidgetObject obj, caddr_t);
+static	void widgetCallback(Widget, WidgetObject, void *);
+static	void widgetSCCallback(Widget w, WidgetObject obj, void *);
+static	void widgetJPCallback(Widget w, WidgetObject obj, void *);
+static	void widgetSPCallback(Widget w, WidgetObject obj, void *);
+static	void widgetPUCallback(Widget w, WidgetObject obj, void *);
+static	void widgetPDCallback(Widget w, WidgetObject obj, void *);
+static	void widgetSBCallback(Widget w, WidgetObject obj, void *);
+static	void widgetSECallback(Widget w, WidgetObject obj, void *);
+static	void widgetRPCallback(Widget w, WidgetObject obj, void *);
+static	void widgetRGCallback(Widget w, WidgetObject obj, void *);
+static	void widgetLTHCallback(Widget w, WidgetObject obj, void *);
+static	void widgetLTACallback(Widget w, WidgetObject obj, void *);
+static	void widgetTCCCallback(Widget w, WidgetObject obj, void *);
 static	int widgetSet(MsgContext, Tcl_Interp *, int, char **);
 static	int widgetGet(MsgContext, Tcl_Interp *, int, char **);
 static	int widgetMap(MsgContext, Tcl_Interp *, int, char **);
@@ -857,7 +857,7 @@ widgetAddCallback (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	    if (callback_type == Ctlinemode) {
 		char text_translations[SZ_LINE];
 		XtTranslations translations;
-		sprintf (text_translations, "<Key>Return: do_text(0x%lx, %s) ",
+		sprintf (text_translations, "<Key>Return: do_text(%p, %s) ",
 		    wp->obm, XtName(wp->w));
 		translations = XtParseTranslationTable (text_translations);
 		XtOverrideTranslations (wp->w, translations);
@@ -916,7 +916,7 @@ widgetDeleteCallback (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
  * the callback type.
  */
 static void
-widgetCallback (Widget w, WidgetObject obj, caddr_t call_data)
+widgetCallback (Widget w, WidgetObject obj, void * call_data)
 {
 	WidgetPrivate wp = &obj->widget;
 	ObjClassRec classrec = obj->core.classrec;
@@ -1057,7 +1057,7 @@ widgetCallback (Widget w, WidgetObject obj, caddr_t call_data)
  * are currently selected.
  */
 static void
-widgetRGCallback (Widget w, WidgetObject obj, caddr_t call_data)
+widgetRGCallback (Widget w, WidgetObject obj, void * call_data)
 {
 	WidgetPrivate wp = &obj->widget;
 	long selection = (long) call_data;
@@ -1111,7 +1111,7 @@ widgetRGCallback (Widget w, WidgetObject obj, caddr_t call_data)
 /* widgetLTHCallback -- ListTree highlight callback.
  */
 static void
-widgetLTHCallback (Widget w, WidgetObject obj, caddr_t call_data)
+widgetLTHCallback (Widget w, WidgetObject obj, void * call_data)
 {
 	ListTreeMultiReturnStruct *list;
 	ListTreeItem *item;
@@ -1149,7 +1149,7 @@ widgetLTHCallback (Widget w, WidgetObject obj, caddr_t call_data)
 /* widgetLTACallback -- ListTree activate callback.
  */
 static void
-widgetLTACallback (Widget w, WidgetObject obj, caddr_t call_data)
+widgetLTACallback (Widget w, WidgetObject obj, void * call_data)
 {
 	ListTreeActivateStruct *ret;
 	ListTreeMultiReturnStruct ret2;
@@ -1182,7 +1182,7 @@ widgetLTACallback (Widget w, WidgetObject obj, caddr_t call_data)
 /* widgetSBCallback -- Repeater start callback.
  */
 static void
-widgetSBCallback (Widget w, WidgetObject obj, caddr_t call_data)
+widgetSBCallback (Widget w, WidgetObject obj, void * call_data)
 {
 	WidgetPrivate wp = &obj->widget;
 	call_callbacks (obj, CtstartCallback, NULL);
@@ -1192,7 +1192,7 @@ widgetSBCallback (Widget w, WidgetObject obj, caddr_t call_data)
 /* widgetSECallback -- Repeater stop callback.
  */
 static void
-widgetSECallback (Widget w, WidgetObject obj, caddr_t call_data)
+widgetSECallback (Widget w, WidgetObject obj, void * call_data)
 {
 	WidgetPrivate wp = &obj->widget;
 	call_callbacks (obj, CtstopCallback, NULL);
@@ -1204,7 +1204,7 @@ widgetSECallback (Widget w, WidgetObject obj, caddr_t call_data)
  * thumb (panner) or child widget (porthole, viewport).
  */
 static void
-widgetRPCallback (Widget w, WidgetObject obj, caddr_t call_data)
+widgetRPCallback (Widget w, WidgetObject obj, void * call_data)
 {
 	WidgetPrivate wp = &obj->widget;
 	XawPannerReport *rp = (XawPannerReport *) call_data;
@@ -1223,7 +1223,7 @@ widgetRPCallback (Widget w, WidgetObject obj, caddr_t call_data)
  * called when the thumb port of the scroll bar is dragged or moved (button 2).
  */
 static void
-widgetJPCallback (Widget w, WidgetObject obj, caddr_t call_data)
+widgetJPCallback (Widget w, WidgetObject obj, void * call_data)
 {
 	WidgetPrivate wp = &obj->widget;
 	XfwfScrollInfo *info = (XfwfScrollInfo *) call_data;
@@ -1269,7 +1269,7 @@ widgetJPCallback (Widget w, WidgetObject obj, caddr_t call_data)
  * used for incremental scrolling (button 1 or 3).
  */
 static void
-widgetSPCallback (Widget w, WidgetObject obj, caddr_t call_data)
+widgetSPCallback (Widget w, WidgetObject obj, void * call_data)
 {
 	WidgetPrivate wp = &obj->widget;
 	char message[100];
@@ -1313,7 +1313,7 @@ widgetSPCallback (Widget w, WidgetObject obj, caddr_t call_data)
 	    /* Update the slider. */
 	    update_info = *info;
 	    update_info.reason = XfwfSNotify;
-	    wp->response_cb (NULL, w, (caddr_t) &update_info);
+	    wp->response_cb (NULL, w, (void *) &update_info);
 	}
 }
 
@@ -1323,7 +1323,7 @@ widgetSPCallback (Widget w, WidgetObject obj, caddr_t call_data)
  * plotted.
  */
 static void
-widgetSCCallback (Widget w, WidgetObject obj, caddr_t call_data)
+widgetSCCallback (Widget w, WidgetObject obj, void * call_data)
 {
 	WidgetPrivate wp = &obj->widget;
 	ObmContext obm = wp->obm;
@@ -1369,7 +1369,7 @@ widgetSCCallback (Widget w, WidgetObject obj, caddr_t call_data)
  * widgets.  Called when the window pops up.
  */
 static void
-widgetPUCallback (Widget w, WidgetObject obj, caddr_t call_data)
+widgetPUCallback (Widget w, WidgetObject obj, void * call_data)
 {
 	WidgetPrivate wp = &obj->widget;
 	call_callbacks (obj, CtpopupCallback, NULL);
@@ -1380,7 +1380,7 @@ widgetPUCallback (Widget w, WidgetObject obj, caddr_t call_data)
  * widgets.  Called when the window pops down.
  */
 static void
-widgetPDCallback (Widget w, WidgetObject obj, caddr_t call_data)
+widgetPDCallback (Widget w, WidgetObject obj, void * call_data)
 {
 	WidgetPrivate wp = &obj->widget;
 	call_callbacks (obj, CtpopdownCallback, NULL);
@@ -1569,7 +1569,7 @@ do_userproc (Widget w, XEvent *event, String *params, Cardinal *num_params)
 		    *op++ = ' ';
 
 		} else if (strcmp (param, "$time") == 0) {
-		    sprintf (op, "%u ", time);
+		    sprintf (op, "%lu ", time);
 		    while (*op)
 			op++;
 		} else if (strcmp (param, "$x") == 0) {
@@ -1841,7 +1841,7 @@ widgetSet (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 		   strcmp (rp->type, XtRPosition) == 0) {
 
 	    Dimension value;
-	    to.addr = (caddr_t) &value;
+	    to.addr = (void *) &value;
 	    to.size = sizeof(value);
 
 	    /* Convert resource value. */
@@ -1854,7 +1854,7 @@ widgetSet (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 		   strcmp (rp->type, XtRBoolean) == 0) {
 
 	    Boolean value;
-	    to.addr = (caddr_t) &value;
+	    to.addr = (void *) &value;
 	    to.size = sizeof(value);
 
 	    /* Convert resource value.  The numeric values "0" and "1" are
@@ -1876,7 +1876,7 @@ set_bval:	XtSetArg (args[0], rp->name, value);
 		   strcmp (rp->type, XtRInt) == 0) {
 
 	    int value;
-	    to.addr = (caddr_t) &value;
+	    to.addr = (void *) &value;
 	    to.size = sizeof(value);
 
 	    /* Convert resource value. */
@@ -1891,7 +1891,7 @@ set_bval:	XtSetArg (args[0], rp->name, value);
 		float float_value;
 	    } value;
 
-	    to.addr = (caddr_t) &value.float_value;
+	    to.addr = (void *) &value.float_value;
 	    to.size = sizeof(value);
 
 	    /* Convert resource value. */
@@ -1902,7 +1902,7 @@ set_bval:	XtSetArg (args[0], rp->name, value);
 
 	} else if (strcmp (rp->type, XtRPixel) == 0) {
 	    Pixel value;
-	    to.addr = (caddr_t) &value;
+	    to.addr = (void *) &value;
 	    to.size = sizeof(value);
 
 	    /* Convert resource value. */
@@ -1915,7 +1915,7 @@ set_bval:	XtSetArg (args[0], rp->name, value);
 		   strcmp (rp->type, XtRBitmap) == 0) {
 
 	    Pixmap value;
-	    to.addr = (caddr_t) &value;
+	    to.addr = (void *) &value;
 	    to.size = sizeof(value);
 
 	    /* Convert resource value. */
@@ -1928,7 +1928,7 @@ set_bval:	XtSetArg (args[0], rp->name, value);
 
 	} else if (strcmp (rp->type, XtRIcon) == 0) {
 	    Icon *value;
-	    to.addr = (caddr_t) &value;
+	    to.addr = (void *) &value;
 	    to.size = sizeof(value);
 
 	    /* Convert resource value. */
@@ -1941,7 +1941,7 @@ set_bval:	XtSetArg (args[0], rp->name, value);
 
 	} else if (strcmp (rp->type, XtRCursor) == 0) {
 	    Cursor value;
-	    to.addr = (caddr_t) &value;
+	    to.addr = (void *) &value;
 	    to.size = sizeof(value);
 
 	    /* Convert resource value. */
@@ -1954,7 +1954,7 @@ set_bval:	XtSetArg (args[0], rp->name, value);
 
 	} else if (strcmp (rp->type, XtRFontStruct) == 0) {
 	    XFontStruct *value;
-	    to.addr = (caddr_t) &value;
+	    to.addr = (void *) &value;
 	    to.size = sizeof(value);
 
 	    /* Convert resource value. */
@@ -1965,7 +1965,7 @@ set_bval:	XtSetArg (args[0], rp->name, value);
 
 	} else if (strcmp (rp->type, XtRVisual) == 0) {
 	    Visual *value;
-	    to.addr = (caddr_t) &value;
+	    to.addr = (void *) &value;
 	    to.size = sizeof(value);
 
 	    /* Convert resource value. */
@@ -1992,8 +1992,8 @@ set_bval:	XtSetArg (args[0], rp->name, value);
 	    XtSetValues (wp->w, args, 1);
 
 	} else {
-	    caddr_t value;
-	    to.addr = (caddr_t) &value;
+	    void * value;
+	    to.addr = (void *) &value;
 	    to.size = sizeof(value);
 
 	    /* Convert resource value. */
@@ -2096,14 +2096,14 @@ widgetGet (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	    result = XtName (value);
 
 	} else if (strcmp (rp->type, XtRFontStruct) == 0) {	/* MF016 */
-	    caddr_t value;  Arg args[1];
+	    void * value;  Arg args[1];
   	    XFontStruct *font_struct;
   	    ObmContext obm = wp->obm;
   	    char *name = NULL;
 
 	    XtSetArg (args[0], rp->name, &value);
 	    XtGetValues (wp->w, args, 1);
-	    sprintf (result, "0x%x", value);
+	    sprintf (result, "%p", value);
 
   	    font_struct = (XFontStruct *) value;
   	    name = widgetGetFontName (obm->display, font_struct);
@@ -2114,10 +2114,10 @@ widgetGet (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	    XtFree ((char *)name);
 
 	} else {
-	    caddr_t value;  Arg args[1];
+	    void * value;  Arg args[1];
 	    XtSetArg (args[0], rp->name, &value);
 	    XtGetValues (wp->w, args, 1);
-	    sprintf (result, "0x%x", value);
+	    sprintf (result, "%p", value);
 	}
 
 	Tcl_SetResult (wp->obm->tcl, result, TCL_VOLATILE);
@@ -2219,7 +2219,7 @@ widgetSetList (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	    return (TCL_ERROR);
 
 	if ((obmClass (obj->core.classrec, WtList)))
-	  XawListChange (wp->w, items, nitems, 0, resize);
+	  XawListChange (wp->w, (char **)items, nitems, 0, resize);
 	else if ((obmClass (obj->core.classrec, WtMultiList)))
 	    XfwfMultiListSetNewData ((XfwfMultiListWidget)wp->w,
 				     (String *) items, nitems, 0, resize, NULL);
@@ -3293,7 +3293,7 @@ widgetSetCellAttr (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	} else if (strcmp(attr, "background") == 0) {
             from.size = strlen (value) + 1;
             from.addr = value;
-            to.addr = (caddr_t) &bg;
+            to.addr = (void *) &bg;
             to.size = sizeof(bg);
 
             if (!XtConvertAndStore (wp->w, XtRString, &from, XtRPixel, &to))
@@ -3304,7 +3304,7 @@ widgetSetCellAttr (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	} else if (strcmp(attr, "foreground") == 0) {
             from.size = strlen (value) + 1;
             from.addr = value;
-            to.addr = (caddr_t) &fg;
+            to.addr = (void *) &fg;
             to.size = sizeof(fg);
 
             if (!XtConvertAndStore (wp->w, XtRString, &from, XtRPixel, &to))
@@ -3388,7 +3388,7 @@ widgetSetColAttr (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	    /* Reset the column background color. */
             from.size = strlen (argv[3]) + 1;
             from.addr = argv[3];
-            to.addr = (caddr_t) &bg;
+            to.addr = (void *) &bg;
             to.size = sizeof(bg);
 
             if (!XtConvertAndStore (wp->w, XtRString, &from, XtRPixel, &to))
@@ -3401,7 +3401,7 @@ widgetSetColAttr (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	    /* Reset the column foreground color. */
             from.size = strlen (argv[3]) + 1;
             from.addr = argv[3];
-            to.addr = (caddr_t) &fg;
+            to.addr = (void *) &fg;
             to.size = sizeof(fg);
 
             if (!XtConvertAndStore (wp->w, XtRString, &from, XtRPixel, &to))
@@ -3522,7 +3522,7 @@ widgetSetRowAttr (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	    /* Reset the column background color. */
             from.size = strlen (argv[3]) + 1;
             from.addr = argv[3];
-            to.addr = (caddr_t) &bg;
+            to.addr = (void *) &bg;
             to.size = sizeof(bg);
 
             if (!XtConvertAndStore (wp->w, XtRString, &from, XtRPixel, &to))
@@ -3535,7 +3535,7 @@ widgetSetRowAttr (MsgContext msg, Tcl_Interp *tcl, int argc, char **argv)
 	    /* Reset the column foreground color. */
             from.size = strlen (argv[3]) + 1;
             from.addr = argv[3];
-            to.addr = (caddr_t) &fg;
+            to.addr = (void *) &fg;
             to.size = sizeof(fg);
 
             if (!XtConvertAndStore (wp->w, XtRString, &from, XtRPixel, &to))
@@ -4499,7 +4499,7 @@ widgetEvent (Widget w, ObmCallback cb, XEvent *event, Boolean *continue_to_dispa
 		char buf[20];
 		int n;
 
-		sprintf (op, "%u %d %d %d %d ",
+		sprintf (op, "%lu %d %d %d %d ",
 		    ev->time, ev->x, ev->y, ev->x_root, ev->y_root);
 		while (*op) op++;
 
@@ -4530,7 +4530,7 @@ widgetEvent (Widget w, ObmCallback cb, XEvent *event, Boolean *continue_to_dispa
 	case ButtonRelease:
 	    {	XButtonPressedEvent *ev = (XButtonPressedEvent *) event;
 
-		sprintf (op, "%u %d %d %d %d ",
+		sprintf (op, "%lu %d %d %d %d ",
 		    ev->time, ev->x, ev->y, ev->x_root, ev->y_root);
 		while (*op) op++;
 
@@ -4572,7 +4572,7 @@ widgetEvent (Widget w, ObmCallback cb, XEvent *event, Boolean *continue_to_dispa
 	case LeaveNotify:
 	    {	XPointerMovedEvent *ev = (XPointerMovedEvent *) event;
 
-		sprintf (op, "%u %d %d %d %d ",
+		sprintf (op, "%lu %d %d %d %d ",
 		    ev->time, ev->x, ev->y, ev->x_root, ev->y_root);
 		while (*op) op++;
 
@@ -4739,7 +4739,7 @@ widgetGetFontName (Display *display, XFontStruct *fs) /* MF016 */
                     case unscaled:
                     case scaledXoverY:
                     case uncomputed:
-                        sprintf(name, "%s%d", name, val);
+                        sprintf(name, "%s%lu", name, val);
                         break;
                     }
                 } else

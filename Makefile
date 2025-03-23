@@ -2,6 +2,7 @@ all: xgterm ximtool
 
 prefix = /usr/local
 
+export CFLAGS += -std=gnu11
 export TCL_INCLUDE_DIR = /usr/include/tcl
 export TCL_LIB = -ltcl
 

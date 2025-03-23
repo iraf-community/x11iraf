@@ -500,7 +500,7 @@ serverCreateObjects (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 	r.resource_size   = sizeof (char *);
 	r.resource_offset = 0;
 	r.default_type    = XtRString;
-	r.default_addr    = (caddr_t) NULL;
+	r.default_addr    = (void *) NULL;
 
 	/* Get the UI object list. */
 	XtGetApplicationResources (obm->toplevel, &objects, &r, 1, NULL, 0);
@@ -901,7 +901,7 @@ serverGetResource (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
         r.resource_size   = sizeof (char *);
         r.resource_offset = 0;
         r.default_type    = XtRString;
-        r.default_addr    = (caddr_t) default_value;
+        r.default_addr    = (void *) default_value;
 
         XtGetApplicationResources (obm->toplevel, &value, &r, 1, NULL, 0);
 	Tcl_SetResult (tcl, value, TCL_VOLATILE);
@@ -982,7 +982,7 @@ err:		sprintf (buf, "bad item '%d' in resource list", item + 1);
 	    r->resource_size   = sizeof (char *);
 	    r->resource_offset = (unsigned int) &(((Value *)NULL)[item].value);
 	    r->default_type    = XtRString;
-	    r->default_addr    = (caddr_t) default_value;
+	    r->default_addr    = (void *) default_value;
 
 	    values[item].variable = (char *) variable;
 	    values[item].item_list = (char *) fields;
@@ -1064,7 +1064,7 @@ serverPostTimedCallback (ObmObject object, Tcl_Interp *tcl, int argc, char **arg
 	} else
 	    cb = NULL;
 
-	sprintf (buf, "0x%lx", cb);
+	sprintf (buf, "%p", cb);
 	Tcl_SetResult (tcl, buf, TCL_VOLATILE);
 
 	return (TCL_OK);
@@ -1179,7 +1179,7 @@ serverPostWorkProc (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 	    serverWorkProc, (XtPointer)cb);
 	link_callback (&obj->server, cb);
 
-	sprintf (buf, "0x%lx", cb);
+	sprintf (buf, "%p", cb);
 	Tcl_SetResult (tcl, buf, TCL_VOLATILE);
 
 	return (TCL_OK);
@@ -1337,7 +1337,7 @@ createBitmap (ObmContext obm, char *name, int width, int height, char *pixels)
 	    return (TCL_ERROR);
 	icon->pixmap = XCreateBitmapFromData (obm->display,
 	    RootWindowOfScreen (obm->screen), data, width, height);
-	lp->ptr = (caddr_t) icon;
+	lp->ptr = (void *) icon;
 
 	XtFree ((char *)data);
 	return (OK);
@@ -1470,7 +1470,7 @@ createPixmap (
 	    }
 	}
 
-	lp->ptr = (caddr_t) icon;
+	lp->ptr = (void *) icon;
 	XtFree ((char *)data);
 
 	return (OK);
@@ -1516,7 +1516,7 @@ serverCreatePixmap (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 	    XrmValue from, to;
 	    from.size = strlen (argv[5]) + 1;
 	    from.addr = argv[5];
-	    to.addr = (caddr_t) &fg;
+	    to.addr = (void *) &fg;
 	    to.size = sizeof(fg);
 
 	    if (!XtConvertAndStore (obm->toplevel,
@@ -1531,7 +1531,7 @@ serverCreatePixmap (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 	    XrmValue from, to;
 	    from.size = strlen (argv[6]) + 1;
 	    from.addr = argv[6];
-	    to.addr = (caddr_t) &bg;
+	    to.addr = (void *) &bg;
 	    to.size = sizeof(bg);
 
 	    if (!XtConvertAndStore (obm->toplevel,
@@ -1622,7 +1622,7 @@ createXPixmap (ObmContext obm, char *name, char *widget, char *description)
 	    lp->next = NULL;
 	}
 
-	lp->ptr = (caddr_t) icon;
+	lp->ptr = (void *) icon;
 	return (OK);
 }
 
@@ -1853,7 +1853,7 @@ serverCreateCursor (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 	    XrmValue from, to;
 	    from.size = strlen (argv[4]) + 1;
 	    from.addr = argv[4];
-	    to.addr = (caddr_t) &fg;
+	    to.addr = (void *) &fg;
 	    to.size = sizeof(fg);
 
 	    if (!XtConvertAndStore (obm->toplevel,
@@ -1871,7 +1871,7 @@ serverCreateCursor (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 	    XrmValue from, to;
 	    from.size = strlen (argv[5]) + 1;
 	    from.addr = argv[5];
-	    to.addr = (caddr_t) &bg;
+	    to.addr = (void *) &bg;
 	    to.size = sizeof(bg);
 
 	    if (!XtConvertAndStore (obm->toplevel,
@@ -1904,7 +1904,7 @@ serverCreateCursor (ObmObject object, Tcl_Interp *tcl, int argc, char **argv)
 	}
 
 	/* Create the cursor. */
-	lp->ptr = (caddr_t) XCreatePixmapCursor (obm->display,
+	lp->ptr = (void *) XCreatePixmapCursor (obm->display,
 	    source, mask, &fg_color, &bg_color, x_hot, y_hot);
 
 	return (TCL_OK);
@@ -2181,7 +2181,7 @@ serverCreateMenu (ObmObject object, Tcl_Interp *tcl, int argc, const char **argv
 	    obmDestroyObject (obm, o_mp->obj);
 	    freeMenu (o_mp);
 	    createMenu (obm, mp, menu_name, parent, pw);
-	    lp->ptr = (caddr_t) mp;
+	    lp->ptr = (void *) mp;
 
 	} else {
 	    /* Create a new menu. */
@@ -2189,7 +2189,7 @@ serverCreateMenu (ObmObject object, Tcl_Interp *tcl, int argc, const char **argv
 
 	    newobj = (ObjList) XtMalloc (sizeof (struct objList));
 	    strcpy (newobj->name, menu_name);
-	    newobj->ptr = (caddr_t) mp;
+	    newobj->ptr = (void *) mp;
 	    newobj->next = NULL;
 
 	    if (obm->menu_list == NULL)
@@ -2372,7 +2372,7 @@ createMenu (
 		for (i=0;  s[i];  i++) {
 		    from.size = strlen(s[i]) + 1;
 		    from.addr = s[i];
-		    to[i].addr = (caddr_t) &value[i];
+		    to[i].addr = (void *) &value[i];
 		    to[i].size = sizeof(value[i]);
 
 		    if (XtConvertAndStore (entry,
@@ -2489,7 +2489,7 @@ editMenu (
 
 		from.size = strlen(s) + 1;
 		from.addr = s;
-		to[ncolors].addr = (caddr_t) &value[ncolors];
+		to[ncolors].addr = (void *) &value[ncolors];
 		to[ncolors].size = sizeof(value[ncolors]);
 
 		if (XtConvertAndStore (old->entry,
@@ -2516,7 +2516,7 @@ editMenu (
 
 		from.size = strlen(s) + 1;
 		from.addr = s;
-		to[ncolors].addr = (caddr_t) &value[ncolors];
+		to[ncolors].addr = (void *) &value[ncolors];
 		to[ncolors].size = sizeof(value[ncolors]);
 
 		if (XtConvertAndStore (old->entry,

@@ -46,11 +46,11 @@ void *memmove(a,b,n) void *a, *b; int n; { bcopy(b,a,n); }
 #endif
 
 static XrmOptionDescRec Options[] = {
-  { "-top", "*topObject", XrmoptionSepArg, (caddr_t) NULL },
-  { "-format", "*resourceFormat", XrmoptionSepArg, (caddr_t) NULL },
-  { "-tree", "*showTree", XrmoptionNoArg, (caddr_t) "on" },
-  { "-nosuper", "*showSuper", XrmoptionNoArg, (caddr_t) "off" },
-  { "-variable", "*showVariable", XrmoptionNoArg, (caddr_t) "on" },
+  { "-top", "*topObject", XrmoptionSepArg, (void *) NULL },
+  { "-format", "*resourceFormat", XrmoptionSepArg, (void *) NULL },
+  { "-tree", "*showTree", XrmoptionNoArg, (void *) "on" },
+  { "-nosuper", "*showSuper", XrmoptionNoArg, (void *) "off" },
+  { "-variable", "*showVariable", XrmoptionNoArg, (void *) "on" },
 };
 
 typedef struct {
@@ -70,13 +70,13 @@ static XtResource Resources[] = {
   { "showTree", "ShowTree", XtRBoolean, sizeof(Boolean),
       Offset(show_tree), XtRImmediate, (XtPointer) FALSE },
   { "showSuper", "ShowSuper", XtRBoolean, sizeof(Boolean),
-      Offset(show_superclass), XtRImmediate, (caddr_t) TRUE },
+      Offset(show_superclass), XtRImmediate, (void *) TRUE },
   { "showVariable", "ShowVariable", XtRBoolean, sizeof(Boolean),
-      Offset(show_variable), XtRImmediate, (caddr_t) FALSE },
+      Offset(show_variable), XtRImmediate, (void *) FALSE },
   { "topObject", "TopObject", XtRString, sizeof(char *),
-      Offset(top_object), XtRString, (caddr_t) "core" },
+      Offset(top_object), XtRString, (void *) "core" },
   { "resourceFormat", "ResourceFormat", XtRString, sizeof(char *),
-      Offset(format), XtRString, (caddr_t) " %-16s %20s  %-20s  %s" },
+      Offset(format), XtRString, (void *) " %-16s %20s  %-20s  %s" },
 };
 
 #undef Offset
@@ -238,7 +238,7 @@ main (int argc, char **argv)
 				&argc, argv, NULL, NULL, 0);
     container = XtCreateWidget ("dummy", widgetClass, toplevel, NULL, ZERO);
 
-    XtGetApplicationResources (toplevel, (caddr_t) &options,
+    XtGetApplicationResources (toplevel, (void *) &options,
 			       Resources, XtNumber(Resources), NULL, ZERO);
     XmuWnInitializeNodes (widget_list, nwidgets);
     if (argc == 1) {
