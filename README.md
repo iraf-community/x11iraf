@@ -62,7 +62,7 @@ IRAF installation with its development tools is required.
 On Debian and its derivatives (Ubuntu, Mint, Devuan, Raspbian etc.):
 
     $ sudo apt install gcc make bison flex libncurses-dev tcl-dev
-    $ sudo apt install libxaw7-dev libxmu-dev xaw3dg-dev libxpm-dev
+    $ sudo apt install libxaw7-dev libxmu-dev libxpm-dev
     $ sudo apt install iraf-dev
 
 On MacOS X, you need to have the XCode tools installed. If you
