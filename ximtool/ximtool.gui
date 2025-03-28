@@ -2,9 +2,9 @@
 #
 # XIMTOOL-ALT.GUI -- Default GUI for the Ximtool-alt image display server.
 #
-# Version 2.1
+# Version 2.2
 
-set Version     "IRAF XImtool Version 2.1"
+set Version     "IRAF XImtool Version 2.2"
 
 reset-server
 
@@ -3689,7 +3689,7 @@ proc min {a b} { expr {($a < $b) ? $a : $b} }
 proc max {a b} { expr {($a > $b) ? $a : $b} }
 
 # Global variables.
-set version	"IRAF XImtool Version 2.1"
+set version	"IRAF XImtool Version 2.2"
 
 set winWidth 	[send imagewin get width ]	;# display window width
 set winHeight 	[send imagewin get height]	;# display window height

@@ -85,8 +85,8 @@ The source distribution file is built as a tarball with the package
 name and version as base directory. Thus, distribution files can be
 unpacked with the command
 
-    $ tar xzf /<path>/x11iraf-2.1.tar.gz
-    $ cd x11iraf-2.1/
+    $ tar xzf /<path>/x11iraf-2.2.tar.gz
+    $ cd x11iraf-2.2/
 
 
 ### Build from Sources

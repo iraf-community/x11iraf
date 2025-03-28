@@ -2,9 +2,9 @@
 #
 # XIMTOOL-ALT.GUI -- Default GUI for the Ximtool-alt image display server.
 #
-# Version 2.1
+# Version 2.2
 
-set Version     "IRAF XImtool Version 2.1"
+set Version     "IRAF XImtool Version 2.2"
 
 reset-server
 

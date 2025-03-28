@@ -1,5 +1,11 @@
 # X11IRAF important changes
 
+## Version 2.2 (2025-03-28)
+
+ * Bugfix release
+
+ * Add metadata required for Linux desktops
+
 ## Version 2.1 (2021-07-17)
 
  * __IRAF community maintainance__
