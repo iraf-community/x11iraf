@@ -9,7 +9,7 @@ endif
 all: xtapemon
 
 xtapemon: $(OBJS)
-	$(CC) $(LDFLAGS) -o $@ $(OBJS) -lXaw3d -lXmu -lXt -lX11 -lm
+	$(CC) $(LDFLAGS) -o $@ $(OBJS) -lXaw -lXmu -lXt -lX11 -lm
 
 clean:
 	rm -f xtapemon $(OBJS)

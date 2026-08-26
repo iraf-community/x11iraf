@@ -42,7 +42,6 @@
 #include <X11/Xaw/Toggle.h>
 #include <X11/Xaw/Tree.h>
 #include <X11/Xaw/Viewport.h>
-#include <X11/Xaw3d/Layout.h>
 #include <X11/Xmu/WinUtil.h>
 
 #include "ObmW/Arrow.h"
@@ -57,6 +56,7 @@
 #endif
 #include "ObmW/Icon.h"
 #include "ObmW/Label.h"
+#include "ObmW/Layout.h"
 #include "ObmW/ListTree.h"
 #include "ObmW/MenuBar.h"
 #include "ObmW/MultiList.h"
